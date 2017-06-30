@@ -9,6 +9,7 @@ See the birthplace here:
 
 https://www.vicious1.com/forum/topic/does-this-count-as-a-build/
 
+
 AFAIK, the steps to replicate this on your machine are:
 
  - Install npm and node.js
@@ -19,5 +20,5 @@ When we want to "deploy" the website, we can do so with 'npm run deploy' command
 
 It's currently hosted at:
 
-
+https://jeffeb3.github.io/sandify/
 
