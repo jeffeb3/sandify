@@ -16,6 +16,11 @@ AFAIK, the steps to replicate this on your machine are:
  - Run 'npm install' from here
  - Run 'npm start' and it should open your browser to http://127.0.0.1:3000
 
-When we want to "deploy" the website, we can do so with 'npm run build' and then moving the files
-from the generated build folder, I think.
+When we want to "deploy" the website, we can do so with 'npm run deploy' command. So much magic. 
+
+It's currently hosted at:
+
+https://github.com/jeffeb3/sandify
+
+
 
