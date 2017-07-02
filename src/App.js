@@ -16,7 +16,7 @@ import {
     MenuItem,
     Panel,
 } from 'react-bootstrap'
-// import './turtle.js';
+import TurtleCanvas from './TurtleCanvas';
 
 class App extends Component {
   render() {
@@ -87,8 +87,8 @@ class App extends Component {
             </Form>
           </Panel>
 
-          <div className="App-canvas">
-            <p/>
+          <div>
+            <TurtleCanvas width={300} height={300} rotation={45}/>
           </div>
 
           <Button id="gcode" bsStyle="primary">Generate GCode</Button>
