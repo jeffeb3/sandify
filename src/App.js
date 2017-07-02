@@ -14,8 +14,33 @@ import {
     Panel,
 } from 'react-bootstrap'
 import TurtleCanvas from './TurtleCanvas';
+import GCodeGenerator from './GCode';
+
+// I'm trying to define a simple struct that we can use everywhere we need vertices. I don't see a
+// problem letting this bloat a little.
+//
+// Currently, I'm using this as input to the GCodeGenerator for the locations of gcode.
+//
+function vertex (x, y, speed=0) {
+  return {
+    x: x,
+    y: y,
+    f: speed
+  }
+}
 
 class App extends Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      vertices: [
+        vertex(0.0, 0.0),
+        vertex(1.0, 1.0),
+      ],
+    };
+  }
+
   render() {
 
     function saySquare() {
@@ -88,7 +113,9 @@ class App extends Component {
             <TurtleCanvas width={300} height={300} rotation={45}/>
           </div>
 
-          <Button id="gcode" bsStyle="primary">Generate GCode</Button>
+          <div id="output">
+            <GCodeGenerator vertices={this.state.vertices}/>
+          </div>
         </div>
       </div>
     );
