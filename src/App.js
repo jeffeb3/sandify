@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import {
-    Button,
-} from 'react-bootstrap'
 import './App.css';
 
 import Header from './Header';
