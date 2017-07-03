@@ -20,12 +20,17 @@
 
 .App-left {
    float:left;
-   width:30%;
+   width:20%;
 }
 
 .App-mid {
    float:left;
-   width:70%;
+   width:30%;
+}
+
+.App-right {
+   float:left;
+   width:50%;
 }
 
 .App-canvas {

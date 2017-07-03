@@ -18,6 +18,12 @@ class App extends Component {
         Vertex(1.0, 1.0),
       ],
     };
+
+    this.setVertices = this.setVertices.bind(this);
+  }
+
+  setVertices(vertices) {
+    this.setState({ vertices: vertices });
   }
 
   render() {
@@ -34,11 +40,12 @@ class App extends Component {
         </div>
 
         <div className="App-mid">
+          <Transforms vertices={this.state.vertices} setVertices={this.setVertices}/>
+        </div>
 
-          <Transforms vertices={this.state.vertices}/>
-
-          <div>
-            <TurtleCanvas width={300} height={300} rotation={45}/>
+        <div className="App-right">
+          <div className="App-canvas">
+            <TurtleCanvas width={600} height={300} vertices={this.state.vertices}/>
           </div>
 
           <div id="output">
