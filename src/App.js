@@ -3,23 +3,10 @@ import './App.css';
 
 import Header from './Header';
 import Documentation from './Documentation';
-import Shapes from './Shapes';
-import Transforms from './Transforms';
+import Transforms from './inputs/Transforms';
 import TurtleCanvas from './TurtleCanvas';
 import GCodeGenerator from './GCode';
-
-// I'm trying to define a simple struct that we can use everywhere we need vertices. I don't see a
-// problem letting this bloat a little.
-//
-// Currently, I'm using this as input to the GCodeGenerator for the locations of gcode.
-//
-function vertex (x, y, speed=0) {
-  return {
-    x: x,
-    y: y,
-    f: speed
-  }
-}
+import Vertex from './Geometry';
 
 class App extends Component {
 
@@ -27,8 +14,8 @@ class App extends Component {
     super(props)
     this.state = {
       vertices: [
-        vertex(0.0, 0.0),
-        vertex(1.0, 1.0),
+        Vertex(0.0, 0.0),
+        Vertex(1.0, 1.0),
       ],
     };
   }
@@ -47,8 +34,8 @@ class App extends Component {
         </div>
 
         <div className="App-mid">
-          <Shapes />
-          <Transforms />
+
+          <Transforms vertices={this.state.vertices}/>
 
           <div>
             <TurtleCanvas width={300} height={300} rotation={45}/>
