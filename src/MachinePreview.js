@@ -54,10 +54,12 @@ class PreviewWindow extends Component {
   }
 
   limit(vertex) {
-    var machine_x = this.props.max_x - this.props.min_x;
-    var machine_y = this.props.max_y - this.props.min_y;
-    return Vertex(Math.min(machine_x/2.0, Math.max(-machine_x/2.0, vertex.x)),
-                  Math.min(machine_y/2.0, Math.max(-machine_x/2.0, vertex.y)))
+    // This doesn't work, so let's just avoid it.
+    return vertex
+    // var machine_x = this.props.max_x - this.props.min_x;
+    // var machine_y = this.props.max_y - this.props.min_y;
+    // return Vertex(Math.min(machine_x/2.0, Math.max(-machine_x/2.0, vertex.x)),
+    //               Math.min(machine_y/2.0, Math.max(-machine_x/2.0, vertex.y)))
   }
 
 
