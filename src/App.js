@@ -4,7 +4,7 @@ import './App.css';
 import Header from './Header';
 import Documentation from './Documentation';
 import Transforms from './inputs/Transforms';
-import TurtleCanvas from './TurtleCanvas';
+import MachinePreview from './MachinePreview';
 import GCodeGenerator from './GCode';
 import Vertex from './Geometry';
 
@@ -45,7 +45,7 @@ class App extends Component {
 
         <div className="App-right">
           <div className="App-canvas">
-            <TurtleCanvas width={600} height={300} vertices={this.state.vertices}/>
+            <MachinePreview canvas_width={600} canvas_height={600} vertices={this.state.vertices}/>
           </div>
 
           <div id="output">

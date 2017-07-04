@@ -33,13 +33,6 @@
    width:50%;
 }
 
-.App-canvas {
-   background:#fff;
-   border: 1px solid red;
-   width:  300;
-   height: 300;
-}
-
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

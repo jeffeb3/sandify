@@ -16,7 +16,7 @@ class Shape extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      size: 1.0
+      size: 10.0
     }
     this.onSizeChange = this.onSizeChange.bind(this);
   }
@@ -238,9 +238,9 @@ class Transforms extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      scaleValue: 1.0,
-      rotateValue: 1.0,
-      loops: 2,
+      scaleValue: 100.0,
+      rotateValue: 2.0,
+      loops: 10,
     }
 
     // Some non-drawing members
@@ -249,10 +249,10 @@ class Transforms extends Component {
     // isn't being called with the most recent versions of rotateActive or scaleActive.
     // So I'm duplicating the state here...
     this.rotateActive = false;
-    this.rotateValue = 1.0;
+    this.rotateValue = 2.0;
     this.scaleActive = false;
-    this.scaleValue = 1.0;
-    this.loops = 2
+    this.scaleValue = 100.0;
+    this.loops = 10
 
     // bind things
     this.setVertices = this.setVertices.bind(this);
