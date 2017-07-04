@@ -16,16 +16,22 @@ var TurtleCanvas = React.createClass({
 
   componentDidUpdate: function() {
     var context = ReactDOM.findDOMNode(this).getContext('2d');
-    context.clearRect(0, 0, 200, 200);
+    context.clearRect(0, 0, this.props.width, this.props.height);
     this.paint(context);
   },
 
   paint: function(context) {
     context.save();
-    context.translate(100, 100);
-    context.rotate(this.props.rotation, 100, 100);
-    context.fillStyle = '#F00';
-    context.fillRect(-50, -50, 100, 100);
+    context.translate(100,100);
+    context.beginPath();
+    context.lineWidth = "1";
+    context.strokeStyle = "green";
+    context.moveTo(0,0)
+    for (var i=0; i<this.props.vertices.length; i++) {
+      context.lineTo(this.props.vertices[i].x,
+                     this.props.vertices[i].y);
+    }
+    context.stroke();
     context.restore();
   },
 
