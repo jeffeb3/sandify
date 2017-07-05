@@ -1,0 +1,11 @@
+.canvas {
+   background:#111;
+   border: 1px solid blue;
+   margin: 12px;
+}
+
+.machine-form {
+   margin: 10px;
+   padding: 0px;
+}
+
