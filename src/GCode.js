@@ -24,10 +24,17 @@ function download(filename, text) {
   }
 }
 
+function formatNumber(number) {
+  // Gcode doesn't like 4+ decimal places
+  var int_part = Math.floor(number);
+  var other_part = (number % 1).toPrecision(3);
+  return int_part + other_part;
+}
+
 function gcode(vertex) {
   var command = 'G01' +
-    ' X' + vertex.x +
-    ' Y' + vertex.y
+    ' X' + formatNumber(vertex.x) +
+    ' Y' + formatNumber(vertex.y)
   if (vertex.speed > 0.0) {
     command += ' F' + vertex.f
   }
