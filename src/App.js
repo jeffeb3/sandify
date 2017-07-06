@@ -6,7 +6,6 @@ import Documentation from './Documentation';
 import Transforms from './inputs/Transforms';
 import MachinePreview from './MachinePreview';
 import GCodeGenerator from './GCode';
-import Vertex from './Geometry';
 
 class App extends Component {
 
@@ -14,8 +13,6 @@ class App extends Component {
     super(props)
     this.state = {
       vertices: [
-        Vertex(0.0, 0.0),
-        Vertex(1.0, 1.0),
       ],
     };
 
