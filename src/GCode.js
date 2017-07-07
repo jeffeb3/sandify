@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import {
     Button,
+    ControlLabel,
+    FormControl,
+    FormGroup,
+    ListGroupItem,
+    Modal,
 } from 'react-bootstrap'
 
 // Helper function to take a string and make the user download a text file with that text as the
@@ -45,18 +50,87 @@ function gcode(vertex) {
 // converts vertices and a speed into a list of positions. There is a lot more than could exists
 // here.
 class GCodeGenerator extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      showSettings: false,
+      reversePath: false,
+      preCode: '',
+      postCode: '',
+    }
+
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
+    this.generateGCode = this.generateGCode.bind(this);
+    this.writePre = this.writePre.bind(this);
+    this.writePost = this.writePost.bind(this);
+    this.toggleReverse = this.toggleReverse.bind(this);
+  }
+
+  open() {
+    this.setState({ showSettings: true });
+  }
+
+  close() {
+    this.setState({ showSettings: false });
+  }
 
   generateGCode() {
-    var content = ""
-    for (var i=0; i<this.props.vertices.length; i++) {
-      content += gcode(this.props.vertices[i]);
+    var content = this.state.preCode
+    content += '\n';
+
+    var lines = this.props.vertices.map(gcode);
+    if (this.state.reversePath) {
+      lines.reverse();
     }
+    content += lines.join('');
+
+    content += '\n';
+    content += this.state.postCode;
     download('sandify.gcode', content)
+    this.close()
+  }
+
+
+  writePre(event) {
+    this.setState({preCode: event.target.value});
+  }
+
+  writePost(event) {
+    this.setState({postCode: event.target.value});
+  }
+
+  toggleReverse(event) {
+    this.setState({reversePath: !this.state.reversePath});
+    console.log(event);
   }
 
   render() {
+    const activeClassName = (this.state.reversePath ? "active" : null);
     return (
-      <Button id="gcode" bsStyle="primary" onClick={this.generateGCode.bind(this)}>Generate GCode</Button>
+      <div>
+        <Button bsStyle="primary" bsSize="large" onClick={this.open}>GCode</Button>
+        <Modal show={this.state.showSettings}>
+          <Modal.Header closeButton>
+            <Modal.Title>GCode Parameters</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <FormGroup controlId="preCode">
+              <ControlLabel>Program Start Code</ControlLabel>
+              <FormControl componentClass="textarea" value={this.state.preCode} onChange={this.writePre}/>
+            </FormGroup>
+            <FormGroup controlId="postCode">
+              <ControlLabel>Program End Code</ControlLabel>
+              <FormControl componentClass="textarea" value={this.state.postCode} onChange={this.writePost}/>
+            </FormGroup>
+            <ListGroupItem header="Reverse Path" className={activeClassName} onClick={this.toggleReverse}>Reverses the GCode, starting at the final location</ListGroupItem>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button id="gcode" bsStyle="default" onClick={this.close}>Close</Button>
+            <Button id="gcode" bsStyle="primary" onClick={this.generateGCode}>Generate GCode</Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
     );
   }
 }
