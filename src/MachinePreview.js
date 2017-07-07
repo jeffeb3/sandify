@@ -144,54 +144,24 @@ class MachineSettings extends Component {
 }
 
 class MachinePreview extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      min_x: 0.0,
-      max_x: 500.0,
-      min_y: 0.0,
-      max_y: 500.0,
-    }
-    this.onMinXChange = this.onMinXChange.bind(this)
-    this.onMaxXChange = this.onMaxXChange.bind(this)
-    this.onMinYChange = this.onMinYChange.bind(this)
-    this.onMaxYChange = this.onMaxYChange.bind(this)
-  }
-
-  onMinXChange(event) {
-    this.setState({ min_x: event.target.value })
-  }
-
-  onMaxXChange(event) {
-    this.setState({ max_x: event.target.value })
-  }
-
-  onMinYChange(event) {
-    this.setState({ min_y: event.target.value })
-  }
-
-  onMaxYChange(event) {
-    this.setState({ max_y: event.target.value })
-  }
-
   render() {
     return (
       <div className="machine-preview">
         <MachineSettings
-          min_x={this.state.min_x}
-          max_x={this.state.max_x}
-          min_y={this.state.min_y}
-          max_y={this.state.max_y}
-          onMinXChange={this.onMinXChange}
-          onMaxXChange={this.onMaxXChange}
-          onMinYChange={this.onMinYChange}
-          onMaxYChange={this.onMaxYChange}
+          min_x={this.props.min_x}
+          max_x={this.props.max_x}
+          min_y={this.props.min_y}
+          max_y={this.props.max_y}
+          onMinXChange={this.props.onMinXChange}
+          onMaxXChange={this.props.onMaxXChange}
+          onMinYChange={this.props.onMinYChange}
+          onMaxYChange={this.props.onMaxYChange}
           />
         <PreviewWindow
-          min_x={this.state.min_x}
-          max_x={this.state.max_x}
-          min_y={this.state.min_y}
-          max_y={this.state.max_y}
+          min_x={this.props.min_x}
+          max_x={this.props.max_x}
+          min_y={this.props.min_y}
+          max_y={this.props.max_y}
           canvas_width={this.props.canvas_width}
           canvas_height={this.props.canvas_height}
           vertices={this.props.vertices}
