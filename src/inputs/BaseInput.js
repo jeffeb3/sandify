@@ -12,34 +12,18 @@ import {
 import './Transforms.css'
 import Vertex from '../Geometry';
 
-
-
 class BaseInput extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
 
-    }
-
-    this.inputVertices = []
-
-    // bind things
-    this.setVertices = this.setVertices.bind(this);
+  componentWillMount(){
     this.updateVertices();
-  }
-
-  setVertices(vertices) {
-    this.inputVertices = vertices;
-
   }
 
   updateVertices() {
     var outputVertices = [
       Vertex(0.0, 0.0),
-      Vertex(10.0, 10.0)
+      Vertex(1.0, 1.0)
     ]
 
-    this.setState({outputVertices: outputVertices});
     this.props.setVertices(outputVertices);
   }
 
