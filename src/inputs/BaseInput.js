@@ -1,14 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Col,
-    ControlLabel,
-    Form,
-    FormControl,
-    FormGroup,
-    ListGroup,
-    ListGroupItem,
-    Panel,
-} from 'react-bootstrap'
+
 import './Transforms.css'
 import Vertex from '../Geometry';
 
@@ -28,7 +19,6 @@ class BaseInput extends Component {
   }
 
   render() {
-
     return (
       <div className="transforms">
         Base Input
