@@ -9,8 +9,12 @@ function nearestVertex(vertex, size_x, size_y) {
 
 // Determines of a point is in bounds or out.
 function outOfBounds(vertex, size_x, size_y) {
-  return (vertex.x < -size_x || vertex.x > size_x ||
-          vertex.y < -size_y || vertex.y > size_y);
+  if (vertex.x < -size_x || vertex.x > size_x ||
+      vertex.y < -size_y || vertex.y > size_y) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 // Find the point on the line defined by these two vertices that is exactly within the limits.
@@ -81,7 +85,7 @@ function enforceLimits(vertices, size_x, size_y) {
       //
     if (previous) {
       if (previous_oob) {
-        if (outOfBounds(vertex)) {
+        if (outOfBounds(vertex, size_x, size_y)) {
           // both previous and this point are out of bounds, don't try to find the boundPoint.
           cleanVertices.push(nearestVertex(previous, size_x, size_y));
         } else {
@@ -90,7 +94,7 @@ function enforceLimits(vertices, size_x, size_y) {
         }
       }
 
-      if (outOfBounds(vertex)) {
+      if (outOfBounds(vertex, size_x, size_y)) {
         // save the vertex along the line towards the border.
         cleanVertices.push(boundPoint(previous, vertex, size_x, size_y));
         previous_oob = true;
@@ -110,12 +114,12 @@ function enforceLimits(vertices, size_x, size_y) {
   }
 
   // Just for sanity, and cases that I haven't thought of, clean this list again.
-  var cleanerVertices = []
-  for (var i=0; i<cleanVertices.length; i++) {
-    cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
-  }
+  // var cleanerVertices = []
+  // for (var i=0; i<cleanVertices.length; i++) {
+  //   cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+  // }
 
-  return cleanerVertices;
+  return cleanVertices;
 }
 
 export default enforceLimits
