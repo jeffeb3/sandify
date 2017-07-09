@@ -38,7 +38,8 @@ class PreviewWindow extends Component {
     var min_scale = this.mmToPixelsScale()
 
     var x = vertex.x * min_scale + this.props.canvas_width/2.0;
-    var y = vertex.y * min_scale + this.props.canvas_height/2.0;
+    // Y for pixels starts at the top, and goes down.
+    var y = -vertex.y * min_scale + this.props.canvas_height/2.0;
 
     return Vertex(x, y);
   }
