@@ -9,7 +9,7 @@ class BaseInput extends Component {
     this.updateVertices();
   }
 
-  updateVertices() {
+  updateVertices(outputVertices) {
     var outputVertices = [
       Vertex(0.0, 0.0),
       Vertex(1.0, 1.0)

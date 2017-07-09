@@ -3,7 +3,7 @@ import './App.css';
 
 import Header from './Header';
 import Documentation from './Documentation';
-import BaseInput from './inputs/BaseInput';
+import Turtle from './inputs/Turtle';
 import MachinePreview from './MachinePreview';
 import GCodeGenerator from './GCode';
 import Vertex from './Geometry';
@@ -40,7 +40,7 @@ class App extends Component {
         </div>
 
         <div className="App-mid">
-          <BaseInput vertices={this.state.vertices} setVertices={this.setVertices}/>
+          <Turtle vertices={this.state.vertices} setVertices={this.setVertices}/>
         </div>
 
         <div className="App-right">
