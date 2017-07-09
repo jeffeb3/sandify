@@ -81,19 +81,17 @@ function enforceLimits(vertices, size_x, size_y) {
       //
     if (previous) {
       if (previous_oob) {
-        if (outOfBounds(vertex)) {
+        if (outOfBounds(vertex, size_x, size_y)) {
           // both previous and this point are out of bounds, don't try to find the boundPoint.
           cleanVertices.push(nearestVertex(previous, size_x, size_y));
         } else {
           // We are coming back into frame. Insert a point on the border.
           cleanVertices.push(boundPoint(vertex, previous, size_x, size_y));
+          cleanVertices.push(vertex);
         }
-      }
-
-      if (outOfBounds(vertex)) {
+      } else if (outOfBounds(vertex, size_x, size_y)) {
         // save the vertex along the line towards the border.
         cleanVertices.push(boundPoint(previous, vertex, size_x, size_y));
-        previous_oob = true;
         // Insert another point at the corners, if we have exited out the corners.
         if ((vertex.x < -size_x || vertex.x > size_x) &&
             (vertex.y < -size_y || vertex.y > size_y)) {
@@ -101,21 +99,21 @@ function enforceLimits(vertices, size_x, size_y) {
         }
       } else {
         cleanVertices.push(vertex);
-        previous_oob = false;
       }
     } else {
-      cleanVertices.push(vertex);
+      cleanVertices.push(nearestVertex(vertex, size_x, size_y));
     }
+    previous_oob = outOfBounds(vertex, size_x, size_y);
     previous = vertex;
   }
 
   // Just for sanity, and cases that I haven't thought of, clean this list again.
-  var cleanerVertices = []
-  for (var i=0; i<cleanVertices.length; i++) {
-    cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
-  }
+  // var cleanerVertices = []
+  // for (var i=0; i<cleanVertices.length; i++) {
+  //   cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+  // }
 
-  return cleanerVertices;
+  return cleanVertices;
 }
 
 export default enforceLimits
