@@ -33,11 +33,18 @@ class Turtle extends Component {
         Vertex(0.0, 0.0),
         Vertex(1.0, 1.0)
       ],
-      spikeHeight: 50
+      dynamicValues: {
+        "spikeHeight": 20,
+        "spikeCount": 10,
+        "spikeCurveRadius": 60,
+        "spikeCentreRadius": 1,
+        "radialLoops": 10,
+        "scaleFactor": 0,
+        "rotateAngle": 0
+      }
     }
 
-    this.spikeHeight = 0;
-    this.changeSpikeHeight = this.changeSpikeHeight.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
   componentDidMount(){
@@ -52,13 +59,21 @@ class Turtle extends Component {
 
     var centreRadius = 1;
     // Must be less than 120.  Not sure why
-    var spikeHeight = this.state.spikeHeight;
+    //var spikeHeight = this.spikeHeight;
+    var spikeHeight = this.state.dynamicValues["spikeHeight"];
+    var spikeCount = this.state.dynamicValues["spikeCount"];
+    var spikeCurveRadius = this.state.dynamicValues["spikeCurveRadius"];
+    var spikeCentreRadius = this.state.dynamicValues["spikeCentreRadius"];
+    var radialLoops = this.state.dynamicValues["radialLoops"];
+    var scaleFactor = this.state.dynamicValues["scaleFactor"];
+    var rotateAngle = this.state.dynamicValues["rotateAngle"];
+    //spikeCurveRadius = 60;
+  //  console.log("SH: " + spikeHeight);
     // Has to be 60+
-    var curveRadius = 60;
-    var n = 10;
-    for(var i=0; i<10; i++){
-      radial(this, centreRadius,spikeHeight-(i*10),curveRadius+i,n);
-      this.right(10);
+
+    for(var i=0; i<radialLoops; i++){
+      radial(this, spikeCentreRadius,spikeHeight-(i*scaleFactor),spikeCurveRadius+i,spikeCount);
+      this.right(rotateAngle);
     }
 
   }
@@ -69,13 +84,19 @@ class Turtle extends Component {
       Vertex(1.0, 1.0)
     ];
     this.state.outputVertices = outputVertices;
+    this.state.angle = 0;
     this.props.setVertices(this.state.outputVertices);
   }
 
-  changeSpikeHeight(event) {
-    console.log("changeSpikeHeight");
-    this.spikeHeight = event.target.value;
-    this.setState({spikeHeigh: event.target.value});
+  handleInputChange(event) {
+    console.log("handleInputChange");
+    console.log(event.target.id);
+
+    var dynamicValues = this.state.dynamicValues;
+
+    dynamicValues[event.target.id] = event.target.value;
+
+    this.setState({dynamicValues: dynamicValues});
     this.drawDemo();
   }
   // Trace the forward motion of the turtle
@@ -107,7 +128,7 @@ class Turtle extends Component {
     //stateVertices.push(Vertex(newX,newY));
     //this.state.outputVertices = stateVertices;
     //this.setState({outputVertices: stateVertices});
-
+""
     this.props.setVertices(this.state.outputVertices);
   }
 
@@ -177,12 +198,94 @@ class Turtle extends Component {
   render() {
     return(
       <div>
-        Turtles!
-        <input type="range" value={this.state.spikeHeight} onChange={this.changeSpikeHeight}/>
+        <h4>Turtle Graphics Demonstration</h4>
+
+        <p>If it all disappears, refresh and try to break it again.  Working on it. :D </p>
+        <p>When rotate angle and centre radius are used together, things get chaotic.  There is a bug creating an interesting offset.</p> 
+
+        <Slider
+          id="spikeHeight"
+          sliderLabel="Spike height"
+          initialValue={this.state.dynamicValues.spikeHeight}
+          minValue="0"
+          maxValue="60"
+          onChange={this.handleInputChange}
+          />
+        <Slider
+          id="spikeCount"
+          sliderLabel="Spike count"
+          initialValue={this.state.dynamicValues.spikeCount}
+          minValue="3"
+          maxValue="40"
+          onChange={this.handleInputChange}
+          />
+        <Slider
+          id="spikeCurveRadius"
+          sliderLabel="Spike curve radius"
+          initialValue={this.state.dynamicValues.spikeCurveRadius}
+          minValue="5"
+          maxValue="60"
+          onChange={this.handleInputChange}
+          />
+        <Slider
+          id="spikeCentreRadius"
+          sliderLabel="Spike centre radius"
+          initialValue={this.state.dynamicValues.spikeCentreRadius}
+          minValue="5"
+          maxValue="60"
+          onChange={this.handleInputChange}
+          />
+        <Slider
+          id="radialLoops"
+          sliderLabel="Radial Loops"
+          initialValue={this.state.dynamicValues.radialLoops}
+          minValue="1"
+          maxValue="15"
+          onChange={this.handleInputChange}
+          />
+          <Slider
+            id="scaleFactor"
+            sliderLabel="Scale Factor"
+            initialValue={this.state.dynamicValues.scaleFactor}
+            minValue="-10"
+            maxValue="10"
+            onChange={this.handleInputChange}
+            />
+            <Slider
+              id="rotateAngle"
+              sliderLabel="Rotate Angle"
+              initialValue={this.state.dynamicValues.rotateAngle}
+              minValue="0"
+              maxValue="300"
+              onChange={this.handleInputChange}
+              />
       </div>
+
     );
   }
 
+}
+
+class Slider extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      rangeValue: this.props.initialValue
+    }
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ rangeValue: event.target.value });
+  }
+
+  render() {
+    return (
+      <div>
+        {this.props.sliderLabel}:<input id={this.props.id} value={this.props.initialValue} type="range" min={this.props.minValue} max={this.props.maxValue}   onChange={this.props.onChange}/>
+      </div>
+    )
+  }
 }
 
 export default Turtle;
