@@ -37,8 +37,8 @@ class Turtle extends Component {
         "spikeHeight": 20,
         "spikeCount": 10,
         "spikeCurveRadius": 60,
-        "spikeCentreRadius": 1,
-        "radialLoops": 10,
+        "spikeCentreRadius": 0,
+        "radialLoops": 1,
         "scaleFactor": 0,
         "rotateAngle": 0
       }
@@ -84,7 +84,7 @@ class Turtle extends Component {
       Vertex(1.0, 1.0)
     ];
     this.state.outputVertices = outputVertices;
-    this.state.angle = 0;
+    this.state.turtleAngle = 0;
     this.props.setVertices(this.state.outputVertices);
   }
 
@@ -128,7 +128,6 @@ class Turtle extends Component {
     //stateVertices.push(Vertex(newX,newY));
     //this.state.outputVertices = stateVertices;
     //this.setState({outputVertices: stateVertices});
-""
     this.props.setVertices(this.state.outputVertices);
   }
 
@@ -144,6 +143,7 @@ class Turtle extends Component {
 
     var stateAngle = this.state.turtleAngle;
     stateAngle += this.degToRad(angle);
+    stateAngle = stateAngle % (2 * Math.PI);
 
     // This is the standard right way, but it doesn't work with
     // the way the turtle calls are happening here.  Wait for Redux refit?
@@ -201,8 +201,8 @@ class Turtle extends Component {
         <h4>Turtle Graphics Demonstration</h4>
 
         <p>If it all disappears, refresh and try to break it again.  Working on it. :D </p>
-        <p>When rotate angle and centre radius are used together, things get chaotic.  There is a bug creating an interesting offset.</p> 
-
+        <p>When rotate angle and centre radius are used together, things get chaotic.  There is a bug creating an interesting offset.</p>
+        <p>Current angle: {this.radToDeg(this.state.turtleAngle)}</p>
         <Slider
           id="spikeHeight"
           sliderLabel="Spike height"
@@ -223,7 +223,7 @@ class Turtle extends Component {
           id="spikeCurveRadius"
           sliderLabel="Spike curve radius"
           initialValue={this.state.dynamicValues.spikeCurveRadius}
-          minValue="5"
+          minValue="4"
           maxValue="60"
           onChange={this.handleInputChange}
           />
@@ -231,7 +231,7 @@ class Turtle extends Component {
           id="spikeCentreRadius"
           sliderLabel="Spike centre radius"
           initialValue={this.state.dynamicValues.spikeCentreRadius}
-          minValue="5"
+          minValue="0"
           maxValue="60"
           onChange={this.handleInputChange}
           />
@@ -250,15 +250,15 @@ class Turtle extends Component {
             minValue="-10"
             maxValue="10"
             onChange={this.handleInputChange}
+          />
+          <Slider
+            id="rotateAngle"
+            sliderLabel="Rotate Angle"
+            initialValue={this.state.dynamicValues.rotateAngle}
+            minValue="0"
+            maxValue="300"
+            onChange={this.handleInputChange}
             />
-            <Slider
-              id="rotateAngle"
-              sliderLabel="Rotate Angle"
-              initialValue={this.state.dynamicValues.rotateAngle}
-              minValue="0"
-              maxValue="300"
-              onChange={this.handleInputChange}
-              />
       </div>
 
     );
