@@ -32,26 +32,52 @@ class Turtle extends Component {
       outputVertices: [
         Vertex(0.0, 0.0),
         Vertex(1.0, 1.0)
-      ]
+      ],
+      spikeHeight: 50
     }
+
+    this.spikeHeight = 0;
+    this.changeSpikeHeight = this.changeSpikeHeight.bind(this);
   }
 
   componentDidMount(){
-      // For single radials, centre radius is interesting at any value.
-      // For loops, it only looks nice with low values for now.
-      // Need to implement offset compensation
-      var centre_radius = 1;
-      // Must be less than 120.  Not sure why
-      var spike_height = 110;
-      // Has to be 60+
-      var curve_radius = 60;
-      var n = 10;
-      for(var i=0; i<10; i++){
-        radial(this, centre_radius,spike_height-(i*10),curve_radius+i,n);
-        this.right(10);
-      }
+    this.drawDemo();
   }
 
+  drawDemo(){
+    this.clearDrawing();
+    // For single radials, centre radius is interesting at any value.
+    // For loops, it only looks nice with low values for now.
+    // Need to implement offset compensation
+
+    var centreRadius = 1;
+    // Must be less than 120.  Not sure why
+    var spikeHeight = this.state.spikeHeight;
+    // Has to be 60+
+    var curveRadius = 60;
+    var n = 10;
+    for(var i=0; i<10; i++){
+      radial(this, centreRadius,spikeHeight-(i*10),curveRadius+i,n);
+      this.right(10);
+    }
+
+  }
+
+  clearDrawing(){
+    var outputVertices = [
+      Vertex(0.0, 0.0),
+      Vertex(1.0, 1.0)
+    ];
+    this.state.outputVertices = outputVertices;
+    this.props.setVertices(this.state.outputVertices);
+  }
+
+  changeSpikeHeight(event) {
+    console.log("changeSpikeHeight");
+    this.spikeHeight = event.target.value;
+    this.setState({spikeHeigh: event.target.value});
+    this.drawDemo();
+  }
   // Trace the forward motion of the turtle
   forward(distance) {
 
@@ -152,6 +178,7 @@ class Turtle extends Component {
     return(
       <div>
         Turtles!
+        <input type="range" value={this.state.spikeHeight} onChange={this.changeSpikeHeight}/>
       </div>
     );
   }
