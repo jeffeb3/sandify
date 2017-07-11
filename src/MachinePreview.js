@@ -64,30 +64,61 @@ class PreviewWindow extends Component {
 
 
   paint(context) {
-    context.save();
+        context.save();
 
-    // Draw the bounds of the machine
-    context.beginPath();
-    context.lineWidth = "1";
-    context.strokeStyle = "blue";
-    this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-    context.stroke();
+        // Draw the bounds of the machine
+        context.beginPath();
+        context.lineWidth = "1";
+        context.strokeStyle = "blue";
+        this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+        this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+        this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
+        this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
+        this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+        context.stroke();
 
-    // Draw the vertices
-    context.beginPath();
-    context.lineWidth = this.mmToPixelsScale();
-    context.strokeStyle = "green";
-    this.moveTo_mm(context, Vertex(0,0));
-    for (var i=0; i<this.props.vertices.length; i++) {
-      this.lineTo_mm(context, this.limit(this.props.vertices[i]));
-    }
-    context.stroke();
-    context.restore();
-  }
+        // Fatten up the line for effect
+        context.lineWidth = this.mmToPixelsScale()*3;
+        context.strokeStyle = "#ffda97";
+        context.shadowColor='#9e885e'; // darker version of sand colour for shadow
+        context.shadowBlur = "4";
+
+        var canvas_width = this.props.canvas_width;
+        var canvas_height = this.props.canvas_height;
+
+        var min_x = this.props.min_x - (canvas_width/2);
+        var min_y = this.props.min_y - (canvas_height/2);
+        var canvas_dimensions_sc = this.mmToPixels(Vertex(canvas_width, canvas_height));
+        var line_width = this.mmToPixelsScale() * 5;
+        var line_count = canvas_dimensions_sc.y/line_width;
+
+        // Sand coloured rectangle for bg
+        context.beginPath();
+        context.fillStyle = "#ffda97";
+        context.fillRect(min_x,min_y,canvas_dimensions_sc.x,canvas_dimensions_sc.y);
+        context.stroke();
+
+        // Fill the canvas with lines
+
+        context.beginPath();
+        this.moveTo_mm(context, Vertex(min_x,min_y));
+        for (var i=0; i<line_count; i++) {
+          var j = i+1;
+          this.lineTo_mm(context, Vertex(canvas_dimensions_sc.x, (min_y + (i * line_width))));
+          this.moveTo_mm(context, Vertex(min_x, (min_y + (j * line_width))));
+        }
+        context.stroke();
+
+        // Draw vertices
+        context.beginPath();
+        this.moveTo_mm(context, Vertex(0,0));
+        for (var i=0; i<this.props.vertices.length; i++) {
+          this.lineTo_mm(context, this.limit(this.props.vertices[i]));
+        }
+        context.stroke();
+
+        context.restore();
+      }
 
   render() {
     const {canvas_width, canvas_height} = this.props;
@@ -202,4 +233,3 @@ class MachinePreview extends Component {
 }
 
 export default MachinePreview;
-
