@@ -3,7 +3,7 @@ import './App.css';
 
 import Header from './Header';
 import Documentation from './Documentation';
-import Turtle from './inputs/Turtle';
+import InputTabs from './inputs/InputTabs';
 import MachinePreview from './MachinePreview';
 import GCodeGenerator from './GCode';
 import enforceLimits from './LimitEnforcer';
@@ -65,7 +65,7 @@ class App extends Component {
         </div>
 
         <div className="App-mid">
-          <Turtle vertices={this.state.vertices} setVertices={this.setVertices}/>
+          <InputTabs vertices={this.state.vertices} setVertices={this.setVertices}/>
         </div>
 
         <div className="App-right">
