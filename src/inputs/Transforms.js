@@ -10,6 +10,7 @@ import {
     Panel,
 } from 'react-bootstrap'
 import './Transforms.css'
+import Vicious1Vertices from './Vicious1Vertices';
 import Vertex from '../Geometry';
 
 class Shape extends Component {
@@ -101,6 +102,12 @@ class ShapeList extends Component {
           description: "5 pointed star",
           active: false,
           vertices: star_points,
+        },
+        {
+          name: "Vicious1",
+          description: "Logo",
+          active: false,
+          vertices: Vicious1Vertices(),
         },
       ]
     }
