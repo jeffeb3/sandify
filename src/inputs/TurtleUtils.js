@@ -3,7 +3,7 @@ import {
   radToDeg,
 } from '../Geometry';
 
-  export const square=(turtle, side)=>{
+export const square=(turtle, side)=>{
     for(var i = 0; i<4; i++){
         turtle.forward(side);
         turtle.right(90);
@@ -20,10 +20,9 @@ import {
   export const arc=(turtle, radius, angle)=>{
 
     var arc_length = 2 * Math.PI * radius * Math.abs(angle) /360;
-    var n = parseInt(arc_length / 4) + 1;
+    var n = parseInt(arc_length / 4, 10) + 1;
     var step_length = arc_length / n;
     var step_angle = parseFloat(angle) / n;
-    var step_reduction = 3;
 
     turtle.left(step_angle/2);
     curve(turtle,n, step_length, step_angle);
@@ -34,9 +33,9 @@ import {
 
     var half_side_angle = 360 / (2*n);
 
-    var half_spike_base = Math.tan(turtle.degToRad(half_side_angle)) * centre_radius;
+    var half_spike_base = Math.tan(degToRad(half_side_angle)) * centre_radius;
 
-    var spike_base_angle = turtle.radToDeg(Math.atan(spike_height / half_spike_base));
+    var spike_base_angle = radToDeg(Math.atan(spike_height / half_spike_base));
     var side_deflection_angle = 360 / n;
     var spike_side_initial_angle = side_deflection_angle - spike_base_angle;
 
@@ -45,7 +44,7 @@ import {
     var half_spike_top_angle = 90 - spike_base_angle;
     var spike_top_turn_angle = 180 - (2 * half_spike_top_angle);
 
-    var chord_angle = turtle.radToDeg(2* (Math.asin(spike_side_length/(2*curve_radius))));
+    var chord_angle = radToDeg(2* (Math.asin(spike_side_length/(2*curve_radius))));
 
     turtle.left(spike_side_initial_angle);
     turtle.right(chord_angle/2);
