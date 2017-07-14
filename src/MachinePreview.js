@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './MachinePreview.css';
-import {
-    Col,
-    ControlLabel,
-    Form,
-    FormControl,
-    FormGroup,
-} from 'react-bootstrap'
 import Vertex from './Geometry';
+import MachineSettings from './MachineSettings.js';
+import { connect } from 'react-redux'
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    min_x: state.min_x,
+    max_x: state.max_x,
+    min_y: state.min_y,
+    max_y: state.max_y,
+    vertices: state.vertices,
+  }
+}
 
 // Contains the preview window, and any paremeters for the machine.
 class PreviewWindow extends Component {
@@ -54,16 +59,6 @@ class PreviewWindow extends Component {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
-  limit(vertex) {
-    // This doesn't work, so let's just avoid it.
-    return vertex
-    // var machine_x = this.props.max_x - this.props.min_x;
-    // var machine_y = this.props.max_y - this.props.min_y;
-    // return Vertex(Math.min(machine_x/2.0, Math.max(-machine_x/2.0, vertex.x)),
-    //               Math.min(machine_y/2.0, Math.max(-machine_x/2.0, vertex.y)))
-  }
-
-
   paint(context) {
     context.save();
 
@@ -84,7 +79,7 @@ class PreviewWindow extends Component {
     context.strokeStyle = "green";
     this.moveTo_mm(context, Vertex(0,0));
     for (var i=0; i<this.props.vertices.length; i++) {
-      this.lineTo_mm(context, this.limit(this.props.vertices[i]));
+      this.lineTo_mm(context, this.props.vertices[i]);
     }
     context.stroke();
     context.restore();
@@ -100,72 +95,16 @@ class PreviewWindow extends Component {
     );
   }
 }
-
-class MachineSettings extends Component {
-  render() {
-    return (
-      <div className="machine-form">
-        <Form horizontal>
-          <FormGroup controlId="min_x">
-            <Col componentClass={ControlLabel} sm={3}>
-              Min X (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.min_x} onChange={this.props.onMinXChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="max_x">
-            <Col componentClass={ControlLabel} sm={3}>
-              Max X (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.max_x} onChange={this.props.onMaxXChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="min_y">
-            <Col componentClass={ControlLabel} sm={3}>
-              Min Y (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.min_y} onChange={this.props.onMinYChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="max_y">
-            <Col componentClass={ControlLabel} sm={3}>
-              Max Y (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.max_y} onChange={this.props.onMaxYChange}/>
-            </Col>
-          </FormGroup>
-        </Form>
-      </div>
-    )
-  }
-}
+PreviewWindow = connect(mapStateToProps)(PreviewWindow);
 
 class MachinePreview extends Component {
   render() {
     return (
       <div className="machine-preview">
-        <MachineSettings
-          min_x={this.props.min_x}
-          max_x={this.props.max_x}
-          min_y={this.props.min_y}
-          max_y={this.props.max_y}
-          onMinXChange={this.props.onMinXChange}
-          onMaxXChange={this.props.onMaxXChange}
-          onMinYChange={this.props.onMinYChange}
-          onMaxYChange={this.props.onMaxYChange}
-          />
+        <MachineSettings />
         <PreviewWindow
-          min_x={this.props.min_x}
-          max_x={this.props.max_x}
-          min_y={this.props.min_y}
-          max_y={this.props.max_y}
           canvas_width={this.props.canvas_width}
           canvas_height={this.props.canvas_height}
-          vertices={this.props.vertices}
         />
       </div>
     )

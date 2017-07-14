@@ -13,10 +13,10 @@ class InputTabs extends Component {
     return (
        <Tabs defaultActiveKey={1} id="inputTabs">
          <Tab eventKey={1} title="Transforms">
-           <Transforms vertices={this.props.vertices} setVertices={this.props.setVertices}/>
+           <Transforms/>
          </Tab>
          <Tab eventKey={2} title="Turtle">
-           <Turtle vertices={this.props.vertices} setVertices={this.props.setVertices}/>
+           <Turtle/>
          </Tab>
        </Tabs>
     );
