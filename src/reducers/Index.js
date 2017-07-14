@@ -1,6 +1,6 @@
 
 import enforceLimits from '../LimitEnforcer';
-import Vertex from '../Geometry.js'
+import { Vertex } from '../Geometry.js'
 
 // Transform actions
 export const addShape = ( shape ) => {
@@ -114,11 +114,17 @@ export const setShowGCode = ( on ) => {
   };
 }
 
-// Set Vertices Action
-export const setVerticesAction = ( vertices ) => {
+// Vertices Actions
+export const clearVertices = ( ) => {
   return {
-    type: 'SET_VERTICES',
-    vertices: vertices,
+    type: 'CLEAR_VERTICES',
+  };
+}
+
+export const addVertex = ( vertex ) => {
+  return {
+    type: 'ADD_VERTEX',
+    value: vertex,
   };
 }
 
@@ -266,10 +272,22 @@ const reducer  = (state = defaultState, action) => {
       });
 
     // Vertex actions
-    case 'SET_VERTICES':
+    case 'CLEAR_VERTICES':
       return Object.assign({}, state, {
-        vertices: action.vertices,
+        vertices: [],
       });
+    case 'ADD_VERTEX': {
+      let newState = {
+        ...state,
+      }
+      setVertices(newState, [
+          ...state.vertices,
+          action.value,
+        ]);
+      return Object.assign({}, state, {
+        vertices: newState.vertices
+      });
+    }
 
     // Machine Settings
     case 'SET_MIN_X':

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './MachinePreview.css';
-import Vertex from './Geometry';
+import { Vertex } from './Geometry';
 import MachineSettings from './MachineSettings.js';
 import { connect } from 'react-redux'
 

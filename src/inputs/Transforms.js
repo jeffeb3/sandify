@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap'
 import './Transforms.css'
 import Vicious1Vertices from './Vicious1Vertices';
-import Vertex from '../Geometry';
+import { Vertex } from '../Geometry';
 import { connect } from 'react-redux'
 import {
   addShape,

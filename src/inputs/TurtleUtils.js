@@ -1,3 +1,8 @@
+import {
+  degToRad,
+  radToDeg,
+} from '../Geometry';
+
   export const square=(turtle, side)=>{
     for(var i = 0; i<4; i++){
         turtle.forward(side);

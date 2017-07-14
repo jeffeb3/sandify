@@ -1,4 +1,4 @@
-import Vertex from '../Geometry';
+import { Vertex } from '../Geometry';
 
 let Vicious1Vertices = () => {
   return [

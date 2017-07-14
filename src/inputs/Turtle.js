@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import Vertex from '../Geometry';
+import {
+  radToDeg,
+  Vertex,
+} from '../Geometry';
 import { square, curve, arc, spike, radial } from './TurtleUtils'
 
 function turtleRight(deltaAngle){
