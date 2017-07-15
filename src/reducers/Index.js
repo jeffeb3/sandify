@@ -331,21 +331,21 @@ const reducer  = (state = defaultState, action) => {
 
     // Machine Settings
     case 'SET_MIN_X':
-      return {...state,
+      return computeInput({...state,
         min_x: action.value,
-      };
+      });
     case 'SET_MAX_X':
-      return {...state,
+      return computeInput({...state,
         max_x: action.value,
-      };
+      });
     case 'SET_MIN_Y':
-      return {...state,
+      return computeInput({...state,
         min_y: action.value,
-      };
+      });
     case 'SET_MAX_Y':
-      return {...state,
+      return computeInput({...state,
         max_y: action.value,
-      };
+      });
 
     // GCode Settings
     case 'SET_GCODE_PRE':
