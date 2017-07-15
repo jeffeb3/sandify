@@ -1,5 +1,5 @@
 
-import Vertex from './Geometry';
+import { Vertex } from './Geometry';
 
 // Finds the nearest vertex that is in the bounds.
 function nearestVertex(vertex, size_x, size_y) {
