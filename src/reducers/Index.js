@@ -234,7 +234,8 @@ const transformShapes = (state) => {
   var outputVertices = []
   for (var i=0; i<num_loops; i++) {
     for (var j=0; j<input.length; j++) {
-      outputVertices.push(transform(state, input[j], i))
+      let fraction = j/input.length;
+      outputVertices.push(transform(state, input[j], i+fraction))
     }
   }
   setVerticesHelper(state, outputVertices);
