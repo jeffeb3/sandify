@@ -1,5 +1,150 @@
-
 import Vertex from './Geometry';
+import Victor from 'victor';
+
+// Determines which of 8 neighbor areas the point is in:
+//   https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle
+//
+//           |          |
+//   0b1001  |  0b0001  |  0b0101
+//           |          |
+// ------------------------------ y_max
+//           |          |
+//   0b1000  |  0b0000  |  0b0100
+//           |          |
+// ------------------------------ y_min
+//           |          |
+//   0b1010  |  0b0010  |  0b0110
+//           |          |
+//         x_min      x_max
+//
+function pointLocation(point, size_x, size_y) {
+  var location = 0b0;
+  if (point.x < -size_x) {
+    location += 0b1000;
+  } else if (point.x > size_x) {
+    location += 0b0100;
+  }
+
+  if (point.y < -size_y) {
+    location += 0b0001;
+  } else if (point.y > size_y) {
+    location += 0b0010;
+  }
+
+  return location;
+}
+
+// Determine intersection with one of the sides
+function intersection(line_start, line_end, side_start, side_end) {
+
+  var line = line_end.clone().subtract(line_start);
+  var side = side_end.clone().subtract(side_start);
+  var lineCrossSidePerp = line.x * side.y - line.y * side.x;
+
+  // if line Cross side === 0, it means the lines are parallel so have infinite intersection points
+  if (lineCrossSidePerp === 0) {
+    return null;
+  }
+
+  var diff = side_start.clone().subtract(line_start);
+  var t = (diff.x * side.y - diff.y * side.x) / lineCrossSidePerp;
+  if (t < 0 || t >= 1) {
+    return null;
+  }
+
+  var u = (diff.x * line.y - diff.y * line.x) / lineCrossSidePerp;
+  if (u < 0 || u >= 1) {
+    return null;
+  }
+
+  var intersection = line_start.clone().add(line.clone().multiply(Victor(t, t)));
+  return intersection;
+}
+
+function clipLine(line_start, line_end, size_x, size_y) {
+
+  var quadrant_start = pointLocation(line_start, size_x, size_y);
+  var quadrant_end = pointLocation(line_end, size_x, size_y);
+
+  if (quadrant_start === 0b0000 && quadrant_end === 0b0000) {
+    // The line is inside the boundaries
+    return [line_start, line_end];
+  }
+
+  if (quadrant_start === quadrant_end) {
+    // We are in the same box, and we are out of bounds.
+    console.log('stay')
+    return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
+  }
+
+  if (quadrant_start & quadrant_end) {
+    console.log('one side')
+    // These points are all on one side of the box.
+    return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
+  }
+
+  if (quadrant_start === 0b000) {
+    console.log('leaving')
+    // We are exiting the box.
+    var line = [line_start];
+    line.push(boundPoint(line_start, line_end, size_x, size_y));
+    line.push(nearestVertex(line_end, size_x, size_y));
+    return line;
+  }
+
+  if (quadrant_end === 0b000) {
+    console.log('returning')
+    // We are re-entering the box.
+    return [boundPoint(line_end, line_start, size_x, size_y), line_end];
+  }
+
+  // We have reached a terrible place, where both points are oob, but it might intersect with the
+  // work area.
+  const sides = [
+    // left
+    [Victor(-size_x, -size_y), Victor(-size_x, size_y)],
+    // right
+    [Victor(size_x, -size_y), Victor(size_x, size_y)],
+    // bottom
+    [Victor(-size_x, -size_y), Victor(size_x, -size_y)],
+    // top
+    [Victor(-size_x, size_y), Victor(size_x, size_y)],
+  ]
+
+  var intersections = []
+  for (var s=0; s<sides.length; s++) {
+    var int_point = intersection(Victor.fromObject(line_start),
+                                 Victor.fromObject(line_end),
+                                 sides[s][0],
+                                 sides[s][1]);
+    if (int_point) {
+      intersections.push(Vertex(int_point.x, int_point.y));
+    }
+  }
+
+  if (intersections.length !== 0) {
+    if (intersections.length !== 2) {
+      // We should never get here
+      console.log(intersections);
+      throw Error("Software Geometry Error");
+    }
+    console.log('through');
+
+    // Determine if they are in the right order.
+    if (Victor.fromObject(intersections[0]).subtract(Victor.fromObject(line_start)) >
+        Victor.fromObject(intersections[1]).subtract(Victor.fromObject(line_start))) {
+      var temp = intersections[0];
+      intersections[0] = intersections[1];
+      intersections[1] = temp;
+      console.log("swapped");
+    }
+    return intersections;
+  }
+
+  // We might need to insert some corner points...
+  console.log('give up');
+  return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
+}
 
 // Finds the nearest vertex that is in the bounds.
 function nearestVertex(vertex, size_x, size_y) {
@@ -18,6 +163,11 @@ function boundPoint(good, bad, size_x, size_y) {
   var dx = good.x - bad.x;
   var dy = good.y - bad.y;
 
+  if (outOfBounds(good)) {
+    console.log('===================');
+    console.log(good);
+    console.log(bad);
+  }
   var fixed = Vertex(bad.x, bad.y);
   var distance = 0;
   if (bad.x < -size_x || bad.x > size_x) {
@@ -47,67 +197,26 @@ function boundPoint(good, bad, size_x, size_y) {
   return fixed;
 }
 
-// Tries to abuse the design as little as possible, but guarantees the points will all be within the
-// limits of the machine. The limits are [-size_x,size_x],[-size_y,size_y]
-//
-// The basic idea of this algorithm is:
-//   - Is the point out of bounds (oob)?
-//     - Yes, then:
-//       - Find the point along the line that intersects with the boundary (boundPoint). Add in that
-//       point
-//       - If the oob point is exiting at a corner, then insert the corner point.
-//       - Next loop, find the point along the next line that comes from the oob point to the next
-//       point. Add in that point.
-//     - No, then:
-//       - Keep that point.
-//   - After preserving the shape as much as possible with the above, there are still some strange
-//   cases where it will fail, like if the line segment is from oob left to oob right, so just clip
-//   those to the nearestPoint.
 function enforceLimits(vertices, size_x, size_y) {
   var cleanVertices = []
   var previous = null;
-  var previous_oob = false;
+  console.log('=============');
   for (var next=0; next<vertices.length; next++) {
     var vertex = vertices[next];
-
-    // If there was a previous OOB point, then find the point that intersects with the limit.
-      // What if there are two limits? We might need some way to bail? Maybe just find the nearest
-      // this time.
-    // Determine if the vertex is OOB.
-    // If it is, then calculate the mx+b
-      // calculate the intersect with the limit
-      // calculate the "nearest" point
-      // cache the desired point, so that next time, it can be extended.
-      //
     if (previous) {
-      if (previous_oob) {
-        if (outOfBounds(vertex, size_x, size_y)) {
-          // both previous and this point are out of bounds, don't try to find the boundPoint.
-          cleanVertices.push(nearestVertex(previous, size_x, size_y));
-        } else {
-          // We are coming back into frame. Insert a point on the border.
-          cleanVertices.push(boundPoint(vertex, previous, size_x, size_y));
-          cleanVertices.push(vertex);
+      var line = clipLine(previous, vertex, size_x, size_y);
+      for (var pt=0; pt<line.length; pt++) {
+        if (line[pt] !== previous) {
+          cleanVertices.push(line[pt]);
         }
-      } else if (outOfBounds(vertex, size_x, size_y)) {
-        // save the vertex along the line towards the border.
-        cleanVertices.push(boundPoint(previous, vertex, size_x, size_y));
-        // Insert another point at the corners, if we have exited out the corners.
-        if ((vertex.x < -size_x || vertex.x > size_x) &&
-            (vertex.y < -size_y || vertex.y > size_y)) {
-          cleanVertices.push(nearestVertex(vertex, size_x, size_y));
-        }
-      } else {
-        cleanVertices.push(vertex);
       }
     } else {
       cleanVertices.push(nearestVertex(vertex, size_x, size_y));
     }
-    previous_oob = outOfBounds(vertex, size_x, size_y);
     previous = vertex;
   }
 
-  // Just for sanity, and cases that I haven't thought of, clean this list again.
+  // // Just for sanity, and cases that I haven't thought of, clean this list again.
   // var cleanerVertices = []
   // for (var i=0; i<cleanVertices.length; i++) {
   //   cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));

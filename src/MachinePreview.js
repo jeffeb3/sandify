@@ -81,7 +81,9 @@ class PreviewWindow extends Component {
     context.beginPath();
     context.lineWidth = this.mmToPixelsScale();
     context.strokeStyle = "green";
-    this.moveTo_mm(context, Vertex(0,0));
+    if (this.props.vertices.length !== 0) {
+      this.moveTo_mm(context, this.props.vertices[0]);
+    }
     for (var i=0; i<this.props.vertices.length; i++) {
       this.lineTo_mm(context, this.limit(this.props.vertices[i]));
     }
