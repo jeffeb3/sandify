@@ -7,8 +7,8 @@ import { radial } from './TurtleUtils'
 import { connect } from 'react-redux'
 
 import {
-  addVertex,
   clearVertices,
+  setVertices,
 } from '../reducers/Index.js';
 
 import {
@@ -63,8 +63,8 @@ const spiralDispatch = (dispatch, ownProps) => {
     clearDrawing: () => {
       dispatch(clearVertices());
     },
-    addVertex: (vertex) => {
-      dispatch(addVertex(vertex));
+    setVertices: (vertices) => {
+      dispatch(setVertices(vertices));
     },
   }
 }
@@ -86,7 +86,11 @@ class SpiralSettings extends Component {
       }
     }
 
-    this.turtle = ReduxTurtle(this.props.addVertex);
+    // this.vertices is not part of this.state, because it's not needed for drawing, and it's nice
+    // to avoid the state. It can be published to the reducer with publishVertices()
+    this.vertices = [];
+
+    this.turtle = ReduxTurtle(this.addVertex.bind(this));
 
     this.handleInputChange = this.handleInputChange.bind(this);
   }
@@ -107,8 +111,13 @@ class SpiralSettings extends Component {
     this.drawDemo();
   }
 
+  addVertex(vertex) {
+    this.vertices.push(vertex);
+  }
+
   drawDemo() {
     this.props.clearDrawing();
+    this.vertices = [];
     this.turtle.reset();
     // For single radials, centre radius is interesting at any value.
     // For loops, it only looks nice with low values for now.
@@ -134,7 +143,7 @@ class SpiralSettings extends Component {
              spikeCount);
       this.turtle.right(rotateAngle);
     }
-
+    this.props.setVertices(this.vertices);
   }
 
   render() {

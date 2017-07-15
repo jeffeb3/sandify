@@ -121,6 +121,13 @@ export const clearVertices = ( ) => {
   };
 }
 
+export const setVertices = ( vertices ) => {
+  return {
+    type: 'SET_VERTICES',
+    vertices: vertices,
+  };
+}
+
 export const addVertex = ( vertex ) => {
   return {
     type: 'ADD_VERTEX',
@@ -156,7 +163,7 @@ const defaultState = {
 }
 
 // Vertex functions
-const setVertices = (state, vertices) => {
+const setVerticesHelper = (state, vertices) => {
   vertices = enforceLimits(vertices,
                            (state.max_x - state.min_x)/2.0,
                            (state.max_y - state.min_y)/2.0
@@ -220,7 +227,7 @@ const transformShapes = (state) => {
       outputVertices.push(transform(state, input[j], i))
     }
   }
-  setVertices(state, outputVertices);
+  setVerticesHelper(state, outputVertices);
   return state;
 };
 
@@ -276,11 +283,15 @@ const reducer  = (state = defaultState, action) => {
       return Object.assign({}, state, {
         vertices: [],
       });
+    case 'SET_VERTICES':
+      return Object.assign({}, state, {
+        vertices: action.vertices,
+      });
     case 'ADD_VERTEX': {
       let newState = {
         ...state,
       }
-      setVertices(newState, [
+      setVerticesHelper(newState, [
           ...state.vertices,
           action.value,
         ]);
