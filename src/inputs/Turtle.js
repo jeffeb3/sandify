@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 
 import {
   clearVertices,
-  setVertices,
+  setTurtleVertices,
 } from '../reducers/Index.js';
 
 import {
@@ -64,7 +64,7 @@ const spiralDispatch = (dispatch, ownProps) => {
       dispatch(clearVertices());
     },
     setVertices: (vertices) => {
-      dispatch(setVertices(vertices));
+      dispatch(setTurtleVertices(vertices));
     },
   }
 }

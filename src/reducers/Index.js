@@ -121,9 +121,9 @@ export const clearVertices = ( ) => {
   };
 }
 
-export const setVertices = ( vertices ) => {
+export const setTurtleVertices = ( vertices ) => {
   return {
-    type: 'SET_VERTICES',
+    type: 'SET_TURTLE_VERTICES',
     vertices: vertices,
   };
 }
@@ -132,6 +132,13 @@ export const addVertex = ( vertex ) => {
   return {
     type: 'ADD_VERTEX',
     value: vertex,
+  };
+}
+
+export const chooseInput = ( input ) => {
+  return {
+    type: 'CHOOSE_INPUT',
+    value: input,
   };
 }
 
@@ -146,8 +153,11 @@ const defaultState = {
   growEnabled: false,
   growValue: 100,
 
+  turtleVertices: [],
+
   // Vertices
   vertices: [],
+  input: 0,
 
   // Machine settings
   min_x: 0,
@@ -231,12 +241,26 @@ const transformShapes = (state) => {
   return state;
 };
 
+const computeInput = (state) => {
+  if (state.input === 0) {
+    return transformShapes(state);
+  } else {
+    let newState = {
+      ...state,
+    }
+    setVerticesHelper(newState, state.turtleVertices);
+    return Object.assign({}, state, {
+      vertices: newState.vertices
+    });
+  }
+}
+
 const reducer  = (state = defaultState, action) => {
   switch (action.type) {
 
     // Transform actions
     case 'ADD_SHAPE':
-      return transformShapes({...state,
+      return computeInput({...state,
         shapes: [
           ...state.shapes,
           action.shape
@@ -244,37 +268,37 @@ const reducer  = (state = defaultState, action) => {
       });
 
     case 'SET_SHAPE':
-      return transformShapes({...state,
+      return computeInput({...state,
         currentShape: action.value,
       });
 
     case 'SET_SHAPE_SIZE':
-      return transformShapes({...state,
+      return computeInput({...state,
         startingSize: action.value,
       });
 
     case 'SET_LOOPS':
-      return transformShapes({...state,
+      return computeInput({...state,
         numLoops: action.value,
       });
 
     case 'TOGGLE_SPIN':
-      return transformShapes({...state,
+      return computeInput({...state,
         spinEnabled: !state.spinEnabled,
       });
 
     case 'TOGGLE_GROW':
-      return transformShapes({...state,
+      return computeInput({...state,
         growEnabled: !state.growEnabled,
       });
 
     case 'SET_SPIN':
-      return transformShapes({...state,
+      return computeInput({...state,
         spinValue: action.value,
       });
 
     case 'SET_GROW':
-      return transformShapes({...state,
+      return computeInput({...state,
         growValue: action.value,
       });
 
@@ -283,9 +307,9 @@ const reducer  = (state = defaultState, action) => {
       return Object.assign({}, state, {
         vertices: [],
       });
-    case 'SET_VERTICES':
-      return Object.assign({}, state, {
-        vertices: action.vertices,
+    case 'SET_TURTLE_VERTICES':
+      return computeInput({...state,
+        turtleVertices: action.vertices,
       });
     case 'ADD_VERTEX': {
       let newState = {
@@ -299,6 +323,10 @@ const reducer  = (state = defaultState, action) => {
         vertices: newState.vertices
       });
     }
+    case 'CHOOSE_INPUT':
+      return computeInput({...state,
+        input: action.value,
+      });
 
     // Machine Settings
     case 'SET_MIN_X':
@@ -328,7 +356,7 @@ const reducer  = (state = defaultState, action) => {
         gcodePost: action.value,
       };
     case 'TOGGLE_GCODE_REVERSE':
-      return transformShapes({...state,
+      return computeInput({...state,
         gcodeReverse: !state.gcodeReverse,
       });
     case 'SET_SHOW_GCODE':
