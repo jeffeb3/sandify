@@ -29,16 +29,16 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onMinXChange: (event) => {
-      dispatch(setMachineMinX(event.target.value))
+      dispatch(setMachineMinX(parseFloat(event.target.value)))
     },
     onMaxXChange: (event) => {
-      dispatch(setMachineMaxX(event.target.value))
+      dispatch(setMachineMaxX(parseFloat(event.target.value)))
     },
     onMinYChange: (event) => {
-      dispatch(setMachineMinY(event.target.value))
+      dispatch(setMachineMinY(parseFloat(event.target.value)))
     },
     onMaxYChange: (event) => {
-      dispatch(setMachineMaxY(event.target.value))
+      dispatch(setMachineMaxY(parseFloat(event.target.value)))
     }
   }
 }

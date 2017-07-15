@@ -48,6 +48,8 @@ function gcode(vertex) {
 
 const gcodeProps = (state, ownProps) => {
   return {
+    xOffset: (state.min_x + state.max_x) / 2.0,
+    yOffset: (state.min_y + state.max_y) / 2.0,
     pre: state.gcodePre,
     post: state.gcodePost,
     reverse: state.gcodeReverse,
@@ -85,8 +87,19 @@ class GCodeGenerator extends Component {
     var content = this.props.pre;
     content += '\n';
 
-    var lines = this.props.vertices.map(gcode);
-    if (this.props.reversePath) {
+    var centeredVertices = this.props.vertices.map( (vertex) => {
+      console.log(vertex.y);
+      console.log(this.props.yOffset);
+      return {
+        ...vertex,
+        x: vertex.x + this.props.xOffset,
+        y: vertex.y + this.props.yOffset,
+      }
+    });
+
+    var lines = centeredVertices.map(gcode);
+
+    if (this.props.reverse) {
       lines.reverse();
     }
     content += lines.join('');
