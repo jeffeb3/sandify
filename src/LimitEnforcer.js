@@ -131,8 +131,8 @@ function clipLine(line_start, line_end, size_x, size_y) {
     console.log('through');
 
     // Determine if they are in the right order.
-    if (Victor.fromObject(intersections[0]).subtract(Victor.fromObject(line_start)) >
-        Victor.fromObject(intersections[1]).subtract(Victor.fromObject(line_start))) {
+    if (Victor.fromObject(intersections[0]).subtract(Victor.fromObject(line_start)).lengthSq() >
+        Victor.fromObject(intersections[1]).subtract(Victor.fromObject(line_start)).lengthSq()) {
       var temp = intersections[0];
       intersections[0] = intersections[1];
       intersections[1] = temp;
@@ -143,7 +143,10 @@ function clipLine(line_start, line_end, size_x, size_y) {
 
   // We might need to insert some corner points...
   console.log('give up');
-  return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
+  var midpoint = Victor.fromObject(line_start).add(Victor.fromObject(line_end)).multiply(Victor(0.5, 0.5));
+  // recurse, and find smaller segments until we don't end up in this place again.
+  return [...clipLine(line_start, midpoint, size_x, size_y),
+          ...clipLine(midpoint,   line_end, size_x, size_y)];
 }
 
 // Finds the nearest vertex that is in the bounds.
