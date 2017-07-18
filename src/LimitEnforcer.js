@@ -61,6 +61,10 @@ function intersection(line_start, line_end, side_start, side_end) {
   return intersection;
 }
 
+// This method is the guts of logic for this limits enforcer. It will take a single line (defined by
+// start and end) and if the line goes out of bounds, returns the vertices around the outside edge
+// to follow around without messing up the shape of the vertices.
+//
 function clipLine(line_start, line_end, size_x, size_y) {
 
   var quadrant_start = pointLocation(line_start, size_x, size_y);
@@ -73,19 +77,17 @@ function clipLine(line_start, line_end, size_x, size_y) {
 
   if (quadrant_start === quadrant_end) {
     // We are in the same box, and we are out of bounds.
-    console.log('stay')
     return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
   }
 
   if (quadrant_start & quadrant_end) {
-    console.log('one side')
     // These points are all on one side of the box.
     return [nearestVertex(line_start, size_x, size_y), nearestVertex(line_end, size_x, size_y)];
   }
 
   if (quadrant_start === 0b000) {
-    console.log('leaving')
-    // We are exiting the box.
+    // We are exiting the box. Return the start, the intersection with the boundary, and the closest
+    // boundary point to the exited point.
     var line = [line_start];
     line.push(boundPoint(line_start, line_end, size_x, size_y));
     line.push(nearestVertex(line_end, size_x, size_y));
@@ -93,13 +95,14 @@ function clipLine(line_start, line_end, size_x, size_y) {
   }
 
   if (quadrant_end === 0b000) {
-    console.log('returning')
     // We are re-entering the box.
     return [boundPoint(line_end, line_start, size_x, size_y), line_end];
   }
 
   // We have reached a terrible place, where both points are oob, but it might intersect with the
   // work area.
+
+  // First, define the boundaries as lines.
   const sides = [
     // left
     [Victor(-size_x, -size_y), Victor(-size_x, size_y)],
@@ -111,6 +114,7 @@ function clipLine(line_start, line_end, size_x, size_y) {
     [Victor(-size_x, size_y), Victor(size_x, size_y)],
   ]
 
+  // Count up the number of boundary lines intersect with our line segment.
   var intersections = []
   for (var s=0; s<sides.length; s++) {
     var int_point = intersection(Victor.fromObject(line_start),
@@ -124,53 +128,49 @@ function clipLine(line_start, line_end, size_x, size_y) {
 
   if (intersections.length !== 0) {
     if (intersections.length !== 2) {
-      // We should never get here
+      // We should never get here. How would we have something other than 2 or 0 intersections with
+      // a box?
       console.log(intersections);
       throw Error("Software Geometry Error");
     }
-    console.log('through');
 
-    // Determine if they are in the right order.
+    // The intersections are tested in some normal order, but the line could be going through them
+    // in any direction. This check will flip the intersections if they are reversed somehow.
     if (Victor.fromObject(intersections[0]).subtract(Victor.fromObject(line_start)).lengthSq() >
         Victor.fromObject(intersections[1]).subtract(Victor.fromObject(line_start)).lengthSq()) {
       var temp = intersections[0];
       intersections[0] = intersections[1];
       intersections[1] = temp;
-      console.log("swapped");
     }
     return intersections;
   }
 
-  // We might need to insert some corner points...
-  console.log('give up');
+  // Damn. We got here because we have a start and end that are failing different boundary checks,
+  // and the line segment doesn't intersect the box. We have to crawl around the outside of the
+  // box until we reach the other point.
+  //
+  // Here, I'm going to split this line into two parts, and send each half line segment back
+  // through the clipLine algorithm. Eventually, that should result in only one of the other cases.
   var midpoint = Victor.fromObject(line_start).add(Victor.fromObject(line_end)).multiply(Victor(0.5, 0.5));
   // recurse, and find smaller segments until we don't end up in this place again.
   return [...clipLine(line_start, midpoint, size_x, size_y),
           ...clipLine(midpoint,   line_end, size_x, size_y)];
 }
 
-// Finds the nearest vertex that is in the bounds.
+// Finds the nearest vertex that is in the bounds. This will change the shape. i.e. this doesn't
+// care about the line segment, only about the point.
 function nearestVertex(vertex, size_x, size_y) {
   return Vertex(Math.min(size_x, Math.max(-size_x, vertex.x)),
                 Math.min(size_y, Math.max(-size_y, vertex.y)));
 }
 
-// Determines of a point is in bounds or out.
-function outOfBounds(vertex, size_x, size_y) {
-  return (vertex.x < -size_x || vertex.x > size_x ||
-          vertex.y < -size_y || vertex.y > size_y);
-}
-
-// Find the point on the line defined by these two vertices that is exactly within the limits.
+// Intersect the line with the boundary, and return the point exactly on the boundary.
+// This will keep the shape. i.e. It will follow the line segment, and return the point on that line
+// segment.
 function boundPoint(good, bad, size_x, size_y) {
   var dx = good.x - bad.x;
   var dy = good.y - bad.y;
 
-  if (outOfBounds(good)) {
-    console.log('===================');
-    console.log(good);
-    console.log(bad);
-  }
   var fixed = Vertex(bad.x, bad.y);
   var distance = 0;
   if (bad.x < -size_x || bad.x > size_x) {
@@ -200,10 +200,12 @@ function boundPoint(good, bad, size_x, size_y) {
   return fixed;
 }
 
+// Manipulates the points to make them all in bounds, while doing the least amount of damage to the
+// desired shape.
 function enforceLimits(vertices, size_x, size_y) {
   var cleanVertices = []
   var previous = null;
-  console.log('=============');
+
   for (var next=0; next<vertices.length; next++) {
     var vertex = vertices[next];
     if (previous) {
@@ -220,12 +222,12 @@ function enforceLimits(vertices, size_x, size_y) {
   }
 
   // // Just for sanity, and cases that I haven't thought of, clean this list again.
-  // var cleanerVertices = []
-  // for (var i=0; i<cleanVertices.length; i++) {
-  //   cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
-  // }
+  var cleanerVertices = []
+  for (var i=0; i<cleanVertices.length; i++) {
+    cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+  }
 
-  return cleanVertices;
+  return cleanerVertices;
 }
 
 export default enforceLimits
