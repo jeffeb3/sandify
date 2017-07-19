@@ -142,7 +142,7 @@ function clipLine(line_start, line_end, size_x, size_y) {
       intersections[0] = intersections[1];
       intersections[1] = temp;
     }
-    return intersections;
+    return [...intersections, nearestVertex(line_end, size_x, size_y)];
   }
 
   // Damn. We got here because we have a start and end that are failing different boundary checks,
