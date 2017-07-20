@@ -20,8 +20,10 @@ import {
   setShapeSize,
   setGrow,
   setSpin,
+  setSides,
   toggleGrow,
   toggleSpin,
+  toggleSides,
 } from '../reducers/Index.js';
 
 class Shape extends Component {
@@ -79,7 +81,7 @@ class ShapeList extends Component {
 	var poly_points = []
 	var num_sides = 13
 	var poly_scale = 1.0
-	for (var i=0; i<num_sides; i++) {
+	for (i=0; i<num_sides; i++) {
 		angle = Math.PI * 2.0 / num_sides * i
 		poly_points.push(Vertex(poly_scale * Math.cos(angle), poly_scale * Math.sin(angle)))
 	}
@@ -253,6 +255,55 @@ class ScaleTransform extends Component {
   }
 }
 ScaleTransform = connect(scaleProps, scaleDispatch)(ScaleTransform) ;
+
+const sidesProps = (state, ownProps) => {
+  return {
+    active: state.sidesEnabled,
+    value: state.sidesValue,
+  }
+}
+
+const sidesDispatch = (dispatch, ownProps) => {
+  return {
+    activeCallback: () => {
+      dispatch(toggleSides());
+    },
+    onChange: (event) => {
+      dispatch(setSides(event.target.value));
+    },
+  }
+}
+
+class SidesTransform extends Component {
+
+  render() {
+    var activeClassName = "";
+    if (this.props.active) {
+      activeClassName = "active";
+    }
+
+    return (
+      <div className="sides">
+        <ListGroupItem header="Sides" className={activeClassName} onClick={this.props.activeCallback}>Sets the number of sides to use in a regular polygon shape</ListGroupItem>
+        <div className="sides-options">
+          <Panel className="options-panel" collapsible expanded={this.props.active}>
+            <Form horizontal>
+              <FormGroup controlId="sides-step">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Number of Sides
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange}/>
+                </Col>
+              </FormGroup>
+            </Form>
+          </Panel>
+        </div>
+      </div>
+    )
+  }
+}
+SidesTransform = connect(sidesProps, sidesDispatch)(SidesTransform) ;
 
 const transformsProps = (state, ownProps) => {
   return {
