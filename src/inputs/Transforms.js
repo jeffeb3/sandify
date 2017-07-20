@@ -345,6 +345,8 @@ class Transforms extends Component {
               />
             <ScaleTransform
               />
+            <SidesTransform
+              />
           </ListGroup>
         </Panel>
       </div>
