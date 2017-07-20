@@ -59,6 +59,13 @@ class PreviewWindow extends Component {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
+  dot_mm(context, vertex) {
+    var in_mm = this.mmToPixels(vertex);
+    context.arc(in_mm.x, in_mm.y, Math.max(4.0, this.mmToPixelsScale() * 1.5), 0, 2 * Math.PI, true);
+    context.fillStyle = context.strokeStyle;
+    context.fill();
+  }
+
   paint(context) {
     context.save();
 
@@ -73,17 +80,31 @@ class PreviewWindow extends Component {
     this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
     context.stroke();
 
-    // Draw the vertices
-    context.beginPath();
-    context.lineWidth = this.mmToPixelsScale();
-    context.strokeStyle = "green";
-    if (this.props.vertices.length !== 0) {
+    if (this.props.vertices && this.props.vertices.length > 0) {
+
+      // Draw the start and end points
+      context.beginPath();
+      context.lineWidth = 1.0;
+      context.strokeStyle = "green";
+      this.dot_mm(context, this.props.vertices[0]);
+      context.stroke();
+      context.beginPath();
+      context.lineWidth = 1.0;
+      context.strokeStyle = "red";
+      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1]);
+      context.stroke();
+
+      // Draw the vertices
+      context.beginPath();
+      context.lineWidth = this.mmToPixelsScale();
+      context.strokeStyle = "yellow";
       this.moveTo_mm(context, this.props.vertices[0]);
+      for (var i=0; i<this.props.vertices.length; i++) {
+        this.lineTo_mm(context, this.props.vertices[i]);
+      }
+      context.stroke();
     }
-    for (var i=0; i<this.props.vertices.length; i++) {
-      this.lineTo_mm(context, this.props.vertices[i]);
-    }
-    context.stroke();
+
     context.restore();
   }
 
