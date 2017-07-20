@@ -79,7 +79,7 @@ class ShapeList extends Component {
       star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
     }
 	var poly_points = []
-	var num_sides = 13
+	var num_sides = 13 // sidesValue
 	var poly_scale = 1.0
 	for (i=0; i<num_sides; i++) {
 		angle = Math.PI * 2.0 / num_sides * i

@@ -57,6 +57,19 @@ export const setGrow = ( value ) => {
   };
 }
 
+export const toggleSides = ( ) => {
+  return {
+    type: 'TOGGLE_SIDES',
+  };
+}
+
+export const setSides = ( value ) => {
+  return {
+    type: 'SET_SIDES',
+    value: value,
+  };
+}
+
 // Machine actions
 export const setMachineMinX = ( value ) => {
   return {
@@ -152,6 +165,8 @@ const defaultState = {
   spinValue: 2,
   growEnabled: false,
   growValue: 100,
+  sidesEnabled: false,
+  sidesValue: 5,
 
   turtleVertices: [],
 
@@ -293,6 +308,11 @@ const reducer  = (state = defaultState, action) => {
         growEnabled: !state.growEnabled,
       });
 
+    case 'TOGGLE_SIDES':
+      return computeInput({...state,
+        sidesEnabled: !state.sidesEnabled,
+      });
+
     case 'SET_SPIN':
       return computeInput({...state,
         spinValue: action.value,
@@ -301,6 +321,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_GROW':
       return computeInput({...state,
         growValue: action.value,
+      });
+
+    case 'SET_SIDES':
+      return computeInput({...state,
+        sidesValue: action.value,
       });
 
     // Vertex actions
