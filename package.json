@@ -9,7 +9,7 @@
     "react-dom": "^15.6.1",
     "react-redux": "^5.0.5",
     "react-scripts": "0.9.5",
-    "redux": "^3.7.1"
+    "redux": "^3.7.2"
   },
   "devDependencies": {
     "gh-pages": "^1.0.0"

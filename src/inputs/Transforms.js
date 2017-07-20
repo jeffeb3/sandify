@@ -76,6 +76,13 @@ class ShapeList extends Component {
       }
       star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
     }
+	var poly_points = []
+	var num_sides = 13
+	var poly_scale = 1.0
+	for (var i=0; i<num_sides; i++) {
+		angle = Math.PI * 2.0 / num_sides * i
+		poly_points.push(Vertex(poly_scale * Math.cos(angle), poly_scale * Math.sin(angle)))
+	}
     this.props.addShape({
         name: "Square",
         vertices: [
@@ -96,6 +103,10 @@ class ShapeList extends Component {
     this.props.addShape({
         name: "Star",
         vertices: star_points,
+      });
+    this.props.addShape({
+        name: "Polygon",
+        vertices: poly_points,
       });
     this.props.addShape({
         name: "Vicious1",
