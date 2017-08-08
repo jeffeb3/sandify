@@ -67,14 +67,19 @@ class ShapeList extends Component {
   constructor(props) {
     super(props)
 
-    var star_points = []
-    for (var i=0; i<10; i++) {
-      var angle = Math.PI * 2.0 / 10.0 * i
-      var star_scale = 1.0
+    let star_points = []
+    for (let i=0; i<10; i++) {
+      let angle = Math.PI * 2.0 / 10.0 * i
+      let star_scale = 1.0
       if (i % 2 === 0) {
         star_scale *= 0.5
       }
       star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
+    }
+    let circle_points = []
+    for (let i=0; i<128; i++) {
+      let angle = Math.PI * 2.0 / 128.0 * i
+      circle_points.push(Vertex(Math.cos(angle), Math.sin(angle)))
     }
     this.props.addShape({
         name: "Square",
@@ -96,6 +101,10 @@ class ShapeList extends Component {
     this.props.addShape({
         name: "Star",
         vertices: star_points,
+      });
+    this.props.addShape({
+        name: "Circle",
+        vertices: circle_points,
       });
     this.props.addShape({
         name: "Vicious1",
