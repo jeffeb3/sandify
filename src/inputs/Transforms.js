@@ -18,6 +18,7 @@ import {
   setLoops,
   setShape,
   setShapeSize,
+  setShapeOffset,
   setGrow,
   setSpin,
   toggleGrow,
@@ -46,6 +47,7 @@ const shapeListProps = (state, ownProps) => {
     shapes: state.shapes,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
+    offset: state.shapeOffset,
   }
 }
 
@@ -59,6 +61,9 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onSizeChange: (event) => {
       dispatch(setShapeSize(event.target.value));
+    },
+    onOffsetChange: (event) => {
+      dispatch(setShapeOffset(event.target.value));
     },
   }
 }
@@ -83,32 +88,40 @@ class ShapeList extends Component {
     }
     this.props.addShape({
         name: "Square",
-        vertices: [
-          Vertex(-1,-1),
-          Vertex( 1,-1),
-          Vertex( 1, 1),
-          Vertex(-1, 1),
-        ],
+        vertices: (state) => {
+          return [
+            Vertex(-1,-1),
+            Vertex( 1,-1),
+            Vertex( 1, 1),
+            Vertex(-1, 1),
+          ]},
       });
     this.props.addShape({
         name: "Triangle",
-        vertices: [
-          Vertex( 1, 0),
-          Vertex( -0.5, 0.867),
-          Vertex( -0.5, -0.867),
-        ],
+        vertices: (state) => {
+          return [
+            Vertex( 1, 0),
+            Vertex( -0.5, 0.867),
+            Vertex( -0.5, -0.867),
+          ]},
       });
     this.props.addShape({
         name: "Star",
-        vertices: star_points,
+        vertices: (state) => {
+          return star_points
+        },
       });
     this.props.addShape({
         name: "Circle",
-        vertices: circle_points,
+        vertices: (state) => {
+          return circle_points
+        },
       });
     this.props.addShape({
         name: "Vicious1",
-        vertices: Vicious1Vertices(),
+        vertices: (state) => {
+          return Vicious1Vertices()
+        },
       });
 
   }
@@ -137,6 +150,14 @@ class ShapeList extends Component {
                 </Col>
                 <Col sm={8}>
                   <FormControl type="number" value={this.props.startingSize} onChange={this.props.onSizeChange}/>
+                </Col>
+              </FormGroup>
+              <FormGroup controlId="shape-offset">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Offset
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.offset} onChange={this.props.onOffsetChange}/>
                 </Col>
               </FormGroup>
             </Form>
