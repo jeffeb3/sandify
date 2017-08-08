@@ -24,6 +24,13 @@ export const setShapeSize = ( size ) => {
   };
 }
 
+export const setShapeOffset = ( offset ) => {
+  return {
+    type: 'SET_SHAPE_OFFSET',
+    value: parseFloat(offset),
+  };
+}
+
 export const setLoops = ( loops ) => {
   return {
     type: 'SET_LOOPS',
@@ -147,6 +154,7 @@ const defaultState = {
   shapes: [],
   currentShape: undefined,
   startingSize: 10.0,
+  shapeOffset: 0.0,
   numLoops: 10,
   spinEnabled: false,
   spinValue: 2,
@@ -199,15 +207,24 @@ function scale (vertex, scale_perc) {
   }
 }
 
+function offset (vertex, offset) {
+  return {
+    x: vertex.x + offset,
+    y: vertex.y,
+    f: vertex.f,
+  }
+}
+
 const transform = (state, vertex, loop_index) => {
   var transformed_vertex = vertex
-  if (state.spinEnabled)
-  {
-    transformed_vertex = rotate(transformed_vertex, state.spinValue * loop_index);
-  }
   if (state.growEnabled)
   {
     transformed_vertex = scale(transformed_vertex, 100.0 + (state.growValue * loop_index));
+  }
+  transformed_vertex = offset(transformed_vertex, state.shapeOffset);
+  if (state.spinEnabled)
+  {
+    transformed_vertex = rotate(transformed_vertex, state.spinValue * loop_index);
   }
   return transformed_vertex;
 }
@@ -225,7 +242,7 @@ const transformShapes = (state) => {
   const shape = findShape(state.shapes, state.currentShape);
   var input = []
   if (shape) {
-    input = shape.vertices.map( (vertex) => {
+    input = shape.vertices(state).map( (vertex) => {
       return scale(vertex, 100.0 * state.startingSize);
     });
   }
@@ -276,6 +293,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_SHAPE_SIZE':
       return computeInput({...state,
         startingSize: action.value,
+      });
+
+    case 'SET_SHAPE_OFFSET':
+      return computeInput({...state,
+        shapeOffset: action.value,
       });
 
     case 'SET_LOOPS':
