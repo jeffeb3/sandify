@@ -14,7 +14,7 @@ class Documentation extends Component {
         Anything that uses gcode can be used with sandify.
             But the machine this was designed for is the ZenXY from Vicious1.com:
         <br/>
-        (Official link coming soon)
+        <a href="http://www.vicious1.com/zenxy/">ZenXY on Vicious1.com</a>
         <br/>
         <a href="https://www.thingiverse.com/thing:2477901">ZenXY Thingiverse Page</a>
         <br/>
