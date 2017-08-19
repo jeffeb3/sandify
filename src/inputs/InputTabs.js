@@ -5,6 +5,7 @@ import {
 } from 'react-bootstrap'
 import './InputTabs.css'
 import Turtle from './Turtle.js'
+import TurtleEditor from './TurtleEditor.js'
 import Transforms from './Transforms.js'
 import { connect } from 'react-redux'
 import {
@@ -24,7 +25,7 @@ class InputTabs extends Component {
            <Transforms/>
          </Tab>
          <Tab eventKey={1} title="Turtle">
-           <Turtle/>
+           <TurtleEditor/>
          </Tab>
        </Tabs>
     );

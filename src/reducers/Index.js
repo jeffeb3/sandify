@@ -135,6 +135,20 @@ export const setTurtleVertices = ( vertices ) => {
   };
 }
 
+export const setTurtleCode = ( code ) => {
+  return {
+    type: 'SET_TURTLE_CODE',
+    value: code,
+  };
+}
+
+export const setTurtleCommand = ( command ) => {
+  return {
+    type: 'SET_TURTLE_COMMAND',
+    value: command,
+  };
+}
+
 export const addVertex = ( vertex ) => {
   return {
     type: 'ADD_VERTEX',
@@ -162,6 +176,25 @@ const defaultState = {
   growValue: 100,
 
   turtleVertices: [],
+  turtleCode:
+    "// Define helper functions here.\n" +
+    "// For example:\n" +
+    "\n" +
+    "function square(side) {\n" +
+    "   repeat(4, function () {\n" +
+    "      forward(side);\n" +
+    "      right(90);\n" +
+    "   });\n" +
+    "}\n" +
+    "\n" +
+    "function demo() {\n" +
+    "   hideTurtle();\n" +
+    "   colour(0,0,255,1);\n" +
+    "   for(s = 100; s > 0; s -= 10) {\n" +
+    "      square(s);\n" +
+    "      right(36);\n" +
+    "   }\n" +
+    "}\n",
 
   // Vertices
   vertices: [],
@@ -333,6 +366,14 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_TURTLE_VERTICES':
       return computeInput({...state,
         turtleVertices: action.vertices,
+      });
+    case 'SET_TURTLE_CODE':
+      return computeInput({...state,
+        turtleCode: action.code,
+      });
+    case 'SET_TURTLE_COMMAND':
+      return computeInput({...state,
+        turtleCommand: action.value,
       });
     case 'ADD_VERTEX': {
       let newState = {
