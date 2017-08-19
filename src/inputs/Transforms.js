@@ -211,7 +211,7 @@ class RotationTransform extends Component {
                   Spin Step
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange}/>
+                  <FormControl type="number" step="0.1" value={this.props.value} onChange={this.props.onChange}/>
                 </Col>
               </FormGroup>
             </Form>
