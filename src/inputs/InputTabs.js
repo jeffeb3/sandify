@@ -6,6 +6,7 @@ import {
 import './InputTabs.css'
 import Turtle from './Turtle.js'
 import Transforms from './Transforms.js'
+import Wiper from './Wiper.js'
 import { connect } from 'react-redux'
 import {
   chooseInput,
@@ -25,6 +26,9 @@ class InputTabs extends Component {
          </Tab>
          <Tab eventKey={1} title="Turtle">
            <Turtle/>
+         </Tab>
+         <Tab eventKey={2} title="Wiper">
+           <Wiper/>
          </Tab>
        </Tabs>
     );
