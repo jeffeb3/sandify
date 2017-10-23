@@ -333,6 +333,13 @@ function boundPoint(good, bad, size_x, size_y) {
   return fixed;
 }
 
+function nearEnough(end, point) {
+  if (point.clone().subtract(end).length() < 0.01) {
+    return true;
+  }
+  return false;
+}
+
 const wiper = (state) => {
 
   var outputVertices = []
@@ -370,6 +377,7 @@ const wiper = (state) => {
   }
   let delta_w = orig_delta_w;
   let delta_h = orig_delta_h;
+  let endLocation = startLocation.clone().multiply(Victor(-1.0, -1.0));
   console.log('dw: ' + delta_w + ' dh: ' + delta_h);
   outputVertices.push(startLocation);
   let nextWidthPoint = startLocation;
@@ -384,10 +392,16 @@ const wiper = (state) => {
     if (outOfBounds(nextWidthPoint, width, height)) {
       let corner = boundPoint(nextWidthPoint.clone().subtract(delta_w), nextWidthPoint, width/2.0, height/2.0);
       outputVertices.push(corner);
+      if (nearEnough(endLocation, corner)) {
+        break;
+      }
       nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0);
       delta_w = orig_delta_h;
     }
     outputVertices.push(nextWidthPoint);
+    if (nearEnough(endLocation, nextWidthPoint)) {
+      break;
+    }
 
     // "down-left"
     nextHeightPoint = nextHeightPoint.clone().add(delta_h);
@@ -396,33 +410,41 @@ const wiper = (state) => {
       delta_h = orig_delta_w;
     }
     outputVertices.push(nextHeightPoint);
+    if (nearEnough(endLocation, nextHeightPoint)) {
+      break;
+    }
 
     // "down"
     nextHeightPoint = nextHeightPoint.clone().add(delta_h);
     outputVertices.push(nextHeightPoint);
+    if (nearEnough(endLocation, nextHeightPoint)) {
+      break;
+    }
     if (outOfBounds(nextHeightPoint, width, height)) {
       let corner = boundPoint(nextHeightPoint.clone().subtract(delta_h), nextHeightPoint, width/2.0, height/2.0);
       outputVertices.push(corner);
+      if (nearEnough(endLocation, corner)) {
+        break;
+      }
       nextHeightPoint = boundPoint(nextWidthPoint, nextHeightPoint, width/2.0, height/2.0);
       delta_h = orig_delta_w;
     }
-
     outputVertices.push(nextHeightPoint);
-    if (outOfBounds(nextHeightPoint, width, height)) {
+    if (nearEnough(endLocation, nextHeightPoint)) {
       break;
     }
 
     // "up-right"
     nextWidthPoint = nextWidthPoint.clone().add(delta_w);
     outputVertices.push(nextWidthPoint);
+    if (nearEnough(endLocation, nextWidthPoint)) {
+      break;
+    }
     if (outOfBounds(nextWidthPoint, width, height)) {
       nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0);
       delta_w = orig_delta_h;
     }
 
-    if (outOfBounds(nextWidthPoint, width, height)) {
-      break;
-    }
   }
 
   console.log(outputVertices);
