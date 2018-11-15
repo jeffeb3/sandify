@@ -347,7 +347,7 @@ const wiper = (state) => {
   // Do the math
 
   // Get the angle between 0,180
-  let angle = (180.0 - state.wiperAngleDeg) % 180.0;
+  let angle = (180.0 - (state.wiperAngleDeg % 360)) % 180.0;
   if (angle < 0.0) {
     angle += 180.0;
   }
