@@ -1,15 +1,10 @@
 .App {
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 70px;
-}
-
 .App-header {
   background-color: #222;
   height: 190px;
-  padding: 20px;
+  padding: 18px;
   color: white;
   text-align: center;
 }
@@ -20,20 +15,40 @@
 
 .App-left {
    float:left;
-   width:20%;
 }
 
 .App-mid {
    float:left;
-   width:30%;
 }
 
-.App-right {
+.App-doc {
    float:left;
-   width:50%;
+}
+
+/* For mobile phones: */
+[class*="App-col-"] {
+    width: 100%;
+    float:left;
+    padding: 15px;
+}
+@media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .App-col-1 {width: 8.33%;}
+    .App-col-2 {width: 16.66%;}
+    .App-col-3 {width: 25%;}
+    .App-col-4 {width: 33.33%;}
+    .App-col-5 {width: 41.66%;}
+    .App-col-6 {width: 50%;}
+    .App-col-7 {width: 58.33%;}
+    .App-col-8 {width: 66.66%;}
+    .App-col-9 {width: 75%;}
+    .App-col-10 {width: 83.33%;}
+    .App-col-11 {width: 91.66%;}
+    .App-col-12 {width: 100%;}
 }
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
