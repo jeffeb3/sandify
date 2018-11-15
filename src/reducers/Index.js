@@ -112,6 +112,13 @@ export const setMachineMaxY = ( value ) => {
   };
 }
 
+export const setMachinePreviewSize = ( value ) => {
+  return {
+    type: 'SET_MACHINE_SIZE',
+    value: value,
+  };
+}
+
 // GCode Actions
 export const setGCodePre = ( text ) => {
   return {
@@ -194,6 +201,8 @@ const defaultState = {
   max_x: 500,
   min_y: 0,
   max_y: 500,
+  canvas_width: 600,
+  canvas_height: 600,
 
   // GCode settings
   gcodePre: '',
@@ -573,6 +582,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_MAX_Y':
       return computeInput({...state,
         max_y: action.value,
+      });
+    case 'SET_MACHINE_SIZE':
+      return computeInput({...state,
+        canvas_width: action.value,
+        canvas_height: action.value,
       });
 
     // GCode Settings

@@ -34,10 +34,7 @@ class App extends Component {
 
           <div className="App-right">
             <div className="App-canvas">
-              <MachinePreview
-                canvas_width={600}
-                canvas_height={600}
-                />
+              <MachinePreview/>
             </div>
 
             <div id="output">
