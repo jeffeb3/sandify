@@ -14,7 +14,7 @@ import {
   setGCodePre,
   setGCodePost,
   toggleGCodeReverse,
-} from './reducers/Index.js';
+} from '../reducers/Index.js';
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.

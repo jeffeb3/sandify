@@ -14,7 +14,7 @@ import {
   setMachineMaxX,
   setMachineMinY,
   setMachineMaxY,
-} from './reducers/Index.js';
+} from '../reducers/Index.js';
 import './MachineSettings.css';
 
 
