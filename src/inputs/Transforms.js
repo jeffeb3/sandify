@@ -17,6 +17,8 @@ import {
   addShape,
   setLoops,
   setShape,
+  setShapePolygonSides,
+  setShapeStarPoints,
   setShapeSize,
   setShapeOffset,
   setGrow,
@@ -34,9 +36,40 @@ class Shape extends Component {
       activeClassName = "active";
     }
 
+    var options_render = this.props.options.map( (option) => {
+      return <FormGroup controlId="options-step" key={option.title}>
+               <Col componentClass={ControlLabel} sm={4}>
+                 {option.title}
+               </Col>
+               <Col sm={8}>
+                 <FormControl
+                   type="number"
+                   step="1"
+                   value={option.value()}
+                   onChange={(event) => {
+                     option.onChange(event)
+                   }}/>
+               </Col>
+             </FormGroup>
+    });
+
+    var options_list_render = undefined;
+
+    if (this.props.options.length >= 1) {
+      options_list_render =
+        <div className="shape-options">
+          <Panel className="options-panel" collapsible expanded={this.props.active}>
+            <Form horizontal>
+              {options_render}
+            </Form>
+          </Panel>
+        </div>
+    }
+
     return (
       <div className="shape">
         <ListGroupItem className={activeClassName} onClick={this.props.clicked}>{this.props.name}</ListGroupItem>
+            {options_list_render}
       </div>
     )
   }
@@ -45,6 +78,8 @@ class Shape extends Component {
 const shapeListProps = (state, ownProps) => {
   return {
     shapes: state.shapes,
+    polygonSides: state.shapePolygonSides,
+    starPoints:   state.shapeStarPoints,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
     offset: state.shapeOffset,
@@ -59,6 +94,12 @@ const shapeListDispatch = (dispatch, ownProps) => {
     setShape: (name) => {
       dispatch(setShape(name));
     },
+    onPolygonSizeChange: (event) => {
+      dispatch(setShapePolygonSides(event.target.value));
+    },
+    onStarPointsChange: (event) => {
+      dispatch(setShapeStarPoints(event.target.value));
+    },
     onSizeChange: (event) => {
       dispatch(setShapeSize(event.target.value));
     },
@@ -72,56 +113,64 @@ class ShapeList extends Component {
   constructor(props) {
     super(props)
 
-    let star_points = []
-    for (let i=0; i<10; i++) {
-      let angle = Math.PI * 2.0 / 10.0 * i
-      let star_scale = 1.0
-      if (i % 2 === 0) {
-        star_scale *= 0.5
-      }
-      star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
-    }
     let circle_points = []
     for (let i=0; i<128; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
       circle_points.push(Vertex(Math.cos(angle), Math.sin(angle)))
     }
     this.props.addShape({
-        name: "Square",
+        name: "Polygon",
         vertices: (state) => {
-          return [
-            Vertex(-1,-1),
-            Vertex( 1,-1),
-            Vertex( 1, 1),
-            Vertex(-1, 1),
-          ]},
-      });
-    this.props.addShape({
-        name: "Triangle",
-        vertices: (state) => {
-          return [
-            Vertex( 1, 0),
-            Vertex( -0.5, 0.867),
-            Vertex( -0.5, -0.867),
-          ]},
+          let points = [];
+          for (let i=0; i<state.shapePolygonSides; i++) {
+            let angle = Math.PI * 2.0 / state.shapePolygonSides * (0.5 + i);
+            points.push(Vertex(Math.cos(angle), Math.sin(angle)))
+          }
+          return points;
+        },
+        options: [
+          {
+            title: "Number of Sides",
+            value: () => { return this.props.polygonSides },
+            onChange: this.props.onPolygonSizeChange,
+          },
+        ],
       });
     this.props.addShape({
         name: "Star",
         vertices: (state) => {
+          let star_points = [];
+          for (let i=0; i<state.shapeStarPoints * 2; i++) {
+            let angle = Math.PI * 2.0 / (2.0 * state.shapeStarPoints) * i;
+            let star_scale = 1.0;
+            if (i % 2 === 0) {
+              star_scale *= 0.5
+            }
+            star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
+          }
           return star_points
         },
+        options: [
+          {
+            title: "Number of Points",
+            value: () => { return this.props.starPoints },
+            onChange: this.props.onStarPointsChange,
+          },
+        ],
       });
     this.props.addShape({
         name: "Circle",
         vertices: (state) => {
           return circle_points
         },
+        options: [],
       });
     this.props.addShape({
         name: "Vicious1",
         vertices: (state) => {
           return Vicious1Vertices()
         },
+        options: [],
       });
 
   }
@@ -132,11 +181,12 @@ class ShapeList extends Component {
 
     var shape_render = this.props.shapes.map( (shape) => {
       return <Shape
-            key={shape.name}
-            name={shape.name}
-            active={shape.name === self.props.currentShape}
-            clicked={ () => { self.props.setShape(shape.name); } }
-          />
+               key={shape.name}
+               name={shape.name}
+               active={shape.name === self.props.currentShape}
+               options={shape.options}
+               clicked={ () => { self.props.setShape(shape.name); } }
+             />
     });
 
     return (
@@ -311,9 +361,9 @@ class Transforms extends Component {
             </Form>
           </Panel>
           <ListGroup>
-            <RotationTransform
-              />
             <ScaleTransform
+              />
+            <RotationTransform
               />
           </ListGroup>
         </Panel>

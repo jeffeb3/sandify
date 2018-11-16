@@ -21,6 +21,20 @@ export const setShape = ( shape ) => {
   };
 }
 
+export const setShapePolygonSides = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_POLYGON_SIDES',
+    value: sides,
+  };
+}
+
+export const setShapeStarPoints = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_STAR_POINTS',
+    value: sides,
+  };
+}
+
 export const setShapeSize = ( size ) => {
   return {
     type: 'SET_SHAPE_SIZE',
@@ -186,6 +200,8 @@ const defaultState = {
   // Transform settings
   shapes: [],
   currentShape: undefined,
+  shapePolygonSides: 4,
+  shapeStarPoints: 5,
   startingSize: 10.0,
   shapeOffset: 0.0,
   numLoops: 10,
@@ -367,7 +383,6 @@ const wiper = (state) => {
   if (angle < 0.0) {
     angle += 180.0;
   }
-  console.log('angle:' + angle);
   angle = degToRad(angle);
 
   // Start with the defaults for 0,45
@@ -379,22 +394,18 @@ const wiper = (state) => {
 
   if (angle > Math.PI/4.0 && angle < 0.75 * Math.PI) {
     // flip the logic of x,y
-    console.log('logic flipped angle:' + angle);
     let temp = orig_delta_w.clone();
     orig_delta_w = orig_delta_h.clone();
     orig_delta_h = temp;
   }
   if (angle > Math.PI/2.0) {
-    console.log('flipping angle:' + angle);
     startLocation = Victor(-width/2.0, -height/2.0)
     orig_delta_w = orig_delta_w.clone().multiply(Victor(-1.0, -1.0));
     orig_delta_h = orig_delta_h.clone().multiply(Victor(-1.0, -1.0));
-    console.log(orig_delta_h);
   }
   let delta_w = orig_delta_w;
   let delta_h = orig_delta_h;
   let endLocation = startLocation.clone().multiply(Victor(-1.0, -1.0));
-  console.log('dw: ' + delta_w + ' dh: ' + delta_h);
   outputVertices.push(startLocation);
   let nextWidthPoint = startLocation;
   let nextHeightPoint = startLocation;
@@ -463,7 +474,6 @@ const wiper = (state) => {
 
   }
 
-  console.log(outputVertices);
   setVerticesHelper(state, outputVertices);
 
   return state;
@@ -500,6 +510,16 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_SHAPE':
       return computeInput({...state,
         currentShape: action.value,
+      });
+
+    case 'SET_SHAPE_POLYGON_SIDES':
+      return computeInput({...state,
+        shapePolygonSides: action.value,
+      });
+
+    case 'SET_SHAPE_STAR_POINTS':
+      return computeInput({...state,
+        shapeStarPoints: action.value,
       });
 
     case 'SET_SHAPE_SIZE':
