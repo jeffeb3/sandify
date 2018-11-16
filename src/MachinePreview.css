@@ -1,5 +1,9 @@
 .canvas {
    background:#111;
    border: 1px solid blue;
-   margin: 12px;
+}
+
+.cheatBox {
+   padding: 0px;
+   margin: 0px;
 }

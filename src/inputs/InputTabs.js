@@ -21,11 +21,8 @@ class InputTabs extends Component {
   render() {
     return (
        <Tabs defaultActiveKey={0} onSelect={this.handleSelect.bind(this)} id="inputTabs">
-         <Tab eventKey={0} title="Transforms">
+         <Tab eventKey={0} title="Shapes">
            <Transforms/>
-         </Tab>
-         <Tab eventKey={1} title="Turtle">
-           <Turtle/>
          </Tab>
          <Tab eventKey={2} title="Wiper">
            <Wiper/>

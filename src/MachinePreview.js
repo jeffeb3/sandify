@@ -4,6 +4,10 @@ import './MachinePreview.css';
 import { Vertex } from './Geometry';
 import MachineSettings from './MachineSettings.js';
 import { connect } from 'react-redux'
+import { Panel } from 'react-bootstrap'
+import {
+  setMachinePreviewSize,
+} from './reducers/Index.js';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -11,7 +15,17 @@ const mapStateToProps = (state, ownProps) => {
     max_x: state.max_x,
     min_y: state.min_y,
     max_y: state.max_y,
+    canvas_width: state.canvas_width,
+    canvas_height: state.canvas_height,
     vertices: state.vertices,
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onResize: (size) => {
+      dispatch(setMachinePreviewSize(size))
+    },
   }
 }
 
@@ -19,13 +33,20 @@ const mapStateToProps = (state, ownProps) => {
 class PreviewWindow extends Component {
 
   componentDidMount() {
-    var context = ReactDOM.findDOMNode(this).getContext('2d');
+    var canvas = ReactDOM.findDOMNode(this);
+    var context = canvas.getContext('2d');
+    var bigBox = document.getElementById("biggerBox");
+    this.resize(canvas, bigBox);
+    window.addEventListener('resize', () => { this.resize(canvas, bigBox) }, false);
     this.paint(context);
   }
 
   componentDidUpdate() {
-    var context = ReactDOM.findDOMNode(this).getContext('2d');
+    var canvas = ReactDOM.findDOMNode(this);
+    var context = canvas.getContext('2d');
     context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
+    var bigBox = document.getElementById("biggerBox");
+    this.resize(canvas, bigBox);
     this.paint(context);
   }
 
@@ -108,27 +129,39 @@ class PreviewWindow extends Component {
     context.restore();
   }
 
+  resize(canvas, bigBox) {
+    var size = parseInt(getComputedStyle(bigBox).getPropertyValue('width'),10);
+    canvas.width = size;
+    canvas.height = size;
+    if (this.props.canvas_width !== size) {
+      this.props.onResize(size);
+    }
+    var context = canvas.getContext('2d');
+    this.paint(context)
+  }
+
   render() {
     const {canvas_width, canvas_height} = this.props;
     return (
-      <canvas className="canvas"
-        width={canvas_width}
-        height={canvas_height}
-      />
+        <canvas className="canvas"
+          width={canvas_width}
+          height={canvas_height}
+        />
     );
   }
 }
-PreviewWindow = connect(mapStateToProps)(PreviewWindow);
+PreviewWindow = connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
 
 class MachinePreview extends Component {
   render() {
     return (
       <div className="machine-preview">
-        <MachineSettings />
-        <PreviewWindow
-          canvas_width={this.props.canvas_width}
-          canvas_height={this.props.canvas_height}
-        />
+        <Panel>
+            <div className="cheatBox" id="biggerBox">
+                <MachineSettings />
+            </div>
+            <PreviewWindow />
+        </Panel>
       </div>
     )
   }

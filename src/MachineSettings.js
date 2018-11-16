@@ -5,6 +5,7 @@ import {
     Form,
     FormControl,
     FormGroup,
+    Panel,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 
@@ -47,40 +48,42 @@ class MachineSettings extends Component {
   render() {
     return (
       <div className="machine-form">
-        <Form horizontal>
-          <FormGroup controlId="min_x">
-            <Col componentClass={ControlLabel} sm={3}>
-              Min X (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.min_x} onChange={this.props.onMinXChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="max_x">
-            <Col componentClass={ControlLabel} sm={3}>
-              Max X (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.max_x} onChange={this.props.onMaxXChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="min_y">
-            <Col componentClass={ControlLabel} sm={3}>
-              Min Y (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.min_y} onChange={this.props.onMinYChange}/>
-            </Col>
-          </FormGroup>
-          <FormGroup controlId="max_y">
-            <Col componentClass={ControlLabel} sm={3}>
-              Max Y (mm)
-            </Col>
-            <Col sm={8}>
-              <FormControl type="number" value={this.props.max_y} onChange={this.props.onMaxYChange}/>
-            </Col>
-          </FormGroup>
-        </Form>
+        <Panel>
+          <Form horizontal>
+            <FormGroup className="machineSmaller" controlId="min_x">
+              <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                Min X (mm)
+              </Col>
+              <Col sm={7} smOffset={1}>
+                <FormControl type="number" value={this.props.min_x} onChange={this.props.onMinXChange}/>
+              </Col>
+            </FormGroup>
+            <FormGroup className="machineSmaller" controlId="max_x">
+              <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                Max X (mm)
+              </Col>
+              <Col sm={7} smOffset={1}>
+                <FormControl type="number" value={this.props.max_x} onChange={this.props.onMaxXChange}/>
+              </Col>
+            </FormGroup>
+            <FormGroup className="machineSmaller" controlId="min_y">
+              <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                Min Y (mm)
+              </Col>
+              <Col sm={7} smOffset={1}>
+                <FormControl type="number" value={this.props.min_y} onChange={this.props.onMinYChange}/>
+              </Col>
+            </FormGroup>
+            <FormGroup className="machineSmaller" controlId="max_y">
+              <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                Max Y (mm)
+              </Col>
+              <Col sm={7} smOffset={1}>
+                <FormControl type="number" value={this.props.max_y} onChange={this.props.onMaxYChange}/>
+              </Col>
+            </FormGroup>
+          </Form>
+        </Panel>
       </div>
     )
   }

@@ -1,3 +1,4 @@
+import './GCode.css';
 import React, { Component } from 'react';
 import {
   Button,
@@ -114,7 +115,7 @@ class GCodeGenerator extends Component {
     const activeClassName = (this.props.reverse ? "active" : null);
     return (
       <div>
-        <Button bsStyle="primary" bsSize="large" onClick={this.props.open}>GCode</Button>
+        <Button className="finishButton" bsStyle="primary" bsSize="large" onClick={this.props.open}>Create GCode</Button>
         <Modal show={this.props.show}>
           <Modal.Header closeButton>
             <Modal.Title>GCode Parameters</Modal.Title>

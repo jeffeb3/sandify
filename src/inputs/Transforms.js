@@ -298,16 +298,18 @@ class Transforms extends Component {
         </Panel>
         <Panel className="transforms-panel">
           <h4>Modifiers</h4>
-          <Form horizontal>
-            <FormGroup controlId="loop-count">
-              <Col componentClass={ControlLabel} sm={4}>
-                Num Loops
-              </Col>
-              <Col sm={8}>
-                <FormControl type="number" value={this.props.loops} onChange={this.props.changeLoops}/>
-              </Col>
-            </FormGroup>
-          </Form>
+          <Panel className="options-panel">
+            <Form horizontal>
+              <FormGroup controlId="loop-count">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Number of Loops
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.loops} onChange={this.props.changeLoops}/>
+                </Col>
+              </FormGroup>
+            </Form>
+          </Panel>
           <ListGroup>
             <RotationTransform
               />

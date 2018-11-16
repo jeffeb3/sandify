@@ -24,26 +24,23 @@ class App extends Component {
             <Header/>
           </div>
 
-          <div className="App-left">
-            <Documentation/>
-          </div>
-
-          <div className="App-mid">
+          <div className="App-col-7 App-left">
             <InputTabs/>
           </div>
 
-          <div className="App-right">
+          <div className="App-col-5 App-mid">
             <div className="App-canvas">
-              <MachinePreview
-                canvas_width={600}
-                canvas_height={600}
-                />
+              <MachinePreview/>
             </div>
 
             <div id="output">
               <GCodeGenerator/>
             </div>
           </div>
+          <div className="App-col-12 App-doc">
+            <Documentation/>
+          </div>
+
         </div>
       </Provider>
     );
