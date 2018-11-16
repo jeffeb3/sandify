@@ -1,4 +1,4 @@
-import { Vertex } from './Geometry';
+import { Vertex } from '../Geometry';
 import Victor from 'victor';
 
 // Determines which of 8 neighbor areas the point is in:

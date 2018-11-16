@@ -19,6 +19,7 @@ import {
   setShape,
   setShapePolygonSides,
   setShapeStarPoints,
+  setShapeCircleLobes,
   setShapeSize,
   setShapeOffset,
   setGrow,
@@ -80,6 +81,7 @@ const shapeListProps = (state, ownProps) => {
     shapes: state.shapes,
     polygonSides: state.shapePolygonSides,
     starPoints:   state.shapeStarPoints,
+    circleLobes:  state.shapeCircleLobes,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
     offset: state.shapeOffset,
@@ -100,6 +102,9 @@ const shapeListDispatch = (dispatch, ownProps) => {
     onStarPointsChange: (event) => {
       dispatch(setShapeStarPoints(event.target.value));
     },
+    onCircleLobesChange: (event) => {
+      dispatch(setShapeCircleLobes(event.target.value));
+    },
     onSizeChange: (event) => {
       dispatch(setShapeSize(event.target.value));
     },
@@ -113,11 +118,6 @@ class ShapeList extends Component {
   constructor(props) {
     super(props)
 
-    let circle_points = []
-    for (let i=0; i<128; i++) {
-      let angle = Math.PI * 2.0 / 128.0 * i
-      circle_points.push(Vertex(Math.cos(angle), Math.sin(angle)))
-    }
     this.props.addShape({
         name: "Polygon",
         vertices: (state) => {
@@ -161,9 +161,20 @@ class ShapeList extends Component {
     this.props.addShape({
         name: "Circle",
         vertices: (state) => {
+          let circle_points = []
+          for (let i=0; i<128; i++) {
+            let angle = Math.PI * 2.0 / 128.0 * i
+            circle_points.push(Vertex(Math.cos(angle), Math.sin(state.shapeCircleLobes * angle)/state.shapeCircleLobes))
+          }
           return circle_points
         },
-        options: [],
+        options: [
+          {
+            title: "Number of Lobes",
+            value: () => { return this.props.circleLobes },
+            onChange: this.props.onCircleLobesChange,
+          },
+        ],
       });
     this.props.addShape({
         name: "Vicious1",

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './MachinePreview.css';
-import { Vertex } from './Geometry';
+import { Vertex } from '../Geometry';
 import MachineSettings from './MachineSettings.js';
 import { connect } from 'react-redux'
 import { Panel } from 'react-bootstrap'
 import {
   setMachinePreviewSize,
-} from './reducers/Index.js';
+} from '../reducers/Index.js';
 
 const mapStateToProps = (state, ownProps) => {
   return {

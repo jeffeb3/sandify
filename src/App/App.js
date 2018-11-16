@@ -3,12 +3,12 @@ import './App.css';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 
-import reducer from './reducers/Index.js';
+import reducer from '../reducers/Index.js';
 import Header from './Header';
 import Documentation from './Documentation';
-import InputTabs from './inputs/InputTabs';
-import MachinePreview from './MachinePreview';
-import GCodeGenerator from './GCode';
+import InputTabs from '../inputs/InputTabs';
+import MachinePreview from '../machine/MachinePreview';
+import GCodeGenerator from '../machine/GCode';
 
 const store = createStore(reducer);
 

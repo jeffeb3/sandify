@@ -1,5 +1,5 @@
 
-import enforceLimits from '../LimitEnforcer';
+import enforceLimits from '../machine/LimitEnforcer';
 import {
   degToRad,
   Vertex,
@@ -31,6 +31,13 @@ export const setShapePolygonSides = ( sides ) => {
 export const setShapeStarPoints = ( sides ) => {
   return {
     type: 'SET_SHAPE_STAR_POINTS',
+    value: sides,
+  };
+}
+
+export const setShapeCircleLobes = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_CIRCLE_LOBES',
     value: sides,
   };
 }
@@ -202,6 +209,7 @@ const defaultState = {
   currentShape: undefined,
   shapePolygonSides: 4,
   shapeStarPoints: 5,
+  shapeCircleLobes: 1,
   startingSize: 10.0,
   shapeOffset: 0.0,
   numLoops: 10,
@@ -520,6 +528,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_SHAPE_STAR_POINTS':
       return computeInput({...state,
         shapeStarPoints: action.value,
+      });
+
+    case 'SET_SHAPE_CIRCLE_LOBES':
+      return computeInput({...state,
+        shapeCircleLobes: action.value,
       });
 
     case 'SET_SHAPE_SIZE':
