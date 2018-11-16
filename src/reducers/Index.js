@@ -85,6 +85,8 @@ export const setWiperSize = ( value ) => {
 
 // Machine actions
 export const setMachineMinX = ( value ) => {
+  // This is definitely a side effect...
+  localStorage.setItem('machine_min_x', value)
   return {
     type: 'SET_MIN_X',
     value: value,
@@ -92,6 +94,7 @@ export const setMachineMinX = ( value ) => {
 }
 
 export const setMachineMaxX = ( value ) => {
+  localStorage.setItem('machine_max_x', value)
   return {
     type: 'SET_MAX_X',
     value: value,
@@ -99,6 +102,7 @@ export const setMachineMaxX = ( value ) => {
 }
 
 export const setMachineMinY = ( value ) => {
+  localStorage.setItem('machine_min_y', value)
   return {
     type: 'SET_MIN_Y',
     value: value,
@@ -106,6 +110,7 @@ export const setMachineMinY = ( value ) => {
 }
 
 export const setMachineMaxY = ( value ) => {
+  localStorage.setItem('machine_max_y', value)
   return {
     type: 'SET_MAX_Y',
     value: value,
@@ -121,6 +126,7 @@ export const setMachinePreviewSize = ( value ) => {
 
 // GCode Actions
 export const setGCodePre = ( text ) => {
+  localStorage.setItem('gcode_pre', text)
   return {
     type: 'SET_GCODE_PRE',
     value: text,
@@ -128,6 +134,7 @@ export const setGCodePre = ( text ) => {
 }
 
 export const setGCodePost = ( text ) => {
+  localStorage.setItem('gcode_post', text)
   return {
     type: 'SET_GCODE_POST',
     value: text,
@@ -197,16 +204,16 @@ const defaultState = {
   input: 0,
 
   // Machine settings
-  min_x: 0,
-  max_x: 500,
-  min_y: 0,
-  max_y: 500,
+  min_x: localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0,
+  max_x: localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500,
+  min_y: localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0,
+  max_y: localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500,
   canvas_width: 600,
   canvas_height: 600,
 
   // GCode settings
-  gcodePre: '',
-  gcodePost: '',
+  gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
+  gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
   showGCode: false,
 }
