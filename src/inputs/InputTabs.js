@@ -4,7 +4,6 @@ import {
     Tabs,
 } from 'react-bootstrap'
 import './InputTabs.css'
-import Turtle from './Turtle.js'
 import Transforms from './Transforms.js'
 import Wiper from './Wiper.js'
 import { connect } from 'react-redux'
