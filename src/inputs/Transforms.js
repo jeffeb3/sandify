@@ -19,6 +19,7 @@ import {
   setShape,
   setShapePolygonSides,
   setShapeStarPoints,
+  setShapeStarRatio,
   setShapeCircleLobes,
   setShapeSize,
   setShapeOffset,
@@ -45,7 +46,7 @@ class Shape extends Component {
                <Col sm={8}>
                  <FormControl
                    type="number"
-                   step="1"
+                   step={option.step ? option.step : 1}
                    value={option.value()}
                    onChange={(event) => {
                      option.onChange(event)
@@ -81,6 +82,7 @@ const shapeListProps = (state, ownProps) => {
     shapes: state.shapes,
     polygonSides: state.shapePolygonSides,
     starPoints:   state.shapeStarPoints,
+    starRatio:    state.shapeStarRatio,
     circleLobes:  state.shapeCircleLobes,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
@@ -101,6 +103,9 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onStarPointsChange: (event) => {
       dispatch(setShapeStarPoints(event.target.value));
+    },
+    onStarRatioChange: (event) => {
+      dispatch(setShapeStarRatio(event.target.value));
     },
     onCircleLobesChange: (event) => {
       dispatch(setShapeCircleLobes(event.target.value));
@@ -144,7 +149,7 @@ class ShapeList extends Component {
             let angle = Math.PI * 2.0 / (2.0 * state.shapeStarPoints) * i;
             let star_scale = 1.0;
             if (i % 2 === 0) {
-              star_scale *= 0.5
+              star_scale *= state.shapeStarRatio;
             }
             star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
           }
@@ -155,6 +160,12 @@ class ShapeList extends Component {
             title: "Number of Points",
             value: () => { return this.props.starPoints },
             onChange: this.props.onStarPointsChange,
+          },
+          {
+            title: "Size of Points",
+            value: () => { return this.props.starRatio },
+            onChange: this.props.onStarRatioChange,
+            step: 0.05,
           },
         ],
       });

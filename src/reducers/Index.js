@@ -38,6 +38,13 @@ export const setShapeStarPoints = ( sides ) => {
   };
 }
 
+export const setShapeStarRatio = ( value ) => {
+  return {
+    type: 'SET_SHAPE_STAR_RATIO',
+    value: Math.min(Math.max(value, 0.0), 1.0),
+  };
+}
+
 export const setShapeCircleLobes = ( sides ) => {
   return {
     type: 'SET_SHAPE_CIRCLE_LOBES',
@@ -236,6 +243,7 @@ const defaultState = {
   currentShape: undefined,
   shapePolygonSides: 4,
   shapeStarPoints: 5,
+  shapeStarRatio: 0.5,
   shapeCircleLobes: 1,
   startingSize: 10.0,
   shapeOffset: 0.0,
@@ -574,6 +582,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_SHAPE_STAR_POINTS':
       return computeInput({...state,
         shapeStarPoints: action.value,
+      });
+
+    case 'SET_SHAPE_STAR_RATIO':
+      return computeInput({...state,
+        shapeStarRatio: action.value,
       });
 
     case 'SET_SHAPE_CIRCLE_LOBES':
