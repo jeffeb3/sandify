@@ -11,10 +11,12 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
+    use_rect: state.machineRectActive,
     min_x: state.min_x,
     max_x: state.max_x,
     min_y: state.min_y,
     max_y: state.max_y,
+    max_radius: state.max_radius,
     canvas_width: state.canvas_width,
     canvas_height: state.canvas_height,
     vertices: state.vertices,
@@ -52,8 +54,17 @@ class PreviewWindow extends Component {
 
   // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
   mmToPixelsScale() {
-    var machine_x = this.props.max_x - this.props.min_x;
-    var machine_y = this.props.max_y - this.props.min_y;
+
+    var machine_x = 1;
+    var machine_y = 1;
+    if (this.props.use_rect) {
+      machine_x = this.props.max_x - this.props.min_x;
+      machine_y = this.props.max_y - this.props.min_y;
+    } else {
+      machine_x = this.props.max_radius * 2.0;
+      machine_y = machine_x;
+    }
+
     var scale_x = this.props.canvas_width / machine_x;
     var scale_y = this.props.canvas_height / machine_y;
     // Keep it square.
@@ -94,11 +105,21 @@ class PreviewWindow extends Component {
     context.beginPath();
     context.lineWidth = "1";
     context.strokeStyle = "blue";
-    this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-    this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+    if (this.props.use_rect) {
+      this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+    } else {
+      this.moveTo_mm(context, Vertex(this.props.max_radius, 0.0));
+      let resolution = 128.0;
+      for (let i=0; i<=resolution ; i++) {
+        let angle = Math.PI * 2.0 / resolution * i
+        this.lineTo_mm(context, Vertex(this.props.max_radius * Math.cos(angle),
+                                       this.props.max_radius * Math.sin(angle)));
+      }
+    }
     context.stroke();
 
     if (this.props.vertices && this.props.vertices.length > 0) {
@@ -157,10 +178,10 @@ class MachinePreview extends Component {
     return (
       <div className="machine-preview">
         <Panel>
+            <PreviewWindow />
             <div className="cheatBox" id="biggerBox">
                 <MachineSettings />
             </div>
-            <PreviewWindow />
         </Panel>
       </div>
     )

@@ -1,5 +1,8 @@
 
-import enforceLimits from '../machine/LimitEnforcer';
+import {
+  enforceRectLimits,
+  enforcePolarLimits
+} from '../machine/LimitEnforcer';
 import {
   degToRad,
   Vertex,
@@ -105,6 +108,22 @@ export const setWiperSize = ( value ) => {
 }
 
 // Machine actions
+export const toggleMachineRectExpanded = ( ) => {
+  localStorage.setItem('machine_rect_active', 1)
+  localStorage.setItem('machine_polar_active', 2)
+  return {
+    type: 'TOGGLE_MACHINE_RECT_EXPANDED',
+  };
+}
+
+export const toggleMachinePolarExpanded = ( ) => {
+  localStorage.setItem('machine_polar_active', 1)
+  localStorage.setItem('machine_rect_active', 2)
+  return {
+    type: 'TOGGLE_MACHINE_POLAR_EXPANDED',
+  };
+}
+
 export const setMachineMinX = ( value ) => {
   // This is definitely a side effect...
   localStorage.setItem('machine_min_x', value)
@@ -134,6 +153,14 @@ export const setMachineMaxY = ( value ) => {
   localStorage.setItem('machine_max_y', value)
   return {
     type: 'SET_MAX_Y',
+    value: value,
+  };
+}
+
+export const setMachineRadius = ( value ) => {
+  localStorage.setItem('machine_radius', value)
+  return {
+    type: 'SET_MAX_RADIUS',
     value: value,
   };
 }
@@ -228,10 +255,15 @@ const defaultState = {
   input: 0,
 
   // Machine settings
+  machineRectActive: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
+  machineRectExpanded: false,
   min_x: localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0,
   max_x: localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500,
   min_y: localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0,
   max_y: localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500,
+  machinePolarActive: undefined !== localStorage.getItem('machine_polar_active') ? localStorage.getItem('machine_polar_active') < 2 : false,
+  machinePolarExpanded: false,
+  max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
   canvas_width: 600,
   canvas_height: 600,
 
@@ -244,10 +276,16 @@ const defaultState = {
 
 // Vertex functions
 const setVerticesHelper = (state, vertices) => {
-  vertices = enforceLimits(vertices,
-                           (state.max_x - state.min_x)/2.0,
-                           (state.max_y - state.min_y)/2.0
-                           );
+  if (state.machineRectActive) {
+    vertices = enforceRectLimits(vertices,
+                                 (state.max_x - state.min_x)/2.0,
+                                 (state.max_y - state.min_y)/2.0
+                                 );
+  } else {
+    vertices = enforcePolarLimits(vertices,
+                                  state.max_radius
+                                  );
+  }
   state.vertices = vertices;
 }
 
@@ -394,8 +432,16 @@ const wiper = (state) => {
   angle = degToRad(angle);
 
   // Start with the defaults for 0,45
-  let height = state.max_y - state.min_y;
-  let width = state.max_x - state.min_x;
+  let height = 1;
+  let width = 1;
+  if (state.machineRectActive) {
+    height = state.max_y - state.min_y;
+    width = state.max_x - state.min_x;
+  } else {
+    height = state.max_radius * 2.0;
+    width = height;
+  }
+
   let startLocation = Victor(-width/2.0, height/2.0)
   let orig_delta_w = Victor(state.wiperSize / Math.cos(angle), 0.0);
   let orig_delta_h = Victor(0.0, -state.wiperSize / Math.sin(angle));
@@ -607,6 +653,22 @@ const reducer  = (state = defaultState, action) => {
       });
 
     // Machine Settings
+    case 'TOGGLE_MACHINE_RECT_EXPANDED':
+      return computeInput({...state,
+        machineRectActive: true,
+        machineRectExpanded: !state.machineRectExpanded,
+        machinePolarActive: false,
+        machinePolarExpanded: false,
+      });
+
+    case 'TOGGLE_MACHINE_POLAR_EXPANDED':
+      return computeInput({...state,
+        machinePolarActive: true,
+        machinePolarExpanded: !state.machinePolarExpanded,
+        machineRectActive: false,
+        machineRectExpanded: false,
+      });
+
     case 'SET_MIN_X':
       return computeInput({...state,
         min_x: action.value,
@@ -622,6 +684,10 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_MAX_Y':
       return computeInput({...state,
         max_y: action.value,
+      });
+    case 'SET_MAX_RADIUS':
+      return computeInput({...state,
+        max_radius: action.value,
       });
     case 'SET_MACHINE_SIZE':
       return computeInput({...state,
