@@ -202,14 +202,9 @@ function boundPoint(good, bad, size_x, size_y) {
 
 // Returns points along the circle from the start to the end, tracing a circle of radius size.
 function traceCircle(start, end, size) {
-  // console.log("start: " + start);
-  // console.log("end: " + end);
   const startAngle = start.angle();
   const endAngle = end.angle();
-  // console.log("startAngle: " + startAngle);
-  // console.log("endAngle: " + endAngle);
   let resolution = (Math.PI*2.0) / 128.0; // 128 segments per circle. Enough?
-  // console.log("resolution: " + resolution);
   let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI);
   if (deltaAngle > Math.PI) {
     deltaAngle -= 2.0 * Math.PI;
@@ -217,16 +212,12 @@ function traceCircle(start, end, size) {
   if (deltaAngle < 0.0) {
     resolution *= -1.0;
   }
-  // console.log("resolution: " + resolution);
-  // console.log("deltaAngle: " + deltaAngle);
-  // console.log("steps: "      + (deltaAngle/resolution));
 
   var tracePoints = []
   for (var step = 0; step < (deltaAngle/resolution) ; step++) {
     tracePoints.push(Victor(size * Math.cos(resolution * step + startAngle),
                             size * Math.sin(resolution * step + startAngle)));
   }
-  // console.log("tracePoints: " + tracePoints.length);
   return tracePoints;
 }
 
@@ -240,17 +231,11 @@ function onSegment(start, end, point) {
 
 function getIntersections(start, end, size) {
   var direction = end.clone().subtract(start).clone().normalize();
-  // console.log("direction: " + direction);
 
   var t = direction.x * -1.0 * start.x + direction.y * -1.0 * start.y;
-  // console.log("t: " + t);
   var e = direction.clone().multiply(Victor(t,t)).add(start);
-  // console.log("e: " + e);
-
-  // console.log("on: " + onSegment(start, end, e));
 
   var distanceToLine = e.magnitude();
-  // console.log("distance: " + distanceToLine);
 
   if (distanceToLine >= size)
   {
@@ -261,12 +246,9 @@ function getIntersections(start, end, size) {
   }
 
   var dt = Math.sqrt(size*size - distanceToLine*distanceToLine);
-  // console.log("dt: " + dt);
 
   var point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start);
-  // console.log("point1: " + point1 + " on: " + onSegment(start, end, point1));
   var point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start);
-  // console.log("point2: " + point2 + " on: " + onSegment(start, end, point2));
 
   return {
     intersection: true,
@@ -308,7 +290,6 @@ function clipLineCircle(line_start, line_end, size) {
   // Helper objects
   const start = Victor.fromObject(line_start);
   const end = Victor.fromObject(line_end);
-  // console.log("start: " + start + " end: " + end);
 
   // I'll need these
   const rad_start = start.magnitude();
@@ -316,7 +297,6 @@ function clipLineCircle(line_start, line_end, size) {
 
   // Check the easy case
   if (rad_start <= size && rad_end <= size) {
-    // console.log("Inside");
     // The whole segment is inside
     return [line_start, line_end];
   }
@@ -330,16 +310,12 @@ function clipLineCircle(line_start, line_end, size) {
 
   if ( !intersections.intersection )
   {
-    // console.log("Outside");
     // The whole line is outside, just trace.
     return traceCircle(start, end, size);
   }
-  // console.log("point1: " + intersections.points[0].point + " on: " + intersections.points[0].on);
-  // console.log("point2: " + intersections.points[1].point + " on: " + intersections.points[1].on);
 
   // if neither point is on the segment, then it should just be a trace
   if (!intersections.points[0].on && ! intersections.points[1].on) {
-    // console.log("Outside2");
     return traceCircle(start, end, size);
   }
 
@@ -357,7 +333,6 @@ function clipLineCircle(line_start, line_end, size) {
 
   // If we're here, then one point is still in the circle.
   if (rad_start <= size) {
-    // console.log("out");
     var point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point;
     return [
       start,
@@ -365,7 +340,6 @@ function clipLineCircle(line_start, line_end, size) {
       end
     ];
   } else {
-    // console.log("in");
     point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point;
     return [
       ...traceCircle(start, point1, size),
