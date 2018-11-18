@@ -320,7 +320,7 @@ function clipLineCircle(line_start, line_end, size) {
   }
 
   // If both points are outside, but there's an intersection
-  if (rad_start > size && rad_end > size) {
+  if (rad_start > size + 1.0e-9 && rad_end > size + 1.0e-9) {
     let point = intersections.points[0].point;
     let other_point = intersections.points[1].point;
 
