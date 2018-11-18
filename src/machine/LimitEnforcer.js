@@ -200,9 +200,170 @@ function boundPoint(good, bad, size_x, size_y) {
   return fixed;
 }
 
+// Returns points along the circle from the start to the end, tracing a circle of radius size.
+function traceCircle(start, end, size) {
+  const startAngle = start.angle();
+  const endAngle = end.angle();
+  let resolution = (Math.PI*2.0) / 128.0; // 128 segments per circle. Enough?
+  let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI);
+  if (deltaAngle > Math.PI) {
+    deltaAngle -= 2.0 * Math.PI;
+  }
+  if (deltaAngle < 0.0) {
+    resolution *= -1.0;
+  }
+
+  var tracePoints = []
+  for (var step = 0; step < (deltaAngle/resolution) ; step++) {
+    tracePoints.push(Victor(size * Math.cos(resolution * step + startAngle),
+                            size * Math.sin(resolution * step + startAngle)));
+  }
+  return tracePoints;
+}
+
+function onSegment(start, end, point) {
+  if (start.distance(point) + end.distance(point) - start.distance(end) < 0.001) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getIntersections(start, end, size) {
+  var direction = end.clone().subtract(start).clone().normalize();
+
+  var t = direction.x * -1.0 * start.x + direction.y * -1.0 * start.y;
+  var e = direction.clone().multiply(Victor(t,t)).add(start);
+
+  var distanceToLine = e.magnitude();
+
+  if (distanceToLine >= size)
+  {
+    return {
+      intersection: false,
+      points: [],
+    }
+  }
+
+  var dt = Math.sqrt(size*size - distanceToLine*distanceToLine);
+
+  var point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start);
+  var point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start);
+
+  return {
+    intersection: true,
+    points: [
+      {
+        point: point1,
+        on: onSegment(start, end, point1),
+      },
+      {
+        point: point2,
+        on: onSegment(start, end, point2),
+      }
+    ]}
+}
+
+// This method is the guts of logic for this limits enforcer. It will take a single line (defined by
+// start and end) and if the line goes out of bounds, returns the vertices around the outside edge
+// to follow around without messing up the shape of the vertices.
+//
+function clipLineCircle(line_start, line_end, size) {
+
+  // Cases:
+  // 1 - Entire line is inside
+  //     return start, end
+  // 2 - Entire line is outside
+  //     trace from start to end
+  // 3 - only start is inside
+  //     find the intersection
+  //     include start
+  //     include intersection
+  //     trace from intersection to closest to end point
+  // 4 - only end is inside
+  //     do reverse of 3
+  // 4 - Neither end is inside, but there is some line segment inside
+  //     find both intersections
+  //     trace from start to first intersction
+  //     trace from second intersection to end
+
+  // Helper objects
+  const start = Victor.fromObject(line_start);
+  const end = Victor.fromObject(line_end);
+
+  // I'll need these
+  const rad_start = start.magnitude();
+  const rad_end = end.magnitude();
+
+  // Check the easy case
+  if (rad_start <= size && rad_end <= size) {
+    // The whole segment is inside
+    return [line_start, line_end];
+  }
+
+  // Check for the odd case of coincident points
+  if (start.distance(end) < 0.00001) {
+     return [nearestVertexCircle(start, size)];
+  }
+
+  var intersections = getIntersections(start, end, size);
+
+  if ( !intersections.intersection )
+  {
+    // The whole line is outside, just trace.
+    return traceCircle(start, end, size);
+  }
+
+  // if neither point is on the segment, then it should just be a trace
+  if (!intersections.points[0].on && ! intersections.points[1].on) {
+    return traceCircle(start, end, size);
+  }
+
+  // If both points are outside, but there's an intersection
+  if (rad_start > size + 1.0e-9 && rad_end > size + 1.0e-9) {
+    let point = intersections.points[0].point;
+    let other_point = intersections.points[1].point;
+
+    return [
+      ...traceCircle(start, point, size),
+      point,
+      ...traceCircle(other_point, end, size)
+    ];
+  }
+
+  // If we're here, then one point is still in the circle.
+  if (rad_start <= size) {
+    var point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point;
+    return [
+      start,
+      ...traceCircle(point1, end, size),
+      end
+    ];
+  } else {
+    point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point;
+    return [
+      ...traceCircle(start, point1, size),
+      point1,
+      end
+    ];
+  }
+}
+
+// Finds the nearest vertex that is in the bounds of the circle. This will change the shape. i.e. this doesn't
+// care about the line segment, only about the point.
+function nearestVertexCircle(vertex, size) {
+  const point = Victor.fromObject(vertex);
+  if ( point.length() > size) {
+    let scale = size / point.length();
+    return point.multiply(Victor(scale, scale));
+  } else {
+    return point;
+  }
+}
+
 // Manipulates the points to make them all in bounds, while doing the least amount of damage to the
 // desired shape.
-function enforceLimits(vertices, size_x, size_y) {
+function enforceRectLimits(vertices, size_x, size_y) {
   var cleanVertices = []
   var previous = null;
 
@@ -230,4 +391,37 @@ function enforceLimits(vertices, size_x, size_y) {
   return cleanerVertices;
 }
 
-export default enforceLimits
+function enforcePolarLimits(vertices, size) {
+
+  var cleanVertices = []
+  var previous = null;
+
+  for (var next=0; next<vertices.length; next++) {
+    var vertex = vertices[next];
+    if (previous) {
+      var line = clipLineCircle(previous, vertex, size);
+      for (var pt=0; pt<line.length; pt++) {
+        if (line[pt] !== previous) {
+          cleanVertices.push(line[pt]);
+        }
+      }
+    } else {
+      cleanVertices.push(nearestVertexCircle(vertex, size));
+    }
+    previous = vertex;
+  }
+
+  // // Just for sanity, and cases that I haven't thought of, clean this list again.
+  var cleanerVertices = []
+  for (var i=0; i<cleanVertices.length; i++) {
+    cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+  }
+
+  return cleanerVertices;
+}
+
+module.exports = {
+  enforceRectLimits: enforceRectLimits,
+  enforcePolarLimits: enforcePolarLimits
+}
+
