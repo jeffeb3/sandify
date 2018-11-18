@@ -155,7 +155,9 @@ class GCodeGenerator extends Component {
       previous = next;
     }
     // Add in the end.
-    subsampledVertices.push(this.props.vertices[this.props.vertices.length - 1]);
+    if (previous !== undefined) {
+      subsampledVertices.push(this.props.vertices[this.props.vertices.length - 1]);
+    }
 
     // Convert to Theta, Rho
     var trVertices = [];
