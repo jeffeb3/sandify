@@ -11,10 +11,15 @@ import {
 import { connect } from 'react-redux'
 import {
   setShowGCode,
+  setGCodeFilename,
   setGCodePre,
   setGCodePost,
   toggleGCodeReverse,
 } from '../reducers/Index.js';
+import {
+  Vertex,
+} from '../Geometry.js'
+import Victor from 'victor';
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.
@@ -47,6 +52,10 @@ function gcode(vertex) {
   return command + '\n'
 }
 
+function thetarho(vertex) {
+  return "" + vertex.x.toFixed(5) + " " + vertex.y.toFixed(5) + "\n";
+}
+
 const gcodeProps = (state, ownProps) => {
   return {
     xOffset: (state.min_x + state.max_x) / 2.0,
@@ -55,7 +64,9 @@ const gcodeProps = (state, ownProps) => {
     post: state.gcodePost,
     reverse: state.gcodeReverse,
     vertices: state.vertices,
+    max_radius: state.max_radius,
     show: state.showGCode,
+    filename: state.filename,
   }
 }
 
@@ -69,6 +80,9 @@ const gcodeDispatch = (dispatch, ownProps) => {
     },
     toggleReverse: () => {
       dispatch(toggleGCodeReverse());
+    },
+    setFilename: (event) => {
+      dispatch(setGCodeFilename(event.target.value));
     },
     setPre: (event) => {
       dispatch(setGCodePre(event.target.value));
@@ -89,8 +103,6 @@ class GCodeGenerator extends Component {
     content += '\n';
 
     var centeredVertices = this.props.vertices.map( (vertex) => {
-      console.log(vertex.y);
-      console.log(this.props.yOffset);
       return {
         ...vertex,
         x: vertex.x + this.props.xOffset,
@@ -100,27 +112,111 @@ class GCodeGenerator extends Component {
 
     var lines = centeredVertices.map(gcode);
 
-    if (this.props.reverse) {
-      lines.reverse();
-    }
     content += lines.join('');
 
     content += '\n';
     content += this.props.post;
-    download('sandify.gcode', content)
+    var filename = this.props.filename;
+    if (!filename.includes(".")) {
+      filename += ".gcode";
+    }
+    download(filename, content)
+    this.props.close();
+  }
+
+  // What resolution?
+  // What name/extension?
+  // Does pre/post make any sense?
+  generateThetaRho() {
+    var content = this.props.pre;
+    content += '\n';
+
+    // First, downsample larger lines into smaller ones.
+    var maxLength = 2.5; // A bit arbitrary, don't you think?
+    var subsampledVertices = [];
+    var previous = undefined;
+    var next;
+    for (next = 0; next < this.props.vertices.length; next++) {
+      if (previous !== undefined) {
+        var start = Victor.fromObject(this.props.vertices[previous]);
+        var end = Victor.fromObject(this.props.vertices[next]);
+
+        var delta = end.clone().subtract(start);
+        var deltaSegment = end.clone().subtract(start).normalize().multiply(Victor(maxLength, maxLength));
+
+        // This loads up (start, end].
+        for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
+          subsampledVertices.push(Vertex(start.x + step * deltaSegment.x,
+                                         start.y + step * deltaSegment.y,
+                                         this.props.vertices[next].f));
+        }
+
+      }
+      previous = next;
+    }
+    // Add in the end.
+    subsampledVertices.push(this.props.vertices[this.props.vertices.length - 1]);
+
+    // Convert to Theta, Rho
+    var trVertices = [];
+    var previousTheta = 0;
+    var previousRawTheta = 0;
+    for (next = 0; next < subsampledVertices.length; ++next) {
+      // Normalize the radius
+      var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.max_radius;
+
+      // What is the basic theta for this point?
+      var rawTheta = Math.atan2(subsampledVertices[next].y,
+                                subsampledVertices[next].x);
+      // Convert to [0,2pi]
+      rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI);
+
+      // Compute the difference to the last point.
+      var deltaTheta = rawTheta - previousRawTheta;
+      // Convert to [-pi,pi]
+      if (deltaTheta < -Math.PI) {
+        deltaTheta += 2.0 * Math.PI;
+      }
+      if (deltaTheta > Math.PI) {
+        deltaTheta -= 2.0 * Math.PI;
+      }
+      var theta = previousTheta + deltaTheta;
+      previousRawTheta = rawTheta;
+      previousTheta = theta;
+
+      trVertices.push(Vertex(theta, rho, subsampledVertices[next].f));
+    }
+
+    var lines = trVertices.map(thetarho);
+
+    content += lines.join('');
+
+    content += '\n';
+    content += this.props.post;
+
+    var filename = this.props.filename;
+    if (!filename.includes(".")) {
+      filename += ".thr";
+    }
+    download(filename, content)
+
     this.props.close();
   }
 
   render() {
-    const activeClassName = (this.props.reverse ? "active" : null);
+    const reverseActiveClass = (this.props.reverse ? "active" : null);
     return (
       <div>
-        <Button className="finishButton" bsStyle="primary" bsSize="large" onClick={this.props.open}>Create GCode</Button>
-        <Modal show={this.props.show}>
+        <Button className="finishButton" bsStyle="primary" bsSize="large" onClick={this.props.open}>Create Code</Button>
+        <Modal show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
-            <Modal.Title>GCode Parameters</Modal.Title>
+            <Modal.Title>Code Parameters</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            <FormGroup controlId="sandifyFilename">
+              <ControlLabel>Name of Output</ControlLabel>
+              <FormControl type="text" value={this.props.filename} onChange={this.props.setFilename}/>
+            </FormGroup>
             <FormGroup controlId="preCode">
               <ControlLabel>Program Start Code</ControlLabel>
               <FormControl componentClass="textarea" value={this.props.pre} onChange={this.props.setPre}/>
@@ -129,11 +225,12 @@ class GCodeGenerator extends Component {
               <ControlLabel>Program End Code</ControlLabel>
               <FormControl componentClass="textarea" value={this.props.post} onChange={this.props.setPost}/>
             </FormGroup>
-            <ListGroupItem header="Reverse Path" className={activeClassName} onClick={this.props.toggleReverse}>Reverses the GCode, starting at the final location</ListGroupItem>
+            <ListGroupItem header="Reverse Path" className={reverseActiveClass} onClick={this.props.toggleReverse}>Reverses the Code, starting at the final location</ListGroupItem>
           </Modal.Body>
           <Modal.Footer>
-            <Button id="gcode" bsStyle="default" onClick={this.props.close}>Close</Button>
-            <Button id="gcode" bsStyle="primary" onClick={this.generateGCode.bind(this)}>Generate GCode</Button>
+            <Button id="code-close" bsStyle="default" onClick={this.props.close}>Close</Button>
+            <Button id="code-gen-gcode" bsStyle="primary" onClick={this.generateGCode.bind(this)}>Generate GCode</Button>
+            <Button id="code-gen-thetarho" bsStyle="primary" onClick={this.generateThetaRho.bind(this)}>Generate Theta Rho</Button>
           </Modal.Footer>
         </Modal>
       </div>

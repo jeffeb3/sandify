@@ -180,6 +180,13 @@ export const setMachinePreviewSize = ( value ) => {
 }
 
 // GCode Actions
+export const setGCodeFilename = ( text ) => {
+  return {
+    type: 'SET_GCODE_FILENAME',
+    value: text,
+  };
+}
+
 export const setGCodePre = ( text ) => {
   localStorage.setItem('gcode_pre', text)
   return {
@@ -199,6 +206,12 @@ export const setGCodePost = ( text ) => {
 export const toggleGCodeReverse = ( ) => {
   return {
     type: 'TOGGLE_GCODE_REVERSE',
+  };
+}
+
+export const toggleMachineEndpoints = ( ) => {
+  return {
+    type: 'TOGGLE_MACHINE_ENDPOINTS',
   };
 }
 
@@ -276,14 +289,47 @@ const defaultState = {
   canvas_height: 600,
 
   // GCode settings
+  filename: "sandify",
   gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
   gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
+  machineEndpoints: false,
   showGCode: false,
 }
 
 // Vertex functions
 const setVerticesHelper = (state, vertices) => {
+  if (vertices.length > 0) {
+    if (state.machineEndpoints) {
+
+      var first = vertices[0];
+      var last = vertices[vertices.length-1];
+
+      // Always put 0.0 in there
+      vertices.unshift(Vertex(0.0, 0.0, first.f));
+
+      // Max radius
+      var max_radius = state.max_radius;
+      if (state.machine_rect_active) {
+        max_radius = Math.sqrt(Math.pow(state.machine_max_x - state.machine_min_x,2.0) + Math.pow(state.machine_max_y - state.machine_min_y, 2.0));
+      }
+      var vFirst = Victor.fromObject(first);
+      var vLast = Victor.fromObject(last);
+      if (vFirst.magnitude() <= vLast.magnitude()) {
+        // It's going outward
+        var scale = max_radius / vLast.magnitude();
+        var outPoint = vLast.multiply(Victor(scale,scale));
+        vertices.push(Vertex(outPoint.x, outPoint.y, last.f));
+      } else {
+        scale = max_radius / vFirst.magnitude();
+        outPoint = vFirst.multiply(Victor(scale,scale));
+        vertices.push(Vertex(outPoint.x, outPoint.y, last.f));
+      }
+    }
+  }
+  if (state.gcodeReverse) {
+    vertices.reverse();
+  }
   if (state.machineRectActive) {
     vertices = enforceRectLimits(vertices,
                                  (state.max_x - state.min_x)/2.0,
@@ -709,6 +755,10 @@ const reducer  = (state = defaultState, action) => {
       });
 
     // GCode Settings
+    case 'SET_GCODE_FILENAME':
+      return {...state,
+        filename: action.value,
+      };
     case 'SET_GCODE_PRE':
       return {...state,
         gcodePre: action.value,
@@ -720,6 +770,10 @@ const reducer  = (state = defaultState, action) => {
     case 'TOGGLE_GCODE_REVERSE':
       return computeInput({...state,
         gcodeReverse: !state.gcodeReverse,
+      });
+    case 'TOGGLE_MACHINE_ENDPOINTS':
+      return computeInput({...state,
+        machineEndpoints: !state.machineEndpoints,
       });
     case 'SET_SHOW_GCODE':
       return {...state,

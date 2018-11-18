@@ -19,6 +19,7 @@ import {
   setMachineRadius,
   toggleMachineRectExpanded,
   toggleMachinePolarExpanded,
+  toggleMachineEndpoints,
 } from '../reducers/Index.js';
 import './MachineSettings.css';
 
@@ -114,6 +115,7 @@ const polarMapStateToProps = (state, ownProps) => {
     active:   state.machinePolarActive,
     expanded: state.machinePolarExpanded,
     max_radius:    state.max_radius,
+    endpoints: state.machineEndpoints,
   }
 }
 
@@ -124,7 +126,10 @@ const polarMapDispatchToProps = (dispatch, ownProps) => {
     },
     onMaxRadiusChange: (event) => {
       dispatch(setMachineRadius(parseFloat(event.target.value)))
-    }
+    },
+    toggleEndpoints: () => {
+      dispatch(toggleMachineEndpoints());
+    },
   }
 }
 
@@ -134,6 +139,8 @@ class PolarSettings extends Component {
     if (this.props.active) {
       activeClassName = "active";
     }
+
+    const endpointsActiveClass = (this.props.endpoints ? "active" : null);
 
     return (
       <div className="polar">
@@ -150,6 +157,7 @@ class PolarSettings extends Component {
                 </Col>
               </FormGroup>
             </Form>
+            <ListGroupItem header="Force Endpoints" className={endpointsActiveClass} onClick={this.props.toggleEndpoints}>Forces the first and last points to be at the center and edge.</ListGroupItem>
           </Panel>
         </div>
       </div>
