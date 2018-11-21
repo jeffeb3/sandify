@@ -22,7 +22,8 @@ import {
   setShapeStarRatio,
   setShapeCircleLobes,
   setShapeSize,
-  setShapeOffset,
+  setShapeOffsetX,
+  setShapeOffsetY,
   setGrow,
   setSpin,
   toggleGrow,
@@ -86,7 +87,8 @@ const shapeListProps = (state, ownProps) => {
     circleLobes:  state.shapeCircleLobes,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
-    offset: state.shapeOffset,
+    x_offset: state.shapeOffsetX,
+    y_offset: state.shapeOffsetY,
   }
 }
 
@@ -113,8 +115,11 @@ const shapeListDispatch = (dispatch, ownProps) => {
     onSizeChange: (event) => {
       dispatch(setShapeSize(event.target.value));
     },
-    onOffsetChange: (event) => {
-      dispatch(setShapeOffset(event.target.value));
+    onOffsetXChange: (event) => {
+      dispatch(setShapeOffsetX(event.target.value));
+    },
+    onOffsetYChange: (event) => {
+      dispatch(setShapeOffsetY(event.target.value));
     },
   }
 }
@@ -228,8 +233,17 @@ class ShapeList extends Component {
                 <Col componentClass={ControlLabel} sm={4}>
                   Offset
                 </Col>
-                <Col sm={8}>
-                  <FormControl type="number" value={this.props.offset} onChange={this.props.onOffsetChange}/>
+                <Col sm={3}>
+                  <FormControl type="number" value={this.props.x_offset} onChange={this.props.onOffsetXChange}/>
+                </Col>
+                <Col componentClass={ControlLabel} sm={1}>
+                  X
+                </Col>
+                <Col sm={3}>
+                  <FormControl type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange}/>
+                </Col>
+                <Col componentClass={ControlLabel} sm={1}>
+                  Y
                 </Col>
               </FormGroup>
             </Form>
