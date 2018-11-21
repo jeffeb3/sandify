@@ -251,6 +251,7 @@ export const chooseInput = ( input ) => {
 }
 
 const defaultState = {
+  sandifyVersion: "0.1.0",
   // Transform settings
   shapes: [],
   currentShape: undefined,
@@ -290,6 +291,7 @@ const defaultState = {
 
   // GCode settings
   filename: "sandify",
+  gcodeSettings: "",
   gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
   gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
@@ -300,7 +302,7 @@ const defaultState = {
 // Vertex functions
 const setVerticesHelper = (state, vertices) => {
   if (vertices.length > 0) {
-    if (state.machineEndpoints) {
+    if (state.machineEndpoints && !state.machineRectActive) {
 
       var first = vertices[0];
       var last = vertices[vertices.length-1];
@@ -341,6 +343,72 @@ const setVerticesHelper = (state, vertices) => {
                                   );
   }
   state.vertices = vertices;
+
+  // Always set the comments too.
+  state.gcodeSettings = [];
+  state.gcodeSettings.push("Created by Sandify");
+  state.gcodeSettings.push("");
+  state.gcodeSettings.push("  https://jeffeb3.github.io/sandify/");
+  state.gcodeSettings.push("");
+  state.gcodeSettings.push("  Sandify Version: " + state.sandifyVersion);
+  state.gcodeSettings.push("");
+  state.gcodeSettings.push("  Machine Type: " + (state.machineRectActive ? "Rectangular" : "Polar"));
+  if (state.machineRectActive) {
+    state.gcodeSettings.push("    MinX: " + state.min_x + " MaxX: " + state.max_x + " MinY: " + state.min_y + " MaxY: " + state.max_y);
+  } else {
+    state.gcodeSettings.push("    Max Radius: " + state.max_radius);
+    state.gcodeSettings.push("    Force Endpoints: " + state.machineEndpoints);
+  }
+
+  switch (state.input) {
+    case 0: // shapes
+      state.gcodeSettings.push("  Content Type: Shapes");
+      state.gcodeSettings.push("    Starting Size: " + state.startingSize);
+      state.gcodeSettings.push("    Offset: " + state.shapeOffset);
+      switch (state.currentShape) {
+        case "Polygon":
+          state.gcodeSettings.push("    Selected Shape: Polygon");
+          state.gcodeSettings.push("      Polygon Sides: " + state.shapePolygonSides);
+          break;
+        case "Star":
+          state.gcodeSettings.push("    Selected Shape: Star");
+          state.gcodeSettings.push("      Star Points: " + state.shapeStarPoints);
+          state.gcodeSettings.push("      Star Ratio: " + state.shapeStarRatio);
+          break;
+        case "Circle":
+          state.gcodeSettings.push("    Selected Shape: Circle");
+          state.gcodeSettings.push("      Circle Lobes: " + state.shapeCircleLobes);
+          break;
+        case "Vicious1":
+          state.gcodeSettings.push("    Selected Shape: Vicious1");
+          break;
+        default:
+          state.gcodeSettings.push("    Selected Shape: None");
+          break;
+      }
+
+      state.gcodeSettings.push("    Number of Loops: " + state.numLoops);
+      state.gcodeSettings.push("    Spin: " + state.spinEnabled);
+      if (state.spinEnabled) {
+        state.gcodeSettings.push("      Spin Value: " + state.spinValue);
+      }
+      state.gcodeSettings.push("    Grow: " + state.growEnabled);
+      if (state.growEnabled) {
+        state.gcodeSettings.push("      Grow Value: " + state.growValue);
+      }
+      break;
+    case 2: // wiper
+      state.gcodeSettings.push("  Content Type: Wiper");
+      state.gcodeSettings.push("    Wiper Angle: " + state.wiperAngleDeg);
+      state.gcodeSettings.push("    Wiper Size: "  + state.wiperSize);
+      break;
+    default: // Dunno
+      state.gcodeSettings.push("  Content Type: Unknown");
+      break;
+  }
+  state.gcodeSettings.push("  Path Reversed: " + state.gcodeReverse);
+  state.gcodeSettings.push("");
+
 }
 
 // Transform funtions
