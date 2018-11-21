@@ -133,8 +133,9 @@ class GCodeGenerator extends Component {
 
   generateThetaRho() {
     var content = "# " + this.props.settings.join("\n# ");
+    content += "\n";
     content += "# filename: '" + this.props.filename + "'\n\n";
-    content += "\n# BEGIN PRE\n";
+    content += "# BEGIN PRE\n";
     content += this.props.pre;
     content += "# END PRE\n";
     content += '\n';
