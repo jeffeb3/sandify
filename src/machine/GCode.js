@@ -131,19 +131,17 @@ class GCodeGenerator extends Component {
     this.props.close();
   }
 
-  // What resolution?
-  // What name/extension?
-  // Does pre/post make any sense?
   generateThetaRho() {
     var content = "# " + this.props.settings.join("\n# ");
+    content += "\n";
     content += "# filename: '" + this.props.filename + "'\n\n";
-    content += "\n# BEGIN PRE\n";
+    content += "# BEGIN PRE\n";
     content += this.props.pre;
     content += "# END PRE\n";
     content += '\n';
 
     // First, downsample larger lines into smaller ones.
-    var maxLength = 2.5; // A bit arbitrary, don't you think?
+    var maxLength = this.props.max_radius / 1500.0; // Shooting for about 1mm.
     var subsampledVertices = [];
     var previous = undefined;
     var next;
