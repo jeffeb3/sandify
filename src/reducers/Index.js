@@ -59,9 +59,16 @@ export const setShapeSize = ( size ) => {
   };
 }
 
-export const setShapeOffset = ( offset ) => {
+export const setShapeOffsetX = ( offset ) => {
   return {
-    type: 'SET_SHAPE_OFFSET',
+    type: 'SET_SHAPE_OFFSET_X',
+    value: parseFloat(offset),
+  };
+}
+
+export const setShapeOffsetY = ( offset ) => {
+  return {
+    type: 'SET_SHAPE_OFFSET_Y',
     value: parseFloat(offset),
   };
 }
@@ -260,7 +267,8 @@ const defaultState = {
   shapeStarRatio: 0.5,
   shapeCircleLobes: 1,
   startingSize: 10.0,
-  shapeOffset: 0.0,
+  shapeOffsetX: 0.0,
+  shapeOffsetY: 0.0,
   numLoops: 10,
   spinEnabled: false,
   spinValue: 2,
@@ -364,7 +372,7 @@ const setVerticesHelper = (state, vertices) => {
     case 0: // shapes
       state.gcodeSettings.push("  Content Type: Shapes");
       state.gcodeSettings.push("    Starting Size: " + state.startingSize);
-      state.gcodeSettings.push("    Offset: " + state.shapeOffset);
+      state.gcodeSettings.push("    Offset: X: " + state.shapeOffsetX + " Y: " + state.shapeOffsetY);
       switch (state.currentShape) {
         case "Polygon":
           state.gcodeSettings.push("    Selected Shape: Polygon");
@@ -429,10 +437,10 @@ function scale (vertex, scale_perc) {
   }
 }
 
-function offset (vertex, offset) {
+function offset (vertex, offset_x, offset_y) {
   return {
-    x: vertex.x + offset,
-    y: vertex.y,
+    x: vertex.x + offset_x,
+    y: vertex.y + offset_y,
     f: vertex.f,
   }
 }
@@ -443,7 +451,7 @@ const transform = (state, vertex, loop_index) => {
   {
     transformed_vertex = scale(transformed_vertex, 100.0 + (state.growValue * loop_index));
   }
-  transformed_vertex = offset(transformed_vertex, state.shapeOffset);
+  transformed_vertex = offset(transformed_vertex, state.shapeOffsetX, state.shapeOffsetY);
   if (state.spinEnabled)
   {
     transformed_vertex = rotate(transformed_vertex, state.spinValue * loop_index);
@@ -713,9 +721,14 @@ const reducer  = (state = defaultState, action) => {
         startingSize: action.value,
       });
 
-    case 'SET_SHAPE_OFFSET':
+    case 'SET_SHAPE_OFFSET_X':
       return computeInput({...state,
-        shapeOffset: action.value,
+        shapeOffsetX: action.value,
+      });
+
+    case 'SET_SHAPE_OFFSET_Y':
+      return computeInput({...state,
+        shapeOffsetY: action.value,
       });
 
     case 'SET_LOOPS':
