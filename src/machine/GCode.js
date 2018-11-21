@@ -60,6 +60,7 @@ const gcodeProps = (state, ownProps) => {
   return {
     xOffset: (state.min_x + state.max_x) / 2.0,
     yOffset: (state.min_y + state.max_y) / 2.0,
+    settings: state.gcodeSettings,
     pre: state.gcodePre,
     post: state.gcodePost,
     reverse: state.gcodeReverse,
@@ -99,8 +100,12 @@ const gcodeDispatch = (dispatch, ownProps) => {
 class GCodeGenerator extends Component {
 
   generateGCode() {
-    var content = this.props.pre;
-    content += '\n';
+    var content = "; " + this.props.settings.join("\n; ");
+    content += "\n";
+    content += "; filename: '" + this.props.filename + "'\n\n";
+    content += "; BEGIN PRE\n";
+    content += this.props.pre;
+    content += "; END PRE\n";
 
     var centeredVertices = this.props.vertices.map( (vertex) => {
       return {
@@ -115,7 +120,9 @@ class GCodeGenerator extends Component {
     content += lines.join('');
 
     content += '\n';
+    content += "; BEGIN POST\n";
     content += this.props.post;
+    content += "; END POST\n";
     var filename = this.props.filename;
     if (!filename.includes(".")) {
       filename += ".gcode";
@@ -128,7 +135,11 @@ class GCodeGenerator extends Component {
   // What name/extension?
   // Does pre/post make any sense?
   generateThetaRho() {
-    var content = this.props.pre;
+    var content = "# " + this.props.settings.join("\n# ");
+    content += "# filename: '" + this.props.filename + "'\n\n";
+    content += "\n# BEGIN PRE\n";
+    content += this.props.pre;
+    content += "# END PRE\n";
     content += '\n';
 
     // First, downsample larger lines into smaller ones.
@@ -194,7 +205,9 @@ class GCodeGenerator extends Component {
     content += lines.join('');
 
     content += '\n';
+    content += "# BEGIN POST\n";
     content += this.props.post;
+    content += "# END POST\n";
 
     var filename = this.props.filename;
     if (!filename.includes(".")) {
