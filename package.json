@@ -1,7 +1,7 @@
 {
   "name": "sandify",
   "homepage": "http://jeffeb3.github.io/sandify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "react": "^15.6.1",
