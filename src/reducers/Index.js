@@ -124,14 +124,12 @@ export const setWiperSize = ( value ) => {
 // Machine actions
 export const toggleMachineRectExpanded = ( ) => {
   localStorage.setItem('machine_rect_active', 1)
-  localStorage.setItem('machine_polar_active', 2)
   return {
     type: 'TOGGLE_MACHINE_RECT_EXPANDED',
   };
 }
 
 export const toggleMachinePolarExpanded = ( ) => {
-  localStorage.setItem('machine_polar_active', 1)
   localStorage.setItem('machine_rect_active', 2)
   return {
     type: 'TOGGLE_MACHINE_POLAR_EXPANDED',
@@ -243,6 +241,41 @@ export const setTurtleVertices = ( vertices ) => {
   };
 }
 
+export const setThrVertices = ( vertices ) => {
+  return {
+    type: 'SET_THR_VERTICES',
+    vertices: vertices,
+  };
+}
+
+export const setThrName = ( value ) => {
+  return {
+    type: 'SET_THR_NAME',
+    value: value,
+  };
+}
+
+export const setThrComment = ( value ) => {
+  return {
+    type: 'SET_THR_COMMENT',
+    value: value,
+  };
+}
+
+export const setThrZoom = ( value ) => {
+  return {
+    type: 'SET_THR_ZOOM',
+    value: value,
+  };
+}
+
+export const toggleThrAspectRatio = ( value ) => {
+  return {
+    type: 'TOGGLE_THR_ASPECT_RATIO',
+    value: value,
+  };
+}
+
 export const addVertex = ( vertex ) => {
   return {
     type: 'ADD_VERTEX',
@@ -258,7 +291,7 @@ export const chooseInput = ( input ) => {
 }
 
 const defaultState = {
-  sandifyVersion: "0.1.0",
+  sandifyVersion: "0.1.1",
   // Transform settings
   shapes: [],
   currentShape: undefined,
@@ -277,6 +310,11 @@ const defaultState = {
 
   turtleVertices: [],
 
+  thrName: "",
+  thrComment: [],
+  thrVertices: [],
+  thrZoom: 100,
+
   wiperAngleDeg: 15,
   wiperSize: 12,
 
@@ -291,7 +329,6 @@ const defaultState = {
   max_x: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
   min_y: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
   max_y: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
-  machinePolarActive: undefined !== localStorage.getItem('machine_polar_active') ? localStorage.getItem('machine_polar_active') < 2 : false,
   machinePolarExpanded: false,
   max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
   canvas_width: 600,
@@ -299,7 +336,7 @@ const defaultState = {
 
   // GCode settings
   filename: "sandify",
-  gcodeSettings: "",
+  gcodeSettings: [],
   gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
   gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
@@ -409,6 +446,12 @@ const setVerticesHelper = (state, vertices) => {
       state.gcodeSettings.push("  Content Type: Wiper");
       state.gcodeSettings.push("    Wiper Angle: " + state.wiperAngleDeg);
       state.gcodeSettings.push("    Wiper Size: "  + state.wiperSize);
+      break;
+    case 3: // thetarho
+      state.gcodeSettings.push("  Content Type: ThetaRho");
+      state.gcodeSettings.push("    Input File: " + state.thrName);
+      state.gcodeSettings.push("    Zoom: "  + state.thrZoom);
+      state.gcodeSettings.push("    Aspect Ratio: " + state.thrAspectRatio);
       break;
     default: // Dunno
       state.gcodeSettings.push("  Content Type: Unknown");
@@ -663,6 +706,28 @@ const wiper = (state) => {
   return state;
 };
 
+const thetaRho = (state) => {
+  var x_scale = (state.max_x - state.min_x)/2.0 * 0.01 * state.thrZoom;
+  var y_scale = (state.max_y - state.min_y)/2.0 * 0.01 * state.thrZoom;
+  if (!state.machineRectActive) {
+    x_scale = y_scale = state.max_radius;
+  }
+  x_scale *= 0.01 * state.thrZoom;
+  y_scale *= 0.01 * state.thrZoom;
+  if (state.thrAspectRatio) {
+    x_scale = y_scale = Math.min(x_scale,y_scale);
+  }
+
+  var newVertices = state.thrVertices.map( (vertex) => {
+    return {...vertex,
+      x: vertex.x * x_scale,
+      y: vertex.y * y_scale,
+    };
+  });
+  setVerticesHelper(state, newVertices);
+  return state;
+}
+
 const computeInput = (state) => {
   if (state.input === 0) {
     return transformShapes(state);
@@ -676,6 +741,8 @@ const computeInput = (state) => {
     });
   } else if (state.input === 2) {
     return wiper(state);
+  } else if (state.input === 3) {
+    return thetaRho(state);
   }
 }
 
@@ -765,6 +832,26 @@ const reducer  = (state = defaultState, action) => {
       return computeInput({...state,
         turtleVertices: action.vertices,
       });
+    case 'SET_THR_VERTICES':
+      return computeInput({...state,
+        thrVertices: action.vertices,
+      });
+    case 'SET_THR_NAME':
+      return computeInput({...state,
+        thrName: action.value,
+      });
+    case 'SET_THR_COMMENT':
+      return computeInput({...state,
+        thrComment: action.value,
+      });
+    case 'SET_THR_ZOOM':
+      return computeInput({...state,
+        thrZoom: action.value,
+      });
+    case 'TOGGLE_THR_ASPECT_RATIO':
+      return computeInput({...state,
+        thrAspectRatio: !state.thrAspectRatio,
+      });
     case 'ADD_VERTEX': {
       let newState = {
         ...state,
@@ -797,13 +884,11 @@ const reducer  = (state = defaultState, action) => {
       return computeInput({...state,
         machineRectActive: true,
         machineRectExpanded: !state.machineRectExpanded,
-        machinePolarActive: false,
         machinePolarExpanded: false,
       });
 
     case 'TOGGLE_MACHINE_POLAR_EXPANDED':
       return computeInput({...state,
-        machinePolarActive: true,
         machinePolarExpanded: !state.machinePolarExpanded,
         machineRectActive: false,
         machineRectExpanded: false,
