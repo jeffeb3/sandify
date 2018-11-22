@@ -107,6 +107,7 @@ class GCodeGenerator extends Component {
     content += this.props.pre;
     content += "; END PRE\n";
 
+    console.log("offset x: " + this.props.xOffset + " y: " + this.props.yOffset);
     var centeredVertices = this.props.vertices.map( (vertex) => {
       return {
         ...vertex,
@@ -141,7 +142,7 @@ class GCodeGenerator extends Component {
     content += '\n';
 
     // First, downsample larger lines into smaller ones.
-    var maxLength = this.props.max_radius / 1500.0; // Shooting for about 1mm.
+    var maxLength = 2.0;
     var subsampledVertices = [];
     var previous = undefined;
     var next;

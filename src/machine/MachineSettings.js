@@ -112,7 +112,7 @@ RectSettings = connect(rectMapStateToProps, rectMapDispatchToProps)(RectSettings
 
 const polarMapStateToProps = (state, ownProps) => {
   return {
-    active:   state.machinePolarActive,
+    active:   !state.machineRectActive,
     expanded: state.machinePolarExpanded,
     max_radius:    state.max_radius,
     endpoints: state.machineEndpoints,

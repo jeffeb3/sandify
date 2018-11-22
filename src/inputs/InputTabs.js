@@ -6,6 +6,7 @@ import {
 import './InputTabs.css'
 import Transforms from './Transforms.js'
 import Wiper from './Wiper.js'
+import ThetaRho from './ThetaRho.js'
 import { connect } from 'react-redux'
 import {
   chooseInput,
@@ -25,6 +26,9 @@ class InputTabs extends Component {
          </Tab>
          <Tab eventKey={2} title="Wiper">
            <Wiper/>
+         </Tab>
+         <Tab eventKey={3} title="Code">
+           <ThetaRho/>
          </Tab>
        </Tabs>
     );
