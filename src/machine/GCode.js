@@ -178,8 +178,8 @@ class GCodeGenerator extends Component {
       var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.max_radius;
 
       // What is the basic theta for this point?
-      var rawTheta = Math.atan2(subsampledVertices[next].y,
-                                subsampledVertices[next].x);
+      var rawTheta = Math.atan2(subsampledVertices[next].x,
+                                subsampledVertices[next].y);
       // Convert to [0,2pi]
       rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI);
 
