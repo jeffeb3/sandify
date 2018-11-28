@@ -14,14 +14,16 @@ class Documentation extends Component {
         <div className="App-col-3">
           <h3 className="docTitle">Sand Machine</h3>
           Anything that uses gcode can be used with sandify.
-              But the machine this was designed for is the ZenXY from Vicious1.com:
+              But the machine this was designed for is the ZenXY from V1Engineering.com:
           <br/>
-          <a href="http://www.vicious1.com/zenxy/">ZenXY on Vicious1.com</a>
+          <a href="http://www.V1Engineering.com/zenxy/">ZenXY on V1Engineering.com</a>
           <br/>
           <a href="https://www.thingiverse.com/thing:2477901">ZenXY Thingiverse Page</a>
           <br/>
+          ZenXY was inspired by the awesome Sisyphus Kinetic Art Table by <a href="https://sisyphus-industries.com/">Sisyphus Industries</a>, which is also now supported.
+          <br/>
           Sandify was created by users in the
-          <a href="https://www.vicious1.com/forum/topic/does-this-count-as-a-build/"> Vicious1.com Forum</a>
+          <a href="https://www.V1Engineering.com/forum/topic/does-this-count-as-a-build/"> V1Engineering.com Forum</a>
         </div>
         <div className="App-col-3">
           <h3 className="docTitle">Github</h3>

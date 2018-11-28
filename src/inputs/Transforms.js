@@ -193,7 +193,7 @@ class ShapeList extends Component {
         ],
       });
     this.props.addShape({
-        name: "Vicious1",
+        name: "V1Engineering",
         vertices: (state) => {
           return Vicious1Vertices()
         },

@@ -176,8 +176,12 @@ class ThetaRho extends Component {
           <br/>
           <h5>Where to get thr files:
           <ul>
+            <li><h5><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></h5></li>
+            <li><h5><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></h5></li>
+            <li><h5><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></h5></li>
             <li><h5><a href="https://reddit.com/r/SisyphusIndustries">Sisyphus on Reddit</a></h5></li>
             <li><h5><a href="https://sisyphus-industries.com/community/community-tracks">Sisyphus Community</a></h5></li>
+            <li><h5><a href="http://thejuggler.net/sisyphus/">The Juggler</a></h5></li>
           </ul>
           </h5>
           <h6>Note about Copyrights:</h6>
