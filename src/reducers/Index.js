@@ -52,6 +52,13 @@ export const setShapeCircleLobes = ( sides ) => {
   };
 }
 
+export const setShapeInputText = ( text ) => {
+  return {
+    type: 'SET_SHAPE_INPUT_TEXT',
+    value: text,
+  };
+}
+
 export const setShapeSize = ( size ) => {
   return {
     type: 'SET_SHAPE_SIZE',
@@ -299,6 +306,7 @@ const defaultState = {
   shapeStarPoints: 5,
   shapeStarRatio: 0.5,
   shapeCircleLobes: 1,
+  shapeInputText: "Sandify",
   startingSize: 10.0,
   shapeOffsetX: 0.0,
   shapeOffsetY: 0.0,
@@ -423,6 +431,10 @@ const setVerticesHelper = (state, vertices) => {
         case "Circle":
           state.gcodeSettings.push("    Selected Shape: Circle");
           state.gcodeSettings.push("      Circle Lobes: " + state.shapeCircleLobes);
+          break;
+        case "Text":
+          state.gcodeSettings.push("    Selected Shape: Text");
+          state.gcodeSettings.push("      Input Text: " + state.shapeInputText);
           break;
         case "Vicious1":
           state.gcodeSettings.push("    Selected Shape: Vicious1");
@@ -781,6 +793,11 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_SHAPE_CIRCLE_LOBES':
       return computeInput({...state,
         shapeCircleLobes: action.value,
+      });
+
+    case 'SET_SHAPE_INPUT_TEXT':
+      return computeInput({...state,
+        shapeInputText: action.value,
       });
 
     case 'SET_SHAPE_SIZE':
