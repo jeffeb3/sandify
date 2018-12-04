@@ -5,8 +5,11 @@ import { Vertex } from '../Geometry';
 import MachineSettings from './MachineSettings.js';
 import { connect } from 'react-redux'
 import { Panel } from 'react-bootstrap'
+import Slider from 'rc-slider'
+import 'rc-slider/assets/index.css'
 import {
   setMachinePreviewSize,
+  setMachineSlider,
 } from '../reducers/Index.js';
 
 const mapStateToProps = (state, ownProps) => {
@@ -20,6 +23,7 @@ const mapStateToProps = (state, ownProps) => {
     canvas_width: state.canvas_width,
     canvas_height: state.canvas_height,
     vertices: state.vertices,
+    sliderValue: state.machineSlider,
   }
 }
 
@@ -98,6 +102,24 @@ class PreviewWindow extends Component {
     context.fill();
   }
 
+  slice_vertices(vertices, sliderValue) {
+    const slide_size = 10.0;
+    if (sliderValue === 0) {
+      return vertices;
+    }
+
+    // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
+    // thing.
+    //
+    const begin_fraction = sliderValue / 100.0;
+    const end_fraction = (slide_size + sliderValue) / 100.0;
+
+    const begin_vertex = Math.round(vertices.length * begin_fraction);
+    const end_vertex = Math.round(vertices.length * end_fraction);
+
+    return vertices.slice(begin_vertex, end_vertex);
+  }
+
   paint(context) {
     context.save();
 
@@ -122,7 +144,11 @@ class PreviewWindow extends Component {
     }
     context.stroke();
 
-    if (this.props.vertices && this.props.vertices.length > 0) {
+    var drawing_vertices = this.props.vertices;
+
+    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue);
+
+    if (drawing_vertices && drawing_vertices.length > 0) {
 
       // Draw the start and end points
       context.beginPath();
@@ -136,13 +162,25 @@ class PreviewWindow extends Component {
       this.dot_mm(context, this.props.vertices[this.props.vertices.length-1]);
       context.stroke();
 
-      // Draw the vertices
+      // Draw the background vertices
+      if (this.props.sliderValue !== 0) {
+        context.beginPath();
+        context.lineWidth = this.mmToPixelsScale();
+        context.strokeStyle = "gray";
+        this.moveTo_mm(context, this.props.vertices[0]);
+        for (let i=0; i<this.props.vertices.length; i++) {
+          this.lineTo_mm(context, this.props.vertices[i]);
+        }
+        context.stroke();
+      }
+
+      // Draw the specific vertices
       context.beginPath();
       context.lineWidth = this.mmToPixelsScale();
       context.strokeStyle = "yellow";
-      this.moveTo_mm(context, this.props.vertices[0]);
-      for (var i=0; i<this.props.vertices.length; i++) {
-        this.lineTo_mm(context, this.props.vertices[i]);
+      this.moveTo_mm(context, drawing_vertices[0]);
+      for (let i=0; i<drawing_vertices.length; i++) {
+        this.lineTo_mm(context, drawing_vertices[i]);
       }
       context.stroke();
     }
@@ -173,12 +211,36 @@ class PreviewWindow extends Component {
 }
 PreviewWindow = connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
 
+const machineStateToProps = (state, ownProps) => {
+  return {
+    sliderValue: state.machineSlider,
+  }
+}
+
+const machineDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onSlider: (value) => {
+      dispatch(setMachineSlider(value))
+    },
+  }
+}
+
 class MachinePreview extends Component {
   render() {
     return (
       <div className="machine-preview">
+
         <Panel>
             <PreviewWindow />
+            <div className="slide-box">
+                <Slider
+                  value={this.props.sliderValue}
+                  step={1.0}
+                  min={0.0}
+                  max={100.0}
+                  onChange={this.props.onSlider}
+                />
+            </div>
             <div className="cheatBox" id="biggerBox">
                 <MachineSettings />
             </div>
@@ -187,6 +249,7 @@ class MachinePreview extends Component {
     )
   }
 }
+MachinePreview = connect(machineStateToProps, machineDispatchToProps)(MachinePreview);
 
 export default MachinePreview;
 
