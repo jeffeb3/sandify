@@ -20,6 +20,7 @@ const mapStateToProps = (state, ownProps) => {
     canvas_width: state.canvas_width,
     canvas_height: state.canvas_height,
     vertices: state.vertices,
+    trackVertices: state.trackVertices,
   }
 }
 
@@ -143,6 +144,18 @@ class PreviewWindow extends Component {
       this.moveTo_mm(context, this.props.vertices[0]);
       for (var i=0; i<this.props.vertices.length; i++) {
         this.lineTo_mm(context, this.props.vertices[i]);
+      }
+      context.stroke();
+    }
+    // Draw the trackVertices
+    if (this.props.trackVertices && this.props.trackVertices.length > 0) {
+      // Draw the track vertices
+      context.beginPath();
+      context.lineWidth = this.mmToPixelsScale();
+      context.strokeStyle = "green";
+      this.moveTo_mm(context, this.props.trackVertices[0]);
+      for (i=0; i<this.props.trackVertices.length; i++) {
+        this.lineTo_mm(context, this.props.trackVertices[i]);
       }
       context.stroke();
     }

@@ -26,8 +26,13 @@ import {
   setShapeOffsetY,
   setGrow,
   setSpin,
+  setTrack,
+  setTrackLength,
+  setTrackGrow,
   toggleGrow,
   toggleSpin,
+  toggleTrack,
+  toggleTrackGrow,
 } from '../reducers/Index.js';
 
 class Shape extends Component {
@@ -359,6 +364,95 @@ class ScaleTransform extends Component {
 }
 ScaleTransform = connect(scaleProps, scaleDispatch)(ScaleTransform) ;
 
+const trackProps = (state, ownProps) => {
+  return {
+    active: state.trackEnabled,
+    activeGrow: state.trackGrowEnabled,
+    value: state.trackValue,
+    length: state.trackLength,
+    trackGrow: state.trackGrow,
+  }
+}
+
+const trackDispatch = (dispatch, ownProps) => {
+  return {
+    activeCallback: () => {
+      dispatch(toggleTrack());
+    },
+    activeGrowCallback: () => {
+      dispatch(toggleTrackGrow());
+    },
+    onChange: (event) => {
+      dispatch(setTrack(event.target.value));
+    },
+    onChangeLength: (event) => {
+      dispatch(setTrackLength(event.target.value));
+    },
+    onChangeGrow: (event) => {
+      dispatch(setTrackGrow(event.target.value));
+    },
+  }
+}
+
+class TrackTransform extends Component {
+
+  render() {
+    var activeClassName = "";
+    if (this.props.active) {
+      activeClassName = "active";
+    }
+
+    var activeGrowClassName = "";
+    if (this.props.activeGrow) {
+      activeGrowClassName = "active";
+    }
+
+    return (
+      <div className="track">
+        <ListGroupItem header="Track" className={activeClassName} onClick={this.props.activeCallback}>Moves the shape along a track (shown in green)</ListGroupItem>
+        <div className="track-options">
+          <Panel className="options-panel" collapsible expanded={this.props.active}>
+            <Form horizontal>
+              <FormGroup controlId="track-size">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Track Size
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange}/>
+                </Col>
+              </FormGroup>
+              <FormGroup controlId="track-length">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Track Length
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength}/>
+                </Col>
+              </FormGroup>
+              <ListGroupItem header="Grow" className={activeGrowClassName} onClick={this.props.activeGrowCallback}>Grows or shrinks the track a little bit for each step</ListGroupItem>
+              <div className="scale-options">
+                <Panel className="options-panel" collapsible expanded={this.props.activeGrow}>
+                  <Form horizontal>
+                    <FormGroup controlId="scale-step">
+                      <Col componentClass={ControlLabel} sm={4}>
+                        Track Grow Step
+                      </Col>
+                      <Col sm={8}>
+                        <FormControl type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow}/>
+                      </Col>
+                    </FormGroup>
+                  </Form>
+                </Panel>
+              </div>
+            </Form>
+          </Panel>
+        </div>
+      </div>
+    )
+  }
+}
+TrackTransform = connect(trackProps, trackDispatch)(TrackTransform) ;
+
 const transformsProps = (state, ownProps) => {
   return {
     loops: state.numLoops,
@@ -400,6 +494,8 @@ class Transforms extends Component {
             <ScaleTransform
               />
             <RotationTransform
+              />
+            <TrackTransform
               />
           </ListGroup>
         </Panel>
