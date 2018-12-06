@@ -192,7 +192,7 @@ class PreviewWindow extends Component {
       context.lineWidth = this.mmToPixelsScale();
       context.strokeStyle = "green";
       this.moveTo_mm(context, this.props.trackVertices[0]);
-      for (i=0; i<this.props.trackVertices.length; i++) {
+      for (let i=0; i<this.props.trackVertices.length; i++) {
         this.lineTo_mm(context, this.props.trackVertices[i]);
       }
       context.stroke();
