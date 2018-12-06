@@ -8,6 +8,8 @@ import {
     ListGroup,
     ListGroupItem,
     Panel,
+    ToggleButton,
+    ToggleButtonGroup,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 
@@ -17,6 +19,7 @@ import {
   setMachineMinY,
   setMachineMaxY,
   setMachineRadius,
+  setMachineRectOrigin,
   toggleMachineRectExpanded,
   toggleMachinePolarExpanded,
   toggleMachineEndpoints,
@@ -32,6 +35,7 @@ const rectMapStateToProps = (state, ownProps) => {
     max_x:    state.max_x,
     min_y:    state.min_y,
     max_y:    state.max_y,
+    origin:   state.machineRectOrigin,
   }
 }
 
@@ -51,7 +55,10 @@ const rectMapDispatchToProps = (dispatch, ownProps) => {
     },
     onMaxYChange: (event) => {
       dispatch(setMachineMaxY(parseFloat(event.target.value)))
-    }
+    },
+    onOriginChange: (value) => {
+      dispatch(setMachineRectOrigin(value))
+    },
   }
 }
 
@@ -62,6 +69,7 @@ class RectSettings extends Component {
       activeClassName = "active";
     }
 
+    console.log("origin: " + this.props.origin);
     return (
       <div className="rect">
         <ListGroupItem header="Rectangular Machine" className={activeClassName} onClick={this.props.activeCallback}>Rectangle Machines like the Zen XY.</ListGroupItem>
@@ -69,35 +77,48 @@ class RectSettings extends Component {
           <Panel className="options-panel" collapsible expanded={this.props.expanded}>
             <Form horizontal>
               <FormGroup className="machineSmaller" controlId="min_x">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
                   Min X (mm)
                 </Col>
-                <Col sm={7} smOffset={1}>
+                <Col sm={8} smOffset={1}>
                   <FormControl type="number" value={this.props.min_x} onChange={this.props.onMinXChange}/>
                 </Col>
               </FormGroup>
               <FormGroup className="machineSmaller" controlId="max_x">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
                   Max X (mm)
                 </Col>
-                <Col sm={7} smOffset={1}>
+                <Col sm={8} smOffset={1}>
                   <FormControl type="number" value={this.props.max_x} onChange={this.props.onMaxXChange}/>
                 </Col>
               </FormGroup>
               <FormGroup className="machineSmaller" controlId="min_y">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
                   Min Y (mm)
                 </Col>
-                <Col sm={7} smOffset={1}>
+                <Col sm={8} smOffset={1}>
                   <FormControl type="number" value={this.props.min_y} onChange={this.props.onMinYChange}/>
                 </Col>
               </FormGroup>
               <FormGroup className="machineSmaller" controlId="max_y">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
+                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
                   Max Y (mm)
                 </Col>
-                <Col sm={7} smOffset={1}>
+                <Col sm={8} smOffset={1}>
                   <FormControl type="number" value={this.props.max_y} onChange={this.props.onMaxYChange}/>
+                </Col>
+              </FormGroup>
+              <FormGroup className="machineSmaller" controlId="max_y">
+                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+                  Force Origin
+                </Col>
+                <Col componentClass={ControlLabel} sm={8} smOffset={1}>
+                  <ToggleButtonGroup id="origin-bar" type="checkbox" name="origin" value={this.props.origin} onChange={this.props.onOriginChange}>
+                    <ToggleButton value={0} >Lower Left</ToggleButton>
+                    <ToggleButton value={1} >Upper Left</ToggleButton>
+                    <ToggleButton value={2} >Upper Right</ToggleButton>
+                    <ToggleButton value={3} >Lower Right</ToggleButton>
+                  </ToggleButtonGroup>
                 </Col>
               </FormGroup>
             </Form>
