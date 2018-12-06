@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {
-    Col,
-    ControlLabel,
-    Form,
-    FormControl,
-    FormGroup,
-    ListGroup,
-    ListGroupItem,
-    Panel,
+  Col,
+  ControlLabel,
+  Form,
+  FormControl,
+  FormGroup,
+  ListGroup,
+  ListGroupItem,
+  Panel,
 } from 'react-bootstrap'
 import './Transforms.css'
 import Vicious1Vertices from './Vicious1Vertices';

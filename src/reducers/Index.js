@@ -184,6 +184,13 @@ export const setMachinePreviewSize = ( value ) => {
   };
 }
 
+export const setMachineSlider = ( value ) => {
+  return {
+    type: 'SET_MACHINE_SLIDER',
+    value: value,
+  };
+}
+
 // GCode Actions
 export const setGCodeFilename = ( text ) => {
   return {
@@ -333,6 +340,7 @@ const defaultState = {
   max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
   canvas_width: 600,
   canvas_height: 600,
+  machineSlider: 0.0,
 
   // GCode settings
   filename: "sandify",
@@ -919,6 +927,11 @@ const reducer  = (state = defaultState, action) => {
         canvas_width: action.value,
         canvas_height: action.value,
       });
+    case 'SET_MACHINE_SLIDER':
+      return computeInput({...state,
+        machineSlider: action.value,
+      });
+
 
     // GCode Settings
     case 'SET_GCODE_FILENAME':
