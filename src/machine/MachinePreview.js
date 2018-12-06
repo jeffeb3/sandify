@@ -24,6 +24,7 @@ const mapStateToProps = (state, ownProps) => {
     canvas_height: state.canvas_height,
     vertices: state.vertices,
     sliderValue: state.machineSlider,
+    trackVertices: state.trackVertices,
   }
 }
 
@@ -181,6 +182,18 @@ class PreviewWindow extends Component {
       this.moveTo_mm(context, drawing_vertices[0]);
       for (let i=0; i<drawing_vertices.length; i++) {
         this.lineTo_mm(context, drawing_vertices[i]);
+      }
+      context.stroke();
+    }
+    // Draw the trackVertices
+    if (this.props.trackVertices && this.props.trackVertices.length > 0) {
+      // Draw the track vertices
+      context.beginPath();
+      context.lineWidth = this.mmToPixelsScale();
+      context.strokeStyle = "green";
+      this.moveTo_mm(context, this.props.trackVertices[0]);
+      for (i=0; i<this.props.trackVertices.length; i++) {
+        this.lineTo_mm(context, this.props.trackVertices[i]);
       }
       context.stroke();
     }

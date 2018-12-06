@@ -106,6 +106,39 @@ export const setGrow = ( value ) => {
   };
 }
 
+export const toggleTrack = ( ) => {
+  return {
+    type: 'TOGGLE_TRACK',
+  };
+}
+
+export const toggleTrackGrow = ( ) => {
+  return {
+    type: 'TOGGLE_TRACK_GROW',
+  };
+}
+
+export const setTrack = ( value ) => {
+  return {
+    type: 'SET_TRACK',
+    value: value,
+  };
+}
+
+export const setTrackLength = ( value ) => {
+  return {
+    type: 'SET_TRACK_LENGTH',
+    value: value,
+  };
+}
+
+export const setTrackGrow = ( value ) => {
+  return {
+    type: 'SET_TRACK_GROW',
+    value: value,
+  };
+}
+
 // Wipe actions
 export const setWiperAngleDeg = ( value ) => {
   return {
@@ -305,7 +338,7 @@ export const chooseInput = ( input ) => {
 }
 
 const defaultState = {
-  sandifyVersion: "0.1.1",
+  sandifyVersion: "0.1.2",
   // Transform settings
   shapes: [],
   currentShape: undefined,
@@ -321,6 +354,12 @@ const defaultState = {
   spinValue: 2,
   growEnabled: false,
   growValue: 100,
+  trackEnabled: false,
+  trackGrowEnabled: false,
+  trackValue: 10,
+  trackLength: 0.2,
+  trackGrow: 50.0,
+  trackVertices: [],
 
   turtleVertices: [],
 
@@ -538,6 +577,15 @@ const setVerticesHelper = (state, vertices) => {
       if (state.growEnabled) {
         state.gcodeSettings.push("      Grow Value: " + state.growValue);
       }
+      state.gcodeSettings.push("    Track: " + state.trackEnabled);
+      if (state.trackEnabled) {
+        state.gcodeSettings.push("      Track Value: " + state.trackValue);
+        state.gcodeSettings.push("      Track Length: " + state.trackLength);
+        state.gcodeSettings.push("      Track Grow: " + state.trackGrowEnabled);
+        if (state.trackGrowEnabled) {
+          state.gcodeSettings.push("        Track Grow Value: " + state.trackGrow);
+        }
+      }
       break;
     case 2: // wiper
       state.gcodeSettings.push("  Content Type: Wiper");
@@ -585,6 +633,20 @@ function offset (vertex, offset_x, offset_y) {
   }
 }
 
+function track (vertex, state, loop_index) {
+  let angle = state.trackLength * loop_index / 16 * 2.0 * Math.PI;
+  let radius = 1.0;
+  if (state.trackGrowEnabled) {
+    radius = 1.0 + loop_index / 10.0 * state.trackGrow / 100.0;
+  }
+  return {
+    x: vertex.x + radius * state.trackValue * Math.cos(angle),
+    y: vertex.y + radius * state.trackValue * Math.sin(angle),
+    f: vertex.f, // Why do I still have f in here?
+  };
+}
+
+
 const transform = (state, vertex, loop_index) => {
   var transformed_vertex = vertex
   if (state.growEnabled)
@@ -595,6 +657,9 @@ const transform = (state, vertex, loop_index) => {
   if (state.spinEnabled)
   {
     transformed_vertex = rotate(transformed_vertex, state.spinValue * loop_index);
+  }
+  if (state.trackEnabled) {
+    transformed_vertex = track(transformed_vertex, state, loop_index);
   }
   return transformed_vertex;
 }
@@ -619,12 +684,17 @@ const transformShapes = (state) => {
 
   var num_loops = state.numLoops;
   var outputVertices = []
+  var trackVertices = []
   for (var i=0; i<num_loops; i++) {
+    if (state.trackEnabled) {
+      trackVertices.push(transform(state, {x: 0.0, y: 0.0}, i))
+    }
     for (var j=0; j<input.length; j++) {
       let fraction = j/input.length;
       outputVertices.push(transform(state, input[j], i+fraction))
     }
   }
+  state.trackVertices = trackVertices;
   setVerticesHelper(state, outputVertices);
   return state;
 };
@@ -828,7 +898,9 @@ const thetaRho = (state) => {
 const computeInput = (state) => {
   if (state.input === 0) {
     return transformShapes(state);
-  } else if (state.input === 1) {
+  } 
+  state.trackVertices = [];
+  if (state.input === 1) {
     let newState = {
       ...state,
     }
@@ -910,6 +982,16 @@ const reducer  = (state = defaultState, action) => {
         growEnabled: !state.growEnabled,
       });
 
+    case 'TOGGLE_TRACK':
+      return computeInput({...state,
+        trackEnabled: !state.trackEnabled,
+      });
+
+    case 'TOGGLE_TRACK_GROW':
+      return computeInput({...state,
+        trackGrowEnabled: !state.trackGrowEnabled,
+      });
+
     case 'SET_SPIN':
       return computeInput({...state,
         spinValue: action.value,
@@ -918,6 +1000,21 @@ const reducer  = (state = defaultState, action) => {
     case 'SET_GROW':
       return computeInput({...state,
         growValue: action.value,
+      });
+
+    case 'SET_TRACK':
+      return computeInput({...state,
+        trackValue: action.value,
+      });
+
+    case 'SET_TRACK_LENGTH':
+      return computeInput({...state,
+        trackLength: action.value,
+      });
+
+    case 'SET_TRACK_GROW':
+      return computeInput({...state,
+        trackGrow: action.value,
       });
 
     // Vertex actions
