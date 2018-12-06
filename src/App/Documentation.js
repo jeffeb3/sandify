@@ -10,6 +10,10 @@ class Documentation extends Component {
           Sandify is working on a solution to turn your
               cold, empty hearted, emotionless sand tables into
               cold, empty hearted emotionless sand table robots with enchanting patterns.
+          <br/>
+          <br/>
+          Sandify is a labor of love, but if you'd like to support me financially,
+            I do have a <a href="https://liberapay.com/jeffeb3">Donation</a> system set up.
         </div>
         <div className="App-col-3">
           <h3 className="docTitle">Sand Machine</h3>
