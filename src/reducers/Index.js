@@ -220,6 +220,13 @@ export const toggleMachineEndpoints = ( ) => {
   };
 }
 
+export const setMachineRectOrigin = (value) => {
+  return {
+    type: 'SET_MACHINE_RECT_ORIGIN',
+    value: value,
+  };
+}
+
 export const setShowGCode = ( on ) => {
   return {
     type: 'SET_SHOW_GCODE',
@@ -341,36 +348,117 @@ const defaultState = {
   gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
   machineEndpoints: false,
+  machineRectOrigin: [],
   showGCode: false,
 }
 
 // Vertex functions
 const setVerticesHelper = (state, vertices) => {
   if (vertices.length > 0) {
-    if (state.machineEndpoints && !state.machineRectActive) {
+    if (state.machineRectActive && state.machineRectOrigin.length === 1) {
 
-      var first = vertices[0];
-      var last = vertices[vertices.length-1];
+      // OK, let's assign corners indices:
+      //
+      // [1]   [2]
+      //
+      //
+      // [0]   [3]
 
-      // Always put 0.0 in there
-      vertices.unshift(Vertex(0.0, 0.0, first.f));
+      let dx = (state.max_x - state.min_x) / 2.0;
+      let dy = (state.max_y - state.min_y) / 2.0;
+
+      let corners = [
+        {x: -dx, y: -dy},
+        {x: -dx, y:  dy},
+        {x:  dx, y:  dy},
+        {x:  dx, y: -dy}
+      ];
+      console.log(corners);
+      
+      let first = vertices[0];
+      let last = vertices[vertices.length-1];
 
       // Max radius
-      var max_radius = state.max_radius;
-      if (state.machine_rect_active) {
-        max_radius = Math.sqrt(Math.pow(state.machine_max_x - state.machine_min_x,2.0) + Math.pow(state.machine_max_y - state.machine_min_y, 2.0));
-      }
-      var vFirst = Victor.fromObject(first);
-      var vLast = Victor.fromObject(last);
+      let max_radius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0;
+      
+      let vFirst = Victor.fromObject(first);
+      let vLast = Victor.fromObject(last);
+      let outPoint;
+      let newVertices = [];
       if (vFirst.magnitude() <= vLast.magnitude()) {
         // It's going outward
-        var scale = max_radius / vLast.magnitude();
-        var outPoint = vLast.multiply(Victor(scale,scale));
+        let scale = max_radius / vLast.magnitude();
+        outPoint = vLast.multiply(Victor(scale,scale));
+        newVertices.push({ ...last, x: outPoint.x, y: outPoint.y});
+      } else {
+        let scale = max_radius / vFirst.magnitude();
+        outPoint = vFirst.multiply(Victor(scale,scale));
+        newVertices.push({ ...first, x: outPoint.x, y: outPoint.y});
+      }
+      console.log(outPoint);
+      console.log(dx);
+
+      let nextCorner = 1;
+      if (outPoint.x >= dx) {
+        // right
+        nextCorner = 2;
+      } else if (outPoint.x <= -dx) {
+        // left
+        nextCorner = 0;
+      } else if (outPoint.y >= dy) {
+        // up
+        nextCorner = 1;
+      } else if (outPoint.y <= -dy) {
+        // down
+        nextCorner = 3;
+      } else {
+        console.log("Darn!");
+        nextCorner = 3;
+      }
+      // console.log("nextCorner: " + nextCorner);
+      // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
+     
+      while (nextCorner !== state.machineRectOrigin[0]) {
+        console.log("nextCorner: " + nextCorner);
+        newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
+        nextCorner -= 1;
+        if (nextCorner < 0) {
+          nextCorner = 3;
+        }
+      }
+      console.log("nextCorner: " + nextCorner);
+      newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
+
+      console.log(newVertices);
+      if (vFirst.magnitude() <= vLast.magnitude()) {
+        // outward
+        vertices = vertices.concat(newVertices);
+      } else {
+        vertices = newVertices.reverse().concat(vertices);
+      }
+    }
+    if (state.machineEndpoints && !state.machineRectActive) {
+
+      let first = vertices[0];
+      let last = vertices[vertices.length-1];
+
+      // Always put 0.0 in there
+
+      // Max radius
+      let max_radius = state.max_radius;
+      let vFirst = Victor.fromObject(first);
+      let vLast = Victor.fromObject(last);
+      if (vFirst.magnitude() <= vLast.magnitude()) {
+        // It's going outward
+        let scale = max_radius / vLast.magnitude();
+        let outPoint = vLast.multiply(Victor(scale,scale));
+        vertices.unshift(Vertex(0.0, 0.0, first.f));
         vertices.push(Vertex(outPoint.x, outPoint.y, last.f));
       } else {
-        scale = max_radius / vFirst.magnitude();
-        outPoint = vFirst.multiply(Victor(scale,scale));
-        vertices.push(Vertex(outPoint.x, outPoint.y, last.f));
+        let scale = max_radius / vFirst.magnitude();
+        let outPoint = vFirst.multiply(Victor(scale,scale));
+        vertices.push(Vertex(0.0, 0.0, first.f));
+        vertices.unshift(Vertex(outPoint.x, outPoint.y, last.f));
       }
     }
   }
@@ -400,6 +488,7 @@ const setVerticesHelper = (state, vertices) => {
   state.gcodeSettings.push("  Machine Type: " + (state.machineRectActive ? "Rectangular" : "Polar"));
   if (state.machineRectActive) {
     state.gcodeSettings.push("    MinX: " + state.min_x + " MaxX: " + state.max_x + " MinY: " + state.min_y + " MaxY: " + state.max_y);
+    state.gcodeSettings.push("    Machine Origin: " + state.machineRectOrigin);
   } else {
     state.gcodeSettings.push("    Max Radius: " + state.max_radius);
     state.gcodeSettings.push("    Force Endpoints: " + state.machineEndpoints);
@@ -940,6 +1029,18 @@ const reducer  = (state = defaultState, action) => {
     case 'TOGGLE_MACHINE_ENDPOINTS':
       return computeInput({...state,
         machineEndpoints: !state.machineEndpoints,
+      });
+    case 'SET_MACHINE_RECT_ORIGIN':
+      let newValue = [];
+      for (let i = 0; i < action.value.length ; i++) {
+        if (!state.machineRectOrigin.includes(action.value[i])) {
+          newValue.push(action.value[i]);
+          break;
+        }
+      }
+
+      return computeInput({...state,
+        machineRectOrigin: newValue,
       });
     case 'SET_SHOW_GCODE':
       return {...state,
