@@ -56,11 +56,86 @@ function thetarho(vertex) {
   return "" + vertex.x.toFixed(5) + " " + vertex.y.toFixed(5) + "\n";
 }
 
+const getComments = (state) => {
+  
+  let comments = [];
+  comments.push("Created by Sandify");
+  comments.push("");
+  comments.push("  https://jeffeb3.github.io/sandify/");
+  comments.push("");
+  comments.push("  Sandify Version: " + state.sandifyVersion);
+  comments.push("");
+  comments.push("  Machine Type: " + (state.machineRectActive ? "Rectangular" : "Polar"));
+  if (state.machineRectActive) {
+    comments.push("    MinX: " + state.min_x + " MaxX: " + state.max_x + " MinY: " + state.min_y + " MaxY: " + state.max_y);
+  } else {
+    comments.push("    Max Radius: " + state.max_radius);
+    comments.push("    Force Endpoints: " + state.machineEndpoints);
+  }
+
+  switch (state.input) {
+    case 0: // shapes
+      comments.push("  Content Type: Shapes");
+      comments.push("    Starting Size: " + state.startingSize);
+      comments.push("    Offset: X: " + state.shapeOffsetX + " Y: " + state.shapeOffsetY);
+      switch (state.currentShape) {
+        case "Polygon":
+          comments.push("    Selected Shape: Polygon");
+          comments.push("      Polygon Sides: " + state.shapePolygonSides);
+          break;
+        case "Star":
+          comments.push("    Selected Shape: Star");
+          comments.push("      Star Points: " + state.shapeStarPoints);
+          comments.push("      Star Ratio: " + state.shapeStarRatio);
+          break;
+        case "Circle":
+          comments.push("    Selected Shape: Circle");
+          comments.push("      Circle Lobes: " + state.shapeCircleLobes);
+          break;
+        case "Vicious1":
+          comments.push("    Selected Shape: Vicious1");
+          break;
+        default:
+          comments.push("    Selected Shape: None");
+          break;
+      }
+
+      comments.push("    Number of Loops: " + state.numLoops);
+      comments.push("    Spin: " + state.spinEnabled);
+      if (state.spinEnabled) {
+        comments.push("      Spin Value: " + state.spinValue);
+      }
+      comments.push("    Grow: " + state.growEnabled);
+      if (state.growEnabled) {
+        comments.push("      Grow Value: " + state.growValue);
+      }
+      break;
+    case 2: // wiper
+      comments.push("  Content Type: Wiper");
+      comments.push("    Wiper Angle: " + state.wiperAngleDeg);
+      comments.push("    Wiper Size: "  + state.wiperSize);
+      break;
+    case 3: // thetarho
+      comments.push("  Content Type: ThetaRho");
+      comments.push("    Input File: " + state.thrName);
+      comments.push("    Zoom: "  + state.thrZoom);
+      comments.push("    Aspect Ratio: " + state.thrAspectRatio);
+      break;
+    default: // Dunno
+      comments.push("  Content Type: Unknown");
+      break;
+  }
+  comments.push("  Path Reversed: " + state.gcodeReverse);
+  comments.push("");
+
+  return comments;
+};
+
 const gcodeProps = (state, ownProps) => {
   return {
     xOffset: (state.min_x + state.max_x) / 2.0,
     yOffset: (state.min_y + state.max_y) / 2.0,
-    settings: state.gcodeSettings,
+    settings: getComments(state),
     pre: state.gcodePre,
     post: state.gcodePost,
     reverse: state.gcodeReverse,
