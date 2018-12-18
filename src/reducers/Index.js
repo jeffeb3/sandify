@@ -52,14 +52,14 @@ export const setShapeSize = ( size ) => {
   };
 }
 
-export const setShapeOffsetX = ( offset ) => {
+export const setXFormOffsetX = ( offset ) => {
   return {
     type: 'SET_SHAPE_OFFSET_X',
     value: parseFloat(offset),
   };
 }
 
-export const setShapeOffsetY = ( offset ) => {
+export const setXFormOffsetY = ( offset ) => {
   return {
     type: 'SET_SHAPE_OFFSET_Y',
     value: parseFloat(offset),
@@ -326,16 +326,19 @@ const defaultState = {
   vertices: [],
 
   // Transform settings
-  shapes: [],
-  currentShape: undefined,
-  shapePolygonSides: 4,
-  shapeStarPoints: 5,
-  shapeStarRatio: 0.5,
-  shapeCircleLobes: 1,
-  startingSize: 10.0,
+  shapes: {
+    shapes: [],
+    currentShape: undefined,
+    polygonSides: 4,
+    starPoints: 5,
+    starRatio: 0.5,
+    circleLobes: 1,
+    startingSize: 10.0,
+  },
+
   transform: {
-    shapeOffsetX: 0.0,
-    shapeOffsetY: 0.0,
+    xformOffsetX: 0.0,
+    xformOffsetY: 0.0,
     numLoops: 10,
     growEnabled: false,
     growValue: 100,
@@ -385,56 +388,69 @@ const defaultState = {
 const reducer  = (state = defaultState, action) => {
   switch (action.type) {
 
-    // Transform actions
+    // shape actions
     case 'ADD_SHAPE':
       return computeInput({...state,
-        shapes: [
-          ...state.shapes,
-          action.shape
-        ],
+        shapes: {...state.shapes,
+          shapes: [...state.shapes.shapes,
+            action.shape
+          ],
+        },
       });
 
     case 'SET_SHAPE':
       return computeInput({...state,
-        currentShape: action.value,
+        shapes: {...state.shapes,
+          currentShape: action.value,
+        },
       });
 
     case 'SET_SHAPE_POLYGON_SIDES':
       return computeInput({...state,
-        shapePolygonSides: action.value,
+        shapes: {...state.shapes,
+          polygonSides: action.value,
+        },
       });
 
     case 'SET_SHAPE_STAR_POINTS':
       return computeInput({...state,
-        shapeStarPoints: action.value,
+        shapes: {...state.shapes,
+          starPoints: action.value,
+        },
       });
 
     case 'SET_SHAPE_STAR_RATIO':
       return computeInput({...state,
-        shapeStarRatio: action.value,
+        shapes: {...state.shapes,
+          starRatio: action.value,
+        },
       });
 
     case 'SET_SHAPE_CIRCLE_LOBES':
       return computeInput({...state,
-        shapeCircleLobes: action.value,
+        shapes: {...state.shapes,
+          circleLobes: action.value,
+        },
       });
 
     case 'SET_SHAPE_SIZE':
       return computeInput({...state,
-        startingSize: action.value,
+        shapes: {...state.shapes,
+          startingSize: action.value,
+        },
       });
 
     case 'SET_SHAPE_OFFSET_X':
       return computeInput({...state,
         transform: {...state.transform,
-          shapeOffsetX: action.value,
+          xformOffsetX: action.value,
         },
       });
 
     case 'SET_SHAPE_OFFSET_Y':
       return computeInput({...state,
         transform: {...state.transform,
-          shapeOffsetY: action.value,
+          xformOffsetY: action.value,
         },
       });
 

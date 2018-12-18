@@ -77,20 +77,20 @@ const getComments = (state) => {
     case 0: // shapes
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.startingSize);
-      comments.push("    Offset: X: " + state.transform.shapeOffsetX + " Y: " + state.transform.shapeOffsetY);
+      comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
       switch (state.currentShape) {
         case "Polygon":
           comments.push("    Selected Shape: Polygon");
-          comments.push("      Polygon Sides: " + state.shapePolygonSides);
+          comments.push("      Polygon Sides: " + state.polygonSides);
           break;
         case "Star":
           comments.push("    Selected Shape: Star");
-          comments.push("      Star Points: " + state.shapeStarPoints);
-          comments.push("      Star Ratio: " + state.shapeStarRatio);
+          comments.push("      Star Points: " + state.starPoints);
+          comments.push("      Star Ratio: " + state.starRatio);
           break;
         case "Circle":
           comments.push("    Selected Shape: Circle");
-          comments.push("      Circle Lobes: " + state.shapeCircleLobes);
+          comments.push("      Circle Lobes: " + state.circleLobes);
           break;
         case "Vicious1":
           comments.push("    Selected Shape: Vicious1");

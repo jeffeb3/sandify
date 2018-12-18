@@ -22,8 +22,8 @@ import {
   setShapeStarRatio,
   setShapeCircleLobes,
   setShapeSize,
-  setShapeOffsetX,
-  setShapeOffsetY,
+  setXFormOffsetX,
+  setXFormOffsetY,
   setGrow,
   setSpin,
   setTrack,
@@ -85,15 +85,15 @@ class Shape extends Component {
 
 const shapeListProps = (state, ownProps) => {
   return {
-    shapes: state.shapes,
-    polygonSides: state.shapePolygonSides,
-    starPoints:   state.shapeStarPoints,
-    starRatio:    state.shapeStarRatio,
-    circleLobes:  state.shapeCircleLobes,
-    currentShape: state.currentShape,
-    startingSize: state.startingSize,
-    x_offset: state.transform.shapeOffsetX,
-    y_offset: state.transform.shapeOffsetY,
+    shapes: state.shapes.shapes,
+    polygonSides: state.shapes.polygonSides,
+    starPoints:   state.shapes.starPoints,
+    starRatio:    state.shapes.starRatio,
+    circleLobes:  state.shapes.circleLobes,
+    currentShape: state.shapes.currentShape,
+    startingSize: state.shapes.startingSize,
+    x_offset: state.transform.xformOffsetX,
+    y_offset: state.transform.xformOffsetY,
   }
 }
 
@@ -121,10 +121,10 @@ const shapeListDispatch = (dispatch, ownProps) => {
       dispatch(setShapeSize(event.target.value));
     },
     onOffsetXChange: (event) => {
-      dispatch(setShapeOffsetX(event.target.value));
+      dispatch(setXFormOffsetX(event.target.value));
     },
     onOffsetYChange: (event) => {
-      dispatch(setShapeOffsetY(event.target.value));
+      dispatch(setXFormOffsetY(event.target.value));
     },
   }
 }
@@ -137,8 +137,8 @@ class ShapeList extends Component {
         name: "Polygon",
         vertices: (state) => {
           let points = [];
-          for (let i=0; i<state.shapePolygonSides; i++) {
-            let angle = Math.PI * 2.0 / state.shapePolygonSides * (0.5 + i);
+          for (let i=0; i<state.shapes.polygonSides; i++) {
+            let angle = Math.PI * 2.0 / state.shapes.polygonSides * (0.5 + i);
             points.push(Vertex(Math.cos(angle), Math.sin(angle)))
           }
           return points;
@@ -155,11 +155,11 @@ class ShapeList extends Component {
         name: "Star",
         vertices: (state) => {
           let star_points = [];
-          for (let i=0; i<state.shapeStarPoints * 2; i++) {
-            let angle = Math.PI * 2.0 / (2.0 * state.shapeStarPoints) * i;
+          for (let i=0; i<state.shapes.starPoints * 2; i++) {
+            let angle = Math.PI * 2.0 / (2.0 * state.shapes.starPoints) * i;
             let star_scale = 1.0;
             if (i % 2 === 0) {
-              star_scale *= state.shapeStarRatio;
+              star_scale *= state.shapes.starRatio;
             }
             star_points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
           }
@@ -185,7 +185,7 @@ class ShapeList extends Component {
           let circle_points = []
           for (let i=0; i<128; i++) {
             let angle = Math.PI * 2.0 / 128.0 * i
-            circle_points.push(Vertex(Math.cos(angle), Math.sin(state.shapeCircleLobes * angle)/state.shapeCircleLobes))
+            circle_points.push(Vertex(Math.cos(angle), Math.sin(state.shapes.circleLobes * angle)/state.shapes.circleLobes))
           }
           return circle_points
         },

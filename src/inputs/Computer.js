@@ -53,7 +53,7 @@ export const transform = (data, vertex, loop_index) => {
   {
     transformed_vertex = scale(transformed_vertex, 100.0 + (data.growValue * loop_index));
   }
-  transformed_vertex = offset(transformed_vertex, data.shapeOffsetX, data.shapeOffsetY);
+  transformed_vertex = offset(transformed_vertex, data.xformOffsetX, data.xformOffsetY);
   if (data.spinEnabled)
   {
     transformed_vertex = rotate(transformed_vertex, data.spinValue * loop_index);
@@ -399,11 +399,11 @@ const thetaRho = (state) => {
 }
 
 const transformShapes = (state) => {
-  const shape = findShape(state.shapes, state.currentShape);
+  const shape = findShape(state.shapes.shapes, state.shapes.currentShape);
   var input = []
   if (shape) {
     input = shape.vertices(state).map( (vertex) => {
-      return scale(vertex, 100.0 * state.startingSize);
+      return scale(vertex, 100.0 * state.shapes.startingSize);
     });
   }
 
@@ -422,15 +422,6 @@ const transformShapes = (state) => {
 export const computeInput = (state) => {
   if (state.app.input === 0) {
     return transformShapes(state);
-  }
-  if (state.app.input === 1) {
-    let newState = {
-      ...state,
-    }
-    setVerticesHelper(newState, state.turtleVertices);
-    return Object.assign({}, state, {
-      vertices: newState.vertices
-    });
   } else if (state.app.input === 2) {
     return wiper(state);
   } else if (state.app.input === 3) {
