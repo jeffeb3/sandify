@@ -1,13 +1,6 @@
-
 import {
-  enforceRectLimits,
-  enforcePolarLimits
-} from '../machine/LimitEnforcer';
-import {
-  degToRad,
-  Vertex,
-} from '../Geometry.js'
-import Victor from 'victor';
+  computeInput,
+} from '../inputs/Computer.js';
 
 // Transform actions
 export const addShape = ( shape ) => {
@@ -274,20 +267,6 @@ export const setShowGCode = ( on ) => {
   };
 }
 
-// Vertices Actions
-export const clearVertices = ( ) => {
-  return {
-    type: 'CLEAR_VERTICES',
-  };
-}
-
-export const setTurtleVertices = ( vertices ) => {
-  return {
-    type: 'SET_TURTLE_VERTICES',
-    vertices: vertices,
-  };
-}
-
 export const setThrVertices = ( vertices ) => {
   return {
     type: 'SET_THR_VERTICES',
@@ -323,13 +302,6 @@ export const toggleThrAspectRatio = ( value ) => {
   };
 }
 
-export const addVertex = ( vertex ) => {
-  return {
-    type: 'ADD_VERTEX',
-    value: vertex,
-  };
-}
-
 export const chooseInput = ( input ) => {
   return {
     type: 'CHOOSE_INPUT',
@@ -347,21 +319,20 @@ const defaultState = {
   shapeStarRatio: 0.5,
   shapeCircleLobes: 1,
   startingSize: 10.0,
-  shapeOffsetX: 0.0,
-  shapeOffsetY: 0.0,
-  numLoops: 10,
-  spinEnabled: false,
-  spinValue: 2,
-  growEnabled: false,
-  growValue: 100,
-  trackEnabled: false,
-  trackGrowEnabled: false,
-  trackValue: 10,
-  trackLength: 0.2,
-  trackGrow: 50.0,
-  trackVertices: [],
-
-  turtleVertices: [],
+  transform: {
+    shapeOffsetX: 0.0,
+    shapeOffsetY: 0.0,
+    numLoops: 10,
+    growEnabled: false,
+    growValue: 100,
+    spinEnabled: false,
+    spinValue: 2,
+    trackEnabled: false,
+    trackGrowEnabled: false,
+    trackValue: 10,
+    trackLength: 0.2,
+    trackGrow: 50.0,
+  },
 
   thrName: "",
   thrComment: [],
@@ -376,17 +347,22 @@ const defaultState = {
   input: 0,
 
   // Machine settings
-  machineRectActive: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
-  machineRectExpanded: false,
-  min_x: parseFloat(localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0),
-  max_x: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
-  min_y: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
-  max_y: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
-  machinePolarExpanded: false,
-  max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
+  machine: {
+    rectangular: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
+    min_x: parseFloat(localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0),
+    max_x: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
+    min_y: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
+    max_y: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
+    max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
+    rectOrigin: [],
+    polarEndpoints: false,
+  },
+
   canvas_width: 600,
   canvas_height: 600,
   machineSlider: 0.0,
+  machineRectExpanded: false,
+  machinePolarExpanded: false,
 
   // GCode settings
   filename: "sandify",
@@ -394,443 +370,7 @@ const defaultState = {
   gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
   gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   gcodeReverse: false,
-  machineEndpoints: false,
-  machineRectOrigin: [],
   showGCode: false,
-}
-
-// Vertex functions
-const setVerticesHelper = (state, vertices) => {
-  if (vertices.length > 0) {
-    if (state.machineRectActive && state.machineRectOrigin.length === 1) {
-
-      // OK, let's assign corners indices:
-      //
-      // [1]   [2]
-      //
-      //
-      // [0]   [3]
-
-      let dx = (state.max_x - state.min_x) / 2.0;
-      let dy = (state.max_y - state.min_y) / 2.0;
-
-      let corners = [
-        {x: -dx, y: -dy},
-        {x: -dx, y:  dy},
-        {x:  dx, y:  dy},
-        {x:  dx, y: -dy}
-      ];
-      console.log(corners);
-      
-      let first = vertices[0];
-      let last = vertices[vertices.length-1];
-
-      // Max radius
-      let max_radius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0;
-      
-      let vFirst = Victor.fromObject(first);
-      let vLast = Victor.fromObject(last);
-      let outPoint;
-      let newVertices = [];
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // It's going outward
-        let scale = max_radius / vLast.magnitude();
-        outPoint = vLast.multiply(Victor(scale,scale));
-        newVertices.push({ ...last, x: outPoint.x, y: outPoint.y});
-      } else {
-        let scale = max_radius / vFirst.magnitude();
-        outPoint = vFirst.multiply(Victor(scale,scale));
-        newVertices.push({ ...first, x: outPoint.x, y: outPoint.y});
-      }
-      console.log(outPoint);
-      console.log(dx);
-
-      let nextCorner = 1;
-      if (outPoint.x >= dx) {
-        // right
-        nextCorner = 2;
-      } else if (outPoint.x <= -dx) {
-        // left
-        nextCorner = 0;
-      } else if (outPoint.y >= dy) {
-        // up
-        nextCorner = 1;
-      } else if (outPoint.y <= -dy) {
-        // down
-        nextCorner = 3;
-      } else {
-        console.log("Darn!");
-        nextCorner = 3;
-      }
-      // console.log("nextCorner: " + nextCorner);
-      // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
-     
-      while (nextCorner !== state.machineRectOrigin[0]) {
-        console.log("nextCorner: " + nextCorner);
-        newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
-        nextCorner -= 1;
-        if (nextCorner < 0) {
-          nextCorner = 3;
-        }
-      }
-      console.log("nextCorner: " + nextCorner);
-      newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y});
-
-      console.log(newVertices);
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // outward
-        vertices = vertices.concat(newVertices);
-      } else {
-        vertices = newVertices.reverse().concat(vertices);
-      }
-    }
-    if (state.machineEndpoints && !state.machineRectActive) {
-
-      let first = vertices[0];
-      let last = vertices[vertices.length-1];
-
-      // Always put 0.0 in there
-
-      // Max radius
-      let max_radius = state.max_radius;
-      let vFirst = Victor.fromObject(first);
-      let vLast = Victor.fromObject(last);
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // It's going outward
-        let scale = max_radius / vLast.magnitude();
-        let outPoint = vLast.multiply(Victor(scale,scale));
-        vertices.unshift(Vertex(0.0, 0.0, first.f));
-        vertices.push(Vertex(outPoint.x, outPoint.y, last.f));
-      } else {
-        let scale = max_radius / vFirst.magnitude();
-        let outPoint = vFirst.multiply(Victor(scale,scale));
-        vertices.push(Vertex(0.0, 0.0, first.f));
-        vertices.unshift(Vertex(outPoint.x, outPoint.y, last.f));
-      }
-    }
-  }
-  if (state.gcodeReverse) {
-    vertices.reverse();
-  }
-  if (state.machineRectActive) {
-    vertices = enforceRectLimits(vertices,
-                                 (state.max_x - state.min_x)/2.0,
-                                 (state.max_y - state.min_y)/2.0
-                                 );
-  } else {
-    vertices = enforcePolarLimits(vertices,
-                                  state.max_radius
-                                  );
-  }
-  state.vertices = vertices;
-}
-
-// Transform funtions
-function rotate (vertex, angle_deg) {
-  var angle = Math.PI / 180.0 * angle_deg;
-  return Vertex(
-           vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
-           vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
-           vertex.f);
-}
-
-function scale (vertex, scale_perc) {
-  var scale = scale_perc / 100.0;
-  return {
-    x: vertex.x * scale,
-    y: vertex.y * scale,
-    f: vertex.f,
-  }
-}
-
-function offset (vertex, offset_x, offset_y) {
-  return {
-    x: vertex.x + offset_x,
-    y: vertex.y + offset_y,
-    f: vertex.f,
-  }
-}
-
-function track (vertex, state, loop_index) {
-  let angle = state.trackLength * loop_index / 16 * 2.0 * Math.PI;
-  let radius = 1.0;
-  if (state.trackGrowEnabled) {
-    radius = 1.0 + loop_index / 10.0 * state.trackGrow / 100.0;
-  }
-  return {
-    x: vertex.x + radius * state.trackValue * Math.cos(angle),
-    y: vertex.y + radius * state.trackValue * Math.sin(angle),
-    f: vertex.f, // Why do I still have f in here?
-  };
-}
-
-
-const transform = (state, vertex, loop_index) => {
-  var transformed_vertex = vertex
-  if (state.growEnabled)
-  {
-    transformed_vertex = scale(transformed_vertex, 100.0 + (state.growValue * loop_index));
-  }
-  transformed_vertex = offset(transformed_vertex, state.shapeOffsetX, state.shapeOffsetY);
-  if (state.spinEnabled)
-  {
-    transformed_vertex = rotate(transformed_vertex, state.spinValue * loop_index);
-  }
-  if (state.trackEnabled) {
-    transformed_vertex = track(transformed_vertex, state, loop_index);
-  }
-  return transformed_vertex;
-}
-
-const findShape = (shapes, name) => {
-  for (let i=0; i<shapes.length; i++) {
-    if (name === shapes[i].name) {
-      return shapes[i];
-    }
-  }
-  return null;
-}
-
-const transformShapes = (state) => {
-  const shape = findShape(state.shapes, state.currentShape);
-  var input = []
-  if (shape) {
-    input = shape.vertices(state).map( (vertex) => {
-      return scale(vertex, 100.0 * state.startingSize);
-    });
-  }
-
-  var num_loops = state.numLoops;
-  var outputVertices = []
-  var trackVertices = []
-  for (var i=0; i<num_loops; i++) {
-    if (state.trackEnabled) {
-      trackVertices.push(transform(state, {x: 0.0, y: 0.0}, i))
-    }
-    for (var j=0; j<input.length; j++) {
-      let fraction = j/input.length;
-      outputVertices.push(transform(state, input[j], i+fraction))
-    }
-  }
-  state.trackVertices = trackVertices;
-  setVerticesHelper(state, outputVertices);
-  return state;
-};
-
-const outOfBounds = (point, width, height) => {
-  if (point.x < -width/2.0) {
-    return true;
-  }
-  if (point.y < -height/2.0) {
-    return true;
-  }
-  if (point.x > width/2.0) {
-    return true;
-  }
-  if (point.y > height/2.0) {
-    return true;
-  }
-  return false;
-}
-
-// Intersect the line with the boundary, and return the point exactly on the boundary.
-// This will keep the shape. i.e. It will follow the line segment, and return the point on that line
-// segment.
-function boundPoint(good, bad, size_x, size_y) {
-  var dx = good.x - bad.x;
-  var dy = good.y - bad.y;
-
-  var fixed = Victor(bad.x, bad.y);
-  var distance = 0;
-  if (bad.x < -size_x || bad.x > size_x) {
-    if (bad.x < -size_x) {
-      // we are leaving the left
-      fixed.x = -size_x;
-    } else {
-      // we are leaving the right
-      fixed.x = size_x;
-    }
-    distance = (fixed.x - good.x) / dx;
-    fixed.y = good.y + distance * dy;
-    // We fixed x, but y might have the same problem, so we'll rerun this, with different points.
-    return boundPoint(good, fixed, size_x, size_y);
-  }
-  if (bad.y < -size_y || bad.y > size_y) {
-    if (bad.y < -size_y) {
-      // we are leaving the bottom
-      fixed.y = -size_y;
-    } else {
-      // we are leaving the top
-      fixed.y = size_y;
-    }
-    distance = (fixed.y - good.y) / dy;
-    fixed.x = good.x + distance * dx;
-  }
-  return fixed;
-}
-
-function nearEnough(end, point) {
-  if (point.clone().subtract(end).length() < 0.01) {
-    return true;
-  }
-  return false;
-}
-
-const wiper = (state) => {
-
-  var outputVertices = []
-
-  // Do the math
-
-  // Get the angle between 0,180
-  let angle = (180.0 - (state.wiperAngleDeg % 360)) % 180.0;
-  if (angle < 0.0) {
-    angle += 180.0;
-  }
-  angle = degToRad(angle);
-
-  // Start with the defaults for 0,45
-  let height = 1;
-  let width = 1;
-  if (state.machineRectActive) {
-    height = state.max_y - state.min_y;
-    width = state.max_x - state.min_x;
-  } else {
-    height = state.max_radius * 2.0;
-    width = height;
-  }
-
-  let startLocation = Victor(-width/2.0, height/2.0)
-  let orig_delta_w = Victor(state.wiperSize / Math.cos(angle), 0.0);
-  let orig_delta_h = Victor(0.0, -state.wiperSize / Math.sin(angle));
-
-  if (angle > Math.PI/4.0 && angle < 0.75 * Math.PI) {
-    // flip the logic of x,y
-    let temp = orig_delta_w.clone();
-    orig_delta_w = orig_delta_h.clone();
-    orig_delta_h = temp;
-  }
-  if (angle > Math.PI/2.0) {
-    startLocation = Victor(-width/2.0, -height/2.0)
-    orig_delta_w = orig_delta_w.clone().multiply(Victor(-1.0, -1.0));
-    orig_delta_h = orig_delta_h.clone().multiply(Victor(-1.0, -1.0));
-  }
-  let delta_w = orig_delta_w;
-  let delta_h = orig_delta_h;
-  let endLocation = startLocation.clone().multiply(Victor(-1.0, -1.0));
-  outputVertices.push(startLocation);
-  let nextWidthPoint = startLocation;
-  let nextHeightPoint = startLocation;
-
-  let emergency_break = 0;
-  while (emergency_break < 1000) {
-    emergency_break += 1;
-
-    // "right"
-    nextWidthPoint = nextWidthPoint.clone().add(delta_w);
-    if (outOfBounds(nextWidthPoint, width, height)) {
-      let corner = boundPoint(nextWidthPoint.clone().subtract(delta_w), nextWidthPoint, width/2.0, height/2.0);
-      outputVertices.push(corner);
-      if (nearEnough(endLocation, corner)) {
-        break;
-      }
-      nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0);
-      delta_w = orig_delta_h;
-    }
-    outputVertices.push(nextWidthPoint);
-    if (nearEnough(endLocation, nextWidthPoint)) {
-      break;
-    }
-
-    // "down-left"
-    nextHeightPoint = nextHeightPoint.clone().add(delta_h);
-    if (outOfBounds(nextHeightPoint, width, height)) {
-      nextHeightPoint = boundPoint(nextWidthPoint, nextHeightPoint, width/2.0, height/2.0);
-      delta_h = orig_delta_w;
-    }
-    outputVertices.push(nextHeightPoint);
-    if (nearEnough(endLocation, nextHeightPoint)) {
-      break;
-    }
-
-    // "down"
-    nextHeightPoint = nextHeightPoint.clone().add(delta_h);
-    outputVertices.push(nextHeightPoint);
-    if (nearEnough(endLocation, nextHeightPoint)) {
-      break;
-    }
-    if (outOfBounds(nextHeightPoint, width, height)) {
-      let corner = boundPoint(nextHeightPoint.clone().subtract(delta_h), nextHeightPoint, width/2.0, height/2.0);
-      outputVertices.push(corner);
-      if (nearEnough(endLocation, corner)) {
-        break;
-      }
-      nextHeightPoint = boundPoint(nextWidthPoint, nextHeightPoint, width/2.0, height/2.0);
-      delta_h = orig_delta_w;
-    }
-    outputVertices.push(nextHeightPoint);
-    if (nearEnough(endLocation, nextHeightPoint)) {
-      break;
-    }
-
-    // "up-right"
-    nextWidthPoint = nextWidthPoint.clone().add(delta_w);
-    outputVertices.push(nextWidthPoint);
-    if (nearEnough(endLocation, nextWidthPoint)) {
-      break;
-    }
-    if (outOfBounds(nextWidthPoint, width, height)) {
-      nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0);
-      delta_w = orig_delta_h;
-    }
-
-  }
-
-  setVerticesHelper(state, outputVertices);
-
-  return state;
-};
-
-const thetaRho = (state) => {
-  var x_scale = (state.max_x - state.min_x)/2.0 * 0.01 * state.thrZoom;
-  var y_scale = (state.max_y - state.min_y)/2.0 * 0.01 * state.thrZoom;
-  if (!state.machineRectActive) {
-    x_scale = y_scale = state.max_radius;
-  }
-  x_scale *= 0.01 * state.thrZoom;
-  y_scale *= 0.01 * state.thrZoom;
-  if (state.thrAspectRatio) {
-    x_scale = y_scale = Math.min(x_scale,y_scale);
-  }
-
-  var newVertices = state.thrVertices.map( (vertex) => {
-    return {...vertex,
-      x: vertex.x * x_scale,
-      y: vertex.y * y_scale,
-    };
-  });
-  setVerticesHelper(state, newVertices);
-  return state;
-}
-
-const computeInput = (state) => {
-  if (state.input === 0) {
-    return transformShapes(state);
-  } 
-  state.trackVertices = [];
-  if (state.input === 1) {
-    let newState = {
-      ...state,
-    }
-    setVerticesHelper(newState, state.turtleVertices);
-    return Object.assign({}, state, {
-      vertices: newState.vertices
-    });
-  } else if (state.input === 2) {
-    return wiper(state);
-  } else if (state.input === 3) {
-    return thetaRho(state);
-  }
 }
 
 const reducer  = (state = defaultState, action) => {
@@ -877,73 +417,89 @@ const reducer  = (state = defaultState, action) => {
 
     case 'SET_SHAPE_OFFSET_X':
       return computeInput({...state,
-        shapeOffsetX: action.value,
+        transform: {...state.transform,
+          shapeOffsetX: action.value,
+        },
       });
 
     case 'SET_SHAPE_OFFSET_Y':
       return computeInput({...state,
-        shapeOffsetY: action.value,
+        transform: {...state.transform,
+          shapeOffsetY: action.value,
+        },
       });
 
     case 'SET_LOOPS':
       return computeInput({...state,
-        numLoops: action.value,
+        transform: {...state.transform,
+          numLoops: action.value,
+        },
       });
 
     case 'TOGGLE_SPIN':
       return computeInput({...state,
-        spinEnabled: !state.spinEnabled,
+        transform: {...state.transform,
+          spinEnabled: !state.transform.spinEnabled,
+        },
       });
 
     case 'TOGGLE_GROW':
       return computeInput({...state,
-        growEnabled: !state.growEnabled,
+        transform: {...state.transform,
+          growEnabled: !state.transform.growEnabled,
+        },
       });
 
     case 'TOGGLE_TRACK':
       return computeInput({...state,
-        trackEnabled: !state.trackEnabled,
+        transform: {...state.transform,
+          trackEnabled: !state.transform.trackEnabled,
+        },
       });
 
     case 'TOGGLE_TRACK_GROW':
       return computeInput({...state,
-        trackGrowEnabled: !state.trackGrowEnabled,
+        transform: {...state.transform,
+          trackGrowEnabled: !state.transform.trackGrowEnabled,
+        },
       });
 
     case 'SET_SPIN':
       return computeInput({...state,
-        spinValue: action.value,
+        transform: {...state.transform,
+          spinValue: action.value,
+        },
       });
 
     case 'SET_GROW':
       return computeInput({...state,
-        growValue: action.value,
+        transform: {...state.transform,
+          growValue: action.value,
+        },
       });
 
     case 'SET_TRACK':
       return computeInput({...state,
-        trackValue: action.value,
+        transform: {...state.transform,
+          trackValue: action.value,
+        },
       });
 
     case 'SET_TRACK_LENGTH':
       return computeInput({...state,
-        trackLength: action.value,
+        transform: {...state.transform,
+          trackLength: action.value,
+        },
       });
 
     case 'SET_TRACK_GROW':
       return computeInput({...state,
-        trackGrow: action.value,
+        transform: {...state.transform,
+          trackGrow: action.value,
+        },
       });
 
     // Vertex actions
-    case 'CLEAR_VERTICES':
-      return Object.assign({}, state, {
-        vertices: [],
-      });
-    case 'SET_TURTLE_VERTICES':
-      return computeInput({...state,
-        turtleVertices: action.vertices,
-      });
     case 'SET_THR_VERTICES':
       return computeInput({...state,
         thrVertices: action.vertices,
@@ -964,18 +520,6 @@ const reducer  = (state = defaultState, action) => {
       return computeInput({...state,
         thrAspectRatio: !state.thrAspectRatio,
       });
-    case 'ADD_VERTEX': {
-      let newState = {
-        ...state,
-      }
-      setVerticesHelper(newState, [
-          ...state.vertices,
-          action.value,
-        ]);
-      return Object.assign({}, state, {
-        vertices: newState.vertices
-      });
-    }
     case 'CHOOSE_INPUT':
       return computeInput({...state,
         input: action.value,
@@ -994,37 +538,71 @@ const reducer  = (state = defaultState, action) => {
     // Machine Settings
     case 'TOGGLE_MACHINE_RECT_EXPANDED':
       return computeInput({...state,
-        machineRectActive: true,
+        machine: {...state.machine,
+          rectangular: true,
+        },
         machineRectExpanded: !state.machineRectExpanded,
         machinePolarExpanded: false,
       });
 
     case 'TOGGLE_MACHINE_POLAR_EXPANDED':
       return computeInput({...state,
+        machine: {...state.machine,
+          rectangular: false,
+        },
         machinePolarExpanded: !state.machinePolarExpanded,
-        machineRectActive: false,
         machineRectExpanded: false,
       });
 
     case 'SET_MIN_X':
       return computeInput({...state,
-        min_x: action.value,
+        machine: {...state.machine,
+          min_x: action.value,
+        },
       });
     case 'SET_MAX_X':
       return computeInput({...state,
-        max_x: action.value,
+        machine: {...state.machine,
+          max_x: action.value,
+        },
       });
     case 'SET_MIN_Y':
       return computeInput({...state,
-        min_y: action.value,
+        machine: {...state.machine,
+          min_y: action.value,
+        },
       });
     case 'SET_MAX_Y':
       return computeInput({...state,
-        max_y: action.value,
+        machine: {...state.machine,
+          max_y: action.value,
+        },
       });
     case 'SET_MAX_RADIUS':
       return computeInput({...state,
-        max_radius: action.value,
+        machine: {...state.machine,
+          max_radius: action.value,
+        },
+      });
+    case 'SET_MACHINE_RECT_ORIGIN':
+      let newValue = [];
+      for (let i = 0; i < action.value.length ; i++) {
+        if (!state.machine.rectOrigin.includes(action.value[i])) {
+          newValue.push(action.value[i]);
+          break;
+        }
+      }
+
+      return computeInput({...state,
+        machine: {...state.machine,
+          rectOrigin: newValue,
+        },
+      });
+    case 'TOGGLE_MACHINE_ENDPOINTS':
+      return computeInput({...state,
+        machine: {...state.machine,
+          polarEndpoints: !state.polarEndpoints,
+        },
       });
     case 'SET_MACHINE_SIZE':
       return computeInput({...state,
@@ -1053,22 +631,6 @@ const reducer  = (state = defaultState, action) => {
     case 'TOGGLE_GCODE_REVERSE':
       return computeInput({...state,
         gcodeReverse: !state.gcodeReverse,
-      });
-    case 'TOGGLE_MACHINE_ENDPOINTS':
-      return computeInput({...state,
-        machineEndpoints: !state.machineEndpoints,
-      });
-    case 'SET_MACHINE_RECT_ORIGIN':
-      let newValue = [];
-      for (let i = 0; i < action.value.length ; i++) {
-        if (!state.machineRectOrigin.includes(action.value[i])) {
-          newValue.push(action.value[i]);
-          break;
-        }
-      }
-
-      return computeInput({...state,
-        machineRectOrigin: newValue,
       });
     case 'SET_SHOW_GCODE':
       return {...state,

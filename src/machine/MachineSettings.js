@@ -29,13 +29,13 @@ import './MachineSettings.css';
 
 const rectMapStateToProps = (state, ownProps) => {
   return {
-    active:   state.machineRectActive,
+    active:   state.machine.rectangular,
     expanded: state.machineRectExpanded,
-    min_x:    state.min_x,
-    max_x:    state.max_x,
-    min_y:    state.min_y,
-    max_y:    state.max_y,
-    origin:   state.machineRectOrigin,
+    min_x:    state.machine.min_x,
+    max_x:    state.machine.max_x,
+    min_y:    state.machine.min_y,
+    max_y:    state.machine.max_y,
+    origin:   state.machine.rectOrigin,
   }
 }
 
@@ -69,7 +69,6 @@ class RectSettings extends Component {
       activeClassName = "active";
     }
 
-    console.log("origin: " + this.props.origin);
     return (
       <div className="rect">
         <ListGroupItem header="Rectangular Machine" className={activeClassName} onClick={this.props.activeCallback}>Rectangle Machines like the Zen XY.</ListGroupItem>
@@ -133,10 +132,10 @@ RectSettings = connect(rectMapStateToProps, rectMapDispatchToProps)(RectSettings
 
 const polarMapStateToProps = (state, ownProps) => {
   return {
-    active:   !state.machineRectActive,
-    expanded: state.machinePolarExpanded,
-    max_radius:    state.max_radius,
-    endpoints: state.machineEndpoints,
+    active:     !state.machine.rectangular,
+    expanded:   state.machinePolarExpanded,
+    max_radius: state.machine.max_radius,
+    endpoints:  state.machine.polarEndpoints,
   }
 }
 

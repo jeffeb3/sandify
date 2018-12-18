@@ -11,6 +11,7 @@
     "react-redux": "^5.0.5",
     "react-scripts": "0.9.5",
     "redux": "^3.7.1",
+    "reselect": "^4.0.0",
     "victor": "^1.1.0"
   },
   "devDependencies": {

@@ -92,8 +92,8 @@ const shapeListProps = (state, ownProps) => {
     circleLobes:  state.shapeCircleLobes,
     currentShape: state.currentShape,
     startingSize: state.startingSize,
-    x_offset: state.shapeOffsetX,
-    y_offset: state.shapeOffsetY,
+    x_offset: state.transform.shapeOffsetX,
+    y_offset: state.transform.shapeOffsetY,
   }
 }
 
@@ -267,8 +267,8 @@ ShapeList = connect(shapeListProps, shapeListDispatch)(ShapeList) ;
 
 const rotateProps = (state, ownProps) => {
   return {
-    active: state.spinEnabled,
-    value: state.spinValue,
+    active: state.transform.spinEnabled,
+    value: state.transform.spinValue,
   }
 }
 
@@ -317,8 +317,8 @@ RotationTransform = connect(rotateProps, rotateDispatch)(RotationTransform) ;
 
 const scaleProps = (state, ownProps) => {
   return {
-    active: state.growEnabled,
-    value: state.growValue,
+    active: state.transform.growEnabled,
+    value: state.transform.growValue,
   }
 }
 
@@ -366,11 +366,11 @@ ScaleTransform = connect(scaleProps, scaleDispatch)(ScaleTransform) ;
 
 const trackProps = (state, ownProps) => {
   return {
-    active: state.trackEnabled,
-    activeGrow: state.trackGrowEnabled,
-    value: state.trackValue,
-    length: state.trackLength,
-    trackGrow: state.trackGrow,
+    active: state.transform.trackEnabled,
+    activeGrow: state.transform.trackGrowEnabled,
+    value: state.transform.trackValue,
+    length: state.transform.trackLength,
+    trackGrow: state.transform.trackGrow,
   }
 }
 
@@ -432,7 +432,6 @@ class TrackTransform extends Component {
               <ListGroupItem header="Grow" className={activeGrowClassName} onClick={this.props.activeGrowCallback}>Grows or shrinks the track a little bit for each step</ListGroupItem>
               <div className="scale-options">
                 <Panel className="options-panel" collapsible expanded={this.props.activeGrow}>
-                  <Form horizontal>
                     <FormGroup controlId="scale-step">
                       <Col componentClass={ControlLabel} sm={4}>
                         Track Grow Step
@@ -441,7 +440,6 @@ class TrackTransform extends Component {
                         <FormControl type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow}/>
                       </Col>
                     </FormGroup>
-                  </Form>
                 </Panel>
               </div>
             </Form>
@@ -455,7 +453,7 @@ TrackTransform = connect(trackProps, trackDispatch)(TrackTransform) ;
 
 const transformsProps = (state, ownProps) => {
   return {
-    loops: state.numLoops,
+    loops: state.transform.numLoops,
   }
 }
 

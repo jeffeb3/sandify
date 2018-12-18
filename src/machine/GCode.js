@@ -57,7 +57,7 @@ function thetarho(vertex) {
 }
 
 const getComments = (state) => {
-  
+
   let comments = [];
   comments.push("Created by Sandify");
   comments.push("");
@@ -65,19 +65,19 @@ const getComments = (state) => {
   comments.push("");
   comments.push("  Sandify Version: " + state.sandifyVersion);
   comments.push("");
-  comments.push("  Machine Type: " + (state.machineRectActive ? "Rectangular" : "Polar"));
-  if (state.machineRectActive) {
-    comments.push("    MinX: " + state.min_x + " MaxX: " + state.max_x + " MinY: " + state.min_y + " MaxY: " + state.max_y);
+  comments.push("  Machine Type: " + (state.machine.rectangular ? "Rectangular" : "Polar"));
+  if (state.machine.rectangular) {
+    comments.push("    MinX: " + state.machine.min_x + " MaxX: " + state.machine.max_x + " MinY: " + state.machine.min_y + " MaxY: " + state.machine.max_y);
   } else {
-    comments.push("    Max Radius: " + state.max_radius);
-    comments.push("    Force Endpoints: " + state.machineEndpoints);
+    comments.push("    Max Radius: " + state.machine.max_radius);
+    comments.push("    Force Endpoints: " + state.machine.polarEndpoints);
   }
 
   switch (state.input) {
     case 0: // shapes
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.startingSize);
-      comments.push("    Offset: X: " + state.shapeOffsetX + " Y: " + state.shapeOffsetY);
+      comments.push("    Offset: X: " + state.transform.shapeOffsetX + " Y: " + state.transform.shapeOffsetY);
       switch (state.currentShape) {
         case "Polygon":
           comments.push("    Selected Shape: Polygon");
@@ -100,14 +100,23 @@ const getComments = (state) => {
           break;
       }
 
-      comments.push("    Number of Loops: " + state.numLoops);
-      comments.push("    Spin: " + state.spinEnabled);
-      if (state.spinEnabled) {
-        comments.push("      Spin Value: " + state.spinValue);
+      comments.push("    Number of Loops: " + state.transform.numLoops);
+      comments.push("    Spin: " + state.transform.spinEnabled);
+      if (state.transform.spinEnabled) {
+        comments.push("      Spin Value: " + state.transform.spinValue);
       }
-      comments.push("    Grow: " + state.growEnabled);
-      if (state.growEnabled) {
-        comments.push("      Grow Value: " + state.growValue);
+      comments.push("    Grow: " + state.transform.growEnabled);
+      if (state.transform.growEnabled) {
+        comments.push("      Grow Value: " + state.transform.growValue);
+      }
+      comments.push("    Track: " + state.transform.trackEnabled);
+      if (state.transform.trackEnabled) {
+        comments.push("      Track Count: " + state.transform.trackValue);
+        comments.push("      Track Size: " + state.transform.trackLength);
+        comments.push("      Track Grow: " + state.transform.trackGrowEnabled);
+        if (state.transform.trackGrowEnabled) {
+          comments.push("          Track Grow Value: " + state.transform.trackGrow);
+        }
       }
       break;
     case 2: // wiper
@@ -133,14 +142,14 @@ const getComments = (state) => {
 
 const gcodeProps = (state, ownProps) => {
   return {
-    xOffset: (state.min_x + state.max_x) / 2.0,
-    yOffset: (state.min_y + state.max_y) / 2.0,
+    xOffset: (state.machine.min_x + state.machine.max_x) / 2.0,
+    yOffset: (state.machine.min_y + state.machine.max_y) / 2.0,
     settings: getComments(state),
     pre: state.gcodePre,
     post: state.gcodePost,
     reverse: state.gcodeReverse,
     vertices: state.vertices,
-    max_radius: state.max_radius,
+    max_radius: state.machine.max_radius,
     show: state.showGCode,
     filename: state.filename,
   }

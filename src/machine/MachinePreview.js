@@ -11,20 +11,41 @@ import {
   setMachinePreviewSize,
   setMachineSlider,
 } from '../reducers/Index.js';
+import {
+  transform,
+} from '../inputs/Computer.js';
+import { createSelector } from 'reselect'
+
+const getTransform = state => state.transform;
+const getMachine = state => state.machine;
+
+const getTrackVertices = createSelector(
+  [getTransform],
+  (data) => {
+    var num_loops = data.numLoops;
+    var trackVertices = []
+    for (var i=0; i<num_loops; i++) {
+      if (data.trackEnabled) {
+        trackVertices.push(transform(data, {x: 0.0, y: 0.0}, i))
+      }
+    }
+    return trackVertices;
+  }
+);
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    use_rect: state.machineRectActive,
-    min_x: state.min_x,
-    max_x: state.max_x,
-    min_y: state.min_y,
-    max_y: state.max_y,
-    max_radius: state.max_radius,
+    use_rect: state.machine.rectangular,
+    min_x: state.machine.min_x,
+    max_x: state.machine.max_x,
+    min_y: state.machine.min_y,
+    max_y: state.machine.max_y,
+    max_radius: state.machine.max_radius,
     canvas_width: state.canvas_width,
     canvas_height: state.canvas_height,
     vertices: state.vertices,
     sliderValue: state.machineSlider,
-    trackVertices: state.trackVertices,
+    trackVertices: getTrackVertices(state),
   }
 }
 
