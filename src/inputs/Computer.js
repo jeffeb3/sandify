@@ -377,18 +377,18 @@ const wiper = (state) => {
 
 const thetaRho = (state) => {
   let machine = state.machine;
-  var x_scale = (machine.max_x - machine.min_x)/2.0 * 0.01 * state.thrZoom;
-  var y_scale = (machine.max_y - machine.min_y)/2.0 * 0.01 * state.thrZoom;
+  var x_scale = (machine.max_x - machine.min_x)/2.0 * 0.01 * state.file.zoom;
+  var y_scale = (machine.max_y - machine.min_y)/2.0 * 0.01 * state.file.zoom;
   if (!machine.rectangular) {
     x_scale = y_scale = machine.max_radius;
   }
-  x_scale *= 0.01 * state.thrZoom;
-  y_scale *= 0.01 * state.thrZoom;
-  if (state.thrAspectRatio) {
+  x_scale *= 0.01 * state.file.zoom;
+  y_scale *= 0.01 * state.file.zoom;
+  if (state.file.aspectRatio) {
     x_scale = y_scale = Math.min(x_scale,y_scale);
   }
 
-  var newVertices = state.thrVertices.map( (vertex) => {
+  var newVertices = state.file.vertices.map( (vertex) => {
     return {...vertex,
       x: vertex.x * x_scale,
       y: vertex.y * y_scale,

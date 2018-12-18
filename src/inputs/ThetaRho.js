@@ -11,21 +11,21 @@ import {
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import {
-  setThrName,
-  setThrComment,
-  setThrVertices,
-  setThrZoom,
-  toggleThrAspectRatio,
+  setFileName,
+  setFileComment,
+  setFileVertices,
+  setFileZoom,
+  toggleFileAspectRatio,
 } from '../reducers/Index.js';
 import './ThetaRho.css'
 
 const thrProps = (state, ownProps) => {
   return {
-    name: state.thrName,
-    comments: state.thrComment,
-    vertices: state.thrVertices,
-    zoom: state.thrZoom,
-    aspectRatio: state.thrAspectRatio,
+    name: state.file.name,
+    comments: state.file.comments,
+    vertices: state.file.vertices,
+    zoom: state.file.zoom,
+    aspectRatio: state.file.aspectRatio,
   }
 }
 
@@ -116,8 +116,8 @@ const thrDispatch = (dispatch, ownProps) => {
         }
       }
 
-      dispatch(setThrComment(rv.comments));
-      dispatch(setThrVertices(convertToXY(rv.vertices)));
+      dispatch(setFileComment(rv.comments));
+      dispatch(setFileVertices(convertToXY(rv.vertices)));
     }
 
     reader.readAsText(file);
@@ -127,14 +127,14 @@ const thrDispatch = (dispatch, ownProps) => {
     setVertices: (event: any) => {
       var file = event.target.files[0];
       console.log(file)
-      dispatch(setThrName(file.name));
+      dispatch(setFileName(file.name));
       parseThrFile(file);
     },
     setZoom: (event) => {
-      dispatch(setThrZoom(parseFloat(event.target.value)));
+      dispatch(setFileZoom(parseFloat(event.target.value)));
     },
     toggleAspectRatio: (event) => {
-      dispatch(toggleThrAspectRatio());
+      dispatch(toggleFileAspectRatio());
     },
   }
 }

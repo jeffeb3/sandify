@@ -267,37 +267,37 @@ export const setShowGCode = ( on ) => {
   };
 }
 
-export const setThrVertices = ( vertices ) => {
+export const setFileVertices = ( vertices ) => {
   return {
-    type: 'SET_THR_VERTICES',
+    type: 'SET_FILE_VERTICES',
     vertices: vertices,
   };
 }
 
-export const setThrName = ( value ) => {
+export const setFileName = ( value ) => {
   return {
-    type: 'SET_THR_NAME',
+    type: 'SET_FILE_NAME',
     value: value,
   };
 }
 
-export const setThrComment = ( value ) => {
+export const setFileComment = ( value ) => {
   return {
-    type: 'SET_THR_COMMENT',
+    type: 'SET_FILE_COMMENT',
     value: value,
   };
 }
 
-export const setThrZoom = ( value ) => {
+export const setFileZoom = ( value ) => {
   return {
-    type: 'SET_THR_ZOOM',
+    type: 'SET_FILE_ZOOM',
     value: value,
   };
 }
 
-export const toggleThrAspectRatio = ( value ) => {
+export const toggleFileAspectRatio = ( value ) => {
   return {
-    type: 'TOGGLE_THR_ASPECT_RATIO',
+    type: 'TOGGLE_FILE_ASPECT_RATIO',
     value: value,
   };
 }
@@ -334,10 +334,13 @@ const defaultState = {
     trackGrow: 50.0,
   },
 
-  thrName: "",
-  thrComment: [],
-  thrVertices: [],
-  thrZoom: 100,
+  file: {
+    name: "",
+    comments: [],
+    vertices: [],
+    zoom: 100,
+    aspectRatio: false,
+  },
 
   wiper: {
     angleDeg: 15,
@@ -501,27 +504,39 @@ const reducer  = (state = defaultState, action) => {
         },
       });
 
+    // File actions
+    case 'SET_FILE_VERTICES':
+      return computeInput({...state,
+        file: {...state.file,
+          vertices : action.vertices,
+        },
+      });
+    case 'SET_FILE_NAME':
+      return computeInput({...state,
+        file: {...state.file,
+          name: action.value,
+        },
+      });
+    case 'SET_FILE_COMMENT':
+      return computeInput({...state,
+        file: {...state.file,
+          comment: action.value,
+        },
+      });
+    case 'SET_FILE_ZOOM':
+      return computeInput({...state,
+        file: {...state.file,
+          zoom: action.value,
+        },
+      });
+    case 'TOGGLE_FILE_ASPECT_RATIO':
+      return computeInput({...state,
+        file: {...state.file,
+          aspectRatio: !state.file.aspectRatio,
+        },
+      });
+
     // Vertex actions
-    case 'SET_THR_VERTICES':
-      return computeInput({...state,
-        thrVertices: action.vertices,
-      });
-    case 'SET_THR_NAME':
-      return computeInput({...state,
-        thrName: action.value,
-      });
-    case 'SET_THR_COMMENT':
-      return computeInput({...state,
-        thrComment: action.value,
-      });
-    case 'SET_THR_ZOOM':
-      return computeInput({...state,
-        thrZoom: action.value,
-      });
-    case 'TOGGLE_THR_ASPECT_RATIO':
-      return computeInput({...state,
-        thrAspectRatio: !state.thrAspectRatio,
-      });
     case 'CHOOSE_INPUT':
       return computeInput({...state,
         input: action.value,

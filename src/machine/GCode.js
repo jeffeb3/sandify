@@ -126,9 +126,9 @@ const getComments = (state) => {
       break;
     case 3: // thetarho
       comments.push("  Content Type: ThetaRho");
-      comments.push("    Input File: " + state.thrName);
-      comments.push("    Zoom: "  + state.thrZoom);
-      comments.push("    Aspect Ratio: " + state.thrAspectRatio);
+      comments.push("    Input File: " + state.file.name);
+      comments.push("    Zoom: "  + state.file.zoom);
+      comments.push("    Aspect Ratio: " + state.file.aspectRatio);
       break;
     default: // Dunno
       comments.push("  Content Type: Unknown");
