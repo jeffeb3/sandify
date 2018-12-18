@@ -63,7 +63,7 @@ const getComments = (state) => {
   comments.push("");
   comments.push("  https://jeffeb3.github.io/sandify/");
   comments.push("");
-  comments.push("  Sandify Version: " + state.sandifyVersion);
+  comments.push("  Sandify Version: " + state.app.sandifyVersion);
   comments.push("");
   comments.push("  Machine Type: " + (state.machine.rectangular ? "Rectangular" : "Polar"));
   if (state.machine.rectangular) {
@@ -73,7 +73,7 @@ const getComments = (state) => {
     comments.push("    Force Endpoints: " + state.machine.polarEndpoints);
   }
 
-  switch (state.input) {
+  switch (state.app.input) {
     case 0: // shapes
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.startingSize);
@@ -134,7 +134,7 @@ const getComments = (state) => {
       comments.push("  Content Type: Unknown");
       break;
   }
-  comments.push("  Path Reversed: " + state.reverse);
+  comments.push("  Path Reversed: " + state.app.reverse);
   comments.push("");
 
   return comments;
@@ -142,16 +142,18 @@ const getComments = (state) => {
 
 const gcodeProps = (state, ownProps) => {
   return {
+    reverse: state.app.reverse,
+    show: state.app.showGCode,
+    vertices: state.vertices,
+
+    settings: getComments(state),
     xOffset: (state.machine.min_x + state.machine.max_x) / 2.0,
     yOffset: (state.machine.min_y + state.machine.max_y) / 2.0,
-    settings: getComments(state),
+    max_radius: state.machine.max_radius,
+
+    filename: state.gcode.filename,
     pre: state.gcode.pre,
     post: state.gcode.post,
-    reverse: state.reverse,
-    vertices: state.vertices,
-    max_radius: state.machine.max_radius,
-    show: state.showGCode,
-    filename: state.gcode.filename,
   }
 }
 

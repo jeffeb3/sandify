@@ -310,7 +310,21 @@ export const chooseInput = ( input ) => {
 }
 
 const defaultState = {
-  sandifyVersion: "0.1.2",
+  app: {
+    sandifyVersion: "0.1.2",
+    input: 0,
+    reverse: false,
+    canvas_width: 600,
+    canvas_height: 600,
+    machineSlider: 0.0,
+    machineRectExpanded: false,
+    machinePolarExpanded: false,
+    showGCode: false,
+  },
+
+  // Vertices
+  vertices: [],
+
   // Transform settings
   shapes: [],
   currentShape: undefined,
@@ -347,11 +361,6 @@ const defaultState = {
     size: 12,
   },
 
-  // Vertices
-  vertices: [],
-  input: 0,
-  reverse: false,
-
   // Machine settings
   machine: {
     rectangular: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
@@ -364,12 +373,6 @@ const defaultState = {
     polarEndpoints: false,
   },
 
-  canvas_width: 600,
-  canvas_height: 600,
-  machineSlider: 0.0,
-  machineRectExpanded: false,
-  machinePolarExpanded: false,
-
   // GCode settings
   gcode: {
     filename: "sandify",
@@ -377,7 +380,6 @@ const defaultState = {
     post: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   },
 
-  showGCode: false,
 }
 
 const reducer  = (state = defaultState, action) => {
@@ -541,11 +543,15 @@ const reducer  = (state = defaultState, action) => {
     // Vertex actions
     case 'CHOOSE_INPUT':
       return computeInput({...state,
-        input: action.value,
+        app: {...state.app,
+          input: action.value,
+        },
       });
     case 'TOGGLE_REVERSE':
       return computeInput({...state,
-        reverse: !state.reverse,
+        app: {...state.app,
+          reverse: !state.app.reverse,
+        },
       });
 
     // Wiper Settings
@@ -568,8 +574,10 @@ const reducer  = (state = defaultState, action) => {
         machine: {...state.machine,
           rectangular: true,
         },
-        machineRectExpanded: !state.machineRectExpanded,
-        machinePolarExpanded: false,
+        app: {...state.app,
+          machineRectExpanded: !state.app.machineRectExpanded,
+          machinePolarExpanded: false,
+        },
       });
 
     case 'TOGGLE_MACHINE_POLAR_EXPANDED':
@@ -577,8 +585,10 @@ const reducer  = (state = defaultState, action) => {
         machine: {...state.machine,
           rectangular: false,
         },
-        machinePolarExpanded: !state.machinePolarExpanded,
-        machineRectExpanded: false,
+        app: {...state.app,
+          machinePolarExpanded: !state.app.machinePolarExpanded,
+          machineRectExpanded: false,
+        },
       });
 
     case 'SET_MIN_X':
@@ -633,16 +643,22 @@ const reducer  = (state = defaultState, action) => {
       });
     case 'SET_MACHINE_SIZE':
       return computeInput({...state,
-        canvas_width: action.value,
-        canvas_height: action.value,
+        app: {...state.app,
+          canvas_width: action.value,
+          canvas_height: action.value,
+        },
       });
     case 'SET_MACHINE_SLIDER':
       return computeInput({...state,
-        machineSlider: action.value,
+        app: {...state.app,
+          machineSlider: action.value,
+        },
       });
     case 'SET_SHOW_GCODE':
       return {...state,
-        showGCode: action.value,
+        app: {...state.app,
+          showGCode: action.value,
+        },
       };
 
     // GCode Settings

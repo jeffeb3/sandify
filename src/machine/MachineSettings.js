@@ -29,8 +29,8 @@ import './MachineSettings.css';
 
 const rectMapStateToProps = (state, ownProps) => {
   return {
+    expanded: state.app.machineRectExpanded,
     active:   state.machine.rectangular,
-    expanded: state.machineRectExpanded,
     min_x:    state.machine.min_x,
     max_x:    state.machine.max_x,
     min_y:    state.machine.min_y,
@@ -132,8 +132,8 @@ RectSettings = connect(rectMapStateToProps, rectMapDispatchToProps)(RectSettings
 
 const polarMapStateToProps = (state, ownProps) => {
   return {
+    expanded:   state.app.machinePolarExpanded,
     active:     !state.machine.rectangular,
-    expanded:   state.machinePolarExpanded,
     max_radius: state.machine.max_radius,
     endpoints:  state.machine.polarEndpoints,
   }

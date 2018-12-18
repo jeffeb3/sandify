@@ -243,7 +243,7 @@ export const setVerticesHelper = (state, vertices) => {
       }
     }
   }
-  if (state.gcodeReverse) {
+  if (state.app.reverse) {
     vertices.reverse();
   }
   if (machine.rectangular) {
@@ -420,10 +420,10 @@ const transformShapes = (state) => {
 };
 
 export const computeInput = (state) => {
-  if (state.input === 0) {
+  if (state.app.input === 0) {
     return transformShapes(state);
   }
-  if (state.input === 1) {
+  if (state.app.input === 1) {
     let newState = {
       ...state,
     }
@@ -431,9 +431,9 @@ export const computeInput = (state) => {
     return Object.assign({}, state, {
       vertices: newState.vertices
     });
-  } else if (state.input === 2) {
+  } else if (state.app.input === 2) {
     return wiper(state);
-  } else if (state.input === 3) {
+  } else if (state.app.input === 3) {
     return thetaRho(state);
   }
 }

@@ -41,10 +41,10 @@ const mapStateToProps = (state, ownProps) => {
     min_y: state.machine.min_y,
     max_y: state.machine.max_y,
     max_radius: state.machine.max_radius,
-    canvas_width: state.canvas_width,
-    canvas_height: state.canvas_height,
+    canvas_width: state.app.canvas_width,
+    canvas_height: state.app.canvas_height,
     vertices: state.vertices,
-    sliderValue: state.machineSlider,
+    sliderValue: state.app.machineSlider,
     trackVertices: getTrackVertices(state),
   }
 }
@@ -247,7 +247,7 @@ PreviewWindow = connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
 
 const machineStateToProps = (state, ownProps) => {
   return {
-    sliderValue: state.machineSlider,
+    sliderValue: state.app.machineSlider,
   }
 }
 
