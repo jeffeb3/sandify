@@ -15,8 +15,8 @@ import {
 
 const wiperProps = (state, ownProps) => {
   return {
-    angle: state.wiperAngleDeg,
-    size: state.wiperSize,
+    angle: state.wiper.angleDeg,
+    size: state.wiper.size,
   }
 }
 

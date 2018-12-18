@@ -121,8 +121,8 @@ const getComments = (state) => {
       break;
     case 2: // wiper
       comments.push("  Content Type: Wiper");
-      comments.push("    Wiper Angle: " + state.wiperAngleDeg);
-      comments.push("    Wiper Size: "  + state.wiperSize);
+      comments.push("    Wiper Angle: " + state.wiper.angleDeg);
+      comments.push("    Wiper Size: "  + state.wiper.size);
       break;
     case 3: // thetarho
       comments.push("  Content Type: ThetaRho");

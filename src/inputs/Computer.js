@@ -266,7 +266,7 @@ const wiper = (state) => {
   // Do the math
 
   // Get the angle between 0,180
-  let angle = (180.0 - (state.wiperAngleDeg % 360)) % 180.0;
+  let angle = (180.0 - (state.wiper.angleDeg % 360)) % 180.0;
   if (angle < 0.0) {
     angle += 180.0;
   }
@@ -285,8 +285,8 @@ const wiper = (state) => {
   }
 
   let startLocation = Victor(-width/2.0, height/2.0)
-  let orig_delta_w = Victor(state.wiperSize / Math.cos(angle), 0.0);
-  let orig_delta_h = Victor(0.0, -state.wiperSize / Math.sin(angle));
+  let orig_delta_w = Victor(state.wiper.size / Math.cos(angle), 0.0);
+  let orig_delta_h = Victor(0.0, -state.wiper.size / Math.sin(angle));
 
   if (angle > Math.PI/4.0 && angle < 0.75 * Math.PI) {
     // flip the logic of x,y

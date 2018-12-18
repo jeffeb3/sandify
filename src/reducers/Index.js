@@ -339,8 +339,10 @@ const defaultState = {
   thrVertices: [],
   thrZoom: 100,
 
-  wiperAngleDeg: 15,
-  wiperSize: 12,
+  wiper: {
+    angleDeg: 15,
+    size: 12,
+  },
 
   // Vertices
   vertices: [],
@@ -528,11 +530,15 @@ const reducer  = (state = defaultState, action) => {
     // Wiper Settings
     case 'SET_WIPER_ANGLE_DEG':
       return computeInput({...state,
-        wiperAngleDeg: action.value,
+        wiper: {...state.wiper,
+          angleDeg: action.value,
+        },
       });
     case 'SET_WIPER_SIZE':
       return computeInput({...state,
-        wiperSize: action.value,
+        wiper: {...state.wiper,
+          size: action.value,
+        },
       });
 
     // Machine Settings
