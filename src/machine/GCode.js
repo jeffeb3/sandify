@@ -14,7 +14,7 @@ import {
   setGCodeFilename,
   setGCodePre,
   setGCodePost,
-  toggleGCodeReverse,
+  toggleReverse,
 } from '../reducers/Index.js';
 import {
   Vertex,
@@ -134,7 +134,7 @@ const getComments = (state) => {
       comments.push("  Content Type: Unknown");
       break;
   }
-  comments.push("  Path Reversed: " + state.gcodeReverse);
+  comments.push("  Path Reversed: " + state.reverse);
   comments.push("");
 
   return comments;
@@ -145,13 +145,13 @@ const gcodeProps = (state, ownProps) => {
     xOffset: (state.machine.min_x + state.machine.max_x) / 2.0,
     yOffset: (state.machine.min_y + state.machine.max_y) / 2.0,
     settings: getComments(state),
-    pre: state.gcodePre,
-    post: state.gcodePost,
-    reverse: state.gcodeReverse,
+    pre: state.gcode.pre,
+    post: state.gcode.post,
+    reverse: state.reverse,
     vertices: state.vertices,
     max_radius: state.machine.max_radius,
     show: state.showGCode,
-    filename: state.filename,
+    filename: state.gcode.filename,
   }
 }
 
@@ -164,7 +164,7 @@ const gcodeDispatch = (dispatch, ownProps) => {
       dispatch(setShowGCode(false));
     },
     toggleReverse: () => {
-      dispatch(toggleGCodeReverse());
+      dispatch(toggleReverse());
     },
     setFilename: (event) => {
       dispatch(setGCodeFilename(event.target.value));

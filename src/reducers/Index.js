@@ -241,9 +241,9 @@ export const setGCodePost = ( text ) => {
   };
 }
 
-export const toggleGCodeReverse = ( ) => {
+export const toggleReverse = ( ) => {
   return {
-    type: 'TOGGLE_GCODE_REVERSE',
+    type: 'TOGGLE_REVERSE',
   };
 }
 
@@ -350,6 +350,7 @@ const defaultState = {
   // Vertices
   vertices: [],
   input: 0,
+  reverse: false,
 
   // Machine settings
   machine: {
@@ -370,11 +371,12 @@ const defaultState = {
   machinePolarExpanded: false,
 
   // GCode settings
-  filename: "sandify",
-  gcodeSettings: [],
-  gcodePre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
-  gcodePost: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
-  gcodeReverse: false,
+  gcode: {
+    filename: "sandify",
+    pre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
+    post: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
+  },
+
   showGCode: false,
 }
 
@@ -541,6 +543,10 @@ const reducer  = (state = defaultState, action) => {
       return computeInput({...state,
         input: action.value,
       });
+    case 'TOGGLE_REVERSE':
+      return computeInput({...state,
+        reverse: !state.reverse,
+      });
 
     // Wiper Settings
     case 'SET_WIPER_ANGLE_DEG':
@@ -634,30 +640,30 @@ const reducer  = (state = defaultState, action) => {
       return computeInput({...state,
         machineSlider: action.value,
       });
-
-
-    // GCode Settings
-    case 'SET_GCODE_FILENAME':
-      return {...state,
-        filename: action.value,
-      };
-    case 'SET_GCODE_PRE':
-      return {...state,
-        gcodePre: action.value,
-      };
-    case 'SET_GCODE_POST':
-      return {...state,
-        gcodePost: action.value,
-      };
-    case 'TOGGLE_GCODE_REVERSE':
-      return computeInput({...state,
-        gcodeReverse: !state.gcodeReverse,
-      });
     case 'SET_SHOW_GCODE':
       return {...state,
         showGCode: action.value,
       };
 
+    // GCode Settings
+    case 'SET_GCODE_FILENAME':
+      return {...state,
+        gcode: {...state.gcode,
+          filename: action.value,
+        },
+      };
+    case 'SET_GCODE_PRE':
+      return {...state,
+        gcode: {...state.gcode,
+          pre: action.value,
+        },
+      };
+    case 'SET_GCODE_POST':
+      return {...state,
+        gcode: {...state.gcode,
+          post: action.value,
+        },
+      };
     case '@@redux/INIT':
       return state;
 
