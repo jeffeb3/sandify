@@ -13,27 +13,135 @@ import './Transforms.css'
 import Vicious1Vertices from './Vicious1Vertices';
 import { Vertex } from '../Geometry';
 import { connect } from 'react-redux'
-import {
-  addShape,
-  setLoops,
-  setShape,
-  setShapePolygonSides,
-  setShapeStarPoints,
-  setShapeStarRatio,
-  setShapeCircleLobes,
-  setShapeSize,
-  setXFormOffsetX,
-  setXFormOffsetY,
-  setGrow,
-  setSpin,
-  setTrack,
-  setTrackLength,
-  setTrackGrow,
-  toggleGrow,
-  toggleSpin,
-  toggleTrack,
-  toggleTrackGrow,
-} from '../reducers/Index.js';
+
+// Transform actions
+export const addShape = ( shape ) => {
+  return {
+    type: 'ADD_SHAPE',
+    shape: shape,
+  };
+}
+export const setShape = ( shape ) => {
+  return {
+    type: 'SET_SHAPE',
+    value: shape,
+  };
+}
+
+export const setShapePolygonSides = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_POLYGON_SIDES',
+    value: sides,
+  };
+}
+
+export const setShapeStarPoints = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_STAR_POINTS',
+    value: sides,
+  };
+}
+
+export const setShapeStarRatio = ( value ) => {
+  return {
+    type: 'SET_SHAPE_STAR_RATIO',
+    value: Math.min(Math.max(value, 0.0), 1.0),
+  };
+}
+
+export const setShapeCircleLobes = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_CIRCLE_LOBES',
+    value: sides,
+  };
+}
+
+export const setShapeSize = ( size ) => {
+  return {
+    type: 'SET_SHAPE_SIZE',
+    value: size,
+  };
+}
+
+export const setXFormOffsetX = ( offset ) => {
+  return {
+    type: 'SET_SHAPE_OFFSET_X',
+    value: parseFloat(offset),
+  };
+}
+
+export const setXFormOffsetY = ( offset ) => {
+  return {
+    type: 'SET_SHAPE_OFFSET_Y',
+    value: parseFloat(offset),
+  };
+}
+
+export const setLoops = ( loops ) => {
+  return {
+    type: 'SET_LOOPS',
+    value: loops,
+  };
+}
+
+export const toggleSpin = ( ) => {
+  return {
+    type: 'TOGGLE_SPIN',
+  };
+}
+
+export const setSpin = ( value ) => {
+  return {
+    type: 'SET_SPIN',
+    value: value,
+  };
+}
+
+export const toggleGrow = ( ) => {
+  return {
+    type: 'TOGGLE_GROW',
+  };
+}
+
+export const setGrow = ( value ) => {
+  return {
+    type: 'SET_GROW',
+    value: value,
+  };
+}
+
+export const toggleTrack = ( ) => {
+  return {
+    type: 'TOGGLE_TRACK',
+  };
+}
+
+export const toggleTrackGrow = ( ) => {
+  return {
+    type: 'TOGGLE_TRACK_GROW',
+  };
+}
+
+export const setTrack = ( value ) => {
+  return {
+    type: 'SET_TRACK',
+    value: value,
+  };
+}
+
+export const setTrackLength = ( value ) => {
+  return {
+    type: 'SET_TRACK_LENGTH',
+    value: value,
+  };
+}
+
+export const setTrackGrow = ( value ) => {
+  return {
+    type: 'SET_TRACK_GROW',
+    value: value,
+  };
+}
 
 class Shape extends Component {
 

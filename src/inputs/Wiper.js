@@ -8,10 +8,22 @@ import {
     Panel,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
-import {
-  setWiperAngleDeg,
-  setWiperSize,
-} from '../reducers/Index.js';
+
+// Wipe actions
+export const setWiperAngleDeg = ( value ) => {
+  return {
+    type: 'SET_WIPER_ANGLE_DEG',
+    value: value,
+  };
+}
+
+export const setWiperSize = ( value ) => {
+  return {
+    type: 'SET_WIPER_SIZE',
+    value: value,
+  };
+}
+
 
 const wiperProps = (state, ownProps) => {
   return {

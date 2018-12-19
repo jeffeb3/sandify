@@ -8,9 +8,13 @@ import Transforms from './Transforms.js'
 import Wiper from './Wiper.js'
 import ThetaRho from './ThetaRho.js'
 import { connect } from 'react-redux'
-import {
-  chooseInput,
-} from '../reducers/Index.js';
+
+export const chooseInput = ( input ) => {
+  return {
+    type: 'CHOOSE_INPUT',
+    value: input,
+  };
+}
 
 class InputTabs extends Component {
 

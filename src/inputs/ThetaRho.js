@@ -10,14 +10,42 @@ import {
     Well,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
-import {
-  setFileName,
-  setFileComment,
-  setFileVertices,
-  setFileZoom,
-  toggleFileAspectRatio,
-} from '../reducers/Index.js';
 import './ThetaRho.css'
+
+export const setFileVertices = ( vertices ) => {
+  return {
+    type: 'SET_FILE_VERTICES',
+    vertices: vertices,
+  };
+}
+
+export const setFileName = ( value ) => {
+  return {
+    type: 'SET_FILE_NAME',
+    value: value,
+  };
+}
+
+export const setFileComment = ( value ) => {
+  return {
+    type: 'SET_FILE_COMMENT',
+    value: value,
+  };
+}
+
+export const setFileZoom = ( value ) => {
+  return {
+    type: 'SET_FILE_ZOOM',
+    value: value,
+  };
+}
+
+export const toggleFileAspectRatio = ( value ) => {
+  return {
+    type: 'TOGGLE_FILE_ASPECT_RATIO',
+    value: value,
+  };
+}
 
 const thrProps = (state, ownProps) => {
   return {

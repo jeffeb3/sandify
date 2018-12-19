@@ -10,13 +10,6 @@ import {
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import {
-  setShowGCode,
-  setGCodeFilename,
-  setGCodePre,
-  setGCodePost,
-  toggleReverse,
-} from '../reducers/Index.js';
-import {
   getVertices,
 } from '../inputs/Computer.js';
 
@@ -24,6 +17,44 @@ import {
   Vertex,
 } from '../Geometry.js'
 import Victor from 'victor';
+
+// GCode Actions
+export const setGCodeFilename = ( text ) => {
+  return {
+    type: 'SET_GCODE_FILENAME',
+    value: text,
+  };
+}
+
+export const setGCodePre = ( text ) => {
+  localStorage.setItem('gcode_pre', text)
+  return {
+    type: 'SET_GCODE_PRE',
+    value: text,
+  };
+}
+
+export const setGCodePost = ( text ) => {
+  localStorage.setItem('gcode_post', text)
+  return {
+    type: 'SET_GCODE_POST',
+    value: text,
+  };
+}
+
+export const toggleReverse = ( ) => {
+  return {
+    type: 'TOGGLE_REVERSE',
+  };
+}
+
+export const setShowGCode = ( on ) => {
+  return {
+    type: 'SET_SHOW_GCODE',
+    value: on,
+  };
+}
+
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.

@@ -8,14 +8,24 @@ import { Panel } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import {
-  setMachinePreviewSize,
-  setMachineSlider,
-} from '../reducers/Index.js';
-import {
   transform,
   getVertices,
 } from '../inputs/Computer.js';
 import { createSelector } from 'reselect'
+
+export const setMachinePreviewSize = ( value ) => {
+  return {
+    type: 'SET_MACHINE_SIZE',
+    value: value,
+  };
+}
+
+export const setMachineSlider = ( value ) => {
+  return {
+    type: 'SET_MACHINE_SLIDER',
+    value: value,
+  };
+}
 
 const getTransform = state => state.transform;
 
