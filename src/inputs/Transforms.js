@@ -1,17 +1,19 @@
 import React, { Component } from 'react';
 import {
-    Col,
-    ControlLabel,
-    Form,
-    FormControl,
-    FormGroup,
-    ListGroup,
-    ListGroupItem,
-    Panel,
+  Col,
+  ControlLabel,
+  Form,
+  FormControl,
+  FormGroup,
+  ListGroup,
+  ListGroupItem,
+  Panel,
 } from 'react-bootstrap'
 import './Transforms.css'
 import Vicious1Vertices from './Vicious1Vertices';
-import Font1 from './Fonts';
+import {
+  Font2
+} from './Fonts';
 import { Vertex } from '../Geometry';
 import { connect } from 'react-redux'
 import {
@@ -202,12 +204,12 @@ class ShapeList extends Component {
         name: "Text",
         vertices: (state) => {
           let points = [];
-          const under_y = -0.5;
+          const under_y = -0.25;
           points.push(Vertex(0.0, under_y))
           console.log("text: " + state.shapeInputText);
           let x = 0.0;
           for (let chi = 0; chi < state.shapeInputText.length; chi++) {
-            var letter = Font1(state.shapeInputText[chi]);
+            var letter = Font2(state.shapeInputText[chi]);
             if (0 < letter.vertices.length) {
               points.push(Vertex(x + letter.vertices[0].x, under_y))
             }
