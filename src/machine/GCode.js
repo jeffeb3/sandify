@@ -17,6 +17,10 @@ import {
   toggleReverse,
 } from '../reducers/Index.js';
 import {
+  getVertices,
+} from '../inputs/Computer.js';
+
+import {
   Vertex,
 } from '../Geometry.js'
 import Victor from 'victor';
@@ -76,21 +80,21 @@ const getComments = (state) => {
   switch (state.app.input) {
     case 0: // shapes
       comments.push("  Content Type: Shapes");
-      comments.push("    Starting Size: " + state.startingSize);
+      comments.push("    Starting Size: " + state.shapes.startingSize);
       comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
-      switch (state.currentShape) {
+      switch (state.shapes.currentShape) {
         case "Polygon":
           comments.push("    Selected Shape: Polygon");
-          comments.push("      Polygon Sides: " + state.polygonSides);
+          comments.push("      Polygon Sides: " + state.shapes.polygonSides);
           break;
         case "Star":
           comments.push("    Selected Shape: Star");
-          comments.push("      Star Points: " + state.starPoints);
-          comments.push("      Star Ratio: " + state.starRatio);
+          comments.push("      Star Points: " + state.shapes.starPoints);
+          comments.push("      Star Ratio: " + state.shapes.starRatio);
           break;
         case "Circle":
           comments.push("    Selected Shape: Circle");
-          comments.push("      Circle Lobes: " + state.circleLobes);
+          comments.push("      Circle Lobes: " + state.shapes.circleLobes);
           break;
         case "Vicious1":
           comments.push("    Selected Shape: Vicious1");
@@ -144,7 +148,7 @@ const gcodeProps = (state, ownProps) => {
   return {
     reverse: state.app.reverse,
     show: state.app.showGCode,
-    vertices: state.vertices,
+    vertices: getVertices(state),
 
     settings: getComments(state),
     xOffset: (state.machine.min_x + state.machine.max_x) / 2.0,

@@ -13,11 +13,11 @@ import {
 } from '../reducers/Index.js';
 import {
   transform,
+  getVertices,
 } from '../inputs/Computer.js';
 import { createSelector } from 'reselect'
 
 const getTransform = state => state.transform;
-const getMachine = state => state.machine;
 
 const getTrackVertices = createSelector(
   [getTransform],
@@ -43,8 +43,9 @@ const mapStateToProps = (state, ownProps) => {
     max_radius: state.machine.max_radius,
     canvas_width: state.app.canvas_width,
     canvas_height: state.app.canvas_height,
-    vertices: state.vertices,
+    vertices: getVertices(state),
     sliderValue: state.app.machineSlider,
+    showTrack: state.app.input === 0,
     trackVertices: getTrackVertices(state),
   }
 }
@@ -207,7 +208,7 @@ class PreviewWindow extends Component {
       context.stroke();
     }
     // Draw the trackVertices
-    if (this.props.trackVertices && this.props.trackVertices.length > 0) {
+    if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
       // Draw the track vertices
       context.beginPath();
       context.lineWidth = this.mmToPixelsScale();

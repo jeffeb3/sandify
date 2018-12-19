@@ -7,6 +7,7 @@ import {
   enforcePolarLimits
 } from '../machine/LimitEnforcer';
 import Victor from 'victor';
+import { createSelector } from 'reselect'
 
 // Transform funtions
 function rotate (vertex, angle_deg) {
@@ -133,7 +134,7 @@ function nearEnough(end, point) {
 }
 
 // Vertex functions
-export const setVerticesHelper = (state, vertices) => {
+export const polishVertices = (state, vertices) => {
   let machine = state.machine;
   if (vertices.length > 0) {
     if (machine.rectangular && machine.rectOrigin.length === 1) {
@@ -256,7 +257,8 @@ export const setVerticesHelper = (state, vertices) => {
                                   machine.max_radius
                                   );
   }
-  state.vertices = vertices;
+
+  return vertices;
 }
 
 const wiper = (state) => {
@@ -370,9 +372,7 @@ const wiper = (state) => {
 
   }
 
-  setVerticesHelper(state, outputVertices);
-
-  return state;
+  return polishVertices(state, outputVertices);
 };
 
 const thetaRho = (state) => {
@@ -394,8 +394,7 @@ const thetaRho = (state) => {
       y: vertex.y * y_scale,
     };
   });
-  setVerticesHelper(state, newVertices);
-  return state;
+  return polishVertices(state, newVertices);
 }
 
 const transformShapes = (state) => {
@@ -415,18 +414,45 @@ const transformShapes = (state) => {
       outputVertices.push(transform(state.transform, input[j], i+fraction))
     }
   }
-  setVerticesHelper(state, outputVertices);
-  return state;
+
+  return polishVertices(state, outputVertices);
 };
 
-export const computeInput = (state) => {
-  if (state.app.input === 0) {
-    return transformShapes(state);
-  } else if (state.app.input === 2) {
-    return wiper(state);
-  } else if (state.app.input === 3) {
-    return thetaRho(state);
+const getApp = state => state.app;
+const getShapes = state => state.shapes;
+const getTransform = state => state.transform;
+const getFile = state => state.file;
+const getWiper = state => state.wiper;
+const getMachine = state => state.machine;
+
+export const getVertices = createSelector(
+  [
+      getApp,
+      getShapes,
+      getTransform,
+      getFile,
+      getWiper,
+      getMachine,
+  ],
+  (app, shapes, transform, file, wiperState, machine) => {
+    let state = {
+      app: app,
+      shapes: shapes,
+      transform: transform,
+      file: file,
+      wiper: wiperState,
+      machine: machine
+    };
+
+    if (state.app.input === 0) {
+      return transformShapes(state);
+    } else if (state.app.input === 2) {
+      return wiper(state);
+    } else if (state.app.input === 3) {
+      return thetaRho(state);
+    }
   }
-}
+);
+
 
 

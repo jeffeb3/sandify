@@ -1,7 +1,3 @@
-import {
-  computeInput,
-} from '../inputs/Computer.js';
-
 // Transform actions
 export const addShape = ( shape ) => {
   return {
@@ -322,9 +318,6 @@ const defaultState = {
     showGCode: false,
   },
 
-  // Vertices
-  vertices: [],
-
   // Transform settings
   shapes: {
     shapes: [],
@@ -382,7 +375,6 @@ const defaultState = {
     pre: localStorage.getItem('gcode_pre') ? localStorage.getItem('gcode_pre') : '',
     post: localStorage.getItem('gcode_post') ? localStorage.getItem('gcode_post') : '',
   },
-
 }
 
 const reducer  = (state = defaultState, action) => {
@@ -390,203 +382,203 @@ const reducer  = (state = defaultState, action) => {
 
     // shape actions
     case 'ADD_SHAPE':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           shapes: [...state.shapes.shapes,
             action.shape
           ],
         },
-      });
+      };
 
     case 'SET_SHAPE':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           currentShape: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_POLYGON_SIDES':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           polygonSides: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_STAR_POINTS':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           starPoints: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_STAR_RATIO':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           starRatio: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_CIRCLE_LOBES':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           circleLobes: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_SIZE':
-      return computeInput({...state,
+      return {...state,
         shapes: {...state.shapes,
           startingSize: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_OFFSET_X':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           xformOffsetX: action.value,
         },
-      });
+      };
 
     case 'SET_SHAPE_OFFSET_Y':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           xformOffsetY: action.value,
         },
-      });
+      };
 
     case 'SET_LOOPS':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           numLoops: action.value,
         },
-      });
+      };
 
     case 'TOGGLE_SPIN':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           spinEnabled: !state.transform.spinEnabled,
         },
-      });
+      };
 
     case 'TOGGLE_GROW':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           growEnabled: !state.transform.growEnabled,
         },
-      });
+      };
 
     case 'TOGGLE_TRACK':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           trackEnabled: !state.transform.trackEnabled,
         },
-      });
+      };
 
     case 'TOGGLE_TRACK_GROW':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           trackGrowEnabled: !state.transform.trackGrowEnabled,
         },
-      });
+      };
 
     case 'SET_SPIN':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           spinValue: action.value,
         },
-      });
+      };
 
     case 'SET_GROW':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           growValue: action.value,
         },
-      });
+      };
 
     case 'SET_TRACK':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           trackValue: action.value,
         },
-      });
+      };
 
     case 'SET_TRACK_LENGTH':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           trackLength: action.value,
         },
-      });
+      };
 
     case 'SET_TRACK_GROW':
-      return computeInput({...state,
+      return {...state,
         transform: {...state.transform,
           trackGrow: action.value,
         },
-      });
+      };
 
     // File actions
     case 'SET_FILE_VERTICES':
-      return computeInput({...state,
+      return {...state,
         file: {...state.file,
           vertices : action.vertices,
         },
-      });
+      };
     case 'SET_FILE_NAME':
-      return computeInput({...state,
+      return {...state,
         file: {...state.file,
           name: action.value,
         },
-      });
+      };
     case 'SET_FILE_COMMENT':
-      return computeInput({...state,
+      return {...state,
         file: {...state.file,
           comment: action.value,
         },
-      });
+      };
     case 'SET_FILE_ZOOM':
-      return computeInput({...state,
+      return {...state,
         file: {...state.file,
           zoom: action.value,
         },
-      });
+      };
     case 'TOGGLE_FILE_ASPECT_RATIO':
-      return computeInput({...state,
+      return {...state,
         file: {...state.file,
           aspectRatio: !state.file.aspectRatio,
         },
-      });
+      };
 
     // Vertex actions
     case 'CHOOSE_INPUT':
-      return computeInput({...state,
+      return {...state,
         app: {...state.app,
           input: action.value,
         },
-      });
+      };
     case 'TOGGLE_REVERSE':
-      return computeInput({...state,
+      return {...state,
         app: {...state.app,
           reverse: !state.app.reverse,
         },
-      });
+      };
 
     // Wiper Settings
     case 'SET_WIPER_ANGLE_DEG':
-      return computeInput({...state,
+      return {...state,
         wiper: {...state.wiper,
           angleDeg: action.value,
         },
-      });
+      };
     case 'SET_WIPER_SIZE':
-      return computeInput({...state,
+      return {...state,
         wiper: {...state.wiper,
           size: action.value,
         },
-      });
+      };
 
     // Machine Settings
     case 'TOGGLE_MACHINE_RECT_EXPANDED':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           rectangular: true,
         },
@@ -594,10 +586,10 @@ const reducer  = (state = defaultState, action) => {
           machineRectExpanded: !state.app.machineRectExpanded,
           machinePolarExpanded: false,
         },
-      });
+      };
 
     case 'TOGGLE_MACHINE_POLAR_EXPANDED':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           rectangular: false,
         },
@@ -605,38 +597,38 @@ const reducer  = (state = defaultState, action) => {
           machinePolarExpanded: !state.app.machinePolarExpanded,
           machineRectExpanded: false,
         },
-      });
+      };
 
     case 'SET_MIN_X':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           min_x: action.value,
         },
-      });
+      };
     case 'SET_MAX_X':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           max_x: action.value,
         },
-      });
+      };
     case 'SET_MIN_Y':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           min_y: action.value,
         },
-      });
+      };
     case 'SET_MAX_Y':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           max_y: action.value,
         },
-      });
+      };
     case 'SET_MAX_RADIUS':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           max_radius: action.value,
         },
-      });
+      };
     case 'SET_MACHINE_RECT_ORIGIN':
       let newValue = [];
       for (let i = 0; i < action.value.length ; i++) {
@@ -646,30 +638,30 @@ const reducer  = (state = defaultState, action) => {
         }
       }
 
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
           rectOrigin: newValue,
         },
-      });
+      };
     case 'TOGGLE_MACHINE_ENDPOINTS':
-      return computeInput({...state,
+      return {...state,
         machine: {...state.machine,
-          polarEndpoints: !state.polarEndpoints,
+          polarEndpoints: !state.machine.polarEndpoints,
         },
-      });
+      };
     case 'SET_MACHINE_SIZE':
-      return computeInput({...state,
+      return {...state,
         app: {...state.app,
           canvas_width: action.value,
           canvas_height: action.value,
         },
-      });
+      };
     case 'SET_MACHINE_SLIDER':
-      return computeInput({...state,
+      return {...state,
         app: {...state.app,
           machineSlider: action.value,
         },
-      });
+      };
     case 'SET_SHOW_GCODE':
       return {...state,
         app: {...state.app,
