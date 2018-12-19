@@ -1,16 +1,34 @@
 import React, { Component } from 'react';
 import './App.css';
 import { createStore } from 'redux';
+import { combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 
-import reducer from '../reducers/Index.js';
+import app from '../reducers/App.js';
+import file from '../reducers/File.js';
+import gcode from '../reducers/GCode.js';
+import machine from '../reducers/Machine.js';
+import shapes from '../reducers/Shapes.js';
+import transform from '../reducers/Transform.js';
+import wiper from '../reducers/Wiper.js';
 import Header from './Header';
 import Documentation from './Documentation';
 import InputTabs from '../inputs/InputTabs';
 import MachinePreview from '../machine/MachinePreview';
 import GCodeGenerator from '../machine/GCode';
 
-const store = createStore(reducer);
+const store =
+  createStore(
+    combineReducers(
+      {
+        app,
+        file,
+        gcode,
+        machine,
+        shapes,
+        transform,
+        wiper,
+      }));
 
 class App extends Component {
 

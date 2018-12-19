@@ -13,19 +13,76 @@ import {
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 
-import {
-  setMachineMinX,
-  setMachineMaxX,
-  setMachineMinY,
-  setMachineMaxY,
-  setMachineRadius,
-  setMachineRectOrigin,
-  toggleMachineRectExpanded,
-  toggleMachinePolarExpanded,
-  toggleMachineEndpoints,
-} from '../reducers/Index.js';
 import './MachineSettings.css';
 
+// Machine actions
+export const toggleMachineRectExpanded = ( ) => {
+  localStorage.setItem('machine_rect_active', 1)
+  return {
+    type: 'TOGGLE_MACHINE_RECT_EXPANDED',
+  };
+}
+
+export const toggleMachinePolarExpanded = ( ) => {
+  localStorage.setItem('machine_rect_active', 2)
+  return {
+    type: 'TOGGLE_MACHINE_POLAR_EXPANDED',
+  };
+}
+
+export const toggleMachineEndpoints = ( ) => {
+  return {
+    type: 'TOGGLE_MACHINE_ENDPOINTS',
+  };
+}
+
+export const setMachineRectOrigin = (value) => {
+  return {
+    type: 'SET_MACHINE_RECT_ORIGIN',
+    value: value,
+  };
+}
+
+export const setMachineMinX = ( value ) => {
+  // This is definitely a side effect...
+  localStorage.setItem('machine_min_x', value)
+  return {
+    type: 'SET_MIN_X',
+    value: value,
+  };
+}
+
+export const setMachineMaxX = ( value ) => {
+  localStorage.setItem('machine_max_x', value)
+  return {
+    type: 'SET_MAX_X',
+    value: value,
+  };
+}
+
+export const setMachineMinY = ( value ) => {
+  localStorage.setItem('machine_min_y', value)
+  return {
+    type: 'SET_MIN_Y',
+    value: value,
+  };
+}
+
+export const setMachineMaxY = ( value ) => {
+  localStorage.setItem('machine_max_y', value)
+  return {
+    type: 'SET_MAX_Y',
+    value: value,
+  };
+}
+
+export const setMachineRadius = ( value ) => {
+  localStorage.setItem('machine_radius', value)
+  return {
+    type: 'SET_MAX_RADIUS',
+    value: value,
+  };
+}
 
 const rectMapStateToProps = (state, ownProps) => {
   return {
