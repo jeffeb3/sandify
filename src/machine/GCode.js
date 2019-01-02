@@ -127,6 +127,10 @@ const getComments = (state) => {
           comments.push("    Selected Shape: Circle");
           comments.push("      Circle Lobes: " + state.shapes.circleLobes);
           break;
+        case "Text":
+          comments.push("    Selected Shape: Text");
+          comments.push("      Input Text: " + state.shapes.inputText);
+          break;
         case "Vicious1":
           comments.push("    Selected Shape: Vicious1");
           break;

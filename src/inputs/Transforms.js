@@ -11,6 +11,7 @@ import {
 } from 'react-bootstrap'
 import './Transforms.css'
 import Vicious1Vertices from './Vicious1Vertices';
+import { Font2 } from './Fonts';
 import { Vertex } from '../Geometry';
 import { connect } from 'react-redux'
 
@@ -53,6 +54,13 @@ export const setShapeCircleLobes = ( sides ) => {
   return {
     type: 'SET_SHAPE_CIRCLE_LOBES',
     value: sides,
+  };
+}
+
+export const setShapeInputText = ( text ) => {
+  return {
+    type: 'SET_SHAPE_INPUT_TEXT',
+    value: text,
   };
 }
 
@@ -159,7 +167,7 @@ class Shape extends Component {
                </Col>
                <Col sm={8}>
                  <FormControl
-                   type="number"
+                   type={option.type ? option.type : "number"}
                    step={option.step ? option.step : 1}
                    value={option.value()}
                    onChange={(event) => {
@@ -198,6 +206,7 @@ const shapeListProps = (state, ownProps) => {
     starPoints:   state.shapes.starPoints,
     starRatio:    state.shapes.starRatio,
     circleLobes:  state.shapes.circleLobes,
+    inputText:    state.shapes.inputText,
     currentShape: state.shapes.currentShape,
     startingSize: state.shapes.startingSize,
     x_offset: state.transform.xformOffsetX,
@@ -224,6 +233,9 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onCircleLobesChange: (event) => {
       dispatch(setShapeCircleLobes(event.target.value));
+    },
+    onInputTextChange: (event) => {
+      dispatch(setShapeInputText(event.target.value));
     },
     onSizeChange: (event) => {
       dispatch(setShapeSize(event.target.value));
@@ -302,6 +314,45 @@ class ShapeList extends Component {
             title: "Number of Lobes",
             value: () => { return this.props.circleLobes },
             onChange: this.props.onCircleLobesChange,
+          },
+        ],
+      });
+    this.props.addShape({
+        name: "Text",
+        vertices: (state) => {
+          let points = [];
+          const under_y = -0.25;
+          points.push(Vertex(0.0, under_y))
+          console.log("text: " + state.shapes.inputText);
+          let x = 0.0;
+          for (let chi = 0; chi < state.shapes.inputText.length; chi++) {
+            console.log(state.shapes.inputText);
+            var letter = Font2(state.shapes.inputText[chi]);
+            if (0 < letter.vertices.length) {
+              points.push(Vertex(x + letter.vertices[0].x, under_y))
+            }
+            for (let vi = 0; vi < letter.vertices.length; vi++) {
+              points.push(Vertex(letter.vertices[vi].x + x, letter.vertices[vi].y));
+            }
+            if (0 < letter.vertices.length) {
+              points.push(Vertex(x + letter.vertices[letter.vertices.length-1].x, under_y))
+            }
+            if (chi !== state.shapes.inputText.length-1) {
+              points.push(Vertex(x + letter.max_x, under_y))
+            }
+            x += letter.max_x;
+          }
+          let widthOffset = x / 2.0;
+          return points.map( (point) => {
+            return Vertex(point.x - widthOffset, point.y);
+          });
+        },
+        options: [
+          {
+            title: "Text",
+            type: "textarea",
+            value: () => { return this.props.inputText },
+            onChange: this.props.onInputTextChange,
           },
         ],
       });
