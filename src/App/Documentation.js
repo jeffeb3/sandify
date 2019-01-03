@@ -13,7 +13,7 @@ class Documentation extends Component {
           <br/>
           <br/>
           Sandify is a labor of love, but if you'd like to support me financially,
-            I do have a <a href="https://liberapay.com/jeffeb3">Donation</a> system set up.
+            I do have a <a href="https://liberapay.com/jeffeb3">Donation</a> system set up. Or just <a href="https://www.paypal.me/jeffeb3">PayPal</a>.
         </div>
         <div className="App-col-3">
           <h3 className="docTitle">Sand Machine</h3>
