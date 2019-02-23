@@ -2,7 +2,7 @@
 const defaultState = {
   // Transform settings
   shapes: [],
-  currentShape: undefined,
+  currentShape: "Polygon",
   polygonSides: 4,
   starPoints: 5,
   starRatio: 0.5,

@@ -414,6 +414,9 @@ class ShapeList extends Component {
 
     return (
       <div className="shapes">
+        <ListGroup>
+          {shape_render}
+        </ListGroup>
         <div className="shoptions">
           <Panel className="options-panel" collapsible expanded>
             <Form horizontal>
@@ -429,25 +432,22 @@ class ShapeList extends Component {
                 <Col componentClass={ControlLabel} sm={4}>
                   Offset
                 </Col>
-                <Col sm={3}>
-                  <FormControl type="number" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter}/>
-                </Col>
                 <Col componentClass={ControlLabel} sm={1}>
                   X
                 </Col>
                 <Col sm={3}>
-                  <FormControl type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange} onKeyDown={disableEnter}/>
+                  <FormControl type="number" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter}/>
                 </Col>
                 <Col componentClass={ControlLabel} sm={1}>
                   Y
+                </Col>
+                <Col sm={3}>
+                  <FormControl type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
             </Form>
           </Panel>
         </div>
-        <ListGroup>
-          {shape_render}
-        </ListGroup>
       </div>
     )
   }
