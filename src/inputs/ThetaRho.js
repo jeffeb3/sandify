@@ -167,6 +167,12 @@ const thrDispatch = (dispatch, ownProps) => {
   }
 }
 
+const disableEnter = (event) => {
+  if (event.key === 'Enter' && event.shiftKey === false) {
+    event.preventDefault();
+  }
+};
+
 class ThetaRho extends Component {
 
   render() {
@@ -196,7 +202,7 @@ class ThetaRho extends Component {
                 Zoom
               </Col>
               <Col sm={8}>
-                <FormControl type="number" value={this.props.zoom} onChange={this.props.setZoom}/>
+                <FormControl type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
               </Col>
             </FormGroup>
           </Form>

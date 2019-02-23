@@ -151,6 +151,12 @@ export const setTrackGrow = ( value ) => {
   };
 }
 
+const disableEnter = (event) => {
+  if (event.key === 'Enter' && event.shiftKey === false) {
+    event.preventDefault();
+  }
+};
+
 class Shape extends Component {
 
   render() {
@@ -172,7 +178,8 @@ class Shape extends Component {
                    value={option.value()}
                    onChange={(event) => {
                      option.onChange(event)
-                   }}/>
+                   }}
+                   onKeyDown={disableEnter}/>
                </Col>
              </FormGroup>
     });
@@ -408,7 +415,7 @@ class ShapeList extends Component {
                   Starting Size
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.startingSize} onChange={this.props.onSizeChange}/>
+                  <FormControl type="number" value={this.props.startingSize} onChange={this.props.onSizeChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
               <FormGroup controlId="shape-offset">
@@ -416,13 +423,13 @@ class ShapeList extends Component {
                   Offset
                 </Col>
                 <Col sm={3}>
-                  <FormControl type="number" value={this.props.x_offset} onChange={this.props.onOffsetXChange}/>
+                  <FormControl type="number" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter}/>
                 </Col>
                 <Col componentClass={ControlLabel} sm={1}>
                   X
                 </Col>
                 <Col sm={3}>
-                  <FormControl type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange}/>
+                  <FormControl type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange} onKeyDown={disableEnter}/>
                 </Col>
                 <Col componentClass={ControlLabel} sm={1}>
                   Y
@@ -479,7 +486,7 @@ class RotationTransform extends Component {
                   Spin Step
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" step="0.1" value={this.props.value} onChange={this.props.onChange}/>
+                  <FormControl type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
             </Form>
@@ -529,7 +536,7 @@ class ScaleTransform extends Component {
                   Grow Step
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange}/>
+                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
             </Form>
@@ -595,7 +602,7 @@ class TrackTransform extends Component {
                   Track Size
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange}/>
+                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
               <FormGroup controlId="track-length">
@@ -603,7 +610,7 @@ class TrackTransform extends Component {
                   Track Length
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength}/>
+                  <FormControl type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
               <ListGroupItem header="Grow" className={activeGrowClassName} onClick={this.props.activeGrowCallback}>Grows or shrinks the track a little bit for each step</ListGroupItem>
@@ -614,7 +621,7 @@ class TrackTransform extends Component {
                         Track Grow Step
                       </Col>
                       <Col sm={8}>
-                        <FormControl type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow}/>
+                        <FormControl type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter}/>
                       </Col>
                     </FormGroup>
                 </Panel>
@@ -660,7 +667,7 @@ class Transforms extends Component {
                   Number of Loops
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.loops} onChange={this.props.changeLoops}/>
+                  <FormControl type="number" value={this.props.loops} onChange={this.props.changeLoops} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
             </Form>
