@@ -14,6 +14,15 @@ cold, empty hearted emotionless sand table robots with enchanting patterns.
 Sandify is a labor of love, but if you'd like to support me financially, I do have a
 `Donation <https://liberapay.com/jeffeb3>`_ system set up. Or just `PayPal <https://www.paypal.me/jeffeb3>`_
 
+Instructions
+============
+
+Part of the fun of Sandify is playing it like you would a xylophone. `Try it out first
+<https://jeffeb3.github.io/sandify/>`_.
+
+If you're getting stuck, or you'd like to know what all that stuff actually does, then head over to
+the :doc:`instructions`.
+
 Sand Machine
 ============
 
@@ -47,4 +56,4 @@ Sandify is licensed under the MIT license.
 Patterns that you create and gcode generated with sandify are not covered
 under the sandify license (they are your work, and are your copyright).
 
-`Sandify License <https://raw.githubusercontent.com/jeffeb3/sandify/master/LICENSE">`_
+`Sandify License <https://raw.githubusercontent.com/jeffeb3/sandify/master/LICENSE>`_
