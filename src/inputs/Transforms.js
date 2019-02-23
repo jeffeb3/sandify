@@ -101,7 +101,14 @@ export const toggleSpin = ( ) => {
 export const setSpin = ( value ) => {
   return {
     type: 'SET_SPIN',
-    value: value,
+    value: parseFloat(value),
+  };
+}
+
+export const setSpinSwitchbacks = ( value ) => {
+  return {
+    type: 'SET_SPIN_SWITCHBACKS',
+    value: parseInt(value),
   };
 }
 
@@ -453,6 +460,7 @@ const rotateProps = (state, ownProps) => {
   return {
     active: state.transform.spinEnabled,
     value: state.transform.spinValue,
+    switchbacks: state.transform.spinSwitchbacks,
   }
 }
 
@@ -463,6 +471,9 @@ const rotateDispatch = (dispatch, ownProps) => {
     },
     onChange: (event) => {
       dispatch(setSpin(event.target.value));
+    },
+    onSwitchbacksChange: (event) => {
+      dispatch(setSpinSwitchbacks(event.target.value));
     },
   }
 }
@@ -483,10 +494,18 @@ class RotationTransform extends Component {
             <Form horizontal>
               <FormGroup controlId="rotate-step">
                 <Col componentClass={ControlLabel} sm={4}>
-                  Spin Step
+                  Spin Step (Can be Negative)
                 </Col>
                 <Col sm={8}>
                   <FormControl type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
+                </Col>
+              </FormGroup>
+              <FormGroup controlId="rotate-switchbacks">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Switchbacks
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" step="1" value={this.props.switchbacks} onChange={this.props.onSwitchbacksChange} onKeyDown={disableEnter}/>
                 </Col>
               </FormGroup>
             </Form>

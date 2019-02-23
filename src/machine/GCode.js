@@ -143,6 +143,7 @@ const getComments = (state) => {
       comments.push("    Spin: " + state.transform.spinEnabled);
       if (state.transform.spinEnabled) {
         comments.push("      Spin Value: " + state.transform.spinValue);
+        comments.push("      Spin Switchbacks: " + state.transform.spinSwitchbacks);
       }
       comments.push("    Grow: " + state.transform.growEnabled);
       if (state.transform.growEnabled) {

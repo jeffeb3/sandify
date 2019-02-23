@@ -48,19 +48,27 @@ function track (vertex, data, loop_index) {
   };
 }
 
-export const transform = (data, vertex, loop_index) => {
+export const transform = (data, vertex, fraction_index) => {
   var transformed_vertex = vertex
   if (data.growEnabled)
   {
-    transformed_vertex = scale(transformed_vertex, 100.0 + (data.growValue * loop_index));
+    transformed_vertex = scale(transformed_vertex, 100.0 + (data.growValue * fraction_index));
   }
   transformed_vertex = offset(transformed_vertex, data.xformOffsetX, data.xformOffsetY);
   if (data.spinEnabled)
   {
-    transformed_vertex = rotate(transformed_vertex, data.spinValue * loop_index);
+    var loop_period = data.numLoops / (parseInt(data.spinSwitchbacks) + 1);
+    var stage = fraction_index/loop_period;
+    var direction = (stage % 2 < 1 ? 1.0 : -1.0);
+    var spin_amount = direction * (fraction_index % loop_period) * data.spinValue;
+    // Add in the amount it goes positive to the negatives, so they start at the same place.
+    if (direction < 0.0) {
+      spin_amount += loop_period * data.spinValue;
+    }
+    transformed_vertex = rotate(transformed_vertex, spin_amount);
   }
   if (data.trackEnabled) {
-    transformed_vertex = track(transformed_vertex, data, loop_index);
+    transformed_vertex = track(transformed_vertex, data, fraction_index);
   }
   return transformed_vertex;
 }

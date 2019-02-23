@@ -7,6 +7,7 @@ const defaultState = {
   growValue: 100,
   spinEnabled: false,
   spinValue: 2,
+  spinSwitchbacks: 0,
   trackEnabled: false,
   trackGrowEnabled: false,
   trackValue: 10,
@@ -55,6 +56,11 @@ export default function transform(state = defaultState, action) {
     case 'SET_SPIN':
       return {...state,
         spinValue: action.value,
+      };
+
+    case 'SET_SPIN_SWITCHBACKS':
+      return {...state,
+        spinSwitchbacks: (action.value >= 0? action.value : 0),
       };
 
     case 'SET_GROW':
