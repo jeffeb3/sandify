@@ -363,7 +363,7 @@ function nearestVertexCircle(vertex, size) {
 
 // Manipulates the points to make them all in bounds, while doing the least amount of damage to the
 // desired shape.
-function enforceRectLimits(vertices, size_x, size_y) {
+export const enforceRectLimits = function(vertices, size_x, size_y) {
   var cleanVertices = []
   var previous = null;
 
@@ -391,7 +391,7 @@ function enforceRectLimits(vertices, size_x, size_y) {
   return cleanerVertices;
 }
 
-function enforcePolarLimits(vertices, size) {
+export const enforcePolarLimits = function(vertices, size) {
 
   var cleanVertices = []
   var previous = null;
@@ -420,8 +420,4 @@ function enforcePolarLimits(vertices, size) {
   return cleanerVertices;
 }
 
-module.exports = {
-  enforceRectLimits: enforceRectLimits,
-  enforcePolarLimits: enforcePolarLimits
-}
 
