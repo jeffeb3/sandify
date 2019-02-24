@@ -422,12 +422,22 @@ export const enforcePolarLimits = function(vertices, size) {
     previous = vertex;
   }
 
-  // // Just for sanity, and cases that I haven't thought of, clean this list again.
+  // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
+  // duplicate points
+  previous = null;
   var cleanerVertices = []
   for (var i=0; i<cleanVertices.length; i++) {
-    cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+    if (previous) {
+      let start = Victor.fromObject(cleanVertices[i]);
+      let end = Victor.fromObject(previous);
+      if (start.distance(end) > 0.001) {
+        cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+      }
+    } else {
+      cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+    }
+    previous = cleanVertices[i];
   }
-
   return cleanerVertices;
 }
 
