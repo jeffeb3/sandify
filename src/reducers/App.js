@@ -6,6 +6,7 @@ const defaultState = {
   canvas_width: 600,
   canvas_height: 600,
   machineSlider: 0.0,
+  machineBallSize: 12.0,
   machineRectExpanded: false,
   machinePolarExpanded: false,
   showGCode: false,
@@ -31,6 +32,10 @@ export default function app(state = defaultState, action) {
     case 'SET_MACHINE_SLIDER':
       return {...state,
         machineSlider: action.value,
+      };
+    case 'SET_MACHINE_BALL_SIZE':
+      return {...state,
+        machineBallSize: action.value,
       };
     case 'TOGGLE_MACHINE_RECT_EXPANDED':
       return {...state,

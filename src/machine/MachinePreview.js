@@ -4,7 +4,14 @@ import './MachinePreview.css';
 import { Vertex } from '../Geometry';
 import MachineSettings from './MachineSettings.js';
 import { connect } from 'react-redux'
-import { Panel } from 'react-bootstrap'
+import {
+    Col,
+    ControlLabel,
+    Form,
+    FormControl,
+    FormGroup,
+    Panel
+} from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import {
@@ -24,6 +31,12 @@ export const setMachineSlider = ( value ) => {
   return {
     type: 'SET_MACHINE_SLIDER',
     value: value,
+  };
+}
+export const setBallSize = ( value ) => {
+  return {
+    type: 'SET_MACHINE_BALL_SIZE',
+    value: parseFloat(value),
   };
 }
 
@@ -46,6 +59,7 @@ const getTrackVertices = createSelector(
 const mapStateToProps = (state, ownProps) => {
   return {
     use_rect: state.machine.rectangular,
+    ball_size: state.app.machineBallSize,
     min_x: state.machine.min_x,
     max_x: state.machine.max_x,
     min_y: state.machine.min_y,
@@ -128,11 +142,10 @@ class PreviewWindow extends Component {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
-  dot_mm(context, vertex) {
+  // Create a filled in circle at vertex coordinate, and size_mm big.
+  dot_mm(context, vertex, size_mm) {
     var in_mm = this.mmToPixels(vertex);
-    context.arc(in_mm.x, in_mm.y, Math.max(4.0, this.mmToPixelsScale() * 1.5), 0, 2 * Math.PI, true);
-    context.fillStyle = context.strokeStyle;
-    context.fill();
+    context.arc(in_mm.x, in_mm.y, this.mmToPixelsScale() * size_mm, 0, 2 * Math.PI, true);
   }
 
   slice_vertices(vertices, sliderValue) {
@@ -185,15 +198,13 @@ class PreviewWindow extends Component {
 
       // Draw the start and end points
       context.beginPath();
-      context.lineWidth = 1.0;
-      context.strokeStyle = "green";
-      this.dot_mm(context, this.props.vertices[0]);
-      context.stroke();
+      context.fillStyle = "green";
+      this.dot_mm(context, this.props.vertices[0], this.props.ball_size / 2.0);
+      context.fill();
       context.beginPath();
-      context.lineWidth = 1.0;
-      context.strokeStyle = "red";
-      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1]);
-      context.stroke();
+      context.fillStyle = "red";
+      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1], this.props.ball_size / 2.0);
+      context.fill();
 
       // Draw the background vertices
       if (this.props.sliderValue !== 0) {
@@ -256,9 +267,16 @@ class PreviewWindow extends Component {
 }
 PreviewWindow = connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
 
+const disableEnter = (event) => {
+  if (event.key === 'Enter' && event.shiftKey === false) {
+    event.preventDefault();
+  }
+};
+
 const machineStateToProps = (state, ownProps) => {
   return {
     sliderValue: state.app.machineSlider,
+    ball_size: state.app.machineBallSize,
   }
 }
 
@@ -266,6 +284,9 @@ const machineDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
       dispatch(setMachineSlider(value))
+    },
+    onBallSize: (event) => {
+      dispatch(setBallSize(parseFloat(event.target.value)))
     },
   }
 }
@@ -286,6 +307,16 @@ class MachinePreview extends Component {
                   onChange={this.props.onSlider}
                 />
             </div>
+            <Form horizontal>
+              <FormGroup controlId="shape-size">
+                <Col componentClass={ControlLabel} sm={4}>
+                  Ball (Ø)
+                </Col>
+                <Col sm={8}>
+                  <FormControl type="number" value={this.props.ball_size} onChange={this.props.onBallSize} onKeyDown={disableEnter}/>
+                </Col>
+              </FormGroup>
+            </Form>
             <div className="cheatBox" id="biggerBox">
                 <MachineSettings />
             </div>
