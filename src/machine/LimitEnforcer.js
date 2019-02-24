@@ -384,7 +384,7 @@ export const enforceRectLimits = function(vertices, size_x, size_y) {
 
   // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
   // duplicate points
-  var previous = null;
+  previous = null;
   var cleanerVertices = []
   for (var i=0; i<cleanVertices.length; i++) {
     if (previous) {
