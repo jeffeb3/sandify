@@ -382,10 +382,21 @@ export const enforceRectLimits = function(vertices, size_x, size_y) {
     previous = vertex;
   }
 
-  // // Just for sanity, and cases that I haven't thought of, clean this list again.
+  // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
+  // duplicate points
+  var previous = null;
   var cleanerVertices = []
   for (var i=0; i<cleanVertices.length; i++) {
-    cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+    if (previous) {
+      let start = Victor.fromObject(cleanVertices[i]);
+      let end = Victor.fromObject(previous);
+      if (start.distance(end) > 0.001) {
+        cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+      }
+    } else {
+      cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
+    }
+    previous = cleanVertices[i];
   }
 
   return cleanerVertices;
