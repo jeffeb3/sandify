@@ -8,15 +8,15 @@ self.__precacheManifest = [
     "url": "/sandify/static/js/runtime~main.1d0255d1.js"
   },
   {
-    "revision": "c701963818c3744abe9a",
-    "url": "/sandify/static/js/main.c7019638.chunk.js"
+    "revision": "a01d04a1d03a9c354d1d",
+    "url": "/sandify/static/js/main.a01d04a1.chunk.js"
   },
   {
     "revision": "24b75008612cd496d6ef",
     "url": "/sandify/static/js/2.24b75008.chunk.js"
   },
   {
-    "revision": "c701963818c3744abe9a",
+    "revision": "a01d04a1d03a9c354d1d",
     "url": "/sandify/static/css/main.e91ab130.chunk.css"
   },
   {
@@ -24,7 +24,7 @@ self.__precacheManifest = [
     "url": "/sandify/static/css/2.1ba76a7a.chunk.css"
   },
   {
-    "revision": "5aed846caa6606272e685b62e49eeb34",
+    "revision": "4098a7231c58abc0959ccc145df87d70",
     "url": "/sandify/index.html"
   }
 ];
