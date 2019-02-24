@@ -1,6 +1,6 @@
 
 const defaultState = {
-  sandifyVersion: "0.1.2",
+  sandifyVersion: "0.1.3",
   input: 0,
   reverse: false,
   canvas_width: 600,
