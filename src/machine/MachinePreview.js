@@ -10,6 +10,7 @@ import 'rc-slider/assets/index.css'
 import {
   transform,
   getVertices,
+  getVerticesStats,
 } from '../inputs/Computer.js';
 import { createSelector } from 'reselect'
 
@@ -68,7 +69,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-// Contains the preview window, and any paremeters for the machine.
+// Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
 
   componentDidMount() {
@@ -259,6 +260,7 @@ PreviewWindow = connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
 const machineStateToProps = (state, ownProps) => {
   return {
     sliderValue: state.app.machineSlider,
+    verticesStats: getVerticesStats(state),
   }
 }
 
@@ -277,6 +279,7 @@ class MachinePreview extends Component {
 
         <Panel>
             <PreviewWindow />
+            Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
             <div className="slide-box">
                 <Slider
                   value={this.props.sliderValue}

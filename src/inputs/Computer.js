@@ -462,5 +462,24 @@ export const getVertices = createSelector(
   }
 );
 
-
+export const getVerticesStats = createSelector(
+  [
+      getVertices
+  ],
+  (vertices) => {
+    let distance = 0.0;
+    let previous = null;
+    vertices.forEach( (vertex) => {
+      if (previous) {
+        distance += Math.sqrt(Math.pow(vertex.x - previous.x, 2.0) +
+                              Math.pow(vertex.y - previous.y, 2.0));
+      }
+      previous = vertex;
+    });
+    return {
+      numPoints: vertices.length,
+      distance: Math.floor(distance),
+    };
+  }
+);
 
