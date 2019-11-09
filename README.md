@@ -18,7 +18,7 @@ sandify preview window, gcode generator, and machine limits will come to you for
 
 It's currently hosted at:
 
-https://jeffeb3.github.io/sandify/
+https://sandify.org
 
  - Visit the webpage
  - Adjust the machine limits to match your build
