@@ -96,7 +96,7 @@ const getComments = (state) => {
   let comments = [];
   comments.push("Created by Sandify");
   comments.push("");
-  comments.push("  https://jeffeb3.github.io/sandify/");
+  comments.push("  https://sandify.org");
   comments.push("");
   comments.push("  Sandify Version: " + state.app.sandifyVersion);
   comments.push("");
