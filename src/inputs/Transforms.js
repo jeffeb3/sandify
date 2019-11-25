@@ -376,8 +376,6 @@ class ShapeList extends Component {
             corners.push( [Vertex(Math.cos(angle), Math.sin(angle)), startAngle] );
             angle += 2.0 * Math.PI / state.shapes.reuleauxSides;
           }
-          // corners.push( [Vertex(Math.cos(-Math.PI*5.0/6.0), Math.sin(-Math.PI*5.0/6.0)), 0] );
-          // corners.push( [Vertex(Math.cos(-Math.PI/6.0), Math.sin(-Math.PI/6.0)), 2.0*Math.PI/3.0] );
           let length = 0.5 / Math.cos(Math.PI/2.0/state.shapes.reuleauxSides);
           for (let corn=0; corn < corners.length; corn++) {
             for (let i=0; i<128; i++) {
