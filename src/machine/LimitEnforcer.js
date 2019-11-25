@@ -17,7 +17,7 @@ import Victor from 'victor';
 //           |          |
 //         x_min      x_max
 //
-export const pointLocation = function(point, size_x, size_y) {
+function pointLocation(point, size_x, size_y) {
   var location = 0b0;
   if (point.x < -size_x) {
     location += 0b1000;
@@ -35,7 +35,7 @@ export const pointLocation = function(point, size_x, size_y) {
 }
 
 // Determine intersection with one of the sides
-export const intersection = function(line_start, line_end, side_start, side_end) {
+function intersection(line_start, line_end, side_start, side_end) {
 
   var line = line_end.clone().subtract(line_start);
   var side = side_end.clone().subtract(side_start);
@@ -48,12 +48,12 @@ export const intersection = function(line_start, line_end, side_start, side_end)
 
   var diff = side_start.clone().subtract(line_start);
   var t = (diff.x * side.y - diff.y * side.x) / lineCrossSidePerp;
-  if (t <= 0 || t >= 1) {
+  if (t < 0 || t >= 1) {
     return null;
   }
 
   var u = (diff.x * line.y - diff.y * line.x) / lineCrossSidePerp;
-  if (u <= 0 || u >= 1) {
+  if (u < 0 || u >= 1) {
     return null;
   }
 
@@ -361,153 +361,90 @@ function nearestVertexCircle(vertex, size) {
   }
 }
 
-// Compute if a point is on the outside edge
-function onPerimeter(vertex, size_x, size_y) {
-  if (Math.abs(vertex.x) >= size_x - 0.001 ||
-      Math.abs(vertex.y) >= size_y - 0.001) {
-    return true;
-  }
-  return false;
-}
-function onPerimeterCircle(vertex, size) {
-  const point = Victor.fromObject(vertex);
-  if ( point.length() >= size - 0.001) {
-    return true;
-  }
-  return false;
-}
-
-// Return a list of points from start to end, along the outside edge
-function tracePerimeter(start, end, size_x, size_y) {
-  return [start, end];
-}
-
-function enforceLimits(vertices, clipLineFunc, nearestVertexFunc, onPerimeterFunc, tracePerimeterFunc) {
-
+// Manipulates the points to make them all in bounds, while doing the least amount of damage to the
+// desired shape.
+export const enforceRectLimits = function(vertices, size_x, size_y) {
   var cleanVertices = []
-  var perimeterVertices = []
-  var on_perimeter = false;
   var previous = null;
 
-  vertices.forEach((vertex) => {
+  if (size_x < 0) {
+    size_x *= -1.0;
+  }
+  if (size_y < 0) {
+    size_y *= -1.0;
+  }
+  for (var next=0; next<vertices.length; next++) {
+    var vertex = vertices[next];
     if (previous) {
-      var line = clipLineFunc(previous, vertex);
-      line.forEach( (point) => {
-        if (point !== previous) {
-          if (onPerimeterFunc(point)) {
-            if (on_perimeter === false) {
-              console.log("up");
-              on_perimeter = true;
-            }
-            perimeterVertices.push(point);
-          } else {
-            if (on_perimeter === false) {
-              cleanVertices.push(point);
-            } else {
-              console.log("down");
-              if (perimeterVertices.length < 1) {
-                throw Error("Software Logic Error");
-              } else if (perimeterVertices.length === 1) {
-                cleanVertices.push(perimeterVertices[0]);
-              } else {
-                // Do the hard work here.
-                cleanVertices.push(...tracePerimeterFunc(perimeterVertices[0], perimeterVertices[perimeterVertices.length-1]));
-              }
-              on_perimeter = false;
-              perimeterVertices = [];
-            }
-          }
+      var line = clipLine(previous, vertex, size_x, size_y);
+      for (var pt=0; pt<line.length; pt++) {
+        if (line[pt] !== previous) {
+          cleanVertices.push(line[pt]);
         }
-      });
-    } else {
-      let cleanVertex = nearestVertexFunc(vertex);
-      if (onPerimeterFunc(cleanVertex)) {
-        on_perimeter = true;
-        perimeterVertices.push(cleanVertex);
-      } else {
-        cleanVertices.push(cleanVertex);
       }
+    } else {
+      cleanVertices.push(nearestVertex(vertex, size_x, size_y));
     }
     previous = vertex;
-  });
-
-  if (on_perimeter) {
-    console.log("down");
-    if (perimeterVertices.length < 1) {
-      throw Error("Software Logic Error");
-    } else if (perimeterVertices.length === 1) {
-      cleanVertices.push(perimeterVertices[0]);
-    } else {
-      // Do the hard work here.
-      cleanVertices.push(...tracePerimeterFunc(perimeterVertices[0], perimeterVertices[perimeterVertices.length-1]));
-    }
-    on_perimeter = false;
-    perimeterVertices = [];
   }
 
   // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
   // duplicate points
   previous = null;
   var cleanerVertices = []
-  var perim_points = 0.0;
-  cleanVertices.forEach( (vertex) => {
+  for (var i=0; i<cleanVertices.length; i++) {
     if (previous) {
-      let start = Victor.fromObject(vertex);
+      let start = Victor.fromObject(cleanVertices[i]);
       let end = Victor.fromObject(previous);
       if (start.distance(end) > 0.001) {
-        cleanerVertices.push(nearestVertexFunc(vertex));
-        if (onPerimeterFunc(vertex)) {
-          perim_points += 1.0;
-        }
+        cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
       }
     } else {
-      cleanerVertices.push(nearestVertexFunc(vertex));
-      if (onPerimeterFunc(vertex)) {
-        perim_points += 1.0;
-      }
+      cleanerVertices.push(nearestVertex(cleanVertices[i], size_x, size_y));
     }
-    previous = vertex;
-
-  });
-  console.log(perim_points);
+    previous = cleanVertices[i];
+  }
 
   return cleanerVertices;
 }
 
-// Manipulates the points to make them all in bounds, while doing the least amount of damage to the
-// desired shape.
-export const enforceRectLimits = function(vertices, size_x, size_y) {
-  const clipLineFunc = (previous, next) => {
-    return clipLine(previous, next, size_x, size_y);
-  }
-  const nearestVertexFunc = (vertex) => {
-    return nearestVertex(vertex, size_x, size_y);
-  }
-  const onPerimeterFunc = (vertex) => {
-    return onPerimeter(vertex, size_x, size_y);
-  }
-  const tracePerimeterFunc = (start, end) => {
-    return tracePerimeter(start, end, size_x, size_y);
-  }
-
-  return enforceLimits(vertices, clipLineFunc, nearestVertexFunc, onPerimeterFunc, tracePerimeterFunc);
-}
-
 export const enforcePolarLimits = function(vertices, size) {
-  const clipLineFunc = (previous, next) => {
-    return clipLineCircle(previous, next, size);
-  }
-  const nearestVertexFunc = (vertex) => {
-    return nearestVertexCircle(vertex, size);
-  }
-  const onPerimeterFunc = (vertex) => {
-    return onPerimeterCircle(vertex, size);
-  }
-  const tracePerimeterFunc = (start, end) => {
-    return traceCircle(start, end, size);
+
+  var cleanVertices = []
+  var previous = null;
+
+  for (var next=0; next<vertices.length; next++) {
+    var vertex = vertices[next];
+    if (previous) {
+      var line = clipLineCircle(previous, vertex, size);
+      for (var pt=0; pt<line.length; pt++) {
+        if (line[pt] !== previous) {
+          cleanVertices.push(line[pt]);
+        }
+      }
+    } else {
+      cleanVertices.push(nearestVertexCircle(vertex, size));
+    }
+    previous = vertex;
   }
 
-  return enforceLimits(vertices, clipLineFunc, nearestVertexFunc, onPerimeterFunc, tracePerimeterFunc);
+  // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
+  // duplicate points
+  previous = null;
+  var cleanerVertices = []
+  for (var i=0; i<cleanVertices.length; i++) {
+    if (previous) {
+      let start = Victor.fromObject(cleanVertices[i]);
+      let end = Victor.fromObject(previous);
+      if (start.distance(end) > 0.001) {
+        cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+      }
+    } else {
+      cleanerVertices.push(nearestVertexCircle(cleanVertices[i], size));
+    }
+    previous = cleanVertices[i];
+  }
+  return cleanerVertices;
 }
 
 
