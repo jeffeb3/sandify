@@ -367,6 +367,12 @@ export const enforceRectLimits = function(vertices, size_x, size_y) {
   var cleanVertices = []
   var previous = null;
 
+  if (size_x < 0) {
+    size_x *= -1.0;
+  }
+  if (size_y < 0) {
+    size_y *= -1.0;
+  }
   for (var next=0; next<vertices.length; next++) {
     var vertex = vertices[next];
     if (previous) {
