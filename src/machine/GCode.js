@@ -130,6 +130,10 @@ const getComments = (state) => {
         case "Heart":
           comments.push("    Selected Shape: Heart");
           break;
+        case "Reuleaux":
+          comments.push("    Selected Shape: Reuleaux");
+          comments.push("      Reuleaux Sides: " + state.shapes.reuleauxSides);
+          break;
         case "Text":
           comments.push("    Selected Shape: Text");
           comments.push("      Input Text: " + state.shapes.inputText);

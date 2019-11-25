@@ -57,6 +57,13 @@ export const setShapeCircleLobes = ( sides ) => {
   };
 }
 
+export const setShapeReuleauxSides = ( sides ) => {
+  return {
+    type: 'SET_SHAPE_REULEAUX_SIDES',
+    value: sides,
+  };
+}
+
 export const setShapeInputText = ( text ) => {
   return {
     type: 'SET_SHAPE_INPUT_TEXT',
@@ -220,6 +227,7 @@ const shapeListProps = (state, ownProps) => {
     starPoints:   state.shapes.starPoints,
     starRatio:    state.shapes.starRatio,
     circleLobes:  state.shapes.circleLobes,
+    reuleauxSides:state.shapes.reuleauxSides,
     inputText:    state.shapes.inputText,
     currentShape: state.shapes.currentShape,
     startingSize: state.shapes.startingSize,
@@ -247,6 +255,9 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onCircleLobesChange: (event) => {
       dispatch(setShapeCircleLobes(event.target.value));
+    },
+    onReuleauxSidesChange: (event) => {
+      dispatch(setShapeReuleauxSides(event.target.value));
     },
     onInputTextChange: (event) => {
       dispatch(setShapeInputText(event.target.value));
@@ -350,15 +361,48 @@ class ShapeList extends Component {
         ],
       });
     this.props.addShape({
+        name: "Reuleaux",
+        vertices: (state) => {
+          let points = []
+          // Construct an equalateral triangle
+          let corners = []
+          // Initial location at PI/2
+          let angle = Math.PI/2.0;
+          // How much of the circle in one side?
+          let coverageAngle = Math.PI/state.shapes.reuleauxSides;
+          let halfCoverageAngle = 0.5 * coverageAngle;
+          for (let c=0; c<state.shapes.reuleauxSides; c++) {
+            let startAngle = angle + Math.PI - halfCoverageAngle;
+            corners.push( [Vertex(Math.cos(angle), Math.sin(angle)), startAngle] );
+            angle += 2.0 * Math.PI / state.shapes.reuleauxSides;
+          }
+          let length = 0.5 / Math.cos(Math.PI/2.0/state.shapes.reuleauxSides);
+          for (let corn=0; corn < corners.length; corn++) {
+            for (let i=0; i<128; i++) {
+              let angle = coverageAngle  * (i / 128.0) + corners[corn][1];
+              points.push(Vertex(length * corners[corn][0].x + Math.cos(angle),
+                                 length * corners[corn][0].y + Math.sin(angle)));
+            }
+          }
+          return points;
+        },
+        options: [
+          {
+            title: "Number of sides",
+            value: () => { return this.props.reuleauxSides },
+            onChange: this.props.onReuleauxSidesChange,
+            step: 1,
+          },
+        ],
+      });
+    this.props.addShape({
         name: "Text",
         vertices: (state) => {
           let points = [];
           const under_y = -0.25;
           points.push(Vertex(0.0, under_y))
-          console.log("text: " + state.shapes.inputText);
           let x = 0.0;
           for (let chi = 0; chi < state.shapes.inputText.length; chi++) {
-            console.log(state.shapes.inputText);
             var letter = Font2(state.shapes.inputText[chi]);
             if (0 < letter.vertices.length) {
               points.push(Vertex(x + letter.vertices[0].x, under_y))

@@ -7,6 +7,7 @@ const defaultState = {
   starPoints: 5,
   starRatio: 0.5,
   circleLobes: 1,
+  reuleauxSides: 3,
   inputText: "Sandify",
   startingSize: 10.0,
 
@@ -46,6 +47,11 @@ export default function shapes(state = defaultState, action) {
     case 'SET_SHAPE_CIRCLE_LOBES':
       return {...state,
         circleLobes: action.value,
+      };
+
+    case 'SET_SHAPE_REULEAUX_SIDES':
+      return {...state,
+        reuleauxSides: action.value,
       };
 
     case 'SET_SHAPE_INPUT_TEXT':
