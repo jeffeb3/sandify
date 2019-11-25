@@ -127,6 +127,9 @@ const getComments = (state) => {
           comments.push("    Selected Shape: Circle");
           comments.push("      Circle Lobes: " + state.shapes.circleLobes);
           break;
+        case "Heart":
+          comments.push("    Selected Shape: Heart");
+          break;
         case "Text":
           comments.push("    Selected Shape: Text");
           comments.push("      Input Text: " + state.shapes.inputText);
@@ -151,8 +154,8 @@ const getComments = (state) => {
       }
       comments.push("    Track: " + state.transform.trackEnabled);
       if (state.transform.trackEnabled) {
-        comments.push("      Track Count: " + state.transform.trackValue);
-        comments.push("      Track Size: " + state.transform.trackLength);
+        comments.push("      Track Size: " + state.transform.trackValue);
+        comments.push("      Track Length: " + state.transform.trackLength);
         comments.push("      Track Grow: " + state.transform.trackGrowEnabled);
         if (state.transform.trackGrowEnabled) {
           comments.push("          Track Grow Value: " + state.transform.trackGrow);
