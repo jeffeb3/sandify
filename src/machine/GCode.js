@@ -110,39 +110,50 @@ const getComments = (state) => {
 
   switch (state.app.input) {
     case 0: // shapes
+      var shapeName = state.shapes.shapes.find(shape => shape.name === state.shapes.currentShape).name;
+
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.shapes.startingSize);
       comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
+      comments.push("    Selected Shape: " + shapeName);
+
       switch (state.shapes.currentShape) {
         case "Polygon":
-          comments.push("    Selected Shape: Polygon");
           comments.push("      Polygon Sides: " + state.shapes.polygonSides);
           break;
         case "Star":
-          comments.push("    Selected Shape: Star");
           comments.push("      Star Points: " + state.shapes.starPoints);
           comments.push("      Star Ratio: " + state.shapes.starRatio);
           break;
         case "Circle":
-          comments.push("    Selected Shape: Circle");
           comments.push("      Circle Lobes: " + state.shapes.circleLobes);
           break;
         case "Heart":
-          comments.push("    Selected Shape: Heart");
           break;
         case "Reuleaux":
-          comments.push("    Selected Shape: Reuleaux");
           comments.push("      Reuleaux Sides: " + state.shapes.reuleauxSides);
           break;
         case "Text":
-          comments.push("    Selected Shape: Text");
           comments.push("      Input Text: " + state.shapes.inputText);
           break;
         case "Vicious1":
-          comments.push("    Selected Shape: Vicious1");
+          break;
+        case "Epicycloid":
+          comments.push("      a: " + state.shapes.epicycloidA);
+          comments.push("      b: " + state.shapes.epicycloidB);
+          break;
+        case "Hypocycloid":
+          comments.push("      a: " + state.shapes.hypocycloidA);
+          comments.push("      b: " + state.shapes.hypocycloidB);
+          break;
+        case "Rose":
+          comments.push("      n: " + state.shapes.roseN);
+          comments.push("      d: " + state.shapes.roseD);
+          break;
+        case "Logarithmic Spiral":
+          comments.push("      b: " + state.shapes.logSpiralB);        
           break;
         default:
-          comments.push("    Selected Shape: None");
           break;
       }
 
