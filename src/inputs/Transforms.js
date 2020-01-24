@@ -463,7 +463,7 @@ class ShapeList extends Component {
         ],
       });
     this.props.addShape(  {
-        name: "Epicycloid",
+        name: "Clover",
         detail: "See http://mathworld.wolfram.com/Epicycloid.html for ideas",
         vertices: (state) => {
           let points = []
@@ -493,7 +493,7 @@ class ShapeList extends Component {
         ],
       });
       this.props.addShape(  {
-          name: "Hypocycloid",
+          name: "Web",
           detail: "See http://mathworld.wolfram.com/Hypocycloid.html for ideas",
           vertices: (state) => {
             let points = []
