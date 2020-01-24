@@ -64,6 +64,48 @@ export const setShapeReuleauxSides = ( sides ) => {
   };
 }
 
+export const setShapeepicycloidA = ( a ) => {
+  return {
+    type: 'SET_SHAPE_EPICYCLOID_A',
+    value: a,
+  };
+}
+
+export const setShapeepicycloidB = ( b ) => {
+  return {
+    type: 'SET_SHAPE_EPICYCLOID_B',
+    value: b,
+  };
+}
+
+export const setShapehypocycloidA = ( a ) => {
+  return {
+    type: 'SET_SHAPE_HYPOCYCLOID_A',
+    value: a,
+  };
+}
+
+export const setShapehypocycloidB = ( b ) => {
+  return {
+    type: 'SET_SHAPE_HYPOCYCLOID_B',
+    value: b,
+  };
+}
+
+export const setShapeRoseN = ( n ) => {
+  return {
+    type: 'SET_SHAPE_ROSE_N',
+    value: n,
+  };
+}
+
+export const setShapeRoseD = ( d ) => {
+  return {
+    type: 'SET_SHAPE_ROSE_D',
+    value: d,
+  };
+}
+
 export const setShapeInputText = ( text ) => {
   return {
     type: 'SET_SHAPE_INPUT_TEXT',
@@ -205,6 +247,7 @@ class Shape extends Component {
         <div className="shape-options">
           <Panel className="options-panel" collapsible expanded={this.props.active}>
             <Form horizontal>
+              <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>
               {options_render}
             </Form>
           </Panel>
@@ -227,7 +270,13 @@ const shapeListProps = (state, ownProps) => {
     starPoints:   state.shapes.starPoints,
     starRatio:    state.shapes.starRatio,
     circleLobes:  state.shapes.circleLobes,
-    reuleauxSides:state.shapes.reuleauxSides,
+    reuleauxSides: state.shapes.reuleauxSides,
+    epicycloidA: state.shapes.epicycloidA,
+    epicycloidB: state.shapes.epicycloidB,
+    hypocycloidA: state.shapes.hypocycloidA,
+    hypocycloidB: state.shapes.hypocycloidB,
+    roseN: state.shapes.roseN,
+    roseD: state.shapes.roseD,
     inputText:    state.shapes.inputText,
     currentShape: state.shapes.currentShape,
     startingSize: state.shapes.startingSize,
@@ -258,6 +307,24 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onReuleauxSidesChange: (event) => {
       dispatch(setShapeReuleauxSides(event.target.value));
+    },
+    onepicycloidAChange: (event) => {
+      dispatch(setShapeepicycloidA(event.target.value));
+    },
+    onepicycloidBChange: (event) => {
+      dispatch(setShapeepicycloidB(event.target.value));
+    },
+    onhypocycloidAChange: (event) => {
+      dispatch(setShapehypocycloidA(event.target.value));
+    },
+    onhypocycloidBChange: (event) => {
+      dispatch(setShapehypocycloidB(event.target.value));
+    },
+    onRoseNChange: (event) => {
+      dispatch(setShapeRoseN(event.target.value));
+    },
+    onRoseDChange: (event) => {
+      dispatch(setShapeRoseD(event.target.value));
     },
     onInputTextChange: (event) => {
       dispatch(setShapeInputText(event.target.value));
@@ -395,6 +462,100 @@ class ShapeList extends Component {
           },
         ],
       });
+    this.props.addShape(  {
+        name: "Clover",
+        link: "http://mathworld.wolfram.com/Epicycloid.html",
+        vertices: (state) => {
+          let points = []
+          let a = parseFloat(state.shapes.epicycloidA)
+          let b = parseFloat(state.shapes.epicycloidB)
+
+          for (let i=0; i<128; i++) {
+            let angle = Math.PI * 2.0 / 128.0 * i
+            points.push(Vertex(0.5 * (a + b) * Math.cos(angle) - 0.5 * b * Math.cos(((a + b) / b) * angle),
+                               0.5 * (a + b) * Math.sin(angle) - 0.5 * b * Math.sin(((a + b) / b) * angle)))
+          }
+          return points
+        },
+        options: [
+          {
+            title: "Large circle radius",
+            value: () => { return this.props.epicycloidA },
+            onChange: this.props.onepicycloidAChange,
+            step: 0.1,
+          },
+          {
+            title: "Small circle radius",
+            value: () => { return this.props.epicycloidB },
+            onChange: this.props.onepicycloidBChange,
+            step: 0.1,
+          },
+        ],
+      });
+      this.props.addShape(  {
+          name: "Web",
+          link: "http://mathworld.wolfram.com/Hypocycloid.html",
+          vertices: (state) => {
+            let points = []
+            let a = parseFloat(state.shapes.hypocycloidA)
+            let b = parseFloat(state.shapes.hypocycloidB)
+
+            for (let i=0; i<128; i++) {
+              let angle = Math.PI * 2.0 / 128.0 * i
+              points.push(Vertex(1.0 * (a - b) * Math.cos(angle) + b * Math.cos(((a - b) / b) * angle),
+                                    1.0 * (a - b) * Math.sin(angle) - b * Math.sin(((a - b) / b) * angle)))
+            }
+            return points
+          },
+          options: [
+            {
+              title: "Large circle radius",
+              value: () => { return this.props.hypocycloidA },
+              onChange: this.props.onhypocycloidAChange,
+              step: 0.1,
+            },
+            {
+              title: "Small circle radius",
+              value: () => { return this.props.hypocycloidB },
+              onChange: this.props.onhypocycloidBChange,
+              step: 0.1,
+            },
+          ],
+        });
+      this.props.addShape({
+          name: "Rose",
+          link: "http://mathworld.wolfram.com/Rose.html",
+          vertices: (state) => {
+            let points = []
+            let a = 2
+            let n = parseInt(state.shapes.roseN)
+            let d = parseInt(state.shapes.roseD)
+            let p = (n * d % 2 === 0) ? 2 : 1
+            let thetaClose = d * p * 32 * n;
+            let resolution = 64 * n;
+
+            for (let i=0; i<thetaClose+1; i++) {
+              let theta = Math.PI * 2.0 / (resolution) * i
+              let r = 0.5 * a * Math.sin((n / d) * theta)
+              points.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
+            }
+            return points
+          },
+          options: [
+            {
+              title: "Numerator",
+              value: () => { return this.props.roseN },
+              onChange: this.props.onRoseNChange,
+              step: 1,
+            },
+            {
+              title: "Denominator",
+              value: () => { return this.props.roseD },
+              onChange: this.props.onRoseDChange,
+              step: 1,
+            },
+          ],
+        });
     this.props.addShape({
         name: "Text",
         vertices: (state) => {
@@ -439,7 +600,6 @@ class ShapeList extends Component {
         },
         options: [],
       });
-
   }
 
   render() {
@@ -450,6 +610,7 @@ class ShapeList extends Component {
       return <Shape
                key={shape.name}
                name={shape.name}
+               link={shape.link || ""}
                active={shape.name === self.props.currentShape}
                options={shape.options}
                clicked={ () => { self.props.setShape(shape.name); } }
@@ -752,4 +913,3 @@ Transforms = connect(transformsProps, transformsDispatch)(Transforms);
 
 
 export default Transforms
-

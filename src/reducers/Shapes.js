@@ -10,7 +10,12 @@ const defaultState = {
   reuleauxSides: 3,
   inputText: "Sandify",
   startingSize: 10.0,
-
+  epicycloidA: 1.0,
+  epicycloidB: .25,
+  hypocycloidA: 1.0,
+  hypocycloidB: .25,
+  roseN: 3,
+  roseD: 2
 }
 
 export default function shapes(state = defaultState, action) {
@@ -54,6 +59,36 @@ export default function shapes(state = defaultState, action) {
         reuleauxSides: action.value,
       };
 
+    case 'SET_SHAPE_EPICYCLOID_A':
+      return {...state,
+        epicycloidA: action.value,
+      };
+
+    case 'SET_SHAPE_EPICYCLOID_B':
+      return {...state,
+        epicycloidB: action.value,
+      };
+
+    case 'SET_SHAPE_HYPOCYCLOID_A':
+      return {...state,
+        hypocycloidA: action.value,
+      };
+
+    case 'SET_SHAPE_HYPOCYCLOID_B':
+      return {...state,
+        hypocycloidB: action.value,
+      };
+
+    case 'SET_SHAPE_ROSE_N':
+      return {...state,
+        roseN: action.value,
+      };
+
+    case 'SET_SHAPE_ROSE_D':
+      return {...state,
+        roseD: action.value,
+      };
+
     case 'SET_SHAPE_INPUT_TEXT':
       return {...state,
         inputText: action.value,
@@ -70,6 +105,3 @@ export default function shapes(state = defaultState, action) {
       return state;
   }
 }
-
-
-
