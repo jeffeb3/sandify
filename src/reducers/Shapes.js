@@ -15,8 +15,7 @@ const defaultState = {
   hypocycloidA: 1.0,
   hypocycloidB: .25,
   roseN: 3,
-  roseD: 1,
-  logSpiralB: 0.33
+  roseD: 1
 }
 
 export default function shapes(state = defaultState, action) {
@@ -88,11 +87,6 @@ export default function shapes(state = defaultState, action) {
     case 'SET_SHAPE_ROSE_D':
       return {...state,
         roseD: action.value,
-      };
-
-    case 'SET_SHAPE_LOG_SPIRAL_B':
-      return {...state,
-        logSpiralB: action.value,
       };
 
     case 'SET_SHAPE_INPUT_TEXT':

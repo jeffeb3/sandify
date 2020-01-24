@@ -150,9 +150,6 @@ const getComments = (state) => {
           comments.push("      n: " + state.shapes.roseN);
           comments.push("      d: " + state.shapes.roseD);
           break;
-        case "Logarithmic Spiral":
-          comments.push("      b: " + state.shapes.logSpiralB);        
-          break;
         default:
           break;
       }

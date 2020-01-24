@@ -106,13 +106,6 @@ export const setShapeRoseD = ( d ) => {
   };
 }
 
-export const setShapeLogSpiralB= ( b ) => {
-  return {
-    type: 'SET_SHAPE_LOG_SPIRAL_B',
-    value: b,
-  };
-}
-
 export const setShapeInputText = ( text ) => {
   return {
     type: 'SET_SHAPE_INPUT_TEXT',
@@ -284,7 +277,6 @@ const shapeListProps = (state, ownProps) => {
     hypocycloidB: state.shapes.hypocycloidB,
     roseN: state.shapes.roseN,
     roseD: state.shapes.roseD,
-    logSpiralB: state.shapes.logSpiralB,
     inputText:    state.shapes.inputText,
     currentShape: state.shapes.currentShape,
     startingSize: state.shapes.startingSize,
@@ -333,9 +325,6 @@ const shapeListDispatch = (dispatch, ownProps) => {
     },
     onRoseDChange: (event) => {
       dispatch(setShapeRoseD(event.target.value));
-    },
-    onLogSpiralBChange: (event) => {
-      dispatch(setShapeLogSpiralB(event.target.value));
     },
     onInputTextChange: (event) => {
       dispatch(setShapeInputText(event.target.value));
@@ -567,31 +556,6 @@ class ShapeList extends Component {
             },
           ],
         });
-        this.props.addShape({
-            name: "Logarithmic Spiral",
-            detail: "r = e^(b*\u03B8) - See http://mathworld.wolfram.com/LogarithmicSpiral.html for ideas",
-            vertices: (state) => {
-              let points = []
-              let a = .5
-              let b = parseFloat(state.shapes.logSpiralB)
-
-              for (let i=0; i<128; i++) {
-                let theta = Math.PI * 2.0 / 128.0 * i
-                let x = a * Math.cos(theta) * Math.pow(Math.E, b * theta)
-                let y = a * Math.sin(theta) * Math.pow(Math.E, b * theta)
-                points.push(Vertex(x, y))
-              }
-              return points
-            },
-            options: [
-              {
-                title: "b",
-                value: () => { return this.props.logSpiralB },
-                onChange: this.props.onLogSpiralBChange,
-                step: .1
-              }
-            ],
-          });
     this.props.addShape({
         name: "Text",
         vertices: (state) => {
