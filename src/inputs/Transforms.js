@@ -254,6 +254,7 @@ class Shape extends Component {
         <div className="shape-options">
           <Panel className="options-panel" collapsible expanded={this.props.active}>
             <Form horizontal>
+              <p>{this.props.detail}</p>
               {options_render}
             </Form>
           </Panel>
@@ -472,6 +473,125 @@ class ShapeList extends Component {
           },
         ],
       });
+    this.props.addShape(  {
+        name: "Epicycloid",
+        detail: "See http://mathworld.wolfram.com/Epicycloid.html for ideas",
+        vertices: (state) => {
+          let points = []
+          let a = parseFloat(state.shapes.epicycloidA)
+          let b = parseFloat(state.shapes.epicycloidB)
+
+          for (let i=0; i<128; i++) {
+            let angle = Math.PI * 2.0 / 128.0 * i
+            points.push(Vertex(1.0 * (a + b) * Math.cos(angle) - b * Math.cos(((a + b) / b) * angle),
+                              1.0 * (a + b) * Math.sin(angle) - b * Math.sin(((a + b) / b) * angle)))
+          }
+          return points
+        },
+        options: [
+          {
+            title: "Large circle radius",
+            value: () => { return this.props.epicycloidA },
+            onChange: this.props.onepicycloidAChange,
+            step: 0.1,
+          },
+          {
+            title: "Small circle radius",
+            value: () => { return this.props.epicycloidB },
+            onChange: this.props.onepicycloidBChange,
+            step: 0.1,
+          },
+        ],
+      });
+      this.props.addShape(  {
+          name: "Hypocycloid",
+          detail: "See http://mathworld.wolfram.com/Hypocycloid.html for ideas",
+          vertices: (state) => {
+            let points = []
+            let a = parseFloat(state.shapes.hypocycloidA)
+            let b = parseFloat(state.shapes.hypocycloidB)
+
+            for (let i=0; i<128; i++) {
+              let angle = Math.PI * 2.0 / 128.0 * i
+              points.push(Vertex(1.0 * (a - b) * Math.cos(angle) + b * Math.cos(((a - b) / b) * angle),
+                                    1.0 * (a - b) * Math.sin(angle) - b * Math.sin(((a - b) / b) * angle)))
+            }
+            return points
+          },
+          options: [
+            {
+              title: "Large circle radius",
+              value: () => { return this.props.hypocycloidA },
+              onChange: this.props.onhypocycloidAChange,
+              step: 0.1,
+            },
+            {
+              title: "Small circle radius",
+              value: () => { return this.props.hypocycloidB },
+              onChange: this.props.onhypocycloidBChange,
+              step: 0.1,
+            },
+          ],
+        });
+      this.props.addShape({
+          name: "Rose",
+          detail: "r=sin((n/d)*\u03B8) - See http://mathworld.wolfram.com/Rose.html for ideas",
+          vertices: (state) => {
+            let points = []
+            let a = 2
+            let n = parseInt(state.shapes.roseN)
+            let d = parseInt(state.shapes.roseD)
+            let p = (n * d % 2 === 0) ? 2 : 1
+            let thetaClose = d * p * 32 * n;
+            let resolution = 64 * n;
+
+            for (let i=0; i<thetaClose+1; i++) {
+              let theta = Math.PI * 2.0 / (resolution) * i
+              let r = a * Math.sin((n / d) * theta)
+              points.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
+            }
+            return points
+          },
+          options: [
+            {
+              title: "Numerator",
+              value: () => { return this.props.roseN },
+              onChange: this.props.onRoseNChange,
+              step: 1,
+            },
+            {
+              title: "Denominator",
+              value: () => { return this.props.roseD },
+              onChange: this.props.onRoseDChange,
+              step: 1,
+            },
+          ],
+        });
+        this.props.addShape({
+            name: "Logarithmic Spiral",
+            detail: "r = e^(b*\u03B8) - See http://mathworld.wolfram.com/LogarithmicSpiral.html for ideas",
+            vertices: (state) => {
+              let points = []
+              let a = .5
+              let b = parseFloat(state.shapes.logSpiralB)
+
+              for (let i=0; i<128; i++) {
+                let theta = Math.PI * 2.0 / 128.0 * i
+                let x = a * Math.cos(theta) * Math.pow(Math.E, b * theta)
+                let y = a * Math.sin(theta) * Math.pow(Math.E, b * theta)
+                points.push(Vertex(x, y))
+              }
+              return points
+            },
+            options: [
+              {
+                title: "b",
+                value: () => { return this.props.logSpiralB },
+                onChange: this.props.onLogSpiralBChange,
+                step: .1
+              }
+            ],
+          });
     this.props.addShape({
         name: "Text",
         vertices: (state) => {
@@ -516,124 +636,6 @@ class ShapeList extends Component {
         },
         options: [],
       });
-    this.props.addShape(  {
-        name: "Epicycloid",
-        title: "Epicycloid - see http://mathworld.wolfram.com/Epicycloid.html for ideas",
-        vertices: (state) => {
-          let points = []
-          let a = parseFloat(state.shapes.epicycloidA)
-          let b = parseFloat(state.shapes.epicycloidB)
-
-          for (let i=0; i<128; i++) {
-            let angle = Math.PI * 2.0 / 128.0 * i
-            points.push(Vertex(1.0 * (a + b) * Math.cos(angle) - b * Math.cos(((a + b) / b) * angle),
-                              1.0 * (a + b) * Math.sin(angle) - b * Math.sin(((a + b) / b) * angle)))
-          }
-          return points
-        },
-        options: [
-          {
-            title: "a (large circle radius)",
-            value: () => { return this.props.epicycloidA },
-            onChange: this.props.onepicycloidAChange,
-            step: 0.1,
-          },
-          {
-            title: "b (small circle radius)",
-            value: () => { return this.props.epicycloidB },
-            onChange: this.props.onepicycloidBChange,
-            step: 0.1,
-          },
-        ],
-      });
-      this.props.addShape(  {
-          name: "Hypocycloid",
-          title: "Hypocycloid - see http://mathworld.wolfram.com/Hypocycloid.html for ideas",
-          vertices: (state) => {
-            let points = []
-            let a = parseFloat(state.shapes.hypocycloidA)
-            let b = parseFloat(state.shapes.hypocycloidB)
-
-            for (let i=0; i<128; i++) {
-              let angle = Math.PI * 2.0 / 128.0 * i
-              points.push(Vertex(1.0 * (a - b) * Math.cos(angle) + b * Math.cos(((a - b) / b) * angle),
-                                1.0 * (a - b) * Math.sin(angle) - b * Math.sin(((a - b) / b) * angle)))
-            }
-            return points
-          },
-          options: [
-            {
-              title: "a (large circle radius)",
-              value: () => { return this.props.hypocycloidA },
-              onChange: this.props.onhypocycloidAChange,
-              step: 0.1,
-            },
-            {
-              title: "b (small circle radius)",
-              value: () => { return this.props.hypocycloidB },
-              onChange: this.props.onhypocycloidBChange,
-              step: 0.1,
-            },
-          ],
-        });
-      this.props.addShape({
-          name: "Rose",
-          title: "Rose: r=sin((n/d)*\u03B8) - see http://mathworld.wolfram.com/Rose.html for ideas",
-          vertices: (state) => {
-            let points = []
-            let a = 2
-            let n = parseInt(state.shapes.roseN)
-            let d = parseInt(state.shapes.roseD)
-            let p = (n * d % 2 === 0) ? 2 : 1
-            let thetaClose = d * p * 64
-
-            for (let i=0; i<thetaClose+1; i++) {
-              let theta = Math.PI * 2.0 / 128.0 * i
-              let r = a * Math.sin((n / d) * theta)
-              points.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
-            }
-            return points
-          },
-          options: [
-            {
-              title: "n (numerator)",
-              value: () => { return this.props.roseN },
-              onChange: this.props.onRoseNChange,
-              step: 1,
-            },
-            {
-              title: "d (denominator)",
-              value: () => { return this.props.roseD },
-              onChange: this.props.onRoseDChange,
-              step: 1,
-            },
-          ],
-        });
-        this.props.addShape({
-            name: "Logarithmic Spiral",
-            title: "Logarithmic Spiral: r = e^(b*\u03B8) - see http://mathworld.wolfram.com/LogarithmicSpiral.html for ideas",
-            vertices: (state) => {
-              let points = []
-              let a = .5
-              let b = parseFloat(state.shapes.logSpiralB)
-
-              for (let i=0; i<128; i++) {
-                let theta = Math.PI * 2.0 / 128.0 * i
-                let x = a * Math.cos(theta) * Math.pow(Math.E, b * theta)
-                let y = a * Math.sin(theta) * Math.pow(Math.E, b * theta)
-                points.push(Vertex(x, y))
-              }
-              return points
-            },
-            options: [
-              {
-                title: "b",
-                value: () => { return this.props.logSpiralB },
-                onChange: this.props.onLogSpiralBChange,
-                step: .1
-              }
-            ],
-          });
   }
 
   render() {
@@ -643,7 +645,8 @@ class ShapeList extends Component {
     var shape_render = this.props.shapes.map( (shape) => {
       return <Shape
                key={shape.name}
-               name={shape.title || shape.name}
+               name={shape.name}
+               detail={shape.detail || ""}
                active={shape.name === self.props.currentShape}
                options={shape.options}
                clicked={ () => { self.props.setShape(shape.name); } }
