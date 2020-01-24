@@ -247,7 +247,7 @@ class Shape extends Component {
         <div className="shape-options">
           <Panel className="options-panel" collapsible expanded={this.props.active}>
             <Form horizontal>
-              <p>{this.props.detail}</p>
+              <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>
               {options_render}
             </Form>
           </Panel>
@@ -464,7 +464,7 @@ class ShapeList extends Component {
       });
     this.props.addShape(  {
         name: "Clover",
-        detail: "See http://mathworld.wolfram.com/Epicycloid.html for ideas",
+        link: "http://mathworld.wolfram.com/Epicycloid.html",
         vertices: (state) => {
           let points = []
           let a = parseFloat(state.shapes.epicycloidA)
@@ -494,7 +494,7 @@ class ShapeList extends Component {
       });
       this.props.addShape(  {
           name: "Web",
-          detail: "See http://mathworld.wolfram.com/Hypocycloid.html for ideas",
+          link: "http://mathworld.wolfram.com/Hypocycloid.html",
           vertices: (state) => {
             let points = []
             let a = parseFloat(state.shapes.hypocycloidA)
@@ -524,7 +524,7 @@ class ShapeList extends Component {
         });
       this.props.addShape({
           name: "Rose",
-          detail: "r=sin((n/d)*\u03B8) - See http://mathworld.wolfram.com/Rose.html for ideas",
+          link: "http://mathworld.wolfram.com/Rose.html",
           vertices: (state) => {
             let points = []
             let a = 2
@@ -610,7 +610,7 @@ class ShapeList extends Component {
       return <Shape
                key={shape.name}
                name={shape.name}
-               detail={shape.detail || ""}
+               link={shape.link || ""}
                active={shape.name === self.props.currentShape}
                options={shape.options}
                clicked={ () => { self.props.setShape(shape.name); } }
