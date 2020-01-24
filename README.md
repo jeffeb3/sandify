@@ -29,7 +29,7 @@ https://sandify.org
 
 See the birthplace here:
 
-https://www.vicious1.com/forum/topic/does-this-count-as-a-build/
+https://forum.v1engineering.com/t/does-this-count-as-a-build/6037?u=jeffeb3
 
 ## Running sandify from source on a local machine
 
