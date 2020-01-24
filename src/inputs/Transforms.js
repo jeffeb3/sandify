@@ -472,8 +472,8 @@ class ShapeList extends Component {
 
           for (let i=0; i<128; i++) {
             let angle = Math.PI * 2.0 / 128.0 * i
-            points.push(Vertex(1.0 * (a + b) * Math.cos(angle) - b * Math.cos(((a + b) / b) * angle),
-                              1.0 * (a + b) * Math.sin(angle) - b * Math.sin(((a + b) / b) * angle)))
+            points.push(Vertex(0.5 * (a + b) * Math.cos(angle) - 0.5 * b * Math.cos(((a + b) / b) * angle),
+                               0.5 * (a + b) * Math.sin(angle) - 0.5 * b * Math.sin(((a + b) / b) * angle)))
           }
           return points
         },
@@ -536,7 +536,7 @@ class ShapeList extends Component {
 
             for (let i=0; i<thetaClose+1; i++) {
               let theta = Math.PI * 2.0 / (resolution) * i
-              let r = a * Math.sin((n / d) * theta)
+              let r = 0.5 * a * Math.sin((n / d) * theta)
               points.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
             }
             return points

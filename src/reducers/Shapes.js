@@ -15,7 +15,7 @@ const defaultState = {
   hypocycloidA: 1.0,
   hypocycloidB: .25,
   roseN: 3,
-  roseD: 1
+  roseD: 2
 }
 
 export default function shapes(state = defaultState, action) {
