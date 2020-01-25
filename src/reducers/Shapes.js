@@ -31,7 +31,7 @@ const defaultState = {
   roseD: 2
 }
 
-export default function shapes(state = defaultState, action) {
+function defaultShapes(state = defaultState, action) {
   switch (action.type) {
 
     // shape actions
