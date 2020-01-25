@@ -241,13 +241,18 @@ class Shape extends Component {
     });
 
     var options_list_render = undefined;
+    var link_render = undefined;
+
+    if (this.props.link) {
+      link_render = <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>;
+    }
 
     if (this.props.options.length >= 1) {
       options_list_render =
         <div className="shape-options">
           <Panel className="options-panel" collapsible expanded={this.props.active}>
             <Form horizontal>
-              <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>
+              {link_render}
               {options_render}
             </Form>
           </Panel>
