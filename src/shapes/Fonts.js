@@ -2,7 +2,7 @@ import { Vertex } from '../Geometry';
 
 const fontSpacing = 1.5;
 
-// Format for vertices: [x,y,b] where in a 0:7(8) by -1:7 grid defining x,y and b defines the line or curve. 
+// Format for vertices: [x,y,b] where in a 0:7(8) by -1:7 grid defining x,y and b defines the line or curve.
 // Bulge directions could be represented by a 0:4 list starting at none, then NE and going clockwise.
 // 4  1
 // 3  2

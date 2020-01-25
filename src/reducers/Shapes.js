@@ -1,3 +1,16 @@
+import { Polygon } from '../shapes/Polygon.js';
+import { Star } from '../shapes/Star.js';
+import { Circle } from '../shapes/Circle.js';
+import { Heart } from '../shapes/Heart.js';
+import { Reuleaux } from '../shapes/Reuleaux.js';
+import { Epicycloid } from '../shapes/Epicycloid.js';
+import { Hypocycloid } from '../shapes/Hypocycloid.js';
+import { Rose } from '../shapes/Rose.js';
+import { InputText } from '../shapes/InputText.js';
+import { V1Engineering } from '../shapes/V1Engineering.js';
+import { registeredShapes } from '../inputs/Transforms.js'
+
+import reduceReducers from 'reduce-reducers';
 
 const defaultState = {
   // Transform settings
@@ -34,66 +47,6 @@ export default function shapes(state = defaultState, action) {
         currentShape: action.value,
       };
 
-    case 'SET_SHAPE_POLYGON_SIDES':
-      return {...state,
-        polygonSides: action.value,
-      };
-
-    case 'SET_SHAPE_STAR_POINTS':
-      return {...state,
-        starPoints: action.value,
-      };
-
-    case 'SET_SHAPE_STAR_RATIO':
-      return {...state,
-        starRatio: action.value,
-      };
-
-    case 'SET_SHAPE_CIRCLE_LOBES':
-      return {...state,
-        circleLobes: action.value,
-      };
-
-    case 'SET_SHAPE_REULEAUX_SIDES':
-      return {...state,
-        reuleauxSides: action.value,
-      };
-
-    case 'SET_SHAPE_EPICYCLOID_A':
-      return {...state,
-        epicycloidA: action.value,
-      };
-
-    case 'SET_SHAPE_EPICYCLOID_B':
-      return {...state,
-        epicycloidB: action.value,
-      };
-
-    case 'SET_SHAPE_HYPOCYCLOID_A':
-      return {...state,
-        hypocycloidA: action.value,
-      };
-
-    case 'SET_SHAPE_HYPOCYCLOID_B':
-      return {...state,
-        hypocycloidB: action.value,
-      };
-
-    case 'SET_SHAPE_ROSE_N':
-      return {...state,
-        roseN: action.value,
-      };
-
-    case 'SET_SHAPE_ROSE_D':
-      return {...state,
-        roseD: action.value,
-      };
-
-    case 'SET_SHAPE_INPUT_TEXT':
-      return {...state,
-        inputText: action.value,
-      };
-
     case 'SET_SHAPE_SIZE':
       return {...state,
         startingSize: action.value,
@@ -105,3 +58,5 @@ export default function shapes(state = defaultState, action) {
       return state;
   }
 }
+
+export default reduceReducers(defaultShapes, ...registeredShapes.map((shape) => shape.getReducer));
