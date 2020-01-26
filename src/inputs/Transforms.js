@@ -10,7 +10,6 @@ import {
   Panel,
 } from 'react-bootstrap'
 import './Transforms.css'
-import { Vertex } from '../Geometry';
 import { connect } from 'react-redux';
 
 import { Polygon } from '../shapes/Polygon.js';

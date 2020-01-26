@@ -17,7 +17,6 @@ import {
   Vertex,
 } from '../Geometry.js'
 import Victor from 'victor';
-import { registeredShapes } from '../inputs/Transforms.js'
 
 // GCode Actions
 export const setGCodeFilename = ( text ) => {

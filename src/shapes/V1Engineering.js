@@ -1,4 +1,3 @@
-import { Vertex } from '../Geometry';
 import Vicious1Vertices from './Vicious1Vertices';
 
 export class V1Engineering {

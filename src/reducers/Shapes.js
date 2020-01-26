@@ -1,15 +1,4 @@
-import { Polygon } from '../shapes/Polygon.js';
-import { Star } from '../shapes/Star.js';
-import { Circle } from '../shapes/Circle.js';
-import { Heart } from '../shapes/Heart.js';
-import { Reuleaux } from '../shapes/Reuleaux.js';
-import { Epicycloid } from '../shapes/Epicycloid.js';
-import { Hypocycloid } from '../shapes/Hypocycloid.js';
-import { Rose } from '../shapes/Rose.js';
-import { InputText } from '../shapes/InputText.js';
-import { V1Engineering } from '../shapes/V1Engineering.js';
 import { registeredShapes } from '../inputs/Transforms.js'
-
 import reduceReducers from 'reduce-reducers';
 
 const defaultState = {
