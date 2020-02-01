@@ -90,7 +90,6 @@ class PreviewWindow extends Component {
     context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
     var bigBox = document.getElementById("biggerBox");
     this.resize(canvas, bigBox);
-    this.paint(context);
   }
 
   // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
@@ -303,4 +302,3 @@ class MachinePreview extends Component {
 MachinePreview = connect(machineStateToProps, machineDispatchToProps)(MachinePreview);
 
 export default MachinePreview;
-
