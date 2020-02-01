@@ -71,13 +71,16 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 // Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
-
   componentDidMount() {
     var canvas = ReactDOM.findDOMNode(this);
     var context = canvas.getContext('2d');
     var bigBox = document.getElementById("biggerBox");
     this.resize(canvas, bigBox);
     window.addEventListener('resize', () => { this.resize(canvas, bigBox) }, false);
+
+    // force a resize so that it autosizes properly when running locally
+    setTimeout(() => this.resize(canvas, bigBox), 250);
+
     this.paint(context);
   }
 
