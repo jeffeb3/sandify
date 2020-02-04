@@ -71,13 +71,16 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 // Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
-
   componentDidMount() {
     var canvas = ReactDOM.findDOMNode(this);
     var context = canvas.getContext('2d');
     var bigBox = document.getElementById("biggerBox");
     this.resize(canvas, bigBox);
     window.addEventListener('resize', () => { this.resize(canvas, bigBox) }, false);
+
+    // force a resize so that it autosizes properly when running locally
+    setTimeout(() => this.resize(canvas, bigBox), 250);
+
     this.paint(context);
   }
 
@@ -87,7 +90,6 @@ class PreviewWindow extends Component {
     context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
     var bigBox = document.getElementById("biggerBox");
     this.resize(canvas, bigBox);
-    this.paint(context);
   }
 
   // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
@@ -300,4 +302,3 @@ class MachinePreview extends Component {
 MachinePreview = connect(machineStateToProps, machineDispatchToProps)(MachinePreview);
 
 export default MachinePreview;
-
