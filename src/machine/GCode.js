@@ -110,49 +110,16 @@ const getComments = (state) => {
 
   switch (state.app.input) {
     case 0: // shapes
-      var shapeName = state.shapes.shapes.find(shape => shape.name === state.shapes.currentShape).name;
+      var shapeInfo = state.shapes.shapes.find(shape => shape.name === state.shapes.currentShape);
 
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.shapes.startingSize);
       comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
-      comments.push("    Selected Shape: " + shapeName);
+      comments.push("    Selected Shape: " + shapeInfo.name);
 
-      switch (state.shapes.currentShape) {
-        case "Polygon":
-          comments.push("      Polygon Sides: " + state.shapes.polygonSides);
-          break;
-        case "Star":
-          comments.push("      Star Points: " + state.shapes.starPoints);
-          comments.push("      Star Ratio: " + state.shapes.starRatio);
-          break;
-        case "Circle":
-          comments.push("      Circle Lobes: " + state.shapes.circleLobes);
-          break;
-        case "Heart":
-          break;
-        case "Reuleaux":
-          comments.push("      Reuleaux Sides: " + state.shapes.reuleauxSides);
-          break;
-        case "Text":
-          comments.push("      Input Text: " + state.shapes.inputText);
-          break;
-        case "Vicious1":
-          break;
-        case "Epicycloid":
-          comments.push("      a: " + state.shapes.epicycloidA);
-          comments.push("      b: " + state.shapes.epicycloidB);
-          break;
-        case "Hypocycloid":
-          comments.push("      a: " + state.shapes.hypocycloidA);
-          comments.push("      b: " + state.shapes.hypocycloidB);
-          break;
-        case "Rose":
-          comments.push("      n: " + state.shapes.roseN);
-          comments.push("      d: " + state.shapes.roseD);
-          break;
-        default:
-          break;
-      }
+      shapeInfo.options.forEach((option) => {
+        comments.push("      " + option.title + ": " + state.shapes[option.key]);
+      });
 
       comments.push("    Number of Loops: " + state.transform.numLoops);
       comments.push("    Spin: " + state.transform.spinEnabled);
