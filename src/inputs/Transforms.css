@@ -4,3 +4,7 @@
   padding: 0;
 }
 
+.dropdown-toggle,
+.dropdown-menu {
+  width: 100%;
+}

@@ -4,14 +4,15 @@ import reduceReducers from 'reduce-reducers';
 const defaultState = {
   // Transform settings
   shapes: [],
-  currentShape: "Polygon",
+  currentShape: "Text",
   polygonSides: 4,
   starPoints: 5,
   starRatio: 0.5,
   circleLobes: 1,
   reuleauxSides: 3,
-  inputText: "Sandify",
-  startingSize: 10.0,
+  inputText: "ohio",
+  inputFont: "Cursive",
+  startingSize: 500.0,
   epicycloidA: 1.0,
   epicycloidB: .25,
   hypocycloidA: 1.0,

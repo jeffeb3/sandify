@@ -1,4 +1,4 @@
-import { Font2 } from './Fonts';
+import { Font3 } from './Fonts';
 import { Vertex } from '../Geometry';
 
 export const setShapeInputText = ( text ) => {
@@ -8,10 +8,18 @@ export const setShapeInputText = ( text ) => {
   };
 }
 
+export const setShapeInputFont = ( font ) => {
+  return {
+    type: 'SET_SHAPE_INPUT_FONT',
+    value: font,
+  };
+}
+
 export class InputText {
   static mapStateToProps(state, ownProps) {
     return {
       inputText: state.shapes.inputText,
+      inputFont: state.shapes.inputFont,
     }
   }
 
@@ -19,6 +27,9 @@ export class InputText {
     return {
       onInputTextChange: (event) => {
         dispatch(setShapeInputText(event.target.value));
+      },
+      onInputFontChange: (event) => {
+        dispatch(setShapeInputFont(event));
       },
     }
   }
@@ -28,24 +39,26 @@ export class InputText {
       name: "Text",
       vertices: (state) => {
         let points = [];
-        const under_y = -0.25;
-        points.push(Vertex(0.0, under_y))
+        let prevLetter = "";
         let x = 0.0;
         for (let chi = 0; chi < state.shapes.inputText.length; chi++) {
-          var letter = Font2(state.shapes.inputText[chi]);
-          if (0 < letter.vertices.length) {
-            points.push(Vertex(x + letter.vertices[0].x, under_y))
+          var letter = state.shapes.inputText[chi];
+          if (prevLetter === 'b' || prevLetter === 'v' || prevLetter === "o" || prevLetter === 'w') {
+            prevLetter = letter
+            if (letter.search('/[a-z]/') === -1)
+            {
+              letter = letter + "*";
+            }
           }
-          for (let vi = 0; vi < letter.vertices.length; vi++) {
-            points.push(Vertex(letter.vertices[vi].x + x, letter.vertices[vi].y));
+          else {
+            prevLetter = letter
           }
-          if (0 < letter.vertices.length) {
-            points.push(Vertex(x + letter.vertices[letter.vertices.length-1].x, under_y))
+
+          var shape = Font3(letter);
+          for (let vi = 0; vi < shape.vertices.length; vi++) {
+            points.push(Vertex(shape.vertices[vi].x + x, shape.vertices[vi].y));
           }
-          if (chi !== state.shapes.inputText.length-1) {
-            points.push(Vertex(x + letter.max_x, under_y))
-          }
-          x += letter.max_x;
+          x += shape.vertices[shape.vertices.length-1].x;
         }
         let widthOffset = x / 2.0;
         return points.map( (point) => {
@@ -56,9 +69,16 @@ export class InputText {
         {
           title: "Text",
           type: "textarea",
-          key: "inputText",                    
+          key: "inputText",
           value: () => { return parent.props.inputText },
           onChange: parent.props.onInputTextChange,
+        },
+        {
+          title: "Font",
+          type: "dropdown",
+          choices: ["Cursive", "Sans Serif", "Monospace"],
+          value: () => { return parent.props.inputFont },
+          onChange: parent.props.onInputFontChange,
         },
       ],
     };
@@ -69,6 +89,11 @@ export class InputText {
       case 'SET_SHAPE_INPUT_TEXT':
         return {...state,
           inputText: action.value,
+        };
+
+      case 'SET_SHAPE_INPUT_FONT':
+        return {...state,
+          inputFont: action.value,
         };
 
       default:

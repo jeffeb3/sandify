@@ -2,8 +2,8 @@
 const defaultState = {
   xformOffsetX: 0.0,
   xformOffsetY: 0.0,
-  numLoops: 10,
-  growEnabled: true,
+  numLoops: 1,
+  growEnabled: false,
   growValue: 100,
   spinEnabled: false,
   spinValue: 2,

@@ -6,6 +6,8 @@ import {
     FormControl,
     FormGroup,
     Panel,
+    MenuItem,
+    DropdownButton
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 
@@ -73,6 +75,12 @@ class Wiper extends Component {
 
           </Panel>
         </Panel>
+        <DropdownButton bsStyle="primary" id="dropdown-basic-button" title="Dropdown button">
+          <MenuItem eventKey="Alpha">Alpha</MenuItem>
+          <MenuItem eventKey="Beta">Beta</MenuItem>
+          <MenuItem eventKey="Charlie">Charlie</MenuItem>
+          <MenuItem eventKey="Delta">Delta</MenuItem>
+        </DropdownButton>
       </div>
     );
   }
