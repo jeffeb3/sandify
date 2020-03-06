@@ -1,7 +1,8 @@
 import { Vertex } from '../Geometry';
-import { raysol_cursive } from './raysoloman_cursive';
+import { raysol_cursive } from './raysol_cursive';
+import { raysol_sanserif } from './raysol_sanserif';
 
-const fontSpacing = 1.5;//.08;
+const fontSpacing = 1.5;
 
 // Format for vertices: [x,y,b] where in a 0:7(8) by -1:7 grid defining x,y and b defines the line or curve.
 // Bulge directions could be represented by a 0:4 list starting at none, then NE and going clockwise.
@@ -135,7 +136,7 @@ const raysolConverter = (vertices) => {
   };
 }
 
-export const Font2 = (ch) => {
+export const MonospaceFont = (ch) => {
   let upper = ch.toUpperCase();
   if (billsey.hasOwnProperty(upper)) {
     return billseyConverter(billsey[upper]);
@@ -144,10 +145,18 @@ export const Font2 = (ch) => {
   }
 }
 
-export const Font3 = (ch) => {
+export const CursiveFont = (ch) => {
   if (raysol_cursive.hasOwnProperty(ch)) {
     return raysolConverter(raysol_cursive[ch]);
   } else {
     return raysolConverter(raysol_cursive[' ']);
+  }
+}
+
+export const SansSerifFont = (ch) => {
+  if (raysol_cursive.hasOwnProperty(ch)) {
+    return raysolConverter(raysol_sanserif[ch]);
+  } else {
+    return raysolConverter(raysol_sanserif[' ']);
   }
 }

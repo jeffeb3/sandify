@@ -1,4 +1,4 @@
-import { Font3 } from './Fonts';
+import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts';
 import { Vertex } from '../Geometry';
 
 export const setShapeInputText = ( text ) => {
@@ -45,7 +45,7 @@ export class InputText {
           var letter = state.shapes.inputText[chi];
           if (prevLetter === 'b' || prevLetter === 'v' || prevLetter === "o" || prevLetter === 'w') {
             prevLetter = letter
-            if (letter.search('/[a-z]/') === -1)
+            if (letter.search('/[a-z]/') === -1 && state.shapes.inputFont === 'Cursive')
             {
               letter = letter + "*";
             }
@@ -54,7 +54,18 @@ export class InputText {
             prevLetter = letter
           }
 
-          var shape = Font3(letter);
+          if (state.shapes.inputFont === 'Cursive') {
+            var shape = CursiveFont(letter);
+          } else if (state.shapes.inputFont === 'Sans Serif') {
+            var shape = SansSerifFont(letter);
+          } else if (state.shapes.inputFont === 'Monospace') {
+            var shape = MonospaceFont(letter);
+          } else {
+            // Internal error, but I'm going to just recover
+            var shape = CursiveFont(letter);
+          }
+
+
           for (let vi = 0; vi < shape.vertices.length; vi++) {
             points.push(Vertex(shape.vertices[vi].x + x, shape.vertices[vi].y));
           }
