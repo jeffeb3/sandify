@@ -17,7 +17,9 @@ with open('abcd.txt', 'r') as abcd:
         if not line.strip():
             continue
         values = line.split()
-        vertex = (float(values[1]), float(values[2]))
+        scale = 10.0
+        y_offset = 0.2
+        vertex = (scale * float(values[1]), scale * (float(values[2])-y_offset))
 
         # This is a new letter
         if values[0] == '1':
@@ -33,7 +35,7 @@ with open('abcd.txt', 'r') as abcd:
         letterVertices.append(vertex)
 
 with open('raysoloman_cursive.js', 'w') as output:
-    output.write('let raysol = {\n')
+    output.write('export let raysol_cursive = {\n')
     for letter, vertices in letterCodex:
         vertexString = ''
         for vertex in vertices:
