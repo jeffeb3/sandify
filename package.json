@@ -1,7 +1,7 @@
 {
   "name": "sandify",
   "homepage": "https://sandify.org",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "dependencies": {
     "rc-slider": "^8.6.3",
