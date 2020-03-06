@@ -63,18 +63,28 @@ export const setShowGCode = ( on ) => {
 // https://stackoverflow.com/a/18197511
 //
 function download(filename, text) {
-  var pom = document.createElement('a');
-  pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  pom.setAttribute('download', filename);
 
-  if (document.createEvent) {
-    var event = document.createEvent('MouseEvents');
-    event.initEvent('click', true, true);
-    pom.dispatchEvent(event);
+  let link = document.createElement('a');
+  link.download = filename;
+
+  let blob = new Blob([text],{type: 'text/plain;charset=utf-8'});
+
+  // Windows Edge fix
+  if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveOrOpenBlob(blob, filename);
+  } else {
+    link.href = URL.createObjectURL(blob);
+    if (document.createEvent) {
+      var event = document.createEvent('MouseEvents');
+      event.initEvent('click', true, true);
+      link.dispatchEvent(event);
+    }
+    else {
+      link.click();
+    }
+    URL.revokeObjectURL(link.href);
   }
-  else {
-    pom.click();
-  }
+
 }
 
 function gcode(vertex) {
