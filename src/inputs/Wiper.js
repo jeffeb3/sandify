@@ -6,8 +6,6 @@ import {
     FormControl,
     FormGroup,
     Panel,
-    MenuItem,
-    DropdownButton
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 

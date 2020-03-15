@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  ButtonGroup,
   Col,
   ControlLabel,
   Form,
@@ -157,19 +156,17 @@ class Shape extends Component {
                    {option.title}
                  </Col>
                  <Col sm={8}>
-                   <ButtonGroup justified>
-                     <DropdownButton bsStyle="default"
-                                     id="dropdown-basic-button"
-                                     title={option.value()}
-                                     onSelect={(event) => {
-                                         option.onChange(event);
-                                     }}
-                                     onKeyDown={disableEnter}>
-                       {option.choices.map((choice) => {
-                           return <MenuItem key={choice} eventKey={choice}>{choice}</MenuItem>;
-                       })}
-                     </DropdownButton>
-                   </ButtonGroup>
+                   <DropdownButton bsStyle="default"
+                                   id="dropdown-basic-button"
+                                   title={option.value()}
+                                   onSelect={(event) => {
+                                       option.onChange(event);
+                                   }}
+                                   onKeyDown={disableEnter}>
+                     {option.choices.map((choice) => {
+                         return <MenuItem key={choice} eventKey={choice}>{choice}</MenuItem>;
+                     })}
+                   </DropdownButton>
                  </Col>
                </FormGroup>
       } else {

@@ -54,15 +54,16 @@ export class InputText {
             prevLetter = letter
           }
 
+          var shape;
           if (state.shapes.inputFont === 'Cursive') {
-            var shape = CursiveFont(letter);
+            shape = CursiveFont(letter);
           } else if (state.shapes.inputFont === 'Sans Serif') {
-            var shape = SansSerifFont(letter);
+            shape = SansSerifFont(letter);
           } else if (state.shapes.inputFont === 'Monospace') {
-            var shape = MonospaceFont(letter);
+            shape = MonospaceFont(letter);
           } else {
             // Internal error, but I'm going to just recover
-            var shape = CursiveFont(letter);
+            shape = CursiveFont(letter);
           }
 
 
