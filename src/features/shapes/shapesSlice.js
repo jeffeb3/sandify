@@ -25,6 +25,7 @@ const shapesSlice = createSlice({
     circle_lobes: 1,
     reuleaux_sides: 3,
     input_text: "Sandify",
+    input_font: "Cursive",    
     starting_size: 10.0,
     epicycloid_a: 1.0,
     epicycloid_b: .25,

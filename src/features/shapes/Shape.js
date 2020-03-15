@@ -7,7 +7,10 @@ import {
   FormGroup,
   ListGroupItem,
   Panel,
+  MenuItem,
+  DropdownButton
 } from 'react-bootstrap'
+import './Shape.css'
 
 export const disableEnter = (event) => {
   if (event.key === 'Enter' && event.shiftKey === false) {
@@ -23,22 +26,43 @@ class Shape extends Component {
     }
 
     var options_render = this.props.options.map( (option) => {
-      return <FormGroup controlId="options-step" key={option.title}>
-               <Col componentClass={ControlLabel} sm={4}>
-                 {option.title}
-               </Col>
-               <Col sm={8}>
-                 <FormControl
-                   type={option.type ? option.type : "number"}
-                   step={option.step ? option.step : 1}
-                   value={option.value()}
-                   onChange={(event) => {
-                     option.onChange(event)
-                   }}
-                   onKeyDown={disableEnter}/>
-               </Col>
-             </FormGroup>
-    });
+      if (option.type && option.type === "dropdown") {
+        return <FormGroup controlId="options-step" key={option.title}>
+                 <Col componentClass={ControlLabel} sm={4}>
+                   {option.title}
+                 </Col>
+                 <Col sm={8}>
+                   <DropdownButton bsStyle="default"
+                                   id="dropdown-basic-button"
+                                   title={option.value()}
+                                   onSelect={(event) => {
+                                       option.onChange(event);
+                                   }}
+                                   onKeyDown={disableEnter}>
+                     {option.choices.map((choice) => {
+                         return <MenuItem key={choice} eventKey={choice}>{choice}</MenuItem>;
+                     })}
+                   </DropdownButton>
+                 </Col>
+               </FormGroup>
+      } else {
+        return <FormGroup controlId="options-step" key={option.title}>
+                 <Col componentClass={ControlLabel} sm={4}>
+                   {option.title}
+                 </Col>
+                 <Col sm={8}>
+                   <FormControl
+                     type={option.type ? option.type : "number"}
+                     step={option.step ? option.step : 1}
+                     value={option.value()}
+                     onChange={(event) => {
+                       option.onChange(event)
+                     }}
+                     onKeyDown={disableEnter}/>
+                 </Col>
+               </FormGroup>
+      }
+    })
 
     var options_list_render = undefined;
     var link_render = undefined;

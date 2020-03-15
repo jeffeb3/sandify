@@ -19,7 +19,7 @@ export class InputText {
   static mapStateToProps(state, ownProps) {
     return {
       input_text: state.shapes.input_text,
-      inputFont: state.shapes.inputFont,
+      input_font: state.shapes.input_font,
     }
   }
 
@@ -42,10 +42,10 @@ export class InputText {
         let prevLetter = "";
         let x = 0.0;
         for (let chi = 0; chi < state.shapes.input_text.length; chi++) {
-          var letter = state.shapes.inputText[chi];
+          var letter = state.shapes.input_text[chi];
           if (prevLetter === 'b' || prevLetter === 'v' || prevLetter === "o" || prevLetter === 'w') {
             prevLetter = letter
-            if (letter.search('/[a-z]/') === -1 && state.shapes.inputFont === 'Cursive')
+            if (letter.search('/[a-z]/') === -1 && state.shapes.input_font === 'Cursive')
             {
               letter = letter + "*";
             }
@@ -55,11 +55,11 @@ export class InputText {
           }
 
           var shape;
-          if (state.shapes.inputFont === 'Cursive') {
+          if (state.shapes.input_font === 'Cursive') {
             shape = CursiveFont(letter);
-          } else if (state.shapes.inputFont === 'Sans Serif') {
+          } else if (state.shapes.input_font === 'Sans Serif') {
             shape = SansSerifFont(letter);
-          } else if (state.shapes.inputFont === 'Monospace') {
+          } else if (state.shapes.input_font === 'Monospace') {
             shape = MonospaceFont(letter);
           } else {
             // Internal error, but I'm going to just recover
@@ -89,7 +89,7 @@ export class InputText {
           title: "Font",
           type: "dropdown",
           choices: ["Cursive", "Sans Serif", "Monospace"],
-          value: () => { return parent.props.inputFont },
+          value: () => { return parent.props.input_font },
           onChange: parent.props.onInputFontChange,
         },
       ],
@@ -105,7 +105,7 @@ export class InputText {
 
       case 'SET_SHAPE_INPUT_FONT':
         return {...state,
-          inputFont: action.value,
+          input_font: action.value,
         };
 
       default:

@@ -14,6 +14,7 @@ describe('shapes reducer', () => {
       star_ratio: 0.5,
       circle_lobes: 1,
       reuleaux_sides: 3,
+      input_font: "Cursive",      
       input_text: "Sandify",
       starting_size: 10.0,
       epicycloid_a: 1.0,
