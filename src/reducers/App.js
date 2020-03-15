@@ -1,6 +1,6 @@
 
 const defaultState = {
-  sandifyVersion: "0.1.6", // Also change the version in package.json.
+  sandifyVersion: "0.1.7", // Also change the version in package.json.
   input: 0,
   reverse: false,
   canvas_width: 600,

@@ -1,4 +1,6 @@
 import { Vertex } from '../Geometry';
+import { raysol_cursive } from './raysol_cursive';
+import { raysol_sanserif } from './raysol_sanserif';
 
 const fontSpacing = 1.5;
 
@@ -122,11 +124,39 @@ const billseyConverter = (vertices) => {
   };
 }
 
-export const Font2 = (ch) => {
+const raysolConverter = (vertices) => {
+  let newVertices = [];
+  vertices.forEach( (vertex) => {
+    newVertices.push(Vertex(vertex[0], vertex[1]));
+  });
+
+  return {
+    max_x: fontSpacing,
+    vertices: newVertices,
+  };
+}
+
+export const MonospaceFont = (ch) => {
   let upper = ch.toUpperCase();
   if (billsey.hasOwnProperty(upper)) {
     return billseyConverter(billsey[upper]);
   } else {
     return billseyConverter(billsey[' ']);
+  }
+}
+
+export const CursiveFont = (ch) => {
+  if (raysol_cursive.hasOwnProperty(ch)) {
+    return raysolConverter(raysol_cursive[ch]);
+  } else {
+    return raysolConverter(raysol_cursive[' ']);
+  }
+}
+
+export const SansSerifFont = (ch) => {
+  if (raysol_cursive.hasOwnProperty(ch)) {
+    return raysolConverter(raysol_sanserif[ch]);
+  } else {
+    return raysolConverter(raysol_sanserif[' ']);
   }
 }

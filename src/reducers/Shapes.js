@@ -11,6 +11,7 @@ const defaultState = {
   circleLobes: 1,
   reuleauxSides: 3,
   inputText: "Sandify",
+  inputFont: "Cursive",
   startingSize: 10.0,
   epicycloidA: 1.0,
   epicycloidB: .25,
