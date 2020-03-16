@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
   Col,
   ControlLabel,
@@ -8,7 +8,7 @@ import {
   ListGroup,
   Panel,
 } from 'react-bootstrap'
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'
 import { disableEnter } from '../shapes/Shape'
 import ShapeList from '../shapes/ShapeList'
 import {

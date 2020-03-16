@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
     Col,
@@ -11,7 +11,6 @@ import {
     ToggleButton,
     ToggleButtonGroup,
 } from 'react-bootstrap'
-
 import {
   toggleMachineRectExpanded,
   setMachineMinX,
@@ -20,17 +19,17 @@ import {
   setMachineMaxY,
   setMachineRectOrigin } from './machineSlice'
 
-  const mapState = (state, ownProps) => {
-    return {
-      expanded: state.machine.rect_expanded,
-      active:   state.machine.rectangular,
-      min_x:    state.machine.min_x,
-      max_x:    state.machine.max_x,
-      min_y:    state.machine.min_y,
-      max_y:    state.machine.max_y,
-      origin:   state.machine.rect_origin,
-    }
+const mapState = (state, ownProps) => {
+  return {
+    expanded: state.machine.rect_expanded,
+    active:   state.machine.rectangular,
+    min_x:    state.machine.min_x,
+    max_x:    state.machine.max_x,
+    min_y:    state.machine.min_y,
+    max_y:    state.machine.max_y,
+    origin:   state.machine.rect_origin,
   }
+}
 
 const mapDispatch = (dispatch, ownProps) => {
   return {

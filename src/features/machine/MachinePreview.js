@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Panel } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
-import { getVerticesStats } from '../common/Computer.js';
-import MachineSettings from './MachineSettings';
-import PreviewWindow from './PreviewWindow';
+import { getVerticesStats } from '../../common/Computer.js'
+import MachineSettings from './MachineSettings'
+import PreviewWindow from './PreviewWindow'
 import { setMachineSlider } from './machineSlice'
-import './MachinePreview.css';
+import './MachinePreview.css'
 
 const mapState = (state, ownProps) => {
   return {

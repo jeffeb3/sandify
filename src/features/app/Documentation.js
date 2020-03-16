@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import './Documentation.css';
+import React, { Component } from 'react'
+import './Documentation.css'
 
 class Documentation extends Component {
   render () {

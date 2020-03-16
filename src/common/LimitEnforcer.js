@@ -1,5 +1,5 @@
-import { Vertex } from './Geometry';
-import Victor from 'victor';
+import { Vertex } from './Geometry'
+import Victor from 'victor'
 
 // Determines which of 8 neighbor areas the point is in:
 //   https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle

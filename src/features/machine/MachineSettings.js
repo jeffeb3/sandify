@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
     ListGroup,
     Panel,
 } from 'react-bootstrap'
-
 import RectSettings from './RectSettings.js'
 import PolarSettings from './PolarSettings.js'
-import './MachineSettings.css';
+import './MachineSettings.css'
 
 class MachineSettings extends Component {
   render() {

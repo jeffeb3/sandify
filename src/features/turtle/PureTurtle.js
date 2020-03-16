@@ -1,7 +1,7 @@
 import {
   degToRad,
   radToDeg,
-} from '../common/Geometry';
+} from '../../common/Geometry'
 
 // Pure functions from the original turtle language.
 

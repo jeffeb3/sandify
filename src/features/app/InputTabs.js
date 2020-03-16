@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
     Tab,
     Tabs,
@@ -8,7 +8,6 @@ import Transforms from '../transforms/Transforms.js'
 import Wiper from '../wiper/Wiper.js'
 import ThetaRho from '../theta_rho/ThetaRho.js'
 import { chooseInput} from '../app/appSlice.js'
-import './InputTabs.css'
 
 class InputTabs extends Component {
   handleSelect( key ) {

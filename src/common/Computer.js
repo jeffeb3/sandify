@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect'
 import {
   degToRad,
   Vertex,
@@ -7,9 +8,9 @@ import {
   enforcePolarLimits
 } from './LimitEnforcer';
 import Victor from 'victor';
-import { createSelector } from 'reselect'
+import { findShape } from '../features/shapes/registered_shapes.js'
 
-// Transform funtions
+// Transform functions
 function rotate (vertex, angle_deg) {
   var angle = Math.PI / 180.0 * angle_deg;
   return Vertex(
@@ -87,15 +88,6 @@ const outOfBounds = (point, width, height) => {
     return true;
   }
   return false;
-}
-
-const findShape = (shapes, name) => {
-  for (let i=0; i<shapes.length; i++) {
-    if (name === shapes[i].name) {
-      return shapes[i];
-    }
-  }
-  return null;
 }
 
 // Intersect the line with the boundary, and return the point exactly on the boundary.
@@ -415,10 +407,12 @@ const thetaRho = (state) => {
 }
 
 const transformShapes = (state) => {
-  const shape = findShape(state.shapes.shapes, state.shapes.current_shape);
+  let shape = findShape(state.shapes.current_shape)
+  let shapeInfo = shape.getInfo()
   var input = []
+
   if (shape) {
-    input = shape.vertices(state).map( (vertex) => {
+    input = shapeInfo.vertices(state).map( (vertex) => {
       return scale(vertex, 100.0 * state.shapes.starting_size);
     });
   }

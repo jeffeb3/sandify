@@ -1,21 +1,21 @@
-import React, { Component } from 'react';
-import { configureStore } from "@reduxjs/toolkit";
-import { combineReducers } from 'redux';
-import { Provider } from 'react-redux';
-import appReducer from './appSlice.js';
-import fileReducer from '../theta_rho/fileSlice.js';
-import machineReducer from '../machine/machineSlice.js';
-import gcodeReducer from '../gcode/gCodeSlice.js';
-import wiperReducer from '../wiper/wiperSlice.js';
-import shapesReducer from '../shapes/shapesSlice.js';
-import transformsReducer from '../transforms/transformsSlice.js';
-import turtleReducer from '../turtle/turtleSlice.js';
-import Header from './Header';
-import Documentation from './Documentation';
-import InputTabs from './InputTabs';
-import MachinePreview from '../machine/MachinePreview';
-import GCodeGenerator from '../gcode/GCodeGenerator';
-import './App.css';
+import React, { Component } from 'react'
+import { configureStore } from "@reduxjs/toolkit"
+import { combineReducers } from 'redux'
+import { Provider } from 'react-redux'
+import appReducer from './appSlice.js'
+import fileReducer from '../theta_rho/fileSlice.js'
+import machineReducer from '../machine/machineSlice.js'
+import gcodeReducer from '../gcode/gCodeSlice.js'
+import wiperReducer from '../wiper/wiperSlice.js'
+import shapesReducer from '../shapes/shapeSlice.js'
+import transformsReducer from '../transforms/transformsSlice.js'
+import turtleReducer from '../turtle/turtleSlice.js'
+import Header from './Header'
+import Documentation from './Documentation'
+import InputTabs from './InputTabs'
+import MachinePreview from '../machine/MachinePreview'
+import GCodeGenerator from '../gcode/GCodeGenerator'
+import './App.css'
 
 const store =
   configureStore({

@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
   radToDeg,
   Vertex,
-} from '../common/Geometry';
+} from '../../common/Geometry'
 import { radial } from './TurtleUtils.js'
 import Slider from './Slider.js'
 import {
@@ -13,7 +13,7 @@ import {
   angle,
   right,
   left,
-} from './PureTurtle.js';
+} from './PureTurtle.js'
 
 let ReduxTurtle = (addVertex) => {
   let turtle = Turtle();

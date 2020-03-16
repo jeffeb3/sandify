@@ -15,8 +15,9 @@ import {
   setGCodeShow,
   toggleGCodeReverse,
 } from './gCodeSlice'
-import { getVertices } from '../common/Computer.js';
-import { Vertex } from '../common/Geometry'
+import { findShape } from '../shapes/registered_shapes.js'
+import { getVertices } from '../../common/Computer.js';
+import { Vertex } from '../../common/Geometry'
 import Victor from 'victor';
 import './GCode.css';
 
@@ -83,7 +84,7 @@ const getComments = (state) => {
 
   switch (state.app.input) {
     case 0: // shapes
-      var shapeInfo = state.shapes.shapes.find(shape => shape.name === state.shapes.current_shape);
+      var shapeInfo = findShape(state.shapes.current_shape).getInfo();
 
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.shapes.starting_size);

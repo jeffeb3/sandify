@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
-import { Vertex } from '../common/Geometry';
+import { Vertex } from '../../common/Geometry'
 import { setMachineSize } from './machineSlice'
-
 import {
   transform,
   getVertices,
-} from '../common/Computer';
+} from '../../common/Computer';
 import { createSelector } from 'reselect'
 
 const getTransform = state => state.transform;
@@ -26,7 +25,7 @@ const getTrackVertices = createSelector(
   }
 );
 
-const mapStateToProps = (state, ownProps) => {
+const mapState = (state, ownProps) => {
   return {
     use_rect: state.machine.rectangular,
     min_x: state.machine.min_x,
@@ -43,7 +42,7 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
+const mapDispatch = (dispatch, ownProps) => {
   return {
     onResize: (size) => {
       dispatch(setMachineSize(size))
@@ -239,4 +238,4 @@ class PreviewWindow extends Component {
     );
   }
 }
-export default connect(mapStateToProps, mapDispatchToProps)(PreviewWindow);
+export default connect(mapState, mapDispatch)(PreviewWindow);
