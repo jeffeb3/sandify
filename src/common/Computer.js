@@ -244,7 +244,8 @@ export const polishVertices = (state, vertices) => {
       }
     }
   }
-  if (state.app.reverse) {
+
+  if (state.gcode.reverse) {
     vertices.reverse();
   }
   if (machine.rectangular) {
@@ -433,6 +434,7 @@ const getApp = state => state.app;
 const getShapes = state => state.shapes;
 const getTransform = state => state.transform;
 const getFile = state => state.file;
+const getGCode = state => state.gcode;
 const getWiper = state => state.wiper;
 const getMachine = state => state.machine;
 
@@ -442,15 +444,17 @@ export const getVertices = createSelector(
       getShapes,
       getTransform,
       getFile,
+      getGCode,
       getWiper,
       getMachine,
   ],
-  (app, shapes, transform, file, wiperState, machine) => {
+  (app, shapes, transform, file, gcode, wiperState, machine) => {
     let state = {
       app: app,
       shapes: shapes,
       transform: transform,
       file: file,
+      gcode: gcode,
       wiper: wiperState,
       machine: machine
     };

@@ -130,7 +130,7 @@ const getComments = (state) => {
       comments.push("  Content Type: Unknown");
       break;
   }
-  comments.push("  Path Reversed: " + state.app.reverse);
+  comments.push("  Path Reversed: " + state.gcode.reverse);
   comments.push("");
 
   return comments;
