@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import { connect } from 'react-redux'
+import React, { Component } from 'react'
 import {
   Col,
   ControlLabel,
@@ -10,6 +11,15 @@ import {
   MenuItem,
   DropdownButton
 } from 'react-bootstrap'
+import {
+  setXFormOffsetX,
+  setXFormOffsetY,
+} from '../transforms/transformsSlice'
+import {
+  setCurrentShape,
+  setShapeStartingSize
+} from './shapeSlice'
+import { registeredShapes } from './registered_shapes.js'
 import './Shape.css'
 
 export const disableEnter = (event) => {
@@ -17,6 +27,38 @@ export const disableEnter = (event) => {
     event.preventDefault();
   }
 };
+
+const mapState = (state, ownProps) => {
+  let props = {
+    current_shape: state.shapes.current_shape,
+    starting_size: state.shapes.starting_size,
+    x_offset: state.transform.xformOffsetX,
+    y_offset: state.transform.xformOffsetY,
+  };
+
+  let registeredProps = registeredShapes.map((shape) => shape.mapState(state, ownProps));
+  return Object.assign(props, ...registeredProps);
+}
+
+const mapDispatch = (dispatch, ownProps) => {
+  let methods = {
+    setCurrentShape: (name) => {
+      dispatch(setCurrentShape(name));
+    },
+    onSizeChange: (event) => {
+      dispatch(setShapeStartingSize(event.target.value));
+    },
+    onOffsetXChange: (event) => {
+      dispatch(setXFormOffsetX(event.target.value));
+    },
+    onOffsetYChange: (event) => {
+      dispatch(setXFormOffsetY(event.target.value));
+    },
+  };
+  let registeredMethods = registeredShapes.map((shape) => shape.mapDispatch(dispatch, ownProps));
+
+  return Object.assign(methods, ...registeredMethods);
+}
 
 class Shape extends Component {
   render() {
@@ -34,9 +76,9 @@ class Shape extends Component {
                  <Col sm={8}>
                    <DropdownButton bsStyle="default"
                                    id="dropdown-basic-button"
-                                   title={option.value()}
+                                   title={option.value(this.props)}
                                    onSelect={(event) => {
-                                       option.onChange(event);
+                                       option.onChange(this.props)(event);
                                    }}
                                    onKeyDown={disableEnter}>
                      {option.choices.map((choice) => {
@@ -54,9 +96,9 @@ class Shape extends Component {
                    <FormControl
                      type={option.type ? option.type : "number"}
                      step={option.step ? option.step : 1}
-                     value={option.value()}
+                     value={option.value(this.props)}
                      onChange={(event) => {
-                       option.onChange(event)
+                       option.onChange(this.props)(event)
                      }}
                      onKeyDown={disableEnter}/>
                  </Col>
@@ -92,4 +134,4 @@ class Shape extends Component {
   }
 }
 
-export default Shape
+export default connect(mapState, mapDispatch)(Shape)

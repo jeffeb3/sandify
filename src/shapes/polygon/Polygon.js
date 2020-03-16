@@ -1,20 +1,24 @@
-import { Vertex } from '../common/Geometry.js';
-
-export const setShapePolygonSides = ( sides ) => {
-  return {
-    type: 'SET_SHAPE_POLYGON_SIDES',
-    value: sides,
-  };
-}
+import { Vertex } from '../../common/Geometry.js';
+import polygonReducer, { setShapePolygonSides } from './polygonSlice.js'
 
 export class Polygon {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      polygon_sides: 4
+    }
+  }
+  
+  static reducer(state, action) {
+    return polygonReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       polygon_sides: state.shapes.polygon_sides,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onPolygonSizeChange: (event) => {
         dispatch(setShapePolygonSides(event.target.value));
@@ -22,7 +26,7 @@ export class Polygon {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Polygon",
       vertices: (state) => {
@@ -37,22 +41,10 @@ export class Polygon {
         {
           title: "Number of Sides",
           key: "polygon_sides",
-          value: () => { return parent.props.polygon_sides },
-          onChange: parent.props.onPolygonSizeChange,
+          value: (props) => { return props.polygon_sides },
+          onChange: (props) => { return props.onPolygonSizeChange },
         },
       ],
-    };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_POLYGON_SIDES':
-        return {...state,
-          polygon_sides: action.value,
-        };
-
-      default:
-        return state;
     }
   }
 }

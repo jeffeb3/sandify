@@ -1,28 +1,29 @@
-import { Vertex } from '../common/Geometry';
-
-export const setShapeRoseN = ( n ) => {
-  return {
-    type: 'SET_SHAPE_ROSE_N',
-    value: n,
-  };
-}
-
-export const setShapeRoseD = ( d ) => {
-  return {
-    type: 'SET_SHAPE_ROSE_D',
-    value: d,
-  };
-}
+import { Vertex } from '../../common/Geometry'
+import roseReducer, {
+  setShapeRoseN,
+  setShapeRoseD
+} from './roseSlice.js'
 
 export class Rose {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      rose_n: 3,
+      rose_d: 2
+    }
+  }
+
+  static reducer(state, action) {
+    return roseReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       rose_n: state.shapes.rose_n,
       rose_d: state.shapes.rose_d,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onRoseNChange: (event) => {
         dispatch(setShapeRoseN(event.target.value));
@@ -33,7 +34,7 @@ export class Rose {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Rose",
       link: "http://mathworld.wolfram.com/Rose.html",
@@ -57,35 +58,18 @@ export class Rose {
         {
           title: "Numerator",
           key: "roseN",
-          value: () => { return parent.props.rose_n },
-          onChange: parent.props.onRoseNChange,
+          value: (props) => { return props.rose_n },
+          onChange: (props) => { return props.onRoseNChange },
           step: 1,
         },
         {
           title: "Denominator",
           key: "roseD",
-          value: () => { return parent.props.rose_d },
-          onChange: parent.props.onRoseDChange,
+          value: (props) => { return props.rose_d },
+          onChange: (props) => { return props.onRoseDChange },
           step: 1,
         },
       ],
     };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_ROSE_N':
-        return {...state,
-          rose_n: action.value,
-        };
-
-      case 'SET_SHAPE_ROSE_D':
-        return {...state,
-          rose_d: action.value,
-        };
-
-      default:
-        return state;
-    }
   }
 }

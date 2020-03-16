@@ -1,6 +1,6 @@
-import { Vertex } from '../common/Geometry';
-import { raysol_cursive } from './raysol_cursive';
-import { raysol_sanserif } from './raysol_sanserif';
+import { Vertex } from '../../common/Geometry'
+import { raysol_cursive } from './raysol_cursive'
+import { raysol_sanserif } from './raysol_sanserif'
 
 const fontSpacing = 1.5;
 

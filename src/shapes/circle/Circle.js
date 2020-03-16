@@ -1,20 +1,24 @@
-import { Vertex } from '../common/Geometry';
-
-export const setShapeCircleLobes = ( sides ) => {
-  return {
-    type: 'SET_SHAPE_CIRCLE_LOBES',
-    value: sides,
-  };
-}
+import { Vertex } from '../../common/Geometry'
+import circleReducer, { setShapeCircleLobes } from './circleSlice.js'
 
 export class Circle {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      circle_lobes: 1
+    }
+  }
+
+  static reducer(state, action) {
+    return circleReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       circle_lobes: state.shapes.circle_lobes,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onCircleLobesChange: (event) => {
         dispatch(setShapeCircleLobes(event.target.value));
@@ -22,7 +26,7 @@ export class Circle {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Circle",
       vertices: (state) => {
@@ -37,22 +41,10 @@ export class Circle {
         {
           title: "Number of Lobes",
           key: "circleLobes",
-          value: () => { return parent.props.circle_lobes },
-          onChange: parent.props.onCircleLobesChange,
+          value: (props) => { return props.circle_lobes },
+          onChange: (props) => { return props.onCircleLobesChange },
         },
       ],
-    };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_CIRCLE_LOBES':
-        return {...state,
-          circle_lobes: action.value,
-        };
-
-      default:
-        return state;
     }
   }
 }

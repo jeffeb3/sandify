@@ -1,19 +1,28 @@
-import { Vertex } from '../common/Geometry';
+import { Vertex } from '../../common/Geometry'
+import heartReducer from './heartSlice.js'
 
 export class Heart {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {}
+  }
+
+  static reducer(state, action) {
+    return heartReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
 
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
 
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Heart",
       vertices: (state) => {
@@ -31,13 +40,6 @@ export class Heart {
       },
       options: [
       ],
-    };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      default:
-        return state;
     }
   }
 }

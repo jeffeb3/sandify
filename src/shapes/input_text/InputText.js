@@ -1,29 +1,30 @@
-import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts';
-import { Vertex } from '../common/Geometry';
-
-export const setShapeInputText = ( text ) => {
-  return {
-    type: 'SET_SHAPE_INPUT_TEXT',
-    value: text,
-  };
-}
-
-export const setShapeInputFont = ( font ) => {
-  return {
-    type: 'SET_SHAPE_INPUT_FONT',
-    value: font,
-  };
-}
+import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
+import { Vertex } from '../../common/Geometry'
+import inputTextReducer, {
+  setShapeInputText,
+  setShapeInputFont
+} from './inputTextSlice.js'
 
 export class InputText {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      input_text: "Sandify",
+      input_font: "Cursive",
+    }
+  }
+
+  static reducer(state, action) {
+    return inputTextReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       input_text: state.shapes.input_text,
       input_font: state.shapes.input_font,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onInputTextChange: (event) => {
         dispatch(setShapeInputText(event.target.value));
@@ -34,7 +35,7 @@ export class InputText {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Text",
       vertices: (state) => {
@@ -82,34 +83,17 @@ export class InputText {
           title: "Text",
           type: "textarea",
           key: "inputText",
-          value: () => { return parent.props.input_text },
-          onChange: parent.props.onInputTextChange,
+          value: (props) => { return props.input_text },
+          onChange: (props) => { return props.onInputTextChange }
         },
         {
           title: "Font",
           type: "dropdown",
           choices: ["Cursive", "Sans Serif", "Monospace"],
-          value: () => { return parent.props.input_font },
-          onChange: parent.props.onInputFontChange,
+          value: (props) => { return props.input_font },
+          onChange: (props) => { return props.onInputFontChange }
         },
       ],
-    };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_INPUT_TEXT':
-        return {...state,
-          input_text: action.value,
-        };
-
-      case 'SET_SHAPE_INPUT_FONT':
-        return {...state,
-          input_font: action.value,
-        };
-
-      default:
-        return state;
     }
   }
 }

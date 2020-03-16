@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry';
+import { Vertex } from '../../common/Geometry'
 
 let Vicious1Vertices = () => {
   return [

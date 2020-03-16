@@ -10,11 +10,10 @@ import {
   Panel,
 } from 'react-bootstrap'
 import {
-  registeredShapes,
   setCurrentShape,
-  setShapeStartingSize,
-  addShape
-} from './shapesSlice'
+  setShapeStartingSize
+} from './shapeSlice'
+import { registeredShapes } from './registered_shapes.js'
 import {
   setXFormOffsetX,
   setXFormOffsetY,
@@ -22,23 +21,16 @@ import {
 import Shape, { disableEnter } from './Shape'
 
 const mapState = (state, ownProps) => {
-  let props = {
-    shapes: state.shapes.shapes,
+  return {
     current_shape: state.shapes.current_shape,
     starting_size: state.shapes.starting_size,
     x_offset: state.transform.xformOffsetX,
     y_offset: state.transform.xformOffsetY,
-  };
-  let registeredProps = registeredShapes.map((shape) => shape.mapStateToProps(state, ownProps));
-
-  return Object.assign(props, ...registeredProps);
+  }
 }
 
 const mapDispatch = (dispatch, ownProps) => {
-  let methods = {
-    addShape: (shape) => {
-      dispatch(addShape(shape));
-    },
+  return {
     setCurrentShape: (name) => {
       dispatch(setCurrentShape(name));
     },
@@ -51,33 +43,20 @@ const mapDispatch = (dispatch, ownProps) => {
     onOffsetYChange: (event) => {
       dispatch(setXFormOffsetY(event.target.value));
     },
-  };
-  let registeredMethods = registeredShapes.map((shape) => shape.mapDispatchToProps(dispatch, ownProps));
-
-  return Object.assign(methods, ...registeredMethods);
+  }
 }
 
 class ShapeList extends Component {
-  constructor(props) {
-    super(props)
-
-    registeredShapes.forEach((shape) => {
-      this.props.addShape(shape.getParams(this));
-    });
-  }
-
   render() {
-    let self = this;
-
-    var shape_render = this.props.shapes.map( (shape) => {
+    var shape_render = registeredShapes.map( (shape) => {
+      let shapeInfo = shape.getInfo(this)
       return <Shape
-               key={shape.name}
-               name={shape.name}
-               link={shape.link || ""}
-               active={shape.name === self.props.current_shape}
-               options={shape.options}
-               clicked={ () => { self.props.setCurrentShape(shape.name); } }
-             />
+               key={shapeInfo.name}
+               name={shapeInfo.name}
+               link={shapeInfo.link || ""}
+               active={shapeInfo.name === this.props.current_shape}
+               options={shapeInfo.options}
+               clicked={ () => { this.props.setCurrentShape(shapeInfo.name); } } />
     });
 
     return (

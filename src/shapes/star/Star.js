@@ -1,29 +1,29 @@
-import { Vertex } from '../common/Geometry';
-
-export const setShapeStarPoints = ( sides ) => {
-  return {
-    type: 'SET_SHAPE_STAR_POINTS',
-    value: sides,
-  };
-}
-
-export const setShapeStarRatio = ( value ) => {
-  return {
-    type: 'SET_SHAPE_STAR_RATIO',
-    value: Math.min(Math.max(value, 0.0), 1.0),
-  };
-}
-
+import { Vertex } from '../../common/Geometry'
+import starReducer, {
+  setShapeStarRatio,
+  setShapeStarPoints
+} from './starSlice.js'
 
 export class Star {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      star_points: 5,
+      star_ratio: 0.5
+    }
+  }
+
+  static reducer(state, action) {
+    return starReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       star_points:   state.shapes.star_points,
       star_ratio:    state.shapes.star_ratio,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onStarPointsChange: (event) => {
         dispatch(setShapeStarPoints(event.target.value));
@@ -34,7 +34,7 @@ export class Star {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Star",
       vertices: (state) => {
@@ -53,34 +53,17 @@ export class Star {
         {
           title: "Number of Points",
           key: "starPoints",
-          value: () => { return parent.props.star_points },
-          onChange: parent.props.onStarPointsChange,
+          value: (props) => { return props.star_points },
+          onChange: (props) => { return props.onStarPointsChange },
         },
         {
           title: "Size of Points",
           key: "starRatio",
-          value: () => { return parent.props.star_ratio },
-          onChange: parent.props.onStarRatioChange,
+          value: (props) => { return props.star_ratio },
+          onChange: (props) => { return props.onStarRatioChange },
           step: 0.05,
         },
       ],
     };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_STAR_POINTS':
-        return {...state,
-          star_points: action.value,
-        };
-
-      case 'SET_SHAPE_STAR_RATIO':
-        return {...state,
-          star_ratio: action.value,
-        };
-
-      default:
-        return state;
-    }
   }
 }

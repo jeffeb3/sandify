@@ -1,20 +1,24 @@
-import { Vertex } from '../common/Geometry';
-
-export const setShapeReuleauxSides = ( sides ) => {
-  return {
-    type: 'SET_SHAPE_REULEAUX_SIDES',
-    value: sides,
-  };
-}
+import { Vertex } from '../../common/Geometry'
+import reuleauxReducer, { setShapeReuleauxSides } from './reuleauxSlice.js'
 
 export class Reuleaux {
-  static mapStateToProps(state, ownProps) {
+  static initialState() {
+    return {
+      reuleaux_sides: 3
+    }
+  }
+
+  static reducer(state, action) {
+    return reuleauxReducer(state, action)
+  }
+
+  static mapState(state, ownProps) {
     return {
       reuleaux_sides: state.shapes.reuleaux_sides,
     }
   }
 
-  static mapDispatchToProps(dispatch, ownProps) {
+  static mapDispatch(dispatch, ownProps) {
     return {
       onReuleauxSidesChange: (event) => {
         dispatch(setShapeReuleauxSides(event.target.value));
@@ -22,7 +26,7 @@ export class Reuleaux {
     }
   }
 
-  static getParams(parent) {
+  static getInfo() {
     return {
       name: "Reuleaux",
       vertices: (state) => {
@@ -53,23 +57,11 @@ export class Reuleaux {
         {
           title: "Number of sides",
           key: "reuleauxSides",
-          value: () => { return parent.props.reuleaux_sides },
-          onChange: parent.props.onReuleauxSidesChange,
+          value: (props) => { return props.reuleaux_sides },
+          onChange: (props) => { return props.onReuleauxSidesChange },
           step: 1,
         },
       ],
-    };
-  }
-
-  static getReducer(state, action) {
-    switch(action.type) {
-      case 'SET_SHAPE_REULEAUX_SIDES':
-        return {...state,
-          reuleaux_sides: action.value,
-        };
-
-      default:
-        return state;
     }
   }
 }
