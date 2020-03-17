@@ -77,7 +77,7 @@ class Transforms extends Component {
             </Col>
 
             <Col sm={8}>
-              <div class="d-flex align-items-center">
+              <div className="d-flex align-items-center">
                 <span>X</span>
                 <FormControl type="number" className="ml-2" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter} />
                 <span className="ml-2">Y</span>

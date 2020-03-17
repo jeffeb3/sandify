@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.2.5",
+    "node-sass": "^4.13.1",
     "rc-slider": "^8.6.3",
     "react": "^16.13.0",
     "react-bootstrap": "^1.0.0-beta.17",

@@ -165,10 +165,10 @@ class ThetaRho extends Component {
             </Card>
           </Accordion>
 
-          <div class="mb-4">
+          <div className="mb-4">
             Name: {this.props.name} <br />
             Comments:
-            <div class="ml-3">
+            <div className="ml-3">
               { commentsRender }
             </div>
             Number of points: {this.props.vertices.length }
@@ -197,7 +197,7 @@ class ThetaRho extends Component {
 
         <Card className="mt-3 p-3">
           <h4>Where to get .thr files</h4>
-          <ul class="list-unstyled">
+          <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
             <li><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></li>
@@ -206,7 +206,7 @@ class ThetaRho extends Component {
             <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
           </ul>
 
-          <h5 class="mt-3">Note about copyrights</h5>
+          <h5 className="mt-3">Note about copyrights</h5>
           <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</p>
           <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
           <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>
