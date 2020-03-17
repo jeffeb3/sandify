@@ -1,42 +1,9 @@
 .App {
+  background-color: #eee;
 }
 
-.App-intro {
-  font-size: large;
-}
-
-.App-left {
-   float:left;
-}
-
-.App-mid {
-   float:left;
-}
-
-.App-doc {
-   float:left;
-}
-
-/* For mobile phones: */
-[class*="App-col-"] {
-    width: 100%;
-    float:left;
-    padding: 15px;
-}
-@media only screen and (min-width: 768px) {
-    /* For desktop: */
-    .App-col-1 {width: 8.33%;}
-    .App-col-2 {width: 16.66%;}
-    .App-col-3 {width: 25%;}
-    .App-col-4 {width: 33.33%;}
-    .App-col-5 {width: 41.66%;}
-    .App-col-6 {width: 50%;}
-    .App-col-7 {width: 58.33%;}
-    .App-col-8 {width: 66.66%;}
-    .App-col-9 {width: 75%;}
-    .App-col-10 {width: 83.33%;}
-    .App-col-11 {width: 91.66%;}
-    .App-col-12 {width: 100%;}
+.card h4 {
+  margin-top: 0.5rem;
 }
 
 @keyframes App-logo-spin {
@@ -44,3 +11,19 @@
   to { transform: rotate(360deg); }
 }
 
+/**
+ Bootstrap 4 overrides
+ **/
+.card-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.card.active > .card-header {
+  background-color: #2d6da4;
+  color: white;
+}
+
+.btn-group .btn-light:focus, .btn-group .btn-light.focus {
+  background-color: #f8f9fa;
+}

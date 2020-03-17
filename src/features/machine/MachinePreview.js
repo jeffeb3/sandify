@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Panel } from 'react-bootstrap'
+import { Card } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import { getVerticesStats } from '../../common/Computer.js'
@@ -28,11 +28,14 @@ class MachinePreview extends Component {
   render() {
     return (
       <div className="machine-preview">
-
-        <Panel>
+        <Card>
             <PreviewWindow />
-            Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
-            <div className="slide-box">
+
+            <div class="m-2">
+              Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
+            </div>
+
+            <div className="p-3">
                 <Slider
                   value={this.props.sliderValue}
                   step={1.0}
@@ -41,10 +44,9 @@ class MachinePreview extends Component {
                   onChange={this.props.onSlider}
                 />
             </div>
-            <div className="cheatBox" id="biggerBox">
-                <MachineSettings />
-            </div>
-        </Panel>
+            
+            <MachineSettings />
+        </Card>
       </div>
     )
   }

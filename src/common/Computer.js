@@ -459,11 +459,11 @@ export const getVertices = createSelector(
       machine: machine
     };
 
-    if (state.app.input === 0) {
+    if (state.app.input === 'shapes') {
       return transformShapes(state);
-    } else if (state.app.input === 2) {
+    } else if (state.app.input === 'wiper') {
       return wiper(state);
-    } else if (state.app.input === 3) {
+    } else if (state.app.input === 'code') {
       return thetaRho(state);
     } else {
       return transformShapes(state);

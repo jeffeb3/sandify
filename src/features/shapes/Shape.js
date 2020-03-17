@@ -2,22 +2,14 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Col,
-  ControlLabel,
   Form,
-  FormControl,
-  FormGroup,
-  ListGroupItem,
-  Panel,
-  MenuItem,
-  DropdownButton
+  Card,
+  Accordion,
+  Dropdown,
+  Row
 } from 'react-bootstrap'
 import {
-  setXFormOffsetX,
-  setXFormOffsetY,
-} from '../transforms/transformsSlice'
-import {
   setCurrentShape,
-  setShapeStartingSize
 } from './shapeSlice'
 import { registeredShapes } from './registered_shapes.js'
 import './Shape.css'
@@ -54,7 +46,7 @@ const mapDispatch = (dispatch, ownProps) => {
 class Shape extends Component {
   render() {
     var activeClassName = this.props.active ? 'active' : ''
-    var options_render = this.props.options.map( (option) => {
+    var optionsRender = this.props.options.map( (option) => {
       if (option.type && option.type === "dropdown") {
         return <Row className="align-items-center pb-2">
                 <Col sm={4}>
@@ -106,30 +98,36 @@ class Shape extends Component {
       }
     })
 
-    var options_list_render = undefined;
-    var link_render = undefined;
+    var optionsListRender = undefined
+    var linkRender = undefined
+    var cardBodyRender = <div></div>
 
     if (this.props.link) {
-      link_render = <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>;
+      linkRender = <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>;
     }
 
     if (this.props.options.length >= 1) {
-      options_list_render =
+      optionsListRender =
         <div className="shape-options">
-          <Panel className="options-panel" collapsible expanded={this.props.active}>
-            <Form horizontal>
-              {link_render}
-              {options_render}
-            </Form>
-          </Panel>
+          {linkRender}
+          {optionsRender}
         </div>
     }
 
+    if (this.props.options.length > 0) {
+      cardBodyRender =
+        <Card.Body>
+          {optionsListRender}
+        </Card.Body>
+    }
+
     return (
-      <div className="shape">
-        <ListGroupItem className={activeClassName} onClick={this.props.clicked}>{this.props.name}</ListGroupItem>
-            {options_list_render}
-      </div>
+      <Card className={`${activeClassName} overflow-auto`}>
+        <Accordion.Toggle as={Card.Header} eventKey={this.props.index} onClick={this.props.clicked}>{this.props.name}</Accordion.Toggle>
+        <Accordion.Collapse eventKey={this.props.index}>
+          { cardBodyRender }
+        </Accordion.Collapse>
+      </Card>
     )
   }
 }

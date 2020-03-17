@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
 import {
+  Accordion,
   Col,
-  ControlLabel,
+  Row,
   Form,
-  FormControl,
-  FormGroup,
-  ListGroupItem,
-  Panel,
+  Card,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import { disableEnter } from '../shapes/Shape'
@@ -40,37 +38,46 @@ const mapDispatch = (dispatch, ownProps) => {
 
 class RotationTransform extends Component {
   render() {
-    var activeClassName = "";
-    if (this.props.active) {
-      activeClassName = "active";
-    }
+    var activeClassName = this.props.active ? 'active' : ''
+    var activeKey = this.props.active ? 0 : null
 
     return (
-      <div className="rotate">
-        <ListGroupItem header="Spin" className={activeClassName} onClick={this.props.activeCallback}>Spins the input shape a little bit for each copy</ListGroupItem>
-        <div className="rotate-options">
-          <Panel className="options-panel" collapsible expanded={this.props.active}>
-            <Form horizontal>
-              <FormGroup controlId="rotate-step">
-                <Col componentClass={ControlLabel} sm={4}>
-                  Spin Step (Can be Negative)
+      <Accordion defaultActiveKey={activeKey}>
+        <Card className={`${activeClassName} overflow-auto`}>
+          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
+            <h4>Spin</h4>
+            Spins the input shape a little bit for each copy
+          </Accordion.Toggle>
+
+          <Accordion.Collapse eventKey={0}>
+            <Card.Body>
+              <Row className="align-items-center pb-2">
+                <Col sm={4}>
+                  <Form.Label htmlFor="rotate-step">
+                    Spin Step (can be negative)
+                  </Form.Label>
                 </Col>
+                
                 <Col sm={8}>
-                  <FormControl type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
+                  <Form.Control id="rotate-step" type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter} />
                 </Col>
-              </FormGroup>
-              <FormGroup controlId="rotate-switchbacks">
-                <Col componentClass={ControlLabel} sm={4}>
-                  Switchbacks
+              </Row>
+
+              <Row className="align-items-center pb-2">
+                <Col sm={4}>
+                  <Form.Label htmlFor="rotate-switchbacks">
+                    Switchbacks
+                  </Form.Label>
                 </Col>
+
                 <Col sm={8}>
-                  <FormControl type="number" step="1" value={this.props.switchbacks} onChange={this.props.onSwitchbacksChange} onKeyDown={disableEnter}/>
+                  <Form.Control id="rotate-switchbacks" type="number" step="1" value={this.props.switchbacks} onChange={this.props.onSwitchbacksChange} onKeyDown={disableEnter} />
                 </Col>
-              </FormGroup>
-            </Form>
-          </Panel>
-        </div>
-      </div>
+              </Row>
+            </Card.Body>
+          </Accordion.Collapse>
+        </Card>
+      </Accordion>
     )
   }
 }

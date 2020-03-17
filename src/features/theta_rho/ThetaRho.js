@@ -1,14 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
+    Accordion,
+    Card,
     Col,
-    ControlLabel,
     Form,
-    FormControl,
-    FormGroup,
-    ListGroupItem,
-    Panel,
-    Well,
+    Row,
 } from 'react-bootstrap'
 import {
   setFileName,
@@ -17,7 +14,6 @@ import {
   setFileZoom,
   toggleFileAspectRatio
 } from './fileSlice'
-import './ThetaRho.css'
 
 const mapState = (state, ownProps) => {
   return {
@@ -144,57 +140,78 @@ const disableEnter = (event) => {
 
 class ThetaRho extends Component {
   render() {
-    var aspectRatioActive = "";
-    if (this.props.aspect_ratio) {
-      aspectRatioActive = "active";
-    }
+    var aspectRatioActive = this.props.aspect_ratio ? 'active' : ''
+    var commentsRender = this.props.comments.map((comment) => {
+      return <span>{comment}<br/></span>
+    })
 
     return (
-      <div className="ThetaRho">
-        <Panel className="thr-panel">
+      <div className="theta-rho">
+        <Card className="p-3">
           <h4>Theta Rho Input</h4>
-          <ControlLabel className="thr-panel" htmlFor="fileUpload" style={{ cursor: "pointer" }}>
-            <ListGroupItem header="Click to Load" className="" >Import a sisyphus style theta rho (.thr) file into sandify.</ListGroupItem>
-            <FormControl
-                id="fileUpload"
-                type="file"
-                accept=".thr"
-                onChange={this.props.setVertices}
-                style={{ display: "none" }}
-            />
-          </ControlLabel>
-          <Well> Name: {this.props.name} <br/> Comments: { this.props.comments.join('\n') } <br/> Number of points: {this.props.vertices.length }</Well>
-          <Form horizontal>
-            <FormGroup controlId="thr-zoom">
-              <Col componentClass={ControlLabel} sm={2}>
+
+          <Accordion className="mb-4 pt-3">
+            <Card>
+              <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
+                <h4>Load file</h4>
+                Import a Sisyphus style theta rho (.thr) file into Sandify
+                <Form.Control
+                    id="fileUpload"
+                    type="file"
+                    accept=".thr"
+                    onChange={this.props.setVertices}
+                    style={{ display: "none" }} />
+              </Card.Header>
+            </Card>
+          </Accordion>
+
+          <div class="mb-4">
+            Name: {this.props.name} <br />
+            Comments:
+            <div class="ml-3">
+              { commentsRender }
+            </div>
+            Number of points: {this.props.vertices.length }
+          </div>
+
+          <Accordion>
+            <Card className={`${aspectRatioActive} overflow-auto`}>
+              <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
+                <h4>Keep Aspect Ratio</h4>
+                Keeps original aspect ratio
+              </Accordion.Toggle>
+            </Card>
+          </Accordion>
+
+          <Row className="align-items-center pt-3">
+            <Col sm={4}>
+              <Form.Label htmlFor="thr-zoom">
                 Zoom
-              </Col>
-              <Col sm={8}>
-                <FormControl type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
-              </Col>
-            </FormGroup>
-          </Form>
-          <ListGroupItem header="Keep Aspect Ratio" className={aspectRatioActive} onClick={this.props.toggleAspectRatio}>Keeps original aspect ratio.</ListGroupItem>
-          <br/>
-          <h5>Where to get thr files:
-          <ul>
-            <li><h5><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></h5></li>
-            <li><h5><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></h5></li>
-            <li><h5><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></h5></li>
-            <li><h5><a href="https://reddit.com/r/SisyphusIndustries">Sisyphus on Reddit</a></h5></li>
-            <li><h5><a href="https://sisyphus-industries.com/community/community-tracks">Sisyphus Community</a></h5></li>
-            <li><h5><a href="http://thejuggler.net/sisyphus/">The Juggler</a></h5></li>
+              </Form.Label>
+            </Col>
+            <Col sm={8}>
+              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
+            </Col>
+          </Row>
+
+          <h5 class="mt-5">Where to get thr files</h5>
+          <ul class="list-unstyled">
+            <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
+            <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
+            <li><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></li>
+            <li><a href="https://reddit.com/r/SisyphusIndustries">Sisyphus on Reddit</a></li>
+            <li><a href="https://sisyphus-industries.com/community/community-tracks">Sisyphus Community</a></li>
+            <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
           </ul>
-          </h5>
-          <h6>Note about Copyrights:</h6>
-          <h6>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</h6>
-          <h6>If you don't have permisson (a license) to use their art, then you shouldn't be.</h6>
-          <h6>If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</h6>
-          <h6>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</h6>
-          <h6>I am not a lawyer.</h6>
-        </Panel>
+
+          <h5 class="mt-3">Note about copyrights</h5>
+          <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</p>
+          <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
+          <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>
+          <p>I am not a lawyer.</p>
+        </Card>
       </div>
-    );
+    )
   }
 }
 

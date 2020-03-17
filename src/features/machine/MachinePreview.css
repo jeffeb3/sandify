@@ -1,14 +1,4 @@
-.canvas {
-   background:#111;
+.preview-canvas {
+   background: black;
    border: 1px solid blue;
-}
-
-.cheatBox {
-   padding: 0px;
-   margin: 0px;
-}
-
-.slide-box {
-   padding: 15px;
-   margin: 0px;
 }
