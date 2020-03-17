@@ -8,6 +8,7 @@ import {
   Dropdown,
   Row
 } from 'react-bootstrap'
+import SelectableContext from "react-bootstrap/SelectableContext";
 import {
   setCurrentShape,
 } from './shapeSlice'
@@ -46,9 +47,9 @@ const mapDispatch = (dispatch, ownProps) => {
 class Shape extends Component {
   render() {
     var activeClassName = this.props.active ? 'active' : ''
-    var optionsRender = this.props.options.map( (option) => {
+    var optionsRender = this.props.options.map( (option, index) => {
       if (option.type && option.type === "dropdown") {
-        return <Row className="align-items-center pb-2">
+        return <Row className="align-items-center pb-2" key={index}>
                 <Col sm={4}>
                   <Form.Label htmlFor="options-dropdown">
                     {option.title}
@@ -124,7 +125,14 @@ class Shape extends Component {
       <Card className={`${activeClassName} overflow-auto`}>
         <Accordion.Toggle as={Card.Header} eventKey={this.props.index} onClick={this.props.clicked}>{this.props.name}</Accordion.Toggle>
         <Accordion.Collapse eventKey={this.props.index}>
-          { cardBodyRender }
+          {/**
+            Wrapping the shape content inside a selectable context to get around a bug
+            where a nested dropdown can close the parent accordion.
+            https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
+          **/}
+          <SelectableContext.Provider value={false}>
+            { cardBodyRender }
+          </SelectableContext.Provider>
         </Accordion.Collapse>
       </Card>
     )
