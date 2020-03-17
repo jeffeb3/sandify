@@ -10,7 +10,7 @@ const machineSlice = createSlice({
     max_x: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
     min_y: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
     max_y: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
-    max_radius: localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250,
+    max_radius: parseFloat(localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250),
     rect_origin: [],
     polar_endpoints: false,
     canvas_width: 600,
