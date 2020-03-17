@@ -1,4 +1,5 @@
 import transforms, {
+  setShapeStartingSize,
   setXFormOffsetX,
   setXFormOffsetY,
   setNumLoops,
@@ -17,6 +18,7 @@ import transforms, {
 describe('transforms reducer', () => {
   it('should handle initial state', () => {
     expect(transforms(undefined, {})).toEqual({
+      starting_size: 10.0,
       xformOffsetX: 0.0,
       xformOffsetY: 0.0,
       numLoops: 10,
@@ -30,6 +32,17 @@ describe('transforms reducer', () => {
       trackValue: 10,
       trackLength: 0.2,
       trackGrow: 50.0,
+    })
+  })
+
+  it('should handle setShapeStartingSize', () => {
+    expect(
+      transforms(
+        {starting_size: 10.0},
+        setShapeStartingSize(20.0)
+      )
+    ).toEqual({
+      starting_size: 20.0
     })
   })
 

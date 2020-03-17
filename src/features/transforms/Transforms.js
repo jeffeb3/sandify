@@ -12,7 +12,10 @@ import { connect } from 'react-redux'
 import { disableEnter } from '../shapes/Shape'
 import ShapeList from '../shapes/ShapeList'
 import {
-  setNumLoops
+  setShapeStartingSize,
+  setNumLoops,
+  setXFormOffsetX,
+  setXFormOffsetY,
 } from './transformsSlice'
 import ScaleTransform from './ScaleTransform'
 import RotationTransform from './RotationTransform'
@@ -22,6 +25,9 @@ import './Transforms.css'
 const mapState = (state, ownProps) => {
   return {
     loops: state.transform.numLoops,
+    starting_size: state.transform.starting_size,
+    x_offset: state.transform.xformOffsetX,
+    y_offset: state.transform.xformOffsetY,
   }
 }
 
@@ -29,6 +35,15 @@ const mapDispatch = (dispatch, ownProps) => {
   return {
     changeLoops: (event) => {
       dispatch(setNumLoops(event.target.value));
+    },
+    onSizeChange: (event) => {
+      dispatch(setShapeStartingSize(event.target.value));
+    },
+    onOffsetXChange: (event) => {
+      dispatch(setXFormOffsetX(event.target.value));
+    },
+    onOffsetYChange: (event) => {
+      dispatch(setXFormOffsetY(event.target.value));
     },
   }
 }
