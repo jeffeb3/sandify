@@ -16,7 +16,7 @@ const mapState = (state, ownProps) => {
 class MachineSettings extends Component {
   render() {
     return (
-      <div id="bigger-box" class="p-3">
+      <div id="bigger-box" className="p-3">
         <h4>Machine Settings</h4>
 
         <Accordion defaultActiveKey={this.props.rectangular ? 0 : 1}>

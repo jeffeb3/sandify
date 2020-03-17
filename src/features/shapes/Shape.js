@@ -58,7 +58,6 @@ class Shape extends Component {
                 <Col sm={8}>
                   <Dropdown
                     id="options-dropdown"
-                    flip={true}
                     onSelect={(event) => {
                        option.onChange(this.props)(event);
                     }}
@@ -76,7 +75,7 @@ class Shape extends Component {
                 </Col>
                </Row>
       } else {
-        return  <Row className="align-items-center pb-2">
+        return  <Row className="align-items-center pb-2" key={index}>
                   <Col sm={4}>
                     <Form.Label htmlFor="options-step">
                       {option.title}

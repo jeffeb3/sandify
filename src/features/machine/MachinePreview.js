@@ -31,7 +31,7 @@ class MachinePreview extends Component {
         <Card>
             <PreviewWindow />
 
-            <div class="m-2">
+            <div className="m-2">
               Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
             </div>
 
