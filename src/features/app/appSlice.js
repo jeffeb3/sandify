@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit"
 const appSlice = createSlice({
   name: 'app',
   initialState: {
-    sandifyVersion: "0.1.6", // Also change the version in package.json.
+    sandifyVersion: "0.1.7", // Also change the version in package.json.
     input: 0,
   },
   reducers: {
