@@ -5,7 +5,7 @@ import app, {
 describe('app reducer', () => {
   it('should handle initial state', () => {
     expect(app(undefined, {})).toEqual({
-      sandifyVersion: "0.1.7", // Also change the version in package.json.
+      sandify_version: "0.1.7", // Also change the version in package.json.
       input: 0,
     })
   })

@@ -24,8 +24,8 @@ const mapState = (state, ownProps) => {
   let props = {
     current_shape: state.shapes.current_shape,
     starting_size: state.transform.starting_size,
-    x_offset: state.transform.xformOffsetX,
-    y_offset: state.transform.xformOffsetY,
+    x_offset: state.transform.offset_x,
+    y_offset: state.transform.offset_y,
   };
 
   let registeredProps = registeredShapes.map((shape) => shape.mapState(state, ownProps));
@@ -103,14 +103,14 @@ class Shape extends Component {
     var cardBodyRender = <div></div>
 
     if (this.props.link) {
-      linkRender = <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>;
+      linkRender = <p className="mb-0 mt-3">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas.</p>;
     }
 
     if (this.props.options.length >= 1) {
       optionsListRender =
         <div className="shape-options">
-          {linkRender}
           {optionsRender}
+          {linkRender}
         </div>
     }
 

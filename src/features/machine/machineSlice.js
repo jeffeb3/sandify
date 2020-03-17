@@ -15,7 +15,7 @@ const machineSlice = createSlice({
     polar_endpoints: false,
     canvas_width: 600,
     canvas_height: 600,
-    sliderValue: 0.0
+    slider_value: 0.0
   },
   reducers: {
     toggleMachineRectExpanded(state, action) {
@@ -70,7 +70,7 @@ const machineSlice = createSlice({
       state.canvas_width = action.payload
     },
     setMachineSlider(state, action) {
-      state.sliderValue = action.payload
+      state.slider_value = action.payload
     }
   }
 })

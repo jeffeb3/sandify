@@ -193,8 +193,10 @@ class ThetaRho extends Component {
               <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
             </Col>
           </Row>
+        </Card>
 
-          <h5 class="mt-5">Where to get thr files</h5>
+        <Card className="mt-3 p-3">
+          <h4>Where to get .thr files</h4>
           <ul class="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>

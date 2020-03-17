@@ -19,19 +19,19 @@ describe('transforms reducer', () => {
   it('should handle initial state', () => {
     expect(transforms(undefined, {})).toEqual({
       starting_size: 10.0,
-      xformOffsetX: 0.0,
-      xformOffsetY: 0.0,
-      numLoops: 10,
-      growEnabled: true,
-      growValue: 100,
-      spinEnabled: false,
-      spinValue: 2,
-      spinSwitchbacks: 0,
-      trackEnabled: false,
-      trackGrowEnabled: false,
-      trackValue: 10,
-      trackLength: 0.2,
-      trackGrow: 50.0,
+      offset_x: 0.0,
+      offset_y: 0.0,
+      num_loops: 10,
+      grow_enabled: true,
+      grow_value: 100,
+      spin_enabled: false,
+      spin_value: 2,
+      spin_switchbacks: 0,
+      track_enabled: false,
+      track_grow_enabled: false,
+      track_value: 10,
+      track_length: 0.2,
+      track_grow: 50.0,
     })
   })
 
@@ -49,143 +49,143 @@ describe('transforms reducer', () => {
   it('should handle setXFormOffsetX', () => {
     expect(
       transforms(
-        {xformOffsetX: 0.0},
+        {offset_x: 0.0},
         setXFormOffsetX('2')
       )
     ).toEqual({
-      xformOffsetX: 2.0
+      offset_x: 2.0
     })
   })
 
   it('should handle setXFormOffsetY', () => {
     expect(
       transforms(
-        {xformOffsetY: 0.0},
+        {offset_y: 0.0},
         setXFormOffsetY('2')
       )
     ).toEqual({
-      xformOffsetY: 2.0
+      offset_y: 2.0
     })
   })
 
   it('should handle setNumLoops', () => {
     expect(
       transforms(
-        {numLoops: 10},
+        {num_loops: 10},
         setNumLoops(20)
       )
     ).toEqual({
-      numLoops: 20
+      num_loops: 20
     })
   })
 
   it('should handle toggleSpin', () => {
     expect(
       transforms(
-        {spinEnabled: false},
+        {spin_enabled: false},
         toggleSpin({})
       )
     ).toEqual({
-      spinEnabled: true
+      spin_enabled: true
     })
   })
 
   it('should handle setSpin', () => {
     expect(
       transforms(
-        {spinValue: 2},
+        {spin_value: 2},
         setSpin(5)
       )
     ).toEqual({
-      spinValue: 5
+      spin_value: 5
     })
   })
 
   it('should handle setSpinSwitchbacks', () => {
     expect(
       transforms(
-        {spinSwitchbacks: 0},
+        {spin_switchbacks: 0},
         setSpinSwitchbacks(2)
       )
     ).toEqual({
-      spinSwitchbacks: 2
+      spin_switchbacks: 2
     })
   })
 
   it('should handle toggleGrow', () => {
     expect(
       transforms(
-        {growEnabled: false},
+        {grow_enabled: false},
         toggleGrow({})
       )
     ).toEqual({
-      growEnabled: true
+      grow_enabled: true
     })
   })
 
   it('should handle setGrow', () => {
     expect(
       transforms(
-        {growValue: 100},
+        {grow_value: 100},
         setGrow(20)
       )
     ).toEqual({
-      growValue: 20
+      grow_value: 20
     })
   })
 
   it('should handle toggleTrack', () => {
     expect(
       transforms(
-        {trackEnabled: false},
+        {track_enabled: false},
         toggleTrack({})
       )
     ).toEqual({
-      trackEnabled: true
+      track_enabled: true
     })
   })
 
   it('should handle toggleTrackGrow', () => {
     expect(
       transforms(
-        {trackGrowEnabled: false},
+        {track_grow_enabled: false},
         toggleTrackGrow({})
       )
     ).toEqual({
-      trackGrowEnabled: true
+      track_grow_enabled: true
     })
   })
 
   it('should handle setTrack', () => {
     expect(
       transforms(
-        {trackValue: 10},
+        {track_value: 10},
         setTrack(20)
       )
     ).toEqual({
-      trackValue: 20
+      track_value: 20
     })
   })
 
   it('should handle setTrackLength', () => {
     expect(
       transforms(
-        {trackLength: 0.2},
+        {track_length: 0.2},
         setTrackLength(0.4)
       )
     ).toEqual({
-      trackLength: 0.4
+      track_length: 0.4
     })
   })
 
   it('should handle setTrackGrow', () => {
     expect(
       transforms(
-        {trackGrow: 50.0},
+        {track_grow: 50.0},
         setTrackGrow(20.0)
       )
     ).toEqual({
-      trackGrow: 20.0
+      track_grow: 20.0
     })
   })
 })

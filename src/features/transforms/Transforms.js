@@ -22,10 +22,10 @@ import TrackTransform from './TrackTransform'
 
 const mapState = (state, ownProps) => {
   return {
-    loops: state.transform.numLoops,
+    loops: state.transform.num_loops,
     starting_size: state.transform.starting_size,
-    x_offset: state.transform.xformOffsetX,
-    y_offset: state.transform.xformOffsetY,
+    x_offset: state.transform.offset_x,
+    y_offset: state.transform.offset_y,
   }
 }
 

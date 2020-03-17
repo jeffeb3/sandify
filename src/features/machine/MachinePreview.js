@@ -11,7 +11,7 @@ import './MachinePreview.css'
 
 const mapState = (state, ownProps) => {
   return {
-    sliderValue: state.machine.sliderValue,
+    slider_value: state.machine.slider_value,
     verticesStats: getVerticesStats(state),
   }
 }
@@ -37,14 +37,14 @@ class MachinePreview extends Component {
 
             <div className="p-3">
                 <Slider
-                  value={this.props.sliderValue}
+                  value={this.props.slider_value}
                   step={1.0}
                   min={0.0}
                   max={100.0}
                   onChange={this.props.onSlider}
                 />
             </div>
-            
+
             <MachineSettings />
         </Card>
       </div>

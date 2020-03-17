@@ -10,7 +10,7 @@ class Footer extends Component {
     return (
       <footer className="py-5">
         <Container fluid>
-          <Row>
+          <Row className="mx-3">
             <Col xs={3}>
               <h3>About</h3>
               <p>

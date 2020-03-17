@@ -39,7 +39,7 @@ export class Circle {
       },
       options: [
         {
-          title: "Number of Lobes",
+          title: "Number of lobes",
           key: "circleLobes",
           value: (props) => { return props.circle_lobes },
           onChange: (props) => { return props.onCircleLobesChange },
