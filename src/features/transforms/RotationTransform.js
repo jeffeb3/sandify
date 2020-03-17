@@ -46,7 +46,7 @@ class RotationTransform extends Component {
         <Card className={`${activeClassName} overflow-auto`}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
             <h4>Spin</h4>
-            Spins the input shape a little bit for each copy
+            Spins the shape a little bit for each copy
           </Accordion.Toggle>
 
           <Accordion.Collapse eventKey={0}>

@@ -51,7 +51,7 @@ class Transforms extends Component {
     return (
       <div className="transforms">
         <Card className="p-3">
-          <h4>Input Shapes</h4>
+          <h4>Select a shape</h4>
           <ShapeList />
         </Card>
 

@@ -45,7 +45,7 @@ class PolarSettings extends Component {
       <Card className={`${activeClassName} overflow-auto`}>
         <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.activeCallback}>
           <h4>Polar Machine</h4>
-          Polar Machines like the Sisyphus
+          Polar machines like Sisyphus
         </Accordion.Toggle>
 
         <Accordion.Collapse eventKey={1}>

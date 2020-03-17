@@ -44,11 +44,11 @@ class App extends Component {
           <main>
             <Container fluid>
               <Row className="pt-3">
-                <Col md={7}>
+                <Col lg={7}>
                   <InputTabs />
                 </Col>
 
-                <Col md={5}>
+                <Col lg={5}>
                   <MachinePreview />
                 </Col>
               </Row>
