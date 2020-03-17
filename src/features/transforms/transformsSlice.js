@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit"
 const transformsSlice = createSlice({
   name: 'transforms',
   initialState: {
+    starting_size: 10.0,    
     xformOffsetX: 0.0,
     xformOffsetY: 0.0,
     numLoops: 10,
@@ -18,6 +19,9 @@ const transformsSlice = createSlice({
     trackGrow: 50.0,
   },
   reducers: {
+    setShapeStartingSize(state, action) {
+      state.starting_size = action.payload
+    },
     setXFormOffsetX(state, action) {
       state.xformOffsetX = parseFloat(action.payload)
     },
@@ -61,6 +65,7 @@ const transformsSlice = createSlice({
 })
 
 export const {
+  setShapeStartingSize,
   setXFormOffsetX,
   setXFormOffsetY,
   setNumLoops,

@@ -26,12 +26,12 @@ export const disableEnter = (event) => {
   if (event.key === 'Enter' && event.shiftKey === false) {
     event.preventDefault();
   }
-};
+}
 
 const mapState = (state, ownProps) => {
   let props = {
     current_shape: state.shapes.current_shape,
-    starting_size: state.shapes.starting_size,
+    starting_size: state.transform.starting_size,
     x_offset: state.transform.xformOffsetX,
     y_offset: state.transform.xformOffsetY,
   };
@@ -45,15 +45,6 @@ const mapDispatch = (dispatch, ownProps) => {
     setCurrentShape: (name) => {
       dispatch(setCurrentShape(name));
     },
-    onSizeChange: (event) => {
-      dispatch(setShapeStartingSize(event.target.value));
-    },
-    onOffsetXChange: (event) => {
-      dispatch(setXFormOffsetX(event.target.value));
-    },
-    onOffsetYChange: (event) => {
-      dispatch(setXFormOffsetY(event.target.value));
-    },
   };
   let registeredMethods = registeredShapes.map((shape) => shape.mapDispatch(dispatch, ownProps));
 
@@ -62,47 +53,56 @@ const mapDispatch = (dispatch, ownProps) => {
 
 class Shape extends Component {
   render() {
-    var activeClassName = "";
-    if (this.props.active) {
-      activeClassName = "active";
-    }
-
+    var activeClassName = this.props.active ? 'active' : ''
     var options_render = this.props.options.map( (option) => {
       if (option.type && option.type === "dropdown") {
-        return <FormGroup controlId="options-step" key={option.title}>
-                 <Col componentClass={ControlLabel} sm={4}>
-                   {option.title}
-                 </Col>
-                 <Col sm={8}>
-                   <DropdownButton bsStyle="default"
-                                   id="dropdown-basic-button"
-                                   title={option.value(this.props)}
-                                   onSelect={(event) => {
-                                       option.onChange(this.props)(event);
-                                   }}
-                                   onKeyDown={disableEnter}>
-                     {option.choices.map((choice) => {
-                         return <MenuItem key={choice} eventKey={choice}>{choice}</MenuItem>;
-                     })}
-                   </DropdownButton>
-                 </Col>
-               </FormGroup>
+        return <Row className="align-items-center pb-2">
+                <Col sm={4}>
+                  <Form.Label htmlFor="options-dropdown">
+                    {option.title}
+                  </Form.Label>
+                </Col>
+
+                <Col sm={8}>
+                  <Dropdown
+                    id="options-dropdown"
+                    flip={true}
+                    onSelect={(event) => {
+                       option.onChange(this.props)(event);
+                    }}
+                    onKeyDown={disableEnter}>
+                    <Dropdown.Toggle variant="secondary">
+                      {option.value(this.props)}
+                     </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      {option.choices.map((choice) => {
+                         return <Dropdown.Item key={choice} eventKey={choice}>{choice}</Dropdown.Item>
+                      })}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Col>
+               </Row>
       } else {
-        return <FormGroup controlId="options-step" key={option.title}>
-                 <Col componentClass={ControlLabel} sm={4}>
-                   {option.title}
+        return  <Row className="align-items-center pb-2">
+                  <Col sm={4}>
+                    <Form.Label htmlFor="options-step">
+                      {option.title}
+                    </Form.Label>
+                  </Col>
+
+                  <Col sm={8}>
+                    <Form.Control
+                      id="options-step"
+                      type={option.type ? option.type : "number"}
+                      step={option.step ? option.step : 1}
+                      value={option.value(this.props)}
+                      onChange={(event) => {
+                        option.onChange(this.props)(event)
+                      }}
+                      onKeyDown={disableEnter} />
                  </Col>
-                 <Col sm={8}>
-                   <FormControl
-                     type={option.type ? option.type : "number"}
-                     step={option.step ? option.step : 1}
-                     value={option.value(this.props)}
-                     onChange={(event) => {
-                       option.onChange(this.props)(event)
-                     }}
-                     onKeyDown={disableEnter}/>
-                 </Col>
-               </FormGroup>
+                </Row>
       }
     })
 

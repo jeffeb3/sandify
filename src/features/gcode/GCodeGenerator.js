@@ -87,7 +87,7 @@ const getComments = (state) => {
       var shapeInfo = findShape(state.shapes.current_shape).getInfo();
 
       comments.push("  Content Type: Shapes");
-      comments.push("    Starting Size: " + state.shapes.starting_size);
+      comments.push("    Starting Size: " + state.transform.starting_size);
       comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
       comments.push("    Selected Shape: " + shapeInfo.name);
 

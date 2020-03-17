@@ -414,7 +414,7 @@ const transformShapes = (state) => {
 
   if (shape) {
     input = shapeInfo.vertices(state).map( (vertex) => {
-      return scale(vertex, 100.0 * state.shapes.starting_size);
+      return scale(vertex, 100.0 * state.transform.starting_size);
     });
   }
 
