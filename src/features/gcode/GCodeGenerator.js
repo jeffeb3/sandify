@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
+  Accordion,
   Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-  ListGroupItem,
+  Form,
   Modal,
+  Card
 } from 'react-bootstrap'
 import {
   setGCodeFilename,
@@ -16,10 +15,9 @@ import {
   toggleGCodeReverse,
 } from './gCodeSlice'
 import { findShape } from '../shapes/registered_shapes.js'
-import { getVertices } from '../../common/Computer.js';
+import { getVertices } from '../../common/Computer.js'
 import { Vertex } from '../../common/Geometry'
-import Victor from 'victor';
-import './GCode.css';
+import Victor from 'victor'
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.
@@ -28,7 +26,6 @@ import './GCode.css';
 // https://stackoverflow.com/a/18197511
 //
 function download(filename, text) {
-
   let link = document.createElement('a');
   link.download = filename;
 
@@ -49,7 +46,6 @@ function download(filename, text) {
     }
     URL.revokeObjectURL(link.href);
   }
-
 }
 
 function gcode(vertex) {
@@ -297,37 +293,51 @@ class GCodeGenerator extends Component {
   }
 
   render() {
-    const reverseActiveClass = (this.props.reverse ? "active" : null);
+    var reverseActiveClass = (this.props.reverse ? "active" : null)
+
     return (
       <div>
-        <Button className="finishButton" bsStyle="primary" bsSize="large" onClick={this.props.open}>Create Code</Button>
+        <Button className="mt-3 p-3 btn-block" variant="secondary" onClick={this.props.open}>Create Code</Button>
+
         <Modal show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
             <Modal.Title>Code Parameters</Modal.Title>
           </Modal.Header>
+
           <Modal.Body>
-            <FormGroup controlId="sandifyFilename">
-              <ControlLabel>Name of Output</ControlLabel>
-              <FormControl type="text" value={this.props.filename} onChange={this.props.setFilename}/>
-            </FormGroup>
-            <FormGroup controlId="preCode">
-              <ControlLabel>Program Start Code</ControlLabel>
-              <FormControl componentClass="textarea" value={this.props.pre} onChange={this.props.setPre}/>
-            </FormGroup>
-            <FormGroup controlId="postCode">
-              <ControlLabel>Program End Code</ControlLabel>
-              <FormControl componentClass="textarea" value={this.props.post} onChange={this.props.setPost}/>
-            </FormGroup>
-            <ListGroupItem header="Reverse Path" className={reverseActiveClass} onClick={this.props.toggleReverse}>Reverses the Code, starting at the final location</ListGroupItem>
+            <Form.Group controlId="sandify-filename">
+              <Form.Label>Name of Output</Form.Label>
+              <Form.Control type="text" value={this.props.filename} onChange={this.props.setFilename} />
+            </Form.Group>
+
+            <Form.Group controlId="pre-code">
+              <Form.Label>Program Start Code</Form.Label>
+              <Form.Control as="textarea" value={this.props.pre} onChange={this.props.setPre} />
+            </Form.Group>
+
+            <Form.Group controlId="post-code">
+              <Form.Label>Program End Code</Form.Label>
+              <Form.Control as="textarea" value={this.props.post} onChange={this.props.setPost} />
+            </Form.Group>
+
+            <Accordion>
+              <Card className={`${reverseActiveClass} overflow-auto`}>
+                <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleReverse}>
+                  <h4>Reverse Path</h4>
+                  Reverses the code, starting at the final location
+                </Accordion.Toggle>
+              </Card>
+            </Accordion>
           </Modal.Body>
+
           <Modal.Footer>
-            <Button id="code-close" bsStyle="default" onClick={this.props.close}>Close</Button>
-            <Button id="code-gen-gcode" bsStyle="primary" onClick={this.generateGCode.bind(this)}>Generate GCode</Button>
-            <Button id="code-gen-thetarho" bsStyle="primary" onClick={this.generateThetaRho.bind(this)}>Generate Theta Rho</Button>
+            <Button id="code-close" variant="link" onClick={this.props.close}>Close</Button>
+            <Button id="code-gen-gcode" variant="primary" onClick={this.generateGCode.bind(this)}>Generate GCode</Button>
+            <Button id="code-gen-thetarho" variant="primary" onClick={this.generateThetaRho.bind(this)}>Generate Theta Rho</Button>
           </Modal.Footer>
         </Modal>
       </div>
-    );
+    )
   }
 }
 

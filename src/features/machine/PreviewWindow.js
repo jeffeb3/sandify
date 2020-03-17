@@ -55,7 +55,7 @@ class PreviewWindow extends Component {
   componentDidMount() {
     var canvas = ReactDOM.findDOMNode(this);
     var context = canvas.getContext('2d');
-    var bigBox = document.getElementById("biggerBox");
+    var bigBox = document.getElementById("bigger-box");
     this.resize(canvas, bigBox);
     window.addEventListener('resize', () => { this.resize(canvas, bigBox) }, false);
 
@@ -69,13 +69,12 @@ class PreviewWindow extends Component {
     var canvas = ReactDOM.findDOMNode(this);
     var context = canvas.getContext('2d');
     context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
-    var bigBox = document.getElementById("biggerBox");
+    var bigBox = document.getElementById("bigger-box");
     this.resize(canvas, bigBox);
   }
 
   // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
   mmToPixelsScale() {
-
     var machine_x = 1;
     var machine_y = 1;
     if (this.props.use_rect) {
@@ -127,7 +126,6 @@ class PreviewWindow extends Component {
 
     // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
     // thing.
-    //
     const begin_fraction = sliderValue / 100.0;
     const end_fraction = (slide_size + sliderValue) / 100.0;
 
@@ -162,11 +160,8 @@ class PreviewWindow extends Component {
     context.stroke();
 
     var drawing_vertices = this.props.vertices;
-
     drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue);
-
     if (drawing_vertices && drawing_vertices.length > 0) {
-
       // Draw the start and end points
       context.beginPath();
       context.lineWidth = 1.0;
@@ -201,6 +196,7 @@ class PreviewWindow extends Component {
       }
       context.stroke();
     }
+
     // Draw the trackVertices
     if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
       // Draw the track vertices
@@ -231,11 +227,11 @@ class PreviewWindow extends Component {
   render() {
     const {canvas_width, canvas_height} = this.props;
     return (
-        <canvas className="canvas"
+        <canvas className="preview-canvas"
           width={canvas_width}
           height={canvas_height}
         />
     );
   }
 }
-export default connect(mapState, mapDispatch)(PreviewWindow);
+export default connect(mapState, mapDispatch)(PreviewWindow)

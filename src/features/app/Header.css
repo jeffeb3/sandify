@@ -1,16 +1,12 @@
-.App-header {
-  background-color: #222;
+header {
+  background-color: #2d6da4;
   height: 190px;
-  padding: 18px;
+  padding: 1rem;
   color: white;
   text-align: center;
 }
 
-.App-logo {
+.app-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 85px;
-}
-
-.docTitle {
-  text-align: center;
 }

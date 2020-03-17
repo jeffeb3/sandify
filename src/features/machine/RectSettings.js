@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
+    Accordion,
+    Card,
     Col,
-    ControlLabel,
     Form,
     FormControl,
-    FormGroup,
-    ListGroupItem,
-    Panel,
+    Row,
     ToggleButton,
     ToggleButtonGroup,
 } from 'react-bootstrap'
@@ -59,60 +58,81 @@ class RectSettings extends Component {
     var activeClassName = this.props.active ? 'active' : ''
 
     return (
-      <div className="rect">
-        <ListGroupItem header="Rectangular Machine" className={activeClassName} onClick={this.props.activeCallback}>Rectangle Machines like the Zen XY.</ListGroupItem>
-        <div className="rect-options">
-          <Panel className="options-panel" collapsible expanded={this.props.expanded}>
-            <Form horizontal>
-              <FormGroup className="machineSmaller" controlId="min_x">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+      <Card className={`${activeClassName} overflow-auto`}>
+        <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
+          <h4>Rectangular Machine</h4>
+          Rectangle Machines like the Zen XY
+        </Accordion.Toggle>
+
+        <Accordion.Collapse eventKey={0}>
+          <Card.Body>
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="min_x">
                   Min X (mm)
-                </Col>
-                <Col sm={8} smOffset={1}>
-                  <FormControl type="number" value={this.props.min_x} onChange={this.props.onMinXChange}/>
-                </Col>
-              </FormGroup>
-              <FormGroup className="machineSmaller" controlId="max_x">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <FormControl id="min_x" type="number" value={this.props.min_x} onChange={this.props.onMinXChange} />
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="max_x">
                   Max X (mm)
-                </Col>
-                <Col sm={8} smOffset={1}>
-                  <FormControl type="number" value={this.props.max_x} onChange={this.props.onMaxXChange}/>
-                </Col>
-              </FormGroup>
-              <FormGroup className="machineSmaller" controlId="min_y">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <FormControl id="max_x" type="number" value={this.props.max_x} onChange={this.props.onMaxXChange} />
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="min_y">
                   Min Y (mm)
-                </Col>
-                <Col sm={8} smOffset={1}>
-                  <FormControl type="number" value={this.props.min_y} onChange={this.props.onMinYChange}/>
-                </Col>
-              </FormGroup>
-              <FormGroup className="machineSmaller" controlId="max_y">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <FormControl id="min_y" type="number" value={this.props.min_y} onChange={this.props.onMinYChange} />
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="max_y">
                   Max Y (mm)
-                </Col>
-                <Col sm={8} smOffset={1}>
-                  <FormControl type="number" value={this.props.max_y} onChange={this.props.onMaxYChange}/>
-                </Col>
-              </FormGroup>
-              <FormGroup className="machineSmaller" controlId="max_y">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={2}>
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <FormControl id="max_y" type="number" value={this.props.max_y} onChange={this.props.onMaxYChange} />
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="origin">
                   Force Origin
-                </Col>
-                <Col componentClass={ControlLabel} sm={8} smOffset={1}>
-                  <ToggleButtonGroup id="origin-bar" type="checkbox" name="origin" value={this.props.origin} onChange={this.props.onOriginChange}>
-                    <ToggleButton value={0} >Lower Left</ToggleButton>
-                    <ToggleButton value={1} >Upper Left</ToggleButton>
-                    <ToggleButton value={2} >Upper Right</ToggleButton>
-                    <ToggleButton value={3} >Lower Right</ToggleButton>
-                  </ToggleButtonGroup>
-                </Col>
-              </FormGroup>
-            </Form>
-          </Panel>
-        </div>
-      </div>
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <ToggleButtonGroup id="origin-bar" type="checkbox" name="origin" value={this.props.origin} onChange={this.props.onOriginChange}>
+                  <ToggleButton variant="light" value={0} >Lower Left</ToggleButton>
+                  <ToggleButton variant="light" value={1} >Upper Left</ToggleButton>
+                  <ToggleButton variant="light" value={2} >Upper Right</ToggleButton>
+                  <ToggleButton variant="light" value={3} >Lower Right</ToggleButton>
+                </ToggleButtonGroup>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
     )
   }
 }
