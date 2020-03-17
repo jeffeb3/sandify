@@ -47,13 +47,13 @@ class PolarSettings extends Component {
           <h4>Polar Machine</h4>
           Polar Machines like the Sisyphus
         </Accordion.Toggle>
-        
+
         <Accordion.Collapse eventKey={1}>
           <Card.Body>
             <Row className="align-items-center pb-2">
               <Col sm={4}>
                 <Form.Label htmlFor="max_radius">
-                  Max Radius (mm)
+                  Max radius (mm)
                 </Form.Label>
               </Col>
               <Col sm={8}>

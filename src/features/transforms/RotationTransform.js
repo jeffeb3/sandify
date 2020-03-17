@@ -16,9 +16,9 @@ import {
 
 const mapState = (state, ownProps) => {
   return {
-    active: state.transform.spinEnabled,
-    value: state.transform.spinValue,
-    switchbacks: state.transform.spinSwitchbacks,
+    active: state.transform.spin_enabled,
+    value: state.transform.spin_value,
+    switchbacks: state.transform.spin_switchbacks,
   }
 }
 
@@ -54,10 +54,10 @@ class RotationTransform extends Component {
               <Row className="align-items-center pb-2">
                 <Col sm={4}>
                   <Form.Label htmlFor="rotate-step">
-                    Spin Step (can be negative)
+                    Spin step (can be negative)
                   </Form.Label>
                 </Col>
-                
+
                 <Col sm={8}>
                   <Form.Control id="rotate-step" type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter} />
                 </Col>

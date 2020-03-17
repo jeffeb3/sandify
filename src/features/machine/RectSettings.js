@@ -117,7 +117,7 @@ class RectSettings extends Component {
             <Row className="align-items-center pb-2">
               <Col sm={4}>
                 <Form.Label htmlFor="origin">
-                  Force Origin
+                  Force origin
                 </Form.Label>
               </Col>
 

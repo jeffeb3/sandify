@@ -14,10 +14,10 @@ const getTransform = state => state.transform;
 const getTrackVertices = createSelector(
   [getTransform],
   (data) => {
-    var num_loops = data.numLoops;
+    var num_loops = data.num_loops;
     var trackVertices = []
     for (var i=0; i<num_loops; i++) {
-      if (data.trackEnabled) {
+      if (data.track_enabled) {
         trackVertices.push(transform(data, {x: 0.0, y: 0.0}, i))
       }
     }
@@ -36,7 +36,7 @@ const mapState = (state, ownProps) => {
     canvas_width: state.machine.canvas_width,
     canvas_height: state.machine.canvas_height,
     vertices: getVertices(state),
-    sliderValue: state.machine.sliderValue,
+    slider_value: state.machine.slider_value,
     showTrack: state.app.input === 0,
     trackVertices: getTrackVertices(state),
   }
@@ -160,7 +160,7 @@ class PreviewWindow extends Component {
     context.stroke();
 
     var drawing_vertices = this.props.vertices;
-    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue);
+    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.slider_value);
     if (drawing_vertices && drawing_vertices.length > 0) {
       // Draw the start and end points
       context.beginPath();
@@ -175,7 +175,7 @@ class PreviewWindow extends Component {
       context.stroke();
 
       // Draw the background vertices
-      if (this.props.sliderValue !== 0) {
+      if (this.props.slider_value !== 0) {
         context.beginPath();
         context.lineWidth = this.mmToPixelsScale();
         context.strokeStyle = "gray";

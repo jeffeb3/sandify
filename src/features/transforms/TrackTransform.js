@@ -19,11 +19,11 @@ import {
 
 const mapState = (state, ownProps) => {
   return {
-    active: state.transform.trackEnabled,
-    activeGrow: state.transform.trackGrowEnabled,
-    value: state.transform.trackValue,
-    length: state.transform.trackLength,
-    trackGrow: state.transform.trackGrow,
+    active: state.transform.track_enabled,
+    active_grow: state.transform.track_grow_enabled,
+    value: state.transform.track_value,
+    length: state.transform.track_length,
+    track_grow: state.transform.track_grow,
   }
 }
 
@@ -51,8 +51,8 @@ class TrackTransform extends Component {
   render() {
     var activeClassName = this.props.active ? 'active' : ''
     var activeKey = this.props.active ? 0 : null
-    var activeGrowClassName = this.props.activeGrow ? 'active' : ''
-    var activeGrowKey = this.props.activeGrow ? 0 : null
+    var activeGrowClassName = this.props.active_grow ? 'active' : ''
+    var activeGrowKey = this.props.active_grow ? 0 : null
 
     return (
       <Accordion defaultActiveKey={activeKey}>
@@ -67,7 +67,7 @@ class TrackTransform extends Component {
               <Row className="align-items-center pb-2">
                 <Col sm={4}>
                   <Form.Label htmlFor="track-size">
-                    Track Size
+                    Track size
                   </Form.Label>
                 </Col>
                 <Col sm={8}>
@@ -78,7 +78,7 @@ class TrackTransform extends Component {
               <Row className="align-items-center pb-2">
                 <Col sm={4}>
                   <Form.Label htmlFor="track-length">
-                    Track Length
+                    Track length
                   </Form.Label>
                 </Col>
                 <Col sm={8}>
@@ -103,7 +103,7 @@ class TrackTransform extends Component {
                         </Col>
 
                         <Col sm={8}>
-                          <FormControl id="scale-step" type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter} />
+                          <FormControl id="scale-step" type="number" value={this.props.track_grow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter} />
                         </Col>
                       </Row>
                     </Card.Body>

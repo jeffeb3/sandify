@@ -68,7 +68,7 @@ const getComments = (state) => {
   comments.push("");
   comments.push("  https://sandify.org");
   comments.push("");
-  comments.push("  Sandify Version: " + state.app.sandifyVersion);
+  comments.push("  Sandify Version: " + state.app.sandify_version);
   comments.push("");
   comments.push("  Machine Type: " + (state.machine.rectangular ? "Rectangular" : "Polar"));
   if (state.machine.rectangular) {
@@ -79,44 +79,44 @@ const getComments = (state) => {
   }
 
   switch (state.app.input) {
-    case 0: // shapes
+    case 'shapes': // shapes
       var shapeInfo = findShape(state.shapes.current_shape).getInfo();
 
       comments.push("  Content Type: Shapes");
       comments.push("    Starting Size: " + state.transform.starting_size);
-      comments.push("    Offset: X: " + state.transform.xformOffsetX + " Y: " + state.transform.xformOffsetY);
+      comments.push("    Offset: X: " + state.transform.offset_x + " Y: " + state.transform.offset_y);
       comments.push("    Selected Shape: " + shapeInfo.name);
 
       shapeInfo.options.forEach((option) => {
         comments.push("      " + option.title + ": " + state.shapes[option.key]);
       });
 
-      comments.push("    Number of Loops: " + state.transform.numLoops);
-      comments.push("    Spin: " + state.transform.spinEnabled);
-      if (state.transform.spinEnabled) {
-        comments.push("      Spin Value: " + state.transform.spinValue);
-        comments.push("      Spin Switchbacks: " + state.transform.spinSwitchbacks);
+      comments.push("    Number of Loops: " + state.transform.num_loops);
+      comments.push("    Spin: " + state.transform.spin_enabled);
+      if (state.transform.spin_enabled) {
+        comments.push("      Spin Value: " + state.transform.spin_value);
+        comments.push("      Spin Switchbacks: " + state.transform.spin_switchbacks);
       }
-      comments.push("    Grow: " + state.transform.growEnabled);
-      if (state.transform.growEnabled) {
-        comments.push("      Grow Value: " + state.transform.growValue);
+      comments.push("    Grow: " + state.transform.grow_enabled);
+      if (state.transform.grow_enabled) {
+        comments.push("      Grow Value: " + state.transform.grow_value);
       }
-      comments.push("    Track: " + state.transform.trackEnabled);
-      if (state.transform.trackEnabled) {
-        comments.push("      Track Size: " + state.transform.trackValue);
-        comments.push("      Track Length: " + state.transform.trackLength);
-        comments.push("      Track Grow: " + state.transform.trackGrowEnabled);
-        if (state.transform.trackGrowEnabled) {
-          comments.push("          Track Grow Value: " + state.transform.trackGrow);
+      comments.push("    Track: " + state.transform.track_enabled);
+      if (state.transform.track_enabled) {
+        comments.push("      Track Size: " + state.transform.track_value);
+        comments.push("      Track Length: " + state.transform.track_length);
+        comments.push("      Track Grow: " + state.transform.track_grow_enabled);
+        if (state.transform.track_grow_enabled) {
+          comments.push("          Track Grow Value: " + state.transform.track_grow);
         }
       }
       break;
-    case 2: // wiper
+    case 'wiper':
       comments.push("  Content Type: Wiper");
       comments.push("    Wiper Angle: " + state.wiper.angle_deg);
       comments.push("    Wiper Size: "  + state.wiper.size);
       break;
-    case 3: // thetarho
+    case 'code': // Theta Rho
       comments.push("  Content Type: ThetaRho");
       comments.push("    Input File: " + state.file.name);
       comments.push("    Zoom: "  + state.file.zoom);
@@ -306,17 +306,17 @@ class GCodeGenerator extends Component {
 
           <Modal.Body>
             <Form.Group controlId="sandify-filename">
-              <Form.Label>Name of Output</Form.Label>
+              <Form.Label>Name of output</Form.Label>
               <Form.Control type="text" value={this.props.filename} onChange={this.props.setFilename} />
             </Form.Group>
 
             <Form.Group controlId="pre-code">
-              <Form.Label>Program Start Code</Form.Label>
+              <Form.Label>Program start code</Form.Label>
               <Form.Control as="textarea" value={this.props.pre} onChange={this.props.setPre} />
             </Form.Group>
 
             <Form.Group controlId="post-code">
-              <Form.Label>Program End Code</Form.Label>
+              <Form.Label>Program end code</Form.Label>
               <Form.Control as="textarea" value={this.props.post} onChange={this.props.setPost} />
             </Form.Group>
 

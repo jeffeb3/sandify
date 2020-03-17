@@ -16,8 +16,8 @@ import {
 
 const mapState = (state, ownProps) => {
   return {
-    active: state.transform.growEnabled,
-    value: state.transform.growValue,
+    active: state.transform.grow_enabled,
+    value: state.transform.grow_value,
   }
 }
 
@@ -50,7 +50,7 @@ class ScaleTransform extends Component {
               <Row className="align-items-center pb-2">
                 <Col sm={4}>
                   <Form.Label htmlFor="scale-step">
-                    Grow Step
+                    Grow step
                   </Form.Label>
                 </Col>
 
