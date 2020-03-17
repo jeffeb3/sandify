@@ -61,7 +61,7 @@ class RectSettings extends Component {
       <Card className={`${activeClassName} overflow-auto`}>
         <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
           <h4>Rectangular Machine</h4>
-          Rectangle Machines like the Zen XY
+          Rectangular machines like Zen XY
         </Accordion.Toggle>
 
         <Accordion.Collapse eventKey={0}>
