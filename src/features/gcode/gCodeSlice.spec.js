@@ -4,7 +4,7 @@ import gcode, {
   setGCodePost,
   setGCodeShow,
   toggleGCodeReverse,
-} from './gcodeSlice'
+} from './gCodeSlice'
 
 describe('gCode reducer', () => {
   it('should handle initial state', () => {

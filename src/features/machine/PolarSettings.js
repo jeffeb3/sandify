@@ -1,14 +1,12 @@
 import React, { Component } from 'react'
-import {
-    Col,
-    ControlLabel,
-    Form,
-    FormControl,
-    FormGroup,
-    ListGroupItem,
-    Panel
-} from 'react-bootstrap'
 import { connect } from 'react-redux'
+import {
+    Accordion,
+    Col,
+    Row,
+    Form,
+    Card
+} from 'react-bootstrap'
 import {
   toggleMachinePolarExpanded,
   setMachineMaxRadius,
@@ -44,24 +42,36 @@ class PolarSettings extends Component {
     var endpointsActiveClass = this.props.endpoints ? 'active' : null
 
     return (
-      <div className="polar">
-        <ListGroupItem header="Polar Machine" className={activeClassName} onClick={this.props.activeCallback}>Polar Machines like the Sisyphus.</ListGroupItem>
-        <div className="polar-options">
-          <Panel className="options-panel" collapsible expanded={this.props.expanded}>
-            <Form horizontal>
-              <FormGroup className="machineSmaller" controlId="max_radius">
-                <Col className="machineSmaller" componentClass={ControlLabel} sm={3}>
-                  Max Radius (mm)
-                </Col>
-                <Col sm={7} smOffset={1}>
-                  <FormControl type="number" value={this.props.max_radius} onChange={this.props.onMaxRadiusChange}/>
-                </Col>
-              </FormGroup>
-            </Form>
-            <ListGroupItem header="Force Endpoints" className={endpointsActiveClass} onClick={this.props.toggleEndpoints}>Forces the first and last points to be at the center and edge.</ListGroupItem>
-          </Panel>
-        </div>
-      </div>
+      <Card className={`${activeClassName} overflow-auto`}>
+        <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.activeCallback}>
+          <h4>Polar Machine</h4>
+          Polar machines like Sisyphus
+        </Accordion.Toggle>
+
+        <Accordion.Collapse eventKey={1}>
+          <Card.Body>
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="max_radius">
+                  Max radius (mm)
+                </Form.Label>
+              </Col>
+              <Col sm={8}>
+                <Form.Control id="max_radius" type="number" value={this.props.max_radius} onChange={this.props.onMaxRadiusChange} />
+              </Col>
+            </Row>
+
+            <Accordion>
+              <Card className={`${endpointsActiveClass} overflow-auto`}>
+                <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleEndpoints}>
+                  <h4>Force Endpoints</h4>
+                  Forces the first and last points to be at the center and edge
+                </Accordion.Toggle>
+              </Card>
+            </Accordion>
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
     )
   }
 }

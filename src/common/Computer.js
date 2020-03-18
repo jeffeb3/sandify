@@ -37,38 +37,38 @@ function offset (vertex, offset_x, offset_y) {
 }
 
 function track (vertex, data, loop_index) {
-  let angle = data.trackLength * loop_index / 16 * 2.0 * Math.PI;
+  let angle = data.track_length * loop_index / 16 * 2.0 * Math.PI;
   let radius = 1.0;
-  if (data.trackGrowEnabled) {
-    radius = 1.0 + loop_index / 10.0 * data.trackGrow / 100.0;
+  if (data.track_grow_enabled) {
+    radius = 1.0 + loop_index / 10.0 * data.track_grow / 100.0;
   }
   return {
-    x: vertex.x + radius * data.trackValue * Math.cos(angle),
-    y: vertex.y + radius * data.trackValue * Math.sin(angle),
+    x: vertex.x + radius * data.track_value * Math.cos(angle),
+    y: vertex.y + radius * data.track_value * Math.sin(angle),
     f: vertex.f, // Why do I still have f in here?
   };
 }
 
 export const transform = (data, vertex, fraction_index) => {
   var transformed_vertex = vertex
-  if (data.growEnabled)
+  if (data.grow_enabled)
   {
-    transformed_vertex = scale(transformed_vertex, 100.0 + (data.growValue * fraction_index));
+    transformed_vertex = scale(transformed_vertex, 100.0 + (data.grow_value * fraction_index));
   }
-  transformed_vertex = offset(transformed_vertex, data.xformOffsetX, data.xformOffsetY);
-  if (data.spinEnabled)
+  transformed_vertex = offset(transformed_vertex, data.offset_x, data.offset_y);
+  if (data.spin_enabled)
   {
-    var loop_period = data.numLoops / (parseInt(data.spinSwitchbacks) + 1);
+    var loop_period = data.num_loops / (parseInt(data.spin_switchbacks) + 1);
     var stage = fraction_index/loop_period;
     var direction = (stage % 2 < 1 ? 1.0 : -1.0);
-    var spin_amount = direction * (fraction_index % loop_period) * data.spinValue;
+    var spin_amount = direction * (fraction_index % loop_period) * data.spin_value;
     // Add in the amount it goes positive to the negatives, so they start at the same place.
     if (direction < 0.0) {
-      spin_amount += loop_period * data.spinValue;
+      spin_amount += loop_period * data.spin_value;
     }
     transformed_vertex = rotate(transformed_vertex, spin_amount);
   }
-  if (data.trackEnabled) {
+  if (data.track_enabled) {
     transformed_vertex = track(transformed_vertex, data, fraction_index);
   }
   return transformed_vertex;
@@ -263,7 +263,6 @@ export const polishVertices = (state, vertices) => {
 }
 
 const wiper = (state) => {
-
   var outputVertices = []
 
   // Do the math
@@ -379,7 +378,6 @@ const wiper = (state) => {
       nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0);
       delta_w = orig_delta_h;
     }
-
   }
 
   return polishVertices(state, outputVertices);
@@ -414,11 +412,11 @@ const transformShapes = (state) => {
 
   if (shape) {
     input = shapeInfo.vertices(state).map( (vertex) => {
-      return scale(vertex, 100.0 * state.shapes.starting_size);
+      return scale(vertex, 100.0 * state.transform.starting_size);
     });
   }
 
-  var num_loops = state.transform.numLoops;
+  var num_loops = state.transform.num_loops;
   var outputVertices = []
   for (var i=0; i<num_loops; i++) {
     for (var j=0; j<input.length; j++) {
@@ -459,11 +457,11 @@ export const getVertices = createSelector(
       machine: machine
     };
 
-    if (state.app.input === 0) {
+    if (state.app.input === 'shapes') {
       return transformShapes(state);
-    } else if (state.app.input === 2) {
+    } else if (state.app.input === 'wiper') {
       return wiper(state);
-    } else if (state.app.input === 3) {
+    } else if (state.app.input === 'code') {
       return thetaRho(state);
     } else {
       return transformShapes(state);

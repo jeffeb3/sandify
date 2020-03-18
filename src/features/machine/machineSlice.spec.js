@@ -27,7 +27,7 @@ describe('machine reducer', () => {
       rect_expanded: false,
       canvas_width: 600,
       canvas_height: 600,
-      sliderValue: 0
+      slider_value: 0
     })
   })
 
@@ -158,11 +158,11 @@ describe('machine reducer', () => {
   it('should handle setMachineSlider', () => {
     expect(
       machine(
-        {sliderValue: 0.0},
+        {slider_value: 0.0},
         setMachineSlider(4.0)
       )
     ).toEqual({
-      sliderValue: 4.0
+      slider_value: 4.0
     })
   })
 })

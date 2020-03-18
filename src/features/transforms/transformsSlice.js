@@ -3,64 +3,69 @@ import { createSlice } from "@reduxjs/toolkit"
 const transformsSlice = createSlice({
   name: 'transforms',
   initialState: {
-    xformOffsetX: 0.0,
-    xformOffsetY: 0.0,
-    numLoops: 10,
-    growEnabled: true,
-    growValue: 100,
-    spinEnabled: false,
-    spinValue: 2,
-    spinSwitchbacks: 0,
-    trackEnabled: false,
-    trackGrowEnabled: false,
-    trackValue: 10,
-    trackLength: 0.2,
-    trackGrow: 50.0,
+    starting_size: 10.0,
+    offset_x: 0.0,
+    offset_y: 0.0,
+    num_loops: 10,
+    grow_enabled: true,
+    grow_value: 100,
+    spin_enabled: false,
+    spin_value: 2,
+    spin_switchbacks: 0,
+    track_enabled: false,
+    track_grow_enabled: false,
+    track_value: 10,
+    track_length: 0.2,
+    track_grow: 50.0,
   },
   reducers: {
+    setShapeStartingSize(state, action) {
+      state.starting_size = action.payload
+    },
     setXFormOffsetX(state, action) {
-      state.xformOffsetX = parseFloat(action.payload)
+      state.offset_x = parseFloat(action.payload)
     },
     setXFormOffsetY(state, action) {
-      state.xformOffsetY = parseFloat(action.payload)
+      state.offset_y = parseFloat(action.payload)
     },
     setNumLoops(state, action) {
-      state.numLoops = action.payload
+      state.num_loops = action.payload
     },
     toggleSpin(state, action) {
-      state.spinEnabled = !state.spinEnabled
+      state.spin_enabled = !state.spin_enabled
     },
     setSpin(state, action) {
-      state.spinValue = action.payload
+      state.spin_value = action.payload
     },
     setSpinSwitchbacks(state, action) {
-      state.spinSwitchbacks = action.payload >= 0 ? action.payload : 0
+      state.spin_switchbacks = action.payload >= 0 ? action.payload : 0
     },
     toggleGrow(state, action) {
-      state.growEnabled = !state.growEnabled
+      state.grow_enabled = !state.grow_enabled
     },
     setGrow(state, action) {
-      state.growValue = action.payload
+      state.grow_value = action.payload
     },
     toggleTrack(state, action) {
-      state.trackEnabled = !state.trackEnabled
+      state.track_enabled = !state.track_enabled
     },
     toggleTrackGrow(state, action) {
-      state.trackGrowEnabled = !state.trackGrowEnabled
+      state.track_grow_enabled = !state.track_grow_enabled
     },
     setTrack(state, action) {
-      state.trackValue = action.payload
+      state.track_value = action.payload
     },
     setTrackLength(state, action) {
-      state.trackLength = action.payload
+      state.track_length = action.payload
     },
     setTrackGrow(state, action) {
-      state.trackGrow = action.payload
+      state.track_grow = action.payload
     },
   }
 })
 
 export const {
+  setShapeStartingSize,
   setXFormOffsetX,
   setXFormOffsetY,
   setNumLoops,

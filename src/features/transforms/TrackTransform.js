@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import {
+  Accordion,
   Col,
-  ControlLabel,
+  Row,
   Form,
   FormControl,
-  FormGroup,
-  ListGroupItem,
-  Panel,
+  Card,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import { disableEnter } from '../shapes/Shape'
@@ -20,11 +19,11 @@ import {
 
 const mapState = (state, ownProps) => {
   return {
-    active: state.transform.trackEnabled,
-    activeGrow: state.transform.trackGrowEnabled,
-    value: state.transform.trackValue,
-    length: state.transform.trackLength,
-    trackGrow: state.transform.trackGrow,
+    active: state.transform.track_enabled,
+    active_grow: state.transform.track_grow_enabled,
+    value: state.transform.track_value,
+    length: state.transform.track_length,
+    track_grow: state.transform.track_grow,
   }
 }
 
@@ -49,57 +48,72 @@ const mapDispatch = (dispatch, ownProps) => {
 }
 
 class TrackTransform extends Component {
-
   render() {
-    var activeClassName = "";
-    if (this.props.active) {
-      activeClassName = "active";
-    }
-
-    var activeGrowClassName = "";
-    if (this.props.activeGrow) {
-      activeGrowClassName = "active";
-    }
+    var activeClassName = this.props.active ? 'active' : ''
+    var activeKey = this.props.active ? 0 : null
+    var activeGrowClassName = this.props.active_grow ? 'active' : ''
+    var activeGrowKey = this.props.active_grow ? 0 : null
 
     return (
-      <div className="track">
-        <ListGroupItem header="Track" className={activeClassName} onClick={this.props.activeCallback}>Moves the shape along a track (shown in green)</ListGroupItem>
-        <div className="track-options">
-          <Panel className="options-panel" collapsible expanded={this.props.active}>
-            <Form horizontal>
-              <FormGroup controlId="track-size">
-                <Col componentClass={ControlLabel} sm={4}>
-                  Track Size
+      <Accordion defaultActiveKey={activeKey}>
+        <Card className={`${activeClassName} overflow-auto`}>
+          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
+            <h4>Track</h4>
+            Moves the shape along a track (shown in green)
+          </Accordion.Toggle>
+
+          <Accordion.Collapse eventKey={0}>
+            <Card.Body>
+              <Row className="align-items-center pb-2">
+                <Col sm={4}>
+                  <Form.Label htmlFor="track-size">
+                    Track size
+                  </Form.Label>
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter}/>
+                  <FormControl id="track-size" type="number" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter} />
                 </Col>
-              </FormGroup>
-              <FormGroup controlId="track-length">
-                <Col componentClass={ControlLabel} sm={4}>
-                  Track Length
+              </Row>
+
+              <Row className="align-items-center pb-2">
+                <Col sm={4}>
+                  <Form.Label htmlFor="track-length">
+                    Track length
+                  </Form.Label>
                 </Col>
                 <Col sm={8}>
-                  <FormControl type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength} onKeyDown={disableEnter}/>
+                  <FormControl id="track-length" type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength} onKeyDown={disableEnter} />
                 </Col>
-              </FormGroup>
-              <ListGroupItem header="Grow" className={activeGrowClassName} onClick={this.props.activeGrowCallback}>Grows or shrinks the track a little bit for each step</ListGroupItem>
-              <div className="scale-options">
-                <Panel className="options-panel" collapsible expanded={this.props.activeGrow}>
-                    <FormGroup controlId="scale-step">
-                      <Col componentClass={ControlLabel} sm={4}>
-                        Track Grow Step
-                      </Col>
-                      <Col sm={8}>
-                        <FormControl type="number" value={this.props.trackGrow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter}/>
-                      </Col>
-                    </FormGroup>
-                </Panel>
-              </div>
-            </Form>
-          </Panel>
-        </div>
-      </div>
+              </Row>
+
+              <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
+                <Card className={`${activeGrowClassName} overflow-auto`}>
+                  <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeGrowCallback}>
+                    <h4>Grow</h4>
+                    Grows or shrinks the track a little bit for each step
+                  </Accordion.Toggle>
+
+                  <Accordion.Collapse eventKey={0}>
+                    <Card.Body>
+                      <Row className="align-items-center pb-2">
+                        <Col sm={4}>
+                          <Form.Label htmlFor="scale-step">
+                            Track Grow Step
+                          </Form.Label>
+                        </Col>
+
+                        <Col sm={8}>
+                          <FormControl id="scale-step" type="number" value={this.props.track_grow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter} />
+                        </Col>
+                      </Row>
+                    </Card.Body>
+                  </Accordion.Collapse>
+                </Card>
+              </Accordion>
+            </Card.Body>
+          </Accordion.Collapse>
+        </Card>
+      </Accordion>
     )
   }
 }

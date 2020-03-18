@@ -2,22 +2,15 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Col,
-  ControlLabel,
   Form,
-  FormControl,
-  FormGroup,
-  ListGroupItem,
-  Panel,
-  MenuItem,
-  DropdownButton
+  Card,
+  Accordion,
+  Dropdown,
+  Row
 } from 'react-bootstrap'
-import {
-  setXFormOffsetX,
-  setXFormOffsetY,
-} from '../transforms/transformsSlice'
+import SelectableContext from "react-bootstrap/SelectableContext";
 import {
   setCurrentShape,
-  setShapeStartingSize
 } from './shapeSlice'
 import { registeredShapes } from './registered_shapes.js'
 import './Shape.css'
@@ -26,14 +19,14 @@ export const disableEnter = (event) => {
   if (event.key === 'Enter' && event.shiftKey === false) {
     event.preventDefault();
   }
-};
+}
 
 const mapState = (state, ownProps) => {
   let props = {
     current_shape: state.shapes.current_shape,
-    starting_size: state.shapes.starting_size,
-    x_offset: state.transform.xformOffsetX,
-    y_offset: state.transform.xformOffsetY,
+    starting_size: state.transform.starting_size,
+    x_offset: state.transform.offset_x,
+    y_offset: state.transform.offset_y,
   };
 
   let registeredProps = registeredShapes.map((shape) => shape.mapState(state, ownProps));
@@ -45,15 +38,6 @@ const mapDispatch = (dispatch, ownProps) => {
     setCurrentShape: (name) => {
       dispatch(setCurrentShape(name));
     },
-    onSizeChange: (event) => {
-      dispatch(setShapeStartingSize(event.target.value));
-    },
-    onOffsetXChange: (event) => {
-      dispatch(setXFormOffsetX(event.target.value));
-    },
-    onOffsetYChange: (event) => {
-      dispatch(setXFormOffsetY(event.target.value));
-    },
   };
   let registeredMethods = registeredShapes.map((shape) => shape.mapDispatch(dispatch, ownProps));
 
@@ -62,74 +46,95 @@ const mapDispatch = (dispatch, ownProps) => {
 
 class Shape extends Component {
   render() {
-    var activeClassName = "";
-    if (this.props.active) {
-      activeClassName = "active";
-    }
-
-    var options_render = this.props.options.map( (option) => {
+    var activeClassName = this.props.active ? 'active' : ''
+    var optionsRender = this.props.options.map( (option, index) => {
       if (option.type && option.type === "dropdown") {
-        return <FormGroup controlId="options-step" key={option.title}>
-                 <Col componentClass={ControlLabel} sm={4}>
-                   {option.title}
-                 </Col>
-                 <Col sm={8}>
-                   <DropdownButton bsStyle="default"
-                                   id="dropdown-basic-button"
-                                   title={option.value(this.props)}
-                                   onSelect={(event) => {
-                                       option.onChange(this.props)(event);
-                                   }}
-                                   onKeyDown={disableEnter}>
-                     {option.choices.map((choice) => {
-                         return <MenuItem key={choice} eventKey={choice}>{choice}</MenuItem>;
-                     })}
-                   </DropdownButton>
-                 </Col>
-               </FormGroup>
+        return <Row className="align-items-center pb-2" key={index}>
+                <Col sm={4}>
+                  <Form.Label htmlFor="options-dropdown">
+                    {option.title}
+                  </Form.Label>
+                </Col>
+
+                <Col sm={8}>
+                  <Dropdown
+                    id="options-dropdown"
+                    onSelect={(event) => {
+                       option.onChange(this.props)(event);
+                    }}
+                    onKeyDown={disableEnter}>
+                    <Dropdown.Toggle variant="secondary">
+                      {option.value(this.props)}
+                     </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      {option.choices.map((choice) => {
+                         return <Dropdown.Item key={choice} eventKey={choice}>{choice}</Dropdown.Item>
+                      })}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Col>
+               </Row>
       } else {
-        return <FormGroup controlId="options-step" key={option.title}>
-                 <Col componentClass={ControlLabel} sm={4}>
-                   {option.title}
+        return  <Row className="align-items-center pb-2" key={index}>
+                  <Col sm={4}>
+                    <Form.Label htmlFor="options-step">
+                      {option.title}
+                    </Form.Label>
+                  </Col>
+
+                  <Col sm={8}>
+                    <Form.Control
+                      id="options-step"
+                      type={option.type ? option.type : "number"}
+                      step={option.step ? option.step : 1}
+                      value={option.value(this.props)}
+                      onChange={(event) => {
+                        option.onChange(this.props)(event)
+                      }}
+                      onKeyDown={disableEnter} />
                  </Col>
-                 <Col sm={8}>
-                   <FormControl
-                     type={option.type ? option.type : "number"}
-                     step={option.step ? option.step : 1}
-                     value={option.value(this.props)}
-                     onChange={(event) => {
-                       option.onChange(this.props)(event)
-                     }}
-                     onKeyDown={disableEnter}/>
-                 </Col>
-               </FormGroup>
+                </Row>
       }
     })
 
-    var options_list_render = undefined;
-    var link_render = undefined;
+    var optionsListRender = undefined
+    var linkRender = undefined
+    var cardBodyRender = <div></div>
 
     if (this.props.link) {
-      link_render = <p>See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas</p>;
+      linkRender = <p className="mb-0 mt-3">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas.</p>;
     }
 
     if (this.props.options.length >= 1) {
-      options_list_render =
+      optionsListRender =
         <div className="shape-options">
-          <Panel className="options-panel" collapsible expanded={this.props.active}>
-            <Form horizontal>
-              {link_render}
-              {options_render}
-            </Form>
-          </Panel>
+          {optionsRender}
+          {linkRender}
         </div>
     }
 
+    if (this.props.options.length > 0) {
+      cardBodyRender =
+        <Card.Body>
+          {optionsListRender}
+        </Card.Body>
+    }
+
     return (
-      <div className="shape">
-        <ListGroupItem className={activeClassName} onClick={this.props.clicked}>{this.props.name}</ListGroupItem>
-            {options_list_render}
-      </div>
+      <Card className={`${activeClassName} overflow-auto`}>
+        <Accordion.Toggle as={Card.Header} eventKey={this.props.index} onClick={this.props.clicked}>{this.props.name}</Accordion.Toggle>
+        <Accordion.Collapse eventKey={this.props.index}>
+          {/**
+            Wrapping the shape content inside a selectable context to get around a bug
+            where a nested dropdown can close the parent accordion.
+            https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
+          **/}
+          <SelectableContext.Provider value={false}>
+            { cardBodyRender }
+          </SelectableContext.Provider>
+        </Accordion.Collapse>
+      </Card>
     )
   }
 }

@@ -1,18 +1,17 @@
 import React, { Component } from 'react'
 import logo from './logo.svg'
-import './Header.css'
+import './Header.scss'
 
 class Header extends Component {
   render() {
     return (
-      <div className="header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h2>sandify</h2>
-        <p>
-          web based user interface to create patterns that
-          could be useful for robots that draw in sand with ball bearings.
-        </p>
-      </div>
+      <header>
+        <div className="d-flex align-items-center justify-content-center">
+          <img src={logo} className="app-logo mr-2" alt="logo" />
+          <h2 className="d-inline m-0">sandify</h2>
+        </div>
+        <p>create patterns for robots that draw in sand with ball bearings</p>
+      </header>
     );
   }
 }

@@ -7,7 +7,7 @@ export class Polygon {
       polygon_sides: 4
     }
   }
-  
+
   static reducer(state, action) {
     return polygonReducer(state, action)
   }
@@ -39,7 +39,7 @@ export class Polygon {
       },
       options: [
         {
-          title: "Number of Sides",
+          title: "Number of sides",
           key: "polygon_sides",
           value: (props) => { return props.polygon_sides },
           onChange: (props) => { return props.onPolygonSizeChange },

@@ -36,7 +36,6 @@ function pointLocation(point, size_x, size_y) {
 
 // Determine intersection with one of the sides
 function intersection(line_start, line_end, side_start, side_end) {
-
   var line = line_end.clone().subtract(line_start);
   var side = side_end.clone().subtract(side_start);
   var lineCrossSidePerp = line.x * side.y - line.y * side.x;
@@ -66,7 +65,6 @@ function intersection(line_start, line_end, side_start, side_end) {
 // to follow around without messing up the shape of the vertices.
 //
 function clipLine(line_start, line_end, size_x, size_y) {
-
   var quadrant_start = pointLocation(line_start, size_x, size_y);
   var quadrant_end = pointLocation(line_end, size_x, size_y);
 
@@ -246,7 +244,6 @@ function getIntersections(start, end, size) {
   }
 
   var dt = Math.sqrt(size*size - distanceToLine*distanceToLine);
-
   var point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start);
   var point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start);
 
@@ -269,7 +266,6 @@ function getIntersections(start, end, size) {
 // to follow around without messing up the shape of the vertices.
 //
 function clipLineCircle(line_start, line_end, size) {
-
   // Cases:
   // 1 - Entire line is inside
   //     return start, end
@@ -409,7 +405,6 @@ export const enforceRectLimits = function(vertices, size_x, size_y) {
 }
 
 export const enforcePolarLimits = function(vertices, size) {
-
   var cleanVertices = []
   var previous = null;
 

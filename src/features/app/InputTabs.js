@@ -10,24 +10,26 @@ import ThetaRho from '../theta_rho/ThetaRho.js'
 import { chooseInput} from '../app/appSlice.js'
 
 class InputTabs extends Component {
-  handleSelect( key ) {
-    this.props.dispatch(chooseInput(key));
+  handleSelect(key) {
+    this.props.dispatch(chooseInput(key))
   }
 
   render() {
     return (
-       <Tabs defaultActiveKey={0} onSelect={this.handleSelect.bind(this)} id="inputTabs">
-         <Tab eventKey={0} title="Shapes">
+       <Tabs defaultActiveKey="shapes" onSelect={this.handleSelect.bind(this)} id="input-tabs">
+         <Tab eventKey="shapes" title="Shapes">
            <Transforms />
          </Tab>
-         <Tab eventKey={2} title="Wiper">
+
+         <Tab eventKey="wiper" title="Wiper">
            <Wiper />
          </Tab>
-         <Tab eventKey={3} title="Code">
+
+         <Tab eventKey="code" title="Code">
            <ThetaRho />
          </Tab>
        </Tabs>
-    );
+    )
   }
 }
 

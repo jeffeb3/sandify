@@ -1,6 +1,5 @@
 import shape, {
   setCurrentShape,
-  setShapeStartingSize,
 } from './shapeSlice'
 
 describe('shapes reducer', () => {
@@ -14,7 +13,6 @@ describe('shapes reducer', () => {
       reuleaux_sides: 3,
       input_font: "Cursive",
       input_text: "Sandify",
-      starting_size: 10.0,
       epicycloid_a: 1.0,
       epicycloid_b: .25,
       hypocycloid_a: 1.5,
@@ -32,17 +30,6 @@ describe('shapes reducer', () => {
       )
     ).toEqual({
       current_shape: 'Heart'
-    })
-  })
-
-  it('should handle setShapeStartingSize', () => {
-    expect(
-      shape(
-        {starting_size: 10.0},
-        setShapeStartingSize(20.0)
-      )
-    ).toEqual({
-      starting_size: 20.0
     })
   })
 })

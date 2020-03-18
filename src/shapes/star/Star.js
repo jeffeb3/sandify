@@ -51,13 +51,13 @@ export class Star {
       },
       options: [
         {
-          title: "Number of Points",
+          title: "Number of points",
           key: "starPoints",
           value: (props) => { return props.star_points },
           onChange: (props) => { return props.onStarPointsChange },
         },
         {
-          title: "Size of Points",
+          title: "Size of points",
           key: "starRatio",
           value: (props) => { return props.star_ratio },
           onChange: (props) => { return props.onStarRatioChange },

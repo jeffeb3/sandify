@@ -1,13 +1,14 @@
 {
   "name": "sandify",
   "homepage": "https://sandify.org",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.2.5",
+    "node-sass": "^4.13.1",
     "rc-slider": "^8.6.3",
     "react": "^16.13.0",
-    "react-bootstrap": "^0.31.0",
+    "react-bootstrap": "^1.0.0-beta.17",
     "react-dom": "^16.13.0",
     "react-redux": "^7.2.0",
     "react-scripts": "3.3.1",

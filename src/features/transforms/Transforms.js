@@ -1,27 +1,31 @@
 import React, { Component } from 'react'
 import {
   Col,
-  ControlLabel,
   Form,
   FormControl,
-  FormGroup,
-  ListGroup,
-  Panel,
+  Accordion,
+  Card,
+  Row
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import { disableEnter } from '../shapes/Shape'
 import ShapeList from '../shapes/ShapeList'
 import {
-  setNumLoops
+  setShapeStartingSize,
+  setNumLoops,
+  setXFormOffsetX,
+  setXFormOffsetY,
 } from './transformsSlice'
 import ScaleTransform from './ScaleTransform'
 import RotationTransform from './RotationTransform'
 import TrackTransform from './TrackTransform'
-import './Transforms.css'
 
 const mapState = (state, ownProps) => {
   return {
-    loops: state.transform.numLoops,
+    loops: state.transform.num_loops,
+    starting_size: state.transform.starting_size,
+    x_offset: state.transform.offset_x,
+    y_offset: state.transform.offset_y,
   }
 }
 
@@ -30,6 +34,15 @@ const mapDispatch = (dispatch, ownProps) => {
     changeLoops: (event) => {
       dispatch(setNumLoops(event.target.value));
     },
+    onSizeChange: (event) => {
+      dispatch(setShapeStartingSize(event.target.value));
+    },
+    onOffsetXChange: (event) => {
+      dispatch(setXFormOffsetX(event.target.value));
+    },
+    onOffsetYChange: (event) => {
+      dispatch(setXFormOffsetY(event.target.value));
+    },
   }
 }
 
@@ -37,32 +50,62 @@ class Transforms extends Component {
   render() {
     return (
       <div className="transforms">
-        <Panel className="shapes-panel">
-          <h4>Input Shapes</h4>
+        <Card className="p-3">
+          <h4>Select a shape</h4>
           <ShapeList />
-        </Panel>
-        <Panel className="transforms-panel">
+        </Card>
+
+        <Card className="mt-3 p-3">
           <h4>Modifiers</h4>
-          <Panel className="options-panel">
-            <Form horizontal>
-              <FormGroup controlId="loop-count">
-                <Col componentClass={ControlLabel} sm={4}>
-                  Number of Loops
-                </Col>
-                <Col sm={8}>
-                  <FormControl type="number" value={this.props.loops} onChange={this.props.changeLoops} onKeyDown={disableEnter}/>
-                </Col>
-              </FormGroup>
-            </Form>
-          </Panel>
-          <ListGroup>
+          <Row className="align-items-center pt-3 pb-2">
+            <Col sm={4}>
+              <Form.Label htmlFor="shape-size">
+                Starting size
+              </Form.Label>
+            </Col>
+
+            <Col sm={8}>
+              <FormControl id="shape-size" type="number" value={this.props.starting_size} onChange={this.props.onSizeChange} onKeyDown={disableEnter} />
+            </Col>
+          </Row>
+
+          <Row className="align-items-center pb-2">
+            <Col sm={4}>
+              <Form.Label htmlFor="shape-offset">
+              Offset
+              </Form.Label>
+            </Col>
+
+            <Col sm={8}>
+              <div className="d-flex align-items-center">
+                <span>X</span>
+                <FormControl type="number" className="ml-2" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter} />
+                <span className="ml-2">Y</span>
+                <FormControl className="ml-2" type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange} onKeyDown={disableEnter} />
+              </div>
+            </Col>
+          </Row>
+
+          <Row className="align-items-center pb-2">
+            <Col sm={4}>
+              <Form.Label htmlFor="loop-count">
+                Number of loops
+              </Form.Label>
+            </Col>
+
+            <Col sm={8}>
+              <FormControl id="loop-count" type="number" value={this.props.loops} onChange={this.props.changeLoops} onKeyDown={disableEnter} />
+            </Col>
+          </Row>
+
+          <Accordion className="pt-4">
             <ScaleTransform />
             <RotationTransform />
             <TrackTransform />
-          </ListGroup>
-        </Panel>
+          </Accordion>
+        </Card>
       </div>
-    );
+    )
   }
 }
 

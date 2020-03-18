@@ -1,0 +1,20 @@
+header {
+  background-color: #2d6da4;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+
+  h2 {
+    font-size: 3rem;
+  }
+
+  p {
+    font-size: 1.4rem;
+    margin: 0.8rem 0 0 0;
+  }
+}
+
+.app-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 3.6rem;
+}

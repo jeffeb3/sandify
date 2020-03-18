@@ -1,4 +1,9 @@
 import React, { Component } from 'react'
+import {
+  Col,
+  Container,
+  Row
+} from 'react-bootstrap'
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
 import { Provider } from 'react-redux'
@@ -11,10 +16,9 @@ import shapesReducer from '../shapes/shapeSlice.js'
 import transformsReducer from '../transforms/transformsSlice.js'
 import turtleReducer from '../turtle/turtleSlice.js'
 import Header from './Header'
-import Documentation from './Documentation'
+import Footer from './Footer'
 import InputTabs from './InputTabs'
 import MachinePreview from '../machine/MachinePreview'
-import GCodeGenerator from '../gcode/GCodeGenerator'
 import './App.css'
 
 const store =
@@ -35,27 +39,23 @@ class App extends Component {
     return (
       <Provider store={store}>
         <div className="App">
-          <div className="App-header">
-            <Header />
-          </div>
+          <Header />
 
-          <div className="App-col-7 App-left">
-            <InputTabs />
-          </div>
+          <main>
+            <Container fluid>
+              <Row className="pt-3">
+                <Col lg={7}>
+                  <InputTabs />
+                </Col>
 
-          <div className="App-col-5 App-mid">
-            <div className="App-canvas">
-              <MachinePreview />
-            </div>
+                <Col lg={5}>
+                  <MachinePreview />
+                </Col>
+              </Row>
+            </Container>
+          </main>
 
-            <div id="output">
-              <GCodeGenerator />
-            </div>
-          </div>
-
-          <div className="App-col-12 App-doc">
-            <Documentation />
-          </div>
+          <Footer />
         </div>
       </Provider>
     );
