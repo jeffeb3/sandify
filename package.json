@@ -4,19 +4,22 @@
   "version": "0.1.7",
   "private": true,
   "dependencies": {
+    "@reduxjs/toolkit": "^1.2.5",
     "rc-slider": "^8.6.3",
-    "react": "^15.6.1",
+    "react": "^16.13.0",
     "react-bootstrap": "^0.31.0",
-    "react-dom": "^15.6.1",
-    "react-redux": "^5.0.5",
+    "react-dom": "^16.13.0",
+    "react-redux": "^7.2.0",
+    "react-scripts": "3.3.1",
     "reduce-reducers": "^1.0.4",
-    "react-scripts": "2.1.5",
-    "redux": "^3.7.1",
+    "redux": "^4.0.5",
     "reselect": "^4.0.0",
     "victor": "^1.1.0"
   },
   "devDependencies": {
-    "gh-pages": "^1.0.0"
+    "gh-pages": "^1.0.0",
+    "eslint-plugin-flowtype": "^3.13.0",
+    "typescript": "^3.7.5"
   },
   "scripts": {
     "start": "react-scripts start",
