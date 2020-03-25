@@ -36,7 +36,7 @@ export const getVertices = createSelector(
       machine: machine
     }
 
-    if (state.app.input === 'shapes') {
+    if (state.app.input === 'shape') {
       return transformShapes(state)
     } else if (state.app.input === 'wiper') {
       return wiper(state)

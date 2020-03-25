@@ -4,7 +4,7 @@ const appSlice = createSlice({
   name: 'app',
   initialState: {
     sandifyVersion: "0.1.8", // Also change the version in package.json.
-    input: 0,
+    input: 'shape',
   },
   reducers: {
     chooseInput(state, action) {

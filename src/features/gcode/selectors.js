@@ -49,18 +49,20 @@ export const getComments = createSelector(
       comments.push("    Force Endpoints: " + state.machine.polarEndpoints)
     }
 
+    comments.push("  Content Type: " + state.app.input)
+
     switch (state.app.input) {
-      case 'shapes': // shapes
+      case 'shape': // shapes
         const shape = state.shapes.byId[state.shapes.currentId]
-        const shapeInfo = getShape(shape).getOptions()
+        const metashape = getShape(shape)
+        const shapeOptions = metashape.getOptions()
 
-        comments.push("  Content Type: Shapes")
         comments.push("    Starting Size: " + shape.startingSize)
-        comments.push("    Offset: X: " + shape.offsetX + " Y: " + shape.offsetY)
-        comments.push("    Selected Shape: " + shapeInfo.name)
+        comments.push("    Offset: X: " + state.transform.offsetX + " Y: " + state.transform.offsetY)
+        comments.push("    Selected Shape: " + metashape.name)
 
-        Object.entries(shapeInfo).forEach((option) => {
-          comments.push("      " + option.title + ": " + shape[option.key])
+        Object.keys(shapeOptions).forEach((key) => {
+          comments.push("      " + shapeOptions[key].title + ": " + shape[key])
         })
 
         comments.push("    Number of Loops: " + state.transform.numLoops)
@@ -85,13 +87,11 @@ export const getComments = createSelector(
         break
 
       case 'wiper':
-        comments.push("  Content Type: Wiper")
         comments.push("    Wiper Angle: " + state.wiper.angleDeg)
         comments.push("    Wiper Size: "  + state.wiper.size)
         break
 
       case 'code': // Theta Rho
-        comments.push("  Content Type: ThetaRho")
         comments.push("    Input File: " + state.file.name)
         comments.push("    Zoom: "  + state.file.zoom)
         comments.push("    Aspect Ratio: " + state.file.aspectRatio)

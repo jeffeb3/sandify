@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const shapesSlice = createSlice({
-  name: 'shapes',
+  name: 'shape',
   initialState: {
     currentId: null,
     byId: {},

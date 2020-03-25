@@ -64,7 +64,6 @@ export default class InputText extends Shape {
         shape = CursiveFont(letter)
       }
 
-
       for (let vi = 0; vi < shape.vertices.length; vi++) {
         points.push(Vertex(shape.vertices[vi].x + x, shape.vertices[vi].y))
       }
