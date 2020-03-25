@@ -38,15 +38,15 @@ export const getComments = createSelector(
     comments.push("")
     comments.push("  https://sandify.org")
     comments.push("")
-    comments.push("  Sandify Version: " + state.app.sandify_version)
+    comments.push("  Sandify Version: " + state.app.sandifyVersion)
     comments.push("")
     comments.push("  Machine Type: " + (state.machine.rectangular ? "Rectangular" : "Polar"))
 
     if (state.machine.rectangular) {
-      comments.push("    MinX: " + state.machine.min_x + " MaxX: " + state.machine.max_x + " MinY: " + state.machine.min_y + " MaxY: " + state.machine.max_y)
+      comments.push("    MinX: " + state.machine.minX + " MaxX: " + state.machine.maxX + " MinY: " + state.machine.minY + " MaxY: " + state.machine.maxY)
     } else {
-      comments.push("    Max Radius: " + state.machine.max_radius)
-      comments.push("    Force Endpoints: " + state.machine.polar_endpoints)
+      comments.push("    Max Radius: " + state.machine.maxRadius)
+      comments.push("    Force Endpoints: " + state.machine.polarEndpoints)
     }
 
     switch (state.app.input) {
@@ -86,7 +86,7 @@ export const getComments = createSelector(
 
       case 'wiper':
         comments.push("  Content Type: Wiper")
-        comments.push("    Wiper Angle: " + state.wiper.angle_deg)
+        comments.push("    Wiper Angle: " + state.wiper.angleDeg)
         comments.push("    Wiper Size: "  + state.wiper.size)
         break
 
@@ -94,7 +94,7 @@ export const getComments = createSelector(
         comments.push("  Content Type: ThetaRho")
         comments.push("    Input File: " + state.file.name)
         comments.push("    Zoom: "  + state.file.zoom)
-        comments.push("    Aspect Ratio: " + state.file.aspect_ratio)
+        comments.push("    Aspect Ratio: " + state.file.aspectRatio)
         break
 
       default: // Dunno

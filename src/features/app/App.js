@@ -39,7 +39,7 @@ const store = configureStore({
     wiper: wiperReducer,
     turtle: turtleReducer
   }),
-});
+})
 
 // preload shapes into store
 Object.keys(registeredShapes).forEach(key => {
@@ -77,8 +77,8 @@ class App extends Component {
           <Footer />
         </div>
       </Provider>
-    );
+    )
   }
 }
 
-export default App;
+export default App

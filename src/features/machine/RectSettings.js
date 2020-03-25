@@ -20,13 +20,13 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    expanded: state.machine.rect_expanded,
+    expanded: state.machine.rectExpanded,
     active:   state.machine.rectangular,
-    min_x:    state.machine.min_x,
-    max_x:    state.machine.max_x,
-    min_y:    state.machine.min_y,
-    max_y:    state.machine.max_y,
-    origin:   state.machine.rect_origin,
+    minX:    state.machine.minX,
+    maxX:    state.machine.maxX,
+    minY:    state.machine.minY,
+    maxY:    state.machine.maxY,
+    origin:   state.machine.rectOrigin,
   }
 }
 
@@ -68,49 +68,49 @@ class RectSettings extends Component {
           <Card.Body>
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="min_x">
+                <Form.Label htmlFor="minX">
                   Min X (mm)
                 </Form.Label>
               </Col>
 
               <Col sm={8}>
-                <FormControl id="min_x" type="number" value={this.props.min_x} onChange={this.props.onMinXChange} />
+                <FormControl id="minX" type="number" value={this.props.minX} onChange={this.props.onMinXChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="max_x">
+                <Form.Label htmlFor="maxX">
                   Max X (mm)
                 </Form.Label>
               </Col>
 
               <Col sm={8}>
-                <FormControl id="max_x" type="number" value={this.props.max_x} onChange={this.props.onMaxXChange} />
+                <FormControl id="maxX" type="number" value={this.props.maxX} onChange={this.props.onMaxXChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="min_y">
+                <Form.Label htmlFor="minY">
                   Min Y (mm)
                 </Form.Label>
               </Col>
 
               <Col sm={8}>
-                <FormControl id="min_y" type="number" value={this.props.min_y} onChange={this.props.onMinYChange} />
+                <FormControl id="minY" type="number" value={this.props.minY} onChange={this.props.onMinYChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="max_y">
+                <Form.Label htmlFor="maxY">
                   Max Y (mm)
                 </Form.Label>
               </Col>
 
               <Col sm={8}>
-                <FormControl id="max_y" type="number" value={this.props.max_y} onChange={this.props.onMaxYChange} />
+                <FormControl id="maxY" type="number" value={this.props.maxY} onChange={this.props.onMaxYChange} />
               </Col>
             </Row>
 

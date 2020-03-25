@@ -119,7 +119,7 @@ const billseyConverter = (vertices) => {
   })
 
   return {
-    max_x: fontSpacing,
+    maxX: fontSpacing,
     vertices: newVertices,
   }
 }
@@ -131,7 +131,7 @@ const raysolConverter = (vertices) => {
   })
 
   return {
-    max_x: fontSpacing,
+    maxX: fontSpacing,
     vertices: newVertices,
   }
 }

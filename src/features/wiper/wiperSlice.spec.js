@@ -6,7 +6,7 @@ import wiper, {
 describe('wiper reducer', () => {
   it('should handle initial state', () => {
     expect(wiper(undefined, {})).toEqual({
-      angle_deg: 15,
+      angleDeg: 15,
       size: 12
     })
   })
@@ -14,11 +14,11 @@ describe('wiper reducer', () => {
   it('should handle setWiperAngleDeg', () => {
     expect(
       wiper(
-        {angle_deg: 15},
+        {angleDeg: 15},
         setWiperAngleDeg(100)
       )
     ).toEqual({
-      angle_deg: 100
+      angleDeg: 100
     })
   })
 

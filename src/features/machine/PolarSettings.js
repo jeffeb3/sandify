@@ -15,10 +15,10 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    expanded:   state.machine.polar_expanded,
+    expanded:   state.machine.polarExpanded,
     active:     !state.machine.rectangular,
-    max_radius: state.machine.max_radius,
-    endpoints:  state.machine.polar_endpoints,
+    maxRadius: state.machine.maxRadius,
+    endpoints:  state.machine.polarEndpoints,
   }
 }
 
@@ -52,12 +52,12 @@ class PolarSettings extends Component {
           <Card.Body>
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="max_radius">
+                <Form.Label htmlFor="maxRadius">
                   Max radius (mm)
                 </Form.Label>
               </Col>
               <Col sm={8}>
-                <Form.Control id="max_radius" type="number" value={this.props.max_radius} onChange={this.props.onMaxRadiusChange} />
+                <Form.Control id="maxRadius" type="number" value={this.props.maxRadius} onChange={this.props.onMaxRadiusChange} />
               </Col>
             </Row>
 

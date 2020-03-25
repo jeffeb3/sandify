@@ -6,11 +6,11 @@ class Slider extends Component {
     this.state = {
       rangeValue: this.props.initialValue
     }
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChange = this.handleChange.bind(this)
   }
 
   handleChange(event) {
-    this.setState({ rangeValue: event.target.value });
+    this.setState({ rangeValue: event.target.value })
   }
 
   render() {

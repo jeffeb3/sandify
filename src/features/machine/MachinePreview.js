@@ -11,7 +11,7 @@ import './MachinePreview.css'
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    slider_value: state.machine.slider_value,
+    sliderValue: state.machine.sliderValue,
     verticesStats: getVerticesStats(state),
   }
 }
@@ -37,7 +37,7 @@ class MachinePreview extends Component {
 
             <div className="p-3">
                 <Slider
-                  value={this.props.slider_value}
+                  value={this.props.sliderValue}
                   step={1.0}
                   min={0.0}
                   max={100.0}

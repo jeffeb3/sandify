@@ -10,8 +10,8 @@ import { getShape } from '../features/shapes/selectors'
 import Victor from 'victor'
 
 // Transform functions
-function rotate (vertex, angle_deg) {
-  var angle = Math.PI / 180.0 * angle_deg
+function rotate (vertex, angleDeg) {
+  var angle = Math.PI / 180.0 * angleDeg
   return Vertex(
            vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
            vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
@@ -140,7 +140,7 @@ function nearEnough(end, point) {
 export const polishVertices = (state, vertices) => {
   let machine = state.machine
   if (vertices.length > 0) {
-    if (machine.rectangular && machine.rect_origin.length === 1) {
+    if (machine.rectangular && machine.rectOrigin.length === 1) {
 
       // OK, let's assign corners indices:
       //
@@ -149,8 +149,8 @@ export const polishVertices = (state, vertices) => {
       //
       // [0]   [3]
 
-      let dx = (machine.max_x - machine.min_x) / 2.0
-      let dy = (machine.max_y - machine.min_y) / 2.0
+      let dx = (machine.maxX - machine.minX) / 2.0
+      let dy = (machine.maxY - machine.minY) / 2.0
 
       let corners = [
         {x: -dx, y: -dy},
@@ -164,7 +164,7 @@ export const polishVertices = (state, vertices) => {
       let last = vertices[vertices.length-1]
 
       // Max radius
-      let max_radius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
+      let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
 
       let vFirst = Victor.fromObject(first)
       let vLast = Victor.fromObject(last)
@@ -172,11 +172,11 @@ export const polishVertices = (state, vertices) => {
       let newVertices = []
       if (vFirst.magnitude() <= vLast.magnitude()) {
         // It's going outward
-        let scale = max_radius / vLast.magnitude()
+        let scale = maxRadius / vLast.magnitude()
         outPoint = vLast.multiply(Victor(scale,scale))
         newVertices.push({ ...last, x: outPoint.x, y: outPoint.y})
       } else {
-        let scale = max_radius / vFirst.magnitude()
+        let scale = maxRadius / vFirst.magnitude()
         outPoint = vFirst.multiply(Victor(scale,scale))
         newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
       }
@@ -203,7 +203,7 @@ export const polishVertices = (state, vertices) => {
       // console.log("nextCorner: " + nextCorner)
       // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
-      while (nextCorner !== machine.rect_origin[0]) {
+      while (nextCorner !== machine.rectOrigin[0]) {
         console.log("nextCorner: " + nextCorner)
         newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
         nextCorner -= 1
@@ -222,7 +222,7 @@ export const polishVertices = (state, vertices) => {
         vertices = newVertices.reverse().concat(vertices)
       }
     }
-    if (machine.polar_endpoints && !machine.rectangular) {
+    if (machine.polarEndpoints && !machine.rectangular) {
 
       let first = vertices[0]
       let last = vertices[vertices.length-1]
@@ -230,17 +230,17 @@ export const polishVertices = (state, vertices) => {
       // Always put 0.0 in there
 
       // Max radius
-      let max_radius = machine.max_radius
+      let maxRadius = machine.maxRadius
       let vFirst = Victor.fromObject(first)
       let vLast = Victor.fromObject(last)
       if (vFirst.magnitude() <= vLast.magnitude()) {
         // It's going outward
-        let scale = max_radius / vLast.magnitude()
+        let scale = maxRadius / vLast.magnitude()
         let outPoint = vLast.multiply(Victor(scale,scale))
         vertices.unshift(Vertex(0.0, 0.0, first.f))
         vertices.push(Vertex(outPoint.x, outPoint.y, last.f))
       } else {
-        let scale = max_radius / vFirst.magnitude()
+        let scale = maxRadius / vFirst.magnitude()
         let outPoint = vFirst.multiply(Victor(scale,scale))
         vertices.push(Vertex(0.0, 0.0, first.f))
         vertices.unshift(Vertex(outPoint.x, outPoint.y, last.f))
@@ -253,12 +253,12 @@ export const polishVertices = (state, vertices) => {
   }
   if (machine.rectangular) {
     vertices = enforceRectLimits(vertices,
-                                 (machine.max_x - machine.min_x)/2.0,
-                                 (machine.max_y - machine.min_y)/2.0
+                                 (machine.maxX - machine.minX)/2.0,
+                                 (machine.maxY - machine.minY)/2.0
                                  )
   } else {
     vertices = enforcePolarLimits(vertices,
-                                  machine.max_radius
+                                  machine.maxRadius
                                   )
   }
 
@@ -271,7 +271,7 @@ export const wiper = (state) => {
   // Do the math
 
   // Get the angle between 0,180
-  let angle = (180.0 - (state.wiper.angle_deg % 360)) % 180.0
+  let angle = (180.0 - (state.wiper.angleDeg % 360)) % 180.0
   if (angle < 0.0) {
     angle += 180.0
   }
@@ -282,10 +282,10 @@ export const wiper = (state) => {
   let width = 1
   let machine = state.machine
   if (machine.rectangular) {
-    height = machine.max_y - machine.min_y
-    width = machine.max_x - machine.min_x
+    height = machine.maxY - machine.minY
+    width = machine.maxX - machine.minX
   } else {
-    height = machine.max_radius * 2.0
+    height = machine.maxRadius * 2.0
     width = height
   }
 
@@ -388,14 +388,14 @@ export const wiper = (state) => {
 
 export const thetaRho = (state) => {
   let machine = state.machine
-  var x_scale = (machine.max_x - machine.min_x)/2.0 * 0.01 * state.file.zoom
-  var y_scale = (machine.max_y - machine.min_y)/2.0 * 0.01 * state.file.zoom
+  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.file.zoom
+  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom
   if (!machine.rectangular) {
-    x_scale = y_scale = machine.max_radius
+    x_scale = y_scale = machine.maxRadius
   }
   x_scale *= 0.01 * state.file.zoom
   y_scale *= 0.01 * state.file.zoom
-  if (state.file.aspect_ratio) {
+  if (state.file.aspectRatio) {
     x_scale = y_scale = Math.min(x_scale,y_scale)
   }
 

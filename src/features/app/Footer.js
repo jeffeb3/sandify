@@ -76,7 +76,7 @@ class Footer extends Component {
           </Row>
         </Container>
       </footer>
-    );
+    )
   }
 }
 

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import {
   Card
 } from 'react-bootstrap'
@@ -24,7 +24,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     setCurrentShape: (selected) => {
-      dispatch(setCurrentShape(selected.value));
+      dispatch(setCurrentShape(selected.value))
     },
   }
 }
@@ -35,7 +35,7 @@ const customStyles = {
     height: 55,
     minHeight: 55
   })
-};
+}
 
 class ShapeList extends Component {
   render() {

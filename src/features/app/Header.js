@@ -12,7 +12,7 @@ class Header extends Component {
         </div>
         <p>create patterns for robots that draw in sand with ball bearings</p>
       </header>
-    );
+    )
   }
 }
 

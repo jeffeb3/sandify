@@ -16,9 +16,9 @@ import {
 } from './PureTurtle'
 
 let ReduxTurtle = (addVertex) => {
-  let turtle = Turtle();
+  let turtle = Turtle()
   let saveVertex = () => {
-    addVertex(Vertex(turtle.x, turtle.y));
+    addVertex(Vertex(turtle.x, turtle.y))
   }
 
   return Object.assign(
@@ -26,24 +26,24 @@ let ReduxTurtle = (addVertex) => {
     turtle,
     {
       reset: () => {
-        reset(turtle);
-        saveVertex();
+        reset(turtle)
+        saveVertex()
       },
       forward: (distance) => {
-        forward(turtle, distance);
-        saveVertex();
+        forward(turtle, distance)
+        saveVertex()
       },
-      angle: (angle_deg) => {
-        angle(turtle, angle_deg);
+      angle: (angleDeg) => {
+        angle(turtle, angleDeg)
       },
-      right: (angle_deg) => {
-        right(turtle, angle_deg);
+      right: (angleDeg) => {
+        right(turtle, angleDeg)
       },
-      left: (angle_deg) => {
-        left(turtle, angle_deg);
+      left: (angleDeg) => {
+        left(turtle, angleDeg)
       },
       saveVertex: saveVertex,
-    });
+    })
 }
 
 const mapStateToProps = (state, ownProps) => {
@@ -52,17 +52,17 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     clearDrawing: () => {
-      // dispatch(clearVertices());
+      // dispatch(clearVertices())
     },
     setVertices: (vertices) => {
-      // dispatch(setTurtleVertices(vertices));
+      // dispatch(setTurtleVertices(vertices))
     },
   }
 }
 
 class SpiralSettings extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       dynamicValues: {
@@ -78,62 +78,62 @@ class SpiralSettings extends Component {
 
     // this.vertices is not part of this.state, because it's not needed for drawing, and it's nice
     // to avoid the state. It can be published to the reducer with publishVertices()
-    this.vertices = [];
+    this.vertices = []
 
-    this.turtle = ReduxTurtle(this.addVertex.bind(this));
+    this.turtle = ReduxTurtle(this.addVertex.bind(this))
 
-    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this)
   }
 
   componentDidMount() {
-    this.drawDemo();
+    this.drawDemo()
   }
 
   handleInputChange(event) {
-    console.log("handleInputChange");
-    console.log(event.target.id);
+    console.log("handleInputChange")
+    console.log(event.target.id)
 
-    var dynamicValues = this.state.dynamicValues;
+    var dynamicValues = this.state.dynamicValues
 
-    dynamicValues[event.target.id] = event.target.value;
+    dynamicValues[event.target.id] = event.target.value
 
-    this.setState({dynamicValues: dynamicValues});
-    this.drawDemo();
+    this.setState({dynamicValues: dynamicValues})
+    this.drawDemo()
   }
 
   addVertex(vertex) {
-    this.vertices.push(vertex);
+    this.vertices.push(vertex)
   }
 
   drawDemo() {
-    this.props.clearDrawing();
-    this.vertices = [];
-    this.turtle.reset();
+    this.props.clearDrawing()
+    this.vertices = []
+    this.turtle.reset()
     // For single radials, centre radius is interesting at any value.
     // For loops, it only looks nice with low values for now.
     // Need to implement offset compensation
 
     // Must be less than 120.  Not sure why
-    //var spikeHeight = this.spikeHeight;
-    var spikeHeight = this.state.dynamicValues["spikeHeight"];
-    var spikeCount = this.state.dynamicValues["spikeCount"];
-    var spikeCurveRadius = this.state.dynamicValues["spikeCurveRadius"];
-    var spikeCentreRadius = this.state.dynamicValues["spikeCentreRadius"];
-    var radialLoops = this.state.dynamicValues["radialLoops"];
-    var scaleFactor = this.state.dynamicValues["scaleFactor"];
-    var rotateAngle = this.state.dynamicValues["rotateAngle"];
-    //spikeCurveRadius = 60;
-  //  console.log("SH: " + spikeHeight);
+    //var spikeHeight = this.spikeHeight
+    var spikeHeight = this.state.dynamicValues["spikeHeight"]
+    var spikeCount = this.state.dynamicValues["spikeCount"]
+    var spikeCurveRadius = this.state.dynamicValues["spikeCurveRadius"]
+    var spikeCentreRadius = this.state.dynamicValues["spikeCentreRadius"]
+    var radialLoops = this.state.dynamicValues["radialLoops"]
+    var scaleFactor = this.state.dynamicValues["scaleFactor"]
+    var rotateAngle = this.state.dynamicValues["rotateAngle"]
+    //spikeCurveRadius = 60
+  //  console.log("SH: " + spikeHeight)
     // Has to be 60+
     for(var i=0; i<radialLoops; i++){
       radial(this.turtle,
              spikeCentreRadius,
              spikeHeight-(i*scaleFactor),
              spikeCurveRadius+i,
-             spikeCount);
-      this.turtle.right(rotateAngle);
+             spikeCount)
+      this.turtle.right(rotateAngle)
     }
-    this.props.setVertices(this.vertices);
+    this.props.setVertices(this.vertices)
   }
 
   render() {
@@ -202,7 +202,7 @@ class SpiralSettings extends Component {
           />
       </div>
 
-    );
+    )
   }
 }
-export default connect(mapStateToProps, mapDispatchToProps)(SpiralSettings);
+export default connect(mapStateToProps, mapDispatchToProps)(SpiralSettings)

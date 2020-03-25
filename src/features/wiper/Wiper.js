@@ -14,7 +14,7 @@ import {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    angle_deg: state.wiper.angle_deg,
+    angleDeg: state.wiper.angleDeg,
     size: state.wiper.size,
   }
 }
@@ -43,7 +43,7 @@ class Wiper extends Component {
               </Form.Label>
             </Col>
             <Col sm={8}>
-              <FormControl id="angle" type="number" min="0" max="180" step="0.5" value={this.props.angle_deg} onChange={this.props.changeAngle} />
+              <FormControl id="angle" type="number" min="0" max="180" step="0.5" value={this.props.angleDeg} onChange={this.props.changeAngle} />
             </Col>
           </Row>
 

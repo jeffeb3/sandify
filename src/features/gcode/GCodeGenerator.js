@@ -65,9 +65,9 @@ const mapStateToProps = (state, ownProps) => {
     show: state.gcode.show,
     vertices: getVertices(state),
     settings: getComments(state),
-    offsetX: (state.machine.min_x + state.machine.max_x) / 2.0,
-    offsetY: (state.machine.min_y + state.machine.max_y) / 2.0,
-    max_radius: state.machine.max_radius,
+    offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
+    offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
+    maxRadius: state.machine.maxRadius,
     filename: state.gcode.filename,
     pre: state.gcode.pre,
     post: state.gcode.post,
@@ -177,7 +177,7 @@ class GCodeGenerator extends Component {
     var previousRawTheta = 0
     for (next = 0; next < subsampledVertices.length; ++next) {
       // Normalize the radius
-      var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.max_radius
+      var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius
 
       // What is the basic theta for this point?
       var rawTheta = Math.atan2(subsampledVertices[next].x,

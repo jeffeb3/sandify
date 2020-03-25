@@ -21,17 +21,17 @@ const mapStateToProps = (state, ownProps) => {
     comments: state.file.comments,
     vertices: state.file.vertices,
     zoom: state.file.zoom,
-    aspect_ratio: state.file.aspect_ratio,
+    aspectRatio: state.file.aspectRatio,
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   var convertToXY = (thetaRhos) => {
     var vertices = []
-    var previous = undefined;
-    var max_angle = Math.PI / 64.0;
+    var previous = undefined
+    var max_angle = Math.PI / 64.0
     for (let ii = 0; ii < thetaRhos.length; ii++) {
-      var next = thetaRhos[ii];
+      var next = thetaRhos[ii]
       if (previous) {
         if (Math.abs(next[0] - previous[0]) < max_angle) {
           // These sin, cos elements are inverted. I'm not sure why
@@ -39,22 +39,22 @@ const mapDispatchToProps = (dispatch, ownProps) => {
                         x: previous[1] * Math.sin(previous[0]),
                         y: previous[1] * Math.cos(previous[0]),
                         f: 1000,
-          });
+          })
         } else {
           // We need to do some interpolating.
-          let deltaAngle = next[0] - previous[0];
-          let rhoStep = max_angle / Math.abs(deltaAngle) * (next[1] - previous[1]);
-          var rho = previous[1];
+          let deltaAngle = next[0] - previous[0]
+          let rhoStep = max_angle / Math.abs(deltaAngle) * (next[1] - previous[1])
+          var rho = previous[1]
           if (deltaAngle > 0.0) {
-            var emergency_break = 0;
+            var emergency_break = 0
             for (let angle = previous[0]; angle < next[0]; angle += max_angle, rho += rhoStep) {
               vertices.push({
                             x: rho * Math.sin(angle),
                             y: rho * Math.cos(angle),
                             f: 1000,
-              });
+              })
               if (emergency_break++ > 100000) {
-                break;
+                break
               }
             }
           } else {
@@ -63,78 +63,78 @@ const mapDispatchToProps = (dispatch, ownProps) => {
                             x: rho * Math.sin(angle),
                             y: rho * Math.cos(angle),
                             f: 1000,
-              });
+              })
               if (emergency_break++ > 100000) {
-                break;
+                break
               }
             }
           }
         }
       }
-      previous = next;
+      previous = next
     }
-    return vertices;
+    return vertices
   }
 
   var parseThrFile = (file) => {
-    var rv = {};
-    rv.comments = [];
-    rv.vertices = [];
+    var rv = {}
+    rv.comments = []
+    rv.vertices = []
 
-    var reader = new FileReader();
+    var reader = new FileReader()
 
     reader.onload = (event) => {
-      var text = reader.result;
-      var lines = text.split('\n');
-      var has_vertex = false;
+      var text = reader.result
+      var lines = text.split('\n')
+      var has_vertex = false
       for (let ii = 0; ii < lines.length; ii++) {
-        var line = lines[ii].trim();
+        var line = lines[ii].trim()
         if (line.length === 0) {
           // blank lines
-          continue;
+          continue
         }
         if (line.indexOf("#") === 0 && !has_vertex) {
-          rv.comments.push(lines[ii]);
+          rv.comments.push(lines[ii])
         }
 
         if (line.indexOf("#") !== 0) {
-          has_vertex = true;
+          has_vertex = true
           // This is a point, let's try to read it.
-          var pointStrings = line.split(/\s+/);
+          var pointStrings = line.split(/\s+/)
           if (pointStrings.length !== 2) {
             // AAAH
-            console.log(pointStrings);
-            continue;
+            console.log(pointStrings)
+            continue
           }
-          rv.vertices.push([parseFloat(pointStrings[0]), parseFloat(pointStrings[1])]);
+          rv.vertices.push([parseFloat(pointStrings[0]), parseFloat(pointStrings[1])])
         }
       }
 
-      dispatch(setFileComments(rv.comments));
-      dispatch(setFileVertices(convertToXY(rv.vertices)));
+      dispatch(setFileComments(rv.comments))
+      dispatch(setFileVertices(convertToXY(rv.vertices)))
     }
 
-    reader.readAsText(file);
+    reader.readAsText(file)
   }
 
   return {
     setVertices: (event: any) => {
-      var file = event.target.files[0];
-      dispatch(setFileName(file.name));
-      parseThrFile(file);
+      var file = event.target.files[0]
+      dispatch(setFileName(file.name))
+      parseThrFile(file)
     },
     setZoom: (event) => {
-      dispatch(setFileZoom(parseFloat(event.target.value)));
+      dispatch(setFileZoom(parseFloat(event.target.value)))
     },
     toggleAspectRatio: (event) => {
-      dispatch(toggleFileAspectRatio());
+      dispatch(toggleFileAspectRatio())
     },
   }
 }
 
 class ThetaRho extends Component {
   render() {
-    var aspectRatioActive = this.props.aspect_ratio ? 'active' : ''
+    var aspectRatioActive = this.props.aspectRatio ? 'active' : ''
     var commentsRender = this.props.comments.map((comment) => {
       return <span>{comment}<br/></span>
     })

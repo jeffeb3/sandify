@@ -28,15 +28,15 @@ const getTrackVertices = createSelector(
 const mapStateToProps = (state, ownProps) => {
   return {
     use_rect: state.machine.rectangular,
-    min_x: state.machine.min_x,
-    max_x: state.machine.max_x,
-    min_y: state.machine.min_y,
-    max_y: state.machine.max_y,
-    max_radius: state.machine.max_radius,
-    canvas_width: state.machine.canvas_width,
-    canvas_height: state.machine.canvas_height,
+    minX: state.machine.minX,
+    maxX: state.machine.maxX,
+    minY: state.machine.minY,
+    maxY: state.machine.maxY,
+    maxRadius: state.machine.maxRadius,
+    canvasWidth: state.machine.canvasWidth,
+    canvasHeight: state.machine.canvasHeight,
     vertices: getVertices(state),
-    slider_value: state.machine.slider_value,
+    sliderValue: state.machine.sliderValue,
     showTrack: state.app.input === 0,
     trackVertices: getTrackVertices(state),
   }
@@ -68,7 +68,7 @@ class PreviewWindow extends Component {
   componentDidUpdate() {
     var canvas = ReactDOM.findDOMNode(this);
     var context = canvas.getContext('2d');
-    context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
+    context.clearRect(0, 0, this.props.canvasWidth, this.props.canvasHeight);
     var bigBox = document.getElementById("bigger-box");
     this.resize(canvas, bigBox);
   }
@@ -78,15 +78,15 @@ class PreviewWindow extends Component {
     var machine_x = 1;
     var machine_y = 1;
     if (this.props.use_rect) {
-      machine_x = this.props.max_x - this.props.min_x;
-      machine_y = this.props.max_y - this.props.min_y;
+      machine_x = this.props.maxX - this.props.minX;
+      machine_y = this.props.maxY - this.props.minY;
     } else {
-      machine_x = this.props.max_radius * 2.0;
+      machine_x = this.props.maxRadius * 2.0;
       machine_y = machine_x;
     }
 
-    var scale_x = this.props.canvas_width / machine_x;
-    var scale_y = this.props.canvas_height / machine_y;
+    var scale_x = this.props.canvasWidth / machine_x;
+    var scale_y = this.props.canvasHeight / machine_y;
     // Keep it square.
     return Math.min(scale_x, scale_y) * 0.95;
   }
@@ -94,9 +94,9 @@ class PreviewWindow extends Component {
   mmToPixels(vertex) {
     var min_scale = this.mmToPixelsScale()
 
-    var x = vertex.x * min_scale + this.props.canvas_width/2.0;
+    var x = vertex.x * min_scale + this.props.canvasWidth/2.0;
     // Y for pixels starts at the top, and goes down.
-    var y = -vertex.y * min_scale + this.props.canvas_height/2.0;
+    var y = -vertex.y * min_scale + this.props.canvasHeight/2.0;
 
     return Vertex(x, y);
   }
@@ -143,24 +143,24 @@ class PreviewWindow extends Component {
     context.lineWidth = "1";
     context.strokeStyle = "blue";
     if (this.props.use_rect) {
-      this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+      this.moveTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
     } else {
-      this.moveTo_mm(context, Vertex(this.props.max_radius, 0.0));
+      this.moveTo_mm(context, Vertex(this.props.maxRadius, 0.0));
       let resolution = 128.0;
       for (let i=0; i<=resolution ; i++) {
         let angle = Math.PI * 2.0 / resolution * i
-        this.lineTo_mm(context, Vertex(this.props.max_radius * Math.cos(angle),
-                                       this.props.max_radius * Math.sin(angle)));
+        this.lineTo_mm(context, Vertex(this.props.maxRadius * Math.cos(angle),
+                                       this.props.maxRadius * Math.sin(angle)));
       }
     }
     context.stroke();
 
     var drawing_vertices = this.props.vertices;
-    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.slider_value);
+    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue);
     if (drawing_vertices && drawing_vertices.length > 0) {
       // Draw the start and end points
       context.beginPath();
@@ -175,7 +175,7 @@ class PreviewWindow extends Component {
       context.stroke();
 
       // Draw the background vertices
-      if (this.props.slider_value !== 0) {
+      if (this.props.sliderValue !== 0) {
         context.beginPath();
         context.lineWidth = this.mmToPixelsScale();
         context.strokeStyle = "gray";
@@ -217,7 +217,7 @@ class PreviewWindow extends Component {
     var size = parseInt(getComputedStyle(bigBox).getPropertyValue('width'),10);
     canvas.width = size;
     canvas.height = size;
-    if (this.props.canvas_width !== size) {
+    if (this.props.canvasWidth !== size) {
       this.props.onResize(size);
     }
     var context = canvas.getContext('2d');
@@ -225,11 +225,11 @@ class PreviewWindow extends Component {
   }
 
   render() {
-    const {canvas_width, canvas_height} = this.props;
+    const {canvasWidth, canvasHeight} = this.props;
     return (
         <canvas className="preview-canvas"
-          width={canvas_width}
-          height={canvas_height}
+          width={canvasWidth}
+          height={canvasHeight}
         />
     );
   }

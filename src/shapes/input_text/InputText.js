@@ -30,7 +30,7 @@ export default class InputText extends Shape {
         inputText: 'Sandify',
         inputFont: 'Cursive',
         repeatEnabled: false,
-        startingSize: 75
+        startingSize: 50
       }
     }
   }
