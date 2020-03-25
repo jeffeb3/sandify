@@ -18,7 +18,7 @@ import {
   setMachineMaxY,
   setMachineRectOrigin } from './machineSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     expanded: state.machine.rect_expanded,
     active:   state.machine.rectangular,
@@ -30,7 +30,7 @@ const mapState = (state, ownProps) => {
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     activeCallback: (event) => {
       dispatch(toggleMachineRectExpanded())
@@ -137,4 +137,4 @@ class RectSettings extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(RectSettings)
+export default connect(mapStateToProps, mapDispatchToProps)(RectSettings)

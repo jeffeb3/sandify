@@ -21,8 +21,8 @@ def getLetterCodex(infont):
                 continue
             values = line.split()
             scale = 10.0
-            y_offset = 0.2
-            vertex = (scale * float(values[1]), scale * (float(values[2])-y_offset))
+            offsetY = 0.2
+            vertex = (scale * float(values[1]), scale * (float(values[2])-offsetY))
 
             # This is a new letter
             if values[0] == '1':

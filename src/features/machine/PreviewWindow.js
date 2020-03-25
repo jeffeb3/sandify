@@ -5,19 +5,19 @@ import { Vertex } from '../../common/Geometry'
 import { setMachineSize } from './machineSlice'
 import {
   transform,
-  getVertices,
 } from '../../common/Computer';
+import { getVertices } from './selectors'
 import { createSelector } from 'reselect'
 
-const getTransform = state => state.transform;
+const getTransforms = state => state.transforms;
 
 const getTrackVertices = createSelector(
-  [getTransform],
+  [getTransforms],
   (data) => {
-    var num_loops = data.num_loops;
+    var numLoops = data.numLoops;
     var trackVertices = []
-    for (var i=0; i<num_loops; i++) {
-      if (data.track_enabled) {
+    for (var i=0; i<numLoops; i++) {
+      if (data.trackEnabled) {
         trackVertices.push(transform(data, {x: 0.0, y: 0.0}, i))
       }
     }
@@ -25,7 +25,7 @@ const getTrackVertices = createSelector(
   }
 );
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     use_rect: state.machine.rectangular,
     min_x: state.machine.min_x,
@@ -42,7 +42,7 @@ const mapState = (state, ownProps) => {
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onResize: (size) => {
       dispatch(setMachineSize(size))
@@ -234,4 +234,4 @@ class PreviewWindow extends Component {
     );
   }
 }
-export default connect(mapState, mapDispatch)(PreviewWindow)
+export default connect(mapStateToProps, mapDispatchToProps)(PreviewWindow)

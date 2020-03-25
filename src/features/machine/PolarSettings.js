@@ -13,7 +13,7 @@ import {
   toggleMachineEndpoints,
 } from './machineSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     expanded:   state.machine.polar_expanded,
     active:     !state.machine.rectangular,
@@ -22,7 +22,7 @@ const mapState = (state, ownProps) => {
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     activeCallback: (event) => {
       dispatch(toggleMachinePolarExpanded())
@@ -76,4 +76,4 @@ class PolarSettings extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(PolarSettings)
+export default connect(mapStateToProps, mapDispatchToProps)(PolarSettings)

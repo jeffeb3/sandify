@@ -14,14 +14,17 @@
 /**
  Bootstrap 4 overrides
  **/
-.card-header h4 {
-  margin: 0;
-  font-size: 1.25rem;
+.card-header {
+  background-color: rgba(0,0,0,.05);
+
+  h4 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
 }
 
 .card.active > .card-header {
-  background-color: #2d6da4;
-  color: white;
+  background-color: #A0D4EB;
 }
 
 .btn-group .btn-light:focus, .btn-group .btn-light.focus {

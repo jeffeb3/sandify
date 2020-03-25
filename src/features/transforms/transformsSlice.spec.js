@@ -1,191 +1,160 @@
 import transforms, {
-  setShapeStartingSize,
-  setXFormOffsetX,
-  setXFormOffsetY,
-  setNumLoops,
+  addTransform,
+  updateTransform,
   toggleSpin,
-  setSpin,
-  setSpinSwitchbacks,
   toggleGrow,
-  setGrow,
   toggleTrack,
   toggleTrackGrow,
-  setTrack,
-  setTrackLength,
-  setTrackGrow
 } from './transformsSlice'
 
 describe('transforms reducer', () => {
   it('should handle initial state', () => {
     expect(transforms(undefined, {})).toEqual({
-      starting_size: 10.0,
-      offset_x: 0.0,
-      offset_y: 0.0,
-      num_loops: 10,
-      grow_enabled: true,
-      grow_value: 100,
-      spin_enabled: false,
-      spin_value: 2,
-      spin_switchbacks: 0,
-      track_enabled: false,
-      track_grow_enabled: false,
-      track_value: 10,
-      track_length: 0.2,
-      track_grow: 50.0,
+      byId: {},
+      allIds: []
     })
   })
 
-  it('should handle setShapeStartingSize', () => {
+  it('should handle addTransform', () => {
     expect(
       transforms(
-        {starting_size: 10.0},
-        setShapeStartingSize(20.0)
+        {
+          byId: {},
+          allIds: []
+        },
+        addTransform({
+          id: '1'
+        })
       )
     ).toEqual({
-      starting_size: 20.0
+      byId: {
+        '1': {
+          id: '1',
+          startingSize: 10.0,
+          offsetX: 0,
+          offsetY: 0,
+          numLoops: 10,
+          repeatEnabled: true,
+          growEnabled: true,
+          growValue: 100,
+          spinEnabled: false,
+          spinValue: 2,
+          spinSwitchbacks: 0,
+          trackEnabled: false,
+          trackGrowEnabled: false,
+          trackValue: 10,
+          trackLength: 0.2,
+          trackGrow: 50.0
+        }
+      },
+      allIds: ['1'],
     })
   })
 
-  it('should handle setXFormOffsetX', () => {
+  it('should handle updateTransform', () => {
     expect(
       transforms(
-        {offset_x: 0.0},
-        setXFormOffsetX('2')
+        {
+          byId: {
+            '1': {
+              id: '1',
+              offsetX: 0.0
+            }
+          }
+        },
+        updateTransform({id: '1', offsetX: 20.0})
       )
     ).toEqual({
-      offset_x: 2.0
-    })
-  })
-
-  it('should handle setXFormOffsetY', () => {
-    expect(
-      transforms(
-        {offset_y: 0.0},
-        setXFormOffsetY('2')
-      )
-    ).toEqual({
-      offset_y: 2.0
-    })
-  })
-
-  it('should handle setNumLoops', () => {
-    expect(
-      transforms(
-        {num_loops: 10},
-        setNumLoops(20)
-      )
-    ).toEqual({
-      num_loops: 20
-    })
-  })
-
-  it('should handle toggleSpin', () => {
-    expect(
-      transforms(
-        {spin_enabled: false},
-        toggleSpin({})
-      )
-    ).toEqual({
-      spin_enabled: true
-    })
-  })
-
-  it('should handle setSpin', () => {
-    expect(
-      transforms(
-        {spin_value: 2},
-        setSpin(5)
-      )
-    ).toEqual({
-      spin_value: 5
-    })
-  })
-
-  it('should handle setSpinSwitchbacks', () => {
-    expect(
-      transforms(
-        {spin_switchbacks: 0},
-        setSpinSwitchbacks(2)
-      )
-    ).toEqual({
-      spin_switchbacks: 2
+      byId: {
+        '1': {
+          id: '1',
+          offsetX: 20.0
+        }
+      }
     })
   })
 
   it('should handle toggleGrow', () => {
     expect(
       transforms(
-        {grow_enabled: false},
-        toggleGrow({})
+        {
+          byId: {
+            '1': {
+              growEnabled: false
+            }
+          }
+        },
+        toggleGrow({id: '1'})
       )
     ).toEqual({
-      grow_enabled: true
+      byId: {
+        '1': {
+          growEnabled: true
+        }
+      }
     })
   })
 
-  it('should handle setGrow', () => {
+  it('should handle toggleSpin', () => {
     expect(
       transforms(
-        {grow_value: 100},
-        setGrow(20)
+        {
+          byId: {
+            '1': {
+              spinEnabled: false
+            }
+          }
+        },
+        toggleSpin({id: '1'})
       )
     ).toEqual({
-      grow_value: 20
+      byId: {
+        '1': {
+          spinEnabled: true
+        }
+      }
     })
   })
 
   it('should handle toggleTrack', () => {
     expect(
       transforms(
-        {track_enabled: false},
-        toggleTrack({})
+        {
+          byId: {
+            '1': {
+              trackEnabled: false
+            }
+          }
+        },
+        toggleTrack({id: '1'})
       )
     ).toEqual({
-      track_enabled: true
+      byId: {
+        '1': {
+          trackEnabled: true
+        }
+      }
     })
   })
 
-  it('should handle toggleTrackGrow', () => {
+  it('should handle toggleToggleGrow', () => {
     expect(
       transforms(
-        {track_grow_enabled: false},
-        toggleTrackGrow({})
+        {
+          byId: {
+            '1': {
+              trackGrowEnabled: false
+            }
+          }
+        },
+        toggleTrackGrow({id: '1'})
       )
     ).toEqual({
-      track_grow_enabled: true
-    })
-  })
-
-  it('should handle setTrack', () => {
-    expect(
-      transforms(
-        {track_value: 10},
-        setTrack(20)
-      )
-    ).toEqual({
-      track_value: 20
-    })
-  })
-
-  it('should handle setTrackLength', () => {
-    expect(
-      transforms(
-        {track_length: 0.2},
-        setTrackLength(0.4)
-      )
-    ).toEqual({
-      track_length: 0.4
-    })
-  })
-
-  it('should handle setTrackGrow', () => {
-    expect(
-      transforms(
-        {track_grow: 50.0},
-        setTrackGrow(20.0)
-      )
-    ).toEqual({
-      track_grow: 20.0
+      byId: {
+        '1': {
+          trackGrowEnabled: true
+        }
+      }
     })
   })
 })

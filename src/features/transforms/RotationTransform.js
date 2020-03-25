@@ -1,79 +1,71 @@
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Col,
-  Row,
-  Form,
-  Card,
+  Card
 } from 'react-bootstrap'
-import { connect } from 'react-redux'
-import { disableEnter } from '../shapes/Shape'
+import InputOption from '../../components/InputOption'
 import {
   toggleSpin,
-  setSpin,
-  setSpinSwitchbacks,
+  updateTransform,
 } from './transformsSlice'
+import { getCurrentTransformSelector } from '../shapes/selectors'
+import Transform from '../../shapes/Transform'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
+  const transform = getCurrentTransformSelector(state)
+
   return {
-    active: state.transform.spin_enabled,
-    value: state.transform.spin_value,
-    switchbacks: state.transform.spin_switchbacks,
+    transform: transform,
+    active: transform.spinEnabled,
+    options: (new Transform()).getOptions()
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const { id } = ownProps
+
   return {
-    activeCallback: () => {
-      dispatch(toggleSpin());
+    onChange: (attrs) => {
+      attrs.id = id
+      dispatch(updateTransform(attrs))
     },
-    onChange: (event) => {
-      dispatch(setSpin(event.target.value));
-    },
-    onSwitchbacksChange: (event) => {
-      dispatch(setSpinSwitchbacks(event.target.value));
+    onSpin: () => {
+      dispatch(toggleSpin({id: id}))
     },
   }
 }
 
 class RotationTransform extends Component {
   render() {
-    var activeClassName = this.props.active ? 'active' : ''
-    var activeKey = this.props.active ? 0 : null
+    const activeClassName = this.props.active ? 'active' : ''
+    const activeKey = this.props.active ? 0 : null
 
     return (
       <Accordion defaultActiveKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
-          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
+          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onSpin}>
             <h4>Spin</h4>
-            Spins the shape a little bit for each copy
+            Spins the shape
           </Accordion.Toggle>
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
-              <Row className="align-items-center pb-2">
-                <Col sm={4}>
-                  <Form.Label htmlFor="rotate-step">
-                    Spin step (can be negative)
-                  </Form.Label>
-                </Col>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="spinValue"
+                optionKey="spinValue"
+                index={0}
+                model={this.props.transform} />
 
-                <Col sm={8}>
-                  <Form.Control id="rotate-step" type="number" step="0.1" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter} />
-                </Col>
-              </Row>
-
-              <Row className="align-items-center pb-2">
-                <Col sm={4}>
-                  <Form.Label htmlFor="rotate-switchbacks">
-                    Switchbacks
-                  </Form.Label>
-                </Col>
-
-                <Col sm={8}>
-                  <Form.Control id="rotate-switchbacks" type="number" step="1" value={this.props.switchbacks} onChange={this.props.onSwitchbacksChange} onKeyDown={disableEnter} />
-                </Col>
-              </Row>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="spinSwitchbacks"
+                optionKey="spinSwitchbacks"
+                index={0}
+                model={this.props.transform} />
             </Card.Body>
           </Accordion.Collapse>
         </Card>
@@ -82,4 +74,4 @@ class RotationTransform extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(RotationTransform)
+export default connect(mapStateToProps, mapDispatchToProps)(RotationTransform)

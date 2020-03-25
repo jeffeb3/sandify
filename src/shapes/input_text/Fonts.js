@@ -2,7 +2,7 @@ import { Vertex } from '../../common/Geometry'
 import { raysol_cursive } from './raysol_cursive'
 import { raysol_sanserif } from './raysol_sanserif'
 
-const fontSpacing = 1.5;
+const fontSpacing = 1.5
 
 // Format for vertices: [x,y,b] where in a 0:7(8) by -1:7 grid defining x,y and b defines the line or curve.
 // Bulge directions could be represented by a 0:4 list starting at none, then NE and going clockwise.
@@ -48,115 +48,115 @@ let billsey = {
   '9': [ [3.5,-1,0], [3.5,0,0], [6,5.25,2], [3.5,7,1], [1,5.25,4], [3.5,3.5,3], [6,5.25,2], [3.5,0,2], [3.5,-1,0], [8,-1,0] ],
   '$': [ [3.5,-1,0], [3.5,0.5,0], [0,2.00,3], [3.5,0.5,3], [7,2.00,2], [3.5,3.5,1], [0,5.00,3], [3.5,6.5,4], [7,5.00,1], [3.5,6.5,1], [3.5, 7, 0], [3.5, 0, 0], [3.5,-1,0], [8,-1,0] ],
   '.': [ [3.5,-1,0], [3.5,0.5,0], [3,1,3], [3.5,1.5,4], [4,1,1], [3.5,0.5,2], [3.5,-1,0], [8,-1,0] ],
-};
+}
 
 // This is a clever way to create a range from 0..32, and then compute an x,y for each of those
 // points on the unit circle from zero to pi/2.
 const curve = [...Array(32).keys()].map((index) => {
-  let angle = (index+1) * Math.PI/2.0/32.0;
-  return Vertex(Math.cos(angle), Math.sin(angle));
-});
+  let angle = (index+1) * Math.PI/2.0/32.0
+  return Vertex(Math.cos(angle), Math.sin(angle))
+})
 
 const billseyConverter = (vertices) => {
-  let newVertices = [];
-  let prevPoint = Vertex(0,0);
+  let newVertices = []
+  let prevPoint = Vertex(0,0)
   vertices.forEach( (vertex) => {
     switch (vertex[2]) {
     case 0:
     default:
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0));
-      break;
+      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      break
     case 1: // NE
       if (vertex[1] < prevPoint[1]) { // clockwise
-        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse());
+        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       } else { // ccwise
-        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)));
+        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0));
-      break;
+      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      break
     case 2: // SE
       if (vertex[1] < prevPoint[1]) { // clockwise
-        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)));
+        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       } else { // ccwise
-        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse());
+        let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0));
-      break;
+      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      break
     case 3: // SW
       if (vertex[1] > prevPoint[1]) { // clockwise
-        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse());
+        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       } else { // ccwise
-        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)));
+        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0));
-      break;
+      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      break
     case 4: // NW
       if (vertex[1] > prevPoint[1]) { // clockwise
-        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)));
+        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       } else { // ccwise
-        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0;
-        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0;
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse());
+        let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
+        let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
+        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0));
-      break;
+      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      break
     }
-    prevPoint = vertex;
-  });
+    prevPoint = vertex
+  })
 
   return {
     max_x: fontSpacing,
     vertices: newVertices,
-  };
+  }
 }
 
 const raysolConverter = (vertices) => {
-  let newVertices = [];
+  let newVertices = []
   vertices.forEach( (vertex) => {
-    newVertices.push(Vertex(vertex[0], vertex[1]));
-  });
+    newVertices.push(Vertex(vertex[0], vertex[1]))
+  })
 
   return {
     max_x: fontSpacing,
     vertices: newVertices,
-  };
+  }
 }
 
 export const MonospaceFont = (ch) => {
-  let upper = ch.toUpperCase();
+  let upper = ch.toUpperCase()
   if (billsey.hasOwnProperty(upper)) {
-    return billseyConverter(billsey[upper]);
+    return billseyConverter(billsey[upper])
   } else {
-    return billseyConverter(billsey[' ']);
+    return billseyConverter(billsey[' '])
   }
 }
 
 export const CursiveFont = (ch) => {
   if (raysol_cursive.hasOwnProperty(ch)) {
-    return raysolConverter(raysol_cursive[ch]);
+    return raysolConverter(raysol_cursive[ch])
   } else {
-    return raysolConverter(raysol_cursive[' ']);
+    return raysolConverter(raysol_cursive[' '])
   }
 }
 
 export const SansSerifFont = (ch) => {
   if (raysol_cursive.hasOwnProperty(ch)) {
-    return raysolConverter(raysol_sanserif[ch]);
+    return raysolConverter(raysol_sanserif[ch])
   } else {
-    return raysolConverter(raysol_sanserif[' ']);
+    return raysolConverter(raysol_sanserif[' '])
   }
 }

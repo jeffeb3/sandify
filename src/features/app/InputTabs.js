@@ -4,10 +4,10 @@ import {
     Tabs,
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
-import Transforms from '../transforms/Transforms.js'
-import Wiper from '../wiper/Wiper.js'
-import ThetaRho from '../theta_rho/ThetaRho.js'
-import { chooseInput} from '../app/appSlice.js'
+import ShapeList from '../shapes/ShapeList'
+import Wiper from '../wiper/Wiper'
+import ThetaRho from '../theta_rho/ThetaRho'
+import { chooseInput } from '../app/appSlice'
 
 class InputTabs extends Component {
   handleSelect(key) {
@@ -18,7 +18,7 @@ class InputTabs extends Component {
     return (
        <Tabs defaultActiveKey="shapes" onSelect={this.handleSelect.bind(this)} id="input-tabs">
          <Tab eventKey="shapes" title="Shapes">
-           <Transforms />
+           <ShapeList />
          </Tab>
 
          <Tab eventKey="wiper" title="Wiper">

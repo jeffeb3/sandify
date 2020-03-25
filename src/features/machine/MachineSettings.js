@@ -3,11 +3,11 @@ import { connect } from 'react-redux'
 import {
     Accordion
 } from 'react-bootstrap'
-import RectSettings from './RectSettings.js'
-import PolarSettings from './PolarSettings.js'
+import RectSettings from './RectSettings'
+import PolarSettings from './PolarSettings'
 import GCodeGenerator from '../gcode/GCodeGenerator'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     rectangular: state.machine.rectangular,
   }
@@ -30,4 +30,4 @@ class MachineSettings extends Component {
   }
 }
 
-export default connect(mapState, null)(MachineSettings)
+export default connect(mapStateToProps, null)(MachineSettings)

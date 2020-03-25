@@ -15,7 +15,7 @@ import {
   toggleFileAspectRatio
 } from './fileSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     name: state.file.name,
     comments: state.file.comments,
@@ -25,7 +25,7 @@ const mapState = (state, ownProps) => {
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   var convertToXY = (thetaRhos) => {
     var vertices = []
     var previous = undefined;
@@ -132,12 +132,6 @@ const mapDispatch = (dispatch, ownProps) => {
   }
 }
 
-const disableEnter = (event) => {
-  if (event.key === 'Enter' && event.shiftKey === false) {
-    event.preventDefault();
-  }
-};
-
 class ThetaRho extends Component {
   render() {
     var aspectRatioActive = this.props.aspect_ratio ? 'active' : ''
@@ -190,7 +184,7 @@ class ThetaRho extends Component {
               </Form.Label>
             </Col>
             <Col sm={8}>
-              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
+              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} />
             </Col>
           </Row>
         </Card>
@@ -217,4 +211,4 @@ class ThetaRho extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(ThetaRho)
+export default connect(mapStateToProps, mapDispatchToProps)(ThetaRho)

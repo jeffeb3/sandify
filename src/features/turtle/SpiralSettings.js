@@ -4,8 +4,8 @@ import {
   radToDeg,
   Vertex,
 } from '../../common/Geometry'
-import { radial } from './TurtleUtils.js'
-import Slider from './Slider.js'
+import { radial } from './TurtleUtils'
+import Slider from './Slider'
 import {
   Turtle,
   reset,
@@ -13,7 +13,7 @@ import {
   angle,
   right,
   left,
-} from './PureTurtle.js'
+} from './PureTurtle'
 
 let ReduxTurtle = (addVertex) => {
   let turtle = Turtle();
@@ -46,10 +46,10 @@ let ReduxTurtle = (addVertex) => {
     });
 }
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     clearDrawing: () => {
       // dispatch(clearVertices());
@@ -205,4 +205,4 @@ class SpiralSettings extends Component {
     );
   }
 }
-export default connect(mapState, mapDispatch)(SpiralSettings);
+export default connect(mapStateToProps, mapDispatchToProps)(SpiralSettings);

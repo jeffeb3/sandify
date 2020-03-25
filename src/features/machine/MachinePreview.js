@@ -3,20 +3,20 @@ import { connect } from 'react-redux'
 import { Card } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
-import { getVerticesStats } from '../../common/Computer.js'
 import MachineSettings from './MachineSettings'
 import PreviewWindow from './PreviewWindow'
 import { setMachineSlider } from './machineSlice'
+import { getVerticesStats } from './selectors'
 import './MachinePreview.css'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     slider_value: state.machine.slider_value,
     verticesStats: getVerticesStats(state),
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
       dispatch(setMachineSlider(value))
@@ -52,4 +52,4 @@ class MachinePreview extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(MachinePreview)
+export default connect(mapStateToProps, mapDispatchToProps)(MachinePreview)

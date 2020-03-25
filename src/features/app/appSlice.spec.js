@@ -1,6 +1,4 @@
-import app, {
-  chooseInput
-} from './appSlice'
+import app, { chooseInput } from './appSlice'
 
 describe('app reducer', () => {
   it('should handle initial state', () => {
@@ -20,5 +18,4 @@ describe('app reducer', () => {
       input: 1
     })
   })
-
 })

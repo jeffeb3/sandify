@@ -12,14 +12,14 @@ import {
   setWiperSize
 } from './wiperSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     angle_deg: state.wiper.angle_deg,
     size: state.wiper.size,
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     changeAngle: (event) => {
       dispatch(setWiperAngleDeg(parseFloat(event.target.value)))
@@ -63,5 +63,5 @@ class Wiper extends Component {
   }
 }
 
-Wiper = connect(mapState, mapDispatch)(Wiper)
+Wiper = connect(mapStateToProps, mapDispatchToProps)(Wiper)
 export default Wiper

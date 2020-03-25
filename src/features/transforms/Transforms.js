@@ -1,112 +1,96 @@
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
-  Col,
-  Form,
-  FormControl,
   Accordion,
-  Card,
-  Row
+  Card
 } from 'react-bootstrap'
-import { connect } from 'react-redux'
-import { disableEnter } from '../shapes/Shape'
-import ShapeList from '../shapes/ShapeList'
+import InputOption from '../../components/InputOption'
 import {
-  setShapeStartingSize,
-  setNumLoops,
-  setXFormOffsetX,
-  setXFormOffsetY,
+  updateTransform,
+  toggleRepeat
 } from './transformsSlice'
+import { getCurrentTransformSelector } from '../shapes/selectors'
+import Transform from '../../shapes/Transform'
 import ScaleTransform from './ScaleTransform'
 import RotationTransform from './RotationTransform'
 import TrackTransform from './TrackTransform'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
+  const transform = getCurrentTransformSelector(state)
+
   return {
-    loops: state.transform.num_loops,
-    starting_size: state.transform.starting_size,
-    x_offset: state.transform.offset_x,
-    y_offset: state.transform.offset_y,
+    transform: transform,
+    active: transform.repeatEnabled,
+    options: (new Transform()).getOptions()
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const { id } = ownProps
+
   return {
-    changeLoops: (event) => {
-      dispatch(setNumLoops(event.target.value));
+    onChange: (attrs) => {
+      attrs.id = id
+      dispatch(updateTransform(attrs))
     },
-    onSizeChange: (event) => {
-      dispatch(setShapeStartingSize(event.target.value));
-    },
-    onOffsetXChange: (event) => {
-      dispatch(setXFormOffsetX(event.target.value));
-    },
-    onOffsetYChange: (event) => {
-      dispatch(setXFormOffsetY(event.target.value));
+    onRepeat: () => {
+      dispatch(toggleRepeat({id: id}))
     },
   }
 }
 
 class Transforms extends Component {
   render() {
+    const activeClassName = this.props.active ? 'active' : ''
+    const activeKey = this.props.active ? 0 : null
+
     return (
       <div className="transforms">
-        <Card className="p-3">
-          <h4>Select a shape</h4>
-          <ShapeList />
-        </Card>
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          key="offsetX"
+          optionKey="offsetX"
+          index={0}
+          model={this.props.transform} />
 
-        <Card className="mt-3 p-3">
-          <h4>Modifiers</h4>
-          <Row className="align-items-center pt-3 pb-2">
-            <Col sm={4}>
-              <Form.Label htmlFor="shape-size">
-                Starting size
-              </Form.Label>
-            </Col>
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          key="offsetY"
+          optionKey="offsetY"
+          index={0}
+          model={this.props.transform} />
 
-            <Col sm={8}>
-              <FormControl id="shape-size" type="number" value={this.props.starting_size} onChange={this.props.onSizeChange} onKeyDown={disableEnter} />
-            </Col>
-          </Row>
+        <Accordion className="mt-3" defaultActiveKey={activeKey}>
+          <Card className={activeClassName}>
+            <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onRepeat}>
+              <h4>Repeat and modify</h4>
+              Draw the shape multiple times, transforming the shape each time.
+            </Accordion.Toggle>
 
-          <Row className="align-items-center pb-2">
-            <Col sm={4}>
-              <Form.Label htmlFor="shape-offset">
-              Offset
-              </Form.Label>
-            </Col>
+            <Accordion.Collapse eventKey={0}>
+              <Card.Body>
+                <InputOption
+                  onChange={this.props.onChange}
+                  options={this.props.options}
+                  key="numLoops"
+                  optionKey="numLoops"
+                  index={0}
+                  model={this.props.transform} />
 
-            <Col sm={8}>
-              <div className="d-flex align-items-center">
-                <span>X</span>
-                <FormControl type="number" className="ml-2" value={this.props.x_offset} onChange={this.props.onOffsetXChange} onKeyDown={disableEnter} />
-                <span className="ml-2">Y</span>
-                <FormControl className="ml-2" type="number" value={this.props.y_offset} onChange={this.props.onOffsetYChange} onKeyDown={disableEnter} />
-              </div>
-            </Col>
-          </Row>
-
-          <Row className="align-items-center pb-2">
-            <Col sm={4}>
-              <Form.Label htmlFor="loop-count">
-                Number of loops
-              </Form.Label>
-            </Col>
-
-            <Col sm={8}>
-              <FormControl id="loop-count" type="number" value={this.props.loops} onChange={this.props.changeLoops} onKeyDown={disableEnter} />
-            </Col>
-          </Row>
-
-          <Accordion className="pt-4">
-            <ScaleTransform />
-            <RotationTransform />
-            <TrackTransform />
-          </Accordion>
-        </Card>
+                  <Accordion className="mt-3">
+                    <ScaleTransform id={this.props.transform.id} />
+                    <RotationTransform id={this.props.transform.id} />
+                    <TrackTransform id={this.props.transform.id} />
+                  </Accordion>
+              </Card.Body>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
       </div>
     )
   }
 }
 
-export default connect(mapState, mapDispatch)(Transforms)
+export default connect(mapStateToProps, mapDispatchToProps)(Transforms)
