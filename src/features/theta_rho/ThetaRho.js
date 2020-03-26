@@ -142,13 +142,13 @@ class ThetaRho extends Component {
     return (
       <div className="theta-rho">
         <Card className="p-3">
-          <h4>Theta Rho Input</h4>
+          <h4>Import theta rho file</h4>
 
           <Accordion className="mb-4 pt-3">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
-                <h4>Load file</h4>
-                Import a Sisyphus style theta rho (.thr) file into Sandify
+                <h4>Import</h4>
+                Imports a Sisyphus-style theta rho (.thr) file into Sandify
                 <Form.Control
                     id="fileUpload"
                     type="file"
@@ -171,7 +171,7 @@ class ThetaRho extends Component {
           <Accordion>
             <Card className={`${aspectRatioActive} overflow-auto`}>
               <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
-                <h4>Keep Aspect Ratio</h4>
+                <h4>Keep aspect ratio</h4>
                 Keeps original aspect ratio
               </Accordion.Toggle>
             </Card>

@@ -1,9 +1,9 @@
 const transformOptions = {
   offsetX: {
-    title: 'X Offset',
+    title: 'X offset',
   },
   offsetY: {
-    title: 'Y Offset',
+    title: 'Y offset',
   },
   numLoops: {
     title: 'Number of loops',

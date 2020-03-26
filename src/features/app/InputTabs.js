@@ -25,7 +25,7 @@ class InputTabs extends Component {
            <Wiper />
          </Tab>
 
-         <Tab eventKey="code" title="Code">
+         <Tab eventKey="code" title="Import">
            <ThetaRho />
          </Tab>
        </Tabs>

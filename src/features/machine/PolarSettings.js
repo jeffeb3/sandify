@@ -44,7 +44,7 @@ class PolarSettings extends Component {
     return (
       <Card className={`${activeClassName} overflow-auto`}>
         <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.activeCallback}>
-          <h4>Polar Machine</h4>
+          <h4>Polar machine</h4>
           Polar machines like Sisyphus
         </Accordion.Toggle>
 
@@ -64,7 +64,7 @@ class PolarSettings extends Component {
             <Accordion>
               <Card className={`${endpointsActiveClass} overflow-auto`}>
                 <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleEndpoints}>
-                  <h4>Force Endpoints</h4>
+                  <h4>Force endpoints</h4>
                   Forces the first and last points to be at the center and edge
                 </Accordion.Toggle>
               </Card>

@@ -78,7 +78,7 @@ class TrackTransform extends Component {
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
                 <Card className={activeGrowClassName}>
                   <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrackGrow}>
-                    <h4>Scale</h4>
+                    <h4>Scale track</h4>
                     Grows or shrinks the track
                   </Accordion.Toggle>
 
