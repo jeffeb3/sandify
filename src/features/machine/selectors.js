@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect'
 import {
   transformShapes,
-  wiper,
   thetaRho
 } from '../../common/Computer'
 
@@ -10,7 +9,6 @@ const getShapes = state => state.shapes
 const getTransforms = state => state.transforms
 const getFile = state => state.file
 const getGCode = state => state.gcode
-const getWiper = state => state.wiper
 const getMachine = state => state.machine
 
 export const getVertices = createSelector(
@@ -20,10 +18,9 @@ export const getVertices = createSelector(
       getTransforms,
       getFile,
       getGCode,
-      getWiper,
       getMachine,
   ],
-  (app, shapes, transforms, file, gcode, wiperState, machine) => {
+  (app, shapes, transforms, file, gcode, machine) => {
     let state = {
       app: app,
       shapes: shapes,
@@ -32,14 +29,11 @@ export const getVertices = createSelector(
       transform: transforms.byId[shapes.currentId],
       file: file,
       gcode: gcode,
-      wiper: wiperState,
       machine: machine
     }
 
     if (state.app.input === 'shape') {
       return transformShapes(state)
-    } else if (state.app.input === 'wiper') {
-      return wiper(state)
     } else if (state.app.input === 'code') {
       return thetaRho(state)
     } else {

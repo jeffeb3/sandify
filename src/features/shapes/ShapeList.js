@@ -56,7 +56,7 @@ class ShapeList extends Component {
             value={selectedOption}
             onChange={this.props.setCurrentShape}
             styles={customStyles}
-            maxMenuHeight={400}
+            maxMenuHeight={305}
             options={options} />
 
           <Shape key={this.props.currentShape.id} id={this.props.currentShape.id} />

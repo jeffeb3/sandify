@@ -12,7 +12,6 @@ import appReducer from './appSlice'
 import fileReducer from '../theta_rho/fileSlice'
 import machineReducer from '../machine/machineSlice'
 import gcodeReducer from '../gcode/gCodeSlice'
-import wiperReducer from '../wiper/wiperSlice'
 import shapesReducer from '../shapes/shapesSlice'
 import transformsReducer from '../transforms/transformsSlice'
 import turtleReducer from '../turtle/turtleSlice'
@@ -36,7 +35,6 @@ const store = configureStore({
     file: fileReducer,
     gcode: gcodeReducer,
     machine: machineReducer,
-    wiper: wiperReducer,
     turtle: turtleReducer
   }),
 })

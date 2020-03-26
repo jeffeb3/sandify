@@ -7,6 +7,7 @@ import Epicycloid from '../shapes/Epicycloid'
 import Hypocycloid from '../shapes/Hypocycloid'
 import Rose from '../shapes/Rose'
 import InputText from '../shapes/input_text/InputText'
+import Wiper from '../shapes/Wiper'
 import V1Engineering from '../shapes/v1_engineering/V1Engineering'
 
 /*----------------------------------------------
@@ -22,5 +23,6 @@ export const registeredShapes = {
   hypocycloid: new Hypocycloid(),
   rose: new Rose(),
   inputText: new InputText(),
+  wiper: new Wiper(),
   v1Engineering: new V1Engineering()
 }

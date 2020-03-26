@@ -6,7 +6,6 @@ const getShapes = state => state.shapes
 const getTransforms = state => state.transforms
 const getFile = state => state.file
 const getGCode = state => state.gcode
-const getWiper = state => state.wiper
 const getMachine = state => state.machine
 
 export const getComments = createSelector(
@@ -16,10 +15,9 @@ export const getComments = createSelector(
       getTransforms,
       getFile,
       getGCode,
-      getWiper,
       getMachine,
   ],
-  (app, shapes, transforms, file, gcode, wiperState, machine) => {
+  (app, shapes, transforms, file, gcode, machine) => {
     let state = {
       app: app,
       shapes: shapes,
@@ -28,7 +26,6 @@ export const getComments = createSelector(
       transform: transforms.byId[shapes.currentId],
       file: file,
       gcode: gcode,
-      wiper: wiperState,
       machine: machine
     }
 
@@ -84,11 +81,6 @@ export const getComments = createSelector(
             comments.push("          Track Grow Value: " + state.transform.trackGrow)
           }
         }
-        break
-
-      case 'wiper':
-        comments.push("    Wiper Angle: " + state.wiper.angleDeg)
-        comments.push("    Wiper Size: "  + state.wiper.size)
         break
 
       case 'code': // Theta Rho
