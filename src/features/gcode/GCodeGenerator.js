@@ -250,7 +250,7 @@ class GCodeGenerator extends Component {
             <Accordion>
               <Card className={`${reverseActiveClass} overflow-auto`}>
                 <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleReverse}>
-                  <h4>Reverse path</h4>
+                  <h3>Reverse path</h3>
                   Reverses the code, starting at the final location
                 </Accordion.Toggle>
               </Card>

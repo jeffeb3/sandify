@@ -34,7 +34,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class Shape extends Component {
   render() {
-    console.log('render')
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
       const option = this.props.options[key]
 
@@ -63,7 +62,7 @@ class Shape extends Component {
 
       optionsListRender =
         <div className="shape-options">
-          {linkRender}        
+          {linkRender}
           {optionsRender}
         </div>
     }

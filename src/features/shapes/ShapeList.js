@@ -49,9 +49,7 @@ class ShapeList extends Component {
 
     return (
       <div>
-        <Card className="p-3">
-          <h4>Customize shape</h4>
-
+        <Card className="p-3 border-0">
           <Select
             value={selectedOption}
             onChange={this.props.setCurrentShape}

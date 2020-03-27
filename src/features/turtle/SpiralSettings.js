@@ -139,7 +139,7 @@ class SpiralSettings extends Component {
   render() {
     return(
       <div>
-        <h4>Turtle Graphics Demonstration</h4>
+        <h3>Turtle Graphics Demonstration</h3>
 
         <p>If it all disappears, refresh and try to break it again.  Working on it. :D </p>
         <p>When rotate angle and centre radius are used together, things get chaotic.  There is a bug creating an interesting offset.</p>

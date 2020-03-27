@@ -45,7 +45,7 @@ class ScaleTransform extends Component {
       <Accordion defaultActiveKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onGrow}>
-            <h4>Scale</h4>
+            <h3>Scale</h3>
             Grows or shrinks the shape
           </Accordion.Toggle>
 

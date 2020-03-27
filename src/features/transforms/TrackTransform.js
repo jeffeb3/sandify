@@ -52,7 +52,7 @@ class TrackTransform extends Component {
       <Accordion defaultActiveKey={activeKey}>
         <Card className={activeClassName}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrack}>
-            <h4>Track</h4>
+            <h3>Track</h3>
             Moves the shape along a track (shown in green)
           </Accordion.Toggle>
 
@@ -78,7 +78,7 @@ class TrackTransform extends Component {
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
                 <Card className={activeGrowClassName}>
                   <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrackGrow}>
-                    <h4>Scale track</h4>
+                    <h3>Scale track</h3>
                     Grows or shrinks the track
                   </Accordion.Toggle>
 

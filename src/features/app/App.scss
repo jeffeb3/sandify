@@ -2,13 +2,36 @@
   background-color: #eee;
 }
 
-.card h4 {
-  margin-top: 0.5rem;
+@media (min-width: 992px) {
+  .full-page {
+    height: calc(100vh - 145px);
+    overflow: auto;
+  }
+
+  .full-page-tab {
+    height: calc(100vh - 205px);
+    overflow: auto;
+  }
 }
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+#sidebar {
+  width: 550px;
+
+  @media(max-width: 992px) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .no-gutters-md {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 /**
@@ -17,10 +40,22 @@
 .card-header {
   background-color: rgba(0,0,0,.05);
 
-  h4 {
+  h3 {
     margin: 0;
     font-size: 1.25rem;
   }
+}
+
+h2 {
+  font-size: 1.6rem;
+}
+
+.card h3 {
+  margin-top: 0.5rem;
+}
+
+.tab-content {
+  background-color: white;
 }
 
 .card.active > .card-header {

@@ -1,0 +1,11 @@
+.preview-canvas {
+   background: black;
+   width: 100%;
+}
+
+@media (min-width: 992px) {
+  .preview-wrapper {
+    height: calc(100vh - 283px);
+    background-color: black;
+  }
+}

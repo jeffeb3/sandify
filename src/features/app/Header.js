@@ -8,7 +8,7 @@ class Header extends Component {
       <header>
         <div className="d-flex align-items-center justify-content-center">
           <img src={logo} className="app-logo mr-2" alt="logo" />
-          <h2 className="d-inline m-0">sandify</h2>
+          <h1 className="d-inline m-0">sandify</h1>
         </div>
         <p>create patterns for robots that draw in sand with ball bearings</p>
       </header>

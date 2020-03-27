@@ -26,7 +26,7 @@ const transformOptions = {
     step: 0.05
   },
   trackGrow: {
-    title: 'Track scale step (can be negative)',
+    title: 'Scale step (can be negative)',
   },
 }
 

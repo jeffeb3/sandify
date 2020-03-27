@@ -65,7 +65,7 @@ class Transforms extends Component {
         <Accordion className="mt-3" defaultActiveKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onRepeat}>
-              <h4>Loop and transform</h4>
+              <h3>Loop and transform</h3>
               Draws the shape multiple times, transforming the shape each time.
             </Accordion.Toggle>
 

@@ -142,12 +142,10 @@ class ThetaRho extends Component {
     return (
       <div className="theta-rho">
         <Card className="p-3">
-          <h4>Import theta rho file</h4>
-
-          <Accordion className="mb-4 pt-3">
+          <Accordion className="mb-4">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
-                <h4>Import</h4>
+                <h3>Import</h3>
                 Imports a Sisyphus-style theta rho (.thr) file into Sandify
                 <Form.Control
                     id="fileUpload"
@@ -171,7 +169,7 @@ class ThetaRho extends Component {
           <Accordion>
             <Card className={`${aspectRatioActive} overflow-auto`}>
               <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
-                <h4>Keep aspect ratio</h4>
+                <h3>Keep aspect ratio</h3>
                 Keeps original aspect ratio
               </Accordion.Toggle>
             </Card>
@@ -190,7 +188,7 @@ class ThetaRho extends Component {
         </Card>
 
         <Card className="mt-3 p-3">
-          <h4>Where to get .thr files</h4>
+          <h3>Where to get .thr files</h3>
           <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
@@ -200,7 +198,7 @@ class ThetaRho extends Component {
             <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
           </ul>
 
-          <h5 className="mt-3">Note about copyrights</h5>
+          <h4 className="mt-3">Note about copyrights</h4>
           <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</p>
           <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
           <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>

@@ -45,7 +45,7 @@ class RotationTransform extends Component {
       <Accordion defaultActiveKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onSpin}>
-            <h4>Spin</h4>
+            <h3>Spin</h3>
             Spins the shape
           </Accordion.Toggle>
 

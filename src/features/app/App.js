@@ -16,7 +16,6 @@ import shapesReducer from '../shapes/shapesSlice'
 import transformsReducer from '../transforms/transformsSlice'
 import turtleReducer from '../turtle/turtleSlice'
 import Header from './Header'
-import Footer from './Footer'
 import InputTabs from './InputTabs'
 import MachinePreview from '../machine/MachinePreview'
 import { registeredShapes } from '../../common/registeredShapes'
@@ -61,18 +60,16 @@ class App extends Component {
           <main>
             <Container fluid>
               <Row className="pt-3">
-                <Col lg={7}>
-                  <InputTabs />
-                </Col>
-
-                <Col lg={5}>
+                <Col className="full-page no-gutters-md d-flex flex-column">
                   <MachinePreview />
                 </Col>
+
+                <div id="sidebar">
+                  <InputTabs />
+                </div>
               </Row>
             </Container>
           </main>
-
-          <Footer />
         </div>
       </Provider>
     )

@@ -16,9 +16,7 @@ const mapStateToProps = (state, ownProps) => {
 class MachineSettings extends Component {
   render() {
     return (
-      <div id="bigger-box" className="p-3">
-        <h4>Machine Settings</h4>
-
+      <div className="p-3">
         <Accordion defaultActiveKey={this.props.rectangular ? 0 : 1}>
           <RectSettings />
           <PolarSettings />
