@@ -6,6 +6,7 @@ import {
 import { connect } from 'react-redux'
 import ShapeList from '../shapes/ShapeList'
 import ThetaRho from '../theta_rho/ThetaRho'
+import MachineSettings from '../machine/MachineSettings'
 import { chooseInput } from '../app/appSlice'
 
 class InputTabs extends Component {
@@ -18,6 +19,10 @@ class InputTabs extends Component {
        <Tabs defaultActiveKey="shapes" onSelect={this.handleSelect.bind(this)} id="input-tabs">
          <Tab eventKey="shapes" title="Shapes">
            <ShapeList />
+         </Tab>
+
+         <Tab eventKey="machine" title="Machine">
+           <MachineSettings />
          </Tab>
 
          <Tab eventKey="code" title="Import">

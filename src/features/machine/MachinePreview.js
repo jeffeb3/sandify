@@ -29,23 +29,21 @@ class MachinePreview extends Component {
     return (
       <div className="machine-preview">
         <Card>
-            <PreviewWindow />
+          <PreviewWindow />
 
-            <div className="m-2">
-              Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
-            </div>
+          <div className="m-2">
+            Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
+          </div>
 
-            <div className="p-3">
-                <Slider
-                  value={this.props.sliderValue}
-                  step={1.0}
-                  min={0.0}
-                  max={100.0}
-                  onChange={this.props.onSlider}
-                />
-            </div>
-
-            <MachineSettings />
+          <div className="p-3">
+              <Slider
+                value={this.props.sliderValue}
+                step={1.0}
+                min={0.0}
+                max={100.0}
+                onChange={this.props.onSlider}
+              />
+          </div>
         </Card>
       </div>
     )
