@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 const shapesSlice = createSlice({
   name: 'shape',
@@ -15,6 +15,7 @@ const shapesSlice = createSlice({
     },
     setCurrentShape(state, action) {
       state.currentId = action.payload
+      localStorage.setItem('currentShape', state.currentId)
     },
     updateShape(state, action) {
       const shape = action.payload

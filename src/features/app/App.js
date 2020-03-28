@@ -48,7 +48,10 @@ Object.keys(registeredShapes).forEach(key => {
   store.dispatch(addTransform( {id: state.id, repeatEnabled: state.repeatEnabled}))
   store.dispatch(addShape(state))
 })
-store.dispatch(setCurrentShape('polygon'))
+
+const storedShape = localStorage.getItem('currentShape')
+const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
+store.dispatch(setCurrentShape(currentShape))
 
 class App extends Component {
   render() {
