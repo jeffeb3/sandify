@@ -13,13 +13,13 @@ class DropdownOption extends Component {
 
     return (
       <Row className="align-items-center pb-2" key={this.props.index}>
-        <Col sm={4}>
+        <Col sm={5}>
           <Form.Label htmlFor="options-dropdown">
             {option.title}
           </Form.Label>
         </Col>
 
-        <Col sm={8}>
+        <Col sm={7}>
           <Dropdown
             id="options-dropdown"
             onSelect={(value) => {

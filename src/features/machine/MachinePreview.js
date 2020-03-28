@@ -26,7 +26,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 class MachinePreview extends Component {
   render() {
     return (
-      <div className="machine-preview mb-3 d-flex flex-grow-1 flex-column" id="machine-preview">
+      <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
         <Card className="flex-grow-1 d-flex flex-column">
           <div className="preview-wrapper overflow-auto">
             <PreviewWindow />

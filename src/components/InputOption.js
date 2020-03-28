@@ -13,13 +13,13 @@ class InputOption extends Component {
 
     return (
       <Row className="align-items-center pb-2">
-        <Col sm={4}>
+        <Col sm={5}>
         <Form.Label htmlFor="options-step">
           {option.title}
         </Form.Label>
         </Col>
 
-        <Col sm={8}>
+        <Col sm={7}>
           <Form.Control
             id="options-step"
             type={optionType}
