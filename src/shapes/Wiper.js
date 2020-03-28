@@ -1,5 +1,4 @@
 import { degToRad } from '../common/Geometry'
-
 import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
