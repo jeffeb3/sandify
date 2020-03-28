@@ -10,6 +10,7 @@ import InputText from '../shapes/input_text/InputText'
 import Wiper from '../shapes/Wiper'
 import V1Engineering from '../shapes/v1_engineering/V1Engineering'
 import FractalSpirograph from '../shapes/fractal_spirograph/FractalSpirograph'
+import TesselationTwist from '../shapes/tesselation_twist/TesselationTwist'
 
 /*----------------------------------------------
 Supported input shapes
@@ -26,5 +27,6 @@ export const registeredShapes = {
   v1Engineering: new V1Engineering(),
   inputText: new InputText(),
   fractal_spirograph: new FractalSpirograph(),
+  tesselation_twist: new TesselationTwist(),
   wiper: new Wiper()
 }
