@@ -58,7 +58,7 @@ class PreviewWindow extends Component {
     const context = canvas.getContext('2d')
     const bigBox = document.getElementById("preview-canvas")
 
-    this.throttledResize = throttle(this.resize, 200).bind(this)
+    this.throttledResize = throttle(this.resize, 500).bind(this)
 
     window.addEventListener('resize', () => { this.throttledResize(canvas, bigBox) }, false)
     setTimeout(() => this.resize(canvas, bigBox), 250)
@@ -216,11 +216,15 @@ class PreviewWindow extends Component {
   resize(canvas, bigBox) {
     var size = parseInt(getComputedStyle(bigBox).getPropertyValue('width'),10) - 100
 
-    if (this.props.canvasWidth !== size) {
+    if (this.props.canvasWidth !== size && this.props.canvasWidth != this.oldSize) {
       this.props.onResize(size)
     }
     var context = canvas.getContext('2d')
     this.paint(context)
+
+    // this is a (temporary?) hack to get around a bug that toggles between two different
+    // canvas values during window resize    
+    this.oldSize = size
   }
 
   render() {
