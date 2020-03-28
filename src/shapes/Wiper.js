@@ -10,6 +10,7 @@ const options = {
     },
     wiperSize: {
       title: 'Wiper size',
+      min: 1
     },
   }
 }

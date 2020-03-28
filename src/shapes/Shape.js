@@ -1,6 +1,7 @@
 export const shapeOptions = {
   startingSize: {
     title: 'Starting size',
+    min: 1
   }
 }
 

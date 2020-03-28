@@ -7,6 +7,7 @@ const options = {
     reuleauxSides: {
       title: 'Number of sides',
       step: 1,
+      min: 2
     },
   }
 }

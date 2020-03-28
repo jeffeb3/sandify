@@ -7,10 +7,12 @@ const options = {
     roseN: {
       title: 'Numerator',
       step: 1,
+      min: 1
     },
     roseD: {
       title: 'Denominator',
       step: 1,
+      min: 1
     },
   }
 }
