@@ -9,10 +9,10 @@ const transformOptions = {
     title: 'Number of loops',
   },
   growValue: {
-    title: 'Scale step (can be negative)',
+    title: 'Scale step (+/-)',
   },
   spinValue: {
-    title: 'Spin step (can be negative)',
+    title: 'Spin step (+/-)',
     step: 0.1
   },
   spinSwitchbacks: {
@@ -26,7 +26,7 @@ const transformOptions = {
     step: 0.05
   },
   trackGrow: {
-    title: 'Scale step (can be negative)',
+    title: 'Scale step (+/-)',
   },
 }
 

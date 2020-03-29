@@ -1,11 +1,17 @@
 .preview-canvas {
-   background: black;
-   width: 100%;
+   background-color: black;
+   margin: 0 auto;
 }
 
-@media (min-width: 992px) {
-  .preview-wrapper {
-    height: calc(100vh - 236px);
-    background-color: black;
+.preview-wrapper {
+  background-color: #333;
+
+  @media (max-width: 991px) {
+    height: 400px;
+  }
+
+  @media (min-width: 992px) {
+    width: 100%;
+    height: calc(100vh - 216px);
   }
 }

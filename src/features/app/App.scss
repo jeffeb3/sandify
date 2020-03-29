@@ -4,8 +4,9 @@
 
 @media (min-width: 992px) {
   .full-page {
-    height: calc(100vh - 145px);
+    height: calc(100vh - 137px);
     overflow: auto;
+    border-right: 1px solid #aaa;
   }
 
   .full-page-tab {
@@ -21,6 +22,7 @@
 
 #sidebar {
   width: 550px;
+  padding-top: 0.5rem;
 
   @media(max-width: 992px) {
     width: 100%;
@@ -52,6 +54,10 @@
 
 h2 {
   font-size: 1.6rem;
+}
+
+.bg-white {
+  background-color: white;
 }
 
 .card h3 {

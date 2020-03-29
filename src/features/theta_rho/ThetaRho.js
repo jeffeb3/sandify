@@ -187,7 +187,7 @@ class ThetaRho extends Component {
           </Row>
         </Card>
 
-        <Card className="mt-3 p-3">
+        <div className="p-4">
           <h3>Where to get .thr files</h3>
           <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
@@ -203,7 +203,7 @@ class ThetaRho extends Component {
           <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
           <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>
           <p>I am not a lawyer.</p>
-        </Card>
+        </div>
       </div>
     )
   }

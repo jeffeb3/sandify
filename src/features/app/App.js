@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import {
   Col,
-  Container,
   Row
 } from 'react-bootstrap'
 import { configureStore } from "@reduxjs/toolkit"
@@ -61,17 +60,15 @@ class App extends Component {
           <Header />
 
           <main>
-            <Container fluid>
-              <Row className="pt-3">
-                <Col className="full-page no-gutters-md d-flex flex-column">
-                  <MachinePreview />
-                </Col>
+            <Row className="no-gutters">
+              <Col className="full-page d-flex flex-column">
+                <MachinePreview />
+              </Col>
 
-                <div id="sidebar">
-                  <InputTabs />
-                </div>
-              </Row>
-            </Container>
+              <div id="sidebar">
+                <InputTabs />
+              </div>
+            </Row>
           </main>
         </div>
       </Provider>

@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 class Footer extends Component {
   render () {
     return (
-      <footer className="py-4 px-3">
+      <footer className="p-4">
         <div>
           <h2>About</h2>
           <p>Sandify turns your cold, empty-hearted, emotionless sand tables into cold, empty-hearted, emotionless sand table robots with enchanting patterns.</p>

@@ -50,7 +50,7 @@ class PolarSettings extends Component {
 
         <Accordion.Collapse eventKey={1}>
           <Card.Body>
-            <Row className="align-items-center pb-2">
+            <Row className="align-items-center pb-1">
               <Col sm={4}>
                 <Form.Label htmlFor="maxRadius">
                   Max radius (mm)

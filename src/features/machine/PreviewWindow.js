@@ -56,12 +56,15 @@ class PreviewWindow extends Component {
   componentDidMount() {
     const canvas = ReactDOM.findDOMNode(this)
     const context = canvas.getContext('2d')
-    const bigBox = document.getElementById("preview-canvas")
+    const bigBox = document.getElementById("preview-wrapper")
 
-    this.throttledResize = throttle(this.resize, 500).bind(this)
+    this.throttledResize = throttle(this.resize, 200, {trailing: true}).bind(this)
 
     window.addEventListener('resize', () => { this.throttledResize(canvas, bigBox) }, false)
-    setTimeout(() => this.resize(canvas, bigBox), 250)
+    setTimeout(() => {
+      this.visible = true
+      this.resize(canvas, bigBox)
+    }, 250)
     this.paint(context)
   }
 
@@ -69,7 +72,8 @@ class PreviewWindow extends Component {
     var canvas = ReactDOM.findDOMNode(this)
     var context = canvas.getContext('2d')
     context.clearRect(0, 0, this.props.canvasWidth, this.props.canvasHeight)
-    var bigBox = document.getElementById("preview-canvas")
+    var bigBox = document.getElementById("preview-wrapper")
+
     this.resize(canvas, bigBox)
   }
 
@@ -214,25 +218,25 @@ class PreviewWindow extends Component {
   }
 
   resize(canvas, bigBox) {
-    var size = parseInt(getComputedStyle(bigBox).getPropertyValue('width'),10) - 100
+    const width = parseInt(getComputedStyle(bigBox).getPropertyValue('width'))
+    const height = parseInt(getComputedStyle(bigBox).getPropertyValue('height'))
+    const size = Math.max(Math.min(width, height))
 
-    if (this.props.canvasWidth !== size && this.props.canvasWidth != this.oldSize) {
+    if (this.props.canvasWidth !== size) {
       this.props.onResize(size)
     }
+
     var context = canvas.getContext('2d')
     this.paint(context)
-
-    // this is a (temporary?) hack to get around a bug that toggles between two different
-    // canvas values during window resize    
-    this.oldSize = size
   }
 
   render() {
     const {canvasWidth, canvasHeight} = this.props
+    const visibilityClass = `preview-canvas ${this.visible ? 'd-inline' : 'd-none'}`
+
     return (
       <canvas
-        className="preview-canvas"
-        id="preview-canvas"
+        className={visibilityClass}
         height={canvasHeight}
         width={canvasWidth} />
     )

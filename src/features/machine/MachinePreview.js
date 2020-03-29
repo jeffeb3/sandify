@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Card } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
@@ -27,12 +26,12 @@ class MachinePreview extends Component {
   render() {
     return (
       <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
-        <Card className="flex-grow-1 d-flex flex-column">
-          <div className="preview-wrapper overflow-auto">
+        <div className="flex-grow-1 d-flex flex-column">
+          <div id="preview-wrapper" className="preview-wrapper overflow-hidden d-flex align-items-center">
             <PreviewWindow />
           </div>
 
-          <div className="mt-auto">
+          <div className="mt-auto pt-2 bg-white">
             <div className="mx-2">
               Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
             </div>
@@ -47,7 +46,7 @@ class MachinePreview extends Component {
                 />
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     )
   }

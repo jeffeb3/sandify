@@ -12,7 +12,7 @@ class InputOption extends Component {
     const optionType = option.type || 'number'
 
     return (
-      <Row className="align-items-center pb-2">
+      <Row className="align-items-center pb-1">
         <Col sm={5}>
         <Form.Label htmlFor="options-step">
           {option.title}
