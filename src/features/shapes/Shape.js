@@ -43,6 +43,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       let tAttrs = metatransform.getInitialState()
       tAttrs.id = id
+      tAttrs.repeatEnabled = attrs.repeatEnabled
       dispatch(updateShape(attrs))
       dispatch(updateTransform(tAttrs))
     }
