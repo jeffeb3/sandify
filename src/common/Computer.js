@@ -215,7 +215,7 @@ export const thetaRho = (state) => {
     x_scale = y_scale = Math.min(x_scale,y_scale)
   }
 
-  var newVertices = state.file.vertices.map( (vertex) => {
+  const newVertices = state.file.vertices.map( (vertex) => {
     return {...vertex,
       x: vertex.x * x_scale,
       y: vertex.y * y_scale,
@@ -239,7 +239,7 @@ export const transformShapes = (state) => {
 
   for (var i=0; i<numLoops; i++) {
     for (var j=0; j<input.length; j++) {
-      let fraction = j/input.length
+      const fraction = j/input.length
       outputVertices.push(transform(state.transform, input[j], i+fraction))
     }
   }

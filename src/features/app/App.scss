@@ -4,13 +4,13 @@
 
 @media (min-width: 992px) {
   .full-page {
-    height: calc(100vh - 137px);
+    height: calc(100vh - 90px);
     overflow: auto;
     border-right: 1px solid #aaa;
   }
 
   .full-page-tab {
-    height: calc(100vh - 187px);
+    height: calc(100vh - 140px);
     overflow: auto;
   }
 }
