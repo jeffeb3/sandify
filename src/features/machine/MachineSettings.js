@@ -5,7 +5,6 @@ import {
 } from 'react-bootstrap'
 import RectSettings from './RectSettings'
 import PolarSettings from './PolarSettings'
-import GCodeGenerator from '../gcode/GCodeGenerator'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -21,8 +20,6 @@ class MachineSettings extends Component {
           <RectSettings />
           <PolarSettings />
         </Accordion>
-
-        <GCodeGenerator />
       </div>
     )
   }

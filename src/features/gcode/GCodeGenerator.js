@@ -224,7 +224,7 @@ class GCodeGenerator extends Component {
 
     return (
       <div>
-        <Button className="mt-3 p-3 btn-block" variant="secondary" onClick={this.props.open}>Generate code</Button>
+        <Button className="ml-2 mr-3" variant="primary" onClick={this.props.open}>Generate code</Button>
 
         <Modal show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
