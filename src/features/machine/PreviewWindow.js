@@ -11,15 +11,21 @@ import { createSelector } from 'reselect'
 import throttle from 'lodash/throttle'
 
 const getTransforms = state => state.transforms
+const getShapes = state => state.shapes
 
 const getTrackVertices = createSelector(
-  [getTransforms],
-  (data) => {
-    var numLoops = data.numLoops
+  [
+    getShapes,
+    getTransforms
+  ],
+  (shapes, transforms) => {
+    let currentTransform = transforms.byId[shapes.currentId]
+
+    var numLoops = currentTransform.numLoops
     var trackVertices = []
     for (var i=0; i<numLoops; i++) {
-      if (data.trackEnabled) {
-        trackVertices.push(transform(data, {x: 0.0, y: 0.0}, i))
+      if (currentTransform.trackEnabled) {
+        trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i))
       }
     }
     return trackVertices
@@ -38,7 +44,7 @@ const mapStateToProps = (state, ownProps) => {
     canvasHeight: state.machine.canvasHeight,
     vertices: getVertices(state),
     sliderValue: state.machine.sliderValue,
-    showTrack: state.app.input === 0,
+    showTrack: state.app.input === 'shape',
     trackVertices: getTrackVertices(state),
   }
 }
@@ -201,7 +207,6 @@ class PreviewWindow extends Component {
       context.stroke()
     }
 
-    // Draw the trackVertices
     if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
       // Draw the track vertices
       context.beginPath()
