@@ -42,7 +42,7 @@ class ScaleTransform extends Component {
     const activeKey = this.props.active ? 0 : null
 
     return (
-      <Accordion defaultActiveKey={activeKey}>
+      <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onGrow}>
             <h3>Scale</h3>

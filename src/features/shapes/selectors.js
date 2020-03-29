@@ -22,3 +22,7 @@ export const getCurrentTransformSelector = createSelector(
 export const getShape = (shape) => {
   return registeredShapes[shape.type]
 }
+
+export const getShapeById = (id) => {
+  return registeredShapes[id]
+}

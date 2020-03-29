@@ -62,7 +62,7 @@ class Transforms extends Component {
           index={0}
           model={this.props.transform} />
 
-        <Accordion className="mt-3" defaultActiveKey={activeKey}>
+        <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onRepeat}>
               <h3>Loop and transform</h3>

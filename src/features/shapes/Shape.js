@@ -1,13 +1,19 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
+import {
+  Button,
+} from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
 import Transforms from '../transforms/Transforms'
 import { updateShape } from './shapesSlice'
+import { updateTransform } from '../transforms/transformsSlice'
 import {
   getShape,
+  getShapeById,
   getCurrentShapeSelector
 } from './selectors'
+import Transform from '../../shapes/Transform'
 import './Shape.css'
 
 const mapStateToProps = (state, ownProps) => {
@@ -23,11 +29,22 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   const { id } = ownProps
+  const metashape = getShapeById(id)
+  const metatransform = new Transform()
 
   return {
     onChange: (attrs) => {
       attrs.id = id
       dispatch(updateShape(attrs))
+    },
+    onRestoreDefaults: (event) => {
+      let attrs = metashape.getInitialState()
+      attrs.id = id
+
+      let tAttrs = metatransform.getInitialState()
+      tAttrs.id = id
+      dispatch(updateShape(attrs))
+      dispatch(updateTransform(tAttrs))
     }
   }
 }
@@ -68,7 +85,10 @@ class Shape extends Component {
     }
 
     return (
-      <div className="pt-4">
+      <div className="pt-1">
+        <div className="d-flex align-items-center pt-1 pb-3">
+          <Button variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
+        </div>
         { optionsListRender }
         <Transforms id={this.props.shape.id} />
       </div>

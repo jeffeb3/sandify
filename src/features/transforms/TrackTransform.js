@@ -49,7 +49,7 @@ class TrackTransform extends Component {
     const activeGrowKey = this.props.activeGrow ? 0 : null
 
     return (
-      <Accordion defaultActiveKey={activeKey}>
+      <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
         <Card className={activeClassName}>
           <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrack}>
             <h3>Track</h3>
