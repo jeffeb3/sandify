@@ -3,12 +3,11 @@ import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import { Vertex } from '../../common/Geometry'
 import { setMachineSize } from './machineSlice'
-import {
-  transform,
-} from '../../common/Computer'
+import { transform } from '../../common/Computer'
 import { getVertices } from './selectors'
 import { createSelector } from 'reselect'
 import throttle from 'lodash/throttle'
+import Color from 'color'
 
 const getTransforms = state => state.transforms
 const getShapes = state => state.shapes
@@ -172,23 +171,11 @@ class PreviewWindow extends Component {
     var drawing_vertices = this.props.vertices
     drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue)
     if (drawing_vertices && drawing_vertices.length > 0) {
-      // Draw the start and end points
-      context.beginPath()
-      context.lineWidth = 1.0
-      context.strokeStyle = "green"
-      this.dot_mm(context, this.props.vertices[0])
-      context.stroke()
-      context.beginPath()
-      context.lineWidth = 1.0
-      context.strokeStyle = "red"
-      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1])
-      context.stroke()
-
       // Draw the background vertices
       if (this.props.sliderValue !== 0) {
         context.beginPath()
         context.lineWidth = this.mmToPixelsScale()
-        context.strokeStyle = "gray"
+        context.strokeStyle = "rgba(204, 204, 204, 0.35)"
         this.moveTo_mm(context, this.props.vertices[0])
         for (let i=0; i<this.props.vertices.length; i++) {
           this.lineTo_mm(context, this.props.vertices[i])
@@ -197,20 +184,42 @@ class PreviewWindow extends Component {
       }
 
       // Draw the specific vertices
+      var startColor = Color('#6E6E00')
+      const colorStep = 200.0 / drawing_vertices.length / 100
+
       context.beginPath()
       context.lineWidth = this.mmToPixelsScale()
-      context.strokeStyle = "yellow"
       this.moveTo_mm(context, drawing_vertices[0])
-      for (let i=0; i<drawing_vertices.length; i++) {
+      context.stroke()
+
+      for (let i=1; i<drawing_vertices.length; i++) {
+        const strokeColor = this.props.sliderValue !== 0 ? startColor.lighten(colorStep * i).hex() : 'yellow'
+
+        context.beginPath()
+        context.strokeStyle = strokeColor
+        context.lineWidth = this.mmToPixelsScale()
+        this.moveTo_mm(context, drawing_vertices[i-1])
         this.lineTo_mm(context, drawing_vertices[i])
+        context.stroke()
       }
+
+      // Draw the start and end points
+      context.beginPath()
+      context.lineWidth = 4.0
+      context.strokeStyle = "green"
+      this.dot_mm(context, this.props.vertices[0])
+      context.stroke()
+      context.beginPath()
+      context.lineWidth = 4.0
+      context.strokeStyle = "red"
+      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1])
       context.stroke()
     }
 
     if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
       // Draw the track vertices
       context.beginPath()
-      context.lineWidth = this.mmToPixelsScale()
+      context.lineWidth = 6.0
       context.strokeStyle = "green"
       this.moveTo_mm(context, this.props.trackVertices[0])
       for (let i=0; i<this.props.trackVertices.length; i++) {

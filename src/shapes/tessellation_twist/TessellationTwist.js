@@ -140,7 +140,7 @@ export default class TessellationTwist extends Shape {
         type: 'tessellation_twist',
         startingSize: 110,
         repeatEnabled: false,
-        tessellationTwistNumSides: 3,
+        tessellationTwistNumSides: 5,
         tessellationTwistIterations: 2,
         tessellationTwistRotate: 0
       }
