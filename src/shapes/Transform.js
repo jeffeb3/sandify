@@ -33,7 +33,6 @@ const transformOptions = {
 export default class Transform {
   getInitialState() {
     return {
-      startingSize: 10.0,
       offsetX: 0.0,
       offsetY: 0.0,
       numLoops: 10,

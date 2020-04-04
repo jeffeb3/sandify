@@ -30,7 +30,6 @@ describe('transforms reducer', () => {
       byId: {
         '1': {
           id: '1',
-          startingSize: 10.0,
           offsetX: 0,
           offsetY: 0,
           numLoops: 10,
