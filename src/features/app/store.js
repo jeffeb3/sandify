@@ -6,7 +6,6 @@ import machineReducer from '../machine/machineSlice'
 import gcodeReducer from '../gcode/gCodeSlice'
 import shapesReducer from '../shapes/shapesSlice'
 import transformsReducer from '../transforms/transformsSlice'
-import turtleReducer from '../turtle/turtleSlice'
 import { registeredShapes } from '../../common/registeredShapes'
 import {
   addShape,
@@ -21,8 +20,7 @@ const store = configureStore({
     transforms: transformsReducer,
     file: fileReducer,
     gcode: gcodeReducer,
-    machine: machineReducer,
-    turtle: turtleReducer
+    machine: machineReducer
   }),
 })
 
