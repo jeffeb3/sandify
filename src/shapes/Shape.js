@@ -12,6 +12,7 @@ export default class Shape {
   getInitialState() {
     return {
       repeatEnabled: true,
+      canTransform: true,
       startingSize: 10
     }
   }

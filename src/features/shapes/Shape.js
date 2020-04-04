@@ -91,7 +91,7 @@ class Shape extends Component {
           <Button variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
         </div>
         { optionsListRender }
-        <Transforms id={this.props.shape.id} />
+        { this.props.shape.canTransform && <Transforms id={this.props.shape.id} />}
       </div>
     )
   }
