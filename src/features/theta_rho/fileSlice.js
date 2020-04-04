@@ -7,7 +7,7 @@ const fileSlice = createSlice({
     comments: [],
     vertices: [],
     zoom: 100,
-    aspect_ratio: false,
+    aspectRatio: false,
   },
   reducers: {
     setFileVertices(state, action) {
@@ -23,7 +23,7 @@ const fileSlice = createSlice({
       state.zoom = action.payload
     },
     toggleFileAspectRatio(state, action) {
-      state.aspect_ratio = !state.aspect_ratio
+      state.aspectRatio = !state.aspectRatio
     },
   }
 })

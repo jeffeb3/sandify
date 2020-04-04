@@ -1,10 +1,10 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 const appSlice = createSlice({
   name: 'app',
   initialState: {
-    sandify_version: "0.1.8", // Also change the version in package.json.
-    input: 0,
+    sandifyVersion: '0.2.0', // Also change the version in package.json.
+    input: 'shape',
   },
   reducers: {
     chooseInput(state, action) {

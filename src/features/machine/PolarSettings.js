@@ -13,16 +13,16 @@ import {
   toggleMachineEndpoints,
 } from './machineSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    expanded:   state.machine.polar_expanded,
+    expanded:   state.machine.polarExpanded,
     active:     !state.machine.rectangular,
-    max_radius: state.machine.max_radius,
-    endpoints:  state.machine.polar_endpoints,
+    maxRadius: state.machine.maxRadius,
+    endpoints:  state.machine.polarEndpoints,
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     activeCallback: (event) => {
       dispatch(toggleMachinePolarExpanded())
@@ -44,27 +44,27 @@ class PolarSettings extends Component {
     return (
       <Card className={`${activeClassName} overflow-auto`}>
         <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.activeCallback}>
-          <h4>Polar Machine</h4>
+          <h3>Polar machine</h3>
           Polar machines like Sisyphus
         </Accordion.Toggle>
 
         <Accordion.Collapse eventKey={1}>
           <Card.Body>
-            <Row className="align-items-center pb-2">
+            <Row className="align-items-center pb-1">
               <Col sm={4}>
-                <Form.Label htmlFor="max_radius">
+                <Form.Label htmlFor="maxRadius">
                   Max radius (mm)
                 </Form.Label>
               </Col>
               <Col sm={8}>
-                <Form.Control id="max_radius" type="number" value={this.props.max_radius} onChange={this.props.onMaxRadiusChange} />
+                <Form.Control id="maxRadius" type="number" value={this.props.maxRadius} onChange={this.props.onMaxRadiusChange} />
               </Col>
             </Row>
 
             <Accordion>
               <Card className={`${endpointsActiveClass} overflow-auto`}>
                 <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleEndpoints}>
-                  <h4>Force Endpoints</h4>
+                  <h3>Force endpoints</h3>
                   Forces the first and last points to be at the center and edge
                 </Accordion.Toggle>
               </Card>
@@ -76,4 +76,4 @@ class PolarSettings extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(PolarSettings)
+export default connect(mapStateToProps, mapDispatchToProps)(PolarSettings)

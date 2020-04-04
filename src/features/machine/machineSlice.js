@@ -4,73 +4,73 @@ const machineSlice = createSlice({
   name: 'machine',
   initialState: {
     rectangular: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
-    rect_expanded: false,
-    polar_expanded: false,
-    min_x: parseFloat(localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0),
-    max_x: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
-    min_y: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
-    max_y: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
-    max_radius: parseFloat(localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250),
-    rect_origin: [],
-    polar_endpoints: false,
-    canvas_width: 600,
-    canvas_height: 600,
-    slider_value: 0.0
+    rectExpanded: false,
+    polarExpanded: false,
+    minX: parseFloat(localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0),
+    maxX: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
+    minY: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
+    maxY: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
+    maxRadius: parseFloat(localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250),
+    rectOrigin: [],
+    polarEndpoints: false,
+    canvasWidth: 600,
+    canvasHeight: 600,
+    sliderValue: 0.0
   },
   reducers: {
     toggleMachineRectExpanded(state, action) {
       state.rectangular = true
-      state.rect_expanded = !state.rect_expanded
-      state.polar_expanded = false
+      state.rectExpanded = !state.rectExpanded
+      state.polarExpanded = false
       localStorage.setItem('machine_rect_active', 1)
     },
     toggleMachinePolarExpanded(state, action) {
       state.rectangular = false
-      state.rect_expanded = false
-      state.polar_expanded = !state.polar_expanded
+      state.rectExpanded = false
+      state.polarExpanded = !state.polarExpanded
       localStorage.setItem('machine_rect_active', 2)
     },
     setMachineMinX(state, action) {
-      state.min_x = action.payload
-      localStorage.setItem('machine_min_x', state.min_x)
+      state.minX = action.payload
+      localStorage.setItem('machine_min_x', state.minX)
     },
     setMachineMaxX(state, action) {
-      state.max_x = action.payload
-      localStorage.setItem('machine_max_x', state.max_x)
+      state.maxX = action.payload
+      localStorage.setItem('machine_max_x', state.maxX)
     },
     setMachineMinY(state, action) {
-      state.min_y = action.payload
-      localStorage.setItem('machine_min_y', state.min_y)
+      state.minY = action.payload
+      localStorage.setItem('machine_min_y', state.minY)
     },
     setMachineMaxY(state, action) {
-      state.max_y = action.payload
-      localStorage.setItem('machine_max_y', state.max_y)
+      state.maxY = action.payload
+      localStorage.setItem('machine_max_y', state.maxY)
     },
     setMachineMaxRadius(state, action) {
-      state.max_radius = action.payload
-      localStorage.setItem('machine_radius', state.max_radius)
+      state.maxRadius = action.payload
+      localStorage.setItem('machine_radius', state.maxRadius)
     },
     setMachineRectOrigin(state, action) {
       let newValue = []
       let value = action.payload
 
       for (let i = 0; i < value.length ; i++) {
-        if (!state.rect_origin.includes(value[i])) {
+        if (!state.rectOrigin.includes(value[i])) {
           newValue.push(value[i])
           break
         }
       }
-      state.rect_origin = newValue
+      state.rectOrigin = newValue
     },
     toggleMachineEndpoints(state, action) {
-      state.polar_endpoints = !state.polar_endpoints
+      state.polarEndpoints = !state.polarEndpoints
     },
     setMachineSize(state, action) {
-      state.canvas_height = action.payload
-      state.canvas_width = action.payload
+      state.canvasHeight = action.payload
+      state.canvasWidth = action.payload
     },
     setMachineSlider(state, action) {
-      state.slider_value = action.payload
+      state.sliderValue = action.payload
     }
   }
 })

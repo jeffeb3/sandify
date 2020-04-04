@@ -3,11 +3,10 @@ import { connect } from 'react-redux'
 import {
     Accordion
 } from 'react-bootstrap'
-import RectSettings from './RectSettings.js'
-import PolarSettings from './PolarSettings.js'
-import GCodeGenerator from '../gcode/GCodeGenerator'
+import RectSettings from './RectSettings'
+import PolarSettings from './PolarSettings'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     rectangular: state.machine.rectangular,
   }
@@ -16,18 +15,14 @@ const mapState = (state, ownProps) => {
 class MachineSettings extends Component {
   render() {
     return (
-      <div id="bigger-box" className="p-3">
-        <h4>Machine Settings</h4>
-
+      <div className="p-3">
         <Accordion defaultActiveKey={this.props.rectangular ? 0 : 1}>
           <RectSettings />
           <PolarSettings />
         </Accordion>
-
-        <GCodeGenerator />
       </div>
     )
   }
 }
 
-export default connect(mapState, null)(MachineSettings)
+export default connect(mapStateToProps, null)(MachineSettings)

@@ -1,50 +1,80 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import {
-  Accordion
+  Card
 } from 'react-bootstrap'
+import Select from 'react-select'
+
 import {
   setCurrentShape,
-} from './shapeSlice'
-import { registeredShapes } from './registered_shapes.js'
+} from '../shapes/shapesSlice'
 import Shape from './Shape'
+import {
+  getShapesSelector,
+  getCurrentShapeSelector
+} from './selectors'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    current_shape: state.shapes.current_shape,
+    currentShape: getCurrentShapeSelector(state),
+    shapes: getShapesSelector(state)
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    setCurrentShape: (name) => {
-      dispatch(setCurrentShape(name));
+    setCurrentShape: (selected) => {
+      dispatch(setCurrentShape(selected.value))
     },
   }
 }
 
+const customStyles = {
+  control: base => ({
+    ...base,
+    height: 55,
+    minHeight: 55
+  })
+}
+
 class ShapeList extends Component {
   render() {
-    var shapeRender = registeredShapes.map((shape, index) => {
-      let shapeInfo = shape.getInfo(this)
-      return <Shape
-               key={shapeInfo.name}
-               name={shapeInfo.name}
-               active={shapeInfo.name === this.props.current_shape}
-               link={shapeInfo.link || ""}
-               index={index}
-               options={shapeInfo.options}
-               clicked={() => { this.props.setCurrentShape(shapeInfo.name); }} />
-    })
+    const groupOptions = []
+    for (const shape of this.props.shapes) {
+      const optionLabel = { value: shape.id, label: shape.name }
+      var found = false
+      for (const group of groupOptions) {
+        if (group.label === shape.selectGroup) {
+          found = true
+          group.options.push(optionLabel)
+        }
+      }
+      if (!found) {
+        const newOptions = [ optionLabel ]
+        groupOptions.push( { label: shape.selectGroup, options: newOptions } )
+      }
+    }
+
+    const selectedOption = {
+      value: this.props.currentShape.id,
+      label: this.props.currentShape.name
+    }
 
     return (
       <div>
-        <Accordion defaultActiveKey={0}>
-          {shapeRender}
-        </Accordion>
+        <Card className="p-3 border-0">
+          <Select
+            value={selectedOption}
+            onChange={this.props.setCurrentShape}
+            styles={customStyles}
+            maxMenuHeight={305}
+            options={groupOptions} />
+
+          <Shape key={this.props.currentShape.id} id={this.props.currentShape.id} />
+        </Card>
       </div>
     )
   }
 }
 
-export default connect(mapState, mapDispatch)(ShapeList)
+export default connect(mapStateToProps, mapDispatchToProps)(ShapeList)

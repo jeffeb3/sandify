@@ -15,23 +15,23 @@ import {
   toggleFileAspectRatio
 } from './fileSlice'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     name: state.file.name,
     comments: state.file.comments,
     vertices: state.file.vertices,
     zoom: state.file.zoom,
-    aspect_ratio: state.file.aspect_ratio,
+    aspectRatio: state.file.aspectRatio,
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   var convertToXY = (thetaRhos) => {
     var vertices = []
-    var previous = undefined;
-    var max_angle = Math.PI / 64.0;
+    var previous = undefined
+    var max_angle = Math.PI / 64.0
     for (let ii = 0; ii < thetaRhos.length; ii++) {
-      var next = thetaRhos[ii];
+      var next = thetaRhos[ii]
       if (previous) {
         if (Math.abs(next[0] - previous[0]) < max_angle) {
           // These sin, cos elements are inverted. I'm not sure why
@@ -39,22 +39,22 @@ const mapDispatch = (dispatch, ownProps) => {
                         x: previous[1] * Math.sin(previous[0]),
                         y: previous[1] * Math.cos(previous[0]),
                         f: 1000,
-          });
+          })
         } else {
           // We need to do some interpolating.
-          let deltaAngle = next[0] - previous[0];
-          let rhoStep = max_angle / Math.abs(deltaAngle) * (next[1] - previous[1]);
-          var rho = previous[1];
+          let deltaAngle = next[0] - previous[0]
+          let rhoStep = max_angle / Math.abs(deltaAngle) * (next[1] - previous[1])
+          var rho = previous[1]
           if (deltaAngle > 0.0) {
-            var emergency_break = 0;
+            var emergency_break = 0
             for (let angle = previous[0]; angle < next[0]; angle += max_angle, rho += rhoStep) {
               vertices.push({
                             x: rho * Math.sin(angle),
                             y: rho * Math.cos(angle),
                             f: 1000,
-              });
+              })
               if (emergency_break++ > 100000) {
-                break;
+                break
               }
             }
           } else {
@@ -63,84 +63,78 @@ const mapDispatch = (dispatch, ownProps) => {
                             x: rho * Math.sin(angle),
                             y: rho * Math.cos(angle),
                             f: 1000,
-              });
+              })
               if (emergency_break++ > 100000) {
-                break;
+                break
               }
             }
           }
         }
       }
-      previous = next;
+      previous = next
     }
-    return vertices;
+    return vertices
   }
 
   var parseThrFile = (file) => {
-    var rv = {};
-    rv.comments = [];
-    rv.vertices = [];
+    var rv = {}
+    rv.comments = []
+    rv.vertices = []
 
-    var reader = new FileReader();
+    var reader = new FileReader()
 
     reader.onload = (event) => {
-      var text = reader.result;
-      var lines = text.split('\n');
-      var has_vertex = false;
+      var text = reader.result
+      var lines = text.split('\n')
+      var has_vertex = false
       for (let ii = 0; ii < lines.length; ii++) {
-        var line = lines[ii].trim();
+        var line = lines[ii].trim()
         if (line.length === 0) {
           // blank lines
-          continue;
+          continue
         }
         if (line.indexOf("#") === 0 && !has_vertex) {
-          rv.comments.push(lines[ii]);
+          rv.comments.push(lines[ii])
         }
 
         if (line.indexOf("#") !== 0) {
-          has_vertex = true;
+          has_vertex = true
           // This is a point, let's try to read it.
-          var pointStrings = line.split(/\s+/);
+          var pointStrings = line.split(/\s+/)
           if (pointStrings.length !== 2) {
             // AAAH
-            console.log(pointStrings);
-            continue;
+            console.log(pointStrings)
+            continue
           }
-          rv.vertices.push([parseFloat(pointStrings[0]), parseFloat(pointStrings[1])]);
+          rv.vertices.push([parseFloat(pointStrings[0]), parseFloat(pointStrings[1])])
         }
       }
 
-      dispatch(setFileComments(rv.comments));
-      dispatch(setFileVertices(convertToXY(rv.vertices)));
+      dispatch(setFileComments(rv.comments))
+      dispatch(setFileVertices(convertToXY(rv.vertices)))
     }
 
-    reader.readAsText(file);
+    reader.readAsText(file)
   }
 
   return {
     setVertices: (event: any) => {
-      var file = event.target.files[0];
-      dispatch(setFileName(file.name));
-      parseThrFile(file);
+      var file = event.target.files[0]
+      dispatch(setFileName(file.name))
+      parseThrFile(file)
     },
     setZoom: (event) => {
-      dispatch(setFileZoom(parseFloat(event.target.value)));
+      dispatch(setFileZoom(parseFloat(event.target.value)))
     },
     toggleAspectRatio: (event) => {
-      dispatch(toggleFileAspectRatio());
+      dispatch(toggleFileAspectRatio())
     },
   }
 }
 
-const disableEnter = (event) => {
-  if (event.key === 'Enter' && event.shiftKey === false) {
-    event.preventDefault();
-  }
-};
-
 class ThetaRho extends Component {
   render() {
-    var aspectRatioActive = this.props.aspect_ratio ? 'active' : ''
+    var aspectRatioActive = this.props.aspectRatio ? 'active' : ''
     var commentsRender = this.props.comments.map((comment) => {
       return <span>{comment}<br/></span>
     })
@@ -148,13 +142,11 @@ class ThetaRho extends Component {
     return (
       <div className="theta-rho">
         <Card className="p-3">
-          <h4>Theta Rho Input</h4>
-
-          <Accordion className="mb-4 pt-3">
+          <Accordion className="mb-4">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
-                <h4>Load file</h4>
-                Import a Sisyphus style theta rho (.thr) file into Sandify
+                <h3>Import</h3>
+                Imports a Sisyphus-style theta rho (.thr) file into Sandify
                 <Form.Control
                     id="fileUpload"
                     type="file"
@@ -177,7 +169,7 @@ class ThetaRho extends Component {
           <Accordion>
             <Card className={`${aspectRatioActive} overflow-auto`}>
               <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
-                <h4>Keep Aspect Ratio</h4>
+                <h3>Keep aspect ratio</h3>
                 Keeps original aspect ratio
               </Accordion.Toggle>
             </Card>
@@ -190,13 +182,13 @@ class ThetaRho extends Component {
               </Form.Label>
             </Col>
             <Col sm={8}>
-              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} onKeyDown={disableEnter} />
+              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} />
             </Col>
           </Row>
         </Card>
 
-        <Card className="mt-3 p-3">
-          <h4>Where to get .thr files</h4>
+        <div className="p-4">
+          <h3>Where to get .thr files</h3>
           <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
@@ -206,15 +198,15 @@ class ThetaRho extends Component {
             <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
           </ul>
 
-          <h5 className="mt-3">Note about copyrights</h5>
+          <h4 className="mt-3">Note about copyrights</h4>
           <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</p>
           <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
           <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>
           <p>I am not a lawyer.</p>
-        </Card>
+        </div>
       </div>
     )
   }
 }
 
-export default connect(mapState, mapDispatch)(ThetaRho)
+export default connect(mapStateToProps, mapDispatchToProps)(ThetaRho)

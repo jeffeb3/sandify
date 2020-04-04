@@ -13,7 +13,7 @@ describe('file reducer', () => {
       comments: [],
       vertices: [],
       zoom: 100,
-      aspect_ratio: false,
+      aspectRatio: false,
     })
   })
 
@@ -64,11 +64,11 @@ describe('file reducer', () => {
   it('should handle toggleFileAspectRatio', () => {
     expect(
       file(
-        {aspect_ratio: false},
+        {aspectRatio: false},
         toggleFileAspectRatio({})
       )
     ).toEqual({
-      aspect_ratio: true
+      aspectRatio: true
     })
   })
 })

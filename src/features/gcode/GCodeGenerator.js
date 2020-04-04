@@ -14,37 +14,34 @@ import {
   setGCodeShow,
   toggleGCodeReverse,
 } from './gCodeSlice'
-import { findShape } from '../shapes/registered_shapes.js'
-import { getVertices } from '../../common/Computer.js'
+import { getComments } from './selectors'
+import { getVertices } from '../machine/selectors'
 import { Vertex } from '../../common/Geometry'
 import Victor from 'victor'
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.
-//
 // I don't really understand this, but I took it from here, and it seems to work:
 // https://stackoverflow.com/a/18197511
-//
 function download(filename, text) {
-  let link = document.createElement('a');
-  link.download = filename;
+  let link = document.createElement('a')
+  link.download = filename
 
-  let blob = new Blob([text],{type: 'text/plain;charset=utf-8'});
+  let blob = new Blob([text],{type: 'text/plain;charset=utf-8'})
 
   // Windows Edge fix
   if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-    window.navigator.msSaveOrOpenBlob(blob, filename);
+    window.navigator.msSaveOrOpenBlob(blob, filename)
   } else {
-    link.href = URL.createObjectURL(blob);
+    link.href = URL.createObjectURL(blob)
     if (document.createEvent) {
-      var event = document.createEvent('MouseEvents');
-      event.initEvent('click', true, true);
-      link.dispatchEvent(event);
+      var event = document.createEvent('MouseEvents')
+      event.initEvent('click', true, true)
+      link.dispatchEvent(event)
+    } else {
+      link.click()
     }
-    else {
-      link.click();
-    }
-    URL.revokeObjectURL(link.href);
+    URL.revokeObjectURL(link.href)
   }
 }
 
@@ -59,113 +56,43 @@ function gcode(vertex) {
 }
 
 function thetarho(vertex) {
-  return "" + vertex.x.toFixed(5) + " " + vertex.y.toFixed(5) + "\n";
+  return "" + vertex.x.toFixed(5) + " " + vertex.y.toFixed(5) + "\n"
 }
 
-const getComments = (state) => {
-  let comments = [];
-  comments.push("Created by Sandify");
-  comments.push("");
-  comments.push("  https://sandify.org");
-  comments.push("");
-  comments.push("  Sandify Version: " + state.app.sandify_version);
-  comments.push("");
-  comments.push("  Machine Type: " + (state.machine.rectangular ? "Rectangular" : "Polar"));
-  if (state.machine.rectangular) {
-    comments.push("    MinX: " + state.machine.min_x + " MaxX: " + state.machine.max_x + " MinY: " + state.machine.min_y + " MaxY: " + state.machine.max_y);
-  } else {
-    comments.push("    Max Radius: " + state.machine.max_radius);
-    comments.push("    Force Endpoints: " + state.machine.polar_endpoints);
-  }
-
-  switch (state.app.input) {
-    case 'shapes': // shapes
-      var shapeInfo = findShape(state.shapes.current_shape).getInfo();
-
-      comments.push("  Content Type: Shapes");
-      comments.push("    Starting Size: " + state.transform.starting_size);
-      comments.push("    Offset: X: " + state.transform.offset_x + " Y: " + state.transform.offset_y);
-      comments.push("    Selected Shape: " + shapeInfo.name);
-
-      shapeInfo.options.forEach((option) => {
-        comments.push("      " + option.title + ": " + state.shapes[option.key]);
-      });
-
-      comments.push("    Number of Loops: " + state.transform.num_loops);
-      comments.push("    Spin: " + state.transform.spin_enabled);
-      if (state.transform.spin_enabled) {
-        comments.push("      Spin Value: " + state.transform.spin_value);
-        comments.push("      Spin Switchbacks: " + state.transform.spin_switchbacks);
-      }
-      comments.push("    Grow: " + state.transform.grow_enabled);
-      if (state.transform.grow_enabled) {
-        comments.push("      Grow Value: " + state.transform.grow_value);
-      }
-      comments.push("    Track: " + state.transform.track_enabled);
-      if (state.transform.track_enabled) {
-        comments.push("      Track Size: " + state.transform.track_value);
-        comments.push("      Track Length: " + state.transform.track_length);
-        comments.push("      Track Grow: " + state.transform.track_grow_enabled);
-        if (state.transform.track_grow_enabled) {
-          comments.push("          Track Grow Value: " + state.transform.track_grow);
-        }
-      }
-      break;
-    case 'wiper':
-      comments.push("  Content Type: Wiper");
-      comments.push("    Wiper Angle: " + state.wiper.angle_deg);
-      comments.push("    Wiper Size: "  + state.wiper.size);
-      break;
-    case 'code': // Theta Rho
-      comments.push("  Content Type: ThetaRho");
-      comments.push("    Input File: " + state.file.name);
-      comments.push("    Zoom: "  + state.file.zoom);
-      comments.push("    Aspect Ratio: " + state.file.aspect_ratio);
-      break;
-    default: // Dunno
-      comments.push("  Content Type: Unknown");
-      break;
-  }
-  comments.push("  Path Reversed: " + state.gcode.reverse);
-  comments.push("");
-
-  return comments;
-};
-
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     reverse: state.gcode.reverse,
     show: state.gcode.show,
     vertices: getVertices(state),
     settings: getComments(state),
-    xOffset: (state.machine.min_x + state.machine.max_x) / 2.0,
-    yOffset: (state.machine.min_y + state.machine.max_y) / 2.0,
-    max_radius: state.machine.max_radius,
+    offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
+    offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
+    maxRadius: state.machine.maxRadius,
     filename: state.gcode.filename,
     pre: state.gcode.pre,
     post: state.gcode.post,
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     open: () => {
-      dispatch(setGCodeShow(true));
+      dispatch(setGCodeShow(true))
     },
     close: () => {
-      dispatch(setGCodeShow(false));
+      dispatch(setGCodeShow(false))
     },
     toggleReverse: () => {
-      dispatch(toggleGCodeReverse());
+      dispatch(toggleGCodeReverse())
     },
     setFilename: (event) => {
-      dispatch(setGCodeFilename(event.target.value));
+      dispatch(setGCodeFilename(event.target.value))
     },
     setPre: (event) => {
-      dispatch(setGCodePre(event.target.value));
+      dispatch(setGCodePre(event.target.value))
     },
     setPost: (event) => {
-      dispatch(setGCodePost(event.target.value));
+      dispatch(setGCodePost(event.target.value))
     },
   }
 }
@@ -175,121 +102,121 @@ const mapDispatch = (dispatch, ownProps) => {
 // here.
 class GCodeGenerator extends Component {
   generateGCode() {
-    var content = "; " + this.props.settings.join("\n; ");
-    content += "\n";
-    content += "; filename: '" + this.props.filename + "'\n\n";
-    content += "; BEGIN PRE\n";
-    content += this.props.pre;
-    content += "; END PRE\n";
+    var content = "; " + this.props.settings.join("\n; ")
+    content += "\n"
+    content += "; filename: '" + this.props.filename + "'\n\n"
+    content += "; BEGIN PRE\n"
+    content += this.props.pre
+    content += "; END PRE\n"
 
-    console.log("offset x: " + this.props.xOffset + " y: " + this.props.yOffset);
+    console.log("offset x: " + this.props.offsetX + " y: " + this.props.offsetY)
     var centeredVertices = this.props.vertices.map( (vertex) => {
       return {
         ...vertex,
-        x: vertex.x + this.props.xOffset,
-        y: vertex.y + this.props.yOffset,
+        x: vertex.x + this.props.offsetX,
+        y: vertex.y + this.props.offsetY,
       }
-    });
+    })
 
-    var lines = centeredVertices.map(gcode);
+    var lines = centeredVertices.map(gcode)
+    content += lines.join('')
+    content += '\n'
+    content += "; BEGIN POST\n"
+    content += this.props.post
+    content += "; END POST\n"
 
-    content += lines.join('');
-
-    content += '\n';
-    content += "; BEGIN POST\n";
-    content += this.props.post;
-    content += "; END POST\n";
-    var filename = this.props.filename;
+    var filename = this.props.filename
     if (!filename.includes(".")) {
-      filename += ".gcode";
+      filename += ".gcode"
     }
+
     download(filename, content)
-    this.props.close();
+    this.props.close()
   }
 
   generateThetaRho() {
-    var content = "# " + this.props.settings.join("\n# ");
-    content += "\n";
-    content += "# filename: '" + this.props.filename + "'\n\n";
-    content += "# BEGIN PRE\n";
-    content += this.props.pre;
-    content += "# END PRE\n";
-    content += '\n';
+    var content = "# " + this.props.settings.join("\n# ")
+    content += "\n"
+    content += "# filename: '" + this.props.filename + "'\n\n"
+    content += "# BEGIN PRE\n"
+    content += this.props.pre
+    content += "# END PRE\n"
+    content += '\n'
 
     // First, downsample larger lines into smaller ones.
-    var maxLength = 2.0;
-    var subsampledVertices = [];
-    var previous = undefined;
-    var next;
+    var maxLength = 2.0
+    var subsampledVertices = []
+    var previous = undefined
+    var next
     for (next = 0; next < this.props.vertices.length; next++) {
       if (previous !== undefined) {
-        var start = Victor.fromObject(this.props.vertices[previous]);
-        var end = Victor.fromObject(this.props.vertices[next]);
+        var start = Victor.fromObject(this.props.vertices[previous])
+        var end = Victor.fromObject(this.props.vertices[next])
 
-        var delta = end.clone().subtract(start);
-        var deltaSegment = end.clone().subtract(start).normalize().multiply(Victor(maxLength, maxLength));
+        var delta = end.clone().subtract(start)
+        var deltaSegment = end.clone().subtract(start).normalize().multiply(Victor(maxLength, maxLength))
 
         // This loads up (start, end].
         for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
           subsampledVertices.push(Vertex(start.x + step * deltaSegment.x,
                                          start.y + step * deltaSegment.y,
-                                         this.props.vertices[next].f));
+                                         this.props.vertices[next].f))
         }
 
       }
-      previous = next;
+      previous = next
     }
     // Add in the end.
     if (previous !== undefined) {
-      subsampledVertices.push(this.props.vertices[this.props.vertices.length - 1]);
+      subsampledVertices.push(this.props.vertices[this.props.vertices.length - 1])
     }
 
     // Convert to Theta, Rho
-    var trVertices = [];
-    var previousTheta = 0;
-    var previousRawTheta = 0;
+    var trVertices = []
+    var previousTheta = 0
+    var previousRawTheta = 0
     for (next = 0; next < subsampledVertices.length; ++next) {
       // Normalize the radius
-      var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.max_radius;
+      var rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius
 
       // What is the basic theta for this point?
       var rawTheta = Math.atan2(subsampledVertices[next].x,
-                                subsampledVertices[next].y);
+                                subsampledVertices[next].y)
       // Convert to [0,2pi]
-      rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI);
+      rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
       // Compute the difference to the last point.
-      var deltaTheta = rawTheta - previousRawTheta;
+      var deltaTheta = rawTheta - previousRawTheta
       // Convert to [-pi,pi]
       if (deltaTheta < -Math.PI) {
-        deltaTheta += 2.0 * Math.PI;
+        deltaTheta += 2.0 * Math.PI
       }
       if (deltaTheta > Math.PI) {
-        deltaTheta -= 2.0 * Math.PI;
+        deltaTheta -= 2.0 * Math.PI
       }
-      var theta = previousTheta + deltaTheta;
-      previousRawTheta = rawTheta;
-      previousTheta = theta;
+      var theta = previousTheta + deltaTheta
+      previousRawTheta = rawTheta
+      previousTheta = theta
 
-      trVertices.push(Vertex(theta, rho, subsampledVertices[next].f));
+      trVertices.push(Vertex(theta, rho, subsampledVertices[next].f))
     }
 
-    var lines = trVertices.map(thetarho);
+    var lines = trVertices.map(thetarho)
 
-    content += lines.join('');
+    content += lines.join('')
 
-    content += '\n';
-    content += "# BEGIN POST\n";
-    content += this.props.post;
-    content += "# END POST\n";
+    content += '\n'
+    content += "# BEGIN POST\n"
+    content += this.props.post
+    content += "# END POST\n"
 
-    var filename = this.props.filename;
+    var filename = this.props.filename
     if (!filename.includes(".")) {
-      filename += ".thr";
+      filename += ".thr"
     }
     download(filename, content)
 
-    this.props.close();
+    this.props.close()
   }
 
   render() {
@@ -297,7 +224,7 @@ class GCodeGenerator extends Component {
 
     return (
       <div>
-        <Button className="mt-3 p-3 btn-block" variant="secondary" onClick={this.props.open}>Generate code</Button>
+        <Button className="ml-2 mr-3" variant="primary" onClick={this.props.open}>Generate code</Button>
 
         <Modal show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
@@ -323,7 +250,7 @@ class GCodeGenerator extends Component {
             <Accordion>
               <Card className={`${reverseActiveClass} overflow-auto`}>
                 <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleReverse}>
-                  <h4>Reverse Path</h4>
+                  <h3>Reverse path</h3>
                   Reverses the code, starting at the final location
                 </Accordion.Toggle>
               </Card>
@@ -341,4 +268,4 @@ class GCodeGenerator extends Component {
   }
 }
 
-export default connect(mapState, mapDispatch)(GCodeGenerator)
+export default connect(mapStateToProps, mapDispatchToProps)(GCodeGenerator)

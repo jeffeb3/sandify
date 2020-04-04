@@ -1,0 +1,81 @@
+.App {
+  background-color: #eee;
+}
+
+@media (min-width: 992px) {
+  .full-page {
+    height: calc(100vh - 90px);
+    overflow: auto;
+    border-right: 1px solid #aaa;
+  }
+
+  .full-page-tab {
+    height: calc(100vh - 140px);
+    overflow: auto;
+  }
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+#sidebar {
+  width: 550px;
+  padding-top: 0.5rem;
+
+  @media(max-width: 992px) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 991px) {
+  .no-gutters-md {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/**
+ Bootstrap 4 overrides
+ **/
+.card-header {
+  background-color: rgba(0,0,0,.05);
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.accordion > .card > .card-header {
+  margin-bottom: 0;
+}
+
+.card-body .form-label {
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: 1.6rem;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.card h3 {
+  margin-top: 0.5rem;
+}
+
+.tab-content {
+  background-color: white;
+}
+
+.card.active > .card-header {
+  background-color: #A0D4EB;
+}
+
+.btn-group .btn-light:focus, .btn-group .btn-light.focus {
+  background-color: #f8f9fa;
+}

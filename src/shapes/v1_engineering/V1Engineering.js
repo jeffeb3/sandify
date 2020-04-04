@@ -1,34 +1,21 @@
 import Vicious1Vertices from './Vicious1Vertices'
-import v1EngineeringReducer from './v1EngineeringSlice.js'
+import Shape from '../Shape'
 
-export class V1Engineering {
-  static initialState() {
-    return {}
+export default class V1Engineering extends Shape {
+  constructor() {
+    super('V1Engineering')
   }
 
-  static reducer(state, action) {
-    return v1EngineeringReducer(state, action)
-  }
-
-  static mapState(state, ownProps) {
+  getInitialState() {
     return {
-
+      ...super.getInitialState(),
+      ...{
+        type: 'v1Engineering',
+      }
     }
   }
 
-  static mapDispatch(dispatch, ownProps) {
-    return {
-
-    }
-  }
-
-  static getInfo() {
-    return {
-      name: "V1Engineering",
-      vertices: (state) => {
-        return Vicious1Vertices();
-      },
-      options: [],
-    }
+  getVertices(state) {
+    return Vicious1Vertices()
   }
 }

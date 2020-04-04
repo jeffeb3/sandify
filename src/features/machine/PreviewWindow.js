@@ -5,44 +5,51 @@ import { Vertex } from '../../common/Geometry'
 import { setMachineSize } from './machineSlice'
 import {
   transform,
-  getVertices,
-} from '../../common/Computer';
+} from '../../common/Computer'
+import { getVertices } from './selectors'
 import { createSelector } from 'reselect'
+import throttle from 'lodash/throttle'
 
-const getTransform = state => state.transform;
+const getTransforms = state => state.transforms
+const getShapes = state => state.shapes
 
 const getTrackVertices = createSelector(
-  [getTransform],
-  (data) => {
-    var num_loops = data.num_loops;
+  [
+    getShapes,
+    getTransforms
+  ],
+  (shapes, transforms) => {
+    let currentTransform = transforms.byId[shapes.currentId]
+
+    var numLoops = currentTransform.numLoops
     var trackVertices = []
-    for (var i=0; i<num_loops; i++) {
-      if (data.track_enabled) {
-        trackVertices.push(transform(data, {x: 0.0, y: 0.0}, i))
+    for (var i=0; i<numLoops; i++) {
+      if (currentTransform.trackEnabled) {
+        trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i))
       }
     }
-    return trackVertices;
+    return trackVertices
   }
-);
+)
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
     use_rect: state.machine.rectangular,
-    min_x: state.machine.min_x,
-    max_x: state.machine.max_x,
-    min_y: state.machine.min_y,
-    max_y: state.machine.max_y,
-    max_radius: state.machine.max_radius,
-    canvas_width: state.machine.canvas_width,
-    canvas_height: state.machine.canvas_height,
+    minX: state.machine.minX,
+    maxX: state.machine.maxX,
+    minY: state.machine.minY,
+    maxY: state.machine.maxY,
+    maxRadius: state.machine.maxRadius,
+    canvasWidth: state.machine.canvasWidth,
+    canvasHeight: state.machine.canvasHeight,
     vertices: getVertices(state),
-    slider_value: state.machine.slider_value,
-    showTrack: state.app.input === 0,
+    sliderValue: state.machine.sliderValue,
+    showTrack: state.app.input === 'shape',
     trackVertices: getTrackVertices(state),
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onResize: (size) => {
       dispatch(setMachineSize(size))
@@ -53,185 +60,191 @@ const mapDispatch = (dispatch, ownProps) => {
 // Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
   componentDidMount() {
-    var canvas = ReactDOM.findDOMNode(this);
-    var context = canvas.getContext('2d');
-    var bigBox = document.getElementById("bigger-box");
-    this.resize(canvas, bigBox);
-    window.addEventListener('resize', () => { this.resize(canvas, bigBox) }, false);
+    const canvas = ReactDOM.findDOMNode(this)
+    const context = canvas.getContext('2d')
+    const bigBox = document.getElementById("preview-wrapper")
 
-    // force a resize so that it autosizes properly when running locally
-    setTimeout(() => this.resize(canvas, bigBox), 250);
+    this.throttledResize = throttle(this.resize, 200, {trailing: true}).bind(this)
 
-    this.paint(context);
+    window.addEventListener('resize', () => { this.throttledResize(canvas, bigBox) }, false)
+    setTimeout(() => {
+      this.visible = true
+      this.resize(canvas, bigBox)
+    }, 250)
+    this.paint(context)
   }
 
   componentDidUpdate() {
-    var canvas = ReactDOM.findDOMNode(this);
-    var context = canvas.getContext('2d');
-    context.clearRect(0, 0, this.props.canvas_width, this.props.canvas_height);
-    var bigBox = document.getElementById("bigger-box");
-    this.resize(canvas, bigBox);
+    var canvas = ReactDOM.findDOMNode(this)
+    var context = canvas.getContext('2d')
+    context.clearRect(0, 0, this.props.canvasWidth, this.props.canvasHeight)
+    var bigBox = document.getElementById("preview-wrapper")
+
+    this.resize(canvas, bigBox)
   }
 
   // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
   mmToPixelsScale() {
-    var machine_x = 1;
-    var machine_y = 1;
+    var machine_x = 1
+    var machine_y = 1
     if (this.props.use_rect) {
-      machine_x = this.props.max_x - this.props.min_x;
-      machine_y = this.props.max_y - this.props.min_y;
+      machine_x = this.props.maxX - this.props.minX
+      machine_y = this.props.maxY - this.props.minY
     } else {
-      machine_x = this.props.max_radius * 2.0;
-      machine_y = machine_x;
+      machine_x = this.props.maxRadius * 2.0
+      machine_y = machine_x
     }
 
-    var scale_x = this.props.canvas_width / machine_x;
-    var scale_y = this.props.canvas_height / machine_y;
+    var scale_x = this.props.canvasWidth / machine_x
+    var scale_y = this.props.canvasHeight / machine_y
     // Keep it square.
-    return Math.min(scale_x, scale_y) * 0.95;
+    return Math.min(scale_x, scale_y) * 0.95
   }
 
   mmToPixels(vertex) {
     var min_scale = this.mmToPixelsScale()
 
-    var x = vertex.x * min_scale + this.props.canvas_width/2.0;
+    var x = vertex.x * min_scale + this.props.canvasWidth/2.0
     // Y for pixels starts at the top, and goes down.
-    var y = -vertex.y * min_scale + this.props.canvas_height/2.0;
+    var y = -vertex.y * min_scale + this.props.canvasHeight/2.0
 
-    return Vertex(x, y);
+    return Vertex(x, y)
   }
 
   moveTo_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex);
+    var in_mm = this.mmToPixels(vertex)
     context.moveTo(in_mm.x, in_mm.y)
   }
 
   lineTo_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex);
+    var in_mm = this.mmToPixels(vertex)
     context.lineTo(in_mm.x, in_mm.y)
   }
 
   dot_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex);
-    context.arc(in_mm.x, in_mm.y, Math.max(4.0, this.mmToPixelsScale() * 1.5), 0, 2 * Math.PI, true);
-    context.fillStyle = context.strokeStyle;
-    context.fill();
+    var in_mm = this.mmToPixels(vertex)
+    context.arc(in_mm.x, in_mm.y, Math.max(4.0, this.mmToPixelsScale() * 1.5), 0, 2 * Math.PI, true)
+    context.fillStyle = context.strokeStyle
+    context.fill()
   }
 
   slice_vertices(vertices, sliderValue) {
-    const slide_size = 10.0;
+    const slide_size = 10.0
     if (sliderValue === 0) {
-      return vertices;
+      return vertices
     }
 
     // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
     // thing.
-    const begin_fraction = sliderValue / 100.0;
-    const end_fraction = (slide_size + sliderValue) / 100.0;
+    const begin_fraction = sliderValue / 100.0
+    const end_fraction = (slide_size + sliderValue) / 100.0
 
-    const begin_vertex = Math.round(vertices.length * begin_fraction);
-    const end_vertex = Math.round(vertices.length * end_fraction);
+    const begin_vertex = Math.round(vertices.length * begin_fraction)
+    const end_vertex = Math.round(vertices.length * end_fraction)
 
-    return vertices.slice(begin_vertex, end_vertex);
+    return vertices.slice(begin_vertex, end_vertex)
   }
 
   paint(context) {
-    context.save();
+    context.save()
 
     // Draw the bounds of the machine
-    context.beginPath();
-    context.lineWidth = "1";
-    context.strokeStyle = "blue";
+    context.beginPath()
+    context.lineWidth = "1"
+    context.strokeStyle = "lightblue"
     if (this.props.use_rect) {
-      this.moveTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.max_x - this.props.min_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.max_y - this.props.min_y)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.min_x - this.props.max_x)/2.0, (this.props.min_y - this.props.max_y)/2.0))
+      this.moveTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
     } else {
-      this.moveTo_mm(context, Vertex(this.props.max_radius, 0.0));
-      let resolution = 128.0;
-      for (let i=0; i<=resolution ; i++) {
+      this.moveTo_mm(context, Vertex(this.props.maxRadius, 0.0))
+      let resolution = 128.0
+      for (let i=0; i<=resolution; i++) {
         let angle = Math.PI * 2.0 / resolution * i
-        this.lineTo_mm(context, Vertex(this.props.max_radius * Math.cos(angle),
-                                       this.props.max_radius * Math.sin(angle)));
+        this.lineTo_mm(context, Vertex(this.props.maxRadius * Math.cos(angle),
+                                       this.props.maxRadius * Math.sin(angle)))
       }
     }
-    context.stroke();
+    context.stroke()
 
-    var drawing_vertices = this.props.vertices;
-    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.slider_value);
+    var drawing_vertices = this.props.vertices
+    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue)
     if (drawing_vertices && drawing_vertices.length > 0) {
       // Draw the start and end points
-      context.beginPath();
-      context.lineWidth = 1.0;
-      context.strokeStyle = "green";
-      this.dot_mm(context, this.props.vertices[0]);
-      context.stroke();
-      context.beginPath();
-      context.lineWidth = 1.0;
-      context.strokeStyle = "red";
-      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1]);
-      context.stroke();
+      context.beginPath()
+      context.lineWidth = 1.0
+      context.strokeStyle = "green"
+      this.dot_mm(context, this.props.vertices[0])
+      context.stroke()
+      context.beginPath()
+      context.lineWidth = 1.0
+      context.strokeStyle = "red"
+      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1])
+      context.stroke()
 
       // Draw the background vertices
-      if (this.props.slider_value !== 0) {
-        context.beginPath();
-        context.lineWidth = this.mmToPixelsScale();
-        context.strokeStyle = "gray";
-        this.moveTo_mm(context, this.props.vertices[0]);
+      if (this.props.sliderValue !== 0) {
+        context.beginPath()
+        context.lineWidth = this.mmToPixelsScale()
+        context.strokeStyle = "gray"
+        this.moveTo_mm(context, this.props.vertices[0])
         for (let i=0; i<this.props.vertices.length; i++) {
-          this.lineTo_mm(context, this.props.vertices[i]);
+          this.lineTo_mm(context, this.props.vertices[i])
         }
-        context.stroke();
+        context.stroke()
       }
 
       // Draw the specific vertices
-      context.beginPath();
-      context.lineWidth = this.mmToPixelsScale();
-      context.strokeStyle = "yellow";
-      this.moveTo_mm(context, drawing_vertices[0]);
+      context.beginPath()
+      context.lineWidth = this.mmToPixelsScale()
+      context.strokeStyle = "yellow"
+      this.moveTo_mm(context, drawing_vertices[0])
       for (let i=0; i<drawing_vertices.length; i++) {
-        this.lineTo_mm(context, drawing_vertices[i]);
+        this.lineTo_mm(context, drawing_vertices[i])
       }
-      context.stroke();
+      context.stroke()
     }
 
-    // Draw the trackVertices
     if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
       // Draw the track vertices
-      context.beginPath();
-      context.lineWidth = this.mmToPixelsScale();
-      context.strokeStyle = "green";
-      this.moveTo_mm(context, this.props.trackVertices[0]);
+      context.beginPath()
+      context.lineWidth = this.mmToPixelsScale()
+      context.strokeStyle = "green"
+      this.moveTo_mm(context, this.props.trackVertices[0])
       for (let i=0; i<this.props.trackVertices.length; i++) {
-        this.lineTo_mm(context, this.props.trackVertices[i]);
+        this.lineTo_mm(context, this.props.trackVertices[i])
       }
-      context.stroke();
+      context.stroke()
     }
 
-    context.restore();
+    context.restore()
   }
 
   resize(canvas, bigBox) {
-    var size = parseInt(getComputedStyle(bigBox).getPropertyValue('width'),10);
-    canvas.width = size;
-    canvas.height = size;
-    if (this.props.canvas_width !== size) {
-      this.props.onResize(size);
+    const width = parseInt(getComputedStyle(bigBox).getPropertyValue('width'))
+    const height = parseInt(getComputedStyle(bigBox).getPropertyValue('height'))
+    const size = Math.max(Math.min(width, height))
+
+    if (this.props.canvasWidth !== size) {
+      this.props.onResize(size)
     }
-    var context = canvas.getContext('2d');
+
+    var context = canvas.getContext('2d')
     this.paint(context)
   }
 
   render() {
-    const {canvas_width, canvas_height} = this.props;
+    const {canvasWidth, canvasHeight} = this.props
+    const visibilityClass = `preview-canvas ${this.visible ? 'd-inline' : 'd-none'}`
+
     return (
-        <canvas className="preview-canvas"
-          width={canvas_width}
-          height={canvas_height}
-        />
-    );
+      <canvas
+        className={visibilityClass}
+        height={canvasHeight}
+        width={canvasWidth} />
+    )
   }
 }
-export default connect(mapState, mapDispatch)(PreviewWindow)
+export default connect(mapStateToProps, mapDispatchToProps)(PreviewWindow)

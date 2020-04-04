@@ -1,22 +1,21 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Card } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
-import { getVerticesStats } from '../../common/Computer.js'
-import MachineSettings from './MachineSettings'
 import PreviewWindow from './PreviewWindow'
+import GCodeGenerator from '../gcode/GCodeGenerator'
 import { setMachineSlider } from './machineSlice'
-import './MachinePreview.css'
+import { getVerticesStats } from './selectors'
+import './MachinePreview.scss'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
   return {
-    slider_value: state.machine.slider_value,
+    sliderValue: state.machine.sliderValue,
     verticesStats: getVerticesStats(state),
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
       dispatch(setMachineSlider(value))
@@ -27,29 +26,34 @@ const mapDispatch = (dispatch, ownProps) => {
 class MachinePreview extends Component {
   render() {
     return (
-      <div className="machine-preview">
-        <Card>
+      <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
+        <div className="flex-grow-1 d-flex flex-column">
+          <div id="preview-wrapper" className="preview-wrapper overflow-hidden d-flex align-items-center">
             <PreviewWindow />
+          </div>
 
-            <div className="m-2">
-              Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
+          <div className="mt-auto pt-2 bg-white d-flex align-items-center">
+            <div className="flex-grow-1">
+              <div className="mx-2">
+                Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
+              </div>
+
+              <div className="p-3">
+                  <Slider
+                    value={this.props.sliderValue}
+                    step={1.0}
+                    min={0.0}
+                    max={100.0}
+                    onChange={this.props.onSlider}
+                  />
+              </div>
             </div>
-
-            <div className="p-3">
-                <Slider
-                  value={this.props.slider_value}
-                  step={1.0}
-                  min={0.0}
-                  max={100.0}
-                  onChange={this.props.onSlider}
-                />
-            </div>
-
-            <MachineSettings />
-        </Card>
+            <GCodeGenerator />
+          </div>
+        </div>
       </div>
     )
   }
 }
 
-export default connect(mapState, mapDispatch)(MachinePreview)
+export default connect(mapStateToProps, mapDispatchToProps)(MachinePreview)

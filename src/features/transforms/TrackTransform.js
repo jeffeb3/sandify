@@ -1,111 +1,96 @@
+import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Col,
-  Row,
-  Form,
-  FormControl,
-  Card,
+  Card
 } from 'react-bootstrap'
-import { connect } from 'react-redux'
-import { disableEnter } from '../shapes/Shape'
+import InputOption from '../../components/InputOption'
 import {
   toggleTrack,
   toggleTrackGrow,
-  setTrack,
-  setTrackLength,
-  setTrackGrow
+  updateTransform
 } from './transformsSlice'
+import { getCurrentTransformSelector } from '../shapes/selectors'
+import Transform from '../../shapes/Transform'
 
-const mapState = (state, ownProps) => {
+const mapStateToProps = (state, ownProps) => {
+  const transform = getCurrentTransformSelector(state)
+
   return {
-    active: state.transform.track_enabled,
-    active_grow: state.transform.track_grow_enabled,
-    value: state.transform.track_value,
-    length: state.transform.track_length,
-    track_grow: state.transform.track_grow,
+    transform: transform,
+    active: transform.trackEnabled,
+    activeGrow: transform.trackGrowEnabled,
+    options: (new Transform()).getOptions()
   }
 }
 
-const mapDispatch = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const { id } = ownProps
+
   return {
-    activeCallback: () => {
-      dispatch(toggleTrack());
+    onChange: (attrs) => {
+      attrs.id = id
+      dispatch(updateTransform(attrs))
     },
-    activeGrowCallback: () => {
-      dispatch(toggleTrackGrow());
+    onTrack: () => {
+      dispatch(toggleTrack({id: id}))
     },
-    onChange: (event) => {
-      dispatch(setTrack(event.target.value));
-    },
-    onChangeLength: (event) => {
-      dispatch(setTrackLength(event.target.value));
-    },
-    onChangeGrow: (event) => {
-      dispatch(setTrackGrow(event.target.value));
+    onTrackGrow: () => {
+      dispatch(toggleTrackGrow({id: id}))
     },
   }
 }
 
 class TrackTransform extends Component {
   render() {
-    var activeClassName = this.props.active ? 'active' : ''
-    var activeKey = this.props.active ? 0 : null
-    var activeGrowClassName = this.props.active_grow ? 'active' : ''
-    var activeGrowKey = this.props.active_grow ? 0 : null
+    const activeClassName = this.props.active ? 'active' : ''
+    const activeKey = this.props.active ? 0 : null
+    const activeGrowClassName = this.props.activeGrow ? 'active' : ''
+    const activeGrowKey = this.props.activeGrow ? 0 : null
 
     return (
-      <Accordion defaultActiveKey={activeKey}>
-        <Card className={`${activeClassName} overflow-auto`}>
-          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeCallback}>
-            <h4>Track</h4>
+      <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
+        <Card className={activeClassName}>
+          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrack}>
+            <h3>Track</h3>
             Moves the shape along a track (shown in green)
           </Accordion.Toggle>
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
-              <Row className="align-items-center pb-2">
-                <Col sm={4}>
-                  <Form.Label htmlFor="track-size">
-                    Track size
-                  </Form.Label>
-                </Col>
-                <Col sm={8}>
-                  <FormControl id="track-size" type="number" value={this.props.value} onChange={this.props.onChange} onKeyDown={disableEnter} />
-                </Col>
-              </Row>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="trackValue"
+                optionKey="trackValue"
+                index={0}
+                model={this.props.transform} />
 
-              <Row className="align-items-center pb-2">
-                <Col sm={4}>
-                  <Form.Label htmlFor="track-length">
-                    Track length
-                  </Form.Label>
-                </Col>
-                <Col sm={8}>
-                  <FormControl id="track-length" type="number" value={this.props.length} step="0.05" onChange={this.props.onChangeLength} onKeyDown={disableEnter} />
-                </Col>
-              </Row>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="trackLength"
+                optionKey="trackLength"
+                index={0}
+                step={0.05}
+                model={this.props.transform} />
 
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
-                <Card className={`${activeGrowClassName} overflow-auto`}>
-                  <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.activeGrowCallback}>
-                    <h4>Grow</h4>
-                    Grows or shrinks the track a little bit for each step
+                <Card className={activeGrowClassName}>
+                  <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrackGrow}>
+                    <h3>Scale track</h3>
+                    Grows or shrinks the track
                   </Accordion.Toggle>
 
                   <Accordion.Collapse eventKey={0}>
                     <Card.Body>
-                      <Row className="align-items-center pb-2">
-                        <Col sm={4}>
-                          <Form.Label htmlFor="scale-step">
-                            Track Grow Step
-                          </Form.Label>
-                        </Col>
-
-                        <Col sm={8}>
-                          <FormControl id="scale-step" type="number" value={this.props.track_grow} onChange={this.props.onChangeGrow} onKeyDown={disableEnter} />
-                        </Col>
-                      </Row>
+                      <InputOption
+                        onChange={this.props.onChange}
+                        options={this.props.options}
+                        key="trackGrow"
+                        optionKey="trackGrow"
+                        index={0}
+                        model={this.props.transform} />
                     </Card.Body>
                   </Accordion.Collapse>
                 </Card>
@@ -117,4 +102,4 @@ class TrackTransform extends Component {
     )
   }
 }
-export default connect(mapState, mapDispatch)(TrackTransform)
+export default connect(mapStateToProps, mapDispatchToProps)(TrackTransform)

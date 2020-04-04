@@ -1,24 +1,21 @@
-import app, {
-  chooseInput
-} from './appSlice'
+import app, { chooseInput } from './appSlice'
 
 describe('app reducer', () => {
   it('should handle initial state', () => {
     expect(app(undefined, {})).toEqual({
-      sandify_version: "0.1.8", // Also change the version in package.json.
-      input: 0,
+      sandifyVersion: "0.2.0", // Also change the version in package.json.
+      input: 'shape',
     })
   })
 
   it('should handle chooseInput', () => {
     expect(
       app(
-        {input: 0},
-        chooseInput(1)
+        {input: 'shape'},
+        chooseInput('code')
       )
     ).toEqual({
-      input: 1
+      input: 'code'
     })
   })
-
 })

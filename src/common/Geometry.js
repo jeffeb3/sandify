@@ -11,10 +11,10 @@ export const Vertex = (x, y, speed=0) => {
 
 // convert degrees to radians
 export const degToRad = (deg) => {
-  return deg / 180.0 * Math.PI;
+  return deg / 180.0 * Math.PI
 }
 
 // convert radians to degrees
 export const radToDeg = (rad) => {
-  return rad * 180.0 / Math.PI;
+  return rad * 180.0 / Math.PI
 }
