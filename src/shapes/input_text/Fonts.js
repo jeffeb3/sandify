@@ -118,9 +118,14 @@ const billseyConverter = (vertices) => {
     prevPoint = vertex
   })
 
+  const scale = 0.6;
+  const offset_y = -0.5
+  const scaledVertices = newVertices.map( vertex => {
+    return Vertex(scale * vertex.x, scale * vertex.y + offset_y)
+  })
   return {
     maxX: fontSpacing,
-    vertices: newVertices,
+    vertices: scaledVertices,
   }
 }
 

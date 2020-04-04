@@ -20,9 +20,9 @@ def getLetterCodex(infont):
             if not line.strip():
                 continue
             values = line.split()
-            scale = 10.0
-            offsetY = 0.2
-            vertex = (scale * float(values[1]), scale * (float(values[2])-offsetY))
+            scale = 8.5
+            offsetY = -0.175
+            vertex = (scale * float(values[1]), scale * (float(values[2])+offsetY))
 
             # This is a new letter
             if values[0] == '1':
@@ -50,5 +50,5 @@ for infont, outfont in fonts:
             for vertex in vertices:
                 vertexString += "[%0.03f,%0.03f], " % vertex
             output.write("  '%s' : [ %s ],\n" % (letter, vertexString))
-        output.write('};\n')
+        output.write('}\n')
 

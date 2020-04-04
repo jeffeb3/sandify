@@ -41,11 +41,12 @@ export default class Reuleaux extends Shape {
       angle += 2.0 * Math.PI / state.shape.reuleauxSides
     }
     let length = 0.5 / Math.cos(Math.PI/2.0/state.shape.reuleauxSides)
+    const scale = 1.7
     for (let corn=0; corn < corners.length; corn++) {
       for (let i=0; i<128; i++) {
         let angle = coverageAngle  * (i / 128.0) + corners[corn][1]
-        points.push(Vertex(length * corners[corn][0].x + Math.cos(angle),
-                           length * corners[corn][0].y + Math.sin(angle)))
+        points.push(Vertex(scale * (length * corners[corn][0].x + Math.cos(angle)),
+                           scale * (length * corners[corn][0].y + Math.sin(angle))))
       }
     }
     return points
