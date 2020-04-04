@@ -1,6 +1,7 @@
-import { Vertex, distance } from './Geometry'
-import { enforceRectLimits, enforcePolarLimits } from './LimitEnforcer'
-import { getShape } from '../features/shapes/selectors'
+import { Vertex, distance } from '../../common/Geometry'
+import { polishPolarVertices } from './polarMachine'
+import { polishRectVertices } from './rectMachine'
+import { getShape } from '../shapes/selectors'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
@@ -88,107 +89,6 @@ const getShapeVertices = (state) => {
   return vertices
 }
 
-function addRectEndpoints(machine, vertices) {
-  // OK, let's assign corners indices:
-  //
-  // [1]   [2]
-  //
-  //
-  // [0]   [3]
-  const dx = (machine.maxX - machine.minX) / 2.0
-  const dy = (machine.maxY - machine.minY) / 2.0
-  const corners = [
-    {x: -dx, y: -dy},
-    {x: -dx, y:  dy},
-    {x:  dx, y:  dy},
-    {x:  dx, y: -dy}
-  ]
-
-  let first = vertices[0]
-  let last = vertices[vertices.length-1]
-  let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
-  let vFirst = Victor.fromObject(first)
-  let vLast = Victor.fromObject(last)
-  let outPoint
-  let newVertices = []
-
-  if (vFirst.magnitude() <= vLast.magnitude()) {
-    // It's going outward
-    let scale = maxRadius / vLast.magnitude()
-    outPoint = vLast.multiply(Victor(scale,scale))
-    newVertices.push({ ...last, x: outPoint.x, y: outPoint.y})
-  } else {
-    let scale = maxRadius / vFirst.magnitude()
-    outPoint = vFirst.multiply(Victor(scale,scale))
-    newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
-  }
-
-  let nextCorner = 1
-  if (outPoint.x >= dx) {
-    // right
-    nextCorner = 2
-  } else if (outPoint.x <= -dx) {
-    // left
-    nextCorner = 0
-  } else if (outPoint.y >= dy) {
-    // up
-    nextCorner = 1
-  } else if (outPoint.y <= -dy) {
-    // down
-    nextCorner = 3
-  } else {
-    console.log("Darn!")
-    nextCorner = 3
-  }
-
-  while (nextCorner !== machine.rectOrigin[0]) {
-    newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
-    nextCorner -= 1
-    if (nextCorner < 0) {
-      nextCorner = 3
-    }
-  }
-
-  newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
-
-  if (vFirst.magnitude() <= vLast.magnitude()) {
-    // outward
-    vertices = vertices.concat(newVertices)
-  } else {
-    vertices = newVertices.reverse().concat(vertices)
-  }
-
-  return vertices
-}
-
-function addPolarEndpoints(machine, vertices) {
-  const maxRadius = machine.maxRadius
-
-  if (machine.polarStartPoint !== 'none') {
-    if (machine.polarStartPoint === 'center') {
-      vertices.unshift(Vertex(0.0, 0.0))
-    } else {
-      const first = Victor.fromObject(vertices[0])
-      const scale = maxRadius / first.magnitude()
-      const startPoint = first.multiply(Victor(scale, scale))
-      vertices.unshift(Vertex(startPoint.x, startPoint.y))
-    }
-  }
-
-  if (machine.polarEndPoint !== 'none') {
-    if (machine.polarEndPoint === 'center') {
-      vertices.push(Vertex(0.0, 0.0))
-    } else {
-      const last = Victor.fromObject(vertices[vertices.length-1])
-      const scale = maxRadius / last.magnitude()
-      const endPoint = last.multiply(Victor(scale, scale))
-      vertices.push(Vertex(endPoint.x, endPoint.y))
-    }
-  }
-
-  return vertices
-}
-
 function buildTrackLoop(state, i, t) {
   const input = getShapeVertices(state)
   const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
@@ -232,20 +132,13 @@ function buildTrackLoop(state, i, t) {
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
 export const polishVertices = (state, vertices) => {
-  const machine = state.machine
+  vertices = vertices.map(vertex => Victor.fromObject(vertex))
 
   if (vertices.length > 0) {
-    if (machine.rectangular) {
-      if (machine.rectOrigin.length === 1) {
-        vertices = addRectEndpoints(machine, vertices)
-      }
-
-      const sizeX = (machine.maxX - machine.minX)/2.0
-      const sizeY = (machine.maxY - machine.minY)/2.0
-      vertices = enforceRectLimits(vertices, sizeX, sizeY)
+    if (state.machine.rectangular) {
+      vertices = polishRectVertices(vertices, state.machine)
     } else {
-      vertices = addPolarEndpoints(machine, vertices)
-      vertices = enforcePolarLimits(vertices, machine.maxRadius)
+      vertices = polishPolarVertices(vertices, state.machine)
     }
   }
 
@@ -260,11 +153,14 @@ export const thetaRho = (state) => {
   let machine = state.machine
   var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.file.zoom
   var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom
+
   if (!machine.rectangular) {
     x_scale = y_scale = machine.maxRadius
   }
+
   x_scale *= 0.01 * state.file.zoom
   y_scale *= 0.01 * state.file.zoom
+
   if (state.file.aspectRatio) {
     x_scale = y_scale = Math.min(x_scale,y_scale)
   }
