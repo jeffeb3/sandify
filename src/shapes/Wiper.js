@@ -88,6 +88,7 @@ export default class Wiper extends Shape {
         wiperSize: 12,
         startingSize: 1,
         repeatEnabled: false,
+        selectGroup: 'Wiper',
         canTransform: false
       }
     }
@@ -209,7 +210,6 @@ export default class Wiper extends Shape {
         delta_w = orig_delta_h
       }
     }
-    console.log(outputVertices.length)
     return outputVertices
   }
 

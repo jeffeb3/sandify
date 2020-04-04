@@ -13,6 +13,7 @@ export default class Shape {
     return {
       repeatEnabled: true,
       canTransform: true,
+      selectGroup: "Shapes",
       startingSize: 10
     }
   }

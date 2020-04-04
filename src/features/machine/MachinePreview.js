@@ -48,7 +48,7 @@ class MachinePreview extends Component {
                   />
               </div>
             </div>
-            <GCodeGenerator />            
+            <GCodeGenerator />
           </div>
         </div>
       </div>

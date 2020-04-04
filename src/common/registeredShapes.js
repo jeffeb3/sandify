@@ -22,7 +22,7 @@ export const registeredShapes = {
   epicycloid: new Epicycloid(),
   hypocycloid: new Hypocycloid(),
   rose: new Rose(),
+  v1Engineering: new V1Engineering(),
   inputText: new InputText(),
-  wiper: new Wiper(),
-  v1Engineering: new V1Engineering()
+  wiper: new Wiper()
 }
