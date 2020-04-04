@@ -18,6 +18,7 @@ const machineSlice = createSlice({
     minY: localMinY || 0,
     maxY: localMaxY || 500,
     maxRadius: localMaxRadius || 250,
+    minimizeMoves: false,
     rectOrigin: [],
     polarStartPoint: 'none',
     polarEndPoint: 'none',
@@ -56,6 +57,9 @@ const machineSlice = createSlice({
       }
       state.rectOrigin = newValue
     },
+    toggleMinimizeMoves(state, action) {
+      state.minimizeMoves = !state.minimizeMoves
+    },
     setMachineSize(state, action) {
       state.canvasHeight = action.payload
       state.canvasWidth = action.payload
@@ -68,7 +72,8 @@ export const {
   toggleMachineRectExpanded,
   toggleMachinePolarExpanded,
   setMachineRectOrigin,
-  setMachineSize
+  setMachineSize,
+  toggleMinimizeMoves,
 } = machineSlice.actions
 
 export default machineSlice.reducer
