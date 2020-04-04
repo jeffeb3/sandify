@@ -88,7 +88,7 @@ export default class Wiper extends Shape {
         wiperSize: 12,
         startingSize: 1,
         repeatEnabled: false,
-        selectGroup: 'Wiper',
+        selectGroup: 'Erasers',
         canTransform: false
       }
     }
