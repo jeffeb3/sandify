@@ -90,7 +90,6 @@ function addRectEndpoints(machine, vertices) {
     {x:  dx, y:  dy},
     {x:  dx, y: -dy}
   ]
-  console.log(corners)
 
   let first = vertices[0]
   let last = vertices[vertices.length-1]
@@ -110,8 +109,6 @@ function addRectEndpoints(machine, vertices) {
     outPoint = vFirst.multiply(Victor(scale,scale))
     newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
   }
-  console.log(outPoint)
-  console.log(dx)
 
   let nextCorner = 1
   if (outPoint.x >= dx) {
@@ -134,7 +131,6 @@ function addRectEndpoints(machine, vertices) {
   // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
   while (nextCorner !== machine.rectOrigin[0]) {
-    console.log("nextCorner: " + nextCorner)
     newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
     nextCorner -= 1
     if (nextCorner < 0) {
@@ -142,10 +138,8 @@ function addRectEndpoints(machine, vertices) {
     }
   }
 
-  console.log("nextCorner: " + nextCorner)
   newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
-  console.log(newVertices)
   if (vFirst.magnitude() <= vLast.magnitude()) {
     // outward
     vertices = vertices.concat(newVertices)
