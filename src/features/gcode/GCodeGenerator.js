@@ -109,7 +109,6 @@ class GCodeGenerator extends Component {
     content += this.props.pre
     content += "; END PRE\n"
 
-    console.log("offset x: " + this.props.offsetX + " y: " + this.props.offsetY)
     var centeredVertices = this.props.vertices.map( (vertex) => {
       return {
         ...vertex,
