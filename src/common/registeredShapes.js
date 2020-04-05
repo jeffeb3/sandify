@@ -9,6 +9,8 @@ import Rose from '../shapes/Rose'
 import InputText from '../shapes/input_text/InputText'
 import Wiper from '../shapes/Wiper'
 import V1Engineering from '../shapes/v1_engineering/V1Engineering'
+import FractalSpirograph from '../shapes/fractal_spirograph/FractalSpirograph'
+import TessellationTwist from '../shapes/tessellation_twist/TessellationTwist'
 
 /*----------------------------------------------
 Supported input shapes
@@ -24,5 +26,7 @@ export const registeredShapes = {
   rose: new Rose(),
   v1Engineering: new V1Engineering(),
   inputText: new InputText(),
+  fractal_spirograph: new FractalSpirograph(),
+  tessellation_twist: new TessellationTwist(),
   wiper: new Wiper()
 }

@@ -5,6 +5,7 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
+import CheckboxOption from '../../components/CheckboxOption'
 import Transforms from '../transforms/Transforms'
 import { updateShape } from './shapesSlice'
 import { updateTransform } from '../transforms/transformsSlice'
@@ -55,8 +56,16 @@ class Shape extends Component {
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
       const option = this.props.options[key]
 
-      if (option.type && option.type === "dropdown") {
+      if (option.type === 'dropdown') {
         return  <DropdownOption
+                  onChange={this.props.onChange}
+                  options={this.props.options}
+                  optionKey={key}
+                  key={key}
+                  index={index}
+                  model={this.props.shape} />
+      } else if (option.type === 'checkbox') {
+        return <CheckboxOption
                   onChange={this.props.onChange}
                   options={this.props.options}
                   optionKey={key}

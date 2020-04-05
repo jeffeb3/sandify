@@ -6,6 +6,7 @@ const options = {
   ...{
     circleLobes: {
       title: 'Number of lobes',
+      min: 1
     }
   }
 }

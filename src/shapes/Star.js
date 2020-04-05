@@ -6,10 +6,12 @@ const options = {
   ...{
     points: {
       title: 'Number of points',
+      min: 2
     },
     starRatio: {
       title: 'Size of points',
       step: 0.05,
+      min: 0.05
     },
   }
 }

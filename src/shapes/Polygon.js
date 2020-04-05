@@ -6,6 +6,7 @@ const options = {
   ...{
     polygonSides: {
       title: 'Number of sides',
+      min: 3
     }
   }
 }

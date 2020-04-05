@@ -10,6 +10,8 @@ class InputOption extends Component {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
     const optionType = option.type || 'number'
+    const minimum = parseFloat(option.min)
+    const maximum = parseFloat(option.max)
 
     return (
       <Row className="align-items-center pb-1">
@@ -24,6 +26,8 @@ class InputOption extends Component {
             id="options-step"
             type={optionType}
             step={option.step ? option.step : 1}
+            min={!isNaN(minimum) ? minimum : ''}
+            max={!isNaN(maximum) ? maximum : ''}            
             value={model[this.props.optionKey]}
             onChange={(event) => {
               let attrs = {}

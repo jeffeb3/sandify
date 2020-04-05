@@ -7,11 +7,9 @@ import gcodeReducer from '../gcode/gCodeSlice'
 import shapesReducer from '../shapes/shapesSlice'
 import transformsReducer from '../transforms/transformsSlice'
 import { registeredShapes } from '../../common/registeredShapes'
-import {
-  addShape,
-  setCurrentShape
-} from '../shapes/shapesSlice'
-import { addTransform } from '../transforms/transformsSlice'
+import { loadState, saveState } from '../../common/localStorage'
+import { addShape, setCurrentShape, updateShape } from '../shapes/shapesSlice'
+import { addTransform, updateTransform } from '../transforms/transformsSlice'
 
 const store = configureStore({
   reducer: combineReducers({
@@ -35,8 +33,41 @@ Object.keys(registeredShapes).forEach(key => {
   store.dispatch(addShape(state))
 })
 
+// set to true when running locally if you want to preserve your shape
+// settings across page loads; don't forget to toggle false when done testing!
+const persistState = false
+if (persistState) {
+  // override default values with saved ones
+  const persistedState = loadState()
+
+  if (persistedState) {
+    Object.keys(persistedState.shapes.byId).forEach((key) => {
+      let shape = persistedState.shapes.byId[key]
+      shape.id = key
+      store.dispatch(updateShape(shape))
+    })
+
+    Object.keys(persistedState.transforms.byId).forEach((key) => {
+      let transform = persistedState.transforms.byId[key]
+      transform.id = key
+      store.dispatch(updateTransform(transform))
+    })
+  }
+}
+
 const storedShape = localStorage.getItem('currentShape')
 const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
 store.dispatch(setCurrentShape(currentShape))
+
+if (persistState) {
+  store.subscribe(() => {
+    const state = store.getState()
+
+    saveState({
+      shapes: state.shapes,
+      transforms: state.transforms
+    })
+  })
+}
 
 export default store

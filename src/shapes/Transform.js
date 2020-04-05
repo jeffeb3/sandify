@@ -7,6 +7,7 @@ const transformOptions = {
   },
   numLoops: {
     title: 'Number of loops',
+    min: 1
   },
   growValue: {
     title: 'Scale step (+/-)',
