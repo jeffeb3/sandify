@@ -76,6 +76,12 @@ h2 {
   background-color: #A0D4EB;
 }
 
-.btn-group .btn-light:focus, .btn-group .btn-light.focus {
-  background-color: #f8f9fa;
+.btn-group {
+  .btn-light:focus, .btn-light.focus {
+    background-color: #f8f9fa;
+  }
+
+  .btn {
+    box-shadow: none !important;
+  }
 }

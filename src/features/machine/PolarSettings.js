@@ -5,12 +5,13 @@ import {
     Col,
     Row,
     Form,
-    Card
+    Card,
+    ToggleButton,
+    ToggleButtonGroup
 } from 'react-bootstrap'
 import {
   toggleMachinePolarExpanded,
-  updateMachine,
-  toggleMachineEndpoints,
+  updateMachine
 } from './machineSlice'
 
 const mapStateToProps = (state, ownProps) => {
@@ -18,7 +19,8 @@ const mapStateToProps = (state, ownProps) => {
     expanded:   state.machine.polarExpanded,
     active:     !state.machine.rectangular,
     maxRadius: state.machine.maxRadius,
-    endpoints:  state.machine.polarEndpoints,
+    startPoint: state.machine.polarStartPoint,
+    endPoint: state.machine.polarEndPoint
   }
 }
 
@@ -30,17 +32,18 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onMaxRadiusChange: (event) => {
       dispatch(updateMachine({maxRadius: parseFloat(event.target.value)}))
     },
+    onStartPointChange: (value) => {
+      dispatch(updateMachine({polarStartPoint: value}))
     },
-    toggleEndpoints: () => {
-      dispatch(toggleMachineEndpoints());
-    },
+    onEndPointChange: (value) => {
+      dispatch(updateMachine({polarEndPoint: value}))
+    }
   }
 }
 
 class PolarSettings extends Component {
   render() {
     var activeClassName = this.props.active ? 'active' : ''
-    var endpointsActiveClass = this.props.endpoints ? 'active' : null
 
     return (
       <Card className={`${activeClassName} overflow-auto`}>
@@ -62,14 +65,37 @@ class PolarSettings extends Component {
               </Col>
             </Row>
 
-            <Accordion>
-              <Card className={`${endpointsActiveClass} overflow-auto`}>
-                <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleEndpoints}>
-                  <h3>Force endpoints</h3>
-                  Forces the first and last points to be at the center and edge
-                </Accordion.Toggle>
-              </Card>
-            </Accordion>
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="forceStart">
+                  Start point
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <ToggleButtonGroup id="forceStart" type="radio" name="origin" value={this.props.startPoint} onChange={this.props.onStartPointChange}>
+                  <ToggleButton variant="light" value={0}>auto</ToggleButton>
+                  <ToggleButton variant="light" value={1}>center</ToggleButton>
+                  <ToggleButton variant="light" value={2}>perimeter</ToggleButton>
+                </ToggleButtonGroup>
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-2">
+              <Col sm={4}>
+                <Form.Label htmlFor="forceStart">
+                  End point
+                </Form.Label>
+              </Col>
+
+              <Col sm={8}>
+                <ToggleButtonGroup id="forceStart" type="radio" name="origin" value={this.props.endPoint} onChange={this.props.onEndPointChange}>
+                  <ToggleButton variant="light" value={0}>auto</ToggleButton>
+                  <ToggleButton variant="light" value={1}>center</ToggleButton>
+                  <ToggleButton variant="light" value={2}>perimeter</ToggleButton>
+                </ToggleButtonGroup>
+              </Col>
+            </Row>
           </Card.Body>
         </Accordion.Collapse>
       </Card>

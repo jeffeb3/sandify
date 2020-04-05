@@ -4,7 +4,6 @@ import machine, {
   toggleMachinePolarExpanded,
   setMachineRectOrigin,
   setMachineSize,
-  toggleMachineEndpoints
 } from './machineSlice'
 
 describe('machine reducer', () => {
@@ -17,7 +16,8 @@ describe('machine reducer', () => {
       maxY: 500,
       maxRadius: 250,
       rectOrigin: [],
-      polarEndpoints: false,
+      polarStartPoint: 0,
+      polarEndPoint: 0,
       polarExpanded: false,
       rectExpanded: false,
       canvasWidth: 600,
@@ -72,26 +72,6 @@ describe('machine reducer', () => {
       )
     ).toEqual({
       rectOrigin: [3]
-    })
-  })
-
-  it('should handle toggleMachineEndpoints', () => {
-    expect(
-      machine(
-        {polarEndpoints: false},
-        toggleMachineEndpoints({})
-      )
-    ).toEqual({
-      polarEndpoints: true
-    })
-
-    expect(
-      machine(
-        {polarEndpoints: true},
-        toggleMachineEndpoints({})
-      )
-    ).toEqual({
-      polarEndpoints: false
     })
   })
 
