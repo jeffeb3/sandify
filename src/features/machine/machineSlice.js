@@ -1,16 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit"
 
+// accommodate old and new local storage keys
+const localMinX = parseFloat(localStorage.getItem('minX') || localStorage.getItem('machine_min_x'))
+const localMaxX = parseFloat(localStorage.getItem('maxX') || localStorage.getItem('machine_max_x'))
+const localMinY = parseFloat(localStorage.getItem('minY') || localStorage.getItem('machine_min_y'))
+const localMaxY = parseFloat(localStorage.getItem('maxY') || localStorage.getItem('machine_max_y'))
+const localMaxRadius = parseFloat(localStorage.getItem('maxRadius') || localStorage.getItem('machine_radius'))
+
 const machineSlice = createSlice({
   name: 'machine',
   initialState: {
     rectangular: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
     rectExpanded: false,
     polarExpanded: false,
-    minX: parseFloat(localStorage.getItem('machine_min_x') ? localStorage.getItem('machine_min_x') : 0),
-    maxX: parseFloat(localStorage.getItem('machine_max_x') ? localStorage.getItem('machine_max_x') : 500),
-    minY: parseFloat(localStorage.getItem('machine_min_y') ? localStorage.getItem('machine_min_y') : 0),
-    maxY: parseFloat(localStorage.getItem('machine_max_y') ? localStorage.getItem('machine_max_y') : 500),
-    maxRadius: parseFloat(localStorage.getItem('machine_radius') ? localStorage.getItem('machine_radius') : 250),
+    minX: localMinX || 0,
+    maxX: localMaxX || 500,
+    minY: localMinY || 0,
+    maxY: localMaxY || 500,
+    maxRadius: localMaxRadius || 250,
     rectOrigin: [],
     polarEndpoints: false,
     canvasWidth: 600,
@@ -18,6 +25,12 @@ const machineSlice = createSlice({
     sliderValue: 0.0
   },
   reducers: {
+    updateMachine(state, action) {
+      Object.assign(state, action.payload)
+      Object.keys(action.payload).forEach(key => {
+        localStorage.setItem(key, action.payload[key])
+      })
+    },
     toggleMachineRectExpanded(state, action) {
       state.rectangular = true
       state.rectExpanded = !state.rectExpanded
@@ -29,26 +42,6 @@ const machineSlice = createSlice({
       state.rectExpanded = false
       state.polarExpanded = !state.polarExpanded
       localStorage.setItem('machine_rect_active', 2)
-    },
-    setMachineMinX(state, action) {
-      state.minX = action.payload
-      localStorage.setItem('machine_min_x', state.minX)
-    },
-    setMachineMaxX(state, action) {
-      state.maxX = action.payload
-      localStorage.setItem('machine_max_x', state.maxX)
-    },
-    setMachineMinY(state, action) {
-      state.minY = action.payload
-      localStorage.setItem('machine_min_y', state.minY)
-    },
-    setMachineMaxY(state, action) {
-      state.maxY = action.payload
-      localStorage.setItem('machine_max_y', state.maxY)
-    },
-    setMachineMaxRadius(state, action) {
-      state.maxRadius = action.payload
-      localStorage.setItem('machine_radius', state.maxRadius)
     },
     setMachineRectOrigin(state, action) {
       let newValue = []
@@ -69,24 +62,16 @@ const machineSlice = createSlice({
       state.canvasHeight = action.payload
       state.canvasWidth = action.payload
     },
-    setMachineSlider(state, action) {
-      state.sliderValue = action.payload
-    }
   }
 })
 
 export const {
+  updateMachine,
   toggleMachineRectExpanded,
   toggleMachinePolarExpanded,
-  setMachineMinX,
-  setMachineMaxX,
-  setMachineMinY,
-  setMachineMaxY,
-  setMachineMaxRadius,
   setMachineRectOrigin,
   toggleMachineEndpoints,
-  setMachineSize,
-  setMachineSlider
+  setMachineSize
 } = machineSlice.actions
 
 export default machineSlice.reducer

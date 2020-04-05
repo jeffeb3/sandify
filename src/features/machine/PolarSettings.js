@@ -9,7 +9,7 @@ import {
 } from 'react-bootstrap'
 import {
   toggleMachinePolarExpanded,
-  setMachineMaxRadius,
+  updateMachine,
   toggleMachineEndpoints,
 } from './machineSlice'
 
@@ -28,7 +28,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(toggleMachinePolarExpanded())
     },
     onMaxRadiusChange: (event) => {
-      dispatch(setMachineMaxRadius(parseFloat(event.target.value)))
+      dispatch(updateMachine({maxRadius: parseFloat(event.target.value)}))
+    },
     },
     toggleEndpoints: () => {
       dispatch(toggleMachineEndpoints());
