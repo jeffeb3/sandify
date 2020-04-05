@@ -73,26 +73,26 @@ class PolarSettings extends Component {
               </Col>
 
               <Col sm={8}>
-                <ToggleButtonGroup id="forceStart" type="radio" name="origin" value={this.props.startPoint} onChange={this.props.onStartPointChange}>
-                  <ToggleButton variant="light" value={0}>auto</ToggleButton>
-                  <ToggleButton variant="light" value={1}>center</ToggleButton>
-                  <ToggleButton variant="light" value={2}>perimeter</ToggleButton>
+                <ToggleButtonGroup id="startPoint" type="radio" name="startPoint" value={this.props.startPoint} onChange={this.props.onStartPointChange}>
+                  <ToggleButton variant="light" value="none">none</ToggleButton>
+                  <ToggleButton variant="light" value="center">center</ToggleButton>
+                  <ToggleButton variant="light" value="perimeter">perimeter</ToggleButton>
                 </ToggleButtonGroup>
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
               <Col sm={4}>
-                <Form.Label htmlFor="forceStart">
+                <Form.Label htmlFor="endPoint">
                   End point
                 </Form.Label>
               </Col>
 
               <Col sm={8}>
-                <ToggleButtonGroup id="forceStart" type="radio" name="origin" value={this.props.endPoint} onChange={this.props.onEndPointChange}>
-                  <ToggleButton variant="light" value={0}>auto</ToggleButton>
-                  <ToggleButton variant="light" value={1}>center</ToggleButton>
-                  <ToggleButton variant="light" value={2}>perimeter</ToggleButton>
+                <ToggleButtonGroup id="endPoint" type="radio" name="endPoint" value={this.props.endPoint} onChange={this.props.onEndPointChange}>
+                  <ToggleButton variant="light" value="none">none</ToggleButton>
+                  <ToggleButton variant="light" value="center">center</ToggleButton>
+                  <ToggleButton variant="light" value="perimeter">perimeter</ToggleButton>
                 </ToggleButtonGroup>
               </Col>
             </Row>

@@ -19,8 +19,8 @@ const machineSlice = createSlice({
     maxY: localMaxY || 500,
     maxRadius: localMaxRadius || 250,
     rectOrigin: [],
-    polarStartPoint: 0,
-    polarEndPoint: 0,
+    polarStartPoint: 'none',
+    polarEndPoint: 'none',
     canvasWidth: 600,
     canvasHeight: 600,
     sliderValue: 0.0

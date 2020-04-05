@@ -159,8 +159,8 @@ function addRectEndpoints(machine, vertices) {
 function addPolarEndpoints(machine, vertices) {
   const maxRadius = machine.maxRadius
 
-  if (machine.polarStartPoint > 0) {
-    if (machine.polarStartPoint === 1) {
+  if (machine.polarStartPoint !== 'none') {
+    if (machine.polarStartPoint === 'center') {
       vertices.unshift(Vertex(0.0, 0.0))
     } else {
       const first = Victor.fromObject(vertices[0])
@@ -170,8 +170,8 @@ function addPolarEndpoints(machine, vertices) {
     }
   }
 
-  if (machine.polarEndPoint > 0) {
-    if (machine.polarEndPoint === 1) {
+  if (machine.polarEndPoint !== 'none') {
+    if (machine.polarEndPoint === 'center') {
       vertices.push(Vertex(0.0, 0.0))
     } else {
       const last = Victor.fromObject(vertices[vertices.length-1])
