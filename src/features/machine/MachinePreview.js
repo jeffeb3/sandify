@@ -4,7 +4,7 @@ import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
 import GCodeGenerator from '../gcode/GCodeGenerator'
-import { setMachineSlider } from './machineSlice'
+import { updateMachine } from './machineSlice'
 import { getVerticesStats } from './selectors'
 import './MachinePreview.scss'
 
@@ -18,7 +18,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
-      dispatch(setMachineSlider(value))
+      dispatch(updateMachine({sliderValue: value}))
     },
   }
 }

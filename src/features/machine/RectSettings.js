@@ -11,11 +11,8 @@ import {
     ToggleButtonGroup,
 } from 'react-bootstrap'
 import {
+  updateMachine,
   toggleMachineRectExpanded,
-  setMachineMinX,
-  setMachineMaxX,
-  setMachineMinY,
-  setMachineMaxY,
   setMachineRectOrigin } from './machineSlice'
 
 const mapStateToProps = (state, ownProps) => {
@@ -36,16 +33,16 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(toggleMachineRectExpanded())
     },
     onMinXChange: (event) => {
-      dispatch(setMachineMinX(parseFloat(event.target.value)))
+      dispatch(updateMachine({minX: parseFloat(event.target.value)}))
     },
     onMaxXChange: (event) => {
-      dispatch(setMachineMaxX(parseFloat(event.target.value)))
+      dispatch(updateMachine({maxX: parseFloat(event.target.value)}))
     },
     onMinYChange: (event) => {
-      dispatch(setMachineMinY(parseFloat(event.target.value)))
+      dispatch(updateMachine({minY: parseFloat(event.target.value)}))
     },
     onMaxYChange: (event) => {
-      dispatch(setMachineMaxY(parseFloat(event.target.value)))
+      dispatch(updateMachine({maxY: parseFloat(event.target.value)}))
     },
     onOriginChange: (value) => {
       dispatch(setMachineRectOrigin(value))

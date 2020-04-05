@@ -7,7 +7,7 @@ import { getShape } from '../features/shapes/selectors'
 import Victor from 'victor'
 
 // Transform functions
-function rotate (vertex, angleDeg) {
+function rotate(vertex, angleDeg) {
   var angle = Math.PI / 180.0 * angleDeg
   return Vertex(
            vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
@@ -15,7 +15,7 @@ function rotate (vertex, angleDeg) {
            vertex.f)
 }
 
-function scale (vertex, scale_perc) {
+function scale(vertex, scale_perc) {
   var scale = scale_perc / 100.0
   return {
     x: vertex.x * scale,
@@ -24,7 +24,7 @@ function scale (vertex, scale_perc) {
   }
 }
 
-function offset (vertex, offsetX, offsetY) {
+function offset(vertex, offsetX, offsetY) {
   return {
     x: vertex.x + offsetX,
     y: vertex.y + offsetY,
@@ -32,7 +32,7 @@ function offset (vertex, offsetX, offsetY) {
   }
 }
 
-function track (vertex, data, loop_index) {
+function track(vertex, data, loop_index) {
   let angle = data.trackLength * loop_index / 16 * 2.0 * Math.PI
   let radius = 1.0
   if (data.trackGrowEnabled) {
@@ -75,128 +75,136 @@ export const transform = (data, vertex, fraction_index) => {
 }
 
 // Vertex functions
-export const polishVertices = (state, vertices) => {
-  let machine = state.machine
-  if (vertices.length > 0) {
-    if (machine.rectangular && machine.rectOrigin.length === 1) {
+function addRectEndpoints(machine, vertices) {
+  // OK, let's assign corners indices:
+  //
+  // [1]   [2]
+  //
+  //
+  // [0]   [3]
+  const dx = (machine.maxX - machine.minX) / 2.0
+  const dy = (machine.maxY - machine.minY) / 2.0
+  const corners = [
+    {x: -dx, y: -dy},
+    {x: -dx, y:  dy},
+    {x:  dx, y:  dy},
+    {x:  dx, y: -dy}
+  ]
+  console.log(corners)
 
-      // OK, let's assign corners indices:
-      //
-      // [1]   [2]
-      //
-      //
-      // [0]   [3]
-      let dx = (machine.maxX - machine.minX) / 2.0
-      let dy = (machine.maxY - machine.minY) / 2.0
+  let first = vertices[0]
+  let last = vertices[vertices.length-1]
+  let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
+  let vFirst = Victor.fromObject(first)
+  let vLast = Victor.fromObject(last)
+  let outPoint
+  let newVertices = []
 
-      let corners = [
-        {x: -dx, y: -dy},
-        {x: -dx, y:  dy},
-        {x:  dx, y:  dy},
-        {x:  dx, y: -dy}
-      ]
-      console.log(corners)
+  if (vFirst.magnitude() <= vLast.magnitude()) {
+    // It's going outward
+    let scale = maxRadius / vLast.magnitude()
+    outPoint = vLast.multiply(Victor(scale,scale))
+    newVertices.push({ ...last, x: outPoint.x, y: outPoint.y})
+  } else {
+    let scale = maxRadius / vFirst.magnitude()
+    outPoint = vFirst.multiply(Victor(scale,scale))
+    newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
+  }
+  console.log(outPoint)
+  console.log(dx)
 
-      let first = vertices[0]
-      let last = vertices[vertices.length-1]
+  let nextCorner = 1
+  if (outPoint.x >= dx) {
+    // right
+    nextCorner = 2
+  } else if (outPoint.x <= -dx) {
+    // left
+    nextCorner = 0
+  } else if (outPoint.y >= dy) {
+    // up
+    nextCorner = 1
+  } else if (outPoint.y <= -dy) {
+    // down
+    nextCorner = 3
+  } else {
+    console.log("Darn!")
+    nextCorner = 3
+  }
+  // console.log("nextCorner: " + nextCorner)
+  // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
-      // Max radius
-      let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
-
-      let vFirst = Victor.fromObject(first)
-      let vLast = Victor.fromObject(last)
-      let outPoint
-      let newVertices = []
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // It's going outward
-        let scale = maxRadius / vLast.magnitude()
-        outPoint = vLast.multiply(Victor(scale,scale))
-        newVertices.push({ ...last, x: outPoint.x, y: outPoint.y})
-      } else {
-        let scale = maxRadius / vFirst.magnitude()
-        outPoint = vFirst.multiply(Victor(scale,scale))
-        newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
-      }
-      console.log(outPoint)
-      console.log(dx)
-
-      let nextCorner = 1
-      if (outPoint.x >= dx) {
-        // right
-        nextCorner = 2
-      } else if (outPoint.x <= -dx) {
-        // left
-        nextCorner = 0
-      } else if (outPoint.y >= dy) {
-        // up
-        nextCorner = 1
-      } else if (outPoint.y <= -dy) {
-        // down
-        nextCorner = 3
-      } else {
-        console.log("Darn!")
-        nextCorner = 3
-      }
-      // console.log("nextCorner: " + nextCorner)
-      // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
-
-      while (nextCorner !== machine.rectOrigin[0]) {
-        console.log("nextCorner: " + nextCorner)
-        newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
-        nextCorner -= 1
-        if (nextCorner < 0) {
-          nextCorner = 3
-        }
-      }
-      console.log("nextCorner: " + nextCorner)
-      newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
-
-      console.log(newVertices)
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // outward
-        vertices = vertices.concat(newVertices)
-      } else {
-        vertices = newVertices.reverse().concat(vertices)
-      }
+  while (nextCorner !== machine.rectOrigin[0]) {
+    console.log("nextCorner: " + nextCorner)
+    newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
+    nextCorner -= 1
+    if (nextCorner < 0) {
+      nextCorner = 3
     }
-    if (machine.polarEndpoints && !machine.rectangular) {
+  }
 
-      let first = vertices[0]
-      let last = vertices[vertices.length-1]
+  console.log("nextCorner: " + nextCorner)
+  newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
-      // Always put 0.0 in there
+  console.log(newVertices)
+  if (vFirst.magnitude() <= vLast.magnitude()) {
+    // outward
+    vertices = vertices.concat(newVertices)
+  } else {
+    vertices = newVertices.reverse().concat(vertices)
+  }
 
-      // Max radius
-      let maxRadius = machine.maxRadius
-      let vFirst = Victor.fromObject(first)
-      let vLast = Victor.fromObject(last)
-      if (vFirst.magnitude() <= vLast.magnitude()) {
-        // It's going outward
-        let scale = maxRadius / vLast.magnitude()
-        let outPoint = vLast.multiply(Victor(scale,scale))
-        vertices.unshift(Vertex(0.0, 0.0, first.f))
-        vertices.push(Vertex(outPoint.x, outPoint.y, last.f))
-      } else {
-        let scale = maxRadius / vFirst.magnitude()
-        let outPoint = vFirst.multiply(Victor(scale,scale))
-        vertices.push(Vertex(0.0, 0.0, first.f))
-        vertices.unshift(Vertex(outPoint.x, outPoint.y, last.f))
+  return vertices
+}
+
+function addPolarEndpoints(machine, vertices) {
+  const maxRadius = machine.maxRadius
+
+  if (machine.polarStartPoint !== 'none') {
+    if (machine.polarStartPoint === 'center') {
+      vertices.unshift(Vertex(0.0, 0.0))
+    } else {
+      const first = Victor.fromObject(vertices[0])
+      const scale = maxRadius / first.magnitude()
+      const startPoint = first.multiply(Victor(scale, scale))
+      vertices.unshift(Vertex(startPoint.x, startPoint.y))
+    }
+  }
+
+  if (machine.polarEndPoint !== 'none') {
+    if (machine.polarEndPoint === 'center') {
+      vertices.push(Vertex(0.0, 0.0))
+    } else {
+      const last = Victor.fromObject(vertices[vertices.length-1])
+      const scale = maxRadius / last.magnitude()
+      const endPoint = last.multiply(Victor(scale, scale))
+      vertices.push(Vertex(endPoint.x, endPoint.y))
+    }
+  }
+
+  return vertices
+}
+
+// ensure vertices do not exceed machine boundary limits, and endpoints as needed
+export const polishVertices = (state, vertices) => {
+  const machine = state.machine
+
+  if (vertices.length > 0) {
+    if (machine.rectangular) {
+      if (machine.rectOrigin.length === 1) {
+        vertices = addRectEndpoints(machine, vertices)
       }
+
+      const sizeX = (machine.maxX - machine.minX)/2.0
+      const sizeY = (machine.maxY - machine.minY)/2.0
+      vertices = enforceRectLimits(vertices, sizeX, sizeY)
+    } else {
+      vertices = addPolarEndpoints(machine, vertices)
+      vertices = enforcePolarLimits(vertices, machine.maxRadius)
     }
   }
 
   if (state.gcode.reverse) {
     vertices.reverse()
-  }
-  if (machine.rectangular) {
-    vertices = enforceRectLimits(vertices,
-                                 (machine.maxX - machine.minX)/2.0,
-                                 (machine.maxY - machine.minY)/2.0
-                                 )
-  } else {
-    vertices = enforcePolarLimits(vertices,
-                                  machine.maxRadius
-                                  )
   }
 
   return vertices

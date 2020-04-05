@@ -43,7 +43,8 @@ export const getComments = createSelector(
       comments.push("    MinX: " + state.machine.minX + " MaxX: " + state.machine.maxX + " MinY: " + state.machine.minY + " MaxY: " + state.machine.maxY)
     } else {
       comments.push("    Max Radius: " + state.machine.maxRadius)
-      comments.push("    Force Endpoints: " + state.machine.polarEndpoints)
+      comments.push("    Start Point: " + state.machine.polarStartPoint)
+      comments.push("    End Point: " + state.machine.polarEndPoint)
     }
 
     comments.push("  Content Type: " + state.app.input)
