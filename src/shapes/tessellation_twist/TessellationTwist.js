@@ -6,8 +6,8 @@ import Shape, { shapeOptions } from '../Shape'
 
 const vec_triangle = [
   vec2(-0.85, -0.4907477295),
-  vec2( 0.85, -0.4907477295),
-  vec2( 0.0,  0.9814954573),
+  vec2(0.85, -0.4907477295),
+  vec2(0.0,  0.9814954573),
 ]
 
 const vec_square = [
@@ -16,56 +16,8 @@ const vec_square = [
   vec2(-0.7,  0.7),
 
   vec2(-0.7, -0.7),
-  vec2( 0.7,  0.7),
-  vec2( 0.7, -0.7)
-]
-
-var vec_pentagon = [
-  vec2(0.0, 0.0),
-  vec2(0.0, -1.000000),
-  vec2(-0.951057, -0.309017),
-
-  vec2(0.0, 0.0),
-  vec2(-0.951057, -0.309017),
-  vec2(-0.587785, 0.809017),
-
-  vec2(0.0, 0.0),
-  vec2(-0.587785, 0.809017),
-  vec2(0.587785, 0.809017),
-
-  vec2(0.0, 0.0),
-  vec2(0.587785, 0.809017),
-  vec2(0.951057, -0.309017),
-
-  vec2(0.0, 0.0),
-  vec2(0.951057, -0.309017),
-  vec2(0.0, -1.000000),
-]
-
-var vec_hexagon = [
-  vec2(0.0, 0.0),
-  vec2(0.0, -1.000000),
-  vec2(-0.866025, -0.500000),
-
-  vec2(0.0, 0.0),
-  vec2(-0.866025, -0.500000),
-  vec2(-0.866025, 0.500000),
-
-  vec2(0.0, 0.0),
-  vec2(-0.866025, 0.500000),
-  vec2(0.0, 1.000000),
-
-  vec2(0.0, 0.0),
-  vec2(0.0, 1.000000),
-  vec2(0.866025, 0.500000),
-
-  vec2(0.0, 0.0),
-  vec2(0.866025, 0.500000),
-  vec2(0.866025, -0.500000),
-
-  vec2(0.0, 0.0),
-  vec2(0.866025, -0.500000),
-  vec2(0.0, -1.000000),
+  vec2(0.7,  0.7),
+  vec2(0.7, -0.7)
 ]
 
 function getEdges(edges, a, b, c, count, settings) {
@@ -111,8 +63,7 @@ const options = {
   ...{
     tessellationTwistNumSides: {
       title: "Number of sides",
-      min: 3,
-      max: 6
+      min: 3
     },
     tessellationTwistIterations: {
       title: "Iterations",
@@ -147,6 +98,19 @@ export default class TessellationTwist extends Shape {
     }
   }
 
+  getShapeVertices(numSides) {
+    let vertices = []
+    for (let i=0; i<=numSides; i++) {
+      let angle = Math.PI * 2.0 / numSides * (0.5 + i)
+      let angle2 = Math.PI * 2.0 / numSides * (0.5 + ((i + 1) % numSides))
+
+      vertices.push(vec2(0, 0))
+      vertices.push(vec2(Math.cos(angle), Math.sin(angle)))
+      vertices.push(vec2(Math.cos(angle2), Math.sin(angle2)))
+    }
+    return vertices
+  }
+
   getVertices(state) {
     let vertices
     let edges = []
@@ -154,18 +118,14 @@ export default class TessellationTwist extends Shape {
     const sides = parseInt(state.shape.tessellationTwistNumSides)
 
     switch (sides) {
-      default:
       case 3:
         vertices = vec_triangle.slice(0)
         break
       case 4:
         vertices = vec_square.slice(0)
         break
-      case 5:
-        vertices = vec_pentagon.slice(0)
-        break
-      case 6:
-        vertices = vec_hexagon.slice(0)
+      default:
+        vertices = this.getShapeVertices(sides)
         break
     }
 
