@@ -35,7 +35,7 @@ Object.keys(registeredShapes).forEach(key => {
 
 // set to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const persistState = true
+const persistState = false
 if (persistState) {
   // override default values with saved ones
   const persistedState = loadState()
