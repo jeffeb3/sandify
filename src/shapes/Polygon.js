@@ -28,7 +28,7 @@ export default class Polygon extends Shape {
 
   getVertices(state) {
     let points = []
-    for (let i=0; i<state.shape.polygonSides; i++) {
+    for (let i=0; i<=state.shape.polygonSides; i++) {
       let angle = Math.PI * 2.0 / state.shape.polygonSides * (0.5 + i)
       points.push(Vertex(Math.cos(angle), Math.sin(angle)))
     }

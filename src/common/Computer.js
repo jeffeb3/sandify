@@ -1,8 +1,5 @@
-import { Vertex } from './Geometry'
-import {
-  enforceRectLimits,
-  enforcePolarLimits
-} from './LimitEnforcer'
+import { Vertex, distance } from './Geometry'
+import { enforceRectLimits, enforcePolarLimits } from './LimitEnforcer'
 import { getShape } from '../features/shapes/selectors'
 import Victor from 'victor'
 
@@ -45,36 +42,44 @@ function track(vertex, data, loop_index) {
   }
 }
 
-export const transform = (data, vertex, fraction_index) => {
-  var transformed_vertex = vertex
+export const transform = (data, vertex, amount, trackIndex=0, numLoops) => {
+  numLoops = numLoops || data.numLoops
+  let transformedVertex = vertex
 
   if (data.repeatEnabled && data.growEnabled) {
-    transformed_vertex = scale(transformed_vertex, 100.0 + (data.growValue * fraction_index))
+    transformedVertex = scale(transformedVertex, 100.0 + (data.growValue * amount))
   }
 
-  transformed_vertex = offset(transformed_vertex, data.offsetX || 0, data.offsetY || 0)
+  transformedVertex = offset(transformedVertex, data.offsetX || 0, data.offsetY || 0)
 
   if (data.repeatEnabled && data.spinEnabled) {
-    const loop_period = data.numLoops / (parseInt(data.spinSwitchbacks) + 1)
-    const stage = fraction_index/loop_period
+    const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
+    const stage = amount/loopPeriod
     const direction = (stage % 2 < 1 ? 1.0 : -1.0)
-    var spin_amount = direction * (fraction_index % loop_period) * data.spinValue
+    var spinAmount = direction * (amount % loopPeriod) * data.spinValue
 
     // Add in the amount it goes positive to the negatives, so they start at the same place.
     if (direction < 0.0) {
-      spin_amount += loop_period * data.spinValue
+      spinAmount += loopPeriod * data.spinValue
     }
-    transformed_vertex = rotate(transformed_vertex, spin_amount)
+    transformedVertex = rotate(transformedVertex, spinAmount)
   }
 
   if (data.repeatEnabled && data.trackEnabled) {
-    transformed_vertex = track(transformed_vertex, data, fraction_index)
+    transformedVertex = track(transformedVertex, data, trackIndex)
   }
 
-  return transformed_vertex
+  return transformedVertex
 }
 
 // Vertex functions
+const getShapeVertices = (state) => {
+  const shape = getShape(state.shape)
+  return shape.getVertices(state).map(vertex => {
+    return scale(vertex, 100.0 * state.shape.startingSize)
+  })
+}
+
 function addRectEndpoints(machine, vertices) {
   // OK, let's assign corners indices:
   //
@@ -127,8 +132,6 @@ function addRectEndpoints(machine, vertices) {
     console.log("Darn!")
     nextCorner = 3
   }
-  // console.log("nextCorner: " + nextCorner)
-  // newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
 
   while (nextCorner !== machine.rectOrigin[0]) {
     newVertices.push({ ...first, x: corners[nextCorner].x, y: corners[nextCorner].y})
@@ -176,6 +179,45 @@ function addPolarEndpoints(machine, vertices) {
   }
 
   return vertices
+}
+
+function buildTrackLoop(state, i, t) {
+  const input = getShapeVertices(state)
+  const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
+  const nextTrackVertex = transform(state.transform, input[0], 0, i + 1)
+  const optimizeDistance = (numTrackLoops > 1 && t === numTrackLoops - 1) || numTrackLoops === 1
+  let numVertices = input.length
+  let trackVertices = []
+  let trackDistances = []
+
+  for (var j=0; j<numVertices; j++) {
+    const amount = state.transform.transformFrequency === 'point' ? i + t + j/input.length : i + t
+    const trackVertex = transform(state.transform, input[j], amount, i, numTrackLoops)
+    trackVertices.push(trackVertex)
+
+    if (optimizeDistance) {
+      trackDistances.push(distance(nextTrackVertex, trackVertex))
+    }
+  }
+
+  // backtrack to the vertex with the shortest distance to the first vertex in
+  // the next track loop; this minimizes the amount our shape draws over the
+  // previous shape, which is not visually appealing.
+  if (optimizeDistance) {
+    let minIdx = 0
+    let minD = Number.MAX_SAFE_INTEGER
+
+    trackDistances.forEach((d, idx) => {
+      if (d <= minD) {
+        minD = d
+        minIdx = idx
+      }
+    })
+
+    trackVertices = trackVertices.concat(trackVertices.slice(minIdx, trackVertices.length-1).reverse())
+  }
+
+  return trackVertices
 }
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
@@ -227,22 +269,23 @@ export const thetaRho = (state) => {
 }
 
 export const transformShapes = (state) => {
-  const shape = getShape(state.shape)
-  let input = []
-
-  if (shape) {
-    input = shape.getVertices(state).map( (vertex) => {
-      return scale(vertex, 100.0 * state.shape.startingSize)
-    })
-  }
-
+  const input = getShapeVertices(state)
   const numLoops = state.transform.repeatEnabled ? state.transform.numLoops : 1
+  const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
   let outputVertices = []
 
   for (var i=0; i<numLoops; i++) {
-    for (var j=0; j<input.length; j++) {
-      const fraction = j/input.length
-      outputVertices.push(transform(state.transform, input[j], i+fraction))
+    if (numTrackLoops > 1 || state.transform.transformFrequency === 'loop') {
+      for (var t=0; t<numTrackLoops; t++) {
+        outputVertices = outputVertices.concat(buildTrackLoop(state, i, t))
+      }
+    } else {
+      for (i=0; i<numLoops; i++) {
+        for (var j=0; j<input.length; j++) {
+          let amount = state.transform.transformFrequency === 'point' ? i + j/input.length : i
+          outputVertices.push(transform(state.transform, input[j], amount, amount))
+        }
+      }
     }
   }
 

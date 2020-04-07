@@ -9,6 +9,11 @@ const transformOptions = {
     title: 'Number of loops',
     min: 1
   },
+  transformFrequency: {
+    title: 'Transform after each',
+    type: 'dropdown',
+    choices: ['point', 'loop'],
+  },
   growValue: {
     title: 'Scale step (+/-)',
   },
@@ -21,6 +26,10 @@ const transformOptions = {
   },
   trackValue: {
     title: 'Track size',
+  },
+  trackNumLoops: {
+    title: 'Number of loops at each track position',
+    min: 1
   },
   trackLength: {
     title: 'Track length',
@@ -37,6 +46,7 @@ export default class Transform {
       offsetX: 0.0,
       offsetY: 0.0,
       numLoops: 10,
+      transformFrequency: 'point',
       repeatEnabled: true,
       growEnabled: true,
       growValue: 100,
@@ -47,6 +57,7 @@ export default class Transform {
       trackGrowEnabled: false,
       trackValue: 10,
       trackLength: 0.2,
+      trackNumLoops: 1,
       trackGrow: 50.0
     }
   }

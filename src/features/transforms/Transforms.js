@@ -5,6 +5,7 @@ import {
   Card
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
+import DropdownOption from '../../components/DropdownOption'
 import {
   updateTransform,
   toggleRepeat
@@ -78,6 +79,14 @@ class Transforms extends Component {
                   optionKey="numLoops"
                   index={0}
                   model={this.props.transform} />
+
+                  <DropdownOption
+                    onChange={this.props.onChange}
+                    options={this.props.options}
+                    key="transformFrequency"
+                    optionKey="transformFrequency"
+                    index={0}
+                    model={this.props.transform} />
 
                   <Accordion className="mt-3">
                     <ScaleTransform id={this.props.transform.id} />

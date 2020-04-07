@@ -24,7 +24,7 @@ const getTrackVertices = createSelector(
     var trackVertices = []
     for (var i=0; i<numLoops; i++) {
       if (currentTransform.trackEnabled) {
-        trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i))
+        trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i, i))
       }
     }
     return trackVertices

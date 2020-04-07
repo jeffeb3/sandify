@@ -28,7 +28,7 @@ export default class Circle extends Shape {
 
   getVertices(state) {
     let points = []
-    for (let i=0; i<128; i++) {
+    for (let i=0; i<=128; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
       points.push(Vertex(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
     }
