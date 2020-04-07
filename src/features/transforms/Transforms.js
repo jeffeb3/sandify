@@ -2,7 +2,12 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Card
+  Card,
+  Row,
+  Col,
+  Form,
+  ToggleButton,
+  ToggleButtonGroup
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
@@ -37,6 +42,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
     },
+    onTransformFrequencyChange: (value) => {
+      dispatch(updateTransform({ transformFrequency: value, id: id}))
+    }
   }
 }
 
@@ -80,13 +88,20 @@ class Transforms extends Component {
                   index={0}
                   model={this.props.transform} />
 
-                  <DropdownOption
-                    onChange={this.props.onChange}
-                    options={this.props.options}
-                    key="transformFrequency"
-                    optionKey="transformFrequency"
-                    index={0}
-                    model={this.props.transform} />
+                  <Row className="align-items-center pb-2">
+                    <Col sm={5}>
+                      <Form.Label htmlFor="transformFrequency">
+                        When transforming shape
+                      </Form.Label>
+                    </Col>
+
+                    <Col sm={7}>
+                      <ToggleButtonGroup id="transformFrequency" type="radio" name="transformFrequency" value={this.props.transform.transformFrequency} onChange={this.props.onTransformFrequencyChange}>
+                        <ToggleButton variant="light" value="point">smear</ToggleButton>
+                        <ToggleButton variant="light" value="loop">keep intact</ToggleButton>
+                      </ToggleButtonGroup>
+                    </Col>
+                  </Row>
 
                   <Accordion className="mt-3">
                     <ScaleTransform id={this.props.transform.id} />
