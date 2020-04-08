@@ -137,9 +137,16 @@ class PreviewWindow extends Component {
     // thing.
     const begin_fraction = sliderValue / 100.0
     const end_fraction = (slide_size + sliderValue) / 100.0
+    let begin_vertex = Math.round(vertices.length * begin_fraction)
+    let end_vertex = Math.round(vertices.length * end_fraction)
 
-    const begin_vertex = Math.round(vertices.length * begin_fraction)
-    const end_vertex = Math.round(vertices.length * end_fraction)
+    // never return less than two vertices; this keeps the preview slider smooth even when
+    // there are just a few vertices
+    if (begin_vertex == end_vertex) {
+      if (begin_vertex > 1) begin_vertex = begin_vertex - 2
+    } else if (begin_vertex === end_vertex - 1) {
+      if (begin_vertex > 0) begin_vertex = begin_vertex - 1
+    }
 
     return vertices.slice(begin_vertex, end_vertex)
   }
@@ -168,9 +175,9 @@ class PreviewWindow extends Component {
     }
     context.stroke()
 
-    var drawing_vertices = this.props.vertices
-    drawing_vertices = this.slice_vertices(drawing_vertices, this.props.sliderValue)
-    if (drawing_vertices && drawing_vertices.length > 0) {
+    if (this.props.vertices && this.props.vertices.length > 0) {
+      let drawing_vertices = this.slice_vertices(this.props.vertices, this.props.sliderValue)
+
       // Draw the background vertices
       if (this.props.sliderValue !== 0) {
         context.beginPath()
@@ -183,24 +190,38 @@ class PreviewWindow extends Component {
         context.stroke()
       }
 
-      // Draw the specific vertices
-      var startColor = Color('#6E6E00')
-      const colorStep = 200.0 / drawing_vertices.length / 100
+      if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
+        // Draw the track vertices
+        context.beginPath()
+        context.lineWidth = 6.0
+        context.strokeStyle = "green"
+        this.moveTo_mm(context, this.props.trackVertices[0])
+        for (let i=0; i<this.props.trackVertices.length; i++) {
+          this.lineTo_mm(context, this.props.trackVertices[i])
+        }
+        context.stroke()
+      }
 
-      context.beginPath()
-      context.lineWidth = this.mmToPixelsScale()
-      this.moveTo_mm(context, drawing_vertices[0])
-      context.stroke()
-
-      for (let i=1; i<drawing_vertices.length; i++) {
-        const strokeColor = this.props.sliderValue !== 0 ? startColor.lighten(colorStep * i).hex() : 'yellow'
+      if (drawing_vertices.length > 0) {
+        // Draw the slider path vertices
+        var startColor = Color('#6E6E00')
+        const colorStep = 200.0 / drawing_vertices.length / 100
 
         context.beginPath()
-        context.strokeStyle = strokeColor
         context.lineWidth = this.mmToPixelsScale()
-        this.moveTo_mm(context, drawing_vertices[i-1])
-        this.lineTo_mm(context, drawing_vertices[i])
+        this.moveTo_mm(context, drawing_vertices[0])
         context.stroke()
+
+        for (let i=1; i<drawing_vertices.length; i++) {
+          const strokeColor = this.props.sliderValue !== 0 ? startColor.lighten(colorStep * i).hex() : 'yellow'
+
+          context.beginPath()
+          context.strokeStyle = strokeColor
+          context.lineWidth = this.mmToPixelsScale()
+          this.moveTo_mm(context, drawing_vertices[i-1])
+          this.lineTo_mm(context, drawing_vertices[i])
+          context.stroke()
+        }
       }
 
       // Draw the start and end points
@@ -214,18 +235,22 @@ class PreviewWindow extends Component {
       context.strokeStyle = "red"
       this.dot_mm(context, this.props.vertices[this.props.vertices.length-1])
       context.stroke()
-    }
 
-    if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
-      // Draw the track vertices
-      context.beginPath()
-      context.lineWidth = 6.0
-      context.strokeStyle = "green"
-      this.moveTo_mm(context, this.props.trackVertices[0])
-      for (let i=0; i<this.props.trackVertices.length; i++) {
-        this.lineTo_mm(context, this.props.trackVertices[i])
+      // Draw a slider path end point if sliding
+      if (drawing_vertices.length > 0 && this.props.sliderValue !== 0) {
+        const sliderEndPoint = drawing_vertices[drawing_vertices.length - 1]
+
+        context.beginPath()
+        context.strokeStyle = "yellow"
+        context.lineWidth = 6.0
+        this.dot_mm(context, sliderEndPoint)
+
+        // START debug: uncomment these lines to show slider end point coordinates
+        // context.font = "20px Arial"
+        // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
+        // END debug
+        context.stroke()
       }
-      context.stroke()
     }
 
     context.restore()
