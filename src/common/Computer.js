@@ -184,8 +184,8 @@ function addPolarEndpoints(machine, vertices) {
 function buildTrackLoop(state, i, t) {
   const input = getShapeVertices(state)
   const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
-  const nextTrackVertex = transform(state.transform, input[0], 0, i + 1)
-  const optimizeDistance = (numTrackLoops > 1 && t === numTrackLoops - 1) || numTrackLoops === 1
+  const nextTrackVertex = transform(state.transform, input[0], 0, i + 1, numTrackLoops)
+  const backtrack = numTrackLoops > 1 && t === numTrackLoops - 1
   let numVertices = input.length
   let trackVertices = []
   let trackDistances = []
@@ -195,7 +195,7 @@ function buildTrackLoop(state, i, t) {
     const trackVertex = transform(state.transform, input[j], amount, i, numTrackLoops)
     trackVertices.push(trackVertex)
 
-    if (optimizeDistance) {
+    if (backtrack) {
       trackDistances.push(distance(nextTrackVertex, trackVertex))
     }
   }
@@ -203,7 +203,7 @@ function buildTrackLoop(state, i, t) {
   // backtrack to the vertex with the shortest distance to the first vertex in
   // the next track loop; this minimizes the amount our shape draws over the
   // previous shape, which is not visually appealing.
-  if (optimizeDistance) {
+  if (backtrack) {
     let minIdx = 0
     let minD = Number.MAX_SAFE_INTEGER
 
@@ -214,7 +214,9 @@ function buildTrackLoop(state, i, t) {
       }
     })
 
-    trackVertices = trackVertices.concat(trackVertices.slice(minIdx, trackVertices.length-1).reverse())
+    if (minIdx !== 0) {
+      trackVertices = trackVertices.concat(trackVertices.slice(minIdx, trackVertices.length-1).reverse())
+    }
   }
 
   return trackVertices
@@ -275,7 +277,7 @@ export const transformShapes = (state) => {
   let outputVertices = []
 
   for (var i=0; i<numLoops; i++) {
-    if (numTrackLoops > 1 || state.transform.transformFrequency === 'loop') {
+    if (numTrackLoops > 1) {
       for (var t=0; t<numTrackLoops; t++) {
         outputVertices = outputVertices.concat(buildTrackLoop(state, i, t))
       }
