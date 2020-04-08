@@ -142,7 +142,7 @@ class PreviewWindow extends Component {
 
     // never return less than two vertices; this keeps the preview slider smooth even when
     // there are just a few vertices
-    if (begin_vertex == end_vertex) {
+    if (begin_vertex === end_vertex) {
       if (begin_vertex > 1) begin_vertex = begin_vertex - 2
     } else if (begin_vertex === end_vertex - 1) {
       if (begin_vertex > 0) begin_vertex = begin_vertex - 1

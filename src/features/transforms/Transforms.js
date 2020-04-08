@@ -10,7 +10,6 @@ import {
   ToggleButtonGroup
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
-import DropdownOption from '../../components/DropdownOption'
 import {
   updateTransform,
   toggleRepeat
