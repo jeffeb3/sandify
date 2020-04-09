@@ -180,7 +180,7 @@ class ThetaRho extends Component {
             </Col>
           </Row>
 
-          {this.props.comments.length > 0 && <div id="theta-rho-comments" className="mt-4 p-3">
+          { this.props.name && <div id="theta-rho-comments" className="mt-4 p-3">
             Name: {this.props.name} <br />
             Comments:
             <div className="ml-3">
