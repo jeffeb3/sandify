@@ -75,9 +75,15 @@ export const transform = (data, vertex, amount, trackIndex=0, numLoops) => {
 // Vertex functions
 const getShapeVertices = (state) => {
   const shape = getShape(state.shape)
-  return shape.getVertices(state).map(vertex => {
+  let vertices = shape.getVertices(state).map(vertex => {
     return scale(vertex, 100.0 * state.shape.startingSize)
   })
+
+  if (state.transform.transformFrequency === 'point' && state.transform.repeatEnabled) {
+    // remove last vertex; we don't want to return to our starting point when completing the shape
+    vertices.pop()
+  }
+  return vertices
 }
 
 function addRectEndpoints(machine, vertices) {
