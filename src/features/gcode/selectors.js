@@ -63,23 +63,28 @@ export const getComments = createSelector(
           comments.push("      " + shapeOptions[key].title + ": " + shape[key])
         })
 
-        comments.push("    Number of Loops: " + state.transform.numLoops)
-        comments.push("    Spin: " + state.transform.spinEnabled)
-        if (state.transform.spinEnabled) {
-          comments.push("      Spin Value: " + state.transform.spinValue)
-          comments.push("      Spin Switchbacks: " + state.transform.spinSwitchbacks)
-        }
-        comments.push("    Grow: " + state.transform.growEnabled)
-        if (state.transform.growEnabled) {
-          comments.push("      Grow Value: " + state.transform.growValue)
-        }
-        comments.push("    Track: " + state.transform.trackEnabled)
-        if (state.transform.trackEnabled) {
-          comments.push("      Track Size: " + state.transform.trackValue)
-          comments.push("      Track Length: " + state.transform.trackLength)
-          comments.push("      Track Grow: " + state.transform.trackGrowEnabled)
-          if (state.transform.trackGrowEnabled) {
-            comments.push("          Track Grow Value: " + state.transform.trackGrow)
+        if (state.transform.repeatEnabled) {
+          comments.push("    Number of Loops: " + state.transform.numLoops)
+          comments.push("    Transform Method: " + state.transform.transformMethod)
+          comments.push("    Spin: " + state.transform.spinEnabled)
+          if (state.transform.spinEnabled) {
+            comments.push("      Spin Value: " + state.transform.spinValue)
+            comments.push("      Spin Switchbacks: " + state.transform.spinSwitchbacks)
+          }
+          comments.push("    Grow: " + state.transform.growEnabled)
+          if (state.transform.growEnabled) {
+            comments.push("      Grow Value: " + state.transform.growValue)
+          }
+          comments.push("    Track: " + state.transform.trackEnabled)
+          if (state.transform.trackEnabled) {
+            comments.push("      Track Size: " + state.transform.trackValue)
+            comments.push("      Track Length: " + state.transform.trackLength)
+            comments.push("      Track Number of Loops: " + state.transform.trackNumLoops)
+            comments.push("      Track Grow: " + state.transform.trackGrowEnabled)
+
+            if (state.transform.trackGrowEnabled) {
+              comments.push("          Track Grow Value: " + state.transform.trackGrow)
+            }
           }
         }
         break

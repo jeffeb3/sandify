@@ -9,10 +9,10 @@ const transformOptions = {
     title: 'Number of loops',
     min: 1
   },
-  transformFrequency: {
+  transformMethod: {
     title: 'Transform after each',
     type: 'dropdown',
-    choices: ['point', 'loop'],
+    choices: ['smear', 'intact'],
   },
   growValue: {
     title: 'Scale step (+/-)',
@@ -46,7 +46,7 @@ export default class Transform {
       offsetX: 0.0,
       offsetY: 0.0,
       numLoops: 10,
-      transformFrequency: 'point',
+      transformMethod: 'smear',
       repeatEnabled: true,
       growEnabled: true,
       growValue: 100,

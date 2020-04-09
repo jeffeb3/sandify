@@ -79,7 +79,7 @@ const getShapeVertices = (state) => {
     return scale(vertex, 100.0 * state.shape.startingSize)
   })
 
-  if (state.transform.transformFrequency === 'point' && state.transform.repeatEnabled) {
+  if (state.transform.transformMethod === 'smear' && state.transform.repeatEnabled) {
     // remove last vertex; we don't want to return to our starting point when completing the shape
     vertices.pop()
   }
@@ -197,7 +197,7 @@ function buildTrackLoop(state, i, t) {
   let trackDistances = []
 
   for (var j=0; j<numVertices; j++) {
-    const amount = state.transform.transformFrequency === 'point' ? i + t + j/input.length : i + t
+    const amount = state.transform.transformMethod === 'smear' ? i + t + j/input.length : i + t
     const trackVertex = transform(state.transform, input[j], amount, i, numTrackLoops)
     trackVertices.push(trackVertex)
 
@@ -290,7 +290,7 @@ export const transformShapes = (state) => {
     } else {
       for (i=0; i<numLoops; i++) {
         for (var j=0; j<input.length; j++) {
-          let amount = state.transform.transformFrequency === 'point' ? i + j/input.length : i
+          let amount = state.transform.transformMethod === 'smear' ? i + j/input.length : i
           outputVertices.push(transform(state.transform, input[j], amount, amount))
         }
       }

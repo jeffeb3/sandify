@@ -41,8 +41,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
     },
-    onTransformFrequencyChange: (value) => {
-      dispatch(updateTransform({ transformFrequency: value, id: id}))
+    ontransformMethodChange: (value) => {
+      dispatch(updateTransform({ transformMethod: value, id: id}))
     }
   }
 }
@@ -89,15 +89,15 @@ class Transforms extends Component {
 
                   <Row className="align-items-center pb-2">
                     <Col sm={5}>
-                      <Form.Label htmlFor="transformFrequency">
+                      <Form.Label htmlFor="transformMethod">
                         When transforming shape
                       </Form.Label>
                     </Col>
 
                     <Col sm={7}>
-                      <ToggleButtonGroup id="transformFrequency" type="radio" name="transformFrequency" value={this.props.transform.transformFrequency} onChange={this.props.onTransformFrequencyChange}>
-                        <ToggleButton variant="light" value="point">smear</ToggleButton>
-                        <ToggleButton variant="light" value="loop">keep intact</ToggleButton>
+                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.transform.transformMethod} onChange={this.props.ontransformMethodChange}>
+                        <ToggleButton variant="light" value="smear">smear</ToggleButton>
+                        <ToggleButton variant="light" value="intact">keep intact</ToggleButton>
                       </ToggleButtonGroup>
                     </Col>
                   </Row>

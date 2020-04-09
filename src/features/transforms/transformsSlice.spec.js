@@ -44,7 +44,7 @@ describe('transforms reducer', () => {
           trackValue: 10,
           trackLength: 0.2,
           trackNumLoops: 1,
-          transformFrequency: 'point',
+          transformMethod: 'smear',
           trackGrow: 50.0
         }
       },
