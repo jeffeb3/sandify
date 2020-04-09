@@ -277,7 +277,7 @@ export const transformShapes = (state) => {
   let outputVertices = []
 
   for (var i=0; i<numLoops; i++) {
-    if (numTrackLoops > 1) {
+    if (state.transform.trackEnabled && numTrackLoops > 1) {
       for (var t=0; t<numTrackLoops; t++) {
         outputVertices = outputVertices.concat(buildTrackLoop(state, i, t))
       }
