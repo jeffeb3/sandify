@@ -7,6 +7,7 @@ import {
     Form,
     Row,
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 import {
   setFileName,
   setFileComments,
@@ -134,7 +135,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class ThetaRho extends Component {
   render() {
-    var aspectRatioActive = this.props.aspectRatio ? 'active' : ''
     var commentsRender = this.props.comments.map((comment) => {
       return <span>{comment}<br/></span>
     })
@@ -157,23 +157,16 @@ class ThetaRho extends Component {
             </Card>
           </Accordion>
 
-          <div className="mb-4">
-            Name: {this.props.name} <br />
-            Comments:
-            <div className="ml-3">
-              { commentsRender }
-            </div>
-            Number of points: {this.props.vertices.length }
-          </div>
-
-          <Accordion>
-            <Card className={`${aspectRatioActive} overflow-auto`}>
-              <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
-                <h3>Keep aspect ratio</h3>
-                Keeps original aspect ratio
-              </Accordion.Toggle>
-            </Card>
-          </Accordion>
+          <Row className="align-items-center">
+            <Col sm={5}>
+              <Form.Label htmlFor="keepAspectRatio">
+                Keep original aspect ratio
+              </Form.Label>
+            </Col>
+            <Col sm={7}>
+              <Switch checked={this.props.aspectRatio} onChange={this.props.toggleAspectRatio} />
+            </Col>
+          </Row>
 
           <Row className="align-items-center pt-3">
             <Col sm={4}>
