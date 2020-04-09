@@ -64,66 +64,66 @@ class RectSettings extends Component {
         <Accordion.Collapse eventKey={0}>
           <Card.Body>
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="minX">
                   Min X (mm)
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <FormControl id="minX" type="number" value={this.props.minX} onChange={this.props.onMinXChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="maxX">
                   Max X (mm)
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <FormControl id="maxX" type="number" value={this.props.maxX} onChange={this.props.onMaxXChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="minY">
                   Min Y (mm)
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <FormControl id="minY" type="number" value={this.props.minY} onChange={this.props.onMinYChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="maxY">
                   Max Y (mm)
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <FormControl id="maxY" type="number" value={this.props.maxY} onChange={this.props.onMaxYChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="origin">
                   Force origin
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
-                <ToggleButtonGroup id="origin-bar" type="checkbox" name="origin" value={this.props.origin} onChange={this.props.onOriginChange}>
-                  <ToggleButton variant="light" value={0} >Lower Left</ToggleButton>
-                  <ToggleButton variant="light" value={1} >Upper Left</ToggleButton>
-                  <ToggleButton variant="light" value={2} >Upper Right</ToggleButton>
-                  <ToggleButton variant="light" value={3} >Lower Right</ToggleButton>
+              <Col sm={7}>
+                <ToggleButtonGroup id="origin-bar" type="checkbox" name="origin" className="flex-wrap" value={this.props.origin} onChange={this.props.onOriginChange}>
+                  <ToggleButton variant="light" value={1} >upper left</ToggleButton>
+                  <ToggleButton variant="light" value={2} >upper right</ToggleButton>
+                  <ToggleButton variant="light" value={0} >lower left</ToggleButton>
+                  <ToggleButton variant="light" value={3} >lower right</ToggleButton>
                 </ToggleButtonGroup>
               </Col>
             </Row>

@@ -15,6 +15,7 @@ import {
   setFileZoom,
   toggleFileAspectRatio
 } from './fileSlice'
+import './ThetaRho.scss'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -141,7 +142,7 @@ class ThetaRho extends Component {
 
     return (
       <div className="theta-rho">
-        <Card className="p-3">
+        <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
@@ -168,16 +169,25 @@ class ThetaRho extends Component {
             </Col>
           </Row>
 
-          <Row className="align-items-center pt-3">
-            <Col sm={4}>
+          <Row className="align-items-center pt-1">
+            <Col sm={5}>
               <Form.Label htmlFor="thr-zoom">
                 Zoom
               </Form.Label>
             </Col>
-            <Col sm={8}>
-              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} />
+            <Col sm={7}>
+              <Form.Control type="number" id="thr-zoom" value={this.props.zoom} onChange={this.props.setZoom} />
             </Col>
           </Row>
+
+          {this.props.comments.length > 0 && <div id="theta-rho-comments" className="mt-4 p-3">
+            Name: {this.props.name} <br />
+            Comments:
+            <div className="ml-3">
+              { commentsRender }
+            </div>
+            Number of points: {this.props.vertices.length }
+          </div>}
         </Card>
 
         <div className="p-4">
