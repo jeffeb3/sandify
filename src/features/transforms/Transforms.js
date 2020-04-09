@@ -2,7 +2,12 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Card
+  Card,
+  Row,
+  Col,
+  Form,
+  ToggleButton,
+  ToggleButtonGroup
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import {
@@ -36,6 +41,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
     },
+    ontransformMethodChange: (value) => {
+      dispatch(updateTransform({ transformMethod: value, id: id}))
+    }
   }
 }
 
@@ -78,6 +86,21 @@ class Transforms extends Component {
                   optionKey="numLoops"
                   index={0}
                   model={this.props.transform} />
+
+                  <Row className="align-items-center pb-2">
+                    <Col sm={5}>
+                      <Form.Label htmlFor="transformMethod">
+                        When transforming shape
+                      </Form.Label>
+                    </Col>
+
+                    <Col sm={7}>
+                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.transform.transformMethod} onChange={this.props.ontransformMethodChange}>
+                        <ToggleButton variant="light" value="smear">smear</ToggleButton>
+                        <ToggleButton variant="light" value="intact">keep intact</ToggleButton>
+                      </ToggleButtonGroup>
+                    </Col>
+                  </Row>
 
                   <Accordion className="mt-3">
                     <ScaleTransform id={this.props.transform.id} />

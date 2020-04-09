@@ -43,6 +43,8 @@ describe('transforms reducer', () => {
           trackGrowEnabled: false,
           trackValue: 10,
           trackLength: 0.2,
+          trackNumLoops: 1,
+          transformMethod: 'smear',
           trackGrow: 50.0
         }
       },
