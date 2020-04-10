@@ -7,6 +7,7 @@ import {
     Form,
     Row,
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 import {
   setFileName,
   setFileComments,
@@ -14,6 +15,7 @@ import {
   setFileZoom,
   toggleFileAspectRatio
 } from './fileSlice'
+import './ThetaRho.scss'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -134,14 +136,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class ThetaRho extends Component {
   render() {
-    var aspectRatioActive = this.props.aspectRatio ? 'active' : ''
     var commentsRender = this.props.comments.map((comment) => {
       return <span>{comment}<br/></span>
     })
 
     return (
       <div className="theta-rho">
-        <Card className="p-3">
+        <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
@@ -157,34 +158,36 @@ class ThetaRho extends Component {
             </Card>
           </Accordion>
 
-          <div className="mb-4">
+          <Row className="align-items-center">
+            <Col sm={5}>
+              <Form.Label htmlFor="keepAspectRatio">
+                Keep original aspect ratio
+              </Form.Label>
+            </Col>
+            <Col sm={7}>
+              <Switch checked={this.props.aspectRatio} onChange={this.props.toggleAspectRatio} />
+            </Col>
+          </Row>
+
+          <Row className="align-items-center pt-1">
+            <Col sm={5}>
+              <Form.Label htmlFor="thr-zoom">
+                Zoom
+              </Form.Label>
+            </Col>
+            <Col sm={7}>
+              <Form.Control type="number" id="thr-zoom" value={this.props.zoom} onChange={this.props.setZoom} />
+            </Col>
+          </Row>
+
+          { this.props.name && <div id="theta-rho-comments" className="mt-4 p-3">
             Name: {this.props.name} <br />
             Comments:
             <div className="ml-3">
               { commentsRender }
             </div>
             Number of points: {this.props.vertices.length }
-          </div>
-
-          <Accordion>
-            <Card className={`${aspectRatioActive} overflow-auto`}>
-              <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleAspectRatio}>
-                <h3>Keep aspect ratio</h3>
-                Keeps original aspect ratio
-              </Accordion.Toggle>
-            </Card>
-          </Accordion>
-
-          <Row className="align-items-center pt-3">
-            <Col sm={4}>
-              <Form.Label htmlFor="thr-zoom">
-                Zoom
-              </Form.Label>
-            </Col>
-            <Col sm={8}>
-              <Form.Control type="number" value={this.props.zoom} onChange={this.props.setZoom} />
-            </Col>
-          </Row>
+          </div>}
         </Card>
 
         <div className="p-4">

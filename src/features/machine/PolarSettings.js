@@ -55,24 +55,24 @@ class PolarSettings extends Component {
         <Accordion.Collapse eventKey={1}>
           <Card.Body>
             <Row className="align-items-center pb-1">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="maxRadius">
                   Max radius (mm)
                 </Form.Label>
               </Col>
-              <Col sm={8}>
+              <Col sm={7}>
                 <Form.Control id="maxRadius" type="number" value={this.props.maxRadius} onChange={this.props.onMaxRadiusChange} />
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="forceStart">
                   Start point
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <ToggleButtonGroup id="startPoint" type="radio" name="startPoint" value={this.props.startPoint} onChange={this.props.onStartPointChange}>
                   <ToggleButton variant="light" value="none">none</ToggleButton>
                   <ToggleButton variant="light" value="center">center</ToggleButton>
@@ -82,13 +82,13 @@ class PolarSettings extends Component {
             </Row>
 
             <Row className="align-items-center pb-2">
-              <Col sm={4}>
+              <Col sm={5}>
                 <Form.Label htmlFor="endPoint">
                   End point
                 </Form.Label>
               </Col>
 
-              <Col sm={8}>
+              <Col sm={7}>
                 <ToggleButtonGroup id="endPoint" type="radio" name="endPoint" value={this.props.endPoint} onChange={this.props.onEndPointChange}>
                   <ToggleButton variant="light" value="none">none</ToggleButton>
                   <ToggleButton variant="light" value="center">center</ToggleButton>

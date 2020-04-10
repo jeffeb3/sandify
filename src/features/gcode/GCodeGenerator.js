@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import {
-  Accordion,
   Button,
   Form,
-  Modal,
-  Card
+  Modal
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 import {
   setGCodeFilename,
   setGCodePre,
@@ -219,8 +218,6 @@ class GCodeGenerator extends Component {
   }
 
   render() {
-    var reverseActiveClass = (this.props.reverse ? "active" : null)
-
     return (
       <div>
         <Button className="ml-2 mr-3" variant="primary" onClick={this.props.open}>Generate code</Button>
@@ -246,14 +243,12 @@ class GCodeGenerator extends Component {
               <Form.Control as="textarea" value={this.props.post} onChange={this.props.setPost} />
             </Form.Group>
 
-            <Accordion>
-              <Card className={`${reverseActiveClass} overflow-auto`}>
-                <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.toggleReverse}>
-                  <h3>Reverse path</h3>
-                  Reverses the code, starting at the final location
-                </Accordion.Toggle>
-              </Card>
-            </Accordion>
+            <Form.Group controlId="reverse-path">
+              <div className="d-flex flex-column">
+                <Form.Label>Reverse the path in the code</Form.Label>
+                <Switch checked={this.props.reverse} onChange={this.props.toggleReverse} />
+              </div>
+            </Form.Group>
           </Modal.Body>
 
           <Modal.Footer>

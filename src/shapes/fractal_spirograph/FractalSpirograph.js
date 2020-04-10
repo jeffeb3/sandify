@@ -24,7 +24,7 @@ const options = {
       max: 6
     },
     fractalSpirographAlternateRotation: {
-      title: 'Alternate direction of rotation',
+      title: 'Alternate rotation direction',
       type: 'checkbox'
     },
   }

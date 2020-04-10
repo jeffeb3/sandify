@@ -4,6 +4,7 @@ import {
   Row,
   Form,
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 
 class CheckboxOption extends Component {
   render() {
@@ -19,13 +20,11 @@ class CheckboxOption extends Component {
         </Col>
 
         <Col sm={7}>
-          <Form.Check
+          <Switch
             checked={model[this.props.optionKey]}
-            onChange={(event) => {
+            onChange={(checked) => {
               let attrs = {}
-              let value = event.target.checked
-
-              attrs[this.props.optionKey] = value
+              attrs[this.props.optionKey] = checked
               this.props.onChange(attrs)
             }} />
         </Col>
