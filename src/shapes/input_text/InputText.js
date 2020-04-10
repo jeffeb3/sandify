@@ -14,6 +14,11 @@ const options = {
       type: 'dropdown',
       choices: ['Cursive', 'Sans Serif', 'Monospace'],
     },
+    rotateDir: {
+      title: 'Rotate',
+      type: 'dropdown',
+      choices: ['None', 'Inside', 'Outside'],
+    },
   }
 }
 
@@ -29,6 +34,7 @@ export default class InputText extends Shape {
         type: 'inputText',
         inputText: 'Sandify',
         inputFont: 'Cursive',
+        rotateDir: 'None',
         repeatEnabled: false,
         startingSize: 50
       }

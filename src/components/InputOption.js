@@ -24,10 +24,11 @@ class InputOption extends Component {
         <Col sm={7}>
           <Form.Control
             id="options-step"
+            as={optionType==="textarea" ? "textarea" : "input"}
             type={optionType}
             step={option.step ? option.step : 1}
             min={!isNaN(minimum) ? minimum : ''}
-            max={!isNaN(maximum) ? maximum : ''}            
+            max={!isNaN(maximum) ? maximum : ''}
             value={model[this.props.optionKey]}
             onChange={(event) => {
               let attrs = {}
