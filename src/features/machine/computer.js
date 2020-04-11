@@ -1,6 +1,6 @@
 import { distance } from '../../common/Geometry'
-import { polishPolarVertices } from './polarMachine'
-import { polishRectVertices } from './rectMachine'
+import PolarMachine from './polarMachine'
+import RectMachine from './rectMachine'
 import { getShape } from '../shapes/selectors'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
@@ -131,13 +131,10 @@ function buildTrackLoop(state, i, t) {
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
 export const polishVertices = (state, vertices) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
+  const machineClass = state.machine.rectangular ? RectMachine : PolarMachine
 
   if (vertices.length > 0) {
-    if (state.machine.rectangular) {
-      vertices = polishRectVertices(vertices, state.machine)
-    } else {
-      vertices = polishPolarVertices(vertices, state.machine)
-    }
+    vertices = new machineClass(vertices, state.machine).polish().vertices
   }
 
   if (state.gcode.reverse) {
