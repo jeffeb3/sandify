@@ -21,17 +21,7 @@ export const angle = function(point) {
   return Math.atan2(point.y, point.x)
 }
 
-// returns whether a point is on the perimeter of a circle.
-export const onCirclePerimeter = function(v, size, delta=.001) {
-  let r = Math.pow(v.x, 2) + Math.pow(v.y, 2)
-  return r >= Math.pow(size, 2) - delta
-}
-
 // returns whether a point is on the segment defined by start and end
 export const onSegment = function(start, end, point) {
-  if (start.distance(point) + end.distance(point) - start.distance(end) < 0.001) {
-    return true;
-  } else {
-    return false;
-  }
+  return start.distance(point) + end.distance(point) - start.distance(end) < 0.001
 }
