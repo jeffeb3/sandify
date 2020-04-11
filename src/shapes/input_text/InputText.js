@@ -1,7 +1,7 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
-import { Vertex } from '../../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
-import { traceCircle } from '../../common/LimitEnforcer'
+import { traceCircle } from '../../features/machine/polarMachine'
 
 const options = {
   ...shapeOptions,
@@ -94,7 +94,7 @@ export default class InputText extends Shape {
 
       // TODO add in the "Kern" here.
       for (let vi = 0; vi < shape.vertices.length; vi++) {
-        points.push(Vertex(shape.vertices[vi].x + x, shape.vertices[vi].y))
+        points.push(new Victor(shape.vertices[vi].x + x, shape.vertices[vi].y))
       }
       x += shape.vertices[shape.vertices.length-1].x
     }
@@ -121,15 +121,15 @@ export default class InputText extends Shape {
 
         // offset the line's vertices
         textPoints = [...textPoints, ...points.map( (point) => {
-          return Vertex(point.x - widthOffset, point.y + y)
+          return new Victor(point.x - widthOffset, point.y + y)
         })]
 
         // Add in some points way off, so to wrap around for this line.
-        connectorPoints.push(Vertex(1e9, y))
-        connectorPoints.push(Vertex(1e9, -1e9))
-        connectorPoints.push(Vertex(-1e9, -1e9))
+        connectorPoints.push(new Victor(1e9, y))
+        connectorPoints.push(new Victor(1e9, -1e9))
+        connectorPoints.push(new Victor(-1e9, -1e9))
         y -= maxY
-        connectorPoints.push(Vertex(-1e9, y))
+        connectorPoints.push(new Victor(-1e9, y))
       })
       return textPoints
     } else {
@@ -203,7 +203,7 @@ export default class InputText extends Shape {
         textPoints = [...textPoints, ...points.map( (point) => {
           const r = rOffset + rPerY * point.y
           lastTheta = thetaCenter + thetaPerX * (point.x - widthOffset)
-          return Vertex(r * Math.cos(lastTheta), r * Math.sin(lastTheta))
+          return new Victor(r * Math.cos(lastTheta), r * Math.sin(lastTheta))
         })]
 
         // Set up for the next line.

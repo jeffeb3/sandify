@@ -2,7 +2,7 @@ import { coterminal, angle, onCirclePerimeter, onSegment } from '../../common/Ge
 import Victor from 'victor'
 
 // Returns points along the circle from the start to the end, tracing a circle of radius size.
-function traceCircle(start, end, size) {
+export const traceCircle = (start, end, size) => {
   const startAngle = start.angle()
   const endAngle = end.angle()
   let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?

@@ -1,4 +1,4 @@
-import { Vertex } from '../../common/Geometry'
+import Victor from 'victor'
 import { raysol_cursive } from './raysol_cursive'
 import { raysol_sanserif } from './raysol_sanserif'
 
@@ -54,65 +54,65 @@ let billsey = {
 // points on the unit circle from zero to pi/2.
 const curve = [...Array(32).keys()].map((index) => {
   let angle = (index+1) * Math.PI/2.0/32.0
-  return Vertex(Math.cos(angle), Math.sin(angle))
+  return new Victor(Math.cos(angle), Math.sin(angle))
 })
 
 const billseyConverter = (vertices) => {
   let newVertices = []
-  let prevPoint = Vertex(0,0)
+  let prevPoint = new Victor(0,0)
   vertices.forEach( (vertex) => {
     switch (vertex[2]) {
     case 0:
     default:
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      newVertices.push(new Victor(vertex[0] / 8.0, vertex[1] / 4.0))
       break
     case 1: // NE
       if (vertex[1] < prevPoint[1]) { // clockwise
         let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       } else { // ccwise
         let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      newVertices.push(new Victor(vertex[0] / 8.0, vertex[1] / 4.0))
       break
     case 2: // SE
       if (vertex[1] < prevPoint[1]) { // clockwise
         let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       } else { // ccwise
         let width = Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      newVertices.push(new Victor(vertex[0] / 8.0, vertex[1] / 4.0))
       break
     case 3: // SW
       if (vertex[1] > prevPoint[1]) { // clockwise
         let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       } else { // ccwise
         let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = -Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      newVertices.push(new Victor(vertex[0] / 8.0, vertex[1] / 4.0))
       break
     case 4: // NW
       if (vertex[1] > prevPoint[1]) { // clockwise
         let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + vertex[0] / 8.0, cv.y * height + prevPoint[1] / 4.0)))
       } else { // ccwise
         let width = -Math.abs(vertex[0] - prevPoint[0]) / 8.0
         let height = Math.abs(vertex[1] - prevPoint[1]) / 4.0
-        newVertices = newVertices.concat(curve.map( cv => Vertex(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
+        newVertices = newVertices.concat(curve.map( cv => new Victor(cv.x * width + prevPoint[0] / 8.0, cv.y * height + vertex[1] / 4.0)).reverse())
       }
-      newVertices.push(Vertex(vertex[0] / 8.0, vertex[1] / 4.0))
+      newVertices.push(new Victor(vertex[0] / 8.0, vertex[1] / 4.0))
       break
     }
     prevPoint = vertex
@@ -121,7 +121,7 @@ const billseyConverter = (vertices) => {
   const scale = 0.6;
   const offset_y = -0.5
   const scaledVertices = newVertices.map( vertex => {
-    return Vertex(scale * vertex.x, scale * vertex.y + offset_y)
+    return new Victor(scale * vertex.x, scale * vertex.y + offset_y)
   })
   return {
     maxX: fontSpacing,
@@ -132,7 +132,7 @@ const billseyConverter = (vertices) => {
 const raysolConverter = (vertices) => {
   let newVertices = []
   vertices.forEach( (vertex) => {
-    newVertices.push(Vertex(vertex[0], vertex[1]))
+    newVertices.push(new Victor(vertex[0], vertex[1]))
   })
 
   return {

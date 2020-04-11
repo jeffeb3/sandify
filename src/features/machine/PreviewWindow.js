@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
-import { Vertex } from '../../common/Geometry'
+import Victor from 'victor'
 import { setMachineSize } from './machineSlice'
 import { transform } from './computer'
 import { getVertices } from './selectors'
@@ -107,7 +107,7 @@ class PreviewWindow extends Component {
     // Y for pixels starts at the top, and goes down.
     var y = -vertex.y * min_scale + this.props.canvasHeight/2.0
 
-    return Vertex(x, y)
+      return new Victor(x, y)
   }
 
   moveTo_mm(context, vertex) {
@@ -159,17 +159,17 @@ class PreviewWindow extends Component {
     context.lineWidth = "1"
     context.strokeStyle = "lightblue"
     if (this.props.use_rect) {
-      this.moveTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.moveTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
     } else {
-      this.moveTo_mm(context, Vertex(this.props.maxRadius, 0.0))
+      this.moveTo_mm(context, new Victor(this.props.maxRadius, 0.0))
       let resolution = 128.0
       for (let i=0; i<=resolution; i++) {
         let angle = Math.PI * 2.0 / resolution * i
-        this.lineTo_mm(context, Vertex(this.props.maxRadius * Math.cos(angle),
+        this.lineTo_mm(context, new Victor(this.props.maxRadius * Math.cos(angle),
                                        this.props.maxRadius * Math.sin(angle)))
       }
     }

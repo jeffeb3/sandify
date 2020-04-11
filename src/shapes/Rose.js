@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
 const options = {
@@ -46,7 +46,7 @@ export default class Rose extends Shape {
     for (let i=0; i<thetaClose+1; i++) {
       let theta = Math.PI * 2.0 / (resolution) * i
       let r = 0.5 * a * Math.sin((n / d) * theta)
-      points.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
+      points.push(new Victor(r * Math.cos(theta), r * Math.sin(theta)))
     }
     return points
   }
