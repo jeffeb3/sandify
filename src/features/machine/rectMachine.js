@@ -18,6 +18,7 @@ import Victor from 'victor'
 //
 function pointLocation(point, sizeX, sizeY) {
   let location = 0b0
+
   if (point.x < -sizeX) {
     location += 0b1000
   } else if (point.x > sizeX) {
@@ -55,7 +56,7 @@ function intersection(lineStart, lineEnd, sideStart, sideEnd) {
     return null
   }
 
-  const intersection = lineStart.clone().add(line.clone().multiply(Victor(t, t)))
+  const intersection = lineStart.clone().add(line.clone().multiply(new Victor(t, t)))
   return intersection
 }
 
@@ -64,8 +65,8 @@ function intersection(lineStart, lineEnd, sideStart, sideEnd) {
 // to follow around without messing up the shape of the vertices.
 //
 function clipLine(lineStart, lineEnd, sizeX, sizeY) {
-  const quadrantStart = pointLocation(lineStart, sizeX, sizeY)
-  const quadrantEnd = pointLocation(lineEnd, sizeX, sizeY)
+  var quadrantStart = pointLocation(lineStart, sizeX, sizeY)
+  var quadrantEnd = pointLocation(lineEnd, sizeX, sizeY)
 
   if (quadrantStart === 0b0000 && quadrantEnd === 0b0000) {
     // The line is inside the boundaries
@@ -85,7 +86,8 @@ function clipLine(lineStart, lineEnd, sizeX, sizeY) {
   if (quadrantStart === 0b000) {
     // We are exiting the box. Return the start, the intersection with the boundary, and the closest
     // boundary point to the exited point.
-    let line = [lineStart]
+    var line = [lineStart]
+
     line.push(boundPoint(lineStart, lineEnd, sizeX, sizeY))
     line.push(nearestVertex(lineEnd, sizeX, sizeY))
 
@@ -98,24 +100,22 @@ function clipLine(lineStart, lineEnd, sizeX, sizeY) {
   }
 
   // We have reached a terrible place, where both points are oob, but it might intersect with the
-  // work area.
-
-  // First, define the boundaries as lines.
+  // work area. First, define the boundaries as lines.
   const sides = [
     // left
-    [Victor(-sizeX, -sizeY), Victor(-sizeX, sizeY)],
+    [Victor(-sizeX, -sizeY), new Victor(-sizeX, sizeY)],
     // right
-    [Victor(sizeX, -sizeY), Victor(sizeX, sizeY)],
+    [new Victor(sizeX, -sizeY), new Victor(sizeX, sizeY)],
     // bottom
-    [Victor(-sizeX, -sizeY), Victor(sizeX, -sizeY)],
+    [new Victor(-sizeX, -sizeY), new Victor(sizeX, -sizeY)],
     // top
-    [Victor(-sizeX, sizeY), Victor(sizeX, sizeY)],
+    [new Victor(-sizeX, sizeY), new Victor(sizeX, sizeY)],
   ]
 
   // Count up the number of boundary lines intersect with our line segment.
-  let intersections = []
-  for (let s=0; s<sides.length; s++) {
-    const intPoint = intersection(lineStart,
+  var intersections = []
+  for (var s=0; s<sides.length; s++) {
+    var intPoint = intersection(lineStart,
                                  lineEnd,
                                  sides[s][0],
                                  sides[s][1])
@@ -134,8 +134,9 @@ function clipLine(lineStart, lineEnd, sizeX, sizeY) {
 
     // The intersections are tested in some normal order, but the line could be going through them
     // in any direction. This check will flip the intersections if they are reversed somehow.
-    if (intersections[0].subtract(lineStart).lengthSq() > intersections[1].subtract(lineStart).lengthSq()) {
-      const temp = intersections[0]
+    if (Victor.fromObject(intersections[0]).subtract(lineStart).lengthSq() >
+        Victor.fromObject(intersections[1]).subtract(lineStart).lengthSq()) {
+      var temp = intersections[0]
       intersections[0] = intersections[1]
       intersections[1] = temp
     }
@@ -145,10 +146,9 @@ function clipLine(lineStart, lineEnd, sizeX, sizeY) {
   // Damn. We got here because we have a start and end that are failing different boundary checks,
   // and the line segment doesn't intersect the box. We have to crawl around the outside of the
   // box until we reach the other point.
-  //
   // Here, I'm going to split this line into two parts, and send each half line segment back
   // through the clipLine algorithm. Eventually, that should result in only one of the other cases.
-  const midpoint = lineStart.add(lineEnd).multiply(new Victor(0.5, 0.5))
+  var midpoint = Victor.fromObject(lineStart).add(lineEnd).multiply(new Victor(0.5, 0.5))
 
   // recurse, and find smaller segments until we don't end up in this place again.
   return [...clipLine(lineStart, midpoint, sizeX, sizeY),
@@ -177,6 +177,7 @@ function boundPoint(good, bad, sizeX, sizeY) {
     // We fixed x, but y might have the same problem, so we'll rerun this, with different points.
     return boundPoint(good, fixed, sizeX, sizeY)
   }
+
   if (bad.y < -sizeY || bad.y > sizeY) {
     if (bad.y < -sizeY) {
       // we are leaving the bottom
@@ -188,6 +189,7 @@ function boundPoint(good, bad, sizeX, sizeY) {
     distance = (fixed.y - good.y) / dy
     fixed.x = good.x + distance * dx
   }
+
   return fixed
 }
 
@@ -300,11 +302,11 @@ function addRectEndpoints(vertices, settings) {
   if (first.magnitude() <= last.magnitude()) {
     // It's going outward
     let scale = maxRadius / last.magnitude()
-    outPoint = last.multiply(Victor(scale,scale))
+    outPoint = last.multiply(new Victor(scale,scale))
     newVertices.push({ ...last, x: outPoint.x, y: outPoint.y})
   } else {
     let scale = maxRadius / first.magnitude()
-    outPoint = first.multiply(Victor(scale,scale))
+    outPoint = first.multiply(new Victor(scale,scale))
     newVertices.push({ ...first, x: outPoint.x, y: outPoint.y})
   }
 

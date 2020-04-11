@@ -1,4 +1,4 @@
-import { Vertex } from '../../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
 import Orbit from './Orbit'
 
@@ -82,7 +82,7 @@ export default class FractalSpirograph extends Shape {
           next = next.child
         }
 
-        points.push(Vertex(end.x, end.y))
+        points.push(new Victor(end.x, end.y))
       }
     }
 

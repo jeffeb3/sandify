@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
 const options = {
@@ -40,7 +40,7 @@ export default class Star extends Shape {
       if (i % 2 === 0) {
         star_scale *= state.shape.starRatio
       }
-      points.push(Vertex(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
+      points.push(new Victor(star_scale * Math.cos(angle), star_scale * Math.sin(angle)))
     }
     return points
   }
