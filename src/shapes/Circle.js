@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
 const options = {
@@ -30,7 +30,7 @@ export default class Circle extends Shape {
     let points = []
     for (let i=0; i<=128; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
-      points.push(Vertex(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
+      points.push(new Victor(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
     }
     return points
   }

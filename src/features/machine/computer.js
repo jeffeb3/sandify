@@ -1,4 +1,4 @@
-import { Vertex, distance } from '../../common/Geometry'
+import { distance } from '../../common/Geometry'
 import { polishPolarVertices } from './polarMachine'
 import { polishRectVertices } from './rectMachine'
 import { getShape } from '../shapes/selectors'
@@ -9,40 +9,38 @@ import throttle from 'lodash/throttle'
 // Transform functions
 function rotate(vertex, angleDeg) {
   var angle = Math.PI / 180.0 * angleDeg
-  return Vertex(
-           vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
-           vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
-           vertex.f)
+  return new Victor(
+   vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
+   vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle)
+  )
 }
 
-function scale(vertex, scale_perc) {
-  var scale = scale_perc / 100.0
-  return {
-    x: vertex.x * scale,
-    y: vertex.y * scale,
-    f: vertex.f,
-  }
+function scale(vertex, scalePerc) {
+  var scale = scalePerc / 100.0
+  return new Victor(
+    vertex.x * scale,
+    vertex.y * scale
+  )
 }
 
 function offset(vertex, offsetX, offsetY) {
-  return {
-    x: vertex.x + offsetX,
-    y: vertex.y + offsetY,
-    f: vertex.f,
-  }
+  return new Victor(
+    vertex.x + offsetX,
+    vertex.y + offsetY
+  )
 }
 
-function track(vertex, data, loop_index) {
-  let angle = data.trackLength * loop_index / 16 * 2.0 * Math.PI
+function track(vertex, data, loopIndex) {
+  let angle = data.trackLength * loopIndex / 16 * 2.0 * Math.PI
   let radius = 1.0
+
   if (data.trackGrowEnabled) {
-    radius = 1.0 + loop_index / 10.0 * data.trackGrow / 100.0
+    radius = 1.0 + loopIndex / 10.0 * data.trackGrow / 100.0
   }
-  return {
-    x: vertex.x + radius * data.trackValue * Math.cos(angle),
-    y: vertex.y + radius * data.trackValue * Math.sin(angle),
-    f: vertex.f, // Why do I still have f in here?
-  }
+  return new Victor(
+    vertex.x + radius * data.trackValue * Math.cos(angle),
+    vertex.y + radius * data.trackValue * Math.sin(angle)
+  )
 }
 
 export const transform = (data, vertex, amount, trackIndex=0, numLoops) => {
