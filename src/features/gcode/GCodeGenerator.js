@@ -17,6 +17,7 @@ import { getComments } from './selectors'
 import { getVertices } from '../machine/selectors'
 import { Vertex } from '../../common/Geometry'
 import Victor from 'victor'
+import ReactGA from 'react-ga'
 
 // Helper function to take a string and make the user download a text file with that text as the
 // content.
@@ -64,6 +65,8 @@ const mapStateToProps = (state, ownProps) => {
     show: state.gcode.show,
     vertices: getVertices(state),
     settings: getComments(state),
+    input: state.app.input,
+    shape: state.shapes.currentId,
     offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
     offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
     maxRadius: state.machine.maxRadius,
@@ -100,7 +103,22 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 // converts vertices and a speed into a list of positions. There is a lot more than could exists
 // here.
 class GCodeGenerator extends Component {
+
+  // Record this event to google analytics.
+  gaRecord(fileType) {
+    let savedCode = 'Saved: ' + this.props.input
+    if (this.props.input === 'shape' || this.props.input === 'Shape') {
+      savedCode = savedCode + ': ' + this.props.shape
+    }
+    console.log(savedCode)
+    ReactGA.event({
+      category: fileType,
+      action: savedCode,
+    })
+  }
+
   generateGCode() {
+    let startTime = performance.now()
     var content = "; " + this.props.settings.join("\n; ")
     content += "\n"
     content += "; filename: '" + this.props.filename + "'\n\n"
@@ -128,11 +146,21 @@ class GCodeGenerator extends Component {
       filename += ".gcode"
     }
 
+    this.gaRecord("Gcode")
+
     download(filename, content)
     this.props.close()
+
+    let endTime = performance.now()
+    ReactGA.timing({
+      category: 'Gcode',
+      variable: 'Save GCode',
+      value: endTime - startTime, // in milliseconds
+    });
   }
 
   generateThetaRho() {
+    let startTime = performance.now()
     var content = "# " + this.props.settings.join("\n# ")
     content += "\n"
     content += "# filename: '" + this.props.filename + "'\n\n"
@@ -212,9 +240,18 @@ class GCodeGenerator extends Component {
     if (!filename.includes(".")) {
       filename += ".thr"
     }
+
+    this.gaRecord("ThetaRho")
     download(filename, content)
 
     this.props.close()
+
+    let endTime = performance.now()
+    ReactGA.timing({
+      category: 'ThetaRho',
+      variable: 'Save GCode',
+      value: endTime - startTime, // in milliseconds
+    });
   }
 
   render() {

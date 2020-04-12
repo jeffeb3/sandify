@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import ReactGA from 'react-ga'
 
 const shapesSlice = createSlice({
   name: 'shape',
@@ -15,6 +16,10 @@ const shapesSlice = createSlice({
     },
     setCurrentShape(state, action) {
       state.currentId = action.payload
+      ReactGA.event({
+        category: 'Shapes',
+        action: 'setCurrentShape: ' + action.payload,
+      })
       localStorage.setItem('currentShape', state.currentId)
     },
     updateShape(state, action) {
