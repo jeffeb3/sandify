@@ -17,7 +17,7 @@ const options = {
     rotateDir: {
       title: 'Rotate',
       type: 'dropdown',
-      choices: ['None', 'Inside', 'Outside'],
+      choices: ['Top', 'Center', 'Bottom'],
     },
   }
 }
@@ -34,7 +34,7 @@ export default class InputText extends Shape {
         type: 'inputText',
         inputText: 'Sandify',
         inputFont: 'Cursive',
-        rotateDir: 'None',
+        rotateDir: 'Center',
         repeatEnabled: false,
         startingSize: 50
       }
