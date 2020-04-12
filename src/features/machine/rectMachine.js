@@ -1,4 +1,6 @@
 import Victor from 'victor'
+import { coterminal, angle, onSegment, slope } from '../../common/Geometry'
+import { roundP } from '../../common/util'
 
 // Determine intersection with one of the sides
 function intersection(lineStart, lineEnd, sideStart, sideEnd) {
@@ -166,56 +168,75 @@ export default class RectMachine {
     return this
   }
 
-  // strip out unnecessary/redundant perimeter moves
+  // Removes unnecessary extra loops
   optimizePerimeter() {
-    let segments = this.removeExtraPerimeterMoves()
-    console.log(segments)
-
-    return this
-  }
-
-  // Removes extra perimeter moves out of a given list of vertices, and returns
-  // an array of non-contiguous segments representing the valid perimeter
-  // vertices that are left.
-  removeExtraPerimeterMoves = function() {
-    let segments = []
-    let segment = {vertices: []}
-    let cutting = false
-    let start
+    let segment = {vertices: [], corners: {}, loop: {}}
 
     for (let i=0; i<this.vertices.length; i++) {
-      const v = this.vertices[i]
+      const curr = this.vertices[i]
+      const prev = this.vertices[i-1]
 
-      if (!this.onPerimeter(v)) {
-        segment.vertices.push(v)
-        cutting = false
-      } else {
-        if (!cutting) {
-          segment.vertices.push(v)
-          segments.push(segment)
-          segment = {vertices: []}
-          cutting = true
-        } else {
-          if (segment.vertices.length === 0) {
-            segment.vertices = [v]
-            start = v
+      // calculate line slope, but allow for imprecision
+      const s = i === 0 ? 0 : slope(
+        {x: roundP(curr.x, 5), y: roundP(curr.y, 5)},
+        {x: roundP(prev.x, 5), y: roundP(prev.y, 5)}
+      )
+
+      // if we're not on an edge, we should reset our loop counting
+      if (s !== undefined && s !== 0) {
+        segment.corners = {}
+        segment.loop = {}
+      }
+
+      if (segment.vertices.length === 0) {
+        segment.vertices = [curr]
+      } else if (this.onCorner(curr)) {
+        let key = curr.x + '-' + curr.y
+        let found = segment.corners[key]
+
+        if (found) {
+          // this is a second loop; roll back
+          found = segment.loop[key]
+          if (found) {
+            segment.vertices = segment.vertices.slice(0, found + 1)
+            Object.keys(segment.loop).forEach(ckey => {
+              if (ckey !== key && segment.loop[ckey] && segment.loop[ckey] > found) {
+                segment.loop[ckey] = null
+              }
+            })
           } else {
-            segment.vertices = [v]
+            // note that we've looped once
+            segment.vertices.push(curr)
+            segment.loop[key] = segment.vertices.length - 1
           }
+        } else {
+          segment.vertices.push(curr)
+          segment.corners[key] = segment.vertices.length - 1
         }
+      } else {
+        segment.vertices.push(curr)
       }
     }
 
-    if (segment.vertices.length > 0) {
-      segments.push(segment)
-    }
-
-    return segments.map((group) => group.vertices)
+    this.vertices = segment.vertices
+    return this
   }
 
   // whether a given vertex is inside the boundaries of the rect
-  onPerimeter(vertex) {
-    return vertex.x === this.sizeX || vertex.x === -this.sizeX || vertex.y === this.sizeY || vertex.y === -this.sizeY
+  onPerimeter(vertex, delta=.00001) {
+    const dx = Math.abs(Math.abs(vertex.x) - this.sizeX)
+    const dy = Math.abs(Math.abs(vertex.y) - this.sizeY)
+    return dx < delta || dy < delta
+  }
+
+  onCorner(vertex, delta=.00001) {
+    const dx = Math.abs(Math.abs(vertex.x) - this.sizeX)
+    const dy = Math.abs(Math.abs(vertex.y) - this.sizeY)
+    return dx < delta && dy < delta
+  }
+
+  isCornerEdge(v1, v2) {
+    return (this.onCorner(v1) && this.onPerimeter(v2)) || (this.onCorner(v2) && this.onPerimeter(v1))
   }
 
   // Determines which of 8 neighbor areas the point is in:
