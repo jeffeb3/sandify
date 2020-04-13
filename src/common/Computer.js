@@ -287,7 +287,7 @@ function reportTiming(time) {
   });
 }
 
-const throttledReportTiming = throttle(reportTiming, 1000, {trailong: true })
+const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
 export const transformShapes = (state) => {
   const startTime = performance.now()
