@@ -2,6 +2,8 @@ import { Vertex, distance } from './Geometry'
 import { enforceRectLimits, enforcePolarLimits } from './LimitEnforcer'
 import { getShape } from '../features/shapes/selectors'
 import Victor from 'victor'
+import ReactGA from 'react-ga'
+import throttle from 'lodash/throttle'
 
 // Transform functions
 function rotate(vertex, angleDeg) {
@@ -276,7 +278,19 @@ export const thetaRho = (state) => {
   return polishVertices(state, newVertices)
 }
 
+function reportTiming(time) {
+  time = Math.max(time, 0.01)
+  ReactGA.timing({
+    category: 'Compute',
+    variable: 'transformShapes',
+    value: time, // in milliseconds
+  });
+}
+
+const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
+
 export const transformShapes = (state) => {
+  const startTime = performance.now()
   const input = getShapeVertices(state)
   const numLoops = state.transform.repeatEnabled ? state.transform.numLoops : 1
   const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
@@ -297,5 +311,8 @@ export const transformShapes = (state) => {
     }
   }
 
-  return polishVertices(state, outputVertices)
+  const rv = polishVertices(state, outputVertices)
+  const endTime = performance.now()
+  throttledReportTiming(endTime - startTime)
+  return rv
 }

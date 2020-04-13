@@ -9,9 +9,14 @@ import ThetaRho from '../theta_rho/ThetaRho'
 import MachineSettings from '../machine/MachineSettings'
 import Footer from './Footer'
 import { chooseInput } from '../app/appSlice'
+import ReactGA from 'react-ga'
 
 class InputTabs extends Component {
   handleSelect(key) {
+    ReactGA.event({
+      category: 'InputTabs',
+      action: 'handleSelect: ' + key,
+    })
     this.props.dispatch(chooseInput(key))
   }
 

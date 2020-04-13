@@ -16,6 +16,7 @@ import {
   toggleFileAspectRatio
 } from './fileSlice'
 import './ThetaRho.scss'
+import ReactGA from 'react-ga'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -86,6 +87,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     var reader = new FileReader()
 
     reader.onload = (event) => {
+      const startTime = performance.now()
       var text = reader.result
       var lines = text.split('\n')
       var has_vertex = false
@@ -114,6 +116,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       dispatch(setFileComments(rv.comments))
       dispatch(setFileVertices(convertToXY(rv.vertices)))
+      const endTime = performance.now()
+      ReactGA.timing({
+        category: 'ThetaRho',
+        variable: 'readThetaRho',
+        value: endTime - startTime, // in milliseconds
+      });
     }
 
     reader.readAsText(file)
