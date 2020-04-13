@@ -3,6 +3,7 @@ import { enforceRectLimits, enforcePolarLimits } from './LimitEnforcer'
 import { getShape } from '../features/shapes/selectors'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
+import throttle from 'lodash/throttle'
 
 // Transform functions
 function rotate(vertex, angleDeg) {
@@ -277,6 +278,17 @@ export const thetaRho = (state) => {
   return polishVertices(state, newVertices)
 }
 
+function reportTiming(time) {
+  time = Math.max(time, 0.01)
+  ReactGA.timing({
+    category: 'Compute',
+    variable: 'transformShapes',
+    value: time, // in milliseconds
+  });
+}
+
+const throttledReportTiming = throttle(reportTiming, 1000, {trailong: true })
+
 export const transformShapes = (state) => {
   const startTime = performance.now()
   const input = getShapeVertices(state)
@@ -301,10 +313,6 @@ export const transformShapes = (state) => {
 
   const rv = polishVertices(state, outputVertices)
   const endTime = performance.now()
-  ReactGA.timing({
-    category: 'Compute',
-    variable: 'transformShapes',
-    value: endTime - startTime, // in milliseconds
-  });
+  throttledReportTiming(endTime - startTime)
   return rv
 }
