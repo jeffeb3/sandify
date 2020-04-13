@@ -97,6 +97,7 @@ export default class InputText extends Shape {
       }
       x += shape.vertices[shape.vertices.length-1].x
     }
+    // Save the last line we were working on.
     lines.push(points)
 
     // The height of a row of text, including the space above.
@@ -131,21 +132,37 @@ export default class InputText extends Shape {
       })
       return textPoints
     } else {
-      // These variables control "Top" vs. "Bottom"
-      let rDir = 1.0
-      let thetaDir = 1.0
+      // This variable controls "Top" vs. "Bottom"
+      let direction = 1.0
       if (state.shape.rotateDir === 'Bottom') {
-        rDir = -1.0
-        thetaDir = -1.0
+        direction = -1.0
       }
 
       // These are the vertices we will be using.
       let textPoints = []
 
       // Some constants to rotate the letters.
+      //
+      // The "lines" object contains lines of words, in vertices.
+      // The vertices are in X, Y, the X starts at 0, the Y goes between -something and +something.
+      // The middle of the word is about at Y=0.
+      //
+      // We want the words to follow around a circle. We want them to stay about the same size, as
+      // if they were plotted in a line. We want them to be centered.
+      //
+      // r is the radius, theta is the angle.
+      // rPerY is the multiplier to get from Y to r.
+      // thetaPerX is the multiplier to get from X to theta.
+      //
+      // The Max is based on how far away from the center we start.
+      //
+      // Offset is because we want to start the row far away from the center.
+      //
+      // thetaCenter is how far off from the theta=0 we start the words.
+      //
       const maxRPerY = 0.8
-      let rPerY = rDir * maxRPerY
-      let thetaCenter = thetaDir * Math.PI / 2.0
+      let rPerY = direction * maxRPerY
+      let thetaCenter = direction * Math.PI / 2.0
       const maxROffset = maxY * 2.0
       let rOffset = maxROffset
       const rOffsetPerLine = rOffset / lines.length
@@ -153,38 +170,52 @@ export default class InputText extends Shape {
 
       // This captures the previous angle, so we can track around for the next line.
       let lastTheta
+
       lines.forEach( (points) => {
+
         let maxX = getMaxX(points)
+        // This widthOffset is in X.
         let widthOffset = maxX / 2.0
+
+        // Scale the size of the words to fit within one circle.
         if (Math.PI * 2.0 < Math.abs(thetaPerX * maxX)) {
           // We are going to roll all the way around
-          thetaPerX = thetaDir * -Math.PI * 2.0 / maxX
+          thetaPerX = direction * -Math.PI * 2.0 / maxX
           rPerY = -thetaPerX * rOffset
         }
 
         // Add in the connector points (if we have any)
         if (lastTheta) {
           let endTheta = thetaCenter + thetaPerX * -widthOffset
-          if (thetaDir * lastTheta < thetaDir * endTheta) {
-            lastTheta += thetaDir * 2.0 * Math.PI
+
+          // We always want to go clockwise, so if the angles are inverted, go around the rest of
+          // the circle.
+          if (direction * lastTheta < direction * endTheta) {
+            lastTheta += direction * 2.0 * Math.PI
           }
+
+          // Get the Y value of the first point in the next (this) line.
           let r = rOffset + rPerY * 0.0
           if (points.length > 0) {
             r = rOffset + rPerY * points[0].y
           }
 
-          for (let theta = lastTheta; thetaDir * theta > thetaDir * endTheta; theta -= thetaDir * 0.01) {
+          // Make the connecting arc.
+          for (let theta = lastTheta; direction * theta > direction * endTheta; theta -= direction * 0.01) {
             textPoints.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
           }
         }
 
+        // Transform the points and add them to textPoints.
         textPoints = [...textPoints, ...points.map( (point) => {
           const r = rOffset + rPerY * point.y
           lastTheta = thetaCenter + thetaPerX * (point.x - widthOffset)
           return Vertex(r * Math.cos(lastTheta), r * Math.sin(lastTheta))
         })]
+
+        // Set up for the next line.
         rOffset -= rOffsetPerLine
-        rPerY = rDir * Math.sqrt(maxRPerY * rOffset / maxROffset)
+        rPerY = direction * Math.sqrt(maxRPerY * rOffset / maxROffset)
         thetaPerX = -rPerY / rOffset
       })
       return textPoints
