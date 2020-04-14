@@ -1,6 +1,7 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
 import { Vertex } from '../../common/Geometry'
 import Shape, { shapeOptions } from '../Shape'
+import { traceCircle } from '../../common/LimitEnforcer'
 
 const options = {
   ...shapeOptions,
@@ -188,22 +189,13 @@ export default class InputText extends Shape {
         if (lastTheta) {
           let endTheta = thetaCenter + thetaPerX * -widthOffset
 
-          // We always want to go clockwise, so if the angles are inverted, go around the rest of
-          // the circle.
-          if (direction * lastTheta < direction * endTheta) {
-            lastTheta += direction * 2.0 * Math.PI
-          }
-
           // Get the Y value of the first point in the next (this) line.
           let r = rOffset + rPerY * 0.0
           if (points.length > 0) {
             r = rOffset + rPerY * points[0].y
           }
 
-          // Make the connecting arc.
-          for (let theta = lastTheta; direction * theta > direction * endTheta; theta -= direction * 0.01) {
-            textPoints.push(Vertex(r * Math.cos(theta), r * Math.sin(theta)))
-          }
+          textPoints = [...textPoints, ...traceCircle(lastTheta, endTheta, r)]
         }
 
         // Transform the points and add them to textPoints.
