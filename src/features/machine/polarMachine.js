@@ -1,19 +1,7 @@
 import { coterminal, angle, onSegment } from '../../common/Geometry'
+import Machine from './machine'
 import Victor from 'victor'
 
-function perimeterDistance(p, q) {
-  const startAngle = angle(p)
-  const endAngle = angle(q)
-  let deltaAngle = Math.abs(endAngle - startAngle)
-
-  if (deltaAngle > Math.PI) {
-    deltaAngle -= 2.0 * Math.PI
-  }
-
-  return Math.abs(deltaAngle)
-}
-
-// Returns points along the circle from the start to the end, tracing a circle of radius size.
 export const traceCircle = (start, end, size) => {
   const startAngle = start.angle()
   const endAngle = end.angle()
@@ -35,66 +23,12 @@ export const traceCircle = (start, end, size) => {
   return tracePoints
 }
 
-// given a list of segments on the perimeter, starting with the first group,
-// walk to the next closest segment and repeat; returns the ordered list of segments.
-function minimizePerimeterMoves(segments) {
-  let walked = []
-  let current = segments.shift()
-  let currentIndex
-
-  walked.push(current)
-  while (segments.length > 0) {
-    // find group that is the shortest distance from our current one
-    let minDist = Number.MAX_SAFE_INTEGER
-    let prev = current
-
-    /* eslint-disable no-loop-func */
-    segments.forEach((group, index) => {
-      const dist = Math.min(perimeterDistance(current[current.length-1], group[0]), perimeterDistance(current[current.length-1], group[group.length-1]))
-
-      if (dist < minDist) {
-        currentIndex = index
-        minDist = dist
-      }
-    })
-    /* eslint-enable no-loop-func */
-
-    // reverse if needed to connect
-    current = segments.splice(currentIndex, 1)[0]
-    if (perimeterDistance(prev[prev.length-1], current[0]) > perimeterDistance(prev[prev.length-1], current[current.length-1])) {
-      current = current.reverse()
-    }
-    walked.push(current)
-  }
-
-  return walked
-}
-
-export default class PolarMachine {
+export default class PolarMachine extends Machine {
   // vertices should be a Victor array
   constructor(vertices, settings) {
+    super()
     this.vertices = vertices
     this.settings = settings
-  }
-
-  polish() {
-    return this.addEndpoints()
-      .clipAlongPerimeter()
-      .cleanVertices()
-      .optimizePerimeter()
-  }
-
-  // Finds the nearest vertex that is in the bounds of the circle. This will change the shape. i.e. this doesn't
-  // care about the line segment, only about the point.
-  nearestVertex(vertex) {
-    const size = this.settings.maxRadius
-
-    if ( vertex.length() > size) {
-      const scale = size / vertex.length()
-      return vertex.multiply(new Victor(scale, scale))
-    } else {
-      return vertex
-    }
   }
 
   addEndpoints() {
@@ -125,7 +59,7 @@ export default class PolarMachine {
     return this
   }
 
-  // Walk the given vertices, clipping as needed along the circle perimeter
+  // walk the given vertices, clipping as needed along the circle perimeter
   clipAlongPerimeter() {
     let cleanVertices = []
     let previous = null
@@ -150,6 +84,32 @@ export default class PolarMachine {
 
     this.vertices = cleanVertices
     return this
+  }
+
+  // Finds the nearest vertex that is in the bounds of the circle. This will change the shape. i.e. this doesn't
+  // care about the line segment, only about the point.
+  nearestVertex(vertex) {
+    const size = this.settings.maxRadius
+
+    if ( vertex.length() > size) {
+      const scale = size / vertex.length()
+      return vertex.multiply(new Victor(scale, scale))
+    } else {
+      return vertex
+    }
+  }
+
+  // returns the distance along the perimeter between two points
+  perimeterDistance(v1, v2) {
+    const startAngle = angle(v1)
+    const endAngle = angle(v2)
+    let deltaAngle = Math.abs(endAngle - startAngle)
+
+    if (deltaAngle > Math.PI) {
+      deltaAngle -= 2.0 * Math.PI
+    }
+
+    return Math.abs(deltaAngle)
   }
 
   // This method is the guts of logic for this limits enforcer. It will take a single line (defined by
@@ -190,12 +150,12 @@ export default class PolarMachine {
     let intersections = this.getIntersections(start, end)
     if (!intersections.intersection) {
       // The whole line is outside, just trace.
-      return this.traceCircle(start, end)
+      return this.tracePerimeter(start, end)
     }
 
     // if neither point is on the segment, then it should just be a trace
     if (!intersections.points[0].on && ! intersections.points[1].on) {
-      return this.traceCircle(start, end)
+      return this.tracePerimeter(start, end)
     }
 
     // If both points are outside, but there's an intersection
@@ -204,9 +164,9 @@ export default class PolarMachine {
       let otherPoint = intersections.points[1].point
 
       return [
-        ...this.traceCircle(start, point),
+        ...this.tracePerimeter(start, point),
         point,
-        ...this.traceCircle(otherPoint, end)
+        ...this.tracePerimeter(otherPoint, end)
       ]
     }
 
@@ -216,128 +176,22 @@ export default class PolarMachine {
 
       return [
         start,
-        ...this.traceCircle(point1, end),
+        ...this.tracePerimeter(point1, end),
         end
       ]
     } else {
       const point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point
 
       return [
-        ...this.traceCircle(start, point1),
+        ...this.tracePerimeter(start, point1),
         point1,
         end
       ]
     }
   }
 
-  // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
-  // duplicate points
-  cleanVertices() {
-    let previous = null
-    let cleanVertices = []
-
-    for (let i=0; i<this.vertices.length; i++) {
-      if (previous) {
-        let start = this.vertices[i]
-        let end = previous
-
-        if (start.distance(end) > 0.001) {
-          cleanVertices.push(this.nearestVertex(this.vertices[i]))
-        }
-      } else {
-        cleanVertices.push(this.nearestVertex(this.vertices[i]))
-      }
-      previous = this.vertices[i]
-    }
-
-    this.vertices = cleanVertices
-    return this
-  }
-
-  // strip out unnecessary/redundant perimeter moves
-  optimizePerimeter() {
-    let segments = this.removeExtraPerimeterMoves()
-
-    if (this.settings.minimizeMoves) {
-      segments = minimizePerimeterMoves(segments)
-    }
-
-    // connect the segments together
-    let connectedVertices = []
-    for (let j=0; j<segments.length; j++) {
-      const current = segments[j]
-
-      if (j > 0) {
-        // connect the two segments along the circle perimeter
-        const prev = segments[j-1]
-        connectedVertices.push(this.traceCircle(prev[prev.length-1], current[0]))
-      }
-      connectedVertices.push(current)
-    }
-
-    this.vertices = connectedVertices.flat()
-    return this
-  }
-
-  // Removes extra perimeter moves out of a given list of vertices, and returns
-  // an array of non-contiguous segments representing the valid perimeter
-  // vertices that are left.
-  removeExtraPerimeterMoves = function() {
-    let segments = []
-    let segment = {vertices: []}
-    let cutting = false
-    let start, startAngle
-
-    for (let i=0; i<this.vertices.length; i++) {
-      const v = this.vertices[i]
-      const dDelta = 15
-      const d = (i === 0) ? 1 : Math.abs(this.vertices[i-1].distance(v))
-
-      if (!this.onPerimeter(v) || d > dDelta) {
-        segment.vertices.push(v)
-        cutting = false
-      } else {
-        if (!cutting) {
-          segment.vertices.push(v)
-          segments.push(segment)
-          segment = {vertices: []}
-          cutting = true
-        } else { // walking along perimeter
-          if (segment.vertices.length === 0) {
-            segment.vertices = [v]
-            start = v
-            startAngle = coterminal(start.angle())
-          } else {
-            const delta = v.angle() - start.angle()
-
-            if (!segment.direction) {
-              segment.direction = Math.sign(delta)
-              segment.vertices = [v] // update our vertex
-            } else {
-              const endAngle = coterminal(v.angle())
-              if (endAngle * segment.direction >= startAngle * segment.direction) {
-                segment.vertices = [v] // update our vertex
-              } else {
-                // moved past starting vertex discard vertex group as it is full of empty moves
-                segment = {vertices: [v]}
-                start = v
-                startAngle = coterminal(start.angle())
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (segment.vertices.length > 0) {
-      segments.push(segment)
-    }
-
-    return segments.map((group) => group.vertices)
-  }
-
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
-  traceCircle(start, end) {
+  tracePerimeter(start, end) {
     return traceCircle(start, end, this.settings.maxRadius)
   }
 
@@ -373,8 +227,11 @@ export default class PolarMachine {
       ]}
   }
 
-  onPerimeter(v, delta=.001) {
-    let r = Math.pow(v.x, 2) + Math.pow(v.y, 2)
-    return r >= Math.pow(this.settings.maxRadius, 2) - delta
+  onPerimeter(v1, v2, delta=.001) {
+    let rm = Math.pow(this.settings.maxRadius, 2)
+    let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
+    let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
+
+    return r1 >= rm - delta && r2 >= rm - delta
   }
 }
