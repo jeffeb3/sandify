@@ -1,5 +1,6 @@
 import Victor from 'victor'
-import { coterminal, angle, onSegment, slope } from '../../common/Geometry'
+import Machine from './machine'
+import { distance } from '../../common/Geometry'
 import { roundP } from '../../common/util'
 
 // Determine intersection with one of the sides
@@ -28,22 +29,14 @@ function intersection(lineStart, lineEnd, sideStart, sideEnd) {
   return intersection
 }
 
-export default class RectMachine {
+export default class RectMachine extends Machine {
   // vertices should be a Victor array
   constructor(vertices, settings) {
+    super()
     this.vertices = vertices
     this.settings = settings
     this.sizeX = Math.abs((settings.maxX - settings.minX) / 2.0)
     this.sizeY = Math.abs((settings.maxY - settings.minY) / 2.0)
-  }
-
-  // manipulates the points to make them all in bounds, while doing the least
-  // amount of damage to the desired shape.
-  polish() {
-    return this.addEndpoints()
-      .clipAlongPerimeter()
-      .cleanVertices()
-      .optimizePerimeter()
   }
 
   addEndpoints() {
@@ -107,7 +100,6 @@ export default class RectMachine {
       }
 
       newVertices.push(Victor.fromObject({...first, x: corners[nextCorner].x, y: corners[nextCorner].y}))
-
       if (first.magnitude() <= last.magnitude()) {
         // outward
         this.vertices = this.vertices.concat(newVertices)
@@ -144,99 +136,31 @@ export default class RectMachine {
     return this
   }
 
-  // Just for sanity, and cases that I haven't thought of, clean this list again, including removing
-  // duplicate points
-  cleanVertices() {
-    let previous = null
-    let cleanVertices = []
+  // returns the distance along the perimeter between two points
+  perimeterDistance(v1, v2) {
+    return this.distance(this.tracePerimeter(v1, v2, true))
+  }
 
-    for (let i=0; i<this.vertices.length; i++) {
-      if (previous) {
-        let start = this.vertices[i]
-        let end = previous
+  // returns whether a given path lies on the perimeter
+  onPerimeter(v1, v2, delta=.00001) {
+    const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
+    const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
 
-        if (start.distance(end) > 0.001) {
-          cleanVertices.push(this.nearestVertex(this.vertices[i]))
-        }
-      } else {
-        cleanVertices.push(this.nearestVertex(this.vertices[i]))
-      }
-      previous = this.vertices[i]
+    if (dx < delta || dy < delta) {
+      return v1.x === v2.x || v1.y === v2.y
+    } else {
+      return false
+    }
+  }
+
+  // returns the distance walked from the first vertex to the last vertex
+  distance(vertices) {
+    let d = 0
+    for(let i=0; i<vertices.length; i++) {
+      if (i > 0) d = d + distance(vertices[i], vertices[i-1])
     }
 
-    this.vertices = cleanVertices
-    return this
-  }
-
-  // Removes unnecessary extra loops
-  optimizePerimeter() {
-    let segment = {vertices: [], corners: {}, loop: {}}
-
-    for (let i=0; i<this.vertices.length; i++) {
-      const curr = this.vertices[i]
-      const prev = this.vertices[i-1]
-
-      // calculate line slope, but allow for imprecision
-      const s = i === 0 ? 0 : slope(
-        {x: roundP(curr.x, 5), y: roundP(curr.y, 5)},
-        {x: roundP(prev.x, 5), y: roundP(prev.y, 5)}
-      )
-
-      // if we're not on an edge, we should reset our loop counting
-      if (s !== undefined && s !== 0) {
-        segment.corners = {}
-        segment.loop = {}
-      }
-
-      if (segment.vertices.length === 0) {
-        segment.vertices = [curr]
-      } else if (this.onCorner(curr)) {
-        let key = curr.x + '-' + curr.y
-        let found = segment.corners[key]
-
-        if (found) {
-          // this is a second loop; roll back
-          found = segment.loop[key]
-          if (found) {
-            segment.vertices = segment.vertices.slice(0, found + 1)
-            Object.keys(segment.loop).forEach(ckey => {
-              if (ckey !== key && segment.loop[ckey] && segment.loop[ckey] > found) {
-                segment.loop[ckey] = null
-              }
-            })
-          } else {
-            // note that we've looped once
-            segment.vertices.push(curr)
-            segment.loop[key] = segment.vertices.length - 1
-          }
-        } else {
-          segment.vertices.push(curr)
-          segment.corners[key] = segment.vertices.length - 1
-        }
-      } else {
-        segment.vertices.push(curr)
-      }
-    }
-
-    this.vertices = segment.vertices
-    return this
-  }
-
-  // whether a given vertex is inside the boundaries of the rect
-  onPerimeter(vertex, delta=.00001) {
-    const dx = Math.abs(Math.abs(vertex.x) - this.sizeX)
-    const dy = Math.abs(Math.abs(vertex.y) - this.sizeY)
-    return dx < delta || dy < delta
-  }
-
-  onCorner(vertex, delta=.00001) {
-    const dx = Math.abs(Math.abs(vertex.x) - this.sizeX)
-    const dy = Math.abs(Math.abs(vertex.y) - this.sizeY)
-    return dx < delta && dy < delta
-  }
-
-  isCornerEdge(v1, v2) {
-    return (this.onCorner(v1) && this.onPerimeter(v2)) || (this.onCorner(v2) && this.onPerimeter(v1))
+    return d
   }
 
   // Determines which of 8 neighbor areas the point is in:
@@ -273,10 +197,61 @@ export default class RectMachine {
     return location
   }
 
+  // Given two perimeter points, traces the shortest valid path between them (stays on
+  // perimeter). Returns a list of intermediate points on that path (if any).
+  // On further consideration, this could be redone using Dijsktra's algorithm, I believe,
+  // but this works and is, I believe, reasonably efficient.
+  tracePerimeter(p1, p2, includeOriginalPoints=false) {
+    let points
+
+    if ((p1.x === p2.x && Math.abs(p1.x) === 250) || (p1.y === p2.y && (Math.abs(p1.y) === 250))) {
+      // on the same line; no connecting points needed
+      points = []
+    } else {
+      // horizontal or vertical orientation
+      let o1 = Math.abs(p1.x) === this.sizeX ? 'v' : 'h'
+      let o2 = Math.abs(p2.x) === this.sizeX ? 'v' : 'h'
+
+      if (o1 !== o2) {
+        // connects via a single corner
+        points = (o1 === 'h') ?
+          [{x: p2.x, y: p1.y}] :
+          [{x: p1.x, y: p2.y}]
+      } else {
+        // connects via two corners; find the shortest way around
+        if (o1 === 'h') {
+          let d1 = -2*this.sizeX - p1.x - p2.x
+          let d2 = 2*this.sizeX - p1.x - p2.x
+          let xSign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
+
+          points = [
+            {x: Math.sign(xSign)*this.sizeX, y: Math.sign(p1.y)*this.sizeY},
+            {x: Math.sign(xSign)*this.sizeX, y: -Math.sign(p1.y)*this.sizeY}
+          ]
+        } else {
+          let d1 = -2*this.sizeY - p1.y - p2.y
+          let d2 = 2*this.sizeY - p1.y - p2.y
+          let ySign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
+
+          points = [
+            {x: Math.sign(p1.x)*this.sizeX, y: Math.sign(ySign)*this.sizeY},
+            {x: -Math.sign(p1.x)*this.sizeX, y: Math.sign(ySign)*this.sizeY},
+          ]
+        }
+      }
+    }
+
+    if (includeOriginalPoints) {
+      points.unshift(p1)
+      points.push(p2)
+    }
+
+    return points
+  }
+
   // This method is the guts of logic for this limits enforcer. It will take a single line (defined by
   // start and end) and if the line goes out of bounds, returns the vertices around the outside edge
   // to follow around without messing up the shape of the vertices.
-  //
   clipLine(lineStart, lineEnd) {
     var quadrantStart = this.pointLocation(lineStart)
     var quadrantEnd = this.pointLocation(lineEnd)

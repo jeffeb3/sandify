@@ -10,8 +10,10 @@ import {
     ToggleButton,
     ToggleButtonGroup,
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 import {
   updateMachine,
+  toggleMinimizeMoves,
   toggleMachineRectExpanded,
   setMachineRectOrigin } from './machineSlice'
 
@@ -24,6 +26,7 @@ const mapStateToProps = (state, ownProps) => {
     minY:    state.machine.minY,
     maxY:    state.machine.maxY,
     origin:   state.machine.rectOrigin,
+    minimizeMoves: state.machine.minimizeMoves
   }
 }
 
@@ -46,6 +49,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onOriginChange: (value) => {
       dispatch(setMachineRectOrigin(value))
+    },
+    toggleMinimizeMoves: () => {
+      dispatch(toggleMinimizeMoves());
     },
   }
 }
@@ -125,6 +131,17 @@ class RectSettings extends Component {
                   <ToggleButton variant="light" value={0} >lower left</ToggleButton>
                   <ToggleButton variant="light" value={3} >lower right</ToggleButton>
                 </ToggleButtonGroup>
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-1">
+              <Col sm={5}>
+                <Form.Label htmlFor="minimizeMoves">
+                  Try to minimize<br />perimeter moves
+                </Form.Label>
+              </Col>
+              <Col sm={7}>
+                <Switch checked={this.props.minimizeMoves} onChange={this.props.toggleMinimizeMoves} />
               </Col>
             </Row>
           </Card.Body>
