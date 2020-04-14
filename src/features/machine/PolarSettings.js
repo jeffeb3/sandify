@@ -106,7 +106,7 @@ class PolarSettings extends Component {
             <Row className="align-items-center pb-1">
               <Col sm={5}>
                 <Form.Label htmlFor="minimizeMoves">
-                  Minimize perimeter moves
+                  Try to minimize<br />perimeter moves
                 </Form.Label>
               </Col>
               <Col sm={7}>

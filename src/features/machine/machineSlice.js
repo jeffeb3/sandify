@@ -18,7 +18,7 @@ const machineSlice = createSlice({
     minY: localMinY || 0,
     maxY: localMaxY || 500,
     maxRadius: localMaxRadius || 250,
-    minimizeMoves: false,
+    minimizeMoves: JSON.parse(localStorage.getItem('minimizeMoves')) || false,
     rectOrigin: [],
     polarStartPoint: 'none',
     polarEndPoint: 'none',
@@ -59,6 +59,7 @@ const machineSlice = createSlice({
     },
     toggleMinimizeMoves(state, action) {
       state.minimizeMoves = !state.minimizeMoves
+      localStorage.setItem('minimizeMoves', state.minimizeMoves)
     },
     setMachineSize(state, action) {
       state.canvasHeight = action.payload
