@@ -199,9 +199,7 @@ function boundPoint(good, bad, size_x, size_y) {
 }
 
 // Returns points along the circle from the start to the end, tracing a circle of radius size.
-function traceCircle(start, end, size) {
-  const startAngle = start.angle()
-  const endAngle = end.angle()
+export const traceCircle = function(startAngle, endAngle, size) {
   let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?
   let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI)
   if (deltaAngle > Math.PI) {
@@ -307,12 +305,12 @@ function clipLineCircle(line_start, line_end, size) {
   if ( !intersections.intersection )
   {
     // The whole line is outside, just trace.
-    return traceCircle(start, end, size)
+    return traceCircle(start.angle(), end.angle(), size)
   }
 
   // if neither point is on the segment, then it should just be a trace
   if (!intersections.points[0].on && ! intersections.points[1].on) {
-    return traceCircle(start, end, size)
+    return traceCircle(start.angle(), end.angle(), size)
   }
 
   // If both points are outside, but there's an intersection
@@ -321,9 +319,9 @@ function clipLineCircle(line_start, line_end, size) {
     let other_point = intersections.points[1].point
 
     return [
-      ...traceCircle(start, point, size),
+      ...traceCircle(start.angle(), point.angle(), size),
       point,
-      ...traceCircle(other_point, end, size)
+      ...traceCircle(other_point.angle(), end.angle(), size)
     ]
   }
 
@@ -332,13 +330,13 @@ function clipLineCircle(line_start, line_end, size) {
     var point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point
     return [
       start,
-      ...traceCircle(point1, end, size),
+      ...traceCircle(point1.angle(), end.angle(), size),
       end
     ]
   } else {
     point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point
     return [
-      ...traceCircle(start, point1, size),
+      ...traceCircle(start.angle(), point1.angle(), size),
       point1,
       end
     ]
