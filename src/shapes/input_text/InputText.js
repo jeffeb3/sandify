@@ -137,6 +137,7 @@ export default class InputText extends Shape {
       let direction = 1.0
       if (state.shape.rotateDir === 'Bottom') {
         direction = -1.0
+        lines.reverse()
       }
 
       // These are the vertices we will be using.
