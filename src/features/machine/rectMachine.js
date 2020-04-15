@@ -41,37 +41,37 @@ export default class RectMachine extends Machine {
   addEndpoints() {
     if (this.settings.rectOrigin.length === 1) {
       // OK, let's assign corners indices:
-      //
       // [1]   [2]
       //
       //
       // [0]   [3]
       const corner = this.settings.rectOrigin[0]
-      const dx = (this.settings.maxX - this.settings.minX) / 2.0
-      const dy = (this.settings.maxY - this.settings.minY) / 2.0
       const corners = [
-        new Victor(-dx, -dy),
-        new Victor(-dx, dy),
-        new Victor(dx, dy),
-        new Victor(dx, -dy)
+        new Victor(-this.sizeX, -this.sizeY),
+        new Victor(-this.sizeX, this.sizeY),
+        new Victor(this.sizeX, this.sizeY),
+        new Victor(this.sizeX, -this.sizeY)
       ]
 
-      let first = this.vertices[0]
-      let last = this.vertices[this.vertices.length-1]
-      let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
-      let outPoint
+      const first = this.vertices[0]
+      const last = this.vertices[this.vertices.length-1]
+      const maxRadius = Math.sqrt(Math.pow(2.0*this.sizeX, 2.0) + Math.pow(2.0*this.sizeY, 2.0)) / 2.0
+      let scale, outPoint
 
       if (first.magnitude() <= last.magnitude()) {
         // It's going outward
-        let scale = maxRadius / last.magnitude()
-        outPoint = Victor.fromObject(last).multiply(new Victor(scale, scale))
-        this.vertices.push(Victor.fromObject({...last, x: outPoint.x, y: outPoint.y}))
+        scale = maxRadius / last.magnitude()
+        outPoint = last
       } else {
-        let scale = maxRadius / first.magnitude()
-        outPoint = Victor.fromObject(first).multiply(new Victor(scale, scale))
-        this.vertices.push(Victor.fromObject({...first, x: outPoint.x, y: outPoint.y}))
+        scale = maxRadius / first.magnitude()
+        outPoint = first
       }
 
+      let clipped = this.clipLine(
+        this.vertices[this.vertices.length - 1],
+        Victor.fromObject(outPoint).multiply(new Victor(scale, scale))
+      )
+      this.vertices.push(clipped[clipped.length - 1])
       this.vertices = [this.vertices, this.tracePerimeter(this.vertices[this.vertices.length - 1], corners[corner], true)].flat()
     }
 

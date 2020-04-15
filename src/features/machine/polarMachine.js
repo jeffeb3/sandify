@@ -109,7 +109,7 @@ export default class PolarMachine extends Machine {
       deltaAngle -= 2.0 * Math.PI
     }
 
-    return Math.abs(deltaAngle)
+    return Math.abs(deltaAngle) * this.settings.maxRadius
   }
 
   // This method is the guts of logic for this limits enforcer. It will take a single line (defined by
@@ -231,7 +231,8 @@ export default class PolarMachine extends Machine {
     let rm = Math.pow(this.settings.maxRadius, 2)
     let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
     let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
+    let d = this.perimeterDistance(v1, v2)
 
-    return r1 >= rm - delta && r2 >= rm - delta
+    return (r1 >= rm - delta && r2 >= rm - delta) && d < 15
   }
 }

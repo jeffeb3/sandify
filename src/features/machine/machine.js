@@ -60,27 +60,22 @@ export default class Machine {
   stripExtraPerimeterVertices() {
     let segments = []
     let segment = []
-    let cutting = false
+    let perimeter = null
 
     for (let i=0; i<this.vertices.length; i++) {
       const curr = this.vertices[i]
       const prev = this.vertices[i-1]
 
       if (!prev || !this.onPerimeter(curr, prev)) {
-        // not on perimeter; keep this vertex
+        if (perimeter) { segment.push(perimeter) }
         segment.push(curr)
-        cutting = false
+        perimeter = null
       } else {
-        if (!cutting) {
-          segment.push(curr)
+        if (!perimeter) {
           segments.push(segment)
           segment = []
-          cutting = true
-        } else { // walking along perimeter
-          // previous vertex isn't needed, so discard it
-          segment.pop()
-          segment.push(curr)
         }
+        perimeter = curr
       }
     }
 
