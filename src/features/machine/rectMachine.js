@@ -47,65 +47,33 @@ export default class RectMachine extends Machine {
       //
       //
       // [0]   [3]
+      const corner = this.settings.rectOrigin[0]
       const dx = (this.settings.maxX - this.settings.minX) / 2.0
       const dy = (this.settings.maxY - this.settings.minY) / 2.0
       const corners = [
-        {x: -dx, y: -dy},
-        {x: -dx, y:  dy},
-        {x:  dx, y:  dy},
-        {x:  dx, y: -dy}
+        new Victor(-dx, -dy),
+        new Victor(-dx, dy),
+        new Victor(dx, dy),
+        new Victor(dx, -dy)
       ]
 
       let first = this.vertices[0]
       let last = this.vertices[this.vertices.length-1]
       let maxRadius = Math.sqrt(Math.pow(2.0*dx,2.0) + Math.pow(2.0*dy, 2.0)) / 2.0
       let outPoint
-      let newVertices = []
 
       if (first.magnitude() <= last.magnitude()) {
         // It's going outward
         let scale = maxRadius / last.magnitude()
         outPoint = Victor.fromObject(last).multiply(new Victor(scale, scale))
-        newVertices.push(Victor.fromObject({...last, x: outPoint.x, y: outPoint.y}))
+        this.vertices.push(Victor.fromObject({...last, x: outPoint.x, y: outPoint.y}))
       } else {
         let scale = maxRadius / first.magnitude()
         outPoint = Victor.fromObject(first).multiply(new Victor(scale, scale))
-        newVertices.push(Victor.fromObject({...first, x: outPoint.x, y: outPoint.y}))
+        this.vertices.push(Victor.fromObject({...first, x: outPoint.x, y: outPoint.y}))
       }
 
-      let nextCorner = 1
-      if (outPoint.x >= dx) {
-        // right
-        nextCorner = 2
-      } else if (outPoint.x <= -dx) {
-        // left
-        nextCorner = 0
-      } else if (outPoint.y >= dy) {
-        // up
-        nextCorner = 1
-      } else if (outPoint.y <= -dy) {
-        // down
-        nextCorner = 3
-      } else {
-        console.log("Darn!")
-        nextCorner = 3
-      }
-
-      while (nextCorner !== this.settings.rectOrigin[0]) {
-        newVertices.push(Victor.fromObject({...first, x: corners[nextCorner].x, y: corners[nextCorner].y}))
-        nextCorner -= 1
-        if (nextCorner < 0) {
-          nextCorner = 3
-        }
-      }
-
-      newVertices.push(Victor.fromObject({...first, x: corners[nextCorner].x, y: corners[nextCorner].y}))
-      if (first.magnitude() <= last.magnitude()) {
-        // outward
-        this.vertices = this.vertices.concat(newVertices)
-      } else {
-        this.vertices = newVertices.reverse().concat(this.vertices)
-      }
+      this.vertices = [this.vertices, this.tracePerimeter(this.vertices[this.vertices.length - 1], corners[corner], true)].flat()
     }
 
     return this
@@ -215,8 +183,8 @@ export default class RectMachine extends Machine {
       if (o1 !== o2) {
         // connects via a single corner
         points = (o1 === 'h') ?
-          [{x: p2.x, y: p1.y}] :
-          [{x: p1.x, y: p2.y}]
+          [new Victor(p2.x, p1.y)] :
+          [new Victor(p1.x, p2.y)]
       } else {
         // connects via two corners; find the shortest way around
         if (o1 === 'h') {
@@ -225,8 +193,8 @@ export default class RectMachine extends Machine {
           let xSign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
 
           points = [
-            {x: Math.sign(xSign)*this.sizeX, y: Math.sign(p1.y)*this.sizeY},
-            {x: Math.sign(xSign)*this.sizeX, y: -Math.sign(p1.y)*this.sizeY}
+            new Victor(Math.sign(xSign)*this.sizeX, Math.sign(p1.y)*this.sizeY),
+            new Victor(Math.sign(xSign)*this.sizeX, -Math.sign(p1.y)*this.sizeY)
           ]
         } else {
           let d1 = -2*this.sizeY - p1.y - p2.y
@@ -234,8 +202,8 @@ export default class RectMachine extends Machine {
           let ySign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
 
           points = [
-            {x: Math.sign(p1.x)*this.sizeX, y: Math.sign(ySign)*this.sizeY},
-            {x: -Math.sign(p1.x)*this.sizeX, y: Math.sign(ySign)*this.sizeY},
+            new Victor(Math.sign(p1.x)*this.sizeX, Math.sign(ySign)*this.sizeY),
+            new Victor(-Math.sign(p1.x)*this.sizeX, Math.sign(ySign)*this.sizeY),
           ]
         }
       }
