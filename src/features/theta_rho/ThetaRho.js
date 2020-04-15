@@ -40,8 +40,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
           // These sin, cos elements are inverted. I'm not sure why
           vertices.push({
                         x: previous[1] * Math.sin(previous[0]),
-                        y: previous[1] * Math.cos(previous[0]),
-                        f: 1000,
+                        y: previous[1] * Math.cos(previous[0])
           })
         } else {
           // We need to do some interpolating.
@@ -53,8 +52,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             for (let angle = previous[0]; angle < next[0]; angle += max_angle, rho += rhoStep) {
               vertices.push({
                             x: rho * Math.sin(angle),
-                            y: rho * Math.cos(angle),
-                            f: 1000,
+                            y: rho * Math.cos(angle)
               })
               if (emergency_break++ > 100000) {
                 break
@@ -64,8 +62,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             for (let angle = previous[0]; angle > next[0]; angle -= max_angle, rho += rhoStep) {
               vertices.push({
                             x: rho * Math.sin(angle),
-                            y: rho * Math.cos(angle),
-                            f: 1000,
+                            y: rho * Math.cos(angle)
               })
               if (emergency_break++ > 100000) {
                 break

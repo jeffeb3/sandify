@@ -184,8 +184,7 @@ class GCodeGenerator extends Component {
         // This loads up (start, end].
         for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
           subsampledVertices.push(new Victor(start.x + step * deltaSegment.x,
-                                         start.y + step * deltaSegment.y,
-                                         this.props.vertices[next].f))
+                                         start.y + step * deltaSegment.y))
         }
 
       }
@@ -223,7 +222,7 @@ class GCodeGenerator extends Component {
       previousRawTheta = rawTheta
       previousTheta = theta
 
-      trVertices.push(new Victor(theta, rho, subsampledVertices[next].f))
+      trVertices.push(new Victor(theta, rho))
     }
 
     var lines = trVertices.map(thetarho)
