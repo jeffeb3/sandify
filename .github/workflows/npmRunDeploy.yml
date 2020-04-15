@@ -1,12 +1,17 @@
+# Deploy when there is a new release "Published". This will take each new release and deploy it to
+# gh-pages.
+#
+# Guide:
+# https://medium.com/@cmichel/how-to-deploy-a-create-react-app-with-github-actions-5e01f7a7b6b
 
-name: npm run deploy
+name: Deployment
 
 on:
   release:
     types: [published]
 
 jobs:
-  build:
+  deploy:
 
     runs-on: ubuntu-latest
 
@@ -16,9 +21,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - run: npm install
-    - run: npm run build --if-present
-    - run: npm test
-      env:
-        CI: true
+    - name: Install Packages
+      run: npm install
+    - name: Build page
+      run: npm run build --if-present
+    - name: Deploy to gh-pages
+      run: npm test
 
