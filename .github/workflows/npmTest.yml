@@ -1,4 +1,11 @@
-
+# Run the npm tests on every push, which automatically tests every PR.
+#
+# If you want a feature to stay working, then make a test, and other coders will notice when it
+# breaks.
+#    -- Sandify testing strategy.
+#
+# Guide for this action workflow:
+# https://help.github.com/en/actions/language-and-framework-guides/using-nodejs-with-github-actions
 name: npm test
 
 on: [push]
