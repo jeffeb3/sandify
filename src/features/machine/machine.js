@@ -1,8 +1,5 @@
 // base machine class
 export default class Machine {
-  constructor() {
-  }
-
   polish() {
     return this.addEndpoints()
       .clipAlongPerimeter()
@@ -64,7 +61,6 @@ export default class Machine {
     let segments = []
     let segment = []
     let cutting = false
-    let start, startAngle
 
     for (let i=0; i<this.vertices.length; i++) {
       const curr = this.vertices[i]
