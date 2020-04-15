@@ -1,7 +1,6 @@
 import Victor from 'victor'
 import Machine from './machine'
 import { distance } from '../../common/Geometry'
-import { roundP } from '../../common/util'
 
 // Determine intersection with one of the sides
 function intersection(lineStart, lineEnd, sideStart, sideEnd) {

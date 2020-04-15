@@ -1,4 +1,4 @@
-import { coterminal, angle, onSegment } from '../../common/Geometry'
+import { angle, onSegment } from '../../common/Geometry'
 import Machine from './machine'
 import Victor from 'victor'
 
