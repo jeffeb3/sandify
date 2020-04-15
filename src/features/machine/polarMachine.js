@@ -60,7 +60,7 @@ export default class PolarMachine extends Machine {
   }
 
   // walk the given vertices, clipping as needed along the circle perimeter
-  clipAlongPerimeter() {
+  enforceLimits() {
     let cleanVertices = []
     let previous = null
 
