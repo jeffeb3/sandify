@@ -12,6 +12,11 @@ def getLetterCodex(infont):
         [letter + "*" for letter in string.ascii_lowercase] + \
         [',','?','&','$','!','%']
 
+    if 'sanserif' in infont:
+        # Add a vertex to the right, to increase the spacing a little.
+        addSpace = True
+    else:
+        addSpace = False
     letterIndex = 0
     letterVertices = []
     letterCodex = []
@@ -20,15 +25,20 @@ def getLetterCodex(infont):
             if not line.strip():
                 continue
             values = line.split()
+            xScale = 2.0
             scale = 8.5
-            offsetY = -0.175
-            vertex = (scale * float(values[1]), scale * (float(values[2])+offsetY))
-
+            offsetY = -0.175-(0.149/8.5)
+            vertex = (scale * float(values[1]) * xScale, scale * (float(values[2])+offsetY))
             # This is a new letter
             if values[0] == '1':
                 if not letterVertices:
                     print ("Empty Letter")
                 else:
+                    if addSpace:
+                        # This distance, 0.02, gets varied in the original code... A lot.
+                        extraDistance = 0.02
+                        spaceVertex = (scale * xScale * extraDistance + letterVertices[-1][0], letterVertices[-1][1])
+                        letterVertices.append(spaceVertex)
                     if letterIndex != 63:
                         letterCodex.append((letters[letterIndex], letterVertices))
                     letterIndex += 1
