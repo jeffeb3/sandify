@@ -40,7 +40,7 @@ export default class PolarMachine extends Machine {
       } else {
         const first = this.vertices[0]
         const scale = maxRadius / first.magnitude()
-        const startPoint = first.multiply(new Victor(scale, scale))
+        const startPoint = Victor.fromObject(first).multiply(new Victor(scale, scale))
         this.vertices.unshift(new Victor(startPoint.x, startPoint.y))
       }
     }
@@ -51,7 +51,7 @@ export default class PolarMachine extends Machine {
       } else {
         const last = this.vertices[this.vertices.length-1]
         const scale = maxRadius / last.magnitude()
-        const endPoint = last.multiply(new Victor(scale, scale))
+        const endPoint =  Victor.fromObject(last).multiply(new Victor(scale, scale))
         this.vertices.push(new Victor(endPoint.x, endPoint.y))
       }
     }
