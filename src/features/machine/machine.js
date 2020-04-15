@@ -1,10 +1,10 @@
 // base machine class
 export default class Machine {
   polish() {
-    return this.addEndpoints()
-      .clipAlongPerimeter()
+    return this.enforceLimits()
       .cleanVertices()
       .optimizePerimeter()
+      .addEndpoints()
   }
 
   // clean the list of vertices and remove duplicate points

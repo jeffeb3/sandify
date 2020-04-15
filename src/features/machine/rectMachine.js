@@ -78,7 +78,7 @@ export default class RectMachine extends Machine {
     return this
   }
 
-  clipAlongPerimeter() {
+  enforceLimits() {
     let cleanVertices = []
     let previous = null
 
