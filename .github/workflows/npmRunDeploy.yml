@@ -1,7 +1,9 @@
 
 name: npm run deploy
 
-on: [release]
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
