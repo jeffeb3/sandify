@@ -30,6 +30,33 @@ export default class Machine {
     return this
   }
 
+  // walk the given vertices, clipping as needed along the circle perimeter
+  enforceLimits() {
+    let cleanVertices = []
+    let previous = null
+
+    for (let next=0; next<this.vertices.length; next++) {
+      const vertex = this.vertices[next]
+
+      if (previous) {
+        const line = this.clipLine(previous, vertex)
+
+        for (let pt=0; pt<line.length; pt++) {
+          if (line[pt] !== previous) {
+            cleanVertices.push(line[pt])
+          }
+        }
+      } else {
+        cleanVertices.push(this.nearestVertex(vertex))
+      }
+
+      previous = vertex
+    }
+
+    this.vertices = cleanVertices
+    return this
+  }
+
   // strip out unnecessary/redundant perimeter moves
   optimizePerimeter() {
     let segments = this.stripExtraPerimeterVertices()

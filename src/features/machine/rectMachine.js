@@ -2,34 +2,7 @@ import Victor from 'victor'
 import Machine from './machine'
 import { distance } from '../../common/Geometry'
 
-// Determine intersection with one of the sides
-function intersection(lineStart, lineEnd, sideStart, sideEnd) {
-  let line = lineEnd.clone().subtract(lineStart)
-  let side = sideEnd.clone().subtract(sideStart)
-  let lineCrossSidePerp = line.x * side.y - line.y * side.x
-
-  // if line Cross side === 0, it means the lines are parallel so have infinite intersection points
-  if (lineCrossSidePerp === 0) {
-    return null
-  }
-
-  const diff = sideStart.clone().subtract(lineStart)
-  let t = (diff.x * side.y - diff.y * side.x) / lineCrossSidePerp
-  if (t < 0 || t >= 1) {
-    return null
-  }
-
-  const u = (diff.x * line.y - diff.y * line.x) / lineCrossSidePerp
-  if (u < 0 || u >= 1) {
-    return null
-  }
-
-  const intersection = lineStart.clone().add(line.clone().multiply(new Victor(t, t)))
-  return intersection
-}
-
 export default class RectMachine extends Machine {
-  // vertices should be a Victor array
   constructor(vertices, settings) {
     super()
     this.vertices = vertices
@@ -78,37 +51,12 @@ export default class RectMachine extends Machine {
     return this
   }
 
-  enforceLimits() {
-    let cleanVertices = []
-    let previous = null
-
-    for (let next=0; next<this.vertices.length; next++) {
-      const vertex = this.vertices[next]
-
-      if (previous) {
-        const line = this.clipLine(previous, vertex)
-
-        for (let pt=0; pt<line.length; pt++) {
-          if (line[pt] !== previous) {
-            cleanVertices.push(line[pt])
-          }
-        }
-      } else {
-        cleanVertices.push(this.nearestVertex(vertex))
-      }
-      previous = vertex
-    }
-
-    this.vertices = cleanVertices
-    return this
-  }
-
-  // returns the distance along the perimeter between two points
+  // Returns the distance along the perimeter between two points
   perimeterDistance(v1, v2) {
     return this.distance(this.tracePerimeter(v1, v2, true))
   }
 
-  // returns whether a given path lies on the perimeter
+  // Returns whether a given path lies on the perimeter of the rectangle
   onPerimeter(v1, v2, delta=.00001) {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
     const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
@@ -118,50 +66,6 @@ export default class RectMachine extends Machine {
     } else {
       return false
     }
-  }
-
-  // returns the distance walked from the first vertex to the last vertex
-  distance(vertices) {
-    let d = 0
-    for(let i=0; i<vertices.length; i++) {
-      if (i > 0) d = d + distance(vertices[i], vertices[i-1])
-    }
-
-    return d
-  }
-
-  // Determines which of 8 neighbor areas the point is in:
-  //   https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle
-  //
-  //           |          |
-  //   0b1001  |  0b0001  |  0b0101
-  //           |          |
-  // ------------------------------ y_max
-  //           |          |
-  //   0b1000  |  0b0000  |  0b0100
-  //           |          |
-  // ------------------------------ y_min
-  //           |          |
-  //   0b1010  |  0b0010  |  0b0110
-  //           |          |
-  //         x_min      x_max
-  //
-  pointLocation(point) {
-    let location = 0b0
-
-    if (point.x < -this.sizeX) {
-      location += 0b1000
-    } else if (point.x > this.sizeX) {
-      location += 0b0100
-    }
-
-    if (point.y < -this.sizeY) {
-      location += 0b0001
-    } else if (point.y > this.sizeY) {
-      location += 0b0010
-    }
-
-    return location
   }
 
   // Given two perimeter points, traces the shortest valid path between them (stays on
@@ -216,9 +120,18 @@ export default class RectMachine extends Machine {
     return points
   }
 
-  // This method is the guts of logic for this limits enforcer. It will take a single line (defined by
-  // start and end) and if the line goes out of bounds, returns the vertices around the outside edge
-  // to follow around without messing up the shape of the vertices.
+  // Finds the nearest vertex that is in the bounds. This will change the shape. i.e. this
+  // doesn't care about the line segment, only about the point.
+  nearestVertex(vertex) {
+    return new Victor(
+      Math.min(this.sizeX, Math.max(-this.sizeX, vertex.x)),
+      Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y))
+    )
+  }
+
+  // The guts of logic for this limits enforcer. It will take a single line (defined by
+  // start and end) and if the line goes out of bounds, returns the vertices around the
+  // outside edge to follow around without messing up the shape of the vertices.
   clipLine(lineStart, lineEnd) {
     var quadrantStart = this.pointLocation(lineStart)
     var quadrantEnd = this.pointLocation(lineEnd)
@@ -268,7 +181,7 @@ export default class RectMachine extends Machine {
     // Count up the number of boundary lines intersect with our line segment.
     var intersections = []
     for (var s=0; s<sides.length; s++) {
-      var intPoint = intersection(lineStart,
+      var intPoint = this.intersection(lineStart,
                                    lineEnd,
                                    sides[s][0],
                                    sides[s][1])
@@ -350,10 +263,71 @@ export default class RectMachine extends Machine {
     return fixed
   }
 
-  // Finds the nearest vertex that is in the bounds. This will change the shape. i.e. this doesn't
-  // care about the line segment, only about the point.
-  nearestVertex(vertex) {
-    return new Victor(Math.min(this.sizeX, Math.max(-this.sizeX, vertex.x)),
-                  Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y)))
+  // Returns the distance walked from the first vertex to the last vertex.
+  distance(vertices) {
+    let d = 0
+    for(let i=0; i<vertices.length; i++) {
+      if (i > 0) d = d + distance(vertices[i], vertices[i-1])
+    }
+
+    return d
+  }
+
+  // Determines which of 8 neighbor areas the point is in:
+  //   https://stackoverflow.com/questions/3746274/line-intersection-with-aabb-rectangle
+  //           |          |
+  //   0b1001  |  0b0001  |  0b0101
+  //           |          |
+  // ------------------------------ y_max
+  //           |          |
+  //   0b1000  |  0b0000  |  0b0100
+  //           |          |
+  // ------------------------------ y_min
+  //           |          |
+  //   0b1010  |  0b0010  |  0b0110
+  //           |          |
+  //         x_min      x_max
+  //
+  pointLocation(point) {
+    let location = 0b0
+
+    if (point.x < -this.sizeX) {
+      location += 0b1000
+    } else if (point.x > this.sizeX) {
+      location += 0b0100
+    }
+
+    if (point.y < -this.sizeY) {
+      location += 0b0001
+    } else if (point.y > this.sizeY) {
+      location += 0b0010
+    }
+
+    return location
+  }
+
+  // Determines intersection with one of the sides.
+  intersection(lineStart, lineEnd, sideStart, sideEnd) {
+    let line = lineEnd.clone().subtract(lineStart)
+    let side = sideEnd.clone().subtract(sideStart)
+    let lineCrossSidePerp = line.x * side.y - line.y * side.x
+
+    // if line Cross side === 0, it means the lines are parallel so have infinite intersection points
+    if (lineCrossSidePerp === 0) {
+      return null
+    }
+
+    const diff = sideStart.clone().subtract(lineStart)
+    let t = (diff.x * side.y - diff.y * side.x) / lineCrossSidePerp
+    if (t < 0 || t >= 1) {
+      return null
+    }
+
+    const u = (diff.x * line.y - diff.y * line.x) / lineCrossSidePerp
+    if (u < 0 || u >= 1) {
+      return null
+    }
+
+    return lineStart.clone().add(line.clone().multiply(new Victor(t, t)))
   }
 }

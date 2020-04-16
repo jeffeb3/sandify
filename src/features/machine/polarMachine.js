@@ -24,7 +24,6 @@ export const traceCircle = (start, end, size) => {
 }
 
 export default class PolarMachine extends Machine {
-  // vertices should be a Victor array
   constructor(vertices, settings) {
     super()
     this.vertices = vertices
@@ -59,35 +58,8 @@ export default class PolarMachine extends Machine {
     return this
   }
 
-  // walk the given vertices, clipping as needed along the circle perimeter
-  enforceLimits() {
-    let cleanVertices = []
-    let previous = null
-
-    for (let next=0; next<this.vertices.length; next++) {
-      const vertex = this.vertices[next]
-
-      if (previous) {
-        const line = this.clipLine(previous, vertex)
-
-        for (let pt=0; pt<line.length; pt++) {
-          if (line[pt] !== previous) {
-            cleanVertices.push(line[pt])
-          }
-        }
-      } else {
-        cleanVertices.push(this.nearestVertex(vertex))
-      }
-
-      previous = vertex
-    }
-
-    this.vertices = cleanVertices
-    return this
-  }
-
-  // Finds the nearest vertex that is in the bounds of the circle. This will change the shape. i.e. this doesn't
-  // care about the line segment, only about the point.
+  // Finds the nearest vertex that is in the bounds of the circle. This will change the
+  // shape. i.e. this doesn't care about the line segment, only about the point.
   nearestVertex(vertex) {
     const size = this.settings.maxRadius
 
@@ -99,7 +71,7 @@ export default class PolarMachine extends Machine {
     }
   }
 
-  // returns the distance along the perimeter between two points
+  // Returns the distance along the perimeter between two points.
   perimeterDistance(v1, v2) {
     const startAngle = angle(v1)
     const endAngle = angle(v2)
@@ -112,10 +84,24 @@ export default class PolarMachine extends Machine {
     return Math.abs(deltaAngle) * this.settings.maxRadius
   }
 
-  // This method is the guts of logic for this limits enforcer. It will take a single line (defined by
-  // start and end) and if the line goes out of bounds, returns the vertices around the outside edge
-  // to follow around without messing up the shape of the vertices.
-  //
+  // Returns points along the circle from the start to the end, tracing a circle of radius size.
+  tracePerimeter(start, end) {
+    return traceCircle(start, end, this.settings.maxRadius)
+  }
+
+  // Returns whether a given path lies on the perimeter of the circle.
+  onPerimeter(v1, v2, delta=.001) {
+    let rm = Math.pow(this.settings.maxRadius, 2)
+    let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
+    let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
+    let d = this.perimeterDistance(v1, v2)
+
+    return (r1 >= rm - delta && r2 >= rm - delta) && d < 15
+  }
+
+  // The guts of logic for this limits enforcer. It will take a single line (defined by
+  // start and end) and if the line goes out of bounds, returns the vertices around the
+  // outside edge to follow around without messing up the shape of the vertices.
   clipLine(start, end) {
     // Cases:
     // 1 - Entire line is inside
@@ -190,11 +176,6 @@ export default class PolarMachine extends Machine {
     }
   }
 
-  // Returns points along the circle from the start to the end, tracing a circle of radius size.
-  tracePerimeter(start, end) {
-    return traceCircle(start, end, this.settings.maxRadius)
-  }
-
   getIntersections(start, end) {
     const size = this.settings.maxRadius
     let direction = end.clone().subtract(start).clone().normalize()
@@ -225,14 +206,5 @@ export default class PolarMachine extends Machine {
           on: onSegment(start, end, point2),
         }
       ]}
-  }
-
-  onPerimeter(v1, v2, delta=.001) {
-    let rm = Math.pow(this.settings.maxRadius, 2)
-    let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
-    let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
-    let d = this.perimeterDistance(v1, v2)
-
-    return (r1 >= rm - delta && r2 >= rm - delta) && d < 15
   }
 }
