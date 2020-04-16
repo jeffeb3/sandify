@@ -2,6 +2,8 @@
 
 Sandify is working on a solution to turn your cold, empty hearted, emotionless sand tables into cold, empty hearted emotionless sand table robots with enchanting patterns.
 
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fjeffeb3%2Fsandify%2Fbadge&style=for-the-badge)](https://actions-badge.atrox.dev/jeffeb3/sandify/goto)
+
 The output of sandify is gcode you can run on your MPCNC based sand table. The requirements of this
 gcode are:
  - Continuous, since the ball can't lift to travel to another location
