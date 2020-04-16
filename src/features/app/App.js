@@ -4,7 +4,6 @@ import {
   Row
 } from 'react-bootstrap'
 import { Provider } from 'react-redux'
-import './reactGA'
 import Header from './Header'
 import InputTabs from './InputTabs'
 import MachinePreview from '../machine/MachinePreview'
