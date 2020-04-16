@@ -75,7 +75,7 @@ export default class RectMachine extends Machine {
   tracePerimeter(p1, p2, includeOriginalPoints=false) {
     let points
 
-    if ((p1.x === p2.x && Math.abs(p1.x) === 250) || (p1.y === p2.y && (Math.abs(p1.y) === 250))) {
+    if ((p1.x === p2.x && Math.abs(p1.x) === this.sizeX) || (p1.y === p2.y && (Math.abs(p1.y) === this.sizeY))) {
       // on the same line; no connecting points needed
       points = []
     } else {
