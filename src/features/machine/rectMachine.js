@@ -41,11 +41,15 @@ export default class RectMachine extends Machine {
       }
 
       let clipped = this.clipLine(
-        this.vertices[this.vertices.length - 1],
+        outPoint,
         Victor.fromObject(outPoint).multiply(new Victor(scale, scale))
       )
-      this.vertices.push(clipped[clipped.length - 1])
-      this.vertices = [this.vertices, this.tracePerimeter(this.vertices[this.vertices.length - 1], corners[corner], true)].flat()
+      const newPoint = clipped[clipped.length - 1]
+      if (outPoint === last) {
+        this.vertices = [this.vertices, this.tracePerimeter(newPoint, corners[corner], true)].flat()
+      } else {
+        this.vertices = [this.tracePerimeter(corners[corner], newPoint, true), this.vertices].flat()
+      }
     }
 
     return this
