@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 import {
   transformShapes,
   thetaRho
-} from '../../common/Computer'
+} from './computer'
 
 const getApp = state => state.app
 const getShapes = state => state.shapes

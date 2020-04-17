@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
 const options = {
@@ -30,7 +30,7 @@ export default class Polygon extends Shape {
     let points = []
     for (let i=0; i<=state.shape.polygonSides; i++) {
       let angle = Math.PI * 2.0 / state.shape.polygonSides * (0.5 + i)
-      points.push(Vertex(Math.cos(angle), Math.sin(angle)))
+      points.push(new Victor(Math.cos(angle), Math.sin(angle)))
     }
     return points
   }

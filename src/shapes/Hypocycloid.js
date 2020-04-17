@@ -1,4 +1,4 @@
-import { Vertex } from '../common/Geometry'
+import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
 const options = {
@@ -40,7 +40,7 @@ export default class Star extends Shape {
     for (let i=0; i<128; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
       let scale = 0.65
-      points.push(Vertex(scale * (a - b) * Math.cos(angle) + scale * b * Math.cos(((a - b) / b) * angle),
+      points.push(new Victor(scale * (a - b) * Math.cos(angle) + scale * b * Math.cos(((a - b) / b) * angle),
                          scale * (a - b) * Math.sin(angle) - scale * b * Math.sin(((a - b) / b) * angle)))
     }
     return points

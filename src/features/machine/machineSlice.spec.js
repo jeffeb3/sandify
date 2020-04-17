@@ -15,6 +15,7 @@ describe('machine reducer', () => {
       minY: 0,
       maxY: 500,
       maxRadius: 250,
+      minimizeMoves: false,
       rectOrigin: [],
       polarStartPoint: 'none',
       polarEndPoint: 'none',

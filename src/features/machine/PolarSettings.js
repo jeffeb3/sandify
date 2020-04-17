@@ -9,18 +9,21 @@ import {
     ToggleButton,
     ToggleButtonGroup
 } from 'react-bootstrap'
+import Switch from 'react-switch'
 import {
   toggleMachinePolarExpanded,
-  updateMachine
+  updateMachine,
+  toggleMinimizeMoves
 } from './machineSlice'
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    expanded:   state.machine.polarExpanded,
-    active:     !state.machine.rectangular,
+    expanded: state.machine.polarExpanded,
+    active: !state.machine.rectangular,
     maxRadius: state.machine.maxRadius,
     startPoint: state.machine.polarStartPoint,
-    endPoint: state.machine.polarEndPoint
+    endPoint: state.machine.polarEndPoint,
+    minimizeMoves: state.machine.minimizeMoves
   }
 }
 
@@ -37,7 +40,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onEndPointChange: (value) => {
       dispatch(updateMachine({polarEndPoint: value}))
-    }
+    },
+    toggleMinimizeMoves: () => {
+      dispatch(toggleMinimizeMoves());
+    },
   }
 }
 
@@ -94,6 +100,17 @@ class PolarSettings extends Component {
                   <ToggleButton variant="light" value="center">center</ToggleButton>
                   <ToggleButton variant="light" value="perimeter">perimeter</ToggleButton>
                 </ToggleButtonGroup>
+              </Col>
+            </Row>
+
+            <Row className="align-items-center pb-1">
+              <Col sm={5}>
+                <Form.Label htmlFor="minimizeMoves">
+                  Try to minimize<br />perimeter moves
+                </Form.Label>
+              </Col>
+              <Col sm={7}>
+                <Switch checked={this.props.minimizeMoves} onChange={this.props.toggleMinimizeMoves} />
               </Col>
             </Row>
           </Card.Body>

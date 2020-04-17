@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
-import { Vertex } from '../../common/Geometry'
+import Victor from 'victor'
 import { setMachineSize } from './machineSlice'
-import { transform } from '../../common/Computer'
+import { transform } from './computer'
 import { getVertices } from './selectors'
 import { createSelector } from 'reselect'
 import throttle from 'lodash/throttle'
@@ -18,10 +18,10 @@ const getTrackVertices = createSelector(
     getTransforms
   ],
   (shapes, transforms) => {
-    let currentTransform = transforms.byId[shapes.currentId]
-
-    var numLoops = currentTransform.numLoops
+    const currentTransform = transforms.byId[shapes.currentId]
+    const numLoops = currentTransform.numLoops
     var trackVertices = []
+
     for (var i=0; i<numLoops; i++) {
       if (currentTransform.trackEnabled) {
         trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i, i))
@@ -107,7 +107,7 @@ class PreviewWindow extends Component {
     // Y for pixels starts at the top, and goes down.
     var y = -vertex.y * min_scale + this.props.canvasHeight/2.0
 
-    return Vertex(x, y)
+      return new Victor(x, y)
   }
 
   moveTo_mm(context, vertex) {
@@ -127,10 +127,10 @@ class PreviewWindow extends Component {
     context.fill()
   }
 
-  slice_vertices(vertices, sliderValue) {
+  sliderVertexRange(vertices, sliderValue) {
     const slide_size = 10.0
     if (sliderValue === 0) {
-      return vertices
+      return [0, vertices.length - 1]
     }
 
     // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
@@ -148,7 +148,7 @@ class PreviewWindow extends Component {
       if (begin_vertex > 0) begin_vertex = begin_vertex - 1
     }
 
-    return vertices.slice(begin_vertex, end_vertex)
+    return [begin_vertex, end_vertex]
   }
 
   paint(context) {
@@ -159,32 +159,39 @@ class PreviewWindow extends Component {
     context.lineWidth = "1"
     context.strokeStyle = "lightblue"
     if (this.props.use_rect) {
-      this.moveTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, Vertex((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.moveTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
+      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
     } else {
-      this.moveTo_mm(context, Vertex(this.props.maxRadius, 0.0))
+      this.moveTo_mm(context, new Victor(this.props.maxRadius, 0.0))
       let resolution = 128.0
       for (let i=0; i<=resolution; i++) {
         let angle = Math.PI * 2.0 / resolution * i
-        this.lineTo_mm(context, Vertex(this.props.maxRadius * Math.cos(angle),
+        this.lineTo_mm(context, new Victor(this.props.maxRadius * Math.cos(angle),
                                        this.props.maxRadius * Math.sin(angle)))
       }
     }
     context.stroke()
 
     if (this.props.vertices && this.props.vertices.length > 0) {
-      let drawing_vertices = this.slice_vertices(this.props.vertices, this.props.sliderValue)
+      let sliderRange = this.sliderVertexRange(this.props.vertices, this.props.sliderValue)
+      let drawing_vertices = this.props.vertices.slice(sliderRange[0], sliderRange[1] + 1)
 
       // Draw the background vertices
       if (this.props.sliderValue !== 0) {
         context.beginPath()
         context.lineWidth = this.mmToPixelsScale()
-        context.strokeStyle = "rgba(204, 204, 204, 0.35)"
+        context.strokeStyle = Color('#6E6E00')
         this.moveTo_mm(context, this.props.vertices[0])
+        
         for (let i=0; i<this.props.vertices.length; i++) {
+          if (i === sliderRange[1]-1) {
+            context.stroke()
+            context.beginPath()
+            context.strokeStyle = "rgba(204, 204, 204, 0.35)"
+          }
           this.lineTo_mm(context, this.props.vertices[i])
         }
         context.stroke()
@@ -245,10 +252,10 @@ class PreviewWindow extends Component {
         context.lineWidth = 6.0
         this.dot_mm(context, sliderEndPoint)
 
-        // START debug: uncomment these lines to show slider end point coordinates
+        // START: uncomment these lines to show slider end point coordinates
         // context.font = "20px Arial"
         // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-        // END debug
+        // END
         context.stroke()
       }
     }

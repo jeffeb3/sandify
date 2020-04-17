@@ -15,7 +15,6 @@ import {
 } from './gCodeSlice'
 import { getComments } from './selectors'
 import { getVertices } from '../machine/selectors'
-import { Vertex } from '../../common/Geometry'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
 
@@ -184,9 +183,8 @@ class GCodeGenerator extends Component {
 
         // This loads up (start, end].
         for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
-          subsampledVertices.push(Vertex(start.x + step * deltaSegment.x,
-                                         start.y + step * deltaSegment.y,
-                                         this.props.vertices[next].f))
+          subsampledVertices.push(new Victor(start.x + step * deltaSegment.x,
+                                         start.y + step * deltaSegment.y))
         }
 
       }
@@ -224,7 +222,7 @@ class GCodeGenerator extends Component {
       previousRawTheta = rawTheta
       previousTheta = theta
 
-      trVertices.push(Vertex(theta, rho, subsampledVertices[next].f))
+      trVertices.push(new Victor(theta, rho))
     }
 
     var lines = trVertices.map(thetarho)
