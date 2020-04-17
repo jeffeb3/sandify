@@ -18,7 +18,7 @@ export const vec2 = (...args) => {
   return args.splice(0, 2)
 }
 
-export class Graph {
+export default class Graph {
   constructor() {
     this.nodes = []
     this.adjacencyList = {}
