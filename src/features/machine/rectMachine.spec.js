@@ -1,4 +1,4 @@
-import RectMachine from './rectMachine'
+import RectMachine from './RectMachine'
 
 describe('rect machine', () => {
   let machine
