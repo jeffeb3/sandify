@@ -2,9 +2,7 @@ import { angle, onSegment } from '../../common/Geometry'
 import Machine from './machine'
 import Victor from 'victor'
 
-export const traceCircle = (start, end, size) => {
-  const startAngle = start.angle()
-  const endAngle = end.angle()
+export const traceCircle = (startAngle, endAngle, size) => {
   let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?
   let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI)
 
@@ -86,7 +84,7 @@ export default class PolarMachine extends Machine {
 
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
-    return traceCircle(start, end, this.settings.maxRadius)
+    return traceCircle(start.angle(), end.angle(), this.settings.maxRadius)
   }
 
   // Returns whether a given path lies on the perimeter of the circle.
@@ -140,7 +138,7 @@ export default class PolarMachine extends Machine {
     }
 
     // if neither point is on the segment, then it should just be a trace
-    if (!intersections.points[0].on && ! intersections.points[1].on) {
+    if (!intersections.points[0].on && !intersections.points[1].on) {
       return this.tracePerimeter(start, end)
     }
 
