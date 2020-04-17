@@ -1,6 +1,6 @@
 import Victor from 'victor'
-import Machine from './machine'
-import { distance } from '../../common/Geometry'
+import Machine from './Machine'
+import { distance } from '../../common/geometry'
 
 export default class RectMachine extends Machine {
   constructor(vertices, settings) {

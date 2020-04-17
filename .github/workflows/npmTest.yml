@@ -8,7 +8,7 @@
 # https://help.github.com/en/actions/language-and-framework-guides/using-nodejs-with-github-actions
 name: npm test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:

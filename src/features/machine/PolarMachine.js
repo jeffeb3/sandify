@@ -1,5 +1,5 @@
-import { angle, onSegment } from '../../common/Geometry'
-import Machine from './machine'
+import { angle, onSegment } from '../../common/geometry'
+import Machine from './Machine'
 import Victor from 'victor'
 
 export const traceCircle = (startAngle, endAngle, size) => {

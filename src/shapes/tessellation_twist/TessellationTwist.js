@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import { Graph, vec2, mix } from '../../common/Graph'
+import Graph, { vec2, mix } from '../../common/Graph'
 import eulerianTrail from '../../common/eulerianTrail'
 import { difference } from '../../common/util'
 import Shape, { shapeOptions } from '../Shape'
