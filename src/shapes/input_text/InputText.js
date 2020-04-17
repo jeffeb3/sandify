@@ -1,7 +1,7 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
 import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
-import { traceCircle } from '../../features/machine/polarMachine'
+import { traceCircle } from '../../features/machine/PolarMachine'
 
 const options = {
   ...shapeOptions,
