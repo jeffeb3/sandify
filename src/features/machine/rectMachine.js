@@ -61,7 +61,7 @@ export default class RectMachine extends Machine {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
     const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
 
-    if (dx < delta || dy < delta) {
+    if ((v1.x === v2.x && dx < delta) || (v1.y === v2.y && dy < delta)) {
       return v1.x === v2.x || v1.y === v2.y
     } else {
       return false
