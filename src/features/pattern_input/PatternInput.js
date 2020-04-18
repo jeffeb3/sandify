@@ -136,12 +136,15 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       maxX = Math.max(vertex.x, maxX)
       maxY = Math.max(vertex.y, maxY)
     })
-
+    console.log(minX)
+    console.log(minY)
+    console.log(maxX)
+    console.log(maxY)
     const offsetX = (maxX + minX)/2.0
     const offsetY = (maxY + minY)/2.0
 
-    const scaleX = 1.0/offsetX
-    const scaleY = 1.0/offsetY
+    const scaleX = 0.97/(maxX - offsetX)
+    const scaleY = 0.97/(maxY - offsetY)
 
     return vertices.map( (vertex) => {
       return {
@@ -179,30 +182,65 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         }
       }
 
-      let first_point = true
       var addVertex = (x, y) => {
-        if (!first_point) {
-          rv.vertices.push({x: x,y: y})
-        }
-        first_point = false
+        rv.vertices.push({x: x,y: y})
       }
       const toolpath = new Toolpath({
         // @param {object} modal The modal object.
         // @param {object} v1 A 3D vector of the start point.
         // @param {object} v2 A 3D vector of the end point.
         addLine: (modal, v1, v2) => {
-          addVertex(v2.x, v2.y)
+          if (v1.x !== v2.x || v1.y !== v2.y) {
+            addVertex(v2.x, v2.y)
+          }
         },
         // @param {object} modal The modal object.
         // @param {object} v1 A 3D vector of the start point.
         // @param {object} v2 A 3D vector of the end point.
         // @param {object} v0 A 3D vector of the fixed point.
         addArcCurve: (modal, v1, v2, v0) => {
+          if (v1.x !== v2.x || v1.y !== v2.y) {
+            console.log(modal)
+            console.log(v0)
+            console.log(v1)
+            console.log(v2)
+            let startTheta = Math.atan2(v1.y-v0.y, v1.x-v0.x)
+            let endTheta = Math.atan2(v2.y-v0.y, v2.x-v0.x)
+            let deltaTheta = endTheta - startTheta
+            const radius = Math.sqrt(Math.pow(v2.x-v0.x, 2.0) + Math.pow(v2.y-v0.y, 2.0))
+            let direction = 1.0
+            if (modal.motion === 'G2') {
+              // Clockwise
+              if (deltaTheta > 0.0) {
+                endTheta -= 2.0*Math.PI
+                deltaTheta -= 2.0*Math.PI
+              }
+              direction = -1.0
+            } else if (modal.motion === 'G3') {
+              // Anti-clockwise
+              if (deltaTheta < 0.0) {
+                endTheta += 2.0*Math.PI
+                deltaTheta += 2.0*Math.PI
+              }
+            }
+            console.log(startTheta)
+            console.log(endTheta)
+            console.log(deltaTheta)
+            console.log(radius)
+            // What angle do we need to have a resolution of approx. 0.1mm?
+            const arcLength = Math.abs(deltaTheta) * radius
+            const thetaStep = deltaTheta * 0.1/arcLength
+            console.log(thetaStep)
+            for (let theta = startTheta; direction * theta < direction * endTheta; theta += thetaStep) {
+              addVertex(v0.x + radius * Math.cos(theta), v0.y + radius * Math.sin(theta))
+            }
+          }
         }
       });
 
       toolpath
         .loadFromString(text, (err, results) => {
+          console.log(rv.vertices)
           dispatch(setFileComments(rv.comments))
           dispatch(setFileVertices(normalizeCoords(rv.vertices)))
           const endTime = performance.now()
