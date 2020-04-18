@@ -7,6 +7,7 @@ import {
     Form,
     Row,
 } from 'react-bootstrap'
+import Toolpath from 'gcode-toolpath';
 import Switch from 'react-switch'
 import {
   setFileName,
@@ -15,7 +16,7 @@ import {
   setFileZoom,
   toggleFileAspectRatio
 } from './fileSlice'
-import './ThetaRho.scss'
+import './PatternInput.scss'
 import ReactGA from 'react-ga'
 
 const mapStateToProps = (state, ownProps) => {
@@ -115,10 +116,103 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(setFileVertices(convertToXY(rv.vertices)))
       const endTime = performance.now()
       ReactGA.timing({
-        category: 'ThetaRho',
+        category: 'PatternInput',
         variable: 'readThetaRho',
         value: endTime - startTime, // in milliseconds
       });
+    }
+
+    reader.readAsText(file)
+  }
+
+  var normalizeCoords = (vertices) => {
+    let minX = 1e9
+    let minY = 1e9
+    let maxX = -1e9
+    let maxY = -1e9
+    vertices.forEach( (vertex) => {
+      minX = Math.min(vertex.x, minX)
+      minY = Math.min(vertex.y, minY)
+      maxX = Math.max(vertex.x, maxX)
+      maxY = Math.max(vertex.y, maxY)
+    })
+
+    const offsetX = (maxX + minX)/2.0
+    const offsetY = (maxY + minY)/2.0
+
+    const scaleX = 1.0/offsetX
+    const scaleY = 1.0/offsetY
+
+    return vertices.map( (vertex) => {
+      return {
+        x: scaleX * (vertex.x - offsetX),
+        y: scaleY * (vertex.y - offsetY)
+      }
+    })
+  }
+
+  var parseGcodeFile = (file) => {
+    let rv = {}
+    rv.comments = []
+    rv.vertices = []
+
+    let reader = new FileReader()
+
+    var isComment = (line) => {
+      return (line.indexOf(";") === 0) || (line.indexOf('(') === 0)
+    }
+
+    reader.onload = (event) => {
+      const startTime = performance.now()
+      var text = reader.result
+      var lines = text.split('\n')
+      for (let ii = 0; ii < lines.length; ii++) {
+        var line = lines[ii].trim()
+        if (line.length === 0) {
+          // blank lines
+          continue
+        }
+        if (isComment(line)) {
+          rv.comments.push(lines[ii])
+        } else {
+          break
+        }
+      }
+
+      let first_point = true
+      var addVertex = (x, y) => {
+        if (!first_point) {
+          rv.vertices.push({x: x,y: y})
+        }
+        first_point = false
+      }
+      const toolpath = new Toolpath({
+        // @param {object} modal The modal object.
+        // @param {object} v1 A 3D vector of the start point.
+        // @param {object} v2 A 3D vector of the end point.
+        addLine: (modal, v1, v2) => {
+          addVertex(v2.x, v2.y)
+        },
+        // @param {object} modal The modal object.
+        // @param {object} v1 A 3D vector of the start point.
+        // @param {object} v2 A 3D vector of the end point.
+        // @param {object} v0 A 3D vector of the fixed point.
+        addArcCurve: (modal, v1, v2, v0) => {
+        }
+      });
+
+      toolpath
+        .loadFromString(text, (err, results) => {
+          dispatch(setFileComments(rv.comments))
+          dispatch(setFileVertices(normalizeCoords(rv.vertices)))
+          const endTime = performance.now()
+          ReactGA.timing({
+            category: 'PatternInput',
+            variable: 'readGCode',
+            value: endTime - startTime, // in milliseconds
+          });
+        })
+
     }
 
     reader.readAsText(file)
@@ -128,7 +222,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     setVertices: (event: any) => {
       var file = event.target.files[0]
       dispatch(setFileName(file.name))
-      parseThrFile(file)
+      if (file.name.toLowerCase().endsWith('.thr')) {
+        parseThrFile(file)
+      } else if (file.name.toLowerCase().endsWith('.gcode') || file.name.toLowerCase().endsWith('.nc')) {
+        parseGcodeFile(file)
+      }
+
     },
     setZoom: (event) => {
       dispatch(setFileZoom(parseFloat(event.target.value)))
@@ -139,14 +238,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-class ThetaRho extends Component {
+class PatternInput extends Component {
   render() {
     var commentsRender = this.props.comments.map((comment, index) => {
       return <span key={index}>{comment}<br/></span>
     })
 
     return (
-      <div className="theta-rho">
+      <div className="pattern-input">
         <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
@@ -156,7 +255,7 @@ class ThetaRho extends Component {
                 <Form.Control
                     id="fileUpload"
                     type="file"
-                    accept=".thr"
+                    accept=".thr,.gcode,.nc"
                     onChange={this.props.setVertices}
                     style={{ display: "none" }} />
               </Card.Header>
@@ -185,7 +284,7 @@ class ThetaRho extends Component {
             </Col>
           </Row>
 
-          { this.props.name && <div id="theta-rho-comments" className="mt-4 p-3">
+          { this.props.name && <div id="pattern-input-comments" className="mt-4 p-3">
             Name: {this.props.name} <br />
             Comments:
             <div className="ml-3">
@@ -217,4 +316,4 @@ class ThetaRho extends Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ThetaRho)
+export default connect(mapStateToProps, mapDispatchToProps)(PatternInput)
