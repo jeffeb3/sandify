@@ -24,7 +24,8 @@ const mapStateToProps = (state, ownProps) => {
   return {
     shape: shape,
     options: metashape.getOptions(),
-    link: metashape.link
+    link: metashape.link,
+    linkText: metashape.linkText
   }
 }
 
@@ -85,7 +86,8 @@ class Shape extends Component {
 
     let optionsListRender = undefined
     if (Object.entries(this.props.options).length > 0) {
-      const linkRender = this.props.link ? <p className="mb-3">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{this.props.link}</a> for ideas.</p> : undefined
+      const linkText = this.props.linkText || this.props.link
+      const linkRender = this.props.link ? <p className="mb-3">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p> : undefined
 
       optionsListRender =
         <div className="shape-options">
