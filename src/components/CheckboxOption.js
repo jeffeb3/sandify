@@ -25,6 +25,11 @@ class CheckboxOption extends Component {
             onChange={(checked) => {
               let attrs = {}
               attrs[this.props.optionKey] = checked
+
+              if (option.onChange !== undefined) {
+                attrs = option.onChange(attrs)
+              }
+              
               this.props.onChange(attrs)
             }} />
         </Col>

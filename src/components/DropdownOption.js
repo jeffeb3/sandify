@@ -27,6 +27,11 @@ class DropdownOption extends Component {
               const value = choice.value
               let attrs = {}
               attrs[this.props.optionKey] = value
+
+              if (option.onChange !== undefined) {
+                attrs = option.onChange(attrs)
+              }
+
               this.props.onChange(attrs)
             }}
             options={option.choices.map((choice) => {
