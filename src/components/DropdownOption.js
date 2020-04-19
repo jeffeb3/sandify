@@ -29,7 +29,7 @@ class DropdownOption extends Component {
               attrs[this.props.optionKey] = value
 
               if (option.onChange !== undefined) {
-                attrs = option.onChange(attrs)
+                attrs = option.onChange(attrs, model)
               }
 
               this.props.onChange(attrs)

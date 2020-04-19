@@ -1,31 +1,32 @@
 import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
+import { lsystem, lsystemPath } from '../../common/lindenmayer'
+import { resizeVertices } from '../../common/geometry'
+import { fillers } from './fillers'
 
-let options = {
+const options = {
   ...shapeOptions,
   ...{
     fillerOrder: {
       title: 'Level',
       min: 1,
       max: (state) => {
-        if (state.fillerType === 'Peano') {
-          return 5
-        } else {
-          return 8
-        }
+        return (fillers[state.fillerType] && fillers[state.fillerType].maxOrder) || 7
       }
     },
     fillerType: {
-      title: 'Type',
+      title: 'Fill type',
       type: 'dropdown',
-      choices: ['Hilbert', 'Peano', 'Morton'],
-      onChange: (attrs) => {
-        if (attrs.fillerType === 'Peano') {
-          // if we switch back to Peano with too high a fillerOrder, the code
-          // will crash from recursion, so we'll set a ceiling
-          attrs.fillerOrder = Math.max(attrs.fillerOrder || 1, 5)
+      choices: [
+        'Gosper (flowsnake)', 'Hilbert', 'Hilbert II', 'Morton', 'Peano',
+        'Sierpinski', 'Sierpinski Square'],
+      onChange: (changes, attrs) => {
+        // if we switch back with too high a fillerOrder, the code
+        // will crash from recursion, so we'll set a ceiling where needed
+        if (fillers[changes.fillerType]) {
+          changes.fillerOrder = Math.min(attrs.fillerOrder || 1, fillers[changes.fillerType].maxOrder || 7)
         }
-        return attrs
+        return changes
       }
     },
   }
@@ -54,80 +55,86 @@ export default class SpaceFiller extends Shape {
     }
   }
 
-  // See https://thecodingtrain.com/CodingInTheCabana/003-hilbert-curve.html for basic idea.
   // Algorithm adapted from https://editor.p5js.org/simontiger/full/2CrT12N4
   getVertices(state) {
     const machine = state.machine
     const shape = state.shape
     const order = shape.fillerOrder || 1
 
-    // feed our algorithm based on the specific space filling curve
-    let grid, seed, rotation
-    if (shape.fillerType === 'Hilbert') {
-      grid = 2
-      seed = [0, 2, 3, 1]
-      rotation = [6, 7, 0, 0]
-    } else if (shape.fillerType === 'Peano') {
-      grid = 3
-      seed = [0, 3, 6, 7, 4, 1, 2, 5, 8]
-      rotation = [0, 5, 0, 4, 2, 4, 0, 5, 0]
-    } else {
-      grid = 2
-      seed = [1, 0, 3, 2]
-      rotation = [0, 0, 0, 0]
-    }
-
-    // create initial seed vertices that are sized to fill the entire machine area
-    let size
+    let sizeX, sizeY
     if (machine.rectangular) {
-      size = Math.max(machine.maxY - machine.minY, machine.maxX - machine.minX)
+      sizeX = machine.maxX - machine.minX
+      sizeY = machine.maxY - machine.minY
     } else {
-      size = machine.maxRadius * 2.0
-    }
-    size = size / grid
-
-    let seedPoints = []
-    for (let j = 0; j < grid; j++) {
-      for (let i = 0; i < grid; i++) {
-        seedPoints.push(new Victor(i*size + size/2, j*size + size/2))
-      }
+      sizeX = sizeY = machine.maxRadius * 2.0
     }
 
-    let seedPointsOrdered = []
-    for (let i=0; i<seed.length; i++) {
-      seedPointsOrdered.push(seedPoints[seed[i]])
+    let config = fillers[shape.fillerType]
+    if (shape.fillerType === 'Morton') {
+      // generate our vertices using space filling curve recursion
+      config.sizeX = sizeX
+      config.sizeY = sizeY
+      return this.spaceFillingCurve(order, config)
+    } else {
+      // generate our vertices using a set of l-system rules
+      let config = fillers[shape.fillerType]
+      config.steps = order
+
+      if (config.side === undefined) { config.side = 5 }
+      if (config.angle === undefined) { config.angle = Math.PI/2 }
+
+      let curve = lsystemPath(lsystem(config), config)
+      let scale = config.orderGrow ? order : 1
+
+      return resizeVertices(curve, sizeX*scale, sizeY*scale)
     }
-
-    // recursively generate our curve
-    let curve = this.fillSpace(order, {
-      seed: seed,
-      seedPointsOrdered: seedPointsOrdered,
-      grid: grid,
-      rotation: rotation,
-      size: size
-    })
-
-    return curve.map(vertex => vertex.add({x: -size*grid/2, y: -size*grid/2}))
   }
 
   getOptions() {
     return options
   }
 
-  fillSpace(order, settings) {
+  spaceFillingCurve(order, config) {
+    // create initial seed vertices that are sized to fill the entire machine area
+    let size = Math.max(config.sizeX, config.sizeY) / config.grid
+    let seedPoints = []
+    let seedPointsOrdered = []
+
+    for (let j = 0; j < config.grid; j++) {
+      for (let i = 0; i < config.grid; i++) {
+        seedPoints.push(new Victor(i*size + size/2, j*size + size/2))
+      }
+    }
+
+    for (let i=0; i<config.seed.length; i++) {
+      seedPointsOrdered.push(seedPoints[config.seed[i]])
+    }
+
+    config.seedPointsOrdered = seedPointsOrdered
+    config.size = size
+
+    // recursively generate our curve
+    let curve = this.fillSpace(order, config)
+    return curve.map(vertex => vertex.add({x: -size*config.grid/2, y: -size*config.grid/2}))
+  }
+
+  // Algorithm adapted from https://editor.p5js.org/simontiger/full/2CrT12N4
+  // Needed at the moment only for the Morton curve because I could not find
+  // L-system rules to define one.
+  fillSpace(order, config) {
     const {
       seed,
       seedPointsOrdered,
       grid,
       rotation,
       size
-    } = settings
+    } = config
 
     if (order === 1) {
       return seedPointsOrdered
     }
 
-    const prevOrder = this.fillSpace(order - 1, settings)
+    const prevOrder = this.fillSpace(order - 1, config)
     let copies = []
 
     for (let j=0; j<grid; j++) {
