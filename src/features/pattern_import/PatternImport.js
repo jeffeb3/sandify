@@ -141,8 +141,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     const offsetX = (maxX + minX)/2.0
     const offsetY = (maxY + minY)/2.0
 
-    const scaleX = 0.97/(maxX - offsetX)
-    const scaleY = 0.97/(maxY - offsetY)
+    const scaleX = 1.0/(maxX - offsetX)
+    const scaleY = 1.0/(maxY - offsetY)
 
     return vertices.map( (vertex) => {
       return {
