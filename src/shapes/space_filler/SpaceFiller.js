@@ -1,4 +1,3 @@
-import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
 import { lsystem, lsystemPath } from '../../common/lindenmayer'
 import { resizeVertices } from '../../common/geometry'
