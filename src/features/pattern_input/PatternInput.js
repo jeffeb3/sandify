@@ -125,6 +125,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     reader.readAsText(file)
   }
 
+  // We want to scale and center the pattern. This may mess up some patterns which were off center,
+  // but there are so many machine coordinates, it will be just too annoying if we don't.
   var normalizeCoords = (vertices) => {
     let minX = 1e9
     let minY = 1e9
@@ -136,10 +138,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       maxX = Math.max(vertex.x, maxX)
       maxY = Math.max(vertex.y, maxY)
     })
-    console.log(minX)
-    console.log(minY)
-    console.log(maxX)
-    console.log(maxY)
     const offsetX = (maxX + minX)/2.0
     const offsetY = (maxY + minY)/2.0
 
@@ -161,6 +159,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
     let reader = new FileReader()
 
+    // This assumes the line is already trimmed and not empty.
+    // The paranthesis isn't perfect, since it usually has a match, but I don't think anyone will
+    // care. I think there are firmwares that do this same kind of hack.
     var isComment = (line) => {
       return (line.indexOf(";") === 0) || (line.indexOf('(') === 0)
     }
@@ -169,6 +170,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       const startTime = performance.now()
       var text = reader.result
       var lines = text.split('\n')
+
+      // Read the initial comments
       for (let ii = 0; ii < lines.length; ii++) {
         var line = lines[ii].trim()
         if (line.length === 0) {
@@ -185,6 +188,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       var addVertex = (x, y) => {
         rv.vertices.push({x: x,y: y})
       }
+
+      // GCode reader object. More info here:
+      // https://github.com/cncjs/gcode-toolpath/blob/master/README.md
       const toolpath = new Toolpath({
         // @param {object} modal The modal object.
         // @param {object} v1 A 3D vector of the start point.
@@ -200,17 +206,15 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         // @param {object} v0 A 3D vector of the fixed point.
         addArcCurve: (modal, v1, v2, v0) => {
           if (v1.x !== v2.x || v1.y !== v2.y) {
-            console.log(modal)
-            console.log(v0)
-            console.log(v1)
-            console.log(v2)
+            // We can't use traceCircle, we have to go a specific direction (not the shortest path).
             let startTheta = Math.atan2(v1.y-v0.y, v1.x-v0.x)
-            let endTheta = Math.atan2(v2.y-v0.y, v2.x-v0.x)
+            let endTheta   = Math.atan2(v2.y-v0.y, v2.x-v0.x)
             let deltaTheta = endTheta - startTheta
-            const radius = Math.sqrt(Math.pow(v2.x-v0.x, 2.0) + Math.pow(v2.y-v0.y, 2.0))
-            let direction = 1.0
+            const radius   = Math.sqrt(Math.pow(v2.x-v0.x, 2.0) + Math.pow(v2.y-v0.y, 2.0))
+            let direction  = 1.0 // Positive, so anticlockwise.
+
+            // Clockwise
             if (modal.motion === 'G2') {
-              // Clockwise
               if (deltaTheta > 0.0) {
                 endTheta -= 2.0*Math.PI
                 deltaTheta -= 2.0*Math.PI
@@ -223,24 +227,25 @@ const mapDispatchToProps = (dispatch, ownProps) => {
                 deltaTheta += 2.0*Math.PI
               }
             }
-            console.log(startTheta)
-            console.log(endTheta)
-            console.log(deltaTheta)
-            console.log(radius)
-            // What angle do we need to have a resolution of approx. 0.1mm?
+
+            // What angle do we need to have a resolution of approx. 0.5mm?
+            const arcResolution = 0.5
             const arcLength = Math.abs(deltaTheta) * radius
-            const thetaStep = deltaTheta * 0.1/arcLength
-            console.log(thetaStep)
-            for (let theta = startTheta; direction * theta < direction * endTheta; theta += thetaStep) {
+            const thetaStep = deltaTheta * arcResolution/arcLength
+            for (let theta = startTheta;
+                 direction * theta <= direction * endTheta;
+                 theta += thetaStep) {
               addVertex(v0.x + radius * Math.cos(theta), v0.y + radius * Math.sin(theta))
             }
+            // Save the final point, in case our math didn't quite get there.
+            addVertex(v2.x, v2.y)
+            console.log(rv.vertices)
           }
         }
       });
 
       toolpath
         .loadFromString(text, (err, results) => {
-          console.log(rv.vertices)
           dispatch(setFileComments(rv.comments))
           dispatch(setFileVertices(normalizeCoords(rv.vertices)))
           const endTime = performance.now()
