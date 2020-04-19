@@ -5,7 +5,7 @@ import {
 } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import ShapeList from '../shapes/ShapeList'
-import PatternInput from '../pattern_input/PatternInput'
+import PatternImport from '../pattern_import/PatternImport'
 import MachineSettings from '../machine/MachineSettings'
 import Footer from './Footer'
 import { chooseInput } from '../app/appSlice'
@@ -32,7 +32,7 @@ class InputTabs extends Component {
          </Tab>
 
          <Tab eventKey="code" title="Import" className="full-page-tab">
-           <PatternInput />
+           <PatternImport />
          </Tab>
 
          <Tab eventKey="about" title="About" className="full-page-tab">

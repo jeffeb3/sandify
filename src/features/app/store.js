@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
 import appReducer from './appSlice'
-import fileReducer from '../pattern_input/fileSlice'
+import fileReducer from '../pattern_import/fileSlice'
 import machineReducer from '../machine/machineSlice'
 import gcodeReducer from '../gcode/gCodeSlice'
 import shapesReducer from '../shapes/shapesSlice'

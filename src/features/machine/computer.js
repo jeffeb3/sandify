@@ -144,7 +144,7 @@ export const polishVertices = (state, vertices) => {
   return vertices
 }
 
-export const thetaRho = (state) => {
+export const patternImport = (state) => {
   let machine = state.machine
   var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.file.zoom
   var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom

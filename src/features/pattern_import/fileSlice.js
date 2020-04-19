@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const fileSlice = createSlice({
-  name: 'theta rho file',
+  name: 'pattern import file',
   initialState: {
     name: "",
     comments: [],

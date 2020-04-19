@@ -16,7 +16,7 @@ import {
   setFileZoom,
   toggleFileAspectRatio
 } from './fileSlice'
-import './PatternInput.scss'
+import './PatternImport.scss'
 import ReactGA from 'react-ga'
 
 const mapStateToProps = (state, ownProps) => {
@@ -116,7 +116,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(setFileVertices(convertToXY(rv.vertices)))
       const endTime = performance.now()
       ReactGA.timing({
-        category: 'PatternInput',
+        category: 'PatternImport',
         variable: 'readThetaRho',
         value: endTime - startTime, // in milliseconds
       });
@@ -250,7 +250,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
           dispatch(setFileVertices(normalizeCoords(rv.vertices)))
           const endTime = performance.now()
           ReactGA.timing({
-            category: 'PatternInput',
+            category: 'PatternImport',
             variable: 'readGCode',
             value: endTime - startTime, // in milliseconds
           });
@@ -281,14 +281,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-class PatternInput extends Component {
+class PatternImport extends Component {
   render() {
     var commentsRender = this.props.comments.map((comment, index) => {
       return <span key={index}>{comment}<br/></span>
     })
 
     return (
-      <div className="pattern-input">
+      <div className="pattern-import">
         <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
@@ -327,7 +327,7 @@ class PatternInput extends Component {
             </Col>
           </Row>
 
-          { this.props.name && <div id="pattern-input-comments" className="mt-4 p-3">
+          { this.props.name && <div id="pattern-import-comments" className="mt-4 p-3">
             Name: {this.props.name} <br />
             Comments:
             <div className="ml-3">
@@ -359,4 +359,4 @@ class PatternInput extends Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PatternInput)
+export default connect(mapStateToProps, mapDispatchToProps)(PatternImport)
