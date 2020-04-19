@@ -150,11 +150,8 @@ export const patternImport = (state) => {
   var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom
 
   if (!machine.rectangular) {
-    x_scale = y_scale = machine.maxRadius
+    x_scale = y_scale = machine.maxRadius * 0.01 * state.file.zoom
   }
-
-  x_scale *= 0.01 * state.file.zoom
-  y_scale *= 0.01 * state.file.zoom
 
   if (state.file.aspectRatio) {
     x_scale = y_scale = Math.min(x_scale,y_scale)
