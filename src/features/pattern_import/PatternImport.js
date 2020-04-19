@@ -14,6 +14,7 @@ import {
   setFileComments,
   setFileVertices,
   setFileZoom,
+  setFileOriginalAspectRatio,
   toggleFileAspectRatio
 } from './fileSlice'
 import './PatternImport.scss'
@@ -114,6 +115,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       dispatch(setFileComments(rv.comments))
       dispatch(setFileVertices(convertToXY(rv.vertices)))
+      dispatch(setFileOriginalAspectRatio(1.0))
       const endTime = performance.now()
       ReactGA.timing({
         category: 'PatternImport',
@@ -143,6 +145,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
     const scaleX = 1.0/(maxX - offsetX)
     const scaleY = 1.0/(maxY - offsetY)
+    dispatch(setFileOriginalAspectRatio(scaleX/scaleY))
 
     return vertices.map( (vertex) => {
       return {

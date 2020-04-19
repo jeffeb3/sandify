@@ -154,7 +154,12 @@ export const patternImport = (state) => {
   }
 
   if (state.file.aspectRatio) {
-    x_scale = y_scale = Math.min(x_scale,y_scale)
+    const machine_aspect_ratio = y_scale / x_scale
+    if (state.file.originalAspectRatio > machine_aspect_ratio) {
+      x_scale = x_scale / state.file.originalAspectRatio * machine_aspect_ratio
+    } else {
+      y_scale = y_scale * state.file.originalAspectRatio / machine_aspect_ratio
+    }
   }
 
   const newVertices = state.file.vertices.map( (vertex) => {

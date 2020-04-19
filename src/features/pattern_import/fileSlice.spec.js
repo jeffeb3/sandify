@@ -3,6 +3,7 @@ import file, {
   setFileVertices,
   setFileComments,
   setFileZoom,
+  setFileOriginalAspectRatio,
   toggleFileAspectRatio
 } from './fileSlice'
 
@@ -13,6 +14,7 @@ describe('file reducer', () => {
       comments: [],
       vertices: [],
       zoom: 100,
+      originalAspectRatio: 1.0,
       aspectRatio: false,
     })
   })
@@ -58,6 +60,17 @@ describe('file reducer', () => {
       )
     ).toEqual({
       zoom: 50
+    })
+  })
+
+  it('should handle setFileOriginalAspectRatio', () => {
+    expect(
+      file(
+        {originalAspectRatio: 1.0},
+        setFileOriginalAspectRatio(0.5)
+      )
+    ).toEqual({
+      originalAspectRatio: 0.5
     })
   })
 
