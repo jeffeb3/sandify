@@ -43,13 +43,6 @@ export const fillers = {
     startingAngle: Math.PI,
     maxOrder: 4
   },
-  // https://editor.p5js.org/simontiger/full/2CrT12N4
-  'Morton': {
-    grid: 2,
-    seed: [1, 0, 3, 2],
-    rotation: [0, 0, 0, 0],
-    maxOrder: 6
-  },
 
   'Penrose Tile': {
     axiom: '[7]++[7]++[7]++[7]++[7]',
