@@ -270,7 +270,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       } else if (file.name.toLowerCase().endsWith('.gcode') || file.name.toLowerCase().endsWith('.nc')) {
         parseGcodeFile(file)
       }
-
     },
     setZoom: (event) => {
       dispatch(setFileZoom(parseFloat(event.target.value)))
@@ -294,7 +293,7 @@ class PatternImport extends Component {
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
                 <h3>Import</h3>
-                Imports a Sisyphus-style theta rho (.thr) file into Sandify
+                Imports a pattern from a .thr, .gcode, or .nc file.
                 <Form.Control
                     id="fileUpload"
                     type="file"
@@ -339,6 +338,7 @@ class PatternImport extends Component {
 
         <div className="p-4">
           <h3>Where to get .thr files</h3>
+          Sisyphus machines use theta rho (.thr) files. There is a large community sharing them.
           <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
