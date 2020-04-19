@@ -141,8 +141,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class ThetaRho extends Component {
   render() {
-    var commentsRender = this.props.comments.map((comment) => {
-      return <span>{comment}<br/></span>
+    var commentsRender = this.props.comments.map((comment, index) => {
+      return <span key={index}>{comment}<br/></span>
     })
 
     return (
