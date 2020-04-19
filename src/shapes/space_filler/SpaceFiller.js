@@ -17,9 +17,7 @@ const options = {
     fillerType: {
       title: 'Fill type',
       type: 'dropdown',
-      choices: [
-        'Gosper (flowsnake)', 'Hilbert', 'Hilbert II', 'Morton', 'Peano',
-        'Sierpinski', 'Sierpinski Square'],
+      choices: Object.keys(fillers),
       onChange: (changes, attrs) => {
         // if we switch back with too high a fillerOrder, the code
         // will crash from recursion, so we'll set a ceiling where needed

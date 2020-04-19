@@ -10,17 +10,8 @@ export const fillers = {
       B: '+A-BB--B-A++A+B'
     },
     angle: Math.PI / 3,
-    orderGrow: true
-  },
-  // http://mathforum.org/advanced/robertd/lsys2d.html
-  'Peano': {
-    axiom: 'F',
-    draw: 'F',
-    rules: {
-      F: 'F+F-F-F-F+F+F+F-F'
-    },
-    startingAngle: -Math.PI/4,
-    maxOrder: 4
+    orderGrow: true,
+    maxOrder: 6
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'Hilbert': {
@@ -44,17 +35,17 @@ export const fillers = {
     maxOrder: 4
   },
 
-  'Penrose Tile': {
-    axiom: '[7]++[7]++[7]++[7]++[7]',
-    draw: ['6', '7', '8', '9'],
-    rules: {
-      6: '8++9----7[-8----6]++',
-      7: '+8--9[---6--7]+',
-      8: '-6++7[+++8++9]-',
-      9: '--8++++6[+9++++7]--7'
-    },
-    angle: Math.PI/5
-  },
+//  'Penrose Tile': {
+//    axiom: '[7]++[7]++[7]++[7]++[7]',
+//    draw: ['6', '7', '8', '9'],
+//    rules: {
+//      6: '8++9----7[-8----6]++',
+//      7: '+8--9[---6--7]+',
+//      8: '-6++7[+++8++9]-',
+//      9: '--8++++6[+9++++7]--7'
+//    },
+//    angle: Math.PI/5
+//  },
 
   // https://en.wikipedia.org/wiki/Sierpi%C5%84ski_curve
   'Sierpinski': {
@@ -67,7 +58,8 @@ export const fillers = {
     angle: Math.PI/4,
     maxOrder: 6
   },
-  // https://editor.p5js.org/simontiger/full/2CrT12N4
+
+  // https://en.wikipedia.org/wiki/Sierpi%C5%84ski_curve
   'Sierpinski Square': {
     axiom: 'F+XF+F+XF',
     draw: 'F',
