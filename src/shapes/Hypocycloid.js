@@ -1,14 +1,17 @@
 import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
+import { reduce } from '../common/util'
 
 const options = {
   ...shapeOptions,
   ...{
     hypocycloidA: {
-      title: 'Large circle radius'
+      title: 'Large circle radius',
+      min: 1
     },
     hypocycloidB: {
-      title: 'Small circle radius'
+      title: 'Small circle radius',
+      min: 1
     },
   }
 }
@@ -32,16 +35,24 @@ export default class Star extends Shape {
 
   getVertices(state) {
     let points = []
-    let a = parseFloat(state.shape.hypocycloidA)
-    let b = parseFloat(state.shape.hypocycloidB)
+    let a = parseInt(state.shape.hypocycloidA)
+    let b = parseInt(state.shape.hypocycloidB)
+    let reduced = reduce(a, b)
+    a = reduced[0]
+    b = reduced[1]
     let rotations = Number.isInteger(a/b) ? 1 : b
+    let scale = b < a ? 1/a : 1/(2*(b - a/2))
 
     for (let i=0; i<128*rotations; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
-      let scale = 0.18
-      points.push(new Victor(scale * (a - b) * Math.cos(angle) + scale * b * Math.cos(((a - b) / b) * angle),
-                         scale * (a - b) * Math.sin(angle) - scale * b * Math.sin(((a - b) / b) * angle)))
+      points.push(
+        new Victor(
+          (a - b) * Math.cos(angle) + b * Math.cos(((a - b) / b) * angle),
+          (a - b) * Math.sin(angle) - b * Math.sin(((a - b) / b) * angle)
+        ).multiply({x: scale, y: scale})
+      )
     }
+
     return points
   }
 
