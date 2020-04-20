@@ -5,12 +5,10 @@ const options = {
   ...shapeOptions,
   ...{
     epicycloidA: {
-      title: "Large circle radius",
-      step: 0.1,
+      title: "Large circle radius"
     },
     epicycloidB: {
-      title: "Small circle radius",
-      step: 0.1,
+      title: "Small circle radius"
     },
   }
 }
@@ -26,8 +24,8 @@ export default class Epicycloid extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'epicycloid',
-        epicycloidA: 1.0,
-        epicycloidB: .25
+        epicycloidA: 4,
+        epicycloidB: 1
       }
     }
   }
@@ -36,10 +34,11 @@ export default class Epicycloid extends Shape {
     let points = []
     let a = parseFloat(state.shape.epicycloidA)
     let b = parseFloat(state.shape.epicycloidB)
+    let rotations = Number.isInteger(a/b) ? 1 : b
 
-    for (let i=0; i<128; i++) {
+    for (let i=0; i<128*rotations; i++) {
       let angle = Math.PI * 2.0 / 128.0 * i
-      let scale = 0.65
+      let scale = 0.18
       points.push(new Victor(scale * (a + b) * Math.cos(angle) - scale * b * Math.cos(((a + b) / b) * angle),
                          scale * (a + b) * Math.sin(angle) - scale * b * Math.sin(((a + b) / b) * angle)))
     }
