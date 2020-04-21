@@ -7,6 +7,8 @@
     "@reduxjs/toolkit": "^1.2.5",
     "color": "^3.1.2",
     "gcode-toolpath": "^2.2.0",
+    "core-js": "^3.6.5",
+    "jest-canvas-mock": "^2.2.0",
     "lodash": "^4.17.15",
     "node-sass": "^4.13.1",
     "rc-slider": "^8.6.3",
@@ -16,7 +18,7 @@
     "react-dom": "^16.13.0",
     "react-ga": "^2.7.0",
     "react-redux": "^7.2.0",
-    "react-scripts": "3.3.1",
+    "react-scripts": "3.4.1",
     "react-select": "^3.0.8",
     "react-switch": "^5.0.1",
     "reduce-reducers": "^1.0.4",
@@ -25,8 +27,8 @@
     "victor": "^1.1.0"
   },
   "devDependencies": {
-    "gh-pages": "^1.0.0",
     "eslint-plugin-flowtype": "^3.13.0",
+    "gh-pages": "^1.0.0",
     "typescript": "^3.7.5"
   },
   "scripts": {
