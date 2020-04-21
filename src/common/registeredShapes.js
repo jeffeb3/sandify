@@ -11,6 +11,7 @@ import Wiper from '../shapes/Wiper'
 import V1Engineering from '../shapes/v1_engineering/V1Engineering'
 import FractalSpirograph from '../shapes/fractal_spirograph/FractalSpirograph'
 import TessellationTwist from '../shapes/tessellation_twist/TessellationTwist'
+import SpaceFiller from '../shapes/space_filler/SpaceFiller'
 
 /*----------------------------------------------
 Supported input shapes
@@ -28,5 +29,6 @@ export const registeredShapes = {
   inputText: new InputText(),
   fractal_spirograph: new FractalSpirograph(),
   tessellation_twist: new TessellationTwist(),
-  wiper: new Wiper()
+  wiper: new Wiper(),
+  space_filler: new SpaceFiller()
 }

@@ -1,7 +1,8 @@
 export const shapeOptions = {
   startingSize: {
     title: 'Starting size',
-    min: 1
+    min: 1,
+    isVisible: (state) => { return state.canChangeSize }
   }
 }
 
@@ -14,8 +15,9 @@ export default class Shape {
     return {
       repeatEnabled: true,
       canTransform: true,
-      selectGroup: "Shapes",
-      startingSize: 10
+      canChangeSize: true,
+      selectGroup: 'Shapes',
+      startingSize: 10,
     }
   }
 

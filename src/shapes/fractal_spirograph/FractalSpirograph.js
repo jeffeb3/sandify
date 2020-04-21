@@ -35,6 +35,7 @@ export default class FractalSpirograph extends Shape {
   constructor() {
     super('Fractal Spirograph')
     this.link = 'https://benice-equation.blogspot.com/2012/01/fractal-spirograph.html'
+    this.linkText = 'Fun math art (pictures) - benice equation'
   }
 
   getInitialState() {

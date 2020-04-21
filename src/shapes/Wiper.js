@@ -87,6 +87,7 @@ export default class Wiper extends Shape {
         wiperAngleDeg: 15,
         wiperSize: 12,
         startingSize: 1,
+        canChangeSize: false,
         repeatEnabled: false,
         selectGroup: 'Erasers',
         canTransform: false
