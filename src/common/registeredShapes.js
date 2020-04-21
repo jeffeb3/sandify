@@ -8,7 +8,6 @@ import Hypocycloid from '../shapes/Hypocycloid'
 import Rose from '../shapes/Rose'
 import InputText from '../shapes/input_text/InputText'
 import Wiper from '../shapes/Wiper'
-import SpiralWiper from '../shapes/SpiralWiper'
 import V1Engineering from '../shapes/v1_engineering/V1Engineering'
 import FractalSpirograph from '../shapes/fractal_spirograph/FractalSpirograph'
 import TessellationTwist from '../shapes/tessellation_twist/TessellationTwist'
@@ -32,5 +31,4 @@ export const registeredShapes = {
   tessellation_twist: new TessellationTwist(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller()
-  spiral_wiper: new SpiralWiper(),
 }
