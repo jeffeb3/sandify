@@ -6,8 +6,8 @@ import {
   onMinIterations,
   onMaxIterations
 } from '../../common/lindenmayer'
-import { resizeVertices } from '../../common/geometry'
 import { subtypes } from './subtypes'
+import { resizeVertices } from '../../common/geometry'
 
 const options = {
   ...shapeOptions,
@@ -28,57 +28,45 @@ const options = {
       max: (state) => {
         return onMaxIterations(subtypes[state.subtype], state)
       }
-    }
+    },
   }
 }
 
-export default class SpaceFiller extends Shape {
+export default class LSystem extends Shape {
   constructor() {
-    super('Space Filler')
-    this.linkText = 'Fractal charm: space filling curves'
-    this.link = 'https://www.youtube.com/watch?v=RU0wScIj36o'
+    super('Fractal Line Writer')
+    this.link = 'https://en.wikipedia.org/wiki/L-system'
+    this.linkText = 'this Wikipedia article on L-systems'
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'space_filler',
-        selectGroup: 'Erasers',
+        type: 'lsystem',
         repeatEnabled: false,
-        canTransform: false,
-        startingSize: 1,
-        canChangeSize: false,
-        iterations: 6,
-        subtype: 'Hilbert'
+        startingSize: 23,
+        iterations: 3,
+        subtype: 'McWorter\'s Pentadendrite'
       }
     }
   }
 
   getVertices(state) {
-    const machine = state.machine
     const shape = state.shape
     const iterations = shape.iterations || 1
-
-    let sizeX, sizeY
-    if (machine.rectangular) {
-      sizeX = machine.maxX - machine.minX
-      sizeY = machine.maxY - machine.minY
-    } else {
-      sizeX = sizeY = machine.maxRadius * 2.0
-    }
+    const size = 8
 
     // generate our vertices using a set of l-system rules
     let config = subtypes[shape.subtype]
     config.iterations = iterations
+    config.side = state.shape.startingSize/5
 
-    if (config.side === undefined) { config.side = 5 }
     if (config.angle === undefined) { config.angle = Math.PI/2 }
 
     let curve = lsystemPath(lsystem(config), config)
-    let scale = config.iterationsGrow ? iterations : 1
 
-    return resizeVertices(curve, sizeX*scale, sizeY*scale)
+    return resizeVertices(curve, size, size)
   }
 
   getOptions() {
