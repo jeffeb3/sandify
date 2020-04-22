@@ -12,7 +12,7 @@ export const subtypes = {
   },
   // http://www.kevs3d.co.uk/dev/lsystems/
   'Cog Triangle': {
-    axiom: 'W----W----W----W',
+    axiom: 'W----W----W',
     draw: ['F'],
     rules:  {
       W: '+++X--F--ZFX+',
