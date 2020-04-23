@@ -66,8 +66,8 @@ export const resizeVertices = (vertices, sizeX, sizeY) => {
   let scale = size/curveSize
 
   let scaledBounds = [bounds[0].multiply({x: scale, y: scale}), bounds[1].multiply({x: scale, y: scale})]
-  let deltaX = size - sizeX - scaledBounds[1].x - scaledBounds[0].x - 1
-  let deltaY = size - sizeY - scaledBounds[1].y - scaledBounds[0].y - 1
+  let deltaX = scaledBounds[1].x - (scaledBounds[1].x - scaledBounds[0].x)/2
+  let deltaY = scaledBounds[1].y - (scaledBounds[1].y - scaledBounds[0].y)/2
 
-  return vertices.map(vertex => vertex.multiply({x: scale, y: scale}).add({x: deltaX/2, y: deltaY/2}))
+  return vertices.map(vertex => vertex.multiply({x: scale, y: scale}).add({x: -deltaX, y: -deltaY}))
 }
