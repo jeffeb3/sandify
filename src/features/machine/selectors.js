@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 import {
   transformShapes,
-  thetaRho
+  patternImport
 } from './computer'
 
 const getApp = state => state.app
@@ -32,12 +32,16 @@ export const getVertices = createSelector(
       machine: machine
     }
 
-    if (state.app.input === 'shape') {
+    if (state.app.input === 'shapes') {
       return transformShapes(state)
     } else if (state.app.input === 'code') {
-      return thetaRho(state)
+      return patternImport(state)
     } else {
-      return transformShapes(state)
+      if (state.file.name) {
+        return patternImport(state)
+      } else {
+        return transformShapes(state)
+      }
     }
   }
 )

@@ -7,15 +7,17 @@ import {
     Form,
     Row,
 } from 'react-bootstrap'
+import Toolpath from 'gcode-toolpath';
 import Switch from 'react-switch'
 import {
   setFileName,
   setFileComments,
   setFileVertices,
   setFileZoom,
+  setFileOriginalAspectRatio,
   toggleFileAspectRatio
 } from './fileSlice'
-import './ThetaRho.scss'
+import './PatternImport.scss'
 import ReactGA from 'react-ga'
 
 const mapStateToProps = (state, ownProps) => {
@@ -113,12 +115,150 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       dispatch(setFileComments(rv.comments))
       dispatch(setFileVertices(convertToXY(rv.vertices)))
+      dispatch(setFileOriginalAspectRatio(1.0))
       const endTime = performance.now()
       ReactGA.timing({
-        category: 'ThetaRho',
+        category: 'PatternImport',
         variable: 'readThetaRho',
         value: endTime - startTime, // in milliseconds
       });
+    }
+
+    reader.readAsText(file)
+  }
+
+  // We want to scale and center the pattern. This may mess up some patterns which were off center,
+  // but there are so many machine coordinates, it will be just too annoying if we don't.
+  var normalizeCoords = (vertices) => {
+    let minX = 1e9
+    let minY = 1e9
+    let maxX = -1e9
+    let maxY = -1e9
+    vertices.forEach( (vertex) => {
+      minX = Math.min(vertex.x, minX)
+      minY = Math.min(vertex.y, minY)
+      maxX = Math.max(vertex.x, maxX)
+      maxY = Math.max(vertex.y, maxY)
+    })
+    const offsetX = (maxX + minX)/2.0
+    const offsetY = (maxY + minY)/2.0
+
+    const scaleX = 1.0/(maxX - offsetX)
+    const scaleY = 1.0/(maxY - offsetY)
+    dispatch(setFileOriginalAspectRatio(scaleX/scaleY))
+
+    return vertices.map( (vertex) => {
+      return {
+        x: scaleX * (vertex.x - offsetX),
+        y: scaleY * (vertex.y - offsetY)
+      }
+    })
+  }
+
+  var parseGcodeFile = (file) => {
+    let rv = {}
+    rv.comments = []
+    rv.vertices = []
+
+    let reader = new FileReader()
+
+    // This assumes the line is already trimmed and not empty.
+    // The paranthesis isn't perfect, since it usually has a match, but I don't think anyone will
+    // care. I think there are firmwares that do this same kind of hack.
+    var isComment = (line) => {
+      return (line.indexOf(";") === 0) || (line.indexOf('(') === 0)
+    }
+
+    reader.onload = (event) => {
+      const startTime = performance.now()
+      var text = reader.result
+      var lines = text.split('\n')
+
+      // Read the initial comments
+      for (let ii = 0; ii < lines.length; ii++) {
+        var line = lines[ii].trim()
+        if (line.length === 0) {
+          // blank lines
+          continue
+        }
+        if (isComment(line)) {
+          rv.comments.push(lines[ii])
+        } else {
+          break
+        }
+      }
+
+      var addVertex = (x, y) => {
+        rv.vertices.push({x: x,y: y})
+      }
+
+      // GCode reader object. More info here:
+      // https://github.com/cncjs/gcode-toolpath/blob/master/README.md
+      const toolpath = new Toolpath({
+        // @param {object} modal The modal object.
+        // @param {object} v1 A 3D vector of the start point.
+        // @param {object} v2 A 3D vector of the end point.
+        addLine: (modal, v1, v2) => {
+          if (v1.x !== v2.x || v1.y !== v2.y) {
+            addVertex(v2.x, v2.y)
+          }
+        },
+        // @param {object} modal The modal object.
+        // @param {object} v1 A 3D vector of the start point.
+        // @param {object} v2 A 3D vector of the end point.
+        // @param {object} v0 A 3D vector of the fixed point.
+        addArcCurve: (modal, v1, v2, v0) => {
+          if (v1.x !== v2.x || v1.y !== v2.y) {
+            // We can't use traceCircle, we have to go a specific direction (not the shortest path).
+            let startTheta = Math.atan2(v1.y-v0.y, v1.x-v0.x)
+            let endTheta   = Math.atan2(v2.y-v0.y, v2.x-v0.x)
+            let deltaTheta = endTheta - startTheta
+            const radius   = Math.sqrt(Math.pow(v2.x-v0.x, 2.0) + Math.pow(v2.y-v0.y, 2.0))
+            let direction  = 1.0 // Positive, so anticlockwise.
+
+            // Clockwise
+            if (modal.motion === 'G2') {
+              if (deltaTheta > 0.0) {
+                endTheta -= 2.0*Math.PI
+                deltaTheta -= 2.0*Math.PI
+              }
+              direction = -1.0
+            } else if (modal.motion === 'G3') {
+              // Anti-clockwise
+              if (deltaTheta < 0.0) {
+                endTheta += 2.0*Math.PI
+                deltaTheta += 2.0*Math.PI
+              }
+            }
+
+            // What angle do we need to have a resolution of approx. 0.5mm?
+            const arcResolution = 0.5
+            const arcLength = Math.abs(deltaTheta) * radius
+            const thetaStep = deltaTheta * arcResolution/arcLength
+            for (let theta = startTheta;
+                 direction * theta <= direction * endTheta;
+                 theta += thetaStep) {
+              addVertex(v0.x + radius * Math.cos(theta), v0.y + radius * Math.sin(theta))
+            }
+            // Save the final point, in case our math didn't quite get there.
+            addVertex(v2.x, v2.y)
+            console.log(rv.vertices)
+          }
+        }
+      });
+
+      toolpath
+        .loadFromString(text, (err, results) => {
+          dispatch(setFileComments(rv.comments))
+          dispatch(setFileVertices(normalizeCoords(rv.vertices)))
+          const endTime = performance.now()
+          ReactGA.timing({
+            category: 'PatternImport',
+            variable: 'readGCode',
+            value: endTime - startTime, // in milliseconds
+          });
+        })
+
     }
 
     reader.readAsText(file)
@@ -128,7 +268,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     setVertices: (event: any) => {
       var file = event.target.files[0]
       dispatch(setFileName(file.name))
-      parseThrFile(file)
+      if (file.name.toLowerCase().endsWith('.thr')) {
+        parseThrFile(file)
+      } else if (file.name.toLowerCase().endsWith('.gcode') || file.name.toLowerCase().endsWith('.nc')) {
+        parseGcodeFile(file)
+      }
     },
     setZoom: (event) => {
       dispatch(setFileZoom(parseFloat(event.target.value)))
@@ -139,24 +283,24 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-class ThetaRho extends Component {
+class PatternImport extends Component {
   render() {
     var commentsRender = this.props.comments.map((comment, index) => {
       return <span key={index}>{comment}<br/></span>
     })
 
     return (
-      <div className="theta-rho">
+      <div className="pattern-import">
         <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
               <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
                 <h3>Import</h3>
-                Imports a Sisyphus-style theta rho (.thr) file into Sandify
+                Imports a pattern from a .thr, .gcode, or .nc file.
                 <Form.Control
                     id="fileUpload"
                     type="file"
-                    accept=".thr"
+                    accept=".thr,.gcode,.nc"
                     onChange={this.props.setVertices}
                     style={{ display: "none" }} />
               </Card.Header>
@@ -185,7 +329,7 @@ class ThetaRho extends Component {
             </Col>
           </Row>
 
-          { this.props.name && <div id="theta-rho-comments" className="mt-4 p-3">
+          { this.props.name && <div id="pattern-import-comments" className="mt-4 p-3">
             Name: {this.props.name} <br />
             Comments:
             <div className="ml-3">
@@ -197,6 +341,7 @@ class ThetaRho extends Component {
 
         <div className="p-4">
           <h3>Where to get .thr files</h3>
+          Sisyphus machines use theta rho (.thr) files. There is a large community sharing them.
           <ul className="list-unstyled">
             <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
             <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
@@ -217,4 +362,4 @@ class ThetaRho extends Component {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ThetaRho)
+export default connect(mapStateToProps, mapDispatchToProps)(PatternImport)

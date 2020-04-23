@@ -144,20 +144,22 @@ export const polishVertices = (state, vertices) => {
   return vertices
 }
 
-export const thetaRho = (state) => {
+export const patternImport = (state) => {
   let machine = state.machine
   var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.file.zoom
   var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom
 
   if (!machine.rectangular) {
-    x_scale = y_scale = machine.maxRadius
+    x_scale = y_scale = machine.maxRadius * 0.01 * state.file.zoom
   }
 
-  x_scale *= 0.01 * state.file.zoom
-  y_scale *= 0.01 * state.file.zoom
-
   if (state.file.aspectRatio) {
-    x_scale = y_scale = Math.min(x_scale,y_scale)
+    const machine_aspect_ratio = y_scale / x_scale
+    if (state.file.originalAspectRatio > machine_aspect_ratio) {
+      x_scale = x_scale / state.file.originalAspectRatio * machine_aspect_ratio
+    } else {
+      y_scale = y_scale * state.file.originalAspectRatio / machine_aspect_ratio
+    }
   }
 
   const newVertices = state.file.vertices.map( (vertex) => {

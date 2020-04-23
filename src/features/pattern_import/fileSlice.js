@@ -1,12 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const fileSlice = createSlice({
-  name: 'theta rho file',
+  name: 'pattern import file',
   initialState: {
     name: "",
     comments: [],
     vertices: [],
     zoom: 100,
+    originalAspectRatio: 1.0,
     aspectRatio: false,
   },
   reducers: {
@@ -22,6 +23,9 @@ const fileSlice = createSlice({
     setFileZoom(state, action) {
       state.zoom = action.payload
     },
+    setFileOriginalAspectRatio(state, action) {
+      state.originalAspectRatio = action.payload
+    },
     toggleFileAspectRatio(state, action) {
       state.aspectRatio = !state.aspectRatio
     },
@@ -33,6 +37,7 @@ export const {
   setFileName,
   setFileComments,
   setFileZoom,
+  setFileOriginalAspectRatio,
   toggleFileAspectRatio
 } = fileSlice.actions
 
