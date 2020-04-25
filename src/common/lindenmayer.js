@@ -113,7 +113,6 @@ export const lsystemPath = (instructions, config) => {
   // walk the shortest path from the end of each branch back to the start
   // of the next
   let connectedVertices = []
-  let keys = []
   for(let i=0; i<vertices.length; i++) {
     let branchVertices = vertices[i]
 
