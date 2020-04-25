@@ -1,5 +1,10 @@
-export const difference = (c1, c2) => {
-  return c1.filter(x => !c2.includes(x)).concat(c2.filter(x => !c1.includes(x)))
+export const difference = (a, b) => {
+  return new Set(
+    [
+      ...[...a].filter(x => !b.has(x)),
+      ...[...b].filter(x => !a.has(x))
+    ]
+  )
 }
 
 // round a given number n to p number of digits
