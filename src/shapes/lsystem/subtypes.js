@@ -24,6 +24,51 @@ export const subtypes = {
     minIterations: 1,
     maxIterations: 8
   },
+  // https://onlinemathtools.com/l-system-generator
+  'Fractal Tree': {
+    axiom: 'F',
+    draw: ['F'],
+    rules:  {
+      F: 'F=F[+FF][-FF]F[-F][+F]F',
+    },
+    angle: Math.PI/5,
+    maxIterations: 3
+  },
+  // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
+  'Fractal Tree 2': {
+    axiom: 'F',
+    draw: ['F'],
+    rules:  {
+      F: 'F[-F][+F]',
+    },
+    angle: 10*Math.PI/72,
+    maxIterations: 8
+  },
+  // waiting on some kind of asynchronous rendering
+  // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
+  // 'Fractal Tree 3': {
+  //   axiom: 'X',
+  //   draw: ['F'],
+  //   rules:  {
+  //     F: 'FF',
+  //     X: 'F+[-F-XF-X][+FF][--XF[+X]][++F-X]'
+  //   },
+  //   angle: Math.PI/8,
+  //   maxIterations: 4
+  // },
+  // waiting on some kind of asynchronous rendering
+  // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
+  // 'Fractal Tree 4': {
+  //   axiom: 'X',
+  //   draw: ['F'],
+  //   rules:  {
+  //     F: 'FX[FX[+XF]]',
+  //     X: 'FF[+XZ++X-F[+ZX]][-X++F-X]',
+  //     Z: '[+F-X-F][++ZX]'
+  //   },
+  //   angle: Math.PI/8,
+  //   maxIterations: 4
+  // },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'Gosper (flowsnake)': {
     axiom: 'A',
@@ -45,6 +90,24 @@ export const subtypes = {
     startingAngle: Math.PI,
     maxIterations: 6
   },
+  // https://fronkonstin.com/2017/06/26/a-shiny-app-to-draw-curves-based-on-l-systems/
+  'Koch Cube 1': {
+    axiom: 'F-F-F-F',
+    draw: ['F'],
+    rules:  {
+      F: 'FF-F-F-F-FF',
+    },
+    maxIterations: 5
+  },
+  // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf
+  'Koch Cube 2': {
+    axiom: 'F-F-F-F',
+    draw: ['F'],
+    rules:  {
+      F: 'FF-F+F-F-FF',
+    },
+    maxIterations: 5
+  },
   // https://onlinemathtools.com/l-system-generator
   'Koch Curve': {
     axiom: 'F',
@@ -55,6 +118,15 @@ export const subtypes = {
     angle: 4*Math.PI/9,
     startingAngle: Math.PI,
     maxIterations: 7
+  },
+  // https://fronkonstin.com/2017/06/26/a-shiny-app-to-draw-curves-based-on-l-systems/
+  'Koch Flower': {
+    axiom: 'F-F-F-F',
+    draw: ['F'],
+    rules:  {
+      F: 'FF-F-F-F-F-F+F',
+    },
+    maxIterations: 4
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'Koch Island': {
@@ -76,24 +148,6 @@ export const subtypes = {
     startingAngle: -Math.PI / 3,
     maxIterations: 5
   },
-  // https://fronkonstin.com/2017/06/26/a-shiny-app-to-draw-curves-based-on-l-systems/
-  'Koch Variation 1': {
-    axiom: 'F-F-F-F',
-    draw: ['F'],
-    rules:  {
-      F: 'FF-F-F-F-FF',
-    },
-    maxIterations: 5
-  },
-  // https://fronkonstin.com/2017/06/26/a-shiny-app-to-draw-curves-based-on-l-systems/
-  'Koch Variation 2': {
-    axiom: 'F-F-F-F',
-    draw: ['F'],
-    rules:  {
-      F: 'FF-F-F-F-F-F+F',
-    },
-    maxIterations: 4
-  },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'McWorter\'s Pentadendrite': {
     axiom: 'F-F-F-F-F',
@@ -106,17 +160,18 @@ export const subtypes = {
   },
   // cannot do this until we support branching with legal vertex moves
   // https://onlinemathtools.com/l-system-generator
-  // 'Penrose Tile': {
-  //   axiom: '[7]++[7]++[7]++[7]++[7]',
-  //   draw: ['6', '7', '8', '9'],
-  //   rules: {
-  //     6: '8++9----7[-8----6]++',
-  //     7: '+8--9[---6--7]+',
-  //     8: '-6++7[+++8++9]-',
-  //     9: '--8++++6[+9++++7]--7'
-  //   },
-  //   angle: Math.PI/5
-  //},
+  'Penrose Tile': {
+     axiom: '[7]++[7]++[7]++[7]++[7]',
+     draw: ['6', '7', '8', '9'],
+    rules: {
+      6: '8++9----7[-8----6]++',
+      7: '+8--9[---6--7]+',
+      8: '-6++7[+++8++9]-',
+      9: '--8++++6[+9++++7]--7'
+    },
+    angle: Math.PI/5,
+    maxIterations: 5
+  },
   'Plusses': {
     axiom: 'XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX',
     draw: ['F'],

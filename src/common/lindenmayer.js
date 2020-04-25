@@ -1,4 +1,6 @@
 import Victor from 'victor'
+import Graph from './Graph'
+import { vertexRoundP } from './geometry'
 
 export const onSubtypeChange = (subtype, changes, attrs) => {
   // if we switch back with too many iterations, the code
@@ -56,8 +58,11 @@ export const lsystem = (config) => {
 
 export const lsystemPath = (instructions, config) => {
   let vertex = new Victor(0, 0)
-  let vertices = [vertex]
+  let vertices = []
+  let currVertices = [vertex]
   let angle = -Math.PI/2
+  let branches = []
+  let currBranch
 
   if (config.startingAngle) {
     angle = typeof config.startingAngle === 'function' ?
@@ -73,14 +78,61 @@ export const lsystemPath = (instructions, config) => {
     } else if (char === '-') {
       angle -= config.angle
     } else if (config.draw.includes(char)) {
-      vertex = vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)})
-      vertices.push(vertex)
+      vertex = vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)}), 2)
+      currVertices.push(vertex)
     } else if (char === '[') {
-      // to do
+      branches.push({ angle: angle, vertex: vertex })
     } else if (char === ']') {
-      // to do
+      currBranch = branches.pop()
+      vertex = currBranch.vertex
+      angle = currBranch.angle
+      vertices.push(currVertices)
+      currVertices = [vertex]
     }
   }
 
-  return vertices
+  vertices.push(currVertices)
+
+  // build a graph of unique vertices
+  let graph = new Graph()
+  for(let i=0; i<vertices.length; i++) {
+    let branchVertices = vertices[i]
+
+    for(let j=0; j<branchVertices.length; j++) {
+      let curr = branchVertices[j]
+
+      graph.addNode(curr)
+
+      if (j > 0) {
+        let prev = branchVertices[j-1]
+        graph.addEdge(prev, curr)
+      }
+    }
+  }
+
+  // walk the shortest path from the end of each branch back to the start
+  // of the next
+  let connectedVertices = []
+  let keys = []
+  for(let i=0; i<vertices.length; i++) {
+    let branchVertices = vertices[i]
+
+   if (i > 0) {
+     let prevVertices = vertices[i-1]
+     let key = branchVertices[0].toString()
+     let prevKey = prevVertices[prevVertices.length-1].toString()
+
+     if (!graph.hasEdge(prevKey, key)) {
+       let path = graph.dijkstraShortestPath(prevKey, key)
+
+       path.shift()
+       path.pop()
+       branchVertices = path.concat(branchVertices)
+     }
+   }
+
+    connectedVertices = connectedVertices.concat(branchVertices)
+  }
+
+  return connectedVertices
 }

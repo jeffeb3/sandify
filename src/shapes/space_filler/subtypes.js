@@ -20,10 +20,11 @@ export const subtypes = {
       L: '+RF-LFL-FR+',
       R: '-LF+RFR+FL-'
     },
-    startingAngle: Math.PI
+    startingAngle: Math.PI,
+    minIterations: 2
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
-  'Hilbert II': {
+  'Hilbert 2': {
     axiom: 'X',
     draw: 'F',
     rules: {
@@ -33,20 +34,6 @@ export const subtypes = {
     startingAngle: Math.PI,
     maxIterations: 4
   },
-// cannot do this until we support branching with legal vertex moves
-// https://onlinemathtools.com/l-system-generator
-//  'Penrose Tile': {
-//    axiom: '[7]++[7]++[7]++[7]++[7]',
-//    draw: ['6', '7', '8', '9'],
-//    rules: {
-//      6: '8++9----7[-8----6]++',
-//      7: '+8--9[---6--7]+',
-//      8: '-6++7[+++8++9]-',
-//      9: '--8++++6[+9++++7]--7'
-//    },
-//    angle: Math.PI/5
-//  },
-
   // https://en.wikipedia.org/wiki/Sierpi%C5%84ski_curve
   'Sierpinski': {
     axiom: 'F--XF--F--XF',
@@ -68,5 +55,5 @@ export const subtypes = {
     },
     startingAngle: Math.PI/4,
     maxIterations: 6
-  }
+  },
 }
