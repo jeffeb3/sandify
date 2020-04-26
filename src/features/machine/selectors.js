@@ -7,8 +7,8 @@ import {
 const getApp = state => state.app
 const getShapes = state => state.shapes
 const getTransforms = state => state.transforms
-const getFile = state => state.file
-const getGCode = state => state.gcode
+const getImporter = state => state.importer
+const getExporter = state => state.exporter
 const getMachine = state => state.machine
 
 export const getVertices = createSelector(
@@ -16,19 +16,19 @@ export const getVertices = createSelector(
       getApp,
       getShapes,
       getTransforms,
-      getFile,
-      getGCode,
+      getImporter,
+      getExporter,
       getMachine,
   ],
-  (app, shapes, transforms, file, gcode, machine) => {
+  (app, shapes, transforms, importer, exporter, machine) => {
     let state = {
       app: app,
       shapes: shapes,
       shape: shapes.byId[shapes.currentId],
       transforms: transforms,
       transform: transforms.byId[shapes.currentId],
-      file: file,
-      gcode: gcode,
+      importer: importer,
+      exporter: exporter,
       machine: machine
     }
 
@@ -37,7 +37,7 @@ export const getVertices = createSelector(
     } else if (state.app.input === 'code') {
       return patternImport(state)
     } else {
-      if (state.file.name) {
+      if (state.importer.name) {
         return patternImport(state)
       } else {
         return transformShapes(state)
@@ -52,7 +52,7 @@ export const getVerticesStats = createSelector(
   ],
   (vertices) => {
     let distance = 0.0
-    var previous = null
+    let previous = null
 
     vertices.forEach( (vertex) => {
       if (previous) {

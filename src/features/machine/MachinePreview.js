@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
-import GCodeGenerator from '../gcode/GCodeGenerator'
+import Downloader from '../exporter/Downloader'
 import { updateMachine } from './machineSlice'
 import { getVerticesStats } from './selectors'
 import './MachinePreview.scss'
@@ -48,7 +48,7 @@ class MachinePreview extends Component {
                   />
               </div>
             </div>
-            <GCodeGenerator />
+            <Downloader />
           </div>
         </div>
       </div>
