@@ -9,7 +9,9 @@ import {
     ToggleButton,
     ToggleButtonGroup
 } from 'react-bootstrap'
-import Switch from 'react-switch'
+import InputOption from '../../components/InputOption'
+import CheckboxOption from '../../components/CheckboxOption'
+import Machine from '../../models/Machine'
 import {
   toggleMachinePolarExpanded,
   updateMachine,
@@ -23,7 +25,8 @@ const mapStateToProps = (state, ownProps) => {
     maxRadius: state.machine.maxRadius,
     startPoint: state.machine.polarStartPoint,
     endPoint: state.machine.polarEndPoint,
-    minimizeMoves: state.machine.minimizeMoves
+    minimizeMoves: state.machine.minimizeMoves,
+    options: new Machine().getOptions()
   }
 }
 
@@ -32,8 +35,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     activeCallback: (event) => {
       dispatch(toggleMachinePolarExpanded())
     },
-    onMaxRadiusChange: (event) => {
-      dispatch(updateMachine({maxRadius: parseFloat(event.target.value)}))
+    onChange: (attrs) => {
+      dispatch(updateMachine(attrs))
     },
     onStartPointChange: (value) => {
       dispatch(updateMachine({polarStartPoint: value}))
@@ -42,7 +45,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(updateMachine({polarEndPoint: value}))
     },
     toggleMinimizeMoves: () => {
-      dispatch(toggleMinimizeMoves());
+      dispatch(toggleMinimizeMoves())
     },
   }
 }
@@ -60,16 +63,13 @@ class PolarSettings extends Component {
 
         <Accordion.Collapse eventKey={1}>
           <Card.Body>
-            <Row className="align-items-center pb-1">
-              <Col sm={5}>
-                <Form.Label htmlFor="maxRadius">
-                  Max radius (mm)
-                </Form.Label>
-              </Col>
-              <Col sm={7}>
-                <Form.Control id="maxRadius" type="number" value={this.props.maxRadius} onChange={this.props.onMaxRadiusChange} />
-              </Col>
-            </Row>
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="maxRadius"
+              optionKey="maxRadius"
+              index={0}
+              model={this.props} />
 
             <Row className="align-items-center pb-2">
               <Col sm={5}>
@@ -103,16 +103,13 @@ class PolarSettings extends Component {
               </Col>
             </Row>
 
-            <Row className="align-items-center pb-1">
-              <Col sm={5}>
-                <Form.Label htmlFor="minimizeMoves">
-                  Try to minimize<br />perimeter moves
-                </Form.Label>
-              </Col>
-              <Col sm={7}>
-                <Switch checked={this.props.minimizeMoves} onChange={this.props.toggleMinimizeMoves} />
-              </Col>
-            </Row>
+            <CheckboxOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              optionKey="minimizeMoves"
+              key="minimizeMoves"
+              index={0}
+              model={this.props} />
           </Card.Body>
         </Accordion.Collapse>
       </Card>
