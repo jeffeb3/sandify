@@ -11,7 +11,7 @@ import {
   updateTransform
 } from './transformsSlice'
 import { getCurrentTransformSelector } from '../shapes/selectors'
-import Transform from '../../shapes/Transform'
+import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
   const transform = getCurrentTransformSelector(state)
@@ -20,7 +20,7 @@ const mapStateToProps = (state, ownProps) => {
     transform: transform,
     active: transform.trackEnabled,
     activeGrow: transform.trackGrowEnabled,
-    options: (new Transform()).getOptions()
+    options: new Transform().getOptions()
   }
 }
 

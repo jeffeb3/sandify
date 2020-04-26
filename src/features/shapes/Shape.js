@@ -14,7 +14,7 @@ import {
   getShapeById,
   getCurrentShapeSelector
 } from './selectors'
-import Transform from '../../shapes/Transform'
+import Transform from '../../models/Transform'
 import './Shape.css'
 
 const mapStateToProps = (state, ownProps) => {
