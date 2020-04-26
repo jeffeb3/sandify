@@ -88,13 +88,13 @@ export default class PolarMachine extends Machine {
   }
 
   // Returns whether a given path lies on the perimeter of the circle.
-  onPerimeter(v1, v2, delta=.001) {
+  onPerimeter(v1, v2, delta=1) {
     let rm = Math.pow(this.settings.maxRadius, 2)
     let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
     let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
     let d = this.perimeterDistance(v1, v2)
 
-    return (r1 >= rm - delta && r2 >= rm - delta) && d < 15
+    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 4*Math.PI
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by

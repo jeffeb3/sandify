@@ -61,15 +61,11 @@ export default class RectMachine extends Machine {
   }
 
   // Returns whether a given path lies on the perimeter of the rectangle
-  onPerimeter(v1, v2, delta=.00001) {
+  onPerimeter(v1, v2, delta=.0001) {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
     const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
 
-    if ((v1.x === v2.x && dx < delta) || (v1.y === v2.y && dy < delta)) {
-      return v1.x === v2.x || v1.y === v2.y
-    } else {
-      return false
-    }
+    return (v1.x === v2.x && dx < delta) || (v1.y === v2.y && dy < delta)
   }
 
   // Given two perimeter points, traces the shortest valid path between them (stays on

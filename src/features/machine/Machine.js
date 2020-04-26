@@ -1,8 +1,11 @@
+import { vertexRoundP } from '../../common/geometry'
+
 // base machine class
 export default class Machine {
   polish() {
     return this.enforceLimits()
       .cleanVertices()
+      .limitPrecision()
       .optimizePerimeter()
       .addEndpoints()
   }
@@ -159,5 +162,12 @@ export default class Machine {
     }
 
     return walked
+  }
+
+  // round each vertex to the nearest .001. This eliminates floating point
+  // math errors and allows us to do accurate equality comparisons.
+  limitPrecision() {
+    this.vertices = this.vertices.map(vertex => vertexRoundP(vertex, 3))
+    return this
   }
 }
