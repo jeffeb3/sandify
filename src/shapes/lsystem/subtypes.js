@@ -29,7 +29,7 @@ export const subtypes = {
     axiom: 'F',
     draw: ['F'],
     rules:  {
-      F: 'F=F[+FF][-FF]F[-F][+F]F',
+      F: 'F[+FF][-FF]F[-F][+F]F',
     },
     angle: Math.PI/5,
     maxIterations: 3
