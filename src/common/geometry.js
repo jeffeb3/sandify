@@ -1,4 +1,5 @@
 import Victor from 'victor'
+import { roundP } from './util'
 
 // convert degrees to radians
 export const degToRad = (deg) => {
@@ -69,5 +70,10 @@ export const resizeVertices = (vertices, sizeX, sizeY) => {
   let deltaX = scaledBounds[1].x - (scaledBounds[1].x - scaledBounds[0].x)/2
   let deltaY = scaledBounds[1].y - (scaledBounds[1].y - scaledBounds[0].y)/2
 
-  return vertices.map(vertex => vertex.multiply({x: scale, y: scale}).add({x: -deltaX, y: -deltaY}))
+  return vertices.map(vertex => vertex.clone().multiply({x: scale, y: scale}).add({x: -deltaX, y: -deltaY}))
+}
+
+// returns a vertex with x and y rounded to p number of digits
+export const vertexRoundP = (v, p) => {
+  return new Victor(roundP(v.x, p), roundP(v.y, p))
 }
