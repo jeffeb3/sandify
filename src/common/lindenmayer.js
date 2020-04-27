@@ -54,6 +54,10 @@ export const lsystem = (config) => {
   return output
 }
 
+const lsystemDraw = (vertex, angle, config) => {
+  return vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)}), 2)
+}
+
 export const lsystemPath = (instructions, config) => {
   let vertex = new Victor(0, 0)
   let currVertices = [vertex]
@@ -81,25 +85,29 @@ export const lsystemPath = (instructions, config) => {
         returnPaths.slice(-1)[0].push('+')
       }
     } else if (config.draw.includes(char)) {
-      vertex = vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)}), 2)
+      vertex = lsystemDraw(vertex, angle, config)
       currVertices.push(vertex)
       if (returnPaths.length) {
-        returnPaths.slice(-1)[0].push(char)
+        returnPaths.slice(-1)[0].push('B')
       }
     } else if (char === '[') {
       // open a branch
       returnPaths.push([])
+
     } else if (char === ']') {
+      // Return to the beginning of the branch
       let returnPath = returnPaths.pop().reverse()
+
       for (let j=0; j<returnPath.length; j++) {
-        const revChar = returnPath[j]
+        let revChar = returnPath[j]
+
         if (revChar === '+') {
           angle += config.angle
         } else if (revChar === '-') {
           angle -= config.angle
-        } else if (config.draw.includes(revChar)) {
-          // Reverse
-          vertex = vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(Math.PI + angle), y: -config.side * Math.sin(Math.PI + angle)}), 2)
+        } else if (revChar === 'B') {
+          // Reverse Draw
+          vertex = lsystemDraw(vertex, angle + Math.PI, config)
           currVertices.push(vertex)
         }
       }
