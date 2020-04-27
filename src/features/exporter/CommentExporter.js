@@ -59,7 +59,7 @@ export default class CommentExporter extends Exporter {
         break
 
       case 'code':
-        this.keyValueLine('Input file', state.importer.name)
+        this.keyValueLine('Input file', state.importer.fileName)
         this.keyValueLine('Zoom', state.importer.zoom)
         this.keyValueLine('Aspect ratio', state.importer.aspectRatio)
         break

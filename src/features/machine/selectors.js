@@ -37,7 +37,7 @@ export const getVertices = createSelector(
     } else if (state.app.input === 'code') {
       return patternImport(state)
     } else {
-      if (state.importer.name) {
+      if (state.importer.fileName) {
         return patternImport(state)
       } else {
         return transformShapes(state)

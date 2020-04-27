@@ -6,7 +6,7 @@ import file, {
 describe('file reducer', () => {
   it('should handle initial state', () => {
     expect(file(undefined, {})).toEqual({
-      name: "",
+      fileName: "",
       comments: [],
       vertices: [],
       zoom: 100,

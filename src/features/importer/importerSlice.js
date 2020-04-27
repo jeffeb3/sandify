@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 const importerSlice = createSlice({
   name: 'importer',
   initialState: {
-    name: '',
+    fileName: '',
     comments: [],
     vertices: [],
     zoom: 100,
