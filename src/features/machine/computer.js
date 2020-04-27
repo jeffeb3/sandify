@@ -3,6 +3,7 @@ import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
+import { evaluate } from 'mathjs'
 import throttle from 'lodash/throttle'
 
 // Transform functions
@@ -56,7 +57,7 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
     const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
     const stage = amount/loopPeriod
     const direction = (stage % 2 < 1 ? 1.0 : -1.0)
-    var spinAmount = direction * (amount % loopPeriod) * data.spinValue
+    var spinAmount = evaluate(data.spinValue, {i: amount})
 
     // Add in the amount it goes positive to the negatives, so they start at the same place.
     if (direction < 0.0) {

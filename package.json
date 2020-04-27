@@ -12,6 +12,7 @@
     "jest-canvas-mock": "^2.2.0",
     "lodash": "^4.17.15",
     "lru-cache": "^5.1.1",
+    "mathjs": "^6.6.4",
     "node-sass": "^4.13.1",
     "rc-slider": "^8.6.3",
     "react": "^16.13.0",
