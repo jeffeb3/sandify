@@ -1,5 +1,4 @@
 import Victor from 'victor'
-import Graph from './Graph'
 import { vertexRoundP } from './geometry'
 
 export const onSubtypeChange = (subtype, changes, attrs) => {
