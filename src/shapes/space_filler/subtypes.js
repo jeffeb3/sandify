@@ -9,7 +9,9 @@ export const subtypes = {
       B: '+A-BB--B-A++A+B'
     },
     angle: Math.PI / 3,
-    iterationsGrow: true,
+    iterationsGrow: (config) => {
+      return config.iterations
+    },
     maxIterations: 6
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
@@ -45,7 +47,22 @@ export const subtypes = {
     angle: Math.PI/4,
     maxIterations: 6
   },
-
+  // https://onlinemathtools.com/l-system-generator
+  'Penrose Tile': {
+     axiom: '[7]++[7]++[7]++[7]++[7]',
+     draw: ['6', '7', '8', '9'],
+    rules: {
+      6: '8++9----7[-8----6]++',
+      7: '+8--9[---6--7]+',
+      8: '-6++7[+++8++9]-',
+      9: '--8++++6[+9++++7]--7'
+    },
+    angle: Math.PI/5,
+    maxIterations: 6,
+    iterationsGrow: (config) => {
+      return 1 + Math.max(1, 3/config.iterations)
+    }
+  },
   // https://en.wikipedia.org/wiki/Sierpi%C5%84ski_curve
   'Sierpinski Square': {
     axiom: 'F+XF+F+XF',
