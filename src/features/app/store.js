@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit"
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
 import appReducer from './appSlice'
 import importerReducer from '../importer/importerSlice'
@@ -12,6 +12,15 @@ import { loadState, saveState } from '../../common/localStorage'
 import { addShape, setCurrentShape, updateShape } from '../shapes/shapesSlice'
 import { addTransform, updateTransform } from '../transforms/transformsSlice'
 
+const customizedMiddleware = getDefaultMiddleware({
+  immutableCheck: {
+    ignoredPaths: ['importer.vertices']
+  },
+  serializableCheck: {
+    ignoredPaths: ['importer.vertices']
+  }
+})
+
 const store = configureStore({
   reducer: combineReducers({
     app: appReducer,
@@ -22,6 +31,7 @@ const store = configureStore({
     machine: machineReducer,
     preview: previewReducer
   }),
+  middleware: customizedMiddleware
 })
 
 // preload shapes into store
