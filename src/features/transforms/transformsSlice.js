@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import Transform from '../../shapes/Transform'
+import Transform from '../../models/Transform'
 
 const transformsSlice = createSlice({
   name: 'transforms',

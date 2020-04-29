@@ -10,7 +10,7 @@ import {
   toggleGrow
 } from './transformsSlice'
 import { getCurrentTransformSelector } from '../shapes/selectors'
-import Transform from '../../shapes/Transform'
+import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
   const transform = getCurrentTransformSelector(state)
