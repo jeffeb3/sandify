@@ -1,23 +1,23 @@
 import Victor from 'victor'
-import Graph, { vec2, mix } from '../../common/Graph'
+import Graph, { mix } from '../../common/Graph'
 import eulerianTrail from '../../common/eulerianTrail'
 import { difference } from '../../common/util'
 import Shape, { shapeOptions } from '../Shape'
 
-const vec_triangle = [
-  vec2(-0.85, -0.4907477295),
-  vec2(0.85, -0.4907477295),
-  vec2(0.0,  0.9814954573),
+const vecTriangle = [
+  new Victor(-0.85, -0.4907477295),
+  new Victor(0.85, -0.4907477295),
+  new Victor(0.0,  0.9814954573),
 ]
 
-const vec_square = [
-  vec2(-0.7, -0.7),
-  vec2( 0.7,  0.7),
-  vec2(-0.7,  0.7),
+const vecSquare = [
+  new Victor(-0.7, -0.7),
+  new Victor( 0.7,  0.7),
+  new Victor(-0.7,  0.7),
 
-  vec2(-0.7, -0.7),
-  vec2(0.7,  0.7),
-  vec2(0.7, -0.7)
+  new Victor(-0.7, -0.7),
+  new Victor(0.7,  0.7),
+  new Victor(0.7, -0.7)
 ]
 
 function getEdges(edges, a, b, c, count, settings) {
@@ -25,24 +25,24 @@ function getEdges(edges, a, b, c, count, settings) {
 
   if (count === 0) {
     if (settings.rotate > 0) {
-      da = Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2)) * (settings.rotate * Math.PI / 180.0)
-      db = Math.sqrt(Math.pow(b[0], 2) + Math.pow(b[1], 2)) * (settings.rotate * Math.PI / 180.0)
-      dc = Math.sqrt(Math.pow(c[0], 2) + Math.pow(c[1], 2)) * (settings.rotate * Math.PI / 180.0)
+      da = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2)) * (settings.rotate * Math.PI / 180.0)
+      db = Math.sqrt(Math.pow(b.x, 2) + Math.pow(b.y, 2)) * (settings.rotate * Math.PI / 180.0)
+      dc = Math.sqrt(Math.pow(c.x, 2) + Math.pow(c.y, 2)) * (settings.rotate * Math.PI / 180.0)
     } else {
       da = (settings.rotate * Math.PI / 180.0)
       db = (settings.rotate * Math.PI / 180.0)
       dc = (settings.rotate * Math.PI / 180.0)
     }
 
-    let ap = vec2(
-      (a[0] * Math.cos(da)) - (a[1] * Math.sin(da)),
-      (a[0] * Math.sin(da)) + (a[1] * Math.cos(da)))
-    let bp = vec2(
-      (b[0] * Math.cos(db)) - (b[1] * Math.sin(db)),
-      (b[0] * Math.sin(db)) + (b[1] * Math.cos(db)))
-    let cp = vec2(
-      (c[0] * Math.cos(dc)) - (c[1] * Math.sin(dc)),
-      (c[0] * Math.sin(dc)) + (c[1] * Math.cos(dc)))
+    let ap = new Victor(
+      (a.x * Math.cos(da)) - (a.y * Math.sin(da)),
+      (a.x * Math.sin(da)) + (a.y * Math.cos(da)))
+    let bp = new Victor(
+      (b.x * Math.cos(db)) - (b.y * Math.sin(db)),
+      (b.x * Math.sin(db)) + (b.y * Math.cos(db)))
+    let cp = new Victor(
+      (c.x * Math.cos(dc)) - (c.y * Math.sin(dc)),
+      (c.x * Math.sin(dc)) + (c.y * Math.cos(dc)))
 
     edges.push([ap, bp], [ap, cp], [bp, cp])
     return
@@ -104,9 +104,9 @@ export default class TessellationTwist extends Shape {
       let angle = Math.PI * 2.0 / numSides * (0.5 + i)
       let angle2 = Math.PI * 2.0 / numSides * (0.5 + ((i + 1) % numSides))
 
-      vertices.push(vec2(0, 0))
-      vertices.push(vec2(Math.cos(angle), Math.sin(angle)))
-      vertices.push(vec2(Math.cos(angle2), Math.sin(angle2)))
+      vertices.push(new Victor(0, 0))
+      vertices.push(new Victor(Math.cos(angle), Math.sin(angle)))
+      vertices.push(new Victor(Math.cos(angle2), Math.sin(angle2)))
     }
     return vertices
   }
@@ -119,10 +119,10 @@ export default class TessellationTwist extends Shape {
 
     switch (sides) {
       case 3:
-        vertices = vec_triangle.slice(0)
+        vertices = vecTriangle.slice(0)
         break
       case 4:
-        vertices = vec_square.slice(0)
+        vertices = vecSquare.slice(0)
         break
       default:
         vertices = this.getShapeVertices(sides)
@@ -138,27 +138,21 @@ export default class TessellationTwist extends Shape {
     // build edge and adjacency maps; this serves to ensure unique
     // vertices and edges, and give us a string-based key to access and run
     // algorithms on them.
-    let vertexMap = new Map()
-    let edgeMap = new Map()
+    let graph = new Graph()
 
     edges.forEach((edge) => {
       let v1 = edge[0]
       let v2 = edge[1]
-      let value = [v1.toString(), v2.toString()]
 
-      vertexMap.set(v1.toString(), v1)
-      vertexMap.set(v2.toString(), v2)
-      edgeMap.set(value.sort().toString(), value)
+      graph.addNode(v1)
+      graph.addNode(v2)
+      graph.addEdge(v1, v2)
     })
 
     // build a graph
-    let graph = new Graph()
-    vertexMap.forEach((vertex, key) => graph.addNode(key))
-    edgeMap.forEach((edge, key) => graph.addEdge(edge[0], edge[1]))
-
     // find the eulerian trail that efficiently visits all of the vertices
-    let edges2 = Array.from(edgeMap.values())
-    let trail = eulerianTrail({edges: edges2})
+    let trail = eulerianTrail({edges: Object.values(graph.edgeMap)})
+
     let prevKey
     let walkedVertices = []
     var walkedEdges = []
@@ -172,44 +166,40 @@ export default class TessellationTwist extends Shape {
       let edge = [trail[i], trail[i+1]].sort().toString()
       walkedEdges.push(edge)
     }
-    walkedEdges = Array.from(new Set(walkedEdges))
-    let missingEdges = difference(walkedEdges, graph.edges).reduce((hash, d) => {
+    walkedEdges = new Set(walkedEdges)
+
+    let missingEdges = Array.from(difference(walkedEdges, graph.edgeKeys)).reduce((hash, d) => {
       d = d.split(',')
       hash[d[0] + ',' + d[1]] = d[2] + ',' + d[3]
       return hash
     }, {})
 
     trail.forEach((key, index) => {
-      let vertex = vertexMap.get(key)
+      let vertex = graph.nodeMap[key]
 
       if (prevKey) {
-        let edgeKey = [key, prevKey].sort().toString()
-
-        if (!edgeMap.get(edgeKey)) {
+        if (!graph.hasEdge(key, prevKey)) {
           // non-eulerian move, so we'll walk the shortest valid path between them
           let path = graph.dijkstraShortestPath(prevKey, key)
           path.shift()
-          path.forEach((walkedKey) => {
-            let walkedVertex = vertexMap.get(walkedKey)
-            walkedVertices.push(Victor(walkedVertex[0], walkedVertex[1]))
-          })
-          walkedVertices.push(Victor(vertex[0], vertex[1]))
+          path.forEach(node => walkedVertices.push(node))
+          walkedVertices.push(vertex)
         } else {
-          walkedVertices.push(Victor(vertex[0], vertex[1]))
+          walkedVertices.push(vertex)
         }
       } else {
-        walkedVertices.push(Victor(vertex[0], vertex[1]))
+        walkedVertices.push(vertex)
       }
 
       // add any missing edges
       if (missingEdges[key]) {
-        let missingVertex = vertexMap.get(missingEdges[key])
+        let missingVertex = graph.nodeMap[missingEdges[key]]
         let edgeKey = [key, missingEdges[key]].sort().toString()
 
-        if (edgeMap.get(edgeKey)) {
+        if (graph.edgeMap[edgeKey]) {
           // only add valid edges
-          walkedVertices.push(Victor(missingVertex[0], missingVertex[1]))
-          walkedVertices.push(Victor(vertex[0], vertex[1]))
+          walkedVertices.push(missingVertex)
+          walkedVertices.push(vertex)
         }
         delete missingEdges[key]
       }
