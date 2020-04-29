@@ -1,5 +1,4 @@
 import Victor from 'victor'
-import Graph from './Graph'
 import { vertexRoundP } from './geometry'
 
 export const onSubtypeChange = (subtype, changes, attrs) => {
@@ -52,17 +51,17 @@ export const lsystem = (config) => {
     }
     input = output
   }
-
   return output
+}
+
+const lsystemDraw = (vertex, angle, config) => {
+  return vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)}), 2)
 }
 
 export const lsystemPath = (instructions, config) => {
   let vertex = new Victor(0, 0)
-  let vertices = []
   let currVertices = [vertex]
   let angle = -Math.PI/2
-  let branches = []
-  let currBranch
 
   if (config.startingAngle) {
     angle = typeof config.startingAngle === 'function' ?
@@ -70,68 +69,50 @@ export const lsystemPath = (instructions, config) => {
       config.startingAngle
   }
 
+  // This will store the previous return paths we are not working on.
+  let returnPaths = []
   for (let i=0; i<instructions.length; i++) {
     let char = instructions[i]
 
     if (char === '+') {
       angle += config.angle
+      if (returnPaths.length) {
+        returnPaths.slice(-1)[0].push('-')
+      }
     } else if (char === '-') {
       angle -= config.angle
+      if (returnPaths.length) {
+        returnPaths.slice(-1)[0].push('+')
+      }
     } else if (config.draw.includes(char)) {
-      vertex = vertexRoundP(vertex.clone().add({x: -config.side * Math.cos(angle), y: -config.side * Math.sin(angle)}), 2)
+      vertex = lsystemDraw(vertex, angle, config)
       currVertices.push(vertex)
+      if (returnPaths.length) {
+        returnPaths.slice(-1)[0].push('B')
+      }
     } else if (char === '[') {
-      branches.push({ angle: angle, vertex: vertex })
+      // open a branch
+      returnPaths.push([])
+
     } else if (char === ']') {
-      currBranch = branches.pop()
-      vertex = currBranch.vertex
-      angle = currBranch.angle
-      vertices.push(currVertices)
-      currVertices = [vertex]
-    }
-  }
+      // Return to the beginning of the branch
+      let returnPath = returnPaths.pop().reverse()
 
-  vertices.push(currVertices)
+      for (let j=0; j<returnPath.length; j++) {
+        let revChar = returnPath[j]
 
-  // build a graph of unique vertices
-  let graph = new Graph()
-  for(let i=0; i<vertices.length; i++) {
-    let branchVertices = vertices[i]
-
-    for(let j=0; j<branchVertices.length; j++) {
-      let curr = branchVertices[j]
-
-      graph.addNode(curr)
-
-      if (j > 0) {
-        let prev = branchVertices[j-1]
-        graph.addEdge(prev, curr)
+        if (revChar === '+') {
+          angle += config.angle
+        } else if (revChar === '-') {
+          angle -= config.angle
+        } else if (revChar === 'B') {
+          // Reverse Draw
+          vertex = lsystemDraw(vertex, angle + Math.PI, config)
+          currVertices.push(vertex)
+        }
       }
     }
   }
 
-  // walk the shortest path from the end of each branch back to the start
-  // of the next
-  let connectedVertices = []
-  for(let i=0; i<vertices.length; i++) {
-    let branchVertices = vertices[i]
-
-   if (i > 0) {
-     let prevVertices = vertices[i-1]
-     let key = branchVertices[0].toString()
-     let prevKey = prevVertices[prevVertices.length-1].toString()
-
-     if (!graph.hasEdge(prevKey, key)) {
-       let path = graph.dijkstraShortestPath(prevKey, key)
-
-       path.shift()
-       path.pop()
-       branchVertices = path.concat(branchVertices)
-     }
-   }
-
-    connectedVertices = connectedVertices.concat(branchVertices)
-  }
-
-  return connectedVertices
+  return currVertices
 }

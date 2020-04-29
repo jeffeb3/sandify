@@ -29,10 +29,10 @@ export const subtypes = {
     axiom: 'F',
     draw: ['F'],
     rules:  {
-      F: 'F=F[+FF][-FF]F[-F][+F]F',
+      F: 'F[+FF][-FF]F[-F][+F]F',
     },
     angle: Math.PI/5,
-    maxIterations: 3
+    maxIterations: 4
   },
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
   'Fractal Tree 2': {
@@ -44,31 +44,40 @@ export const subtypes = {
     angle: 10*Math.PI/72,
     maxIterations: 8
   },
-  // waiting on some kind of asynchronous rendering
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
-  // 'Fractal Tree 3': {
-  //   axiom: 'X',
-  //   draw: ['F'],
-  //   rules:  {
-  //     F: 'FF',
-  //     X: 'F+[-F-XF-X][+FF][--XF[+X]][++F-X]'
-  //   },
-  //   angle: Math.PI/8,
-  //   maxIterations: 4
-  // },
-  // waiting on some kind of asynchronous rendering
+  'Fractal Tree 3': {
+    axiom: 'X',
+    draw: ['F'],
+    rules:  {
+      F: 'FF',
+      X: 'F+[-F-XF-X][+FF][--XF[+X]][++F-X]'
+    },
+    angle: Math.PI/8,
+    maxIterations: 4
+  },
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
-  // 'Fractal Tree 4': {
-  //   axiom: 'X',
-  //   draw: ['F'],
-  //   rules:  {
-  //     F: 'FX[FX[+XF]]',
-  //     X: 'FF[+XZ++X-F[+ZX]][-X++F-X]',
-  //     Z: '[+F-X-F][++ZX]'
-  //   },
-  //   angle: Math.PI/8,
-  //   maxIterations: 4
-  // },
+  'Fractal Tree 4': {
+    axiom: 'X',
+    draw: ['F'],
+    rules:  {
+      F: 'FX[FX[+XF]]',
+      X: 'FF[+XZ++X-F[+ZX]][-X++F-X]',
+      Z: '[+F-X-F][++ZX]'
+    },
+    angle: Math.PI/8,
+    maxIterations: 4
+  },
+  // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf  
+  'Fractal Tree 5': {
+    axiom: 'X',
+    draw: ['F'],
+    rules:  {
+      X: 'F[+X]F[-X]+X',
+      F: 'FF'
+    },
+    angle: Math.PI/9,
+    maxIterations: 7
+  },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'Gosper (flowsnake)': {
     axiom: 'A',
@@ -158,7 +167,6 @@ export const subtypes = {
     angle: 2*Math.PI/5,
     maxIterations: 5
   },
-  // cannot do this until we support branching with legal vertex moves
   // https://onlinemathtools.com/l-system-generator
   'Penrose Tile': {
      axiom: '[7]++[7]++[7]++[7]++[7]',
@@ -170,7 +178,7 @@ export const subtypes = {
       9: '--8++++6[+9++++7]--7'
     },
     angle: Math.PI/5,
-    maxIterations: 5
+    maxIterations: 6
   },
   'Plusses': {
     axiom: 'XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX',

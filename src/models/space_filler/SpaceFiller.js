@@ -76,7 +76,11 @@ export default class SpaceFiller extends Shape {
     if (config.angle === undefined) { config.angle = Math.PI/2 }
 
     let curve = lsystemPath(lsystem(config), config)
-    let scale = config.iterationsGrow ? iterations : 1
+    let scale = 1
+
+    if (config.iterationsGrow) {
+      scale = (typeof config.iterationsGrow === 'function') ? config.iterationsGrow(config) : config.iterationsGrow
+    }
 
     return resizeVertices(curve, sizeX*scale, sizeY*scale)
   }
