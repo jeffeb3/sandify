@@ -24,11 +24,6 @@ export default class GCodeExporter extends Exporter {
     let command = 'G01' +
       ' X' + vertex.x.toFixed(3) +
       ' Y' + vertex.y.toFixed(3)
-
-    if (vertex.speed > 0.0) {
-      command += ' F' + vertex.f
-    }
-
     return command
   }
 }
