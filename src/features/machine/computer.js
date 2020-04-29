@@ -1,14 +1,13 @@
 import { distance } from '../../common/geometry'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
-import { getShape } from '../shapes/selectors'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
 
 // Transform functions
 function rotate(vertex, angleDeg) {
-  var angle = Math.PI / 180.0 * angleDeg
+  const angle = Math.PI / 180.0 * angleDeg
   return new Victor(
    vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
    vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle)
@@ -16,7 +15,7 @@ function rotate(vertex, angleDeg) {
 }
 
 function scale(vertex, scalePerc) {
-  var scale = scalePerc / 100.0
+  const scale = scalePerc / 100.0
   return new Victor(
     vertex.x * scale,
     vertex.y * scale
@@ -31,7 +30,7 @@ function offset(vertex, offsetX, offsetY) {
 }
 
 function track(vertex, data, loopIndex) {
-  let angle = data.trackLength * loopIndex / 16 * 2.0 * Math.PI
+  const angle = data.trackLength * loopIndex / 16 * 2.0 * Math.PI
   let radius = 1.0
 
   if (data.trackGrowEnabled) {
@@ -43,7 +42,7 @@ function track(vertex, data, loopIndex) {
   )
 }
 
-export const transform = (data, vertex, amount, trackIndex=0, numLoops) => {
+export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => {
   numLoops = numLoops || data.numLoops
   let transformedVertex = vertex
 
@@ -73,32 +72,17 @@ export const transform = (data, vertex, amount, trackIndex=0, numLoops) => {
   return transformedVertex
 }
 
-// Vertex functions
-const getShapeVertices = (state) => {
-  const shape = getShape(state.shape)
-  let vertices = shape.getVertices(state).map(vertex => {
-    return scale(vertex, 100.0 * state.shape.startingSize)
-  })
-
-  if (state.transform.transformMethod === 'smear' && state.transform.repeatEnabled) {
-    // remove last vertex; we don't want to return to our starting point when completing the shape
-    vertices.pop()
-  }
-  return vertices
-}
-
-function buildTrackLoop(state, i, t) {
-  const input = getShapeVertices(state)
-  const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
-  const nextTrackVertex = transform(state.transform, input[0], 0, i + 1, numTrackLoops)
+function buildTrackLoop(vertices, transform, i, t) {
+  const numTrackLoops = transform.repeatEnabled ? transform.trackNumLoops : 1
+  const nextTrackVertex = transformShape(transform, vertices[0], 0, i + 1, numTrackLoops)
   const backtrack = numTrackLoops > 1 && t === numTrackLoops - 1
-  let numVertices = input.length
+  let numVertices = vertices.length
   let trackVertices = []
   let trackDistances = []
 
   for (var j=0; j<numVertices; j++) {
-    const amount = state.transform.transformMethod === 'smear' ? i + t + j/input.length : i + t
-    const trackVertex = transform(state.transform, input[j], amount, i, numTrackLoops)
+    const amount = transform.transformMethod === 'smear' ? i + t + j/vertices.length : i + t
+    const trackVertex = transformShape(transform, vertices[j], amount, i, numTrackLoops)
     trackVertices.push(trackVertex)
 
     if (backtrack) {
@@ -129,46 +113,40 @@ function buildTrackLoop(state, i, t) {
 }
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
-export const polishVertices = (state, vertices) => {
+export const polishVertices = (vertices, machine) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
-  const machineClass = state.machine.rectangular ? RectMachine : PolarMachine
+  const machineClass = machine.rectangular ? RectMachine : PolarMachine
 
   if (vertices.length > 0) {
-    vertices = new machineClass(vertices, state.machine).polish().vertices
-  }
-
-  if (state.exporter.reverse) {
-    vertices.reverse()
+    vertices = new machineClass(vertices, machine).polish().vertices
   }
 
   return vertices
 }
 
-export const patternImport = (state) => {
-  let machine = state.machine
-  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.importer.zoom
-  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.importer.zoom
+export const scaleImportedVertices = (importer, machine) => {
+  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * importer.zoom
+  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * importer.zoom
 
   if (!machine.rectangular) {
-    x_scale = y_scale = machine.maxRadius * 0.01 * state.importer.zoom
+    x_scale = y_scale = machine.maxRadius * 0.01 * importer.zoom
   }
 
-  if (state.importer.aspectRatio) {
+  if (importer.aspectRatio) {
     const machine_aspect_ratio = y_scale / x_scale
-    if (state.importer.originalAspectRatio > machine_aspect_ratio) {
-      x_scale = x_scale / state.importer.originalAspectRatio * machine_aspect_ratio
+    if (importer.originalAspectRatio > machine_aspect_ratio) {
+      x_scale = x_scale / importer.originalAspectRatio * machine_aspect_ratio
     } else {
-      y_scale = y_scale * state.importer.originalAspectRatio / machine_aspect_ratio
+      y_scale = y_scale * importer.originalAspectRatio / machine_aspect_ratio
     }
   }
 
-  const newVertices = state.importer.vertices.map( (vertex) => {
+  return importer.vertices.map( (vertex) => {
     return {...vertex,
       x: vertex.x * x_scale,
       y: vertex.y * y_scale,
     }
   })
-  return polishVertices(state, newVertices)
 }
 
 function reportTiming(time) {
@@ -182,29 +160,36 @@ function reportTiming(time) {
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
-export const transformShapes = (state) => {
+export const transformShapes = (vertices, transform) => {
   const startTime = performance.now()
-  const input = getShapeVertices(state)
-  const numLoops = state.transform.repeatEnabled ? state.transform.numLoops : 1
-  const numTrackLoops = state.transform.repeatEnabled ? state.transform.trackNumLoops : 1
+  const numLoops = transform.repeatEnabled ? transform.numLoops : 1
+  const numTrackLoops = transform.repeatEnabled ? transform.trackNumLoops : 1
   let outputVertices = []
 
   for (var i=0; i<numLoops; i++) {
-    if (state.transform.trackEnabled && numTrackLoops > 1) {
+    if (transform.trackEnabled && numTrackLoops > 1) {
       for (var t=0; t<numTrackLoops; t++) {
-        outputVertices = outputVertices.concat(buildTrackLoop(state, i, t))
+        outputVertices = outputVertices.concat(buildTrackLoop(vertices, transform, i, t))
       }
     } else {
       for (i=0; i<numLoops; i++) {
-        for (var j=0; j<input.length; j++) {
-          let amount = state.transform.transformMethod === 'smear' ? i + j/input.length : i
-          outputVertices.push(transform(state.transform, input[j], amount, amount))
+        for (var j=0; j<vertices.length; j++) {
+          let amount = transform.transformMethod === 'smear' ? i + j/vertices.length : i
+          outputVertices.push(transformShape(transform, vertices[j], amount, amount))
         }
       }
     }
   }
 
-  const rv = polishVertices(state, outputVertices)
+  let rv = outputVertices.map(vertex => {
+    return scale(vertex, 100.0 * transform.startingSize)
+  })
+
+  if (transform.transformMethod === 'smear' && transform.repeatEnabled) {
+    // remove last vertex; we don't want to return to our starting point when completing the shape
+    rv.pop()
+  }
+
   const endTime = performance.now()
   throttledReportTiming(endTime - startTime)
   return rv

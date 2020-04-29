@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import Victor from 'victor'
 import { setPreviewSize } from './previewSlice'
-import { transform } from '../machine/computer'
+import { transformShape } from '../machine/computer'
 import { getVertices } from '../machine/selectors'
 import { createSelector } from 'reselect'
 import throttle from 'lodash/throttle'
@@ -24,7 +24,7 @@ const getTrackVertices = createSelector(
 
     for (var i=0; i<numLoops; i++) {
       if (currentTransform.trackEnabled) {
-        trackVertices.push(transform(currentTransform, {x: 0.0, y: 0.0}, i, i))
+        trackVertices.push(transformShape(currentTransform, {x: 0.0, y: 0.0}, i, i))
       }
     }
     return trackVertices

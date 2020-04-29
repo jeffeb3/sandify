@@ -8,8 +8,8 @@ export default class GCodeExporter extends Exporter {
     this.commentChar = ';'
   }
 
-  exportCode() {
-    var centeredVertices = this.props.vertices.map( (vertex) => {
+  exportCode(vertices) {
+    var centeredVertices = vertices.map( (vertex) => {
       return {
         ...vertex,
         x: vertex.x + this.props.offsetX,
