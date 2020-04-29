@@ -94,7 +94,14 @@ export default class PolarMachine extends Machine {
     let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
     let d = this.perimeterDistance(v1, v2)
 
-    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 4*Math.PI
+    // Delta is purposefully large to accommodate the squaring of the compared values.
+    // Setting delta too small will result in perimeter moves being miscategorized.
+    // d is used to guard against the case where there is a straight line connecting two
+    // perimeter points directly. In this case, we want to register that as a non-perimeter
+    // move, or it will be incorrectly optimized out of the final vertices. The 3/50
+    // ratio could likely be refined further (relative to maxRadius), but it seems to produce
+    // accurate results at various machine sizes.
+    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/50
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by
