@@ -3,7 +3,6 @@ import machine, {
   toggleMachineRectExpanded,
   toggleMachinePolarExpanded,
   setMachineRectOrigin,
-  setMachineSize,
 } from './machineSlice'
 
 describe('machine reducer', () => {
@@ -21,9 +20,6 @@ describe('machine reducer', () => {
       polarEndPoint: 'none',
       polarExpanded: false,
       rectExpanded: false,
-      canvasWidth: 600,
-      canvasHeight: 600,
-      sliderValue: 0
     })
   })
 
@@ -73,18 +69,6 @@ describe('machine reducer', () => {
       )
     ).toEqual({
       rectOrigin: [3]
-    })
-  })
-
-  it('should handle setMachineSize', () => {
-    expect(
-      machine(
-        {canvasWidth: 600, canvasHeight: 600},
-        setMachineSize(800)
-      )
-    ).toEqual({
-      canvasWidth: 800,
-      canvasHeight: 800
     })
   })
 })

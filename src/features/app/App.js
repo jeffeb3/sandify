@@ -6,7 +6,7 @@ import {
 import { Provider } from 'react-redux'
 import Header from './Header'
 import InputTabs from './InputTabs'
-import MachinePreview from '../machine/MachinePreview'
+import MachinePreview from '../preview/MachinePreview'
 import store from './store'
 import './App.scss'
 

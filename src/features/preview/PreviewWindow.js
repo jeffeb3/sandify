@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import Victor from 'victor'
-import { setMachineSize } from './machineSlice'
-import { transform } from './computer'
-import { getVertices } from './selectors'
+import { setPreviewSize } from './previewSlice'
+import { transform } from '../machine/computer'
+import { getVertices } from '../machine/selectors'
 import { createSelector } from 'reselect'
 import throttle from 'lodash/throttle'
 import Color from 'color'
@@ -39,10 +39,10 @@ const mapStateToProps = (state, ownProps) => {
     minY: state.machine.minY,
     maxY: state.machine.maxY,
     maxRadius: state.machine.maxRadius,
-    canvasWidth: state.machine.canvasWidth,
-    canvasHeight: state.machine.canvasHeight,
+    canvasWidth: state.preview.canvasWidth,
+    canvasHeight: state.preview.canvasHeight,
     vertices: getVertices(state),
-    sliderValue: state.machine.sliderValue,
+    sliderValue: state.preview.sliderValue,
     showTrack: state.app.input === 'shape',
     trackVertices: getTrackVertices(state),
   }
@@ -51,7 +51,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onResize: (size) => {
-      dispatch(setMachineSize(size))
+      dispatch(setPreviewSize(size))
     },
   }
 }
@@ -185,7 +185,7 @@ class PreviewWindow extends Component {
         context.lineWidth = this.mmToPixelsScale()
         context.strokeStyle = Color('#6E6E00')
         this.moveTo_mm(context, this.props.vertices[0])
-        
+
         for (let i=0; i<this.props.vertices.length; i++) {
           if (i === sliderRange[1]-1) {
             context.stroke()
