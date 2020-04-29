@@ -64,8 +64,10 @@ export default class RectMachine extends Machine {
   onPerimeter(v1, v2, delta=.0001) {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
     const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
+    const rDx = Math.abs(v1.x - v2.x)
+    const rDy = Math.abs(v1.y - v2.y)
 
-    return (v1.x === v2.x && dx < delta) || (v1.y === v2.y && dy < delta)
+    return (rDx < delta && dx < delta) || (rDy < delta && dy < delta)
   }
 
   // Given two perimeter points, traces the shortest valid path between them (stays on
