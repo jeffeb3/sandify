@@ -1,4 +1,9 @@
 const transformOptions = {
+  startingSize: {
+    title: 'Starting size',
+    min: 1,
+    isVisible: (state) => { return state.canChangeSize },        
+  },
   offsetX: {
     title: 'X offset',
   },
@@ -55,6 +60,7 @@ const transformOptions = {
 export default class Transform {
   getInitialState() {
     return {
+      startingSize: 10,
       offsetX: 0.0,
       offsetY: 0.0,
       numLoops: 10,

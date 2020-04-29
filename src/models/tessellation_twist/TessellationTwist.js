@@ -89,15 +89,23 @@ export default class TessellationTwist extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'tessellation_twist',
-        startingSize: 110,
-        repeatEnabled: false,
         tessellationTwistNumSides: 5,
         tessellationTwistIterations: 2,
-        tessellationTwistRotate: 0
+        tessellationTwistRotate: 0,
       }
     }
   }
 
+  getInitialTransformState() {
+    return {
+      ...super.getInitialTransformState(),
+      ...{
+        startingSize: 110,
+        repeatEnabled: false,
+      }
+    }
+  }
+  
   getShapeVertices(numSides) {
     let vertices = []
     for (let i=0; i<=numSides; i++) {

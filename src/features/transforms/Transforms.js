@@ -57,6 +57,14 @@ class Transforms extends Component {
         <InputOption
           onChange={this.props.onChange}
           options={this.props.options}
+          key="startingSize"
+          optionKey="startingSize"
+          index={0}
+          model={this.props.transform} />
+
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
           key="offsetX"
           optionKey="offsetX"
           index={0}

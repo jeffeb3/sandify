@@ -45,20 +45,27 @@ export default class SpaceFiller extends Shape {
       ...{
         type: 'space_filler',
         selectGroup: 'Erasers',
-        repeatEnabled: false,
         canTransform: false,
-        startingSize: 1,
-        canChangeSize: false,
         iterations: 6,
         subtype: 'Hilbert'
       }
     }
   }
 
+  getInitialTransformState() {
+    return {
+      ...super.getInitialTransformState(),
+      ...{
+        repeatEnabled: false,
+        startingSize: 1,
+        canChangeSize: false,
+      }
+    }
+  }
+
   getVertices(state) {
     const machine = state.machine
-    const shape = state.shape
-    const iterations = shape.iterations || 1
+    const iterations = state.shape.iterations || 1
 
     let sizeX, sizeY
     if (machine.rectangular) {
@@ -69,7 +76,7 @@ export default class SpaceFiller extends Shape {
     }
 
     // generate our vertices using a set of l-system rules
-    let config = subtypes[shape.subtype]
+    let config = subtypes[state.shape.subtype]
     config.iterations = iterations
 
     if (config.side === undefined) { config.side = 5 }

@@ -43,9 +43,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       let attrs = metashape.getInitialState()
       attrs.id = id
 
-      let tAttrs = metatransform.getInitialState()
-      tAttrs.id = id
-      tAttrs.repeatEnabled = attrs.repeatEnabled
+      let tAttrs = {
+        ...{id: id},
+        ...metatransform.getInitialState(),
+        ...metashape.getInitialTransformState()
+      }
+
       dispatch(updateShape(attrs))
       dispatch(updateTransform(tAttrs))
     }

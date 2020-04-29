@@ -1,10 +1,4 @@
-export const shapeOptions = {
-  startingSize: {
-    title: 'Starting size',
-    min: 1,
-    isVisible: (state) => { return state.canChangeSize }
-  }
-}
+export const shapeOptions = {}
 
 export default class Shape {
   constructor(name) {
@@ -15,9 +9,14 @@ export default class Shape {
     return {
       repeatEnabled: true,
       canTransform: true,
-      canChangeSize: true,
       selectGroup: 'Shapes',
+    }
+  }
+
+  getInitialTransformState() {
+    return {
       startingSize: 10,
+      canChangeSize: true,
     }
   }
 
@@ -25,7 +24,7 @@ export default class Shape {
     return shapeOptions
   }
 
-  getVertices() {
+  getVertices(state) {
     return []
   }
 }

@@ -44,10 +44,18 @@ export default class LSystem extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'lsystem',
+        iterations: 3,
+        subtype: 'McWorter\'s Pentadendrite',
+      }
+    }
+  }
+
+  getInitialTransformState() {
+    return {
+      ...super.getInitialTransformState(),
+      ...{
         repeatEnabled: false,
         startingSize: 23,
-        iterations: 3,
-        subtype: 'McWorter\'s Pentadendrite'
       }
     }
   }
@@ -60,7 +68,7 @@ export default class LSystem extends Shape {
     // generate our vertices using a set of l-system rules
     let config = subtypes[shape.subtype]
     config.iterations = iterations
-    config.side = state.shape.startingSize/5
+    config.side = 5
 
     if (config.angle === undefined) { config.angle = Math.PI/2 }
 
