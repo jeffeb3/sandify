@@ -15,7 +15,7 @@ import {
   toggleRepeat
 } from './transformsSlice'
 import { getCurrentTransformSelector } from '../shapes/selectors'
-import Transform from '../../shapes/Transform'
+import Transform from '../../models/Transform'
 import ScaleTransform from './ScaleTransform'
 import RotationTransform from './RotationTransform'
 import TrackTransform from './TrackTransform'

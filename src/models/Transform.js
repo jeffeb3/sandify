@@ -10,12 +10,18 @@ const transformOptions = {
     min: 1
   },
   transformMethod: {
-    title: 'Transform after each',
+    title: 'When transforming shape',
     type: 'dropdown',
     choices: ['smear', 'intact'],
   },
+  growEnabled: {
+    title: 'Grow'
+  },
   growValue: {
     title: 'Scale step (+/-)',
+  },
+  spinEnabled: {
+    title: 'Spin'
   },
   spinValue: {
     title: 'Spin step (+/-)',
@@ -23,6 +29,12 @@ const transformOptions = {
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
+  },
+  trackEnabled: {
+    title: 'Track'
+  },
+  trackGrowEnabled: {
+    title: 'Track grow'
   },
   trackValue: {
     title: 'Track size',

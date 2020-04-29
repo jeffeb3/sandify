@@ -137,7 +137,7 @@ export const polishVertices = (state, vertices) => {
     vertices = new machineClass(vertices, state.machine).polish().vertices
   }
 
-  if (state.gcode.reverse) {
+  if (state.exporter.reverse) {
     vertices.reverse()
   }
 
@@ -146,23 +146,23 @@ export const polishVertices = (state, vertices) => {
 
 export const patternImport = (state) => {
   let machine = state.machine
-  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.file.zoom
-  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.file.zoom
+  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * state.importer.zoom
+  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * state.importer.zoom
 
   if (!machine.rectangular) {
-    x_scale = y_scale = machine.maxRadius * 0.01 * state.file.zoom
+    x_scale = y_scale = machine.maxRadius * 0.01 * state.importer.zoom
   }
 
-  if (state.file.aspectRatio) {
+  if (state.importer.aspectRatio) {
     const machine_aspect_ratio = y_scale / x_scale
-    if (state.file.originalAspectRatio > machine_aspect_ratio) {
-      x_scale = x_scale / state.file.originalAspectRatio * machine_aspect_ratio
+    if (state.importer.originalAspectRatio > machine_aspect_ratio) {
+      x_scale = x_scale / state.importer.originalAspectRatio * machine_aspect_ratio
     } else {
-      y_scale = y_scale * state.file.originalAspectRatio / machine_aspect_ratio
+      y_scale = y_scale * state.importer.originalAspectRatio / machine_aspect_ratio
     }
   }
 
-  const newVertices = state.file.vertices.map( (vertex) => {
+  const newVertices = state.importer.vertices.map( (vertex) => {
     return {...vertex,
       x: vertex.x * x_scale,
       y: vertex.y * y_scale,
