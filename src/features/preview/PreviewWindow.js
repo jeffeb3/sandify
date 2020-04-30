@@ -3,33 +3,9 @@ import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import Victor from 'victor'
 import { setPreviewSize } from './previewSlice'
-import { transformShape } from '../machine/computer'
-import { getVertices } from '../machine/selectors'
-import { createSelector } from 'reselect'
+import { getVertices, getTrackVertices } from '../machine/selectors'
 import throttle from 'lodash/throttle'
 import Color from 'color'
-
-const getTransforms = state => state.transforms
-const getShapes = state => state.shapes
-
-const getTrackVertices = createSelector(
-  [
-    getShapes,
-    getTransforms
-  ],
-  (shapes, transforms) => {
-    const currentTransform = transforms.byId[shapes.currentId]
-    const numLoops = currentTransform.numLoops
-    var trackVertices = []
-
-    for (var i=0; i<numLoops; i++) {
-      if (currentTransform.trackEnabled) {
-        trackVertices.push(transformShape(currentTransform, {x: 0.0, y: 0.0}, i, i))
-      }
-    }
-    return trackVertices
-  }
-)
 
 const mapStateToProps = (state, ownProps) => {
   return {

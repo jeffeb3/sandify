@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 import {
   transformShapes,
+  transformShape,
   polishVertices,
   scaleImportedVertices
 } from './computer'
@@ -116,5 +117,23 @@ export const getVerticesStats = createSelector(
       numPoints: vertices.length,
       distance: Math.floor(distance)
     }
+  }
+)
+
+export const getTrackVertices = createSelector(
+  [
+    getTransform
+  ],
+  (transform) => {
+    const numLoops = transform.numLoops
+    var trackVertices = []
+
+    for (var i=0; i<numLoops; i++) {
+      if (transform.trackEnabled) {
+        trackVertices.push(transformShape(transform, {x: 0.0, y: 0.0}, i, i))
+      }
+    }
+
+    return trackVertices
   }
 )
