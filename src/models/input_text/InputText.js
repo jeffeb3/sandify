@@ -47,6 +47,14 @@ export default class InputText extends Shape {
         inputText: 'Sandify',
         inputFont: 'Cursive',
         rotateDir: 'Center',
+      }
+    }
+  }
+
+  getInitialTransformState() {
+    return {
+      ...super.getInitialTransformState(),
+      ...{
         repeatEnabled: false,
         startingSize: 25
       }

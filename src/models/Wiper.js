@@ -252,11 +252,19 @@ export default class Wiper extends Shape {
         wiperAngleDeg: 15,
         wiperSize: 12,
         wiperType: 'Lines',
+        selectGroup: 'Erasers',
+        canTransform: false
+      }
+    }
+  }
+
+  getInitialTransformState() {
+    return {
+      ...super.getInitialTransformState(),
+      ...{
         startingSize: 1,
         canChangeSize: false,
         repeatEnabled: false,
-        selectGroup: 'Erasers',
-        canTransform: false
       }
     }
   }

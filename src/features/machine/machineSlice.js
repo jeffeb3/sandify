@@ -21,10 +21,7 @@ const machineSlice = createSlice({
     minimizeMoves: JSON.parse(localStorage.getItem('minimizeMoves')) || false,
     rectOrigin: [],
     polarStartPoint: 'none',
-    polarEndPoint: 'none',
-    canvasWidth: 600,
-    canvasHeight: 600,
-    sliderValue: 0.0
+    polarEndPoint: 'none'
   },
   reducers: {
     updateMachine(state, action) {
@@ -60,10 +57,6 @@ const machineSlice = createSlice({
     toggleMinimizeMoves(state, action) {
       state.minimizeMoves = !state.minimizeMoves
       localStorage.setItem('minimizeMoves', state.minimizeMoves)
-    },
-    setMachineSize(state, action) {
-      state.canvasHeight = action.payload
-      state.canvasWidth = action.payload
     },
   }
 })

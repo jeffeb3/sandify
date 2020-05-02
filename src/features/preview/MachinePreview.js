@@ -4,13 +4,13 @@ import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
 import Downloader from '../exporter/Downloader'
-import { updateMachine } from './machineSlice'
-import { getVerticesStats } from './selectors'
+import { updatePreview } from './previewSlice'
+import { getVerticesStats } from '../machine/selectors'
 import './MachinePreview.scss'
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    sliderValue: state.machine.sliderValue,
+    sliderValue: state.preview.sliderValue,
     verticesStats: getVerticesStats(state),
   }
 }
@@ -18,7 +18,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
-      dispatch(updateMachine({sliderValue: value}))
+      dispatch(updatePreview({sliderValue: value}))
     },
   }
 }
@@ -41,7 +41,7 @@ class MachinePreview extends Component {
               <div className="p-3">
                   <Slider
                     value={this.props.sliderValue}
-                    step={1.0}
+                    step={0.1}
                     min={0.0}
                     max={100.0}
                     onChange={this.props.onSlider}

@@ -1,15 +1,25 @@
-import { configureStore } from "@reduxjs/toolkit"
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
 import appReducer from './appSlice'
 import importerReducer from '../importer/importerSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
+import previewReducer from '../preview/previewSlice'
 import shapesReducer from '../shapes/shapesSlice'
 import transformsReducer from '../transforms/transformsSlice'
 import { registeredShapes } from '../../common/registeredShapes'
 import { loadState, saveState } from '../../common/localStorage'
 import { addShape, setCurrentShape, updateShape } from '../shapes/shapesSlice'
 import { addTransform, updateTransform } from '../transforms/transformsSlice'
+
+const customizedMiddleware = getDefaultMiddleware({
+  immutableCheck: {
+    ignoredPaths: ['importer.vertices']
+  },
+  serializableCheck: {
+    ignoredPaths: ['importer.vertices']
+  }
+})
 
 const store = configureStore({
   reducer: combineReducers({
@@ -18,19 +28,26 @@ const store = configureStore({
     transforms: transformsReducer,
     importer: importerReducer,
     exporter: exporterReducer,
-    machine: machineReducer
+    machine: machineReducer,
+    preview: previewReducer
   }),
+  middleware: customizedMiddleware
 })
 
 // preload shapes into store
 Object.keys(registeredShapes).forEach(key => {
-  let shape = registeredShapes[key]
-  let state = shape.getInitialState()
+  const shape = registeredShapes[key]
+  const state = shape.getInitialState()
+  const tState = shape.getInitialTransformState()
 
   state.id = key
   state.name = shape.name
-  store.dispatch(addTransform({id: state.id, repeatEnabled: state.repeatEnabled}))
+
   store.dispatch(addShape(state))
+  store.dispatch(addTransform({
+    ...{id: state.id },
+    ...tState,
+  }))
 })
 
 // set to true when running locally if you want to preserve your shape

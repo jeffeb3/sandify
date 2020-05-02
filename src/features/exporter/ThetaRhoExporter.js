@@ -14,10 +14,9 @@ export default class ThetaRhoExporter extends Exporter {
   }
 
   // adds lines mapping given vertices to the theta rho format
-  exportCode() {
+  exportCode(vertices) {
     // First, downsample larger lines into smaller ones.
     const maxLength = 2.0
-    let vertices = this.props.vertices
     let subsampledVertices = []
     let previous = undefined
     let next

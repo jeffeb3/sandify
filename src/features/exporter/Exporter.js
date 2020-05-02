@@ -18,7 +18,12 @@ export default class Exporter {
     this.line('END PRE')
     this.endComments()
 
-    this.exportCode()
+    let vertices = this.props.vertices
+    if (this.props.reverse) {
+      vertices = vertices.reverse()
+    }
+
+    this.exportCode(vertices)
     this.line()
 
     this.startComments()
