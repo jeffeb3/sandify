@@ -2,7 +2,7 @@ const transformOptions = {
   startingSize: {
     title: 'Starting size',
     min: 1,
-    isVisible: (state) => { return state.canChangeSize },        
+    isVisible: (state) => { return state.canChangeSize },
   },
   offsetX: {
     title: 'X offset',

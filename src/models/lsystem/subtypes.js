@@ -67,7 +67,7 @@ export const subtypes = {
     angle: Math.PI/8,
     maxIterations: 4
   },
-  // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf  
+  // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf
   'Fractal Tree 5': {
     axiom: 'X',
     draw: ['F'],

@@ -105,7 +105,7 @@ export default class TessellationTwist extends Shape {
       }
     }
   }
-  
+
   getShapeVertices(numSides) {
     let vertices = []
     for (let i=0; i<=numSides; i++) {
