@@ -31,6 +31,9 @@ export const getShapedVertices = createSelector(
       machine: machine
     }
     const metashape = getShape(shape)
+    if (shape.shouldCache) {
+      return metashape.getVerticesWithCache(state)
+    }
     return metashape.getVertices(state)
   }
 )
