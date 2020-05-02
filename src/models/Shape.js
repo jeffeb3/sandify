@@ -26,18 +26,6 @@ export default class Shape {
     return shapeOptions
   }
 
-  getVerticesWithCache(state) {
-    this.cache.forEach( (cachedShape) => {
-      var [shape, vertices] = cachedShape
-      if (JSON.stringify(state.shape) === JSON.stringify(shape)) {
-        return vertices
-      }
-    })
-    const shapeVertices = this.getVertices(state)
-    this.cache.push([state.shape, shapeVertices])
-    return shapeVertices
-  }
-
   getVertices(state) {
     return []
   }

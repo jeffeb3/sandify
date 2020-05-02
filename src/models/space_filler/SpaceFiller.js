@@ -46,7 +46,6 @@ export default class SpaceFiller extends Shape {
         type: 'space_filler',
         selectGroup: 'Erasers',
         canTransform: false,
-        shouldCache: false,
         iterations: 6,
         subtype: 'Hilbert'
       }
