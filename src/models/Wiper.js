@@ -253,7 +253,8 @@ export default class Wiper extends Shape {
         wiperSize: 12,
         wiperType: 'Lines',
         selectGroup: 'Erasers',
-        canTransform: false
+        canTransform: false,
+        shouldCache: false,
       }
     }
   }

@@ -3,6 +3,7 @@ export const shapeOptions = {}
 export default class Shape {
   constructor(name) {
     this.name = name
+    this.cache = []
   }
 
   getInitialState() {
@@ -10,6 +11,7 @@ export default class Shape {
       repeatEnabled: true,
       canTransform: true,
       selectGroup: 'Shapes',
+      shouldCache: true,
     }
   }
 

@@ -1,3 +1,4 @@
+import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
 import {
   transformShapes,
@@ -6,6 +7,15 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../shapes/selectors'
+
+const cache = new LRUCache({
+  length: (n, key) => { return n.length },
+  max: 500000
+})
+
+const getCacheKey = (state) => {
+  return JSON.stringify(state)
+}
 
 const getApp = state => state.app
 const getShapes = state => state.shapes
@@ -31,7 +41,21 @@ export const getShapedVertices = createSelector(
       machine: machine
     }
     const metashape = getShape(shape)
-    return metashape.getVertices(state)
+    if (shape.shouldCache) {
+      const key = getCacheKey(state)
+      let vertices = cache.get(key)
+
+      if (!vertices) {
+        vertices = metashape.getVertices(state)
+        cache.set(key, vertices)
+        // for debugging purposes
+        // console.log('caching shape...' + cache.length + ' ' + cache.itemCount)
+      }
+
+      return vertices
+    } else {
+      return metashape.getVertices(state)
+    }
   }
 )
 

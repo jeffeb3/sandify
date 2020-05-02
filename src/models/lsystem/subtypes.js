@@ -32,7 +32,7 @@ export const subtypes = {
       F: 'F[+FF][-FF]F[-F][+F]F',
     },
     angle: Math.PI/5,
-    maxIterations: 4
+    maxIterations: 5
   },
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
   'Fractal Tree 2': {
@@ -42,7 +42,7 @@ export const subtypes = {
       F: 'F[-F][+F]',
     },
     angle: 10*Math.PI/72,
-    maxIterations: 8
+    maxIterations: 9
   },
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
   'Fractal Tree 3': {
@@ -53,7 +53,7 @@ export const subtypes = {
       X: 'F+[-F-XF-X][+FF][--XF[+X]][++F-X]'
     },
     angle: Math.PI/8,
-    maxIterations: 4
+    maxIterations: 6
   },
   // https://www.vexlio.com/blog/drawing-simple-organics-with-l-systems/
   'Fractal Tree 4': {
@@ -65,7 +65,7 @@ export const subtypes = {
       Z: '[+F-X-F][++ZX]'
     },
     angle: Math.PI/8,
-    maxIterations: 4
+    maxIterations: 5
   },
   // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf
   'Fractal Tree 5': {
@@ -76,7 +76,7 @@ export const subtypes = {
       F: 'FF'
     },
     angle: Math.PI/9,
-    maxIterations: 7
+    maxIterations: 8
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   'Gosper (flowsnake)': {
