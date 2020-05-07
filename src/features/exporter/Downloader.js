@@ -31,8 +31,8 @@ const mapStateToProps = (state, ownProps) => {
     maxRadius: state.machine.maxRadius,
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
-    pre: state.exporter.pre,
-    post: state.exporter.post,
+    pre: (state.exporter.fileType !== 'SVG (.svg)' ? state.exporter.pre : ''),
+    post: (state.exporter.fileType !== 'SVG (.svg)' ? state.exporter.post : ''),
     options: new Exporter().getOptions()
   }
 }

@@ -10,11 +10,13 @@ const exporterOptions = {
   },
   post: {
     title: 'Program end code',
-    type: 'textarea'
+    type: 'textarea',
+    isVisible: (state) => { return state.fileType !== 'SVG (.svg)' },
   },
   pre: {
     title: 'Program start code',
-    type: 'textarea'
+    type: 'textarea',
+    isVisible: (state) => { return state.fileType !== 'SVG (.svg)' },
   },
   reverse: {
     title: 'Reverse path in the code',
