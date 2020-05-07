@@ -6,7 +6,7 @@ const exporterOptions = {
   fileType: {
     title: 'Export as',
     type: 'dropdown',
-    choices: ['GCode (.gcode)', 'Theta Rho (.thr)']
+    choices: ['GCode (.gcode)', 'Theta Rho (.thr)', 'SVG (.svg)']
   },
   post: {
     title: 'Program end code',

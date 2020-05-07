@@ -5,9 +5,9 @@ export default class Exporter {
   }
 
   export() {
-    this.lines = this.lines.concat(this.props.comments)
-
+    this.header()
     this.startComments()
+    this.props.comments.forEach( comment => this.line(comment) )
     this.line()
     this.keyValueLine('File name', "'" + this.props.fileName + "'")
     this.line()
@@ -23,6 +23,7 @@ export default class Exporter {
       vertices = vertices.reverse()
     }
 
+    this.line()
     this.exportCode(vertices)
     this.line()
 
@@ -32,8 +33,19 @@ export default class Exporter {
     this.line(this.props.post, this.props.post !== '')
     this.startComments()
     this.line('END POST')
+    this.endComments()
+    this.footer()
+    this.line()
 
     return this.lines
+  }
+
+  header() {
+    // default does nothing
+  }
+
+  footer() {
+    // default does nothing
   }
 
   line(content='', add=true) {

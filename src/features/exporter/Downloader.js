@@ -13,6 +13,7 @@ import { getVertices } from '../machine/selectors'
 import ReactGA from 'react-ga'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
+import SvgExporter from './SvgExporter'
 import Exporter from '../../models/Exporter'
 
 const mapStateToProps = (state, ownProps) => {
@@ -25,6 +26,8 @@ const mapStateToProps = (state, ownProps) => {
     shape: state.shapes.currentId,
     offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
     offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
+    width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
+    height:  (state.machine.rectangular ? (state.machine.maxY - state.machine.minY) : (2.0 * state.machine.maxRadius)),
     maxRadius: state.machine.maxRadius,
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
@@ -36,7 +39,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const exporters = {
   'GCode (.gcode)': GCodeExporter,
-  'Theta Rho (.thr)': ThetaRhoExporter
+  'Theta Rho (.thr)': ThetaRhoExporter,
+  'SVG (.svg)': SvgExporter,
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -96,7 +100,11 @@ class Downloader extends Component {
     let link = document.createElement('a')
     link.download = fileName
 
-    let blob = new Blob([text],{type: 'text/plain;charset=utf-8'})
+    let fileType = 'text/plain;charset=utf-8'
+    if (this.props.fileType === 'SVG (.svg)') {
+      fileType = 'image/svg+xml;charset=utf-8'
+    }
+    let blob = new Blob([text],{type: fileType})
 
     // Windows Edge fix
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
