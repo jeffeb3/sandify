@@ -25,7 +25,11 @@ export default class SvgExporter extends Exporter {
     }
     centeredVertices.forEach(vertex => svg.lineTo(vertex.x, vertex.y))
     this.line("    <desc>pwidth:" + this.props.width + ";pheight:" + this.props.height + ";</desc>")
-    this.line("    <path stroke=\"#000000\" stroke-width=\"0.4mm\" fill=\"none\" d=\"" + svg.toString() + "\"/>")
+    this.line("    <path")
+    this.line("       stroke=\"#000000\"")
+    this.line("       stroke-width=\"0.4mm\"")
+    this.line("       fill=\"none\"")
+    this.line("       d=\"" + svg.toString() + "\"/>")
   }
 
   header() {
