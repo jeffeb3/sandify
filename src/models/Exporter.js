@@ -1,3 +1,8 @@
+
+export const gcodeTypeName = 'GCode (.gcode)'
+export const thrTypeName = 'Theta Rho (.thr)'
+export const svgTypeName = 'SVG (.svg)'
+
 const exporterOptions = {
   fileName: {
     title: 'File name',
@@ -6,24 +11,24 @@ const exporterOptions = {
   fileType: {
     title: 'Export as',
     type: 'dropdown',
-    choices: ['GCode (.gcode)', 'Theta Rho (.thr)', 'SVG (.svg)']
+    choices: [gcodeTypeName, thrTypeName, svgTypeName]
   },
   post: {
     title: 'Program end code',
     type: 'textarea',
-    isVisible: (state) => { return state.fileType !== 'SVG (.svg)' },
+    isVisible: (state) => { return state.fileType !== svgTypeName },
   },
   pre: {
     title: 'Program start code',
     type: 'textarea',
-    isVisible: (state) => { return state.fileType !== 'SVG (.svg)' },
+    isVisible: (state) => { return state.fileType !== svgTypeName },
   },
   reverse: {
     title: 'Reverse path in the code',
   },
 }
 
-export default class Exporter {
+export class Exporter {
   getOptions() {
     return exporterOptions
   }

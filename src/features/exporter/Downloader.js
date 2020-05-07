@@ -14,7 +14,12 @@ import ReactGA from 'react-ga'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
 import SvgExporter from './SvgExporter'
-import Exporter from '../../models/Exporter'
+import {
+  gcodeTypeName,
+  thrTypeName,
+  svgTypeName,
+  Exporter,
+} from '../../models/Exporter'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -31,16 +36,16 @@ const mapStateToProps = (state, ownProps) => {
     maxRadius: state.machine.maxRadius,
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
-    pre: (state.exporter.fileType !== 'SVG (.svg)' ? state.exporter.pre : ''),
-    post: (state.exporter.fileType !== 'SVG (.svg)' ? state.exporter.post : ''),
+    pre: (state.exporter.fileType !== svgTypeName ? state.exporter.pre : ''),
+    post: (state.exporter.fileType !== svgTypeName ? state.exporter.post : ''),
     options: new Exporter().getOptions()
   }
 }
 
 const exporters = {
-  'GCode (.gcode)': GCodeExporter,
-  'Theta Rho (.thr)': ThetaRhoExporter,
-  'SVG (.svg)': SvgExporter,
+  [gcodeTypeName]: GCodeExporter,
+  [thrTypeName]: ThetaRhoExporter,
+  [svgTypeName]: SvgExporter,
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -101,7 +106,7 @@ class Downloader extends Component {
     link.download = fileName
 
     let fileType = 'text/plain;charset=utf-8'
-    if (this.props.fileType === 'SVG (.svg)') {
+    if (this.props.fileType === svgTypeName) {
       fileType = 'image/svg+xml;charset=utf-8'
     }
     let blob = new Blob([text],{type: fileType})
