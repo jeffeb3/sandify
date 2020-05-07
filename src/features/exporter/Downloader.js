@@ -29,11 +29,14 @@ const mapStateToProps = (state, ownProps) => {
     comments: getComments(state),
     input: state.app.input,
     shape: state.shapes.currentId,
-    offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
-    offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
+    offsetX: (state.machine.rectangular ? (state.machine.minX + state.machine.maxX) / 2.0 : state.machine.maxRadius),
+    offsetY: (state.machine.rectangular ? (state.machine.minY + state.machine.maxY) / 2.0 : state.machine.maxRadius),
     width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
     height:  (state.machine.rectangular ? (state.machine.maxY - state.machine.minY) : (2.0 * state.machine.maxRadius)),
-    maxRadius: state.machine.maxRadius,
+    maxRadius: (state.machine.rectangular ?
+      Math.sqrt(Math.pow(state.machine.maxX - state.machine.minX, 2.0) +
+                Math.pow(state.machine.maxY - state.machine.minY, 2.0)) :
+      state.machine.maxRadius),
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
     pre: (state.exporter.fileType !== svgTypeName ? state.exporter.pre : ''),
