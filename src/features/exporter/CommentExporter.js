@@ -4,11 +4,9 @@ import Transform from '../../models/Transform'
 import Exporter from './Exporter'
 
 export default class CommentExporter extends Exporter {
-  constructor(props, commentChar=';') {
+  constructor(props) {
     super(props)
     this.indentLevel = 0
-    this.commentChar = commentChar
-    this.startComments()
   }
 
   export() {

@@ -29,7 +29,6 @@ export const getComments = createSelector(
       machine: machine
     }
 
-    const commentChar = state.exporter.fileType === 'GCode (.gcode)' ? ';' : '#'
-    return new CommentExporter(state, commentChar).export()
+    return new CommentExporter(state).export()
   }
 )

@@ -13,7 +13,13 @@ import { getVertices } from '../machine/selectors'
 import ReactGA from 'react-ga'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
-import Exporter from '../../models/Exporter'
+import SvgExporter from './SvgExporter'
+import {
+  gcodeTypeName,
+  thrTypeName,
+  svgTypeName,
+  Exporter,
+} from '../../models/Exporter'
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -23,20 +29,26 @@ const mapStateToProps = (state, ownProps) => {
     comments: getComments(state),
     input: state.app.input,
     shape: state.shapes.currentId,
-    offsetX: (state.machine.minX + state.machine.maxX) / 2.0,
-    offsetY: (state.machine.minY + state.machine.maxY) / 2.0,
-    maxRadius: state.machine.maxRadius,
+    offsetX: (state.machine.rectangular ? (state.machine.minX + state.machine.maxX) / 2.0 : state.machine.maxRadius),
+    offsetY: (state.machine.rectangular ? (state.machine.minY + state.machine.maxY) / 2.0 : state.machine.maxRadius),
+    width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
+    height:  (state.machine.rectangular ? (state.machine.maxY - state.machine.minY) : (2.0 * state.machine.maxRadius)),
+    maxRadius: (state.machine.rectangular ?
+      Math.sqrt(Math.pow(state.machine.maxX - state.machine.minX, 2.0) +
+                Math.pow(state.machine.maxY - state.machine.minY, 2.0)) :
+      state.machine.maxRadius),
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
-    pre: state.exporter.pre,
-    post: state.exporter.post,
+    pre: (state.exporter.fileType !== svgTypeName ? state.exporter.pre : ''),
+    post: (state.exporter.fileType !== svgTypeName ? state.exporter.post : ''),
     options: new Exporter().getOptions()
   }
 }
 
 const exporters = {
-  'GCode (.gcode)': GCodeExporter,
-  'Theta Rho (.thr)': ThetaRhoExporter
+  [gcodeTypeName]: GCodeExporter,
+  [thrTypeName]: ThetaRhoExporter,
+  [svgTypeName]: SvgExporter,
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -96,7 +108,11 @@ class Downloader extends Component {
     let link = document.createElement('a')
     link.download = fileName
 
-    let blob = new Blob([text],{type: 'text/plain;charset=utf-8'})
+    let fileType = 'text/plain;charset=utf-8'
+    if (this.props.fileType === svgTypeName) {
+      fileType = 'image/svg+xml;charset=utf-8'
+    }
+    let blob = new Blob([text],{type: fileType})
 
     // Windows Edge fix
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {

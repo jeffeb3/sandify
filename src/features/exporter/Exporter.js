@@ -5,35 +5,53 @@ export default class Exporter {
   }
 
   export() {
-    this.lines = this.lines.concat(this.props.comments)
-
+    this.header()
     this.startComments()
+    this.props.comments.forEach( comment => this.line(comment) )
     this.line()
     this.keyValueLine('File name', "'" + this.props.fileName + "'")
     this.line()
-    this.line('BEGIN PRE')
     this.endComments()
-    this.line(this.props.pre, this.props.pre !== '')
-    this.startComments()
-    this.line('END PRE')
-    this.endComments()
+    if (this.props.pre !== '') {
+      this.startComments()
+      this.line('BEGIN PRE')
+      this.endComments()
+      this.line(this.props.pre, this.props.pre !== '')
+      this.startComments()
+      this.line('END PRE')
+      this.endComments()
+    }
 
     let vertices = this.props.vertices
     if (this.props.reverse) {
       vertices = vertices.reverse()
     }
 
+    this.line()
     this.exportCode(vertices)
     this.line()
 
-    this.startComments()
-    this.line('BEGIN POST')
-    this.endComments()
-    this.line(this.props.post, this.props.post !== '')
-    this.startComments()
-    this.line('END POST')
+    if (this.props.post !== '') {
+      this.startComments()
+      this.line('BEGIN POST')
+      this.endComments()
+      this.line(this.props.post, this.props.post !== '')
+      this.startComments()
+      this.line('END POST')
+      this.endComments()
+    }
+    this.footer()
+    this.line()
 
     return this.lines
+  }
+
+  header() {
+    // default does nothing
+  }
+
+  footer() {
+    // default does nothing
   }
 
   line(content='', add=true) {
