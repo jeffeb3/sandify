@@ -31,7 +31,7 @@ export default class Exporter {
     this.exportCode(vertices)
     this.line()
 
-    if (this.props.pose !== '') {
+    if (this.props.post !== '') {
       this.startComments()
       this.line('BEGIN POST')
       this.endComments()
