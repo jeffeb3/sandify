@@ -30,7 +30,6 @@ const transformOptions = {
   },
   spinValue: {
     title: 'Spin step (+/-)',
-    type: 'text',
     step: 0.1
   },
   spinSwitchbacks: {
