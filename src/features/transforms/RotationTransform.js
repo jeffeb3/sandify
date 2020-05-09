@@ -4,6 +4,7 @@ import {
   Accordion,
   Card
 } from 'react-bootstrap'
+import CheckboxOption from '../../components/CheckboxOption'
 import InputOption from '../../components/InputOption'
 import {
   toggleSpin,
@@ -51,6 +52,22 @@ class RotationTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+              <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="spinAdvanced"
+                key="spinAdvanced"
+                index={0}
+                model={this.props.transform} />
+
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="spinMath"
+                optionKey="spinMath"
+                index={1}
+                model={this.props.transform} />
+
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}

@@ -4,6 +4,7 @@ import {
   Accordion,
   Card
 } from 'react-bootstrap'
+import CheckboxOption from '../../components/CheckboxOption'
 import InputOption from '../../components/InputOption'
 import {
   updateTransform,
@@ -51,12 +52,26 @@ class ScaleTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+              <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="growAdvanced"
+                key="growAdvanced"
+                index={0}
+                model={this.props.transform} />
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="growMath"
+                optionKey="growMath"
+                index={1}
+                model={this.props.transform} />
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}
                 key="growValue"
                 optionKey="growValue"
-                index={0}
+                index={2}
                 model={this.props.transform} />
             </Card.Body>
           </Accordion.Collapse>
