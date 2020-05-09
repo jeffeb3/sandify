@@ -5,7 +5,9 @@ const previewSlice = createSlice({
   initialState: {
     canvasWidth: 600,
     canvasHeight: 600,
-    sliderValue: 0.0
+    sliderValue: 0.0,
+    selectedId: null,
+    dragging: false
   },
   reducers: {
     updatePreview(state, action) {

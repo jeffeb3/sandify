@@ -1,10 +1,10 @@
-.preview-canvas {
-   background-color: black;
-   margin: 0 auto;
-}
-
 .preview-wrapper {
   background-color: #333;
+
+  .konvajs-content {
+    background-color: black;
+    margin: 0 auto;
+  }
 
   @media (max-width: 991px) {
     height: 400px;

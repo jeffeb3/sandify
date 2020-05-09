@@ -78,6 +78,14 @@ class Transforms extends Component {
           index={0}
           model={this.props.transform} />
 
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          key="rotation"
+          optionKey="rotation"
+          index={0}
+          model={this.props.transform} />
+
         <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onRepeat}>

@@ -1,14 +1,30 @@
 import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
-import { connect } from 'react-redux'
-import Victor from 'victor'
-import { setPreviewSize } from './previewSlice'
-import { getVertices, getTrackVertices } from '../machine/selectors'
+import { connect, ReactReduxContext, Provider } from 'react-redux'
+import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
-import Color from 'color'
+import { setPreviewSize, updatePreview } from './previewSlice'
+import { getCurrentTransformSelector } from '../shapes/selectors'
+import PreviewShape from './PreviewShape'
+
+export const relativeScale = (props) => {
+  let width, height
+
+  if (props.use_rect) {
+    width = props.maxX - props.minX
+    height = props.maxY - props.minY
+  } else {
+    width = height = props.maxRadius * 2.0
+  }
+
+  // keep it square
+  return Math.min(props.canvasWidth / width, props.canvasHeight / height)
+}
 
 const mapStateToProps = (state, ownProps) => {
+  const transform = getCurrentTransformSelector(state)
+
   return {
+    transform: transform,
     use_rect: state.machine.rectangular,
     minX: state.machine.minX,
     maxX: state.machine.maxX,
@@ -17,10 +33,6 @@ const mapStateToProps = (state, ownProps) => {
     maxRadius: state.machine.maxRadius,
     canvasWidth: state.preview.canvasWidth,
     canvasHeight: state.preview.canvasHeight,
-    vertices: getVertices(state),
-    sliderValue: state.preview.sliderValue,
-    showTrack: state.app.input === 'shape',
-    trackVertices: getTrackVertices(state),
   }
 }
 
@@ -29,238 +41,93 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onResize: (size) => {
       dispatch(setPreviewSize(size))
     },
+    onChange: (attrs) => {
+      dispatch(updatePreview(attrs))
+    }
   }
 }
 
 // Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
   componentDidMount() {
-    const canvas = ReactDOM.findDOMNode(this)
-    const context = canvas.getContext('2d')
-    const bigBox = document.getElementById("preview-wrapper")
+    const wrapper = document.getElementById('preview-wrapper')
 
     this.throttledResize = throttle(this.resize, 200, {trailing: true}).bind(this)
-
-    window.addEventListener('resize', () => { this.throttledResize(canvas, bigBox) }, false)
+    window.addEventListener('resize', () => { this.throttledResize(wrapper) }, false)
     setTimeout(() => {
       this.visible = true
-      this.resize(canvas, bigBox)
+      this.resize(wrapper)
     }, 250)
-    this.paint(context)
   }
 
-  componentDidUpdate() {
-    var canvas = ReactDOM.findDOMNode(this)
-    var context = canvas.getContext('2d')
-    context.clearRect(0, 0, this.props.canvasWidth, this.props.canvasHeight)
-    var bigBox = document.getElementById("preview-wrapper")
-
-    this.resize(canvas, bigBox)
-  }
-
-  // in mm means in units of mm, but 0,0 is the center, not the lower corner or something.
-  mmToPixelsScale() {
-    var machine_x = 1
-    var machine_y = 1
-    if (this.props.use_rect) {
-      machine_x = this.props.maxX - this.props.minX
-      machine_y = this.props.maxY - this.props.minY
-    } else {
-      machine_x = this.props.maxRadius * 2.0
-      machine_y = machine_x
-    }
-
-    var scale_x = this.props.canvasWidth / machine_x
-    var scale_y = this.props.canvasHeight / machine_y
-    // Keep it square.
-    return Math.min(scale_x, scale_y) * 0.95
-  }
-
-  mmToPixels(vertex) {
-    var min_scale = this.mmToPixelsScale()
-
-    var x = vertex.x * min_scale + this.props.canvasWidth/2.0
-    // Y for pixels starts at the top, and goes down.
-    var y = -vertex.y * min_scale + this.props.canvasHeight/2.0
-
-      return new Victor(x, y)
-  }
-
-  moveTo_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex)
-    context.moveTo(in_mm.x, in_mm.y)
-  }
-
-  lineTo_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex)
-    context.lineTo(in_mm.x, in_mm.y)
-  }
-
-  dot_mm(context, vertex) {
-    var in_mm = this.mmToPixels(vertex)
-    context.arc(in_mm.x, in_mm.y, Math.max(4.0, this.mmToPixelsScale() * 1.5), 0, 2 * Math.PI, true)
-    context.fillStyle = context.strokeStyle
-    context.fill()
-  }
-
-  sliderVertexRange(vertices, sliderValue) {
-    const slide_size = 10.0
-    if (sliderValue === 0) {
-      return [0, vertices.length - 1]
-    }
-
-    // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
-    // thing.
-    const begin_fraction = sliderValue / 100.0
-    const end_fraction = (slide_size + sliderValue) / 100.0
-    let begin_vertex = Math.round(vertices.length * begin_fraction)
-    let end_vertex = Math.round(vertices.length * end_fraction)
-
-    // never return less than two vertices; this keeps the preview slider smooth even when
-    // there are just a few vertices
-    if (begin_vertex === end_vertex) {
-      if (begin_vertex > 1) begin_vertex = begin_vertex - 2
-    } else if (begin_vertex === end_vertex - 1) {
-      if (begin_vertex > 0) begin_vertex = begin_vertex - 1
-    }
-
-    return [begin_vertex, end_vertex]
-  }
-
-  paint(context) {
-    context.save()
-
-    // Draw the bounds of the machine
-    context.beginPath()
-    context.lineWidth = "1"
-    context.strokeStyle = "lightblue"
-    if (this.props.use_rect) {
-      this.moveTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-      this.lineTo_mm(context, new Victor((this.props.maxX - this.props.minX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.maxY - this.props.minY)/2.0))
-      this.lineTo_mm(context, new Victor((this.props.minX - this.props.maxX)/2.0, (this.props.minY - this.props.maxY)/2.0))
-    } else {
-      this.moveTo_mm(context, new Victor(this.props.maxRadius, 0.0))
-      let resolution = 128.0
-      for (let i=0; i<=resolution; i++) {
-        let angle = Math.PI * 2.0 / resolution * i
-        this.lineTo_mm(context, new Victor(this.props.maxRadius * Math.cos(angle),
-                                       this.props.maxRadius * Math.sin(angle)))
-      }
-    }
-    context.stroke()
-
-    if (this.props.vertices && this.props.vertices.length > 0) {
-      let sliderRange = this.sliderVertexRange(this.props.vertices, this.props.sliderValue)
-      let drawing_vertices = this.props.vertices.slice(sliderRange[0], sliderRange[1] + 1)
-
-      // Draw the background vertices
-      if (this.props.sliderValue !== 0) {
-        context.beginPath()
-        context.lineWidth = this.mmToPixelsScale()
-        context.strokeStyle = Color('#6E6E00')
-        this.moveTo_mm(context, this.props.vertices[0])
-
-        for (let i=0; i<this.props.vertices.length; i++) {
-          if (i === sliderRange[1]-1) {
-            context.stroke()
-            context.beginPath()
-            context.strokeStyle = "rgba(204, 204, 204, 0.35)"
-          }
-          this.lineTo_mm(context, this.props.vertices[i])
-        }
-        context.stroke()
-      }
-
-      if (this.props.trackVertices && this.props.trackVertices.length > 0 && this.props.showTrack) {
-        // Draw the track vertices
-        context.beginPath()
-        context.lineWidth = 6.0
-        context.strokeStyle = "green"
-        this.moveTo_mm(context, this.props.trackVertices[0])
-        for (let i=0; i<this.props.trackVertices.length; i++) {
-          this.lineTo_mm(context, this.props.trackVertices[i])
-        }
-        context.stroke()
-      }
-
-      if (drawing_vertices.length > 0) {
-        // Draw the slider path vertices
-        var startColor = Color('#6E6E00')
-        const colorStep = 200.0 / drawing_vertices.length / 100
-
-        context.beginPath()
-        context.lineWidth = this.mmToPixelsScale()
-        this.moveTo_mm(context, drawing_vertices[0])
-        context.stroke()
-
-        for (let i=1; i<drawing_vertices.length; i++) {
-          const strokeColor = this.props.sliderValue !== 0 ? startColor.lighten(colorStep * i).hex() : 'yellow'
-
-          context.beginPath()
-          context.strokeStyle = strokeColor
-          context.lineWidth = this.mmToPixelsScale()
-          this.moveTo_mm(context, drawing_vertices[i-1])
-          this.lineTo_mm(context, drawing_vertices[i])
-          context.stroke()
-        }
-      }
-
-      // Draw the start and end points
-      context.beginPath()
-      context.lineWidth = 4.0
-      context.strokeStyle = "green"
-      this.dot_mm(context, this.props.vertices[0])
-      context.stroke()
-      context.beginPath()
-      context.lineWidth = 4.0
-      context.strokeStyle = "red"
-      this.dot_mm(context, this.props.vertices[this.props.vertices.length-1])
-      context.stroke()
-
-      // Draw a slider path end point if sliding
-      if (drawing_vertices.length > 0 && this.props.sliderValue !== 0) {
-        const sliderEndPoint = drawing_vertices[drawing_vertices.length - 1]
-
-        context.beginPath()
-        context.strokeStyle = "yellow"
-        context.lineWidth = 6.0
-        this.dot_mm(context, sliderEndPoint)
-
-        // START: uncomment these lines to show slider end point coordinates
-        // context.font = "20px Arial"
-        // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-        // END
-        context.stroke()
-      }
-    }
-
-    context.restore()
-  }
-
-  resize(canvas, bigBox) {
-    const width = parseInt(getComputedStyle(bigBox).getPropertyValue('width'))
-    const height = parseInt(getComputedStyle(bigBox).getPropertyValue('height'))
+  resize(wrapper) {
+    const width = parseInt(getComputedStyle(wrapper).getPropertyValue('width'))
+    const height = parseInt(getComputedStyle(wrapper).getPropertyValue('height'))
     const size = Math.max(Math.min(width, height))
 
     if (this.props.canvasWidth !== size) {
       this.props.onResize(size)
     }
-
-    var context = canvas.getContext('2d')
-    this.paint(context)
   }
 
   render() {
-    const {canvasWidth, canvasHeight} = this.props
-    const visibilityClass = `preview-canvas ${this.visible ? 'd-inline' : 'd-none'}`
+    const {minX, minY, maxX, maxY} = this.props
+    const radius = this.props.maxRadius
+    const scale = relativeScale(this.props)
+    const reduceScale = 0.95
+    const width = this.props.use_rect ? maxX - minX : radius * 2
+    const height = this.props.use_rect ? maxY - minY : radius * 2
+    const visibilityClass = `preview-wrapper ${this.visible ? 'd-flex align-items-center' : 'd-none'}`
+
+    const checkDeselect = e => {
+      // deselect when clicked on empty area
+      if (e.target.className !== undefined && e.target.className !== 'Rect') {
+        this.props.onChange({selectedId: null})
+      }
+     }
+
+     // define Konva clip functions that will let us clip vertices not bound by
+     // machine limits when dragging, and produce a visually seamless experience.
+     const clipCircle = ctx => {
+       ctx.arc(0, 0, radius, 0, Math.PI * 2, false)
+     }
+     const clipRect = ctx => {
+       ctx.rect(-width/2, -height/2, width, height)
+     }
 
     return (
-      <canvas
-        className={visibilityClass}
-        height={canvasHeight}
-        width={canvasWidth} />
+      // the consumer wrapper is needed to pass the store down to our shape
+      // which is not our usual React Component
+      <ReactReduxContext.Consumer>
+        {({store}) => (
+          <Stage className={visibilityClass}
+            scaleX={scale * reduceScale}
+            scaleY={scale * reduceScale}
+            height={height * scale}
+            width={width * scale}
+            onMouseDown={checkDeselect}
+            onTouchStart={checkDeselect}
+            offsetX={-width/2*(1/reduceScale)}
+            offsetY={-height/2*(1/reduceScale)}
+            >
+            <Provider store={store}>
+              <Layer clipFunc={this.props.use_rect ? clipRect : clipCircle}>
+                {!this.props.use_rect && <Circle x={0} y={0} radius={radius}
+                  fill="transparent"
+                  stroke="gray"
+                />}
+                {this.props.use_rect && <Rect x={0} y={0} width={width} height={height}
+                  fill="transparent"
+                  stroke="gray"
+                  offsetX={width/2}
+                  offsetY={height/2}
+                />}
+                <PreviewShape />
+              </Layer>
+            </Provider>
+          </Stage>
+        )}
+      </ReactReduxContext.Consumer>
     )
   }
 }

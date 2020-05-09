@@ -24,6 +24,7 @@ const getCurrentShape = state => state.shapes.byId[state.shapes.currentId]
 const getTransform = state => state.transforms.byId[state.shapes.currentId]
 const getImporter = state => state.importer
 const getMachine = state => state.machine
+const getDragging = state => state.preview.dragging
 
 // by returning null for shapes which can change size, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
@@ -101,20 +102,26 @@ export const getVertices = createSelector(
       getShapes,
       getTransforms,
       getImporter,
-      getMachine
+      getMachine,
+      getDragging
   ],
-  (app, shapes, transforms, importer, machine) => {
+  (app, shapes, transforms, importer, machine, dragging) => {
     const state = {
       app: app,
       shapes: shapes,
       transforms: transforms,
       importer: importer,
-      machine: machine
+      machine: machine,
+      dragging: dragging
     }
 
     const hasImported = (state.app.input === 'code' || state.importer.fileName)
     if (state.app.input === 'shapes' || !hasImported) {
-      return getComputedVertices(state)
+      if (dragging) {
+        return getTransformedVertices(state)
+      } else {
+        return getComputedVertices(state)
+      }
     } else {
       return getImportedVertices(state)
     }
