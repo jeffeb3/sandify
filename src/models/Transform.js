@@ -22,18 +22,39 @@ const transformOptions = {
   growEnabled: {
     title: 'Grow'
   },
+  growAdvanced: {
+    title: 'Advanced',
+    type: 'checkbox',
+  },
+  growMath: {
+    title: 'Scale Function (i)',
+    type: 'text',
+    isVisible: state => { return state.growAdvanced },
+  },
   growValue: {
     title: 'Scale step (+/-)',
   },
+  spinAdvanced: {
+    title: 'Advanced',
+    type: 'checkbox',
+  },
+  spinMath: {
+    title: 'Spin Function (i)',
+    type: 'text',
+    isVisible: state => { return state.spinAdvanced },
+  },
   spinEnabled: {
-    title: 'Spin'
+    title: 'Spin',
+    isVisible: state => { return !state.spinAdvanced },
   },
   spinValue: {
     title: 'Spin step (+/-)',
-    step: 0.1
+    step: 0.1,
+    isVisible: state => { return !state.spinAdvanced },
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
+    isVisible: state => { return !state.spinAdvanced },
   },
   trackEnabled: {
     title: 'Track'
@@ -66,8 +87,12 @@ export default class Transform {
       numLoops: 10,
       transformMethod: 'smear',
       repeatEnabled: true,
+      growAdvanced: false,
+      growMath: '4log(i+1)',
       growEnabled: true,
       growValue: 100,
+      spinAdvanced: false,
+      spinMath: '10*sin(i/2)',
       spinEnabled: false,
       spinValue: 2,
       spinSwitchbacks: 0,
