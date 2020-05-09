@@ -9,14 +9,14 @@ const options = {
       min: 3
     },
     roundCorners: {
-      title: 'Round Corners',
+      title: 'Round corners',
       type: 'checkbox',
     },
     roundFraction: {
-      title: 'Round Fraction',
-      min: 0.0,
-      max: 1.0,
-      step: 0.05,
+      title: 'Round fraction',
+      min: 0.05,
+      max: 0.5,
+      step: 0.025,
       isVisible: (state) => { return state.roundCorners }
     },
   }
@@ -34,7 +34,7 @@ export default class Polygon extends Shape {
         type: 'polygon',
         polygonSides: 4,
         roundCorners: false,
-        roundFraction: 0.5,
+        roundFraction: 0.25,
       }
     }
   }
