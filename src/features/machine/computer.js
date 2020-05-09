@@ -48,20 +48,42 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   let transformedVertex = vertex
 
   if (data.repeatEnabled && data.growEnabled) {
-    transformedVertex = scale(transformedVertex, 100.0 + (data.growValue * amount))
+    var growAmount = 100
+    if (data.growAdvanced) {
+      try {
+        growAmount = data.growValue * evaluate(data.growMath, {i: amount})
+      }
+      catch (err) {
+        console.log(err)
+        growAmount = 200
+      }
+    } else {
+      growAmount = 100.0 + (data.growValue * amount)
+    }
+    transformedVertex = scale(transformedVertex, growAmount)
   }
 
   transformedVertex = offset(transformedVertex, data.offsetX || 0, data.offsetY || 0)
 
   if (data.repeatEnabled && data.spinEnabled) {
-    const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
-    const stage = amount/loopPeriod
-    const direction = (stage % 2 < 1 ? 1.0 : -1.0)
-    var spinAmount = evaluate(data.spinValue, {i: amount})
-
-    // Add in the amount it goes positive to the negatives, so they start at the same place.
-    if (direction < 0.0) {
-      spinAmount += loopPeriod * data.spinValue
+    var spinAmount = 0
+    if (data.spinAdvanced) {
+      try {
+        spinAmount = evaluate(data.spinMath, {i: amount})
+      }
+      catch (err) {
+        console.log(err)
+        spinAmount = 0
+      }
+    } else {
+      const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
+      const stage = amount/loopPeriod
+      const direction = (stage % 2 < 1 ? 1.0 : -1.0)
+      spinAmount = direction * (amount % loopPeriod) * data.spinValue
+      // Add in the amount it goes positive to the negatives, so they start at the same place.
+      if (direction < 0.0) {
+        spinAmount += loopPeriod * data.spinValue
+      }
     }
     transformedVertex = rotate(transformedVertex, spinAmount)
   }
