@@ -22,6 +22,9 @@ const transformOptions = {
   growEnabled: {
     title: 'Grow'
   },
+  growValue: {
+    title: 'Scale (+/-)',
+  },
   growAdvanced: {
     title: 'Advanced',
     type: 'checkbox',
@@ -31,8 +34,13 @@ const transformOptions = {
     type: 'text',
     isVisible: state => { return state.growAdvanced },
   },
-  growValue: {
-    title: 'Scale step (+/-)',
+  spinEnabled: {
+    title: 'Spin',
+    isVisible: state => { return !state.spinAdvanced },
+  },
+  spinValue: {
+    title: 'Spin (+/-)',
+    step: 0.1,
   },
   spinAdvanced: {
     title: 'Advanced',
@@ -42,15 +50,6 @@ const transformOptions = {
     title: 'Spin Function (i)',
     type: 'text',
     isVisible: state => { return state.spinAdvanced },
-  },
-  spinEnabled: {
-    title: 'Spin',
-    isVisible: state => { return !state.spinAdvanced },
-  },
-  spinValue: {
-    title: 'Spin step (+/-)',
-    step: 0.1,
-    isVisible: state => { return !state.spinAdvanced },
   },
   spinSwitchbacks: {
     title: 'Switchbacks',

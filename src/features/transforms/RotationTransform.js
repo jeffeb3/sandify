@@ -52,6 +52,15 @@ class RotationTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="spinValue"
+                optionKey="spinValue"
+                index={0}
+                model={this.props.transform} />
+
               <CheckboxOption
                 onChange={this.props.onChange}
                 options={this.props.options}
@@ -66,14 +75,6 @@ class RotationTransform extends Component {
                 key="spinMath"
                 optionKey="spinMath"
                 index={1}
-                model={this.props.transform} />
-
-              <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                key="spinValue"
-                optionKey="spinValue"
-                index={0}
                 model={this.props.transform} />
 
               <InputOption

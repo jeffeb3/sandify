@@ -52,6 +52,13 @@ class ScaleTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="growValue"
+                optionKey="growValue"
+                index={2}
+                model={this.props.transform} />
               <CheckboxOption
                 onChange={this.props.onChange}
                 options={this.props.options}
@@ -65,13 +72,6 @@ class ScaleTransform extends Component {
                 key="growMath"
                 optionKey="growMath"
                 index={1}
-                model={this.props.transform} />
-              <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                key="growValue"
-                optionKey="growValue"
-                index={2}
                 model={this.props.transform} />
             </Card.Body>
           </Accordion.Collapse>

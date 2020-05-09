@@ -69,7 +69,7 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
     var spinAmount = 0
     if (data.spinAdvanced) {
       try {
-        spinAmount = evaluate(data.spinMath, {i: amount})
+        spinAmount = data.spinValue * evaluate(data.spinMath, {i: amount})
       }
       catch (err) {
         console.log(err)
