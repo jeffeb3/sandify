@@ -58,7 +58,7 @@ export default class Exporter {
     if (add) {
       let padding = ''
       if (this.commenting) {
-        padding = this.commentChar + ' '
+        padding = this.commentChar + (content.length > 0 ? ' ' : '')
         for (let i=0; i<this.indentLevel; i++) {
           padding += '  '
         }
