@@ -42,13 +42,12 @@ const mapStateToProps = (state, ownProps) => {
 const PreviewShape = () => {
   const props = useSelector(mapStateToProps)
   const dispatch = useDispatch()
-  const width = props.transform.startingSize
-  const height = props.transform.startingSize
+  const { startingSize, canChangeSize } = props.transform
   const isSelected = props.selectedId !== null
 
   function mmToPixels(vertex) {
     // Y for pixels starts at the top, and goes down.
-    return new Victor(vertex.x + width/2, -vertex.y + height/2)
+    return new Victor(vertex.x + startingSize/2, -vertex.y + startingSize/2)
   }
 
   function moveTo_mm(context, vertex) {
@@ -229,7 +228,7 @@ const PreviewShape = () => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.selectedId) {
+    if (props.selectedId && canChangeSize) {
       // we need to attach transformer manually
       trRef.current.setNode(shapeRef.current)
       trRef.current.getLayer().batchDraw()
@@ -240,10 +239,10 @@ const PreviewShape = () => {
     <React.Fragment>
       <Shape
         draggable
-        width={width}
-        height={height}
-        offsetY={height/2}
-        offsetX={width/2}
+        width={startingSize}
+        height={startingSize}
+        offsetY={startingSize/2}
+        offsetX={startingSize/2}
         x={props.transform.offsetX}
         y={-props.transform.offsetY}
         onClick={onSelect}
@@ -283,7 +282,7 @@ const PreviewShape = () => {
           })
         }}
       />
-      {isSelected && (
+      {isSelected && canChangeSize && (
         <Transformer
           ref={trRef}
           centeredScaling={true}

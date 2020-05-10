@@ -11,6 +11,7 @@ import { registeredShapes } from '../../common/registeredShapes'
 import { loadState, saveState } from '../../common/localStorage'
 import { addShape, setCurrentShape, updateShape } from '../shapes/shapesSlice'
 import { addTransform, updateTransform } from '../transforms/transformsSlice'
+import { updatePreview } from '../preview/previewSlice'
 
 const customizedMiddleware = getDefaultMiddleware({
   immutableCheck: {
@@ -75,6 +76,7 @@ if (persistState) {
 const storedShape = localStorage.getItem('currentShape')
 const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
 store.dispatch(setCurrentShape(currentShape))
+store.dispatch(updatePreview({selectedId: currentShape}))
 
 if (persistState) {
   store.subscribe(() => {
