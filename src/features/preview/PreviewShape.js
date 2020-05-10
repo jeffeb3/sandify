@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => {
   // they will be added back in via shape offsets. This lets us keep our
   // shape handle centered on the rendered shape.
   const vertices = getVertices(state).map(vertex => {
-    return offset(rotate(vertex, transform.rotation), -transform.offsetX, -transform.offsetY)
+    return rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation)
   })
 
   return {
