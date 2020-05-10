@@ -233,7 +233,7 @@ const PreviewShape = () => {
       trRef.current.setNode(shapeRef.current)
       trRef.current.getLayer().batchDraw()
     }
-  }, [props.selectedId, props.transform.rotation, shapeRef, trRef])
+  }, [props.selectedId, props.transform.rotation, canChangeSize, shapeRef, trRef])
 
   return (
     <React.Fragment>
