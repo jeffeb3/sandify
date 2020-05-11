@@ -26,9 +26,6 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
     transformedVertex = scale(transformedVertex, 100.0 + (data.growValue * amount))
   }
 
-  transformedVertex.rotateDeg(-data.rotation)
-  transformedVertex.addX({x: data.offsetX || 0}).addY({y: data.offsetY || 0})
-
   if (data.repeatEnabled && data.spinEnabled) {
     const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
     const stage = amount/loopPeriod
@@ -45,6 +42,9 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   if (data.repeatEnabled && data.trackEnabled) {
     transformedVertex = track(transformedVertex, data, trackIndex)
   }
+
+  transformedVertex.rotateDeg(-data.rotation)
+  transformedVertex.addX({x: data.offsetX || 0}).addY({y: data.offsetY || 0})
 
   return transformedVertex
 }

@@ -7,6 +7,7 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../shapes/selectors'
+import { rotate, offset } from '../../common/geometry'
 
 const cache = new LRUCache({
   length: (n, key) => { return n.length },
@@ -151,7 +152,46 @@ export const getVerticesStats = createSelector(
   }
 )
 
-export const getTrackVertices = createSelector(
+// used by the preview window; reverses rotation and offsets because they are
+// re-added by Konva transformer.
+export const getPreviewVertices = createSelector(
+  [
+      getApp,
+      getShapes,
+      getTransforms,
+      getTransform,
+      getImporter,
+       getMachine,
+       getDragging
+   ],
+  (app, shapes, transforms, transform, importer, machine, dragging) => {
+     const state = {
+       app: app,
+       shapes: shapes,
+       transform: transform,
+       transforms: transforms,
+       importer: importer,
+       machine: machine,
+     }
+     const hasImported = (state.app.input === 'code' || state.importer.fileName)
+     let vertices
+
+     if (state.app.input === 'shape' || !hasImported) {
+       if (dragging) {
+        vertices = getTransformedVertices(state)
+       } else {
+        vertices = getComputedVertices(state)
+       }
+      return vertices.map(vertex => rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation))
+     } else {
+       return getImportedVertices(state)
+     }
+   }
+)
+
+// used by the preview window; reverses rotation and offsets because they are
+// re-added by Konva transformer.
+export const getPreviewTrackVertices = createSelector(
   [
     getTransform
   ],
@@ -165,6 +205,8 @@ export const getTrackVertices = createSelector(
       }
     }
 
-    return trackVertices
+    return trackVertices.map(vertex => {
+      return rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation)
+    })
   }
 )

@@ -4,21 +4,13 @@ import { Shape, Transformer } from 'react-konva'
 import Color from 'color'
 import Victor from 'victor'
 import { updatePreview } from './previewSlice'
-import { getVertices, getTrackVertices } from '../machine/selectors'
+import { getPreviewVertices, getPreviewTrackVertices } from '../machine/selectors'
 import { getCurrentTransformSelector } from '../shapes/selectors'
 import { updateTransform } from '../transforms/transformsSlice'
 import { roundP } from '../../common/util'
-import { offset, rotate } from '../../common/geometry'
 
 const mapStateToProps = (state, ownProps) => {
   const transform = getCurrentTransformSelector(state)
-
-  // when passing vertices to the shape, subtract the offset values because
-  // they will be added back in via shape offsets. This lets us keep our
-  // shape handle centered on the rendered shape.
-  const vertices = getVertices(state).map(vertex => {
-    return rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation)
-  })
 
   return {
     use_rect: state.machine.rectangular,
@@ -30,11 +22,11 @@ const mapStateToProps = (state, ownProps) => {
     canvasWidth: state.preview.canvasWidth,
     canvasHeight: state.preview.canvasHeight,
     transform: transform,
-    vertices: vertices,
+    trackVertices: getPreviewTrackVertices(state),
+    vertices: getPreviewVertices(state),
     selectedId: state.preview.selectedId,
     sliderValue: state.preview.sliderValue,
     showTrack: state.app.input === 'shape',
-    trackVertices: getTrackVertices(state),
   }
 }
 
