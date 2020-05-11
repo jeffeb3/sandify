@@ -34,7 +34,7 @@ const mapStateToProps = (state, ownProps) => {
 const PreviewShape = () => {
   const props = useSelector(mapStateToProps)
   const dispatch = useDispatch()
-  const { startingSize, canChangeSize } = props.transform
+  const startingSize = props.transform.startingSize
   const isSelected = props.selectedId !== null
 
   function mmToPixels(vertex) {
@@ -220,30 +220,30 @@ const PreviewShape = () => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.selectedId && canChangeSize) {
+    if (isSelected && props.transform.canChangeSize && props.showTrack) {
       // we need to attach transformer manually
-      trRef.current.setNode(shapeRef.current)
+      trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [props.selectedId, props.transform.rotation, canChangeSize, shapeRef, trRef])
+  }, [isSelected, props.transform, props.showTrack, shapeRef, trRef])
 
   return (
     <React.Fragment>
       <Shape
-        draggable
+        draggable={props.showTrack}
         width={startingSize}
         height={startingSize}
         offsetY={startingSize/2}
         offsetX={startingSize/2}
-        x={props.transform.offsetX}
-        y={-props.transform.offsetY}
+        x={(props.showTrack && props.transform.offsetX) || 0}
+        y={(props.showTrack && -props.transform.offsetY) || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         {...props}
         sceneFunc={paint}
         strokeWidth={1}
-        rotation={props.transform.rotation}
+        rotation={(props.showTrack && props.transform.rotation) || 0}
         hitFunc={hitFunc}
         onDragStart={e => {
           onPreviewChange({dragging: true})
@@ -274,10 +274,11 @@ const PreviewShape = () => {
           })
         }}
       />
-      {isSelected && canChangeSize && (
+      {isSelected && props.transform.canChangeSize && props.showTrack && (
         <Transformer
           ref={trRef}
           centeredScaling={true}
+          resizeEnabled={!props.transform.trackEnabled}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
           boundBoxFunc={(oldBox, newBox) => {
