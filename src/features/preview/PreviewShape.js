@@ -11,6 +11,7 @@ import { roundP } from '../../common/util'
 
 const mapStateToProps = (state, ownProps) => {
   const transform = getCurrentTransformSelector(state)
+  const hasImported = (state.app.input === 'code' || state.importer.fileName)
 
   return {
     use_rect: state.machine.rectangular,
@@ -26,7 +27,7 @@ const mapStateToProps = (state, ownProps) => {
     vertices: getPreviewVertices(state),
     selectedId: state.preview.selectedId,
     sliderValue: state.preview.sliderValue,
-    showTrack: state.app.input === 'shape',
+    showTrack: state.app.input === 'shape' || !hasImported,
   }
 }
 
