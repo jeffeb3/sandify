@@ -3,7 +3,9 @@ import { connect, ReactReduxContext, Provider } from 'react-redux'
 import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
+import { updateTransform } from '../transforms/transformsSlice'
 import { getCurrentTransformSelector } from '../shapes/selectors'
+import { roundP } from '../../common/util'
 import PreviewShape from './PreviewShape'
 
 export const relativeScale = (props) => {
@@ -25,6 +27,7 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     transform: transform,
+    selectedId: state.preview.selectedId,
     use_rect: state.machine.rectangular,
     minX: state.machine.minX,
     maxX: state.machine.maxX,
@@ -43,6 +46,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onChange: (attrs) => {
       dispatch(updatePreview(attrs))
+    },
+    onTransformChange: (attrs) => {
+      dispatch(updateTransform(attrs))
     }
   }
 }
@@ -109,6 +115,16 @@ class PreviewWindow extends Component {
             onTouchStart={checkDeselect}
             offsetX={-width/2*(1/reduceScale)}
             offsetY={-height/2*(1/reduceScale)}
+            onWheel={e => {
+              const sign = Math.sign(e.evt.deltaY)
+              const scale = 1 + Math.log(Math.abs(e.evt.deltaY))/30 * sign
+              
+              e.evt.preventDefault()
+              this.props.onTransformChange({
+                startingSize: Math.max(roundP(this.props.transform.startingSize * scale, 0), 1),
+                id: this.props.selectedId
+              })
+            }}
             >
             <Provider store={store}>
               <Layer clipFunc={this.props.use_rect ? clipRect : clipCircle}>
