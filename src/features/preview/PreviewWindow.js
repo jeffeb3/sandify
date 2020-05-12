@@ -101,6 +101,16 @@ class PreviewWindow extends Component {
        ctx.rect(-width/2, -height/2, width, height)
      }
 
+    const scaleByWheel = (size, deltaY) => {
+      const sign = Math.sign(deltaY)
+      const scale = 1 + Math.log(Math.abs(deltaY))/30 * sign
+      let newSize = Math.max(roundP(size * scale, 0), 1)
+      if (newSize === size) {
+        // If the log scaled value isn't big enough to move the scale.
+        newSize = Math.max(sign+size, 1)
+      }
+      return newSize
+    }
     return (
       // the consumer wrapper is needed to pass the store down to our shape
       // which is not our usual React Component
@@ -116,14 +126,13 @@ class PreviewWindow extends Component {
             offsetX={-width/2*(1/reduceScale)}
             offsetY={-height/2*(1/reduceScale)}
             onWheel={e => {
-              const sign = Math.sign(e.evt.deltaY)
-              const scale = 1 + Math.log(Math.abs(e.evt.deltaY))/30 * sign
-              
               e.evt.preventDefault()
-              this.props.onTransformChange({
-                startingSize: Math.max(roundP(this.props.transform.startingSize * scale, 0), 1),
-                id: this.props.selectedId
-              })
+              if (Math.abs(e.evt.deltaY) > 0) {
+                this.props.onTransformChange({
+                  startingSize: scaleByWheel(this.props.transform.startingSize, e.evt.deltaY),
+                  id: this.props.selectedId
+                })
+              }
             }}
             >
             <Provider store={store}>
