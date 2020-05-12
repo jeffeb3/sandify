@@ -110,7 +110,7 @@ const PreviewShape = () => {
       if (props.trackVertices && props.trackVertices.length > 0 && props.showTrack) {
         // Draw the track vertices
         context.beginPath()
-        context.lineWidth = 6.0
+        context.lineWidth = 4.0
         context.strokeStyle = "green"
         moveTo_mm(context, props.trackVertices[0])
         for (let i=0; i<props.trackVertices.length; i++) {
@@ -143,12 +143,12 @@ const PreviewShape = () => {
 
       // Draw the start and end points
       context.beginPath()
-      context.lineWidth = 4.0
+      context.lineWidth = 2.0
       context.strokeStyle = "green"
       dot_mm(context, props.vertices[0])
       context.stroke()
       context.beginPath()
-      context.lineWidth = 4.0
+      context.lineWidth = 2.0
       context.strokeStyle = "red"
       dot_mm(context, props.vertices[props.vertices.length-1])
       context.stroke()
@@ -282,13 +282,6 @@ const PreviewShape = () => {
           resizeEnabled={!props.transform.trackEnabled}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
-          boundBoxFunc={(oldBox, newBox) => {
-            // limit resize
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox
-            }
-            return newBox
-          }}
         />
       )}
     </React.Fragment>
