@@ -36,10 +36,16 @@ const PreviewShape = () => {
   const props = useSelector(mapStateToProps)
   const dispatch = useDispatch()
   const startingSize = props.transform.startingSize
+
+  // our transformer is 5 times bigger than the actual starting shape, so we need
+  // to account for it when drawing the preview; if you change this value, be sure
+  // to change it in machine/selectors#getPreviewVertices,getPreviewTrackVertices
+  const konvaScale = 5
+  const konvaSize = startingSize * konvaScale
   const isSelected = props.selectedId !== null
 
   function mmToPixels(vertex) {
-    // Y for pixels starts at the top, and goes down.
+    // y for pixels starts at the top, and goes down.
     return new Victor(vertex.x + startingSize/2, -vertex.y + startingSize/2)
   }
 
@@ -84,7 +90,7 @@ const PreviewShape = () => {
     return [begin_vertex, end_vertex]
   }
 
-  function paint(context, shape) {
+  function sceneFunc(context, shape) {
     if (props.vertices && props.vertices.length > 0) {
       let sliderRange = sliderVertexRange(props.vertices, props.sliderValue)
       let drawing_vertices = props.vertices.slice(sliderRange[0], sliderRange[1] + 1)
@@ -170,20 +176,21 @@ const PreviewShape = () => {
       }
     }
 
-    // normally, when you define a custom Konva shape, you let Konva handle
-    // styling and scaling. For now, we're doing some of that ourselves.
-    // Because of that, we'll draw an invisible rectangle and pass it
-    // Konva (calling fillStrokeShape instead of the normal stroke).
-    // This will determine the size of the transformer.
-    context.beginPath()
-    const size = props.transform.startingSize/2
-    moveTo_mm(context, new Victor(-size, -size))
-    lineTo_mm(context, new Victor(size, -size))
-    lineTo_mm(context, new Victor(size, size))
-    lineTo_mm(context, new Victor(-size, size))
-    lineTo_mm(context, new Victor(-size, -size))
-
     context.fillStrokeShape(shape)
+  }
+
+  function hitFunc(context) {
+    const vertices = props.vertices
+    if (vertices && vertices.length > 0) {
+      moveTo_mm(context, vertices[0])
+
+      for (let i=1; i<vertices.length; i++) {
+        moveTo_mm(context, vertices[i-1])
+        lineTo_mm(context, vertices[i])
+      }
+    }
+
+    context.fillStrokeShape(this)
   }
 
   function onChange(attrs) {
@@ -197,24 +204,6 @@ const PreviewShape = () => {
 
   function onSelect() {
     dispatch(updatePreview({selectedId: props.selectedId == null ? props.transform.id : null }))
-  }
-
-  // used by konva to determine the boundaries of the shape; we're defining the
-  // boundaries as the total machine area; this lets the user drag the shape by
-  // clicking anywhere in the preview.
-  function hitFunc(context) {
-    context.beginPath()
-
-    if (props.use_rect) {
-      const width = props.maxX - props.minX
-      const height = props.maxY - props.minY
-      const size = props.transform.startingSize/2
-      context.rect(size - width/2 - props.transform.offsetX, size - height/2 + props.transform.offsetY, width, height)
-    } else {
-      context.arc(props.maxRadius/4-props.transform.offsetX, props.maxRadius/4+props.transform.offsetY, props.maxRadius, 0, Math.PI * 2)
-    }
-    context.closePath()
-    context.fillStrokeShape(this)
   }
 
   const shapeRef = React.createRef()
@@ -232,19 +221,19 @@ const PreviewShape = () => {
     <React.Fragment>
       <Shape
         draggable={props.showTrack}
-        width={startingSize}
-        height={startingSize}
-        offsetY={startingSize/2}
-        offsetX={startingSize/2}
+        width={konvaSize}
+        height={konvaSize}
+        offsetY={konvaSize/2}
+        offsetX={konvaSize/2}
         x={(props.showTrack && props.transform.offsetX) || 0}
         y={(props.showTrack && -props.transform.offsetY) || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         {...props}
-        sceneFunc={paint}
         strokeWidth={1}
         rotation={(props.showTrack && props.transform.rotation) || 0}
+        sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {
           onPreviewChange({dragging: true})

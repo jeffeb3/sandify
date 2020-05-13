@@ -161,32 +161,37 @@ export const getPreviewVertices = createSelector(
       getTransforms,
       getTransform,
       getImporter,
-       getMachine,
-       getDragging
+      getMachine,
+      getDragging
    ],
   (app, shapes, transforms, transform, importer, machine, dragging) => {
-     const state = {
-       app: app,
-       shapes: shapes,
-       transform: transform,
-       transforms: transforms,
-       importer: importer,
-       machine: machine,
-     }
-     const hasImported = (state.app.input === 'code' || state.importer.fileName)
-     let vertices
+    const state = {
+      app: app,
+      shapes: shapes,
+      transform: transform,
+      transforms: transforms,
+      importer: importer,
+      machine: machine,
+    }
+    const hasImported = (state.app.input === 'code' || state.importer.fileName)
+    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    let vertices
 
-     if (state.app.input === 'shape' || !hasImported) {
-       if (dragging) {
+    if (state.app.input === 'shape' || !hasImported) {
+      if (dragging) {
         vertices = getTransformedVertices(state)
-       } else {
+      } else {
         vertices = getComputedVertices(state)
-       }
-      return vertices.map(vertex => rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation))
-     } else {
-       return getImportedVertices(state)
-     }
-   }
+      }
+
+      return vertices.map(vertex => {
+        return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
+      })
+    } else {
+      return getImportedVertices(state)
+    }
+  }
 )
 
 // used by the preview window; reverses rotation and offsets because they are
@@ -197,7 +202,9 @@ export const getPreviewTrackVertices = createSelector(
   ],
   (transform) => {
     const numLoops = transform.numLoops
-    var trackVertices = []
+    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    let trackVertices = []
 
     for (var i=0; i<numLoops; i++) {
       if (transform.trackEnabled) {
@@ -206,7 +213,7 @@ export const getPreviewTrackVertices = createSelector(
     }
 
     return trackVertices.map(vertex => {
-      return rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation)
+      return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
     })
   }
 )
