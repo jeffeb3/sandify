@@ -25,7 +25,7 @@ const mapStateToProps = (state, ownProps) => {
     transform: transform,
     trackVertices: getPreviewTrackVertices(state),
     vertices: getPreviewVertices(state),
-    selectedId: state.preview.selectedId,
+    selectedId: state.shapes.selectedId,
     sliderValue: state.preview.sliderValue,
     showTrack: state.app.input === 'shape' || !hasImported,
   }

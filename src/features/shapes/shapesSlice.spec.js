@@ -8,6 +8,7 @@ describe('shapes reducer', () => {
   it('should handle initial state', () => {
     expect(shapes(undefined, {})).toEqual({
       currentId: null,
+      selectedId: null,
       byId: {},
       allIds: []
     })
@@ -43,7 +44,8 @@ describe('shapes reducer', () => {
         setCurrentShape('polygon')
       )
     ).toEqual({
-      currentId: 'polygon'
+      currentId: 'polygon',
+      selectedId: 'polygon'
     })
   })
 

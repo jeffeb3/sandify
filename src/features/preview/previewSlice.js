@@ -6,7 +6,6 @@ const previewSlice = createSlice({
     canvasWidth: 600,
     canvasHeight: 600,
     sliderValue: 0.0,
-    selectedId: null,
     dragging: false
   },
   reducers: {

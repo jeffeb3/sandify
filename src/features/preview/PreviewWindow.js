@@ -27,7 +27,7 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     transform: transform,
-    selectedId: state.preview.selectedId,
+    selectedId: state.shapes.selectedId,
     use_rect: state.machine.rectangular,
     minX: state.machine.minX,
     maxX: state.machine.maxX,

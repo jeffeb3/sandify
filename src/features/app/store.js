@@ -76,7 +76,6 @@ if (persistState) {
 const storedShape = localStorage.getItem('currentShape')
 const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
 store.dispatch(setCurrentShape(currentShape))
-store.dispatch(updatePreview({selectedId: currentShape}))
 
 if (persistState) {
   store.subscribe(() => {

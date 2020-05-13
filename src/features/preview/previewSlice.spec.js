@@ -10,7 +10,6 @@ describe('preview reducer', () => {
       canvasHeight: 600,
       sliderValue: 0,
       dragging: false,
-      selectedId: null
     })
   })
 
