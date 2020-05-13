@@ -11,7 +11,6 @@ import { registeredShapes } from '../../common/registeredShapes'
 import { loadState, saveState } from '../../common/localStorage'
 import { addShape, setCurrentShape, updateShape } from '../shapes/shapesSlice'
 import { addTransform, updateTransform } from '../transforms/transformsSlice'
-import { updatePreview } from '../preview/previewSlice'
 
 const customizedMiddleware = getDefaultMiddleware({
   immutableCheck: {
