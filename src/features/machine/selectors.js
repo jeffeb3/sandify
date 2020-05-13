@@ -21,22 +21,20 @@ const getCacheKey = (state) => {
 
 const getApp = state => state.app
 const getShapes = state => state.shapes
-const getTransforms = state => state.transforms
 const getCurrentShape = state => state.shapes.byId[state.shapes.currentId]
-const getTransform = state => state.transforms.byId[state.shapes.currentId]
 const getImporter = state => state.importer
 const getMachine = state => state.machine
 const getDragging = state => state.preview.dragging
 
 // by returning null for shapes which can change size, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
-const getTransformMachine = state => getTransform(state).canChangeSize ? null : state.machine
+const getShapeMachine = state => getCurrentShape(state).canChangeSize ? null : state.machine
 
 // requires only shape, and in the case of erasers, machine state
 export const getShapedVertices = createSelector(
   [
       getCurrentShape,
-      getTransformMachine
+      getShapeMachine
   ],
   (shape, machine) => {
     const state = {
@@ -66,10 +64,10 @@ export const getShapedVertices = createSelector(
 export const getTransformedVertices = createSelector(
   [
       getShapedVertices,
-      getTransform
+      getCurrentShape
   ],
-  (vertices, transform) => {
-    return transformShapes(vertices, transform)
+  (vertices, shape) => {
+    return transformShapes(vertices, shape)
   }
 )
 
@@ -102,16 +100,14 @@ export const getVertices = createSelector(
   [
       getApp,
       getShapes,
-      getTransforms,
       getImporter,
       getMachine,
       getDragging
   ],
-  (app, shapes, transforms, importer, machine, dragging) => {
+  (app, shapes, importer, machine, dragging) => {
     const state = {
       app: app,
       shapes: shapes,
-      transforms: transforms,
       importer: importer,
       machine: machine,
       dragging: dragging
@@ -159,24 +155,22 @@ export const getPreviewVertices = createSelector(
   [
       getApp,
       getShapes,
-      getTransforms,
-      getTransform,
+      getCurrentShape,
       getImporter,
       getMachine,
       getDragging
    ],
-  (app, shapes, transforms, transform, importer, machine, dragging) => {
+  (app, shapes, shape, importer, machine, dragging) => {
     const state = {
       app: app,
       shapes: shapes,
-      transform: transform,
-      transforms: transforms,
+      shape: shape,
       importer: importer,
       machine: machine,
     }
     const hasImported = (state.app.input === 'code' || state.importer.fileName)
     const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    const konvaDelta = (konvaScale - 1)/2 * shape.startingSize
     let vertices
 
     if (state.app.input === 'shape' || !hasImported) {
@@ -187,7 +181,7 @@ export const getPreviewVertices = createSelector(
       }
 
       return vertices.map(vertex => {
-        return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
+        return offset(rotate(offset(vertex, -shape.offsetX, -shape.offsetY), shape.rotation), konvaDelta, -konvaDelta)
       })
     } else {
       vertices = getImportedVertices(state)
@@ -202,22 +196,22 @@ export const getPreviewVertices = createSelector(
 // re-added by Konva transformer.
 export const getPreviewTrackVertices = createSelector(
   [
-    getTransform
+    getCurrentShape
   ],
-  (transform) => {
-    const numLoops = transform.numLoops
+  (shape) => {
+    const numLoops = shape.numLoops
     const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    const konvaDelta = (konvaScale - 1)/2 * shape.startingSize
     let trackVertices = []
 
     for (var i=0; i<numLoops; i++) {
-      if (transform.trackEnabled) {
-        trackVertices.push(transformShape(transform, new Victor(0.0, 0.0), i, i))
+      if (shape.trackEnabled) {
+        trackVertices.push(transformShape(shape, new Victor(0.0, 0.0), i, i))
       }
     }
 
     return trackVertices.map(vertex => {
-      return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
+      return offset(rotate(offset(vertex, -shape.offsetX, -shape.offsetY), shape.rotation), konvaDelta, -konvaDelta)
     })
   }
 )

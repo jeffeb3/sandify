@@ -1,7 +1,12 @@
 import shapes, {
   addShape,
   setCurrentShape,
-  updateShape
+  updateShape,
+  toggleSpin,
+  toggleGrow,
+  toggleRepeat,
+  toggleTrack,
+  toggleTrackGrow,
 } from './shapesSlice'
 
 describe('shapes reducer', () => {
@@ -10,7 +15,8 @@ describe('shapes reducer', () => {
       currentId: null,
       selectedId: null,
       byId: {},
-      allIds: []
+      allIds: [],
+      layerIds: []
     })
   })
 
@@ -67,6 +73,111 @@ describe('shapes reducer', () => {
         '1': {
           id: '1',
           circleLobes: 2
+        }
+      }
+    })
+  })
+
+  it('should handle toggleGrow', () => {
+    expect(
+      shapes(
+        {
+          byId: {
+            '1': {
+              growEnabled: false
+            }
+          }
+        },
+        toggleGrow({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          growEnabled: true
+        }
+      }
+    })
+  })
+
+  it('should handle toggleSpin', () => {
+    expect(
+      shapes(
+        {
+          byId: {
+            '1': {
+              spinEnabled: false
+            }
+          }
+        },
+        toggleSpin({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          spinEnabled: true
+        }
+      }
+    })
+  })
+
+  it('should handle toggleRepeat', () => {
+    expect(
+      shapes(
+        {
+          byId: {
+            '1': {
+              repeatEnabled: false
+            }
+          }
+        },
+        toggleRepeat({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          repeatEnabled: true
+        }
+      }
+    })
+  })
+
+  it('should handle toggleTrack', () => {
+    expect(
+      shapes(
+        {
+          byId: {
+            '1': {
+              trackEnabled: false
+            }
+          }
+        },
+        toggleTrack({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          trackEnabled: true
+        }
+      }
+    })
+  })
+
+  it('should handle toggleToggleGrow', () => {
+    expect(
+      shapes(
+        {
+          byId: {
+            '1': {
+              trackGrowEnabled: false
+            }
+          }
+        },
+        toggleTrackGrow({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          trackGrowEnabled: true
         }
       }
     })

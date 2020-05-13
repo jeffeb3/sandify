@@ -5,12 +5,12 @@ import Color from 'color'
 import Victor from 'victor'
 import { updatePreview } from './previewSlice'
 import { getPreviewVertices, getPreviewTrackVertices } from '../machine/selectors'
-import { getCurrentTransformSelector } from '../shapes/selectors'
-import { updateTransform } from '../transforms/transformsSlice'
+import { getCurrentShapeSelector } from '../shapes/selectors'
+import { updateShape } from '../shapes/shapesSlice'
 import { roundP } from '../../common/util'
 
 const mapStateToProps = (state, ownProps) => {
-  const transform = getCurrentTransformSelector(state)
+  const shape = getCurrentShapeSelector(state)
   const hasImported = (state.app.input === 'code' || state.importer.fileName)
 
   return {
@@ -22,7 +22,7 @@ const mapStateToProps = (state, ownProps) => {
     maxRadius: state.machine.maxRadius,
     canvasWidth: state.preview.canvasWidth,
     canvasHeight: state.preview.canvasHeight,
-    transform: transform,
+    shape: shape,
     trackVertices: getPreviewTrackVertices(state),
     vertices: getPreviewVertices(state),
     selectedId: state.shapes.selectedId,
@@ -35,7 +35,7 @@ const mapStateToProps = (state, ownProps) => {
 const PreviewShape = () => {
   const props = useSelector(mapStateToProps)
   const dispatch = useDispatch()
-  const startingSize = props.transform.startingSize
+  const startingSize = props.shape.startingSize
 
   // our transformer is 5 times bigger than the actual starting shape, so we need
   // to account for it when drawing the preview; if you change this value, be sure
@@ -194,8 +194,8 @@ const PreviewShape = () => {
   }
 
   function onChange(attrs) {
-    attrs.id = props.transform.id
-    dispatch(updateTransform(attrs))
+    attrs.id = props.shape.id
+    dispatch(updateShape(attrs))
   }
 
   function onPreviewChange(attrs) {
@@ -203,19 +203,19 @@ const PreviewShape = () => {
   }
 
   function onSelect() {
-    dispatch(updatePreview({selectedId: props.selectedId == null ? props.transform.id : null }))
+    dispatch(updatePreview({selectedId: props.selectedId == null ? props.shape.id : null }))
   }
 
   const shapeRef = React.createRef()
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (isSelected && props.transform.canChangeSize && props.showTrack) {
+    if (isSelected && props.shape.canChangeSize && props.showTrack) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isSelected, props.transform, props.showTrack, shapeRef, trRef])
+  }, [isSelected, props.shape, props.showTrack, shapeRef, trRef])
 
   return (
     <React.Fragment>
@@ -225,14 +225,14 @@ const PreviewShape = () => {
         height={konvaSize}
         offsetY={konvaSize/2}
         offsetX={konvaSize/2}
-        x={(props.showTrack && props.transform.offsetX) || 0}
-        y={(props.showTrack && -props.transform.offsetY) || 0}
+        x={(props.showTrack && props.shape.offsetX) || 0}
+        y={(props.showTrack && -props.shape.offsetY) || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         {...props}
         strokeWidth={1}
-        rotation={(props.showTrack && props.transform.rotation) || 0}
+        rotation={(props.showTrack && props.shape.rotation) || 0}
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {
@@ -259,16 +259,16 @@ const PreviewShape = () => {
 
           onPreviewChange({dragging: false})
           onChange({
-            startingSize: roundP(Math.max(5, props.transform.startingSize * scaleX), 0),
+            startingSize: roundP(Math.max(5, props.shape.startingSize * scaleX), 0),
             rotation: roundP(node.rotation(), 0)
           })
         }}
       />
-      {isSelected && props.transform.canChangeSize && props.showTrack && (
+      {isSelected && props.shape.canChangeSize && props.showTrack && (
         <Transformer
           ref={trRef}
           centeredScaling={true}
-          resizeEnabled={!props.transform.trackEnabled}
+          resizeEnabled={!props.shape.trackEnabled}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
         />

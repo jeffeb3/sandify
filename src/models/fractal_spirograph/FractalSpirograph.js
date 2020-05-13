@@ -48,14 +48,6 @@ export default class FractalSpirograph extends Shape {
         fractalSpirographNumCircles: 5,
         fractalSpirographRelativeSize: 3,
         fractalSpirographAlternateRotation: true,
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
         startingSize: 54,
         repeatEnabled: false,
       }

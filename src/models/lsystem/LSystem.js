@@ -46,14 +46,6 @@ export default class LSystem extends Shape {
         type: 'lsystem',
         iterations: 3,
         subtype: 'McWorter\'s Pentadendrite',
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
         repeatEnabled: false,
         startingSize: 23,
       }

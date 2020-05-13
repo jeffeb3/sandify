@@ -8,13 +8,11 @@ import DropdownOption from '../../components/DropdownOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import Transforms from '../transforms/Transforms'
 import { updateShape } from './shapesSlice'
-import { updateTransform } from '../transforms/transformsSlice'
 import {
   getShape,
   getShapeById,
   getCurrentShapeSelector
 } from './selectors'
-import Transform from '../../models/Transform'
 import './Shape.css'
 
 const mapStateToProps = (state, ownProps) => {
@@ -32,7 +30,6 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   const { id } = ownProps
   const metashape = getShapeById(id)
-  const metatransform = new Transform()
 
   return {
     onChange: (attrs) => {
@@ -43,14 +40,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       let attrs = metashape.getInitialState()
       attrs.id = id
 
-      let tAttrs = {
-        ...{id: id},
-        ...metatransform.getInitialState(),
-        ...metashape.getInitialTransformState()
-      }
-
       dispatch(updateShape(attrs))
-      dispatch(updateTransform(tAttrs))
     }
   }
 }
