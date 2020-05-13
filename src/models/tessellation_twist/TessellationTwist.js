@@ -92,14 +92,6 @@ export default class TessellationTwist extends Shape {
         tessellationTwistNumSides: 5,
         tessellationTwistIterations: 2,
         tessellationTwistRotate: 0,
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
         startingSize: 110,
         repeatEnabled: false,
       }

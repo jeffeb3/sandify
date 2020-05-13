@@ -2,6 +2,7 @@ export default class Exporter {
   constructor(props) {
     this.props = props
     this.lines = []
+    this.indentLevel = 0    
   }
 
   export() {

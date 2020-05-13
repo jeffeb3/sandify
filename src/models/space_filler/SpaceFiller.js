@@ -47,15 +47,7 @@ export default class SpaceFiller extends Shape {
         selectGroup: 'Erasers',
         canTransform: false,
         iterations: 6,
-        subtype: 'Hilbert'
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
+        subtype: 'Hilbert',
         repeatEnabled: false,
         startingSize: 1,
         canChangeSize: false,

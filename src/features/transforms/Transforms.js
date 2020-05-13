@@ -11,21 +11,21 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import {
-  updateTransform,
+  updateShape,
   toggleRepeat
-} from './transformsSlice'
-import { getCurrentTransformSelector } from '../shapes/selectors'
+} from '../shapes/shapesSlice'
+import { getCurrentShapeSelector } from '../shapes/selectors'
 import Transform from '../../models/Transform'
 import ScaleTransform from './ScaleTransform'
 import RotationTransform from './RotationTransform'
 import TrackTransform from './TrackTransform'
 
 const mapStateToProps = (state, ownProps) => {
-  const transform = getCurrentTransformSelector(state)
+  const shape = getCurrentShapeSelector(state)
 
   return {
-    transform: transform,
-    active: transform.repeatEnabled,
+    shape: shape,
+    active: shape.repeatEnabled,
     options: (new Transform()).getOptions()
   }
 }
@@ -36,13 +36,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (attrs) => {
       attrs.id = id
-      dispatch(updateTransform(attrs))
+      dispatch(updateShape(attrs))
     },
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
     },
     ontransformMethodChange: (value) => {
-      dispatch(updateTransform({ transformMethod: value, id: id}))
+      dispatch(updateShape({ transformMethod: value, id: id}))
     }
   }
 }
@@ -60,7 +60,7 @@ class Transforms extends Component {
           key="startingSize"
           optionKey="startingSize"
           index={0}
-          model={this.props.transform} />
+          model={this.props.shape} />
 
         <InputOption
           onChange={this.props.onChange}
@@ -68,7 +68,7 @@ class Transforms extends Component {
           key="offsetX"
           optionKey="offsetX"
           index={0}
-          model={this.props.transform} />
+          model={this.props.shape} />
 
         <InputOption
           onChange={this.props.onChange}
@@ -76,7 +76,7 @@ class Transforms extends Component {
           key="offsetY"
           optionKey="offsetY"
           index={0}
-          model={this.props.transform} />
+          model={this.props.shape} />
 
         <InputOption
           onChange={this.props.onChange}
@@ -84,7 +84,7 @@ class Transforms extends Component {
           key="rotation"
           optionKey="rotation"
           index={0}
-          model={this.props.transform} />
+          model={this.props.shape} />
 
         <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
@@ -101,7 +101,7 @@ class Transforms extends Component {
                   key="numLoops"
                   optionKey="numLoops"
                   index={0}
-                  model={this.props.transform} />
+                  model={this.props.shape} />
 
                   <Row className="align-items-center pb-2">
                     <Col sm={5}>
@@ -111,7 +111,7 @@ class Transforms extends Component {
                     </Col>
 
                     <Col sm={7}>
-                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.transform.transformMethod} onChange={this.props.ontransformMethodChange}>
+                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.shape.transformMethod} onChange={this.props.ontransformMethodChange}>
                         <ToggleButton variant="light" value="smear">smear</ToggleButton>
                         <ToggleButton variant="light" value="intact">keep intact</ToggleButton>
                       </ToggleButtonGroup>
@@ -119,9 +119,9 @@ class Transforms extends Component {
                   </Row>
 
                   <Accordion className="mt-3">
-                    <ScaleTransform id={this.props.transform.id} />
-                    <RotationTransform id={this.props.transform.id} />
-                    <TrackTransform id={this.props.transform.id} />
+                    <ScaleTransform id={this.props.shape.id} />
+                    <RotationTransform id={this.props.shape.id} />
+                    <TrackTransform id={this.props.shape.id} />
                   </Accordion>
               </Card.Body>
             </Accordion.Collapse>
