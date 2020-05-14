@@ -1,5 +1,6 @@
 import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
+import Victor from 'victor'
 import {
   transformShapes,
   transformShape,
@@ -211,7 +212,7 @@ export const getPreviewTrackVertices = createSelector(
 
     for (var i=0; i<numLoops; i++) {
       if (transform.trackEnabled) {
-        trackVertices.push(transformShape(transform, {x: 0.0, y: 0.0}, i, i))
+        trackVertices.push(transformShape(transform, new Victor(0.0, 0.0), i, i))
       }
     }
 
