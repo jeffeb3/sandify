@@ -5,6 +5,7 @@ const shapesSlice = createSlice({
   name: 'shape',
   initialState: {
     currentId: null,
+    selectedId: null,
     byId: {},
     allIds: []
   },
@@ -16,6 +17,7 @@ const shapesSlice = createSlice({
     },
     setCurrentShape(state, action) {
       state.currentId = action.payload
+      state.selectedId = action.payload
       ReactGA.event({
         category: 'Shapes',
         action: 'setCurrentShape: ' + action.payload,

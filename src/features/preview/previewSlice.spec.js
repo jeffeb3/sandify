@@ -8,7 +8,8 @@ describe('preview reducer', () => {
     expect(preview(undefined, {})).toEqual({
       canvasWidth: 600,
       canvasHeight: 600,
-      sliderValue: 0
+      sliderValue: 0,
+      dragging: false,
     })
   })
 

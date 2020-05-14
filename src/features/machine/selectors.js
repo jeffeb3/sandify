@@ -1,5 +1,6 @@
 import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
+import Victor from 'victor'
 import {
   transformShapes,
   transformShape,
@@ -7,6 +8,7 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../shapes/selectors'
+import { rotate, offset } from '../../common/geometry'
 
 const cache = new LRUCache({
   length: (n, key) => { return n.length },
@@ -24,6 +26,7 @@ const getCurrentShape = state => state.shapes.byId[state.shapes.currentId]
 const getTransform = state => state.transforms.byId[state.shapes.currentId]
 const getImporter = state => state.importer
 const getMachine = state => state.machine
+const getDragging = state => state.preview.dragging
 
 // by returning null for shapes which can change size, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
@@ -101,20 +104,26 @@ export const getVertices = createSelector(
       getShapes,
       getTransforms,
       getImporter,
-      getMachine
+      getMachine,
+      getDragging
   ],
-  (app, shapes, transforms, importer, machine) => {
+  (app, shapes, transforms, importer, machine, dragging) => {
     const state = {
       app: app,
       shapes: shapes,
       transforms: transforms,
       importer: importer,
-      machine: machine
+      machine: machine,
+      dragging: dragging
     }
 
     const hasImported = (state.app.input === 'code' || state.importer.fileName)
     if (state.app.input === 'shapes' || !hasImported) {
-      return getComputedVertices(state)
+      if (dragging) {
+        return getTransformedVertices(state)
+      } else {
+        return getComputedVertices(state)
+      }
     } else {
       return getImportedVertices(state)
     }
@@ -144,20 +153,71 @@ export const getVerticesStats = createSelector(
   }
 )
 
-export const getTrackVertices = createSelector(
+// used by the preview window; reverses rotation and offsets because they are
+// re-added by Konva transformer.
+export const getPreviewVertices = createSelector(
+  [
+      getApp,
+      getShapes,
+      getTransforms,
+      getTransform,
+      getImporter,
+      getMachine,
+      getDragging
+   ],
+  (app, shapes, transforms, transform, importer, machine, dragging) => {
+    const state = {
+      app: app,
+      shapes: shapes,
+      transform: transform,
+      transforms: transforms,
+      importer: importer,
+      machine: machine,
+    }
+    const hasImported = (state.app.input === 'code' || state.importer.fileName)
+    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    let vertices
+
+    if (state.app.input === 'shape' || !hasImported) {
+      if (dragging) {
+        vertices = getTransformedVertices(state)
+      } else {
+        vertices = getComputedVertices(state)
+      }
+
+      return vertices.map(vertex => {
+        return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
+      })
+    } else {
+      vertices = getImportedVertices(state)
+      return vertices.map(vertex => {
+        return offset(vertex, konvaDelta, -konvaDelta)
+      })
+    }
+  }
+)
+
+// used by the preview window; reverses rotation and offsets because they are
+// re-added by Konva transformer.
+export const getPreviewTrackVertices = createSelector(
   [
     getTransform
   ],
   (transform) => {
     const numLoops = transform.numLoops
-    var trackVertices = []
+    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+    const konvaDelta = (konvaScale - 1)/2 * transform.startingSize
+    let trackVertices = []
 
     for (var i=0; i<numLoops; i++) {
       if (transform.trackEnabled) {
-        trackVertices.push(transformShape(transform, {x: 0.0, y: 0.0}, i, i))
+        trackVertices.push(transformShape(transform, new Victor(0.0, 0.0), i, i))
       }
     }
 
-    return trackVertices
+    return trackVertices.map(vertex => {
+      return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
+    })
   }
 )

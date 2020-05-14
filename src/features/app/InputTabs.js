@@ -22,8 +22,8 @@ class InputTabs extends Component {
 
   render() {
     return (
-       <Tabs defaultActiveKey="shapes" onSelect={this.handleSelect.bind(this)} id="input-tabs">
-         <Tab eventKey="shapes" title="Shapes" className="full-page-tab">
+       <Tabs defaultActiveKey="shape" onSelect={this.handleSelect.bind(this)} id="input-tabs">
+         <Tab eventKey="shape" title="Shapes" className="full-page-tab">
            <ShapeList />
          </Tab>
 

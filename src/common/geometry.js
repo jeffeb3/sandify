@@ -77,3 +77,27 @@ export const resizeVertices = (vertices, sizeX, sizeY) => {
 export const vertexRoundP = (v, p) => {
   return new Victor(roundP(v.x, p), roundP(v.y, p))
 }
+
+// Transform functions
+export const rotate = (vertex, angleDeg) => {
+  const angle = Math.PI / 180.0 * angleDeg
+  return new Victor(
+   vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
+   vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle)
+  )
+}
+
+export const scale = (vertex, scalePerc) => {
+  const scale = scalePerc / 100.0
+  return new Victor(
+    vertex.x * scale,
+    vertex.y * scale
+  )
+}
+
+export const offset = (vertex, offsetX, offsetY) => {
+  return new Victor(
+    vertex.x + offsetX,
+    vertex.y + offsetY
+  )
+}

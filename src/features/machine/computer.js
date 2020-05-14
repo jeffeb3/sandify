@@ -1,34 +1,10 @@
-import { distance } from '../../common/geometry'
+import ReactGA from 'react-ga'
+import throttle from 'lodash/throttle'
+import { evaluate } from 'mathjs'
+import { distance, scale, rotate } from '../../common/geometry'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
 import Victor from 'victor'
-import ReactGA from 'react-ga'
-import { evaluate } from 'mathjs'
-import throttle from 'lodash/throttle'
-
-// Transform functions
-function rotate(vertex, angleDeg) {
-  const angle = Math.PI / 180.0 * angleDeg
-  return new Victor(
-   vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
-   vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle)
-  )
-}
-
-function scale(vertex, scalePerc) {
-  const scale = scalePerc / 100.0
-  return new Victor(
-    vertex.x * scale,
-    vertex.y * scale
-  )
-}
-
-function offset(vertex, offsetX, offsetY) {
-  return new Victor(
-    vertex.x + offsetX,
-    vertex.y + offsetY
-  )
-}
 
 function track(vertex, data, loopIndex) {
   const angle = data.trackLength * loopIndex / 16 * 2.0 * Math.PI
@@ -63,8 +39,6 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
     transformedVertex = scale(transformedVertex, growAmount)
   }
 
-  transformedVertex = offset(transformedVertex, data.offsetX || 0, data.offsetY || 0)
-
   if (data.repeatEnabled && data.spinEnabled) {
     let spinAmount = 0
     if (data.spinMethod === 'function') {
@@ -91,6 +65,9 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   if (data.repeatEnabled && data.trackEnabled) {
     transformedVertex = track(transformedVertex, data, trackIndex)
   }
+
+  transformedVertex.rotateDeg(-data.rotation)
+  transformedVertex.addX({x: data.offsetX || 0}).addY({y: data.offsetY || 0})
 
   return transformedVertex
 }

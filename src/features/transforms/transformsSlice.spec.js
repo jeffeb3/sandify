@@ -33,6 +33,7 @@ describe('transforms reducer', () => {
           startingSize: 10,
           offsetX: 0,
           offsetY: 0,
+          rotation: 0,
           numLoops: 10,
           repeatEnabled: true,
           growMethod: 'constant',

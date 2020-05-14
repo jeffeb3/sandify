@@ -10,6 +10,9 @@ const transformOptions = {
   offsetY: {
     title: 'Y offset',
   },
+  rotation: {
+    title: 'Rotate (degrees)'
+  },
   numLoops: {
     title: 'Number of loops',
     min: 1
@@ -85,6 +88,7 @@ export default class Transform {
       startingSize: 10,
       offsetX: 0.0,
       offsetY: 0.0,
+      rotation: 0,
       numLoops: 10,
       transformMethod: 'smear',
       repeatEnabled: true,

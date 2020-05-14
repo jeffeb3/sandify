@@ -28,7 +28,7 @@ class MachinePreview extends Component {
     return (
       <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
         <div className="flex-grow-1 d-flex flex-column">
-          <div id="preview-wrapper" className="preview-wrapper overflow-hidden d-flex align-items-center">
+          <div id="preview-wrapper" className="preview-wrapper d-flex align-items-center">
             <PreviewWindow />
           </div>
 
