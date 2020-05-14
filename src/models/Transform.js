@@ -25,35 +25,37 @@ const transformOptions = {
   growValue: {
     title: 'Scale (+/-)',
   },
-  growAdvanced: {
-    title: 'Advanced',
-    type: 'checkbox',
+  growMethod: {
+    title: 'Scale by',
+    type: 'dropdown',
+    choices: ['constant', 'function']
   },
   growMath: {
-    title: 'Scale Function (i)',
+    title: 'Scale function (i)',
     type: 'text',
-    isVisible: state => { return state.growAdvanced },
+    isVisible: state => { return state.growMethod === 'function' },
   },
   spinEnabled: {
     title: 'Spin',
-    isVisible: state => { return !state.spinAdvanced },
+    isVisible: state => { return state.growMethod === 'constant'},
   },
   spinValue: {
     title: 'Spin (+/-)',
     step: 0.1,
   },
-  spinAdvanced: {
-    title: 'Advanced',
-    type: 'checkbox',
+  spinMethod: {
+    title: 'Spin by',
+    type: 'dropdown',
+    choices: ['constant', 'function']
   },
   spinMath: {
-    title: 'Spin Function (i)',
+    title: 'Spin function (i)',
     type: 'text',
-    isVisible: state => { return state.spinAdvanced },
+    isVisible: state => { return state.spinMethod === 'function' },
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
-    isVisible: state => { return !state.spinAdvanced },
+    isVisible: state => { return state.spinMethod === 'constant'},
   },
   trackEnabled: {
     title: 'Track'
@@ -86,11 +88,11 @@ export default class Transform {
       numLoops: 10,
       transformMethod: 'smear',
       repeatEnabled: true,
-      growAdvanced: false,
+      growMethod: 'constant',
       growMath: 'i+cos(i/2)',
       growEnabled: true,
       growValue: 100,
-      spinAdvanced: false,
+      spinMethod: 'constant',
       spinMath: '10*sin(i/4)',
       spinEnabled: false,
       spinValue: 2,

@@ -2,9 +2,13 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Card
+  Card,
+  Col,
+  Form,
+  Row,
+  ToggleButton,
+  ToggleButtonGroup,
 } from 'react-bootstrap'
-import CheckboxOption from '../../components/CheckboxOption'
 import InputOption from '../../components/InputOption'
 import {
   updateTransform,
@@ -30,6 +34,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChange: (attrs) => {
       attrs.id = id
       dispatch(updateTransform(attrs))
+    },
+    onGrowMethodChange: (value) => {
+      dispatch(updateTransform({ growMethod: value, id: id}))
     },
     onGrow: () => {
       dispatch(toggleGrow({id: id}))
@@ -59,13 +66,20 @@ class ScaleTransform extends Component {
                 optionKey="growValue"
                 index={2}
                 model={this.props.transform} />
-              <CheckboxOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey="growAdvanced"
-                key="growAdvanced"
-                index={0}
-                model={this.props.transform} />
+              <Row className="align-items-center pb-2">
+                <Col sm={5}>
+                  <Form.Label htmlFor="growMethod">
+                    Scale by
+                  </Form.Label>
+                </Col>
+
+                <Col sm={7}>
+                  <ToggleButtonGroup id="growMethod" type="radio" name="growMethod" value={this.props.transform.growMethod} onChange={this.props.onGrowMethodChange}>
+                    <ToggleButton variant="light" value="constant">constant</ToggleButton>
+                    <ToggleButton variant="light" value="function">function</ToggleButton>
+                  </ToggleButtonGroup>
+                </Col>
+              </Row>
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}

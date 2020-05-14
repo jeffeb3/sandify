@@ -48,13 +48,13 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   let transformedVertex = vertex
 
   if (data.repeatEnabled && data.growEnabled) {
-    var growAmount = 100
-    if (data.growAdvanced) {
+    let growAmount = 100
+    if (data.growMethod === 'function') {
       try {
         growAmount = data.growValue * evaluate(data.growMath, {i: amount})
       }
       catch (err) {
-        console.log(err)
+        console.log("Error parsing grow function: " + err)
         growAmount = 200
       }
     } else {
@@ -66,13 +66,13 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   transformedVertex = offset(transformedVertex, data.offsetX || 0, data.offsetY || 0)
 
   if (data.repeatEnabled && data.spinEnabled) {
-    var spinAmount = 0
-    if (data.spinAdvanced) {
+    let spinAmount = 0
+    if (data.spinMethod === 'function') {
       try {
         spinAmount = data.spinValue * evaluate(data.spinMath, {i: amount})
       }
       catch (err) {
-        console.log(err)
+        console.log("Error parsing spin function: " + err)
         spinAmount = 0
       }
     } else {
