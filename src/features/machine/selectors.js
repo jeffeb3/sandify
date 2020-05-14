@@ -189,7 +189,10 @@ export const getPreviewVertices = createSelector(
         return offset(rotate(offset(vertex, -transform.offsetX, -transform.offsetY), transform.rotation), konvaDelta, -konvaDelta)
       })
     } else {
-      return getImportedVertices(state)
+      vertices = getImportedVertices(state)
+      return vertices.map(vertex => {
+        return offset(vertex, konvaDelta, -konvaDelta)
+      })
     }
   }
 )
