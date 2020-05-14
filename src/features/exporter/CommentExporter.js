@@ -7,6 +7,8 @@ export default class CommentExporter extends Exporter {
   constructor(props) {
     super(props)
     this.indentLevel = 0
+    this.startComments()
+    this.commentChar = ''
   }
 
   export() {
@@ -40,11 +42,19 @@ export default class CommentExporter extends Exporter {
         this.optionLines(transform, state.transform, ['offsetX', 'offsetY'])
         this.optionLines(transform, state.transform, ['numLoops', 'transformMethod', 'spinEnabled'], state.transform.repeatEnabled)
         this.indent()
-        this.optionLines(transform, state.transform, ['spinValue', 'spinSwitchbacks'], state.transform.repeatEnabled && state.transform.spinEnabled)
+        this.optionLines(transform, state.transform, ['spinValue', 'spinMethod'], state.transform.repeatEnabled && state.transform.spinEnabled)
+        this.indent()
+        this.optionLine(transform, state.transform, 'spinMath', state.transform.repeatEnabled && state.transform.spinEnabled && state.transform.spinMethod === 'function')
+        this.optionLine(transform, state.transform, 'spinSwitchbacks', state.transform.repeatEnabled && state.transform.spinEnabled && state.transform.spinMethod === 'constant')
+        this.dedent()
         this.dedent()
         this.optionLine(transform, state.transform, 'growEnabled', state.transform.repeatEnabled)
         this.indent()
         this.optionLine(transform, state.transform, 'growValue', state.transform.repeatEnabled && state.transform.growEnabled)
+        this.optionLine(transform, state.transform, 'growMethod', state.transform.repeatEnabled && state.transform.growEnabled)
+        this.indent()
+        this.optionLine(transform, state.transform, 'growMath', state.transform.repeatEnabled && state.transform.growEnabled && state.transform.growMethod === 'function')
+        this.dedent()
         this.dedent()
         this.optionLine(transform, state.transform, 'trackEnabled', state.transform.repeatEnabled)
         this.indent()

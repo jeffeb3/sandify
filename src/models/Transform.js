@@ -26,17 +26,39 @@ const transformOptions = {
     title: 'Grow'
   },
   growValue: {
-    title: 'Scale step (+/-)',
+    title: 'Scale (+/-)',
+  },
+  growMethod: {
+    title: 'Scale by',
+    type: 'dropdown',
+    choices: ['constant', 'function']
+  },
+  growMath: {
+    title: 'Scale function (i)',
+    type: 'text',
+    isVisible: state => { return state.growMethod === 'function' },
   },
   spinEnabled: {
-    title: 'Spin'
+    title: 'Spin',
+    isVisible: state => { return state.growMethod === 'constant'},
   },
   spinValue: {
-    title: 'Spin step (+/-)',
-    step: 0.1
+    title: 'Spin (+/-)',
+    step: 0.1,
+  },
+  spinMethod: {
+    title: 'Spin by',
+    type: 'dropdown',
+    choices: ['constant', 'function']
+  },
+  spinMath: {
+    title: 'Spin function (i)',
+    type: 'text',
+    isVisible: state => { return state.spinMethod === 'function' },
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
+    isVisible: state => { return state.spinMethod === 'constant'},
   },
   trackEnabled: {
     title: 'Track'
@@ -70,8 +92,12 @@ export default class Transform {
       numLoops: 10,
       transformMethod: 'smear',
       repeatEnabled: true,
+      growMethod: 'constant',
+      growMath: 'i+cos(i/2)',
       growEnabled: true,
       growValue: 100,
+      spinMethod: 'constant',
+      spinMath: '10*sin(i/4)',
       spinEnabled: false,
       spinValue: 2,
       spinSwitchbacks: 0,

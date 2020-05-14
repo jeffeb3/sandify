@@ -2,7 +2,12 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Card
+  Card,
+  Col,
+  Form,
+  Row,
+  ToggleButton,
+  ToggleButtonGroup,
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import {
@@ -30,6 +35,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       attrs.id = id
       dispatch(updateTransform(attrs))
     },
+    onSpinMethodChange: (value) => {
+      dispatch(updateTransform({ spinMethod: value, id: id}))
+    },
     onSpin: () => {
       dispatch(toggleSpin({id: id}))
     },
@@ -51,12 +59,36 @@ class RotationTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}
                 key="spinValue"
                 optionKey="spinValue"
                 index={0}
+                model={this.props.transform} />
+
+              <Row className="align-items-center pb-2">
+                <Col sm={5}>
+                  <Form.Label htmlFor="spinMethod">
+                    Scale by
+                  </Form.Label>
+                </Col>
+
+                <Col sm={7}>
+                  <ToggleButtonGroup id="spinMethod" type="radio" name="spinMethod" value={this.props.transform.spinMethod} onChange={this.props.onSpinMethodChange}>
+                    <ToggleButton variant="light" value="constant">constant</ToggleButton>
+                    <ToggleButton variant="light" value="function">function</ToggleButton>
+                  </ToggleButtonGroup>
+                </Col>
+              </Row>
+
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="spinMath"
+                optionKey="spinMath"
+                index={1}
                 model={this.props.transform} />
 
               <InputOption
