@@ -3,6 +3,7 @@ import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
 import Victor from 'victor'
 import ReactGA from 'react-ga'
+import { evaluate } from 'mathjs'
 import throttle from 'lodash/throttle'
 
 // Transform functions
@@ -47,20 +48,42 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   let transformedVertex = vertex
 
   if (data.repeatEnabled && data.growEnabled) {
-    transformedVertex = scale(transformedVertex, 100.0 + (data.growValue * amount))
+    let growAmount = 100
+    if (data.growMethod === 'function') {
+      try {
+        growAmount = data.growValue * evaluate(data.growMath, {i: amount})
+      }
+      catch (err) {
+        console.log("Error parsing grow function: " + err)
+        growAmount = 200
+      }
+    } else {
+      growAmount = 100.0 + (data.growValue * amount)
+    }
+    transformedVertex = scale(transformedVertex, growAmount)
   }
 
   transformedVertex = offset(transformedVertex, data.offsetX || 0, data.offsetY || 0)
 
   if (data.repeatEnabled && data.spinEnabled) {
-    const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
-    const stage = amount/loopPeriod
-    const direction = (stage % 2 < 1 ? 1.0 : -1.0)
-    var spinAmount = direction * (amount % loopPeriod) * data.spinValue
-
-    // Add in the amount it goes positive to the negatives, so they start at the same place.
-    if (direction < 0.0) {
-      spinAmount += loopPeriod * data.spinValue
+    let spinAmount = 0
+    if (data.spinMethod === 'function') {
+      try {
+        spinAmount = data.spinValue * evaluate(data.spinMath, {i: amount})
+      }
+      catch (err) {
+        console.log("Error parsing spin function: " + err)
+        spinAmount = 0
+      }
+    } else {
+      const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
+      const stage = amount/loopPeriod
+      const direction = (stage % 2 < 1 ? 1.0 : -1.0)
+      spinAmount = direction * (amount % loopPeriod) * data.spinValue
+      // Add in the amount it goes positive to the negatives, so they start at the same place.
+      if (direction < 0.0) {
+        spinAmount += loopPeriod * data.spinValue
+      }
     }
     transformedVertex = rotate(transformedVertex, spinAmount)
   }

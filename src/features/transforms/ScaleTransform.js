@@ -2,7 +2,12 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import {
   Accordion,
-  Card
+  Card,
+  Col,
+  Form,
+  Row,
+  ToggleButton,
+  ToggleButtonGroup,
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import {
@@ -30,6 +35,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       attrs.id = id
       dispatch(updateTransform(attrs))
     },
+    onGrowMethodChange: (value) => {
+      dispatch(updateTransform({ growMethod: value, id: id}))
+    },
     onGrow: () => {
       dispatch(toggleGrow({id: id}))
     },
@@ -56,7 +64,28 @@ class ScaleTransform extends Component {
                 options={this.props.options}
                 key="growValue"
                 optionKey="growValue"
-                index={0}
+                index={2}
+                model={this.props.transform} />
+              <Row className="align-items-center pb-2">
+                <Col sm={5}>
+                  <Form.Label htmlFor="growMethod">
+                    Scale by
+                  </Form.Label>
+                </Col>
+
+                <Col sm={7}>
+                  <ToggleButtonGroup id="growMethod" type="radio" name="growMethod" value={this.props.transform.growMethod} onChange={this.props.onGrowMethodChange}>
+                    <ToggleButton variant="light" value="constant">constant</ToggleButton>
+                    <ToggleButton variant="light" value="function">function</ToggleButton>
+                  </ToggleButtonGroup>
+                </Col>
+              </Row>
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="growMath"
+                optionKey="growMath"
+                index={1}
                 model={this.props.transform} />
             </Card.Body>
           </Accordion.Collapse>
