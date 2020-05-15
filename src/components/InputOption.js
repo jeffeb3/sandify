@@ -6,6 +6,25 @@ import {
 } from 'react-bootstrap'
 
 class InputOption extends Component {
+
+  handleChange = (event, key) => {
+    const option = this.props.options[this.props.optionKey]
+    const model = this.props.model
+    const optionType = option.type || 'number'
+    let attrs = {}
+    let value = event.target.value
+
+    if (optionType === 'number') {
+      value = value === '' ? '' : parseFloat(value)
+    }
+
+    attrs[key] = value
+    if (option.onChange !== undefined) {
+      attrs = option.onChange(attrs, model)
+    }
+    this.props.onChange(attrs)
+  }
+
   render() {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
@@ -32,18 +51,21 @@ class InputOption extends Component {
             max={!isNaN(maximum) ? maximum : ''}
             value={model[this.props.optionKey]}
             onChange={(event) => {
-              let attrs = {}
-              let value = event.target.value
-
-              if (optionType === 'number') value = value === '' ? '' : parseFloat(value)
-              attrs[this.props.optionKey] = value
-
-              if (option.onChange !== undefined) {
-                attrs = option.onChange(attrs, model)
+              this.handleChange(event, this.props.optionKey)
+            }}
+            onBlur={(event) => {
+              if (this.props.blurKey === undefined) {
+                return
               }
-
-              this.props.onChange(attrs)
-            }} />
+              this.handleChange(event, this.props.blurKey)
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' || this.props.blurKey === undefined) {
+                return
+              }
+              this.handleChange(event, this.props.blurKey)
+            }}
+            />
         </Col>
       </Row>
     )
