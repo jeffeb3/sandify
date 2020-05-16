@@ -88,7 +88,7 @@ class RotationTransform extends Component {
                 options={this.props.options}
                 key="spinMathInput"
                 optionKey="spinMathInput"
-                blurKey="spinMath"
+                delayKey="spinMath"
                 index={1}
                 model={this.props.transform} />
 

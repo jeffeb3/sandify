@@ -4,25 +4,16 @@ import {
   Form,
   Row
 } from 'react-bootstrap'
+import debounce from 'lodash/debounce'
 
 class InputOption extends Component {
-
-  handleChange = (event, key) => {
-    const option = this.props.options[this.props.optionKey]
-    const model = this.props.model
-    const optionType = option.type || 'number'
-    let attrs = {}
-    let value = event.target.value
-
-    if (optionType === 'number') {
-      value = value === '' ? '' : parseFloat(value)
-    }
-
-    attrs[key] = value
-    if (option.onChange !== undefined) {
-      attrs = option.onChange(attrs, model)
-    }
-    this.props.onChange(attrs)
+  constructor(props) {
+    super(props);
+    this.delayedSet = debounce( (value, key, onChange) => {
+      let attrs = {}
+      attrs[key] = value
+      onChange(attrs)
+    }, 1500)
   }
 
   render() {
@@ -51,19 +42,21 @@ class InputOption extends Component {
             max={!isNaN(maximum) ? maximum : ''}
             value={model[this.props.optionKey]}
             onChange={(event) => {
-              this.handleChange(event, this.props.optionKey)
-            }}
-            onBlur={(event) => {
-              if (this.props.blurKey === undefined) {
-                return
+              let attrs = {}
+              let value = event.target.value
+
+              if (optionType === 'number') {
+                value = value === '' ? '' : parseFloat(value)
               }
-              this.handleChange(event, this.props.blurKey)
-            }}
-            onKeyDown={(event) => {
-              if (event.key !== 'Enter' || this.props.blurKey === undefined) {
-                return
+
+              attrs[this.props.optionKey] = value
+              if (option.onChange !== undefined) {
+                attrs = option.onChange(attrs, model)
               }
-              this.handleChange(event, this.props.blurKey)
+              this.props.onChange(attrs)
+              if (this.props.delayKey !== undefined) {
+                this.delayedSet(value, this.props.delayKey, this.props.onChange)
+              }
             }}
             />
         </Col>

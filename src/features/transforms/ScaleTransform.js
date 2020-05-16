@@ -87,7 +87,7 @@ class ScaleTransform extends Component {
                 options={this.props.options}
                 key="growMathInput"
                 optionKey="growMathInput"
-                blurKey="growMath"
+                delayKey="growMath"
                 index={1}
                 model={this.props.transform} />
 
