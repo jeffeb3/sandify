@@ -4,8 +4,18 @@ import {
   Form,
   Row
 } from 'react-bootstrap'
+import debounce from 'lodash/debounce'
 
 class InputOption extends Component {
+  constructor(props) {
+    super(props);
+    this.delayedSet = debounce( (value, key, onChange) => {
+      let attrs = {}
+      attrs[key] = value
+      onChange(attrs)
+    }, 1500)
+  }
+
   render() {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
@@ -35,15 +45,20 @@ class InputOption extends Component {
               let attrs = {}
               let value = event.target.value
 
-              if (optionType === 'number') value = value === '' ? '' : parseFloat(value)
-              attrs[this.props.optionKey] = value
+              if (optionType === 'number') {
+                value = value === '' ? '' : parseFloat(value)
+              }
 
+              attrs[this.props.optionKey] = value
               if (option.onChange !== undefined) {
                 attrs = option.onChange(attrs, model)
               }
-
               this.props.onChange(attrs)
-            }} />
+              if (this.props.delayKey !== undefined) {
+                this.delayedSet(value, this.props.delayKey, this.props.onChange)
+              }
+            }}
+            />
         </Col>
       </Row>
     )

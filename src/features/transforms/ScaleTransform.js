@@ -59,6 +59,7 @@ class ScaleTransform extends Component {
 
           <Accordion.Collapse eventKey={0}>
             <Card.Body>
+
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}
@@ -66,13 +67,13 @@ class ScaleTransform extends Component {
                 optionKey="growValue"
                 index={2}
                 model={this.props.transform} />
+
               <Row className="align-items-center pb-2">
                 <Col sm={5}>
                   <Form.Label htmlFor="growMethod">
                     Scale by
                   </Form.Label>
                 </Col>
-
                 <Col sm={7}>
                   <ToggleButtonGroup id="growMethod" type="radio" name="growMethod" value={this.props.transform.growMethod} onChange={this.props.onGrowMethodChange}>
                     <ToggleButton variant="light" value="constant">constant</ToggleButton>
@@ -80,13 +81,16 @@ class ScaleTransform extends Component {
                   </ToggleButtonGroup>
                 </Col>
               </Row>
+
               <InputOption
                 onChange={this.props.onChange}
                 options={this.props.options}
-                key="growMath"
-                optionKey="growMath"
+                key="growMathInput"
+                optionKey="growMathInput"
+                delayKey="growMath"
                 index={1}
                 model={this.props.transform} />
+
             </Card.Body>
           </Accordion.Collapse>
         </Card>

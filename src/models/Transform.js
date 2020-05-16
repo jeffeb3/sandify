@@ -33,10 +33,12 @@ const transformOptions = {
     type: 'dropdown',
     choices: ['constant', 'function']
   },
-  growMath: {
+  growMathInput: {
     title: 'Scale function (i)',
     type: 'text',
     isVisible: state => { return state.growMethod === 'function' },
+  },
+  growMath: {
   },
   spinEnabled: {
     title: 'Spin',
@@ -51,10 +53,12 @@ const transformOptions = {
     type: 'dropdown',
     choices: ['constant', 'function']
   },
-  spinMath: {
+  spinMathInput: {
     title: 'Spin function (i)',
     type: 'text',
     isVisible: state => { return state.spinMethod === 'function' },
+  },
+  spinMath: {
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
@@ -93,10 +97,12 @@ export default class Transform {
       transformMethod: 'smear',
       repeatEnabled: true,
       growMethod: 'constant',
+      growMathInput: 'i+cos(i/2)',
       growMath: 'i+cos(i/2)',
       growEnabled: true,
       growValue: 100,
       spinMethod: 'constant',
+      spinMathInput: '10*sin(i/4)',
       spinMath: '10*sin(i/4)',
       spinEnabled: false,
       spinValue: 2,
