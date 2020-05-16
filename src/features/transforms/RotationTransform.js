@@ -10,19 +10,16 @@ import {
   ToggleButtonGroup,
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
-import {
-  toggleSpin,
-  updateShape,
-} from '../shapes/shapesSlice'
-import { getCurrentShapeSelector } from '../shapes/selectors'
+import { toggleSpin, updateLayer } from '../layers/layersSlice'
+import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
-  const shape = getCurrentShapeSelector(state)
+  const layer = getCurrentLayer(state)
 
   return {
-    shape: shape,
-    active: shape.spinEnabled,
+    layer: layer,
+    active: layer.spinEnabled,
     options: (new Transform()).getOptions()
   }
 }
@@ -33,10 +30,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (attrs) => {
       attrs.id = id
-      dispatch(updateShape(attrs))
+      dispatch(updateLayer(attrs))
     },
     onSpinMethodChange: (value) => {
-      dispatch(updateShape({ spinMethod: value, id: id}))
+      dispatch(updateLayer({ spinMethod: value, id: id}))
     },
     onSpin: () => {
       dispatch(toggleSpin({id: id}))
@@ -66,7 +63,7 @@ class RotationTransform extends Component {
                 key="spinValue"
                 optionKey="spinValue"
                 index={0}
-                model={this.props.shape} />
+                model={this.props.layer} />
 
               <Row className="align-items-center pb-2">
                 <Col sm={5}>
@@ -76,7 +73,7 @@ class RotationTransform extends Component {
                 </Col>
 
                 <Col sm={7}>
-                  <ToggleButtonGroup id="spinMethod" type="radio" name="spinMethod" value={this.props.shape.spinMethod} onChange={this.props.onSpinMethodChange}>
+                  <ToggleButtonGroup id="spinMethod" type="radio" name="spinMethod" value={this.props.layer.spinMethod} onChange={this.props.onSpinMethodChange}>
                     <ToggleButton variant="light" value="constant">constant</ToggleButton>
                     <ToggleButton variant="light" value="function">function</ToggleButton>
                   </ToggleButtonGroup>
@@ -90,7 +87,7 @@ class RotationTransform extends Component {
                 optionKey="spinMathInput"
                 delayKey="spinMath"
                 index={1}
-                model={this.props.shape} />
+                model={this.props.layer} />
 
               <InputOption
                 onChange={this.props.onChange}
@@ -98,7 +95,7 @@ class RotationTransform extends Component {
                 key="spinSwitchbacks"
                 optionKey="spinSwitchbacks"
                 index={0}
-                model={this.props.shape} />
+                model={this.props.layer} />
             </Card.Body>
           </Accordion.Collapse>
         </Card>

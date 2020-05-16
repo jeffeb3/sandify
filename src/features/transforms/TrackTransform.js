@@ -8,18 +8,18 @@ import InputOption from '../../components/InputOption'
 import {
   toggleTrack,
   toggleTrackGrow,
-  updateShape
-} from '../shapes/shapesSlice'
-import { getCurrentShapeSelector } from '../shapes/selectors'
+  updateLayer
+} from '../layers/layersSlice'
+import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
-  const shape = getCurrentShapeSelector(state)
+  const layer = getCurrentLayer(state)
 
   return {
-    shape: shape,
-    active: shape.trackEnabled,
-    activeGrow: shape.trackGrowEnabled,
+    layer: layer,
+    active: layer.trackEnabled,
+    activeGrow: layer.trackGrowEnabled,
     options: new Transform().getOptions()
   }
 }
@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (attrs) => {
       attrs.id = id
-      dispatch(updateShape(attrs))
+      dispatch(updateLayer(attrs))
     },
     onTrack: () => {
       dispatch(toggleTrack({id: id}))
@@ -64,7 +64,7 @@ class TrackTransform extends Component {
                 key="trackValue"
                 optionKey="trackValue"
                 index={0}
-                model={this.props.shape} />
+                model={this.props.layer} />
 
               <InputOption
                 onChange={this.props.onChange}
@@ -73,7 +73,7 @@ class TrackTransform extends Component {
                 optionKey="trackLength"
                 index={0}
                 step={0.05}
-                model={this.props.shape} />
+                model={this.props.layer} />
 
               <InputOption
                 onChange={this.props.onChange}
@@ -81,7 +81,7 @@ class TrackTransform extends Component {
                 key="trackNumLoops"
                 optionKey="trackNumLoops"
                 index={0}
-                model={this.props.shape} />
+                model={this.props.layer} />
 
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
                 <Card className={activeGrowClassName}>
@@ -98,7 +98,7 @@ class TrackTransform extends Component {
                         key="trackGrow"
                         optionKey="trackGrow"
                         index={0}
-                        model={this.props.shape} />
+                        model={this.props.layer} />
                     </Card.Body>
                   </Accordion.Collapse>
                 </Card>
