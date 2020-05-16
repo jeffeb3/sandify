@@ -3,8 +3,8 @@ import { connect, ReactReduxContext, Provider } from 'react-redux'
 import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
-import { updateShape } from '../shapes/shapesSlice'
-import { getCurrentShapeSelector } from '../shapes/selectors'
+import { updateLayer } from '../layers/layersSlice'
+import { getCurrentLayer } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import PreviewShape from './PreviewShape'
 
@@ -23,11 +23,11 @@ export const relativeScale = (props) => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const shape = getCurrentShapeSelector(state)
+  const layer = getCurrentLayer(state)
 
   return {
-    shape: shape,
-    selectedId: state.shapes.selectedId,
+    layer: layer,
+    selectedId: state.layers.selected,
     use_rect: state.machine.rectangular,
     minX: state.machine.minX,
     maxX: state.machine.maxX,
@@ -47,8 +47,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChange: (attrs) => {
       dispatch(updatePreview(attrs))
     },
-    onShapeChange: (attrs) => {
-      dispatch(updateShape(attrs))
+    onLayerChange: (attrs) => {
+      dispatch(updateLayer(attrs))
     }
   }
 }
@@ -128,8 +128,8 @@ class PreviewWindow extends Component {
             onWheel={e => {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {
-                this.props.onShapeChange({
-                  startingSize: scaleByWheel(this.props.shape.startingSize, e.evt.deltaY),
+                this.props.onLayerChange({
+                  startingSize: scaleByWheel(this.props.layer.startingSize, e.evt.deltaY),
                   id: this.props.selectedId
                 })
               }

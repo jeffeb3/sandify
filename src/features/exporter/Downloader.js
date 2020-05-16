@@ -28,7 +28,7 @@ const mapStateToProps = (state, ownProps) => {
     vertices: getVertices(state),
     comments: getComments(state),
     input: state.app.input,
-    shape: state.shapes.currentId,
+    layer: state.layers.current,
     offsetX: (state.machine.rectangular ? (state.machine.minX + state.machine.maxX) / 2.0 : state.machine.maxRadius),
     offsetY: (state.machine.rectangular ? (state.machine.minY + state.machine.maxY) / 2.0 : state.machine.maxRadius),
     width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
@@ -70,7 +70,7 @@ class Downloader extends Component {
   gaRecord(fileType) {
     let savedCode = 'Saved: ' + this.props.input
     if (this.props.input === 'shape' || this.props.input === 'Shape') {
-      savedCode = savedCode + ': ' + this.props.shape
+      savedCode = savedCode + ': ' + this.props.layer
     }
     ReactGA.event({
       category: fileType,

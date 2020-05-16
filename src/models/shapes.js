@@ -34,3 +34,16 @@ export const registeredShapes = {
   wiper: new Wiper(),
   space_filler: new SpaceFiller()
 }
+
+export const getShape = (layer) => {
+  return registeredShapes[layer.type]
+}
+
+export const getShapeDefaults = () => {
+  return Object.keys(registeredShapes).map(id => {
+    const state = registeredShapes[id].getInitialState()
+    state.name = registeredShapes[id].name
+    state.id = id
+    return state
+  })
+}
