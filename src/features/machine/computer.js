@@ -166,26 +166,28 @@ export const transformShapes = (vertices, transform) => {
   const numTrackLoops = transform.repeatEnabled ? transform.trackNumLoops : 1
   let outputVertices = []
 
-  let scaledVertices = vertices.map(vertex => {
-    return scale(vertex, 100.0 * transform.startingSize)
-  })
+  if (transform.canChangeSize) {
+    vertices = vertices.map(vertex => {
+      return scale(vertex, 100.0 * transform.startingSize)
+    })
+  }
 
   if (transform.transformMethod === 'smear' && transform.repeatEnabled) {
     // remove last vertex; we don't want to return to our starting point when completing the shape
-    scaledVertices.pop()
+    vertices.pop()
   }
 
   if (transform.trackEnabled && numTrackLoops > 1) {
     for (var i=0; i<numLoops; i++) {
       for (var t=0; t<numTrackLoops; t++) {
-        outputVertices = outputVertices.concat(buildTrackLoop(scaledVertices, transform, i, t))
+        outputVertices = outputVertices.concat(buildTrackLoop(vertices, transform, i, t))
       }
     }
   } else {
     for (i=0; i<numLoops; i++) {
-      for (var j=0; j<scaledVertices.length; j++) {
-        let amount = transform.transformMethod === 'smear' ? i + j/scaledVertices.length : i
-        outputVertices.push(transformShape(transform, scaledVertices[j], amount, amount))
+      for (var j=0; j<vertices.length; j++) {
+        let amount = transform.transformMethod === 'smear' ? i + j/vertices.length : i
+        outputVertices.push(transformShape(transform, vertices[j], amount, amount))
       }
     }
   }

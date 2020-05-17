@@ -48,7 +48,6 @@ export default class FractalSpirograph extends Shape {
         fractalSpirographNumCircles: 5,
         fractalSpirographRelativeSize: 3,
         fractalSpirographAlternateRotation: true,
-        startingSize: 54,
         repeatEnabled: false,
       }
     }
@@ -87,6 +86,8 @@ export default class FractalSpirograph extends Shape {
       }
     }
 
+    const scale = 5 // to normalize starting size
+    points.forEach(point => point.multiply({x: scale, y: scale }))
     return points
   }
 
