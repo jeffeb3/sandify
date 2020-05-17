@@ -5,16 +5,13 @@ export default class Exporter {
   }
 
   export() {
+    this.pre = this.props.pre
+    this.post = this.props.post
     let vertices = this.props.vertices
     if (this.props.reverse) {
       vertices = vertices.reverse()
     }
-
-    this.pre = this.props.pre
-    this.post = this.props.post
-    if (vertices.lenth !== 0) {
-      this.variableReplace(vertices)
-    }
+    this.computeOutputVertices(vertices)
 
     this.header()
     this.startComments()
@@ -34,7 +31,7 @@ export default class Exporter {
     }
 
     this.line()
-    this.exportCode(vertices)
+    this.exportCode(this.vertices)
     this.line()
 
     if (this.post !== '') {
@@ -60,8 +57,9 @@ export default class Exporter {
     // default does nothing
   }
 
-  variableReplace(vertices) {
+  computeOutputVertices(vertices) {
     // default does nothing
+    this.vertices = vertices
   }
 
   line(content='', add=true) {

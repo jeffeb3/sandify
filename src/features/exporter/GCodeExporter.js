@@ -9,33 +9,32 @@ export default class GCodeExporter extends Exporter {
   }
 
   exportCode(vertices) {
-    var centeredVertices = vertices.map( (vertex) => {
-      return {
-        ...vertex,
-        x: vertex.x + this.props.offsetX,
-        y: vertex.y + this.props.offsetY,
-      }
-    })
-
-    centeredVertices.map(this.gcode).forEach(line => this.line(line))
+    vertices.map(this.gcode).forEach(line => this.line(line))
   }
 
-  variableReplace(vertices) {
+  computeOutputVertices(vertices) {
     // Collect some statistics about these vertices.
-    let startx = vertices[0].x + this.props.offsetX
-    let starty = vertices[0].y + this.props.offsetY
-    let endx = vertices[vertices.length-1].x + this.props.offsetX
-    let endy = vertices[vertices.length-1].y + this.props.offsetY
     let minx = 1e9
     let miny = 1e9
     let maxx = -1e9
     let maxy = -1e9
-    vertices.forEach( (vertex) => {
-      minx = Math.min(vertex.x + this.props.offsetX, minx)
-      miny = Math.min(vertex.y + this.props.offsetY, miny)
-      maxx = Math.max(vertex.x + this.props.offsetX, maxx)
-      maxy = Math.max(vertex.y + this.props.offsetY, maxy)
+    this.vertices = vertices.map( (vertex) => {
+      const x = vertex.x + this.props.offsetX
+      const y = vertex.y + this.props.offsetY
+      minx = Math.min(x, minx)
+      miny = Math.min(y, miny)
+      maxx = Math.max(x, maxx)
+      maxy = Math.max(y, maxy)
+      return {
+        ...vertex,
+        x: x,
+        y: y,
+      }
     })
+    let startx = this.vertices[0].x
+    let starty = this.vertices[0].y
+    let endx = this.vertices[this.vertices.length-1].x
+    let endy = this.vertices[this.vertices.length-1].y
 
     // Replace these strings.
     this.pre  =  this.pre.replace(/{startx}/gi, startx.toFixed(3))
