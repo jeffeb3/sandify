@@ -5,6 +5,17 @@ export default class Exporter {
   }
 
   export() {
+    let vertices = this.props.vertices
+    if (this.props.reverse) {
+      vertices = vertices.reverse()
+    }
+
+    this.pre = this.props.pre
+    this.post = this.props.post
+    if (vertices.lenth !== 0) {
+      this.variableReplace(vertices)
+    }
+
     this.header()
     this.startComments()
     this.props.comments.forEach( comment => this.line(comment) )
@@ -12,30 +23,25 @@ export default class Exporter {
     this.keyValueLine('File name', "'" + this.props.fileName + "'")
     this.line()
     this.endComments()
-    if (this.props.pre !== '') {
+    if (this.pre !== '') {
       this.startComments()
       this.line('BEGIN PRE')
       this.endComments()
-      this.line(this.props.pre, this.props.pre !== '')
+      this.line(this.pre, this.pre !== '')
       this.startComments()
       this.line('END PRE')
       this.endComments()
-    }
-
-    let vertices = this.props.vertices
-    if (this.props.reverse) {
-      vertices = vertices.reverse()
     }
 
     this.line()
     this.exportCode(vertices)
     this.line()
 
-    if (this.props.post !== '') {
+    if (this.post !== '') {
       this.startComments()
       this.line('BEGIN POST')
       this.endComments()
-      this.line(this.props.post, this.props.post !== '')
+      this.line(this.post, this.post !== '')
       this.startComments()
       this.line('END POST')
       this.endComments()
@@ -51,6 +57,10 @@ export default class Exporter {
   }
 
   footer() {
+    // default does nothing
+  }
+
+  variableReplace(vertices) {
     // default does nothing
   }
 
