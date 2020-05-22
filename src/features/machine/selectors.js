@@ -118,7 +118,7 @@ export const getVertices = createSelector(
     }
 
     const hasImported = (state.app.input === 'code' || state.importer.fileName)
-    if (state.app.input === 'shapes' || !hasImported) {
+    if (state.app.input === 'shape' || !hasImported) {
       if (dragging) {
         return getTransformedVertices(state)
       } else {
