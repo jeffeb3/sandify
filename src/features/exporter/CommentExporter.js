@@ -39,7 +39,7 @@ export default class CommentExporter extends Exporter {
 
         this.keyValueLine('Selected Shape', shape.name)
         this.optionLines(shape, instance, Object.keys(options))
-        this.optionLines(transform, state.transform, ['offsetX', 'offsetY'])
+        this.optionLines(transform, state.transform, ['startingSize', 'offsetX', 'offsetY'])
         this.optionLines(transform, state.transform, ['numLoops', 'transformMethod', 'spinEnabled'], state.transform.repeatEnabled)
         this.indent()
         this.optionLines(transform, state.transform, ['spinValue', 'spinMethod'], state.transform.repeatEnabled && state.transform.spinEnabled)
