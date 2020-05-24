@@ -1,5 +1,6 @@
 import layers, {
   addLayer,
+  moveLayer,
   restoreDefaults,
   setCurrentLayer,
   setSelectedLayer,
@@ -75,6 +76,19 @@ describe('layers reducer', () => {
       allIds: ['layer-1'],
       current: 'layer-1',
       selected: 'layer-1'
+    })
+  })
+
+  it('should handle moveLayer', () => {
+    expect(
+      layers(
+        {
+          allIds: ['a', 'b', 'c', 'd', 'e']
+        },
+        moveLayer({oldIndex: 0, newIndex: 2})
+      )
+    ).toEqual({
+      allIds: ['b', 'c', 'a', 'd', 'e'],
     })
   })
 

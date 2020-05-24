@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Button, ListGroup, Modal, Row, Col } from 'react-bootstrap'
 import Select from 'react-select'
+import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
-import { setCurrentLayer, addLayer, updateLayers, removeLayer } from '../layers/layersSlice'
+import { setCurrentLayer, addLayer, updateLayers, removeLayer, moveLayer } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
 import './Playlist.scss'
 
@@ -38,6 +39,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChangeNewType: (selected) => {
       dispatch(updateLayers({ newLayerType: selected.value }))
     },
+    onLayerMoved: ({oldIndex, newIndex}) => {
+      dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
+    }
   }
 }
 
@@ -48,6 +52,38 @@ const customStyles = {
     minHeight: 55
   })
 }
+
+const SortableItem = SortableElement(({id, name, active, canRemove, onLayerRemoved, onLayerSelected}) => {
+  const activeClass = active ? 'active' : ''
+  const dragClass = canRemove ? 'cursor-move' : ''
+  return <ListGroup.Item className={[activeClass, dragClass, 'd-flex align-items-center'].join(' ')} key={id} id={id} onClick={onLayerSelected}>
+    <div className="no-select">{name}</div>
+    {canRemove && <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onLayerRemoved}>
+      <FaTrash />
+    </Button>}
+  </ListGroup.Item>
+})
+
+const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLayerSelected, onLayerRemoved}) => {
+  return (
+    <ListGroup>
+      {layers.map((layer, index) => {
+        return (
+          <SortableItem
+            key={layer.id}
+            id={layer.id}
+            name={layer.name}
+            index={index}
+            active={currentLayer.id === layer.id}
+            canRemove={numLayers > 1}
+            onLayerSelected={onLayerSelected}
+            onLayerRemoved={onLayerRemoved}
+            />
+        )
+      })}
+    </ListGroup>
+  )
+})
 
 class Playlist extends Component {
   constructor(props) {
@@ -105,20 +141,16 @@ class Playlist extends Component {
 
         <div className="p-3">
           <h2 className="panel">Layers ({this.props.numLayers})</h2>
-          <ListGroup variant="flush" ref={(el) => { this.layersList = el; }} style={{maxHeight: "160px"}} className="border overflow-auto mb-2">
-            {this.props.layers.map((layer) => {
-              const active = this.props.currentLayer.id === layer.id ? 'active' : ''
-              return (
-                <ListGroup.Item className={active + ' d-flex align-items-center'} key={layer.id} id={layer.id} onClick={this.props.onLayerSelected}>
-                  <div className="no-select">{layer.name}</div>
-                  {this.props.numLayers > 1 && <Button className="ml-auto layer-button" variant="link" data-id={layer.id} onClick={this.props.onLayerRemoved.bind(this)}>
-                    <FaTrash />
-                  </Button>}
-                </ListGroup.Item>
-              )
-            })}
-          </ListGroup>
-          <Button variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+          <SortableList
+            pressDelay={150}
+            layers={this.props.layers}
+            currentLayer={this.props.currentLayer}
+            numLayers={this.props.numLayers}
+            onLayerSelected={this.props.onLayerSelected}
+            onLayerRemoved={this.props.onLayerRemoved.bind(this)}
+            onSortEnd={this.props.onLayerMoved}
+          />
+          <Button className="mt-2" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
         </div>
       </div>
     )

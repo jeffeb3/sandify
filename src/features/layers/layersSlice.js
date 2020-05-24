@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import uniqueId from 'lodash/uniqueId'
+import arrayMove from 'array-move'
 import { getShape } from '../../models/shapes'
 
 const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'shouldCache']
@@ -23,10 +24,13 @@ const layersSlice = createSlice({
       state.current = layer.id
       state.selected = layer.id
     },
+    moveLayer(state, action) {
+      const { oldIndex, newIndex } = action.payload
+      state.allIds = arrayMove(state.allIds, oldIndex, newIndex)
+    },
     removeLayer(state, action) {
       const deleteId = action.payload
       const idx = state.allIds.findIndex(id => id === deleteId)
-      debugger
       state.allIds.splice(idx, 1)
       delete state.byId[deleteId]
 
@@ -111,6 +115,7 @@ const layersSlice = createSlice({
 
 export const {
   addLayer,
+  moveLayer,
   removeLayer,
   restoreDefaults,
   setCurrentLayer,
