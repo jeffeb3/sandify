@@ -21,6 +21,7 @@ export default class Rose extends Shape {
   constructor() {
     super('Rose')
     this.link = 'http://mathworld.wolfram.com/Rose.html'
+    this.linkText = 'Wolfram Mathworld'
   }
 
   getInitialState() {
@@ -29,7 +30,8 @@ export default class Rose extends Shape {
       ...{
         type: 'rose',
         roseN: 3,
-        roseD: 2
+        roseD: 2,
+        transformMethod: 'intact', 
       }
     }
   }

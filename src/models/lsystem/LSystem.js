@@ -36,7 +36,7 @@ export default class LSystem extends Shape {
   constructor() {
     super('Fractal Line Writer')
     this.link = 'https://en.wikipedia.org/wiki/L-system'
-    this.linkText = 'this Wikipedia article on L-systems'
+    this.linkText = 'L-systems on Wikipedia'
   }
 
   getInitialState() {

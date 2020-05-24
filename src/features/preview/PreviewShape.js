@@ -1,39 +1,40 @@
 import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
 import Color from 'color'
 import Victor from 'victor'
 import { updatePreview } from './previewSlice'
-import { getPreviewVertices, getPreviewTrackVertices } from '../machine/selectors'
-import { getCurrentLayer } from '../layers/selectors'
-import { updateLayer } from '../layers/layersSlice'
+import { getPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices } from '../machine/selectors'
+import { updateLayer, setSelectedLayer } from '../layers/layersSlice'
+import { getCurrentLayer, makeGetLayerIndex, getNumLayers } from '../layers/selectors'
 import { roundP } from '../../common/util'
 
-const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const hasImported = (state.app.input === 'code' || state.importer.fileName)
-
-  return {
-    use_rect: state.machine.rectangular,
-    minX: state.machine.minX,
-    maxX: state.machine.maxX,
-    minY: state.machine.minY,
-    maxY: state.machine.maxY,
-    maxRadius: state.machine.maxRadius,
-    canvasWidth: state.preview.canvasWidth,
-    canvasHeight: state.preview.canvasHeight,
-    layer: layer,
-    trackVertices: getPreviewTrackVertices(state),
-    vertices: getPreviewVertices(state),
-    selectedId: state.layers.selected,
-    sliderValue: state.preview.sliderValue,
-    showTrack: state.app.input === 'shape' || !hasImported,
-  }
-}
-
 // Renders the shapes in the preview window and allows the user to interact with the shape.
-const PreviewShape = () => {
-  const props = useSelector(mapStateToProps)
+const PreviewShape = (ownProps) => {
+  const mapStateToProps = (state) => {
+    // if a layer matching this shape's id does not exist, we have a zombie
+    // child. It has to do with a child (preview shape) subscribing to the store
+    // before its parent (preview window), and trying to render first after a
+    // layer is removed. This is a tangled, but well-known problem with React-Redux
+    // hooks, and the solution for now is to render the current layer instead.
+    // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
+    // It's quite likely there is a more elegant/proper way around this.
+    const layer = state.layers.byId[ownProps.id] || getCurrentLayer(state)
+
+    return {
+      layer: layer,
+      layerIndex: getCachedSelector(makeGetLayerIndex, layer.id)(state),
+      currentLayer: getCurrentLayer(state),
+      numLayers: getNumLayers(state),
+      trackVertices: getPreviewTrackVertices(state),
+      vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
+      selected: state.layers.selected,
+      sliderValue: state.preview.sliderValue,
+      showTrack: true,
+    }
+  }
+
+  const props = useSelector(mapStateToProps, shallowEqual)
   const dispatch = useDispatch()
   const startingSize = props.layer.startingSize
 
@@ -42,7 +43,7 @@ const PreviewShape = () => {
   // to change it in machine/selectors#getPreviewVertices,getPreviewTrackVertices
   const konvaScale = 5
   const konvaSize = startingSize * konvaScale
-  const isSelected = props.selectedId !== null
+  const isSelected = props.selected === ownProps.id
 
   function mmToPixels(vertex) {
     // y for pixels starts at the top, and goes down.
@@ -148,16 +149,21 @@ const PreviewShape = () => {
       }
 
       // Draw the start and end points
-      context.beginPath()
-      context.lineWidth = 2.0
-      context.strokeStyle = "green"
-      dot_mm(context, props.vertices[0])
-      context.stroke()
-      context.beginPath()
-      context.lineWidth = 2.0
-      context.strokeStyle = "red"
-      dot_mm(context, props.vertices[props.vertices.length-1])
-      context.stroke()
+      if (props.layerIndex === 0) {
+        context.beginPath()
+        context.lineWidth = 2.0
+        context.strokeStyle = "green"
+        dot_mm(context, props.vertices[0])
+        context.stroke()
+      }
+
+      if (props.layerIndex === props.numLayers - 1) {
+        context.beginPath()
+        context.lineWidth = 2.0
+        context.strokeStyle = "red"
+        dot_mm(context, props.vertices[props.vertices.length-1])
+        context.stroke()
+      }
 
       // Draw a slider path end point if sliding
       if (drawing_vertices.length > 0 && props.sliderValue !== 0) {
@@ -203,7 +209,7 @@ const PreviewShape = () => {
   }
 
   function onSelect() {
-    dispatch(updatePreview({selectedId: props.selectedId == null ? props.layer.id : null }))
+    dispatch(setSelectedLayer(props.selected == null ? props.currentLayer.id : null))
   }
 
   const shapeRef = React.createRef()
@@ -220,7 +226,7 @@ const PreviewShape = () => {
   return (
     <React.Fragment>
       <Shape
-        draggable={props.showTrack}
+        draggable={props.showTrack && props.layer.id === props.currentLayer.id}
         width={konvaSize}
         height={konvaSize}
         offsetY={konvaSize/2}

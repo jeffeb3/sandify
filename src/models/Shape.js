@@ -1,4 +1,8 @@
 export const shapeOptions = {
+  name: {
+    title: 'Name',
+    type: 'text'
+  }
 }
 
 export default class Shape {

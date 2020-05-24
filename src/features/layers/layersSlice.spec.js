@@ -2,6 +2,7 @@ import layers, {
   addLayer,
   restoreDefaults,
   setCurrentLayer,
+  setSelectedLayer,
   setShapeType,
   updateLayer,
   toggleSpin,
@@ -47,6 +48,7 @@ describe('layers reducer', () => {
     expect(layers(undefined, {})).toEqual({
       current: null,
       selected: null,
+      newLayerType: null,
       byId: {},
       allIds: []
     })
@@ -65,12 +67,14 @@ describe('layers reducer', () => {
       )
     ).toEqual({
       byId: {
-        'layer1': {
-          id: 'layer1',
+        'layer-1': {
+          id: 'layer-1',
           name: 'foo'
         }
       },
-      allIds: ['layer1'],
+      allIds: ['layer-1'],
+      current: 'layer-1',
+      selected: 'layer-1'
     })
   })
 
@@ -79,20 +83,20 @@ describe('layers reducer', () => {
       layers(
         {
           byId: {
-            'layer1': {
-              id: 'layer1',
+            'layer-1': {
+              id: 'layer-1',
               type: 'circle',
               circleLobes: '2',
               polygonSides: '5'
             }
           }
         },
-        restoreDefaults('layer1')
+        restoreDefaults('layer-1')
       )
     ).toEqual({
       byId: {
-        'layer1': {
-          id: 'layer1',
+        'layer-1': {
+          id: 'layer-1',
           ...initialState
         }
       }
@@ -104,23 +108,47 @@ describe('layers reducer', () => {
       layers(
         {
           byId: {
-            'layer2': {
-              id: 'layer2'
+            'layer-2': {
+              id: 'layer-2'
             }
           },
-          allIds: ['layer1', 'layer2']
+          allIds: ['layer-1', 'layer-2']
         },
-        setCurrentLayer(1)
+        setCurrentLayer('layer-2')
       )
     ).toEqual({
       byId: {
-        'layer2': {
-          id: 'layer2'
+        'layer-2': {
+          id: 'layer-2'
         }
       },
-      allIds: ['layer1', 'layer2'],
-      current: 'layer2',
-      selected: 'layer2'
+      allIds: ['layer-1', 'layer-2'],
+      current: 'layer-2',
+      selected: 'layer-2'
+    })
+  })
+
+  it('should handle setSelectedLayer', () => {
+    expect(
+      layers(
+        {
+          byId: {
+            'layer-2': {
+              id: 'layer-2'
+            }
+          },
+          allIds: ['layer-1', 'layer-2']
+        },
+        setSelectedLayer('layer-2')
+      )
+    ).toEqual({
+      byId: {
+        'layer-2': {
+          id: 'layer-2'
+        }
+      },
+      allIds: ['layer-1', 'layer-2'],
+      selected: 'layer-2'
     })
   })
 
@@ -130,17 +158,17 @@ describe('layers reducer', () => {
         layers(
           {
             byId: {
-              'layer1': {
-                id: 'layer1'
+              'layer-1': {
+                id: 'layer-1'
               }
             }
           },
-          setShapeType({id: 'layer1', type: 'circle'})
+          setShapeType({id: 'layer-1', type: 'circle'})
         )
       ).toEqual({
         byId: {
-          'layer1': {
-            id: 'layer1',
+          'layer-1': {
+            id: 'layer-1',
             ...initialState
           }
         }
@@ -152,18 +180,18 @@ describe('layers reducer', () => {
         layers(
           {
             byId: {
-              'layer1': {
-                id: 'layer1',
+              'layer-1': {
+                id: 'layer-1',
                 circleLobes: 2
               }
             }
           },
-          setShapeType({id: 'layer1', type: 'circle'})
+          setShapeType({id: 'layer-1', type: 'circle'})
         )
       ).toEqual({
         byId: {
-          'layer1': {
-            id: 'layer1',
+          'layer-1': {
+            id: 'layer-1',
             ...initialState,
             circleLobes: 2
           }
@@ -176,19 +204,19 @@ describe('layers reducer', () => {
         layers(
           {
             byId: {
-              'layer1': {
-                id: 'layer1',
+              'layer-1': {
+                id: 'layer-1',
                 repeatEnabled: false,
                 canChangeSize: false
               }
             }
           },
-          setShapeType({id: 'layer1', type: 'circle'})
+          setShapeType({id: 'layer-1', type: 'circle'})
         )
       ).toEqual({
         byId: {
-          'layer1': {
-            id: 'layer1',
+          'layer-1': {
+            id: 'layer-1',
             ...initialState,
           }
         }

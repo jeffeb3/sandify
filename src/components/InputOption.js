@@ -24,7 +24,6 @@ class InputOption extends Component {
 
         <Col sm={7}>
           <Form.Control
-            id="options-step"
             as={optionType==="textarea" ? "textarea" : "input"}
             type={optionType}
             step={option.step ? option.step : 1}

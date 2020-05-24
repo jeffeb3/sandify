@@ -6,6 +6,7 @@ import Uploader from '../importer/Uploader'
 import MachineSettings from '../machine/MachineSettings'
 import Footer from './Footer'
 import Layer from '../layers/Layer'
+import Playlist from '../layers/Playlist'
 import { chooseInput } from '../app/appSlice'
 import { getCurrentLayer } from '../layers/selectors'
 
@@ -29,8 +30,11 @@ class InputTabs extends Component {
   render() {
     return (
        <Tabs defaultActiveKey="shape" onSelect={this.handleSelect.bind(this)} id="input-tabs">
-         <Tab eventKey="shape" title="Shapes" className="full-page-tab">
-           <Layer key={this.props.layer.id} id={this.props.layer.id} />
+         <Tab eventKey="shape" title="Draw" className="full-page-tab">
+           <div className="d-flex flex-column">
+             <Playlist />
+             <Layer key={this.props.layer.id} id={this.props.layer.id} />
+            </div>
          </Tab>
 
          <Tab eventKey="machine" title="Machine" className="full-page-tab">

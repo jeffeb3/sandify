@@ -50,7 +50,8 @@ if (persistState) {
   store.dispatch(addLayer(layer))
 }
 
-store.dispatch(setCurrentLayer(0))
+const state = store.getState()
+store.dispatch(setCurrentLayer(state.layers.byId[state.layers.allIds[0]].id))
 
 if (persistState) {
   store.subscribe(() => {

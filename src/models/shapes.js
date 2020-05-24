@@ -47,3 +47,25 @@ export const getShapeDefaults = () => {
     return state
   })
 }
+
+export const getShapeSelectOptions = () => {
+  const groupOptions = []
+  const shapes = getShapeDefaults()
+
+  for (const shape of shapes) {
+    const optionLabel = { value: shape.id, label: shape.name }
+    var found = false
+    for (const group of groupOptions) {
+      if (group.label === shape.selectGroup) {
+        found = true
+        group.options.push(optionLabel)
+      }
+    }
+    if (!found) {
+      const newOptions = [ optionLabel ]
+      groupOptions.push( { label: shape.selectGroup, options: newOptions } )
+    }
+  }
+
+  return groupOptions
+}
