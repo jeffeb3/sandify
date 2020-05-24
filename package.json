@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.2.5",
+    "array-move": "^2.2.1",
     "color": "^3.1.2",
     "core-js": "^3.6.5",
     "d3": "^5.16.0",
@@ -26,6 +27,7 @@
     "react-redux": "^7.2.0",
     "react-scripts": "3.4.1",
     "react-select": "^3.0.8",
+    "react-sortable-hoc": "^1.11.0",
     "react-switch": "^5.0.1",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.0.5",

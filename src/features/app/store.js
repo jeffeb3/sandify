@@ -38,8 +38,8 @@ if (persistState) {
   const persistedState = loadState()
 
   if (persistedState) {
-    Object.keys(persistedState.layers.byId).forEach((key) => {
-      let layer = persistedState.layers.byId[key]
+    persistedState.layers.allIds.forEach((id) => {
+      let layer = persistedState.layers.byId[id]
       store.dispatch(addLayer(layer))
     })
   }
