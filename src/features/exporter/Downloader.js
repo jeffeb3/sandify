@@ -1,15 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import {
-  Button,
-  Modal
-} from 'react-bootstrap'
+import { Button, Modal } from 'react-bootstrap'
 import DropdownOption from '../../components/DropdownOption'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import { updateExporter } from './exporterSlice'
 import { getComments } from './selectors'
-import { getVertices } from '../machine/selectors'
+import { getAllComputedVertices } from '../machine/selectors'
 import ReactGA from 'react-ga'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
@@ -25,7 +22,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     reverse: state.exporter.reverse,
     show: state.exporter.show,
-    vertices: getVertices(state),
+    vertices: getAllComputedVertices(state),
     comments: getComments(state),
     input: state.app.input,
     layer: state.layers.current,

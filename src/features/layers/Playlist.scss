@@ -1,0 +1,7 @@
+.layer-button {
+  color: #aaa;
+
+  .active.list-group-item & {
+    color: white;
+  }
+}

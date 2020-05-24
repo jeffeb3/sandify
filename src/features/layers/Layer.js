@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
-import { Button, Card } from 'react-bootstrap'
+import { Button, Card, Row, Col } from 'react-bootstrap'
 import Select from 'react-select'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
@@ -8,18 +8,17 @@ import CheckboxOption from '../../components/CheckboxOption'
 import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
-import { getShape, getShapeDefaults } from '../../models/shapes'
+import { getShape, getShapeSelectOptions } from '../../models/shapes'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
   const shape = getShape(layer)
-  const shapes = getShapeDefaults()
 
   return {
     layer: layer,
     shape: shape,
-    shapes: shapes,
     options: shape.getOptions(),
+    selectOptions: getShapeSelectOptions(),
     link: shape.link,
     linkText: shape.linkText
   }
@@ -42,32 +41,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-const customStyles = {
-  control: base => ({
-    ...base,
-    height: 55,
-    minHeight: 55
-  })
-}
-
 class Layer extends Component {
   render() {
-    const groupOptions = []
-    for (const shape of this.props.shapes) {
-      const optionLabel = { value: shape.id, label: shape.name }
-      var found = false
-      for (const group of groupOptions) {
-        if (group.label === shape.selectGroup) {
-          found = true
-          group.options.push(optionLabel)
-        }
-      }
-      if (!found) {
-        const newOptions = [ optionLabel ]
-        groupOptions.push( { label: shape.selectGroup, options: newOptions } )
-      }
-    }
-
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
       const option = this.props.options[key]
@@ -99,31 +74,45 @@ class Layer extends Component {
       }
     })
 
-    let optionsListRender = undefined
-    if (Object.entries(this.props.options).length > 0) {
-      const linkText = this.props.linkText || this.props.link
-      const linkRender = this.props.link ? <p className="mb-3">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p> : undefined
 
+    const linkText = this.props.linkText || this.props.link
+    const linkRender = this.props.link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p></Col></Row> : undefined
+    let optionsListRender = undefined
+
+    if (Object.entries(this.props.options).length > 0) {
       optionsListRender =
         <div className="m-0">
-          {linkRender}
           {optionsRender}
         </div>
     }
 
     return (
-      <Card className="p-3 border-0">
-        <Select
-          value={selectedOption}
-          onChange={this.props.onChangeType}
-          styles={customStyles}
-          maxMenuHeight={305}
-          options={groupOptions} />
+      <Card className="p-3 overflow-auto" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
+        <Row className="align-items-center mb-2">
+          <Col sm={5}>
+            <h2 className="panel m-0">Properties</h2>
+          </Col>
+          <Col sm={7}>
+            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
+          </Col>
+        </Row>
+        <Row className="align-items-center">
+          <Col sm={5}>
+            Shape
+          </Col>
+
+          <Col sm={7}>
+            <Select
+              value={selectedOption}
+              onChange={this.props.onChangeType}
+              maxMenuHeight={305}
+              options={this.props.selectOptions} />
+          </Col>
+        </Row>
+
+        { linkRender }
 
         <div className="pt-1">
-          <div className="d-flex align-items-center pt-1 pb-3">
-            <Button variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
-          </div>
           { optionsListRender }
           { this.props.layer.canTransform && <Transforms id={this.props.layer.id} />}
         </div>

@@ -8,6 +8,7 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
+import { makeGetLayer } from '../layers/selectors'
 import { rotate, offset } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -20,21 +21,150 @@ const getCacheKey = (state) => {
 }
 
 const getApp = state => state.app
-const getLayers = state => state.layers
 const getCurrentLayer = state => state.layers.byId[state.layers.current]
+const getLayers = state => state.layers
 const getImporter = state => state.importer
 const getMachine = state => state.machine
 const getDragging = state => state.preview.dragging
+const cachedSelectors = {}
+
+// the make selector functions below are patterned after the comment here:
+// https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
 
 // by returning null for shapes which can change size, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
-const getShapeMachine = state => getCurrentLayer(state).canChangeSize ? null : state.machine
+const makeGetLayerMachine = layerId => {
+  return createSelector(
+    [ getLayers, getMachine ],
+    (layers, machine) => {
+      const layer = layers.byId[layerId]
+      return layer.canChangeSize ? null : machine
+    }
+  )
+}
+
+// creates a selector that returns shape vertices for a given layer
+const makeGetLayerVertices = layerId => {
+  return createSelector(
+    [ getCachedSelector(makeGetLayer, layerId), getCachedSelector(makeGetLayerMachine, layerId) ],
+    (layer, machine) => {
+      const state = {
+        shape: layer,
+        machine: machine
+      }
+      const metashape = getShape(layer)
+      if (layer.shouldCache) {
+        const key = getCacheKey(state)
+        let vertices = cache.get(key)
+
+        if (!vertices) {
+          vertices = metashape.getVertices(state)
+          cache.set(key, vertices)
+          // for debugging purposes
+          // console.log('caching shape...' + cache.length + ' ' + cache.itemCount)
+        }
+
+        return vertices
+      } else {
+        return metashape.getVertices(state)
+      }
+    }
+  )
+}
+
+// creates a selector that returns transformed vertices for a given layer
+const makeGetTransformedVertices = layerId => {
+  return createSelector(
+    [
+      getCachedSelector(makeGetLayerVertices, layerId),
+      getCachedSelector(makeGetLayer, layerId)
+    ],
+    (vertices, layer) => {
+      return transformShapes(vertices, layer)
+    }
+  )
+}
+
+// creates a selector that returns computed (machine-bound) vertices for a given layer
+const makeGetComputedVertices = layerId => {
+  return createSelector(
+    [
+      getCachedSelector(makeGetTransformedVertices, layerId),
+      getMachine
+    ],
+    (vertices, machine) => {
+      return polishVertices(vertices, machine)
+    }
+  )
+}
+
+// creates a selector that returns previewable vertices for a given layer
+export const makeGetPreviewVertices = layerId => {
+  return createSelector(
+    [
+        getLayers,
+        getMachine,
+        getDragging
+    ],
+    (layers, machine, dragging) => {
+      const state = {
+        layers: layers,
+        machine: machine,
+        dragging: dragging
+      }
+
+      let vertices
+      if (dragging) {
+        vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
+      } else {
+        vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
+      }
+
+      const layer = layers.byId[layerId]
+      const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
+
+      return vertices.map(vertex => {
+        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
+      })
+    }
+  )
+}
+
+// ensures we only create a single selector for a given layer
+export const getCachedSelector = (fn, layerId) => {
+  if (!cachedSelectors[fn.name]) {
+    cachedSelectors[fn.name] = {}
+  }
+
+  if (!cachedSelectors[fn.name][layerId]) {
+    cachedSelectors[fn.name][layerId] = fn(layerId)
+  }
+
+  return cachedSelectors[fn.name][layerId]
+}
+
+
+// returns a flattened list of all vertices (across layers)
+const getState = state => state
+export const getAllComputedVertices = createSelector(
+  getState,
+  (state) => {
+    return state.layers.allIds.map(id => getCachedSelector(makeGetComputedVertices, id)(state)).flat()
+  }
+)
+
+// OLD: DELETE ONCE IMPORT IS A LAYER
+
+// by returning null for shapes which can change size, this selector will ensure
+// transformed vertices are not redrawn when machine settings change
+const getLayerMachine = state => getCurrentLayer(state).canChangeSize ? null : state.machine
 
 // requires only shape, and in the case of erasers, machine state
 export const getShapedVertices = createSelector(
   [
       getCurrentLayer,
-      getShapeMachine
+      getLayerMachine
   ],
   (layer, machine) => {
     const state = {
@@ -145,49 +275,6 @@ export const getVerticesStats = createSelector(
     return {
       numPoints: vertices.length,
       distance: Math.floor(distance)
-    }
-  }
-)
-
-// used by the preview window; reverses rotation and offsets because they are
-// re-added by Konva transformer.
-export const getPreviewVertices = createSelector(
-  [
-      getApp,
-      getLayers,
-      getCurrentLayer,
-      getImporter,
-      getMachine,
-      getDragging
-   ],
-  (app, layers, layer, importer, machine, dragging) => {
-    const state = {
-      app: app,
-      layers: layers,
-      layer: layer,
-      importer: importer,
-      machine: machine,
-    }
-    const hasImported = (state.app.input === 'code' || state.importer.fileName)
-    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
-    let vertices
-
-    if (state.app.input === 'shape' || !hasImported) {
-      if (dragging) {
-        vertices = getTransformedVertices(state)
-      } else {
-        vertices = getComputedVertices(state)
-      }
-
-      return vertices.map(vertex => {
-        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
-      })
-    } else {
-      vertices = getImportedVertices(state)
-      return vertices.map(vertex => {
-        return offset(vertex, konvaDelta, -konvaDelta)
-      })
     }
   }
 )

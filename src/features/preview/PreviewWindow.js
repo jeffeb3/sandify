@@ -4,7 +4,7 @@ import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
-import { getCurrentLayer } from '../layers/selectors'
+import { getCurrentLayer, getKonvaLayerIds } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import PreviewShape from './PreviewShape'
 
@@ -23,11 +23,11 @@ export const relativeScale = (props) => {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-
   return {
-    layer: layer,
+    layers: state.layers,
+    currentLayer: getCurrentLayer(state),
     selectedId: state.layers.selected,
+    konvaIds: getKonvaLayerIds(state),
     use_rect: state.machine.rectangular,
     minX: state.machine.minX,
     maxX: state.machine.maxX,
@@ -129,8 +129,8 @@ class PreviewWindow extends Component {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {
                 this.props.onLayerChange({
-                  startingSize: scaleByWheel(this.props.layer.startingSize, e.evt.deltaY),
-                  id: this.props.selectedId
+                  startingSize: scaleByWheel(this.props.currentLayer.startingSize, e.evt.deltaY),
+                  id: this.props.currentLayer.id
                 })
               }
             }}
@@ -147,7 +147,11 @@ class PreviewWindow extends Component {
                   offsetX={width/2}
                   offsetY={height/2}
                 />}
-                <PreviewShape />
+                {this.props.konvaIds.map((id, i) => {
+                  return (
+                    <PreviewShape id={id} key={i} index={i} />
+                  )
+                })}
               </Layer>
             </Provider>
           </Stage>

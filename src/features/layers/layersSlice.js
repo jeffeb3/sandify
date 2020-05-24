@@ -9,16 +9,36 @@ const layersSlice = createSlice({
   initialState: {
     current: null,
     selected: null,
+    newLayerType: null,
     byId: {},
     allIds: []
   },
   reducers: {
     addLayer(state, action) {
       let layer = { ...action.payload }
-      layer.id = uniqueId('layer')
-      layer.name = layer.name || layer.type || layer.id
+      layer.id = uniqueId('layer-')
+      layer.name = layer.name || layer.id.split('-').join(' ')
       state.byId[layer.id] = layer
       state.allIds.push(layer.id)
+      state.current = layer.id
+      state.selected = layer.id
+    },
+    removeLayer(state, action) {
+      const deleteId = action.payload
+      const idx = state.allIds.findIndex(id => id === deleteId)
+      debugger
+      state.allIds.splice(idx, 1)
+      delete state.byId[deleteId]
+
+      if (deleteId === state.current) {
+        if (idx === state.allIds.length) {
+          state.current = state.allIds[idx-1]
+          state.selected = state.allIds[idx-1]
+        } else {
+          state.current = state.allIds[idx]
+          state.selected = state.allIds[idx]
+        }
+      }
     },
     restoreDefaults(state, action) {
       const id = action.payload
@@ -31,10 +51,15 @@ const layersSlice = createSlice({
       }
     },
     setCurrentLayer(state, action) {
-      // expects payload to contain an index, not an id
-      const current = state.byId[state.allIds[action.payload]]
-      state.current = current.id
-      state.selected = current.id
+      const current = state.byId[action.payload]
+
+      if (current) {
+        state.current = current.id
+        state.selected = current.id
+      }
+    },
+    setSelectedLayer(state, action) {
+      state.selected = action.payload
     },
     setShapeType(state, action) {
       const changes = action.payload
@@ -57,6 +82,9 @@ const layersSlice = createSlice({
     updateLayer(state, action) {
       const layer = action.payload
       state.byId[layer.id] = {...state.byId[layer.id], ...layer}
+    },
+    updateLayers(state, action) {
+      Object.assign(state, action.payload)
     },
     toggleRepeat(state, action) {
       const transform = action.payload
@@ -83,10 +111,13 @@ const layersSlice = createSlice({
 
 export const {
   addLayer,
+  removeLayer,
   restoreDefaults,
   setCurrentLayer,
+  setSelectedLayer,
   setShapeType,
   updateLayer,
+  updateLayers,
   toggleRepeat,
   toggleSpin,
   toggleGrow,
