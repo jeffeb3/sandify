@@ -42,7 +42,8 @@ describe('layers reducer', () => {
     trackValue: 10,
     trackLength: 0.2,
     trackNumLoops: 1,
-    trackGrow: 50.0
+    trackGrow: 50.0,
+    dragging: false,    
   }
 
   it('should handle initial state', () => {
@@ -75,7 +76,7 @@ describe('layers reducer', () => {
       },
       allIds: ['layer-1'],
       current: 'layer-1',
-      selected: 'layer-1'
+      selected: 'layer-1',
     })
   })
 

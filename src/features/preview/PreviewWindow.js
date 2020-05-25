@@ -6,7 +6,7 @@ import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
 import { getCurrentLayer, getKonvaLayerIds } from '../layers/selectors'
 import { roundP } from '../../common/util'
-import PreviewShape from './PreviewShape'
+import PreviewLayer from './PreviewLayer'
 
 export const relativeScale = (props) => {
   let width, height
@@ -149,7 +149,7 @@ class PreviewWindow extends Component {
                 />}
                 {this.props.konvaIds.map((id, i) => {
                   return (
-                    <PreviewShape id={id} key={i} index={i} />
+                    <PreviewLayer id={id} key={i} index={i} />
                   )
                 })}
               </Layer>

@@ -3,14 +3,13 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
 import Color from 'color'
 import Victor from 'victor'
-import { updatePreview } from './previewSlice'
 import { getPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices } from '../machine/selectors'
 import { updateLayer, setSelectedLayer } from '../layers/layersSlice'
 import { getCurrentLayer, makeGetLayerIndex, getNumLayers } from '../layers/selectors'
 import { roundP } from '../../common/util'
 
 // Renders the shapes in the preview window and allows the user to interact with the shape.
-const PreviewShape = (ownProps) => {
+const PreviewLayer = (ownProps) => {
   const mapStateToProps = (state) => {
     // if a layer matching this shape's id does not exist, we have a zombie
     // child. It has to do with a child (preview shape) subscribing to the store
@@ -204,10 +203,6 @@ const PreviewShape = (ownProps) => {
     dispatch(updateLayer(attrs))
   }
 
-  function onPreviewChange(attrs) {
-    dispatch(updatePreview(attrs))
-  }
-
   function onSelect() {
     dispatch(setSelectedLayer(props.selected == null ? props.currentLayer.id : null))
   }
@@ -242,17 +237,17 @@ const PreviewShape = (ownProps) => {
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {
-          onPreviewChange({dragging: true})
+          onChange({dragging: true})
         }}
         onDragEnd={e => {
-          onPreviewChange({dragging: false})
           onChange({
+            dragging: false,
             offsetX: roundP(e.target.x(), 0),
             offsetY: roundP(-e.target.y(), 0)
           })
         }}
         onTransformStart={e => {
-          onPreviewChange({dragging: true})
+          onChange({dragging: true})
         }}
         onTransformEnd={e => {
           const node = shapeRef.current
@@ -263,8 +258,8 @@ const PreviewShape = (ownProps) => {
           node.scaleX(1)
           node.scaleY(1)
 
-          onPreviewChange({dragging: false})
           onChange({
+            dragging: false,
             startingSize: roundP(Math.max(5, props.layer.startingSize * scaleX), 0),
             rotation: roundP(node.rotation(), 0)
           })
@@ -283,4 +278,4 @@ const PreviewShape = (ownProps) => {
   )
 }
 
-export default PreviewShape
+export default PreviewLayer

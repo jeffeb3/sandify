@@ -66,7 +66,7 @@ const SortableItem = SortableElement(({id, name, active, canRemove, onLayerRemov
 
 const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLayerSelected, onLayerRemoved}) => {
   return (
-    <ListGroup>
+    <ListGroup variant="flush" style={{maxHeight: "200px"}} className="border overflow-auto" id="playlist-group">
       {layers.map((layer, index) => {
         return (
           <SortableItem
@@ -92,7 +92,10 @@ class Playlist extends Component {
   }
 
   scrollToBottom() {
-    this.layersList.scrollTop = this.layersList.scrollHeight
+    // we're not supposed to directly access DOM with React, with instead use a ref. That said, I can't figure
+    // out how to get the nested ref in an elegant way.
+    const el = document.getElementById('playlist-group')
+    el.scrollTop = el.scrollHeight
   }
 
   toggleNewModal() {
