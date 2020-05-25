@@ -8,7 +8,7 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer } from '../layers/selectors'
+import { makeGetLayer, makeGetLayerIndex, getNumLayers } from '../layers/selectors'
 import { rotate, offset } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -25,7 +25,6 @@ const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getLayers = state => state.layers
 const getImporter = state => state.importer
 const getMachine = state => state.machine
-const getDragging = state => state.preview.dragging
 const cachedSelectors = {}
 
 // the make selector functions below are patterned after the comment here:
@@ -103,24 +102,29 @@ export const makeGetPreviewVertices = layerId => {
   return createSelector(
     [
         getLayers,
-        getMachine,
-        getDragging
+        getMachine
     ],
-    (layers, machine, dragging) => {
+    (layers, machine) => {
       const state = {
         layers: layers,
-        machine: machine,
-        dragging: dragging
+        machine: machine
       }
 
       let vertices
-      if (dragging) {
+      const layer = layers.byId[layerId]
+      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
+      const numLayers = getNumLayers(state)
+
+      if (layer.dragging) {
         vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
       } else {
         vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
+        if (index < numLayers - 1) {
+          const nextVertices = getCachedSelector(makeGetComputedVertices, layers.allIds[index + 1])(state)
+          vertices = vertices.concat(nextVertices[0])
+        }
       }
 
-      const layer = layers.byId[layerId]
       const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
       const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
 
@@ -231,25 +235,19 @@ export const getVertices = createSelector(
       getApp,
       getLayers,
       getImporter,
-      getMachine,
-      getDragging
+      getMachine
   ],
   (app, layers, importer, machine, dragging) => {
     const state = {
       app: app,
       layers: layers,
       importer: importer,
-      machine: machine,
-      dragging: dragging
+      machine: machine
     }
 
     const hasImported = (state.app.input === 'code' || state.importer.fileName)
-    if (state.app.input === 'shape' || !hasImported) {
-      if (dragging) {
-        return getTransformedVertices(state)
-      } else {
-        return getComputedVertices(state)
-      }
+    if (state.app.input === 'shapes' || !hasImported) {
+      return getComputedVertices(state)
     } else {
       return getImportedVertices(state)
     }
