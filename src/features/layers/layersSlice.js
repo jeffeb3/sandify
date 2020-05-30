@@ -51,6 +51,7 @@ const layersSlice = createSlice({
 
       state.byId[layer.id] = {
         id: layer.id,
+        name: layer.name,
         ...defaults
       }
     },
@@ -110,6 +111,10 @@ const layersSlice = createSlice({
       const transform = action.payload
       state.byId[transform.id].trackGrowEnabled = !state.byId[transform.id].trackGrowEnabled
     },
+    toggleVisible(state, action) {
+      const transform = action.payload
+      state.byId[transform.id].visible = !state.byId[transform.id].visible
+    },
   }
 })
 
@@ -128,6 +133,7 @@ export const {
   toggleGrow,
   toggleTrack,
   toggleTrackGrow,
+  toggleVisible
 } = layersSlice.actions
 
 export default layersSlice.reducer

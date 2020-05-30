@@ -3,9 +3,9 @@ import { connect } from 'react-redux'
 import { Button, ListGroup, Modal, Row, Col } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
-import { setCurrentLayer, addLayer, updateLayers, removeLayer, moveLayer } from '../layers/layersSlice'
+import { setCurrentLayer, addLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
 import './Playlist.scss'
 
@@ -26,7 +26,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onLayerSelected: (event) => {
-      dispatch(setCurrentLayer(event.target.closest('.list-group-item').id))
+      const id = event.target.closest('.list-group-item').id
+      dispatch(setCurrentLayer(id))
     },
     onLayerAdded: (type) => {
       const attrs = registeredShapes[type].getInitialState()
@@ -41,6 +42,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onLayerMoved: ({oldIndex, newIndex}) => {
       dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
+    },
+    onToggleLayerVisible: (event) => {
+      const id = event.target.closest('.list-group-item').id
+      dispatch(toggleVisible({id: id}))
     }
   }
 }
@@ -53,10 +58,14 @@ const customStyles = {
   })
 }
 
-const SortableItem = SortableElement(({id, name, active, canRemove, onLayerRemoved, onLayerSelected}) => {
+const SortableItem = SortableElement(({id, name, active, canRemove, visible, onLayerRemoved, onLayerSelected, onToggleLayerVisible}) => {
   const activeClass = active ? 'active' : ''
   const dragClass = canRemove ? 'cursor-move' : ''
   return <ListGroup.Item className={[activeClass, dragClass, 'd-flex align-items-center'].join(' ')} key={id} id={id} onClick={onLayerSelected}>
+    <Button className="layer-button" variant="link" data-id={id} onClick={onToggleLayerVisible}>
+      {visible && <FaEye />}
+      {!visible && <FaEyeSlash />}
+    </Button>
     <div className="no-select">{name}</div>
     {canRemove && <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onLayerRemoved}>
       <FaTrash />
@@ -64,7 +73,7 @@ const SortableItem = SortableElement(({id, name, active, canRemove, onLayerRemov
   </ListGroup.Item>
 })
 
-const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLayerSelected, onLayerRemoved}) => {
+const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLayerSelected, onLayerRemoved, onToggleLayerVisible}) => {
   return (
     <ListGroup variant="flush" style={{maxHeight: "200px"}} className="border overflow-auto" id="playlist-group">
       {layers.map((layer, index) => {
@@ -75,9 +84,11 @@ const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLaye
             name={layer.name}
             index={index}
             active={currentLayer.id === layer.id}
+            visible={layer.visible}
             canRemove={numLayers > 1}
             onLayerSelected={onLayerSelected}
             onLayerRemoved={onLayerRemoved}
+            onToggleLayerVisible={onToggleLayerVisible}
             />
         )
       })}
@@ -152,6 +163,7 @@ class Playlist extends Component {
             onLayerSelected={this.props.onLayerSelected}
             onLayerRemoved={this.props.onLayerRemoved.bind(this)}
             onSortEnd={this.props.onLayerMoved}
+            onToggleLayerVisible={this.props.onToggleLayerVisible}
           />
           <Button className="mt-2" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
         </div>
