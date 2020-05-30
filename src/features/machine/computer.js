@@ -192,7 +192,12 @@ export const transformShapes = (vertices, transform) => {
     }
   }
 
+  if (transform.reverse) {
+    outputVertices = outputVertices.reverse()
+  }
+
   const endTime = performance.now()
   throttledReportTiming(endTime - startTime)
+  
   return outputVertices
 }

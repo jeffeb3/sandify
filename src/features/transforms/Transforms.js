@@ -10,6 +10,7 @@ import {
   ToggleButtonGroup
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
+import CheckboxOption from '../../components/CheckboxOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
@@ -80,6 +81,14 @@ class Transforms extends Component {
           options={this.props.options}
           key="rotation"
           optionKey="rotation"
+          index={0}
+          model={this.props.layer} />
+
+        <CheckboxOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          key="reverse"
+          optionKey="reverse"
           index={0}
           model={this.props.layer} />
 
