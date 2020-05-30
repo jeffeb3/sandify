@@ -20,11 +20,12 @@ const getCacheKey = (state) => {
   return JSON.stringify(state)
 }
 
-const getApp = state => state.app
+const getState = state => state
 const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getLayers = state => state.layers
 const getImporter = state => state.importer
 const getMachine = state => state.machine
+const getPreview = state => state.preview
 const cachedSelectors = {}
 
 // the make selector functions below are patterned after the comment here:
@@ -119,9 +120,15 @@ export const makeGetPreviewVertices = layerId => {
         vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
       } else {
         vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
+        const nextLayerId = layers.allIds[index + 1]
+        const nextLayer = layers.byId[nextLayerId]
+
         if (index < numLayers - 1) {
-          const nextVertices = getCachedSelector(makeGetComputedVertices, layers.allIds[index + 1])(state)
-          vertices = vertices.concat(nextVertices[0])
+          if (!nextLayer.dragging && nextLayer.visible) {
+            // draw the stitch between the two layers
+            const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
+            vertices = vertices.concat(nextVertices[0])
+          }
         }
       }
 
@@ -148,9 +155,7 @@ export const getCachedSelector = (fn, layerId) => {
   return cachedSelectors[fn.name][layerId]
 }
 
-
 // returns a flattened list of all vertices (across layers)
-const getState = state => state
 export const getAllComputedVertices = createSelector(
   getState,
   (state) => {
@@ -158,106 +163,9 @@ export const getAllComputedVertices = createSelector(
   }
 )
 
-// OLD: DELETE ONCE IMPORT IS A LAYER
-
-// by returning null for shapes which can change size, this selector will ensure
-// transformed vertices are not redrawn when machine settings change
-const getLayerMachine = state => getCurrentLayer(state).canChangeSize ? null : state.machine
-
-// requires only shape, and in the case of erasers, machine state
-export const getShapedVertices = createSelector(
-  [
-      getCurrentLayer,
-      getLayerMachine
-  ],
-  (layer, machine) => {
-    const state = {
-      shape: layer,
-      machine: machine
-    }
-    const metashape = getShape(layer)
-    if (layer.shouldCache) {
-      const key = getCacheKey(state)
-      let vertices = cache.get(key)
-
-      if (!vertices) {
-        vertices = metashape.getVertices(state)
-        cache.set(key, vertices)
-        // for debugging purposes
-        // console.log('caching shape...' + cache.length + ' ' + cache.itemCount)
-      }
-
-      return vertices
-    } else {
-      return metashape.getVertices(state)
-    }
-  }
-)
-
-// requires shape and transform state
-export const getTransformedVertices = createSelector(
-  [
-      getShapedVertices,
-      getCurrentLayer
-  ],
-  (vertices, layer) => {
-    return transformShapes(vertices, layer)
-  }
-)
-
-// requires shape, transform, and machine state
-export const getComputedVertices = createSelector(
-  [
-      getTransformedVertices,
-      getMachine
-  ],
-  (vertices, machine) => {
-    return polishVertices(vertices, machine)
-  }
-)
-
-// requires importer and machine state
-export const getImportedVertices = createSelector(
-  [
-    getImporter,
-    getMachine
-  ],
-  (importer, machine) => {
-    let vertices = scaleImportedVertices(importer, machine)
-    return polishVertices(vertices, machine)
-  }
-)
-
-// top-level vertex selector; makes use of Russian-doll cached selectors that are
-// only recalculated when their required states change.
-export const getVertices = createSelector(
-  [
-      getApp,
-      getLayers,
-      getImporter,
-      getMachine
-  ],
-  (app, layers, importer, machine, dragging) => {
-    const state = {
-      app: app,
-      layers: layers,
-      importer: importer,
-      machine: machine
-    }
-
-    const hasImported = (state.app.input === 'code' || state.importer.fileName)
-    if (state.app.input === 'shapes' || !hasImported) {
-      return getComputedVertices(state)
-    } else {
-      return getImportedVertices(state)
-    }
-  }
-)
-
+// statistics across all layers
 export const getVerticesStats = createSelector(
-  [
-      getVertices
-  ],
+  getAllComputedVertices,
   (vertices) => {
     let distance = 0.0
     let previous = null
@@ -274,6 +182,28 @@ export const getVerticesStats = createSelector(
       numPoints: vertices.length,
       distance: Math.floor(distance)
     }
+  }
+)
+
+export const getVertexColors = createSelector(
+  [getAllComputedVertices, getPreview],
+  (vertices, preview) => {
+    const slide_size = 10.0
+    const sliderValue = preview.sliderValue
+    const colors = {}
+
+    if (sliderValue === 0) {
+      colors[vertices[0]] = 'yellow'
+    } else {
+      // Let's start by just assuming we want a slide_size sized window, as a percentage
+      // of the whole thing.
+      const beginFraction = sliderValue / 100.0
+      const endFraction = (slide_size + sliderValue) / 100.0
+      let beginVertex = Math.round(vertices.length * beginFraction)
+      let endVertex = Math.round(vertices.length * endFraction)
+    }
+
+    return colors
   }
 )
 
@@ -298,5 +228,19 @@ export const getPreviewTrackVertices = createSelector(
     return trackVertices.map(vertex => {
       return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
     })
+  }
+)
+
+// OLD: DELETE ONCE IMPORT IS A LAYER
+
+// requires importer and machine state
+export const getImportedVertices = createSelector(
+  [
+    getImporter,
+    getMachine
+  ],
+  (importer, machine) => {
+    let vertices = scaleImportedVertices(importer, machine)
+    return polishVertices(vertices, machine)
   }
 )

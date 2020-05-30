@@ -11,6 +11,7 @@ import layers, {
   toggleRepeat,
   toggleTrack,
   toggleTrackGrow,
+  toggleVisible
 } from './layersSlice'
 
 describe('layers reducer', () => {
@@ -43,7 +44,8 @@ describe('layers reducer', () => {
     trackLength: 0.2,
     trackNumLoops: 1,
     trackGrow: 50.0,
-    dragging: false,    
+    dragging: false,
+    visible: true
   }
 
   it('should handle initial state', () => {
@@ -362,6 +364,27 @@ describe('layers reducer', () => {
       byId: {
         '1': {
           trackGrowEnabled: true
+        }
+      }
+    })
+  })
+
+  it('should handle toggleToggleVisible', () => {
+    expect(
+      layers(
+        {
+          byId: {
+            '1': {
+              visible: true
+            }
+          }
+        },
+        toggleVisible({id: '1'})
+      )
+    ).toEqual({
+      byId: {
+        '1': {
+          visible: false
         }
       }
     })

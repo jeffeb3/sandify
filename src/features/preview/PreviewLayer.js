@@ -59,9 +59,9 @@ const PreviewLayer = (ownProps) => {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
-  function dot_mm(context, vertex) {
+  function dot_mm(context, vertex, radius=4) {
     var in_mm = mmToPixels(vertex)
-    context.arc(in_mm.x, in_mm.y, Math.max(4.0, 1.5), 0, 2 * Math.PI, true)
+    context.arc(in_mm.x, in_mm.y, radius, 0, 2 * Math.PI, true)
     context.fillStyle = context.strokeStyle
     context.fill()
   }
@@ -127,7 +127,8 @@ const PreviewLayer = (ownProps) => {
 
       if (drawing_vertices.length > 0) {
         // Draw the slider path vertices
-        var startColor = Color('#6E6E00')
+        let startColor = Color('#6E6E00')
+        const layerColor = (props.selected === props.layer.id) ? 'yellow' : '#6DC9E2'
         const colorStep = 200.0 / drawing_vertices.length / 100
 
         context.beginPath()
@@ -148,21 +149,15 @@ const PreviewLayer = (ownProps) => {
       }
 
       // Draw the start and end points
-      if (props.layerIndex === 0) {
-        context.beginPath()
-        context.lineWidth = 2.0
-        context.strokeStyle = "green"
-        dot_mm(context, props.vertices[0])
-        context.stroke()
-      }
+      context.beginPath()
+      context.strokeStyle = "green"
+      dot_mm(context, props.vertices[0])
+      context.stroke()
 
-      if (props.layerIndex === props.numLayers - 1) {
-        context.beginPath()
-        context.lineWidth = 2.0
-        context.strokeStyle = "red"
-        dot_mm(context, props.vertices[props.vertices.length-1])
-        context.stroke()
-      }
+      context.beginPath()
+      context.strokeStyle = "red"
+      dot_mm(context, props.vertices[props.vertices.length - (props.layer.dragging ? 1 : 2)])
+      context.stroke()
 
       // Draw a slider path end point if sliding
       if (drawing_vertices.length > 0 && props.sliderValue !== 0) {
@@ -170,7 +165,7 @@ const PreviewLayer = (ownProps) => {
 
         context.beginPath()
         context.strokeStyle = "yellow"
-        context.lineWidth = 6.0
+        context.lineWidth = 1.0
         dot_mm(context, sliderEndPoint)
 
         // START: uncomment these lines to show slider end point coordinates
@@ -211,7 +206,7 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (isSelected && props.layer.canChangeSize && props.showTrack) {
+    if (props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
@@ -220,7 +215,7 @@ const PreviewLayer = (ownProps) => {
 
   return (
     <React.Fragment>
-      <Shape
+      {props.layer.visible && <Shape
         draggable={props.showTrack && props.layer.id === props.currentLayer.id}
         width={konvaSize}
         height={konvaSize}
@@ -264,8 +259,8 @@ const PreviewLayer = (ownProps) => {
             rotation: roundP(node.rotation(), 0)
           })
         }}
-      />
-      {isSelected && props.layer.canChangeSize && props.showTrack && (
+      />}
+      {props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack && (
         <Transformer
           ref={trRef}
           centeredScaling={true}

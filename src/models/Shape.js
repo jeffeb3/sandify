@@ -39,7 +39,8 @@ export default class Shape {
       trackLength: 0.2,
       trackNumLoops: 1,
       trackGrow: 50.0,
-      dragging: false
+      dragging: false,
+      visible: true
     }
   }
 
