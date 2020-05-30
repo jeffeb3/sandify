@@ -13,6 +13,10 @@ const transformOptions = {
   rotation: {
     title: 'Rotate (degrees)'
   },
+  reverse: {
+    title: 'Reverse path',
+    type: 'checkbox'
+  },
   numLoops: {
     title: 'Number of loops',
     min: 1
