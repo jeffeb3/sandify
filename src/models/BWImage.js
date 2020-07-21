@@ -27,11 +27,43 @@ export default class BWImage extends Shape {
   }
 
   getVertices(state) {
+    let value = state.shape.image_file
     let points = []
-    for (let i=0; i<=128; i++) {
-      let angle = Math.PI * 2.0 / 128.0 * i
-      points.push(new Victor(Math.cos(angle), Math.sin(state.shape.image_name * angle)/state.shape.image_name))
+
+    if (value !== ""){
+      try{
+        let im = new Image()
+        let canvas = document.createElement("canvas")
+        im.onload = function(){
+            let ctx = canvas.getContext('2d')
+            ctx.drawImage(im, 0, 0)
+            let w = canvas.width
+            let h = canvas.height
+            let step = 10
+            let x_left_side = true
+            points.push(new Victor(0,0))
+            // must normalize the points scale to be between 0 and 1
+            for(let i=0; i<h;  i+=step){
+              if(x_left_side){
+                points.push(new Victor(0,i/h))   // should use -Infinity/+Infinity but the library cannot handle it. Must check the preview how is done and set a boundary for the points there
+              }else{
+                points.push(new Victor(1,i/h))
+              }
+              x_left_side = !x_left_side
+              for(let j=0; j<w; j++){
+                
+              }
+            }
+        }
+        im.src = value
+        //document.body.appendChild(canvas);
+      }
+      catch(err){
+        console.log(err)
+      }
     }
+    // need to add a way to wait for the points to be ready
+    //TODO remove repetitions (or loop)
     return points
   }
 

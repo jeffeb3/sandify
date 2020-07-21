@@ -36,38 +36,43 @@ class ImageOption extends Component {
             type={optionType}
             accept=".png"
             onChange={(event) => {
-                console.log("Prova")
               let attrs = {}
-              let value = event.target.files[0]
+              let value = event.target.files[0]   // get the loaded file
               let fr = new FileReader()
-              let im = new Image(value)
-              let canvas = document.getElementById("prova")
+              let im = new Image()
+              let canvas = document.getElementById("preview-canvas")  // get the preview element
+              let context = this                  // save it for the callback
               
-              fr.onload = function(){
-                im.onload = function(){
-                    let ctx = canvas.getContext('2d')
-                    ctx.drawImage(im, 0, 0)
+              fr.onload = function(){             // filereader callback
+                im.onload = function(){           // image loaded callback
+                  let ctx = canvas.getContext('2d')
+                  canvas.height = 150
+                  let scale = Math.min(canvas.width/im.width, canvas.height/im.height)
+                  ctx.drawImage(im, 0, 0, im.width*scale, im.height*scale)
+                  
+                  // need to set the state from the callback otherwise the dataurl will be wrong
+                  attrs[context.props.optionKey] = value
+                  if (option.onChange !== undefined) {
+                    attrs = option.onChange(attrs, model)
+                  }
+                  context.props.onChange(attrs)
+                  if (context.props.delayKey !== undefined) {
+                    context.delayedSet(value, context.props.delayKey, context.props.onChange)
+                  }
                 }
-                im.src = fr.result
+                value = fr.result       // need to save the value as a serialized object
+                im.src = value          // use the value for the preview
               };
               fr.readAsDataURL(value)
-              value = canvas.toDataURL()    // need a serialized object
-
-              attrs[this.props.optionKey] = value
-              if (option.onChange !== undefined) {
-                attrs = option.onChange(attrs, model)
-              }
-              this.props.onChange(attrs)
-              if (this.props.delayKey !== undefined) {
-                this.delayedSet(value, this.props.delayKey, this.props.onChange)
-              }
             }}
             />
         </Col>
       </Row>
       <Row className={"align-items-center pb-1 " + (visible ? null : ' d-none')}>
           <Col sm={5}>
-            <canvas id="prova"></canvas>
+          </Col>
+          <Col sm={7}> 
+            <canvas id="preview-canvas" height="0"></canvas>
           </Col>
       </Row>
       </div>
