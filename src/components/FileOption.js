@@ -42,8 +42,7 @@ class ImageOption extends Component {
               let file = event.target.files[0]    // get the loaded file
               let fr = new FileReader()           // prepare the file reader to load the image to an url
               let im = new Image()                // image object to write to canvas
-              let canvas = document.getElementById(canvasId
-          )  // get the canvas element
+              let canvas = document.getElementById(canvasId)  // get the canvas element
               let context = this                  // save it for the callback
               let value
               
@@ -55,7 +54,11 @@ class ImageOption extends Component {
                   ctx.drawImage(im, 0, 0, im.width*scale, im.height*scale)
                   value = true
                   
-                  // need to set the state from the callback otherwise the dataurl will be wrong
+                  // need to set the state from the image handling callback otherwise the dataurl will be wrong
+                  // set the canvas as visible
+                  // TODO add animation and use a better style for the canvas
+                  context.props.options[context.props.optionKey].canvasVisible = true
+
                   attrs[context.props.optionKey] = value
                   if (option.onChange !== undefined) {
                     attrs = option.onChange(attrs, model)
@@ -76,8 +79,7 @@ class ImageOption extends Component {
           <Col sm={5}>
           </Col>
           <Col sm={7}> 
-            <canvas id={canvasId
-      } height="0"></canvas>
+            <canvas id={canvasId} height="0"></canvas>
           </Col>
       </Row>
       </div>
