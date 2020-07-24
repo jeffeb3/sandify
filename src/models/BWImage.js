@@ -16,7 +16,7 @@ const options = {
       title: 'Line spacing',
       min: 0.1
     },
-    colorDifference: {
+    colorDifferenceStep: {
       title: 'Line step'
     },
     darkness: {
@@ -27,7 +27,7 @@ const options = {
     inversion: {
       title: 'Invert dark and white',
       type: 'checkbox'
-    }
+    },
   }
 }
 
@@ -43,7 +43,7 @@ export default class BWImage extends Shape {
         type: 'bwimage',
         imageFile: false,
         lineSpacing: 2,
-        colorDifference: 8,
+        colorDifferenceStep: 8,
         darkness: 254/2,
         inversion: false
       }
@@ -67,15 +67,14 @@ export default class BWImage extends Shape {
     const file_loaded = state.shape.imageFile
     let points = []
 
-    if (file_loaded){
+    if (file_loaded){                     // produces points only if a file has been loaded
       try{
-        const colorDifference = state.shape.colorDifference
         const darknessThreshold = state.shape.darkness
         const darknessInversion = state.shape.inversion
         const position_on_border = 2
+
         // get machine size
         const machine = state.machine
-
         let sizeX, sizeY
         if (machine.rectangular) {
           sizeX = machine.maxX - machine.minX
@@ -83,7 +82,6 @@ export default class BWImage extends Shape {
         } else {
           sizeX = sizeY = machine.maxRadius * 2.0
         }
-        let spacing = state.shape.lineSpacing || 1
 
         // need to save the file into a canvas and load from it
         // cannot save any value of the image into the state (because it is not serializable and it will slow down everything too much)
@@ -94,74 +92,68 @@ export default class BWImage extends Shape {
         const w = image.width
         const h = image.height
         const scale = Math.max(w/sizeX, h/sizeY)
+        const spacing = state.shape.lineSpacing*scale || 1
+        const colorDifferenceStep = state.shape.colorDifferenceStep*scale
 
         let leftSidePoint = true
-        let lastRemappedBorderPosition = mapXY(state, -2, -2)
         let isDarkLine = false
         let darkLineOffset = 0
-        let remapped = null
-        
+
+        // check if the first pixel is dark
         if ((this.getPixelDarkness(ctx.getImageData(w,0,1,1).data) < darknessThreshold) ^ darknessInversion){ 
-          darkLineOffset = colorDifference
+          darkLineOffset = colorDifferenceStep
           isDarkLine = true
         }
 
-        // padding line function
-        function addPaddingLine(i){
+        // map an image pixel to a pointo of the machine bed
+        function mapXY(state, x, y){
+          return new Victor((x-0.5)*state.machine.maxX, (y-0.5)*state.machine.maxY)
+        }
+
+        // border points function
+        function addBorderPoints(i, shape){
           // create padding lines
-          remapped = mapXY(state, position_on_border, (i + darkLineOffset)/h)
+          let pos = position_on_border
           if(!leftSidePoint){
-            remapped.x = -remapped.x 
+            pos = -pos
           }
-          points.push(new Victor(remapped.x, lastRemappedBorderPosition.y))
-          points.push(new Victor(remapped.x, remapped.y))
+          points.push(mapXY(state, pos, (i+darkLineOffset-spacing)/h))
+          points.push(mapXY(state, pos, (i+darkLineOffset)/h))
           
-          // save data for next iteration
-          lastRemappedBorderPosition = remapped
+          // change direction of the scanning line
           leftSidePoint = !leftSidePoint
         }
 
         // TODO center the image on creation
-        // TODO general cleanup
-        // TODO improve mapXY
-        // TODO fix the wrong line bug
-        // TODO merge the 3 cycles
-        // TODO add more control to change the lines orientation
 
-        // first add padding lines so can scale and move the image
-        for(let i=-2*h; i<0; i+=spacing*scale){
-          addPaddingLine(i)
-        }
+        // the cycle iterate from -h to +h in addition to the image size
+        // the cycle will add padding lines until i reaches 0 and when i is over h in order to add padding lines
+        // the padding lines are necessary when the image is moved around
+        for(let i=-h; i<2*h;  i+=spacing){              // iterating rows
+          addBorderPoints(i)
 
-        for(let i=0; i<h+spacing*scale;  i+=spacing*scale){ // iterating rows
-          addPaddingLine(i)
-
-          // create vertex inside the picture
-          for(let j=0; j<w; j+=1){                          // iterating columns
-            if ((this.getPixelDarkness(ctx.getImageData(w-j,i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
-              if(!isDarkLine){
-                isDarkLine = true
-                let tmp = mapXY(state, j/w, (i+darkLineOffset)/h)
-                points.push(new Victor(tmp.x, tmp.y))
-                darkLineOffset = colorDifference
-                tmp = mapXY(state, j/w, (i+darkLineOffset)/h)
-                points.push(new Victor(tmp.x, tmp.y))
-              }
-            }else{
-              if(isDarkLine){
-                isDarkLine = false
-                let tmp = mapXY(state, j/w, (i+darkLineOffset)/h)
-                points.push(new Victor(tmp.x, tmp.y))
-                darkLineOffset = 0
-                tmp = mapXY(state, j/w, (i+darkLineOffset)/h)
-                points.push(new Victor(tmp.x, tmp.y))
+          if(i>0 && i<h+spacing){
+            // if i is in the h range create vertex from the color change
+            for(let j=0, tmpJ=0; j<w; j+=1){            // iterating columns
+              //check if it's moving from left to right or right to left
+              tmpJ = leftSidePoint ? j : w-j
+              if ((this.getPixelDarkness(ctx.getImageData(w-tmpJ,h-i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
+                if(!isDarkLine){
+                  isDarkLine = true
+                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                  darkLineOffset = colorDifferenceStep
+                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                }
+              }else{
+                if(isDarkLine){
+                  isDarkLine = false
+                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                  darkLineOffset = 0
+                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                }
               }
             }
           }
-        }
-        // add more padding line on top
-        for(let i=h+spacing*scale; i<3*h; i+=spacing*scale){
-          addPaddingLine(i)
         }
       }
       catch(err){
@@ -175,12 +167,7 @@ export default class BWImage extends Shape {
     return (pixel[0]+pixel[1]+pixel[2])/3
   }
 
-  
-
   getOptions() {
     return options
   }
-}
-function mapXY(state, x, y){
-  return { x: (x-0.5)*state.machine.maxX, y: (y-0.5)*state.machine.maxY}
 }
