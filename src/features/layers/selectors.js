@@ -50,3 +50,17 @@ export const getNumLayers = createSelector(
     return layers.allIds.length
   }
 )
+
+export const getVisibleLayerIds = createSelector(
+  getLayers,
+  (layers) => {
+    return layers.allIds.filter(id => layers.byId[id].visible)
+  }
+)
+
+export const getNumVisibleLayers = createSelector(
+  getVisibleLayerIds,
+  (layers) => {
+    return layers.length
+  }
+)

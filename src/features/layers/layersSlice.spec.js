@@ -1,5 +1,6 @@
 import layers, {
   addLayer,
+  copyLayer,
   moveLayer,
   restoreDefaults,
   setCurrentLayer,
@@ -28,6 +29,7 @@ describe('layers reducer', () => {
     offsetY: 0.0,
     rotation: 0,
     numLoops: 10,
+    reverse: false,
     transformMethod: 'smear',
     growEnabled: true,
     growValue: 100,
@@ -60,15 +62,13 @@ describe('layers reducer', () => {
 
   it('should handle addLayer', () => {
     expect(
-      layers(
-        {
-          byId: {},
-          allIds: []
-        },
-        addLayer({
-          name: 'foo'
-        })
-      )
+      layers({
+        byId: {},
+        allIds: []
+      },
+      addLayer({
+        name: 'foo'
+      }))
     ).toEqual({
       byId: {
         'layer-1': {
@@ -79,6 +79,35 @@ describe('layers reducer', () => {
       allIds: ['layer-1'],
       current: 'layer-1',
       selected: 'layer-1',
+    })
+  })
+
+  it('should handle copyLayer', () => {
+    expect(
+      layers({
+        byId: {
+          'layer-1': {
+            id: 'layer-1',
+            name: 'foo'
+          }
+        },
+        allIds: ['layer-1'],
+      },
+      copyLayer('layer-1'))
+    ).toEqual({
+      byId: {
+        'layer-1': {
+          id: 'layer-1',
+          name: 'foo'
+        },
+        'layer-2': {
+          id: 'layer-2',
+          name: 'foo'
+        }
+      },
+      allIds: ['layer-1', 'layer-2'],
+      current: 'layer-2',
+      selected: 'layer-2',
     })
   })
 
@@ -102,6 +131,7 @@ describe('layers reducer', () => {
           byId: {
             'layer-1': {
               id: 'layer-1',
+              name: 'foo',
               type: 'circle',
               circleLobes: '2',
               polygonSides: '5'
@@ -114,6 +144,7 @@ describe('layers reducer', () => {
       byId: {
         'layer-1': {
           id: 'layer-1',
+          name: 'foo',
           ...initialState
         }
       }

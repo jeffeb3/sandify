@@ -32,7 +32,8 @@ const store = configureStore({
 
 // set to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const persistState = true
+const persistState = false
+
 if (persistState) {
   // override default values with saved ones
   const persistedState = loadState()
@@ -42,23 +43,25 @@ if (persistState) {
       let layer = persistedState.layers.byId[id]
       store.dispatch(addLayer(layer))
     })
+    store.dispatch(setCurrentLayer(persistedState.layers.current))
   }
 } else {
   const storedShape = localStorage.getItem('currentShape')
   const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
   const layer = registeredShapes[currentShape].getInitialState()
-  store.dispatch(addLayer(layer))
-}
 
-const state = store.getState()
-store.dispatch(setCurrentLayer(state.layers.byId[state.layers.allIds[0]].id))
+  store.dispatch(addLayer(layer))
+  
+  const state = store.getState()
+  store.dispatch(setCurrentLayer(state.layers.byId[state.layers.allIds[0]].id))
+}
 
 if (persistState) {
   store.subscribe(() => {
     const state = store.getState()
 
     saveState({
-      layers: state.layers,
+      layers: state.layers
     })
   })
 }
