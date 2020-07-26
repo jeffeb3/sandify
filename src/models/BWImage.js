@@ -125,6 +125,12 @@ export default class BWImage extends Shape {
         }
 
         // TODO center the image on creation
+        // TODO check error with vertical lines
+        // TODO add padding to canvas to make the image smaller?
+        // TODO add different line tipes for the colors (instead of straight use a different curve like sin or triangular)
+        // TODO use different line density for the colors instead of line step
+        // TODO add image rotation with respect to the lines
+        // TODO fix css/visualization for the canvas?
 
         // the cycle iterate from -h to +h in addition to the image size
         // the cycle will add padding lines until i reaches 0 and when i is over h in order to add padding lines
@@ -137,7 +143,7 @@ export default class BWImage extends Shape {
             for(let j=0, tmpJ=0; j<w; j+=1){            // iterating columns
               //check if it's moving from left to right or right to left
               tmpJ = leftSidePoint ? j : w-j
-              if ((this.getPixelDarkness(ctx.getImageData(w-tmpJ,h-i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
+              if ((this.getPixelDarkness(ctx.getImageData(tmpJ,h-i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
                 if(!isDarkLine){
                   isDarkLine = true
                   points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
