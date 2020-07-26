@@ -1,6 +1,7 @@
 import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
 import Victor from 'victor'
+import Color from 'color'
 import {
   transformShapes,
   transformShape,
@@ -8,8 +9,8 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumLayers } from '../layers/selectors'
-import { rotate, offset } from '../../common/geometry'
+import { makeGetLayer, makeGetLayerIndex, getNumLayers, getVisibleLayerIds } from '../layers/selectors'
+import { rotate, offset, getSliderBounds } from '../../common/geometry'
 
 const cache = new LRUCache({
   length: (n, key) => { return n.length },
@@ -26,10 +27,10 @@ const getLayers = state => state.layers
 const getImporter = state => state.importer
 const getMachine = state => state.machine
 const getPreview = state => state.preview
-const cachedSelectors = {}
 
 // the make selector functions below are patterned after the comment here:
 // https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
+const cachedSelectors = {}
 
 // by returning null for shapes which can change size, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
@@ -155,11 +156,35 @@ export const getCachedSelector = (fn, layerId) => {
   return cachedSelectors[fn.name][layerId]
 }
 
-// returns a flattened list of all vertices (across layers)
+// returns a flattened list of all visible computed vertices (across layers)
 export const getAllComputedVertices = createSelector(
-  getState,
-  (state) => {
-    return state.layers.allIds.map(id => getCachedSelector(makeGetComputedVertices, id)(state)).flat()
+  [getState, getVisibleLayerIds],
+  (state, visibleLayerIds) => {
+    return visibleLayerIds.map(id => getCachedSelector(makeGetComputedVertices, id)(state)).flat()
+  }
+)
+
+// returns a flattened list of all visible preview vertices (across layers)
+export const getAllPreviewVertices = createSelector(
+  [getState, getVisibleLayerIds],
+  (state, visibleLayerIds) => {
+    return visibleLayerIds.map(id => getCachedSelector(makeGetPreviewVertices, id)(state)).flat()
+  }
+)
+
+// returns the starting offset for each layer, given previous layers
+export const getVertexOffsets = createSelector(
+  [getState, getVisibleLayerIds],
+  (state, visibleLayerIds) => {
+    let offsets = {}
+    let offset = 0
+    visibleLayerIds.forEach((id) => {
+      const vertices = getCachedSelector(makeGetComputedVertices, id)(state)
+
+      offsets[id] = offset
+      offset += vertices.length
+    })
+    return offsets
   }
 )
 
@@ -170,7 +195,7 @@ export const getVerticesStats = createSelector(
     let distance = 0.0
     let previous = null
 
-    vertices.forEach( (vertex) => {
+    vertices.forEach((vertex) => {
       if (previous) {
         distance += Math.sqrt(Math.pow(vertex.x - previous.x, 2.0) +
                               Math.pow(vertex.y - previous.y, 2.0))
@@ -185,22 +210,26 @@ export const getVerticesStats = createSelector(
   }
 )
 
-export const getVertexColors = createSelector(
+export const getSliderColors = createSelector(
   [getAllComputedVertices, getPreview],
   (vertices, preview) => {
-    const slide_size = 10.0
     const sliderValue = preview.sliderValue
     const colors = {}
 
-    if (sliderValue === 0) {
-      colors[vertices[0]] = 'yellow'
-    } else {
-      // Let's start by just assuming we want a slide_size sized window, as a percentage
-      // of the whole thing.
-      const beginFraction = sliderValue / 100.0
-      const endFraction = (slide_size + sliderValue) / 100.0
-      let beginVertex = Math.round(vertices.length * beginFraction)
-      let endVertex = Math.round(vertices.length * endFraction)
+    if (sliderValue !== 0) {
+      let { start, end } = getSliderBounds(vertices, sliderValue)
+      let startColor = Color('yellow')
+
+      if (start === end) {
+        if (start > 1) start = start - 2
+      } else if (start === end - 1) {
+        if (start > 0) start = start - 1
+      }
+
+      const colorStep = 3.0 / 4 / (end - start)
+      for(let i=end; i>=start; i--) {
+        colors[i] = startColor.darken(colorStep * (end-i)).hex()
+      }
     }
 
     return colors
@@ -210,9 +239,7 @@ export const getVertexColors = createSelector(
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.
 export const getPreviewTrackVertices = createSelector(
-  [
-    getCurrentLayer
-  ],
+  getCurrentLayer,
   (layer) => {
     const numLoops = layer.numLoops
     const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape

@@ -3,7 +3,7 @@ import CommentExporter from './CommentExporter'
 
 const getApp = state => state.app
 const getLayers = state => state.layers
-const getCurrentLayer = state => state.layers.byId[state.layers.currentId]
+const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getImporter = state => state.importer
 const getExporter = state => state.exporter
 const getMachine = state => state.machine

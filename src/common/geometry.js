@@ -101,3 +101,25 @@ export const offset = (vertex, offsetX, offsetY) => {
     vertex.y + offsetY
   )
 }
+
+// given a set of vertices and a slider value, returns the start and end vertices
+// representing a preview slider moving through them.
+export const getSliderBounds = (vertices, sliderValue) => {
+  const slideSize = 10.0
+  const beginFraction = sliderValue / 100.0
+  const endFraction = (slideSize + sliderValue) / 100.0
+  let start = Math.round(vertices.length * beginFraction)
+  let end = Math.round(vertices.length * endFraction) - 1
+
+  if (start === end) {
+    if (start > 1) start = start - 2
+  } else if (start === end - 1) {
+    if (start > 0) start = start - 1
+  }
+
+  if (end >= vertices.length) {
+    end = vertices.length - 1
+  }
+
+  return { start: start, end: end }
+}

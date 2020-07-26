@@ -28,6 +28,15 @@ const layersSlice = createSlice({
       const { oldIndex, newIndex } = action.payload
       state.allIds = arrayMove(state.allIds, oldIndex, newIndex)
     },
+    copyLayer(state, action) {
+      const source = state.byId[action.payload]
+      const layer = { ...source }
+      layer.id = uniqueId('layer-')
+      state.byId[layer.id] = layer
+      state.allIds.push(layer.id)
+      state.current = layer.id
+      state.selected = layer.id
+    },
     removeLayer(state, action) {
       const deleteId = action.payload
       const idx = state.allIds.findIndex(id => id === deleteId)
@@ -120,6 +129,7 @@ const layersSlice = createSlice({
 
 export const {
   addLayer,
+  copyLayer,
   moveLayer,
   removeLayer,
   restoreDefaults,

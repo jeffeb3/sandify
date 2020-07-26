@@ -1,12 +1,12 @@
 import React from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
-import Color from 'color'
 import Victor from 'victor'
-import { getPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices } from '../machine/selectors'
+import { getPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices, getSliderColors, getVertexOffsets, getAllPreviewVertices } from '../machine/selectors'
 import { updateLayer, setSelectedLayer } from '../layers/layersSlice'
-import { getCurrentLayer, makeGetLayerIndex, getNumLayers } from '../layers/selectors'
+import { getCurrentLayer, makeGetLayerIndex, getNumVisibleLayers } from '../layers/selectors'
 import { roundP } from '../../common/util'
+import { getSliderBounds } from '../../common/geometry'
 
 // Renders the shapes in the preview window and allows the user to interact with the shape.
 const PreviewLayer = (ownProps) => {
@@ -24,18 +24,25 @@ const PreviewLayer = (ownProps) => {
       layer: layer,
       layerIndex: getCachedSelector(makeGetLayerIndex, layer.id)(state),
       currentLayer: getCurrentLayer(state),
-      numLayers: getNumLayers(state),
+      numLayers: getNumVisibleLayers(state),
       trackVertices: getPreviewTrackVertices(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
+      allVertices: getAllPreviewVertices(state),
       selected: state.layers.selected,
       sliderValue: state.preview.sliderValue,
       showTrack: true,
+      colors: getSliderColors(state),
+      offsets: getVertexOffsets(state)
     }
   }
 
   const props = useSelector(mapStateToProps, shallowEqual)
   const dispatch = useDispatch()
   const startingSize = props.layer.startingSize
+  const selectedColor = 'yellow'
+  const unselectedColor = 'rgba(195, 214, 230, 0.65)'
+  const backgroundSelectedColor = '#6E6E00'
+  const backgroundUnselectedColor = 'rgba(195, 214, 230, 0.4)'
 
   // our transformer is 5 times bigger than the actual starting shape, so we need
   // to account for it when drawing the preview; if you change this value, be sure
@@ -43,6 +50,7 @@ const PreviewLayer = (ownProps) => {
   const konvaScale = 5
   const konvaSize = startingSize * konvaScale
   const isSelected = props.selected === ownProps.id
+  const isSliding = props.sliderValue !== 0
 
   function mmToPixels(vertex) {
     // y for pixels starts at the top, and goes down.
@@ -59,126 +67,105 @@ const PreviewLayer = (ownProps) => {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
-  function dot_mm(context, vertex, radius=4) {
+  function dot_mm(context, vertex, radius=3) {
     var in_mm = mmToPixels(vertex)
     context.arc(in_mm.x, in_mm.y, radius, 0, 2 * Math.PI, true)
     context.fillStyle = context.strokeStyle
     context.fill()
   }
 
-  function sliderVertexRange(vertices, sliderValue) {
-    const slide_size = 10.0
-    if (sliderValue === 0) {
-      return [0, vertices.length - 1]
+  // draws a colored path when user is using slider
+  function drawLayerVertices(context) {
+    const { end } = getSliderBounds(props.allVertices, props.sliderValue)
+    const stationaryColor = isSelected ? selectedColor : unselectedColor
+    const defaultColor = isSliding ? backgroundUnselectedColor : stationaryColor
+    let oldColor = defaultColor
+    let currentColor = defaultColor
+
+    context.beginPath()
+    context.lineWidth = 1
+    context.strokeStyle = currentColor
+    moveTo_mm(context, props.vertices[0])
+    context.stroke()
+
+    context.beginPath()
+    for (let i=1; i<props.vertices.length; i++) {
+      let absoluteI = i + props.offsets[props.layer.id]
+      let pathColor = isSliding ? (absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor) : stationaryColor
+
+      currentColor = props.colors[absoluteI] || pathColor
+
+      if (currentColor !== oldColor) {
+        context.stroke()
+        context.strokeStyle = currentColor
+        oldColor = currentColor
+        context.beginPath()
+      }
+
+      moveTo_mm(context, props.vertices[i-1])
+      lineTo_mm(context, props.vertices[i])
     }
+    context.stroke()
 
-    // Let's start by just assuming we want a slide_size sized window, as a percentage of the whole
-    // thing.
-    const begin_fraction = sliderValue / 100.0
-    const end_fraction = (slide_size + sliderValue) / 100.0
-    let begin_vertex = Math.round(vertices.length * begin_fraction)
-    let end_vertex = Math.round(vertices.length * end_fraction)
+    // Draw a slider path end point if sliding
+    if (isSliding && isSelected) {
+      const sliderEnd = props.allVertices[end]
 
-    // never return less than two vertices; this keeps the preview slider smooth even when
-    // there are just a few vertices
-    if (begin_vertex === end_vertex) {
-      if (begin_vertex > 1) begin_vertex = begin_vertex - 2
-    } else if (begin_vertex === end_vertex - 1) {
-      if (begin_vertex > 0) begin_vertex = begin_vertex - 1
+      context.beginPath()
+      context.strokeStyle = backgroundSelectedColor
+
+      moveTo_mm(context, sliderEnd)
+      context.strokeStyle = selectedColor
+      dot_mm(context, sliderEnd)
+
+      // START: uncomment these lines to show slider end point coordinates
+      // context.font = '20px Arial'
+      // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
+      // END
+      context.stroke()
     }
-
-    return [begin_vertex, end_vertex]
   }
 
+  function drawStartAndEndPoints(context) {
+    context.beginPath()
+    context.strokeStyle = 'green'
+    dot_mm(context, props.vertices[0])
+    context.stroke()
+
+    let endOffset = (props.currentLayer.dragging || props.layerIndex === props.numLayers - 1) ? 1 : 2
+    context.beginPath()
+    context.strokeStyle = 'red'
+    dot_mm(context, props.vertices[props.vertices.length - endOffset])
+    context.stroke()
+  }
+
+  // draws the line representing the track the path follows
+  function drawTrackVertices(context) {
+    context.beginPath()
+    context.lineWidth = 4.0
+    context.strokeStyle = 'green'
+    moveTo_mm(context, props.trackVertices[0])
+    for (let i=0; i<props.trackVertices.length; i++) {
+      lineTo_mm(context, props.trackVertices[i])
+    }
+    context.stroke()
+  }
+
+  // used by Konva to draw our custom shape
   function sceneFunc(context, shape) {
     if (props.vertices && props.vertices.length > 0) {
-      let sliderRange = sliderVertexRange(props.vertices, props.sliderValue)
-      let drawing_vertices = props.vertices.slice(sliderRange[0], sliderRange[1] + 1)
-
-      // Draw the background vertices
-      if (props.sliderValue !== 0) {
-        context.beginPath()
-        context.lineWidth = 1
-        context.strokeStyle = Color('#6E6E00')
-        moveTo_mm(context, props.vertices[0])
-
-        for (let i=0; i<props.vertices.length; i++) {
-          if (i === sliderRange[1]-1) {
-            context.stroke()
-            context.beginPath()
-            context.strokeStyle = "rgba(204, 204, 204, 0.35)"
-          }
-          lineTo_mm(context, props.vertices[i])
-        }
-        context.stroke()
-      }
-
       if (props.trackVertices && props.trackVertices.length > 0 && props.showTrack) {
-        // Draw the track vertices
-        context.beginPath()
-        context.lineWidth = 4.0
-        context.strokeStyle = "green"
-        moveTo_mm(context, props.trackVertices[0])
-        for (let i=0; i<props.trackVertices.length; i++) {
-          lineTo_mm(context, props.trackVertices[i])
-        }
-        context.stroke()
+        drawTrackVertices(context)
       }
 
-      if (drawing_vertices.length > 0) {
-        // Draw the slider path vertices
-        let startColor = Color('#6E6E00')
-        const layerColor = (props.selected === props.layer.id) ? 'yellow' : '#6DC9E2'
-        const colorStep = 200.0 / drawing_vertices.length / 100
-
-        context.beginPath()
-        context.lineWidth = 1
-        moveTo_mm(context, drawing_vertices[0])
-        context.stroke()
-
-        for (let i=1; i<drawing_vertices.length; i++) {
-          const strokeColor = props.sliderValue !== 0 ? startColor.lighten(colorStep * i).hex() : 'yellow'
-
-          context.beginPath()
-          context.strokeStyle = strokeColor
-          context.lineWidth = 1
-          moveTo_mm(context, drawing_vertices[i-1])
-          lineTo_mm(context, drawing_vertices[i])
-          context.stroke()
-        }
-      }
-
-      // Draw the start and end points
-      context.beginPath()
-      context.strokeStyle = "green"
-      dot_mm(context, props.vertices[0])
-      context.stroke()
-
-      context.beginPath()
-      context.strokeStyle = "red"
-      dot_mm(context, props.vertices[props.vertices.length - (props.layer.dragging ? 1 : 2)])
-      context.stroke()
-
-      // Draw a slider path end point if sliding
-      if (drawing_vertices.length > 0 && props.sliderValue !== 0) {
-        const sliderEndPoint = drawing_vertices[drawing_vertices.length - 1]
-
-        context.beginPath()
-        context.strokeStyle = "yellow"
-        context.lineWidth = 1.0
-        dot_mm(context, sliderEndPoint)
-
-        // START: uncomment these lines to show slider end point coordinates
-        // context.font = "20px Arial"
-        // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-        // END
-        context.stroke()
-      }
+      drawLayerVertices(context)
+      drawStartAndEndPoints(context)
     }
 
     context.fillStrokeShape(shape)
   }
 
+  // used by Konva to mark boundaries of shape
   function hitFunc(context) {
     const vertices = props.vertices
     if (vertices && vertices.length > 0) {
