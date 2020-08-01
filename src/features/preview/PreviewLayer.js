@@ -106,24 +106,6 @@ const PreviewLayer = (ownProps) => {
       lineTo_mm(context, props.vertices[i])
     }
     context.stroke()
-
-    // Draw a slider path end point if sliding
-    if (isSliding && isSelected) {
-      const sliderEnd = props.allVertices[end]
-
-      context.beginPath()
-      context.strokeStyle = backgroundSelectedColor
-
-      moveTo_mm(context, sliderEnd)
-      context.strokeStyle = selectedColor
-      dot_mm(context, sliderEnd)
-
-      // START: uncomment these lines to show slider end point coordinates
-      // context.font = '20px Arial'
-      // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-      // END
-      context.stroke()
-    }
   }
 
   function drawStartAndEndPoints(context) {
@@ -151,6 +133,33 @@ const PreviewLayer = (ownProps) => {
     context.stroke()
   }
 
+  function drawSliderEndPoint(context) {
+    const { end } = getSliderBounds(props.allVertices, props.sliderValue)
+
+    // Draw a slider path end point if sliding
+    if (isSliding) {
+      let absoluteEnd = props.vertices.length + props.offsets[props.layer.id] - 1
+      let absoluteStart = props.offsets[props.layer.id]
+
+      if (end >= absoluteStart && end <= absoluteEnd) {
+        // end point is in this layer
+        const sliderEnd = props.allVertices[end]
+        context.beginPath()
+        context.strokeStyle = backgroundSelectedColor
+
+        moveTo_mm(context, sliderEnd)
+        context.strokeStyle = selectedColor
+        dot_mm(context, sliderEnd)
+      }
+
+      // START: uncomment these lines to show slider end point coordinates
+      // context.font = '20px Arial'
+      // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
+      // END
+      context.stroke()
+    }
+  }
+
   // used by Konva to draw our custom shape
   function sceneFunc(context, shape) {
     if (props.vertices && props.vertices.length > 0) {
@@ -160,6 +169,7 @@ const PreviewLayer = (ownProps) => {
 
       drawLayerVertices(context)
       drawStartAndEndPoints(context)
+      drawSliderEndPoint(context)
     }
 
     context.fillStrokeShape(shape)
