@@ -19,9 +19,9 @@ export const makeGetLayer = layerId => {
 
 export const makeGetLayerIndex = layerId => {
   return createSelector(
-    getLayers,
-    (layers) => {
-      return layers.allIds.findIndex(id => id === layerId)
+    getVisibleLayerIds,
+    (visibleLayerIds) => {
+      return visibleLayerIds.findIndex(id => id === layerId)
     }
   )
 }

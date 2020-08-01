@@ -9,7 +9,7 @@ import {
   scaleImportedVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumLayers, getVisibleLayerIds } from '../layers/selectors'
+import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
 import { rotate, offset, getSliderBounds } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -104,9 +104,10 @@ export const makeGetPreviewVertices = layerId => {
   return createSelector(
     [
         getLayers,
-        getMachine
+        getVisibleLayerIds,
+        getMachine,
     ],
-    (layers, machine) => {
+    (layers, visibleLayerIds, machine) => {
       const state = {
         layers: layers,
         machine: machine
@@ -115,16 +116,16 @@ export const makeGetPreviewVertices = layerId => {
       let vertices
       const layer = layers.byId[layerId]
       const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
-      const numLayers = getNumLayers(state)
+      const numLayers = getNumVisibleLayers(state)
 
       if (layer.dragging) {
         vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
       } else {
         vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
-        const nextLayerId = layers.allIds[index + 1]
-        const nextLayer = layers.byId[nextLayerId]
-
         if (index < numLayers - 1) {
+          const nextLayerId = visibleLayerIds[index + 1]
+          const nextLayer = layers.byId[nextLayerId]
+
           if (!nextLayer.dragging && nextLayer.visible) {
             // draw the stitch between the two layers
             const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
@@ -182,7 +183,7 @@ export const getVertexOffsets = createSelector(
       const vertices = getCachedSelector(makeGetComputedVertices, id)(state)
 
       offsets[id] = offset
-      offset += vertices.length
+      offset += vertices.length + 1
     })
     return offsets
   }
@@ -211,7 +212,7 @@ export const getVerticesStats = createSelector(
 )
 
 export const getSliderColors = createSelector(
-  [getAllComputedVertices, getPreview],
+  [getAllPreviewVertices, getPreview],
   (vertices, preview) => {
     const sliderValue = preview.sliderValue
     const colors = {}
@@ -219,14 +220,8 @@ export const getSliderColors = createSelector(
     if (sliderValue !== 0) {
       let { start, end } = getSliderBounds(vertices, sliderValue)
       let startColor = Color('yellow')
+      const colorStep = 3.0 / 8 / (end - start)
 
-      if (start === end) {
-        if (start > 1) start = start - 2
-      } else if (start === end - 1) {
-        if (start > 0) start = start - 1
-      }
-
-      const colorStep = 3.0 / 4 / (end - start)
       for(let i=end; i>=start; i--) {
         colors[i] = startColor.darken(colorStep * (end-i)).hex()
       }
