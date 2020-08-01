@@ -11,6 +11,7 @@ const layersSlice = createSlice({
     current: null,
     selected: null,
     newLayerType: null,
+    copyLayerName: null,
     byId: {},
     allIds: []
   },
@@ -30,7 +31,7 @@ const layersSlice = createSlice({
     },
     copyLayer(state, action) {
       const source = state.byId[action.payload]
-      const layer = { ...source }
+      const layer = { ...source, name: state.copyLayerName }
       layer.id = uniqueId('layer-')
       state.byId[layer.id] = layer
       state.allIds.push(layer.id)
@@ -70,6 +71,7 @@ const layersSlice = createSlice({
       if (current) {
         state.current = current.id
         state.selected = current.id
+        state.copyLayerName = current.name
       }
     },
     setSelectedLayer(state, action) {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Button, ListGroup, Modal, Row, Col } from 'react-bootstrap'
+import { Button, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
@@ -19,6 +19,7 @@ const mapStateToProps = (state, ownProps) => {
     currentLayer: layer,
     shape: shape,
     newLayerType: state.layers.newLayerType,
+    copyLayerName: state.layers.copyLayerName,
     selectOptions: getShapeSelectOptions(),
   }
 }
@@ -32,16 +33,18 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onLayerAdded: (type) => {
       const attrs = registeredShapes[type].getInitialState()
       dispatch(addLayer(attrs))
-      dispatch(updateLayers({ showNewLayer: false }))
     },
-    onLayerCopied: (event) => {
-      dispatch(copyLayer(event.target.closest('button').dataset.id))
+    onLayerCopied: (id) => {
+      dispatch(copyLayer(id))
     },
     onLayerRemoved: (event) => {
       dispatch(removeLayer(event.target.closest('button').dataset.id))
     },
     onChangeNewType: (selected) => {
       dispatch(updateLayers({ newLayerType: selected.value }))
+    },
+    onChangeCopyName: (event) => {
+      dispatch(updateLayers({ copyLayerName: event.target.value }))
     },
     onLayerMoved: ({oldIndex, newIndex}) => {
       dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
@@ -61,7 +64,7 @@ const customStyles = {
   })
 }
 
-const SortableItem = SortableElement(({id, name, active, canRemove, visible, onLayerCopied, onLayerRemoved, onLayerSelected, onToggleLayerVisible}) => {
+const SortableItem = SortableElement(({id, name, active, canRemove, visible, onCopyLayer, onLayerRemoved, onLayerSelected, onToggleLayerVisible}) => {
   const activeClass = active ? 'active' : ''
   const dragClass = canRemove ? 'cursor-move' : ''
   return <ListGroup.Item className={[activeClass, dragClass, 'd-flex align-items-center'].join(' ')} key={id} id={id} onClick={onLayerSelected}>
@@ -70,7 +73,7 @@ const SortableItem = SortableElement(({id, name, active, canRemove, visible, onL
       {!visible && <FaEyeSlash />}
     </Button>
     <div className="no-select">{name}</div>
-    <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onLayerCopied}>
+    <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onCopyLayer}>
       <FaCopy />
     </Button>
     {canRemove && <Button className="layer-button" variant="link" data-id={id} onClick={onLayerRemoved}>
@@ -79,7 +82,7 @@ const SortableItem = SortableElement(({id, name, active, canRemove, visible, onL
   </ListGroup.Item>
 })
 
-const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLayerCopied, onLayerSelected, onLayerRemoved, onToggleLayerVisible}) => {
+const SortableList = SortableContainer(({layers, currentLayer, numLayers, onCopyLayer, onLayerSelected, onLayerRemoved, onToggleLayerVisible}) => {
   return (
     <ListGroup variant="flush" style={{maxHeight: "200px"}} className="border overflow-auto" id="playlist-group">
       {layers.map((layer, index) => {
@@ -92,7 +95,7 @@ const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLaye
             active={currentLayer.id === layer.id}
             visible={layer.visible}
             canRemove={numLayers > 1}
-            onLayerCopied={onLayerCopied}
+            onCopyLayer={onCopyLayer}
             onLayerSelected={onLayerSelected}
             onLayerRemoved={onLayerRemoved}
             onToggleLayerVisible={onToggleLayerVisible}
@@ -106,7 +109,7 @@ const SortableList = SortableContainer(({layers, currentLayer, numLayers, onLaye
 class Playlist extends Component {
   constructor(props) {
     super(props)
-    this.state = {showNewLayer: false}
+    this.state = {showNewLayer: false, showCopyLayer: false}
   }
 
   scrollToBottom() {
@@ -120,6 +123,14 @@ class Playlist extends Component {
     this.setState({showNewLayer: !this.state.showNewLayer})
   }
 
+  toggleCopyModal() {
+    this.setState({showCopyLayer: !this.state.showCopyLayer})
+  }
+
+  handleNameFocus(event) {
+    event.target.select()
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.numLayers > prevProps.numLayers) {
       // new layer added; make sure we scroll down to it
@@ -130,6 +141,7 @@ class Playlist extends Component {
   render() {
     const selectedShape = getShape({type: this.props.newLayerType}) || this.props.shape
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
+    const namedInputRef = React.createRef()
 
     return (
       <div>
@@ -155,8 +167,38 @@ class Playlist extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="new-layer-close" variant="link" onClick={this.toggleNewModal.bind(this)}>Close</Button>
+            <Button id="new-layer-close" variant="link" onClick={this.toggleNewModal.bind(this)}>Cancel</Button>
             <Button id="new-layer-add" variant="primary" onClick={() => { this.props.onLayerAdded(this.props.newLayerType || this.props.currentLayer.type); this.toggleNewModal()}}>Create</Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={this.state.showCopyLayer}
+          onHide={this.toggleCopyModal.bind(this)}
+          onEntered={() => namedInputRef.current.focus()}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Copy {this.props.currentLayer.name}</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Row className="align-items-center">
+              <Col sm={5}>
+                Name
+              </Col>
+              <Col sm={7}>
+                <Form.Control
+                  ref={namedInputRef}
+                  value={this.props.copyLayerName}
+                  onFocus={this.handleNameFocus}
+                  onChange={this.props.onChangeCopyName}
+                />
+              </Col>
+            </Row>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button id="copy-layer-close" variant="link" onClick={this.toggleCopyModal.bind(this)}>Cancel</Button>
+            <Button id="copy-layer-copy" variant="primary" onClick={() => { this.props.onLayerCopied(this.props.currentLayer.id); this.toggleCopyModal(); }}>Copy</Button>
           </Modal.Footer>
         </Modal>
 
@@ -168,7 +210,7 @@ class Playlist extends Component {
             currentLayer={this.props.currentLayer}
             numLayers={this.props.numLayers}
             onLayerSelected={this.props.onLayerSelected}
-            onLayerCopied={this.props.onLayerCopied}
+            onCopyLayer={this.toggleCopyModal.bind(this)}
             onLayerRemoved={this.props.onLayerRemoved.bind(this)}
             onSortEnd={this.props.onLayerMoved}
             onToggleLayerVisible={this.props.onToggleLayerVisible}

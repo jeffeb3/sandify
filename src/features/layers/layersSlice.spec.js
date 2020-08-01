@@ -55,6 +55,7 @@ describe('layers reducer', () => {
       current: null,
       selected: null,
       newLayerType: null,
+      copyLayerName: null,
       byId: {},
       allIds: []
     })
