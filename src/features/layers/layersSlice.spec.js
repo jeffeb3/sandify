@@ -93,6 +93,7 @@ describe('layers reducer', () => {
           }
         },
         allIds: ['layer-1'],
+        copyLayerName: 'foo'
       },
       copyLayer('layer-1'))
     ).toEqual({
@@ -109,6 +110,7 @@ describe('layers reducer', () => {
       allIds: ['layer-1', 'layer-2'],
       current: 'layer-2',
       selected: 'layer-2',
+      copyLayerName: 'foo'
     })
   })
 
