@@ -1,4 +1,5 @@
 import { getShape } from '../../models/shapes'
+import { getLayerInfo } from '../layers/selectors'
 import Machine from '../../models/Machine'
 import Transform from '../../models/Transform'
 import Exporter from './Exporter'
@@ -29,41 +30,46 @@ export default class CommentExporter extends Exporter {
     this.dedent()
 
     this.keyValueLine('Content type', state.app.input)
-    this.indent()
 
     switch (state.app.input) {
       case 'shape': // shapes
-        instance = state.layers.byId[state.layers.current]
-        const shape = getShape(instance)
-        const options = shape.getOptions()
+        const layers = getLayerInfo(state)
+        layers.forEach(layer => {
+          const shape = getShape(layer)
+          const options = shape.getOptions()
 
-        this.keyValueLine('Selected Shape', shape.name)
-        this.optionLines(shape, instance, Object.keys(options))
-        this.optionLines(transform, instance, ['offsetX', 'offsetY'])
-        this.optionLines(transform, instance, ['numLoops', 'transformMethod', 'spinEnabled'], instance.repeatEnabled)
-        this.indent()
-        this.optionLines(transform, instance, ['spinValue', 'spinMethod'], instance.repeatEnabled && instance.spinEnabled)
-        this.indent()
-        this.optionLine(transform, instance, 'spinMath', instance.repeatEnabled && instance.spinEnabled && instance.spinMethod === 'function')
-        this.optionLine(transform, instance, 'spinSwitchbacks', instance.repeatEnabled && instance.spinEnabled && instance.spinMethod === 'constant')
-        this.dedent()
-        this.dedent()
-        this.optionLine(transform, instance, 'growEnabled', instance.repeatEnabled)
-        this.indent()
-        this.optionLine(transform, instance, 'growValue', instance.repeatEnabled && instance.growEnabled)
-        this.optionLine(transform, instance, 'growMethod', instance.repeatEnabled && instance.growEnabled)
-        this.indent()
-        this.optionLine(transform, instance, 'growMath', instance.repeatEnabled && instance.growEnabled && instance.growMethod === 'function')
-        this.dedent()
-        this.dedent()
-        this.optionLine(transform, instance, 'trackEnabled', instance.repeatEnabled)
-        this.indent()
-        this.optionLines(transform, instance, ['trackValue', 'trackLength', 'trackNumLoops'], instance.repeatEnabled && instance.trackEnabled)
-        this.optionLine(transform, instance, 'trackGrowEnabled', instance.repeatEnabled && instance.trackEnabled)
-        this.indent()
-        this.optionLine(transform, instance, 'trackGrow', instance.repeatEnabled && instance.trackGrowEnabled)
-        this.dedent()
-        this.dedent()
+          this.line('Layer:')
+          this.indent()
+          this.keyValueLine('Shape', shape.name)
+          this.optionLines(shape, layer, Object.keys(options))
+          this.keyValueLine('Visible', layer.visible)
+          this.optionLines(transform, layer, ['offsetX', 'offsetY'])
+          this.optionLines(transform, layer, ['numLoops', 'transformMethod', 'spinEnabled'], layer.repeatEnabled)
+          this.indent()
+          this.optionLines(transform, layer, ['spinValue', 'spinMethod'], layer.repeatEnabled && layer.spinEnabled)
+          this.indent()
+          this.optionLine(transform, layer, 'spinMath', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'function')
+          this.optionLine(transform, layer, 'spinSwitchbacks', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'constant')
+          this.dedent()
+          this.dedent()
+          this.optionLine(transform, layer, 'growEnabled', layer.repeatEnabled)
+          this.indent()
+          this.optionLine(transform, layer, 'growValue', layer.repeatEnabled && layer.growEnabled)
+          this.optionLine(transform, layer, 'growMethod', layer.repeatEnabled && layer.growEnabled)
+          this.indent()
+          this.optionLine(transform, layer, 'growMath', layer.repeatEnabled && layer.growEnabled && layer.growMethod === 'function')
+          this.dedent()
+          this.dedent()
+          this.optionLine(transform, layer, 'trackEnabled', layer.repeatEnabled)
+          this.indent()
+          this.optionLines(transform, layer, ['trackValue', 'trackLength', 'trackNumLoops'], layer.repeatEnabled && layer.trackEnabled)
+          this.optionLine(transform, layer, 'trackGrowEnabled', layer.repeatEnabled && layer.trackEnabled)
+          this.indent()
+          this.optionLine(transform, layer, 'trackGrow', layer.repeatEnabled && layer.trackGrowEnabled)
+          this.dedent()
+          this.dedent()
+          this.dedent()
+        })
         break
 
       case 'code':
