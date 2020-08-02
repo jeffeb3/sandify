@@ -5,6 +5,7 @@ import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
+import Point from '../models/Point'
 import Polygon from '../models/Polygon'
 import Reuleaux from '../models/Reuleaux'
 import Rose from '../models/Rose'
@@ -31,6 +32,7 @@ export const registeredShapes = {
   lsystem: new LSystem(),
   fractal_spirograph: new FractalSpirograph(),
   tessellation_twist: new TessellationTwist(),
+  point: new Point(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller()
 }

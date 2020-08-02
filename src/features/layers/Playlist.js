@@ -145,7 +145,7 @@ class Playlist extends Component {
 
     return (
       <div>
-        <Modal show={this.state.showNewLayer} onHide={this.toggleNewModal}>
+        <Modal show={this.state.showNewLayer} onHide={this.toggleNewModal.bind(this)}>
           <Modal.Header closeButton>
             <Modal.Title>Create new layer</Modal.Title>
           </Modal.Header>
