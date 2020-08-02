@@ -87,7 +87,7 @@ class Layer extends Component {
     }
 
     return (
-      <Card className="p-3 overflow-auto" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
+      <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
         <Row className="align-items-center mb-2">
           <Col sm={5}>
             <h2 className="panel m-0">Properties</h2>
