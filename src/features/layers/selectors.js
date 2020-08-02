@@ -58,6 +58,13 @@ export const getVisibleLayerIds = createSelector(
   }
 )
 
+export const isDragging = createSelector(
+  [ getLayers, getVisibleLayerIds ],
+  (layers, visibleIds) => {
+    return visibleIds.filter(id => layers.byId[id].dragging).length > 0
+  }
+)
+
 export const getNumVisibleLayers = createSelector(
   getVisibleLayerIds,
   (layers) => {

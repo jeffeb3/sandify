@@ -91,10 +91,15 @@ const makeGetComputedVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetTransformedVertices, layerId),
+      getCachedSelector(makeGetLayerIndex, layerId),
+      getNumVisibleLayers,
       getMachine
     ],
-    (vertices, machine) => {
-      return polishVertices(vertices, machine)
+    (vertices, layerIndex, numLayers, machine) => {
+      return polishVertices(vertices, machine, {
+        start: layerIndex === 0,
+        end: layerIndex === numLayers - 1
+      })
     }
   )
 }

@@ -4,7 +4,7 @@ import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
-import { getCurrentLayer, getKonvaLayerIds } from '../layers/selectors'
+import { getCurrentLayer, getKonvaLayerIds, isDragging } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import PreviewLayer from './PreviewLayer'
 
@@ -29,6 +29,7 @@ const mapStateToProps = (state, ownProps) => {
     selectedId: state.layers.selected,
     konvaIds: getKonvaLayerIds(state),
     use_rect: state.machine.rectangular,
+    dragging: isDragging(state),
     minX: state.machine.minX,
     maxX: state.machine.maxX,
     minY: state.machine.minY,
@@ -111,6 +112,10 @@ class PreviewWindow extends Component {
       }
       return newSize
     }
+
+    const isSliding = this.props.sliderValue > 0
+    const clipFunc = this.props.dragging ? (this.props.use_rect ? clipRect : clipCircle) : null
+
     return (
       // the consumer wrapper is needed to pass the store down to our shape
       // which is not our usual React Component
@@ -136,7 +141,7 @@ class PreviewWindow extends Component {
             }}
             >
             <Provider store={store}>
-              <Layer clipFunc={this.props.use_rect ? clipRect : clipCircle}>
+              <Layer clipFunc={clipFunc}>
                 {!this.props.use_rect && <Circle x={0} y={0} radius={radius}
                   fill="transparent"
                   stroke="gray"

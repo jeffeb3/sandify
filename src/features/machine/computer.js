@@ -113,12 +113,12 @@ function buildTrackLoop(vertices, transform, i, t) {
 }
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
-export const polishVertices = (vertices, machine) => {
+export const polishVertices = (vertices, machine, layerInfo) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
   const machineClass = machine.rectangular ? RectMachine : PolarMachine
 
   if (vertices.length > 0) {
-    vertices = new machineClass(vertices, machine).polish().vertices
+    vertices = new machineClass(vertices, machine, layerInfo).polish().vertices
   }
 
   return vertices
@@ -198,6 +198,6 @@ export const transformShapes = (vertices, transform) => {
 
   const endTime = performance.now()
   throttledReportTiming(endTime - startTime)
-  
+
   return outputVertices
 }

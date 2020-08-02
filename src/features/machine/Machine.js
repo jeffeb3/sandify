@@ -3,11 +3,15 @@ import { vertexRoundP } from '../../common/geometry'
 // base machine class
 export default class Machine {
   polish() {
-    return this.enforceLimits()
+    this.enforceLimits()
       .cleanVertices()
       .limitPrecision()
       .optimizePerimeter()
-      .addEndpoints()
+
+    if (this.layerInfo.start) this.addStartPoint()
+    if (this.layerInfo.end) this.addEndPoint()
+    
+    return this
   }
 
   // clean the list of vertices and remove duplicate points

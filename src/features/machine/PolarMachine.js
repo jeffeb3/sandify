@@ -22,13 +22,14 @@ export const traceCircle = (startAngle, endAngle, size) => {
 }
 
 export default class PolarMachine extends Machine {
-  constructor(vertices, settings) {
+  constructor(vertices, settings, layerInfo) {
     super()
     this.vertices = vertices
     this.settings = settings
+    this.layerInfo = layerInfo
   }
 
-  addEndpoints() {
+  addStartPoint() {
     const maxRadius = this.settings.maxRadius
 
     if (this.settings.polarStartPoint !== 'none') {
@@ -41,6 +42,10 @@ export default class PolarMachine extends Machine {
         this.vertices.unshift(new Victor(startPoint.x, startPoint.y))
       }
     }
+  }
+
+  addEndPoint() {
+    const maxRadius = this.settings.maxRadius
 
     if (this.settings.polarEndPoint !== 'none') {
       if (this.settings.polarEndPoint === 'center') {
@@ -52,8 +57,6 @@ export default class PolarMachine extends Machine {
         this.vertices.push(new Victor(endPoint.x, endPoint.y))
       }
     }
-
-    return this
   }
 
   // Finds the nearest vertex that is in the bounds of the circle. This will change the
