@@ -30,8 +30,8 @@ class InputTabs extends Component {
   render() {
     return (
        <Tabs defaultActiveKey="shape" onSelect={this.handleSelect.bind(this)} id="input-tabs">
-         <Tab eventKey="shape" title="Draw" className="full-page-tab d-flex">
-           <div className="d-flex flex-column flex-grow-1">
+         <Tab eventKey="shape" title="Draw" className="full-page-tab">
+           <div className="d-flex flex-column h-100">
              <Playlist />
              <Layer key={this.props.layer.id} id={this.props.layer.id} />
             </div>
