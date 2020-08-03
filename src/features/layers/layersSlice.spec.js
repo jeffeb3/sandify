@@ -48,6 +48,7 @@ describe('layers reducer', () => {
     trackLength: 0.2,
     trackNumLoops: 1,
     trackGrow: 50.0,
+    usesMachine: false,
     dragging: false,
     visible: true
   }
