@@ -5,8 +5,7 @@ import Color from 'color'
 import {
   transformShapes,
   transformShape,
-  polishVertices,
-  scaleImportedVertices
+  polishVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
 import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
@@ -24,7 +23,6 @@ const getCacheKey = (state) => {
 const getState = state => state
 const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getLayers = state => state.layers
-const getImporter = state => state.importer
 const getMachine = state => state.machine
 const getPreview = state => state.preview
 
@@ -258,16 +256,3 @@ export const getPreviewTrackVertices = createSelector(
   }
 )
 
-// OLD: DELETE ONCE IMPORT IS A LAYER
-
-// requires importer and machine state
-export const getImportedVertices = createSelector(
-  [
-    getImporter,
-    getMachine
-  ],
-  (importer, machine) => {
-    let vertices = scaleImportedVertices(importer, machine)
-    return polishVertices(vertices, machine)
-  }
-)
