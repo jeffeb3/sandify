@@ -35,7 +35,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(setCurrentLayer(id))
     },
     onLayerAdded: (type) => {
-      const attrs = registeredShapes[type].getInitialState()
+      const attrs = {
+        ...registeredShapes[type].getInitialState(),
+        name: registeredShapes[type].name
+      }
+
       dispatch(addLayer(attrs))
     },
     onLayerImport: (importProps) => {

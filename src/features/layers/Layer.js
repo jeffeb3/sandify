@@ -1,7 +1,6 @@
 import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Button, Card, Row, Col } from 'react-bootstrap'
-import Select from 'react-select'
 import CommentsBox from '../../components/CommentsBox'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
@@ -9,7 +8,7 @@ import CheckboxOption from '../../components/CheckboxOption'
 import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
-import { getShape, getShapeSelectOptions } from '../../models/shapes'
+import { getShape } from '../../models/shapes'
 import './Layer.scss'
 
 const mapStateToProps = (state, ownProps) => {
@@ -20,7 +19,6 @@ const mapStateToProps = (state, ownProps) => {
     layer: layer,
     shape: shape,
     options: shape.getOptions(),
-    selectOptions: getShapeSelectOptions(),
     showShapeSelectRender: layer.selectGroup !== "import",
     link: shape.link,
     linkText: shape.linkText
@@ -46,7 +44,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class Layer extends Component {
   render() {
-    const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
       const option = this.props.options[key]
 
@@ -94,25 +91,6 @@ class Layer extends Component {
         </div>
     }
 
-    let shapeSelectRender = undefined
-
-    if (this.props.showShapeSelectRender) {
-      shapeSelectRender =
-        <Row className="align-items-center">
-          <Col sm={5}>
-            Shape
-          </Col>
-
-          <Col sm={7}>
-            <Select
-              value={selectedOption}
-              onChange={this.props.onChangeType}
-              maxMenuHeight={305}
-              options={this.props.selectOptions} />
-          </Col>
-        </Row>
-    }
-
     return (
       <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
         <Row className="align-items-center mb-2">
@@ -123,8 +101,6 @@ class Layer extends Component {
             <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
           </Col>
         </Row>
-
-        { shapeSelectRender }
 
         { linkRender }
 

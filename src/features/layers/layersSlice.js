@@ -19,7 +19,7 @@ const layersSlice = createSlice({
     addLayer(state, action) {
       let layer = { ...action.payload }
       layer.id = uniqueId('layer-')
-      layer.name = layer.name || layer.id.split('-').join(' ')
+      layer.name = layer.name || getShape(layer).name
       state.byId[layer.id] = layer
       state.allIds.push(layer.id)
       state.current = layer.id

@@ -11,6 +11,10 @@ export default class Shape {
     this.cache = []
   }
 
+  getName() {
+    return this.name
+  }
+
   getInitialState() {
     return {
       repeatEnabled: true,
