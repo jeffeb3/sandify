@@ -131,7 +131,7 @@ class Downloader extends Component {
     return (
       <div>
         <Button className="ml-2 mr-3" variant="primary" onClick={this.props.open}>Export</Button>
-        <Modal show={this.props.show} onHide={this.props.close}>
+        <Modal size="lg" show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
             <Modal.Title>Export to a file</Modal.Title>
           </Modal.Header>

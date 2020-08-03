@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import ReactGA from 'react-ga'
 import { Tab, Tabs } from 'react-bootstrap'
 import { connect } from 'react-redux'
-import Uploader from '../importer/Uploader'
 import MachineSettings from '../machine/MachineSettings'
 import Footer from './Footer'
 import Layer from '../layers/Layer'
@@ -39,10 +38,6 @@ class InputTabs extends Component {
 
          <Tab eventKey="machine" title="Machine" className="full-page-tab">
            <MachineSettings />
-         </Tab>
-
-         <Tab eventKey="code" title="Import" className="full-page-tab">
-           <Uploader />
          </Tab>
 
          <Tab eventKey="about" title="About" className="full-page-tab">
