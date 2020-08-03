@@ -32,14 +32,14 @@ const getPreview = state => state.preview
 // https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
 const cachedSelectors = {}
 
-// by returning null for shapes which can change size, this selector will ensure
+// by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
 const makeGetLayerMachine = layerId => {
   return createSelector(
     [ getLayers, getMachine ],
     (layers, machine) => {
       const layer = layers.byId[layerId]
-      return layer.canChangeSize ? null : machine
+      return layer.usesMachine ? null : machine
     }
   )
 }

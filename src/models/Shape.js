@@ -18,6 +18,7 @@ export default class Shape {
       selectGroup: 'Shapes',
       shouldCache: true,
       canChangeSize: true,
+      usesMachine: false,
       startingSize: 10,
       offsetX: 0.0,
       offsetY: 0.0,

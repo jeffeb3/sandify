@@ -9,18 +9,13 @@ const options = {
       type: 'inputText',
       plainText: 'true'
     },
-    zoom: {
-      title: 'Zoom',
-      min: 1
-    },
     aspectRatio: {
       title: 'Aspect Ratio',
       type: 'checkbox'
     },
     comments: {
       title: 'Comments',
-      type: 'textarea',
-      plainText: true
+      type: 'comments'
     },
   }
 }
@@ -39,13 +34,19 @@ export default class FileImport extends Shape {
         aspectRatio: true,
         originalAspectRatio: 1.0,
         vertices: [],
+        comments: [],
         selectGroup: 'import',
         canTransform: false,
-        canChangeSize: false,
-        repeatEnabled: false,
-        zoom: 100
+        canChangeSize: true,
+        usesMachine: false,
+        repeatEnabled: false
       },
-      ...(importProps === undefined ? {} : importProps)
+      ...(importProps === undefined ? {} : {
+        fileName: importProps.fileName,
+        vertices: importProps.vertices,
+        originalAspectRatio: importProps.originalAspectRatio,
+        comments: importProps.comments
+      })
     }
   }
 
@@ -56,11 +57,11 @@ export default class FileImport extends Shape {
       return [new Victor(0.0, 0.0), new Victor(0.0, 0.1)]
     }
 
-    let x_scale = (state.machine.maxX - state.machine.minX)/2.0 * 0.01 * state.shape.zoom
-    let y_scale = (state.machine.maxY - state.machine.minY)/2.0 * 0.01 * state.shape.zoom
+    let x_scale = (state.machine.maxX - state.machine.minX)/2.0 * 0.1
+    let y_scale = (state.machine.maxY - state.machine.minY)/2.0 * 0.1
 
     if (!state.machine.rectangular) {
-      x_scale = y_scale = state.machine.maxRadius * 0.01 * state.shape.zoom
+      x_scale = y_scale = state.machine.maxRadius * 0.1
     }
 
     if (state.shape.aspectRatio) {

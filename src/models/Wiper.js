@@ -256,6 +256,7 @@ export default class Wiper extends Shape {
         canTransform: false,
         shouldCache: false,
         canChangeSize: false,
+        usesMachine: true,
         repeatEnabled: false,
       }
     }
