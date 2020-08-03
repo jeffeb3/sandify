@@ -19,12 +19,14 @@ const PreviewLayer = (ownProps) => {
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
     const layer = state.layers.byId[ownProps.id] || getCurrentLayer(state)
+    const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
+    const numLayers = getNumVisibleLayers(state)
 
     return {
       layer: layer,
-      layerIndex: getCachedSelector(makeGetLayerIndex, layer.id)(state),
+      start: index === 0,
+      end: index === numLayers - 1,
       currentLayer: getCurrentLayer(state),
-      numLayers: getNumVisibleLayers(state),
       trackVertices: getPreviewTrackVertices(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
       allVertices: getAllPreviewVertices(state),
@@ -67,11 +69,14 @@ const PreviewLayer = (ownProps) => {
     context.lineTo(in_mm.x, in_mm.y)
   }
 
-  function dot_mm(context, vertex, radius=3) {
+  function dot_mm(context, vertex, radius=4) {
     var in_mm = mmToPixels(vertex)
     context.arc(in_mm.x, in_mm.y, radius, 0, 2 * Math.PI, true)
     context.fillStyle = context.strokeStyle
     context.fill()
+    context.lineWidth = 1
+    context.strokeStyle = isSelected ? 'yellow' : unselectedColor
+    context.stroke()
   }
 
   // draws a colored path when user is using slider
@@ -111,13 +116,13 @@ const PreviewLayer = (ownProps) => {
   function drawStartAndEndPoints(context) {
     context.beginPath()
     context.strokeStyle = 'green'
-    dot_mm(context, props.vertices[0])
+    dot_mm(context, props.vertices[0], props.start ? 5 : 3)
     context.stroke()
 
-    let endOffset = (props.currentLayer.dragging || props.layerIndex === props.numLayers - 1) ? 1 : 2
+    let endOffset = (props.currentLayer.dragging || props.end) ? 1 : 2
     context.beginPath()
     context.strokeStyle = 'red'
-    dot_mm(context, props.vertices[props.vertices.length - endOffset])
+    dot_mm(context, props.vertices[props.vertices.length - endOffset], props.end ? 5 : 3)
     context.stroke()
   }
 
