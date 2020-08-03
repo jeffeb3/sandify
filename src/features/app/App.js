@@ -1,8 +1,5 @@
 import React, { Component } from 'react'
-import {
-  Col,
-  Row
-} from 'react-bootstrap'
+import { Col, Row } from 'react-bootstrap'
 import { Provider } from 'react-redux'
 import Header from './Header'
 import InputTabs from './InputTabs'

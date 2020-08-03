@@ -20,6 +20,7 @@ export default class Star extends Shape {
   constructor() {
     super('Web')
     this.link = 'http://mathworld.wolfram.com/Hypocycloid.html'
+    this.linkText = 'Wolfram Mathworld'
   }
 
   getInitialState() {

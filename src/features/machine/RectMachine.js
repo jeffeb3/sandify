@@ -3,15 +3,20 @@ import Machine from './Machine'
 import { distance } from '../../common/geometry'
 
 export default class RectMachine extends Machine {
-  constructor(vertices, settings) {
+  constructor(vertices, settings, layerInfo) {
     super()
     this.vertices = vertices
     this.settings = settings
+    this.layerInfo = layerInfo
     this.sizeX = Math.abs((settings.maxX - settings.minX) / 2.0)
     this.sizeY = Math.abs((settings.maxY - settings.minY) / 2.0)
   }
 
-  addEndpoints() {
+  addStartPoint() {
+    return this
+  }
+
+  addEndPoint() {
     if (this.settings.rectOrigin.length === 1) {
       // OK, let's assign corners indices:
       // [1]   [2]

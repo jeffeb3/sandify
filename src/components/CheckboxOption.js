@@ -12,7 +12,7 @@ class CheckboxOption extends Component {
     const model = this.props.model
 
     return (
-      <Row className="align-items-center pb-2">
+      <Row className="align-items-center">
         <Col sm={5}>
         <Form.Label htmlFor="options-step">
           {option.title}

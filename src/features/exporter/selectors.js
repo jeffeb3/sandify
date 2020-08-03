@@ -2,8 +2,8 @@ import { createSelector } from 'reselect'
 import CommentExporter from './CommentExporter'
 
 const getApp = state => state.app
-const getShapes = state => state.shapes
-const getTransforms = state => state.transforms
+const getLayers = state => state.layers
+const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getImporter = state => state.importer
 const getExporter = state => state.exporter
 const getMachine = state => state.machine
@@ -11,19 +11,17 @@ const getMachine = state => state.machine
 export const getComments = createSelector(
   [
       getApp,
-      getShapes,
-      getTransforms,
+      getLayers,
+      getCurrentLayer,
       getImporter,
       getExporter,
       getMachine,
   ],
-  (app, shapes, transforms, importer, exporter, machine) => {
+  (app, layers, layer, importer, exporter, machine) => {
     const state = {
       app: app,
-      shapes: shapes,
-      shape: shapes.byId[shapes.currentId],
-      transforms: transforms,
-      transform: transforms.byId[shapes.currentId],
+      layers: layers,
+      layer: layer,
       importer: importer,
       exporter: exporter,
       machine: machine

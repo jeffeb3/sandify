@@ -12,21 +12,21 @@ import { subtypes } from './subtypes'
 const options = {
   ...shapeOptions,
   ...{
-    subtype: {
+    fillerSubtype: {
       title: 'Type',
       type: 'dropdown',
       choices: Object.keys(subtypes),
       onChange: (changes, attrs) => {
-        return onSubtypeChange(subtypes[changes.subtype], changes, attrs)
+        return onSubtypeChange(subtypes[changes.fillerSubtype], changes, attrs)
       }
     },
     iterations: {
       title: 'Iterations',
       min: (state) => {
-        return onMinIterations(subtypes[state.subtype], state)
+        return onMinIterations(subtypes[state.fillerSubtype], state)
       },
       max: (state) => {
-        return onMaxIterations(subtypes[state.subtype], state)
+        return onMaxIterations(subtypes[state.fillerSubtype], state)
       }
     }
   }
@@ -47,17 +47,8 @@ export default class SpaceFiller extends Shape {
         selectGroup: 'Erasers',
         canTransform: false,
         iterations: 6,
-        subtype: 'Hilbert'
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
+        fillerSubtype: 'Hilbert',
         repeatEnabled: false,
-        startingSize: 1,
         canChangeSize: false,
       }
     }
@@ -76,7 +67,7 @@ export default class SpaceFiller extends Shape {
     }
 
     // generate our vertices using a set of l-system rules
-    let config = subtypes[state.shape.subtype]
+    let config = subtypes[state.shape.fillerSubtype]
     config.iterations = iterations
 
     if (config.side === undefined) { config.side = 5 }

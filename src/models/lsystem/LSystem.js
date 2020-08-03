@@ -36,7 +36,7 @@ export default class LSystem extends Shape {
   constructor() {
     super('Fractal Line Writer')
     this.link = 'https://en.wikipedia.org/wiki/L-system'
-    this.linkText = 'this Wikipedia article on L-systems'
+    this.linkText = 'L-systems on Wikipedia'
   }
 
   getInitialState() {
@@ -46,16 +46,7 @@ export default class LSystem extends Shape {
         type: 'lsystem',
         iterations: 3,
         subtype: 'McWorter\'s Pentadendrite',
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
-        repeatEnabled: false,
-        startingSize: 23,
+        repeatEnabled: false
       }
     }
   }
@@ -63,7 +54,6 @@ export default class LSystem extends Shape {
   getVertices(state) {
     const shape = state.shape
     const iterations = shape.iterations || 1
-    const size = 8
 
     // generate our vertices using a set of l-system rules
     let config = subtypes[shape.subtype]
@@ -73,8 +63,8 @@ export default class LSystem extends Shape {
     if (config.angle === undefined) { config.angle = Math.PI/2 }
 
     let curve = lsystemPath(lsystem(config), config)
-
-    return resizeVertices(curve, size, size)
+    const scale = 18.0 // to normalize starting size
+    return resizeVertices(curve, scale, scale)
   }
 
   getOptions() {

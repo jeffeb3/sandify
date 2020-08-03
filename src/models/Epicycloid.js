@@ -20,6 +20,7 @@ export default class Epicycloid extends Shape {
   constructor() {
     super('Clover')
     this.link = 'http://mathworld.wolfram.com/Epicycloid.html'
+    this.linkText = 'Wolfram Mathworld'
   }
 
   getInitialState() {

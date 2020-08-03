@@ -36,6 +36,11 @@
   }
 }
 
+h2.panel {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
 /**
  Bootstrap 4 overrides
  **/
@@ -76,6 +81,10 @@ h2 {
   background-color: #A0D4EB;
 }
 
+.list-group-item.active {
+  background-color: #2d6da4;
+}
+
 .btn-group {
   .btn-light:focus, .btn-light.focus {
     background-color: #f8f9fa;
@@ -84,4 +93,11 @@ h2 {
   .btn {
     box-shadow: none !important;
   }
+}
+
+.no-select {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
 }

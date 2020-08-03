@@ -25,7 +25,7 @@ class InputOption extends Component {
     const visible = option.isVisible === undefined ? true : option.isVisible(model)
 
     return (
-      <Row className={"align-items-center pb-1 " + (visible ? null : ' d-none')}>
+      <Row className={"align-items-center pb-1" + (visible ? '' : ' d-none')}>
         <Col sm={5}>
         <Form.Label htmlFor="options-step">
           {option.title}
@@ -34,7 +34,6 @@ class InputOption extends Component {
 
         <Col sm={7}>
           <Form.Control
-            id="options-step"
             as={optionType==="textarea" ? "textarea" : "input"}
             type={optionType}
             step={option.step ? option.step : 1}
