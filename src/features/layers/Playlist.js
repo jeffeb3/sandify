@@ -6,7 +6,7 @@ import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy, FaUpload } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
-import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
+import { registeredShapes, getShapeSelectOptions, getShape, getAnyShape } from '../../models/shapes'
 import ReactGA from 'react-ga'
 import ThetaRhoImporter from '../importer/ThetaRhoImporter'
 import GCodeImporter from '../importer/GCodeImporter'
@@ -24,6 +24,7 @@ const mapStateToProps = (state, ownProps) => {
     newLayerType: state.layers.newLayerType,
     copyLayerName: state.layers.copyLayerName,
     selectOptions: getShapeSelectOptions(),
+    defaultNewShape: getAnyShape(),
   }
 }
 
@@ -191,7 +192,8 @@ class Playlist extends Component {
   }
 
   render() {
-    const selectedShape = getShape({type: this.props.newLayerType}) || this.props.shape
+
+    const selectedShape = getShape({type: this.props.newLayerType}) || this.props.defaultNewShape
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
     const namedInputRef = React.createRef()
 

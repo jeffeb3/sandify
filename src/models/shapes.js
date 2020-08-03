@@ -43,6 +43,10 @@ export const getShape = (layer) => {
   return registeredShapes[layer.type]
 }
 
+export const getAnyShape = (layer) => {
+  return registeredShapes["polygon"]
+}
+
 export const getShapeDefaults = () => {
   return Object.keys(registeredShapes).map(id => {
     const state = registeredShapes[id].getInitialState()
