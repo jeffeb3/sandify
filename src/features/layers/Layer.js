@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import React, { Component } from 'react'
 import { Button, Card, Row, Col } from 'react-bootstrap'
 import Select from 'react-select'
+import CommentsBox from '../../components/CommentsBox'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
 import CheckboxOption from '../../components/CheckboxOption'
@@ -9,6 +10,7 @@ import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
 import { getShape, getShapeSelectOptions } from '../../models/shapes'
+import './Layer.scss'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
@@ -64,6 +66,12 @@ class Layer extends Component {
                   key={key}
                   index={index}
                   model={this.props.layer} />
+      } else if (option.type === 'comments') {
+        return <CommentsBox
+                  options={this.props.options}
+                  optionKey={key}
+                  key={key}
+                  comments={this.props.layer.comments} />
       } else {
         return  <InputOption
                   onChange={this.props.onChange}
@@ -74,7 +82,6 @@ class Layer extends Component {
                   model={this.props.layer} />
       }
     })
-
 
     const linkText = this.props.linkText || this.props.link
     const linkRender = this.props.link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p></Col></Row> : undefined
