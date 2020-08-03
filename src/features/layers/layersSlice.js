@@ -57,7 +57,7 @@ const layersSlice = createSlice({
     restoreDefaults(state, action) {
       const id = action.payload
       const layer = state.byId[id]
-      const defaults = getShape(layer).getInitialState()
+      const defaults = getShape(layer).getInitialState(layer)
 
       state.byId[layer.id] = {
         id: layer.id,
