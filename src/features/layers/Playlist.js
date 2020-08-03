@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash, FaEye, FaEyeSlash, FaCopy, FaUpload } from 'react-icons/fa';
+import { FaTrash, FaEye, FaEyeSlash, FaCopy, FaStickyNote, FaUpload } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape, getAnyShape } from '../../models/shapes'
@@ -314,7 +314,7 @@ class Playlist extends Component {
             onSortEnd={this.props.onLayerMoved}
             onToggleLayerVisible={this.props.onToggleLayerVisible}
           />
-          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}><FaStickyNote/></Button>
           <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleImportModal.bind(this)}><FaUpload/></Button>
         </div>
       </div>
