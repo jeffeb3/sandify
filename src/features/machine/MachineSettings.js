@@ -16,7 +16,7 @@ class MachineSettings extends Component {
   render() {
     return (
       <div className="p-3">
-        <Accordion defaultActiveKey={this.props.rectangular ? 0 : 1}>
+        <Accordion defaultActiveKey={this.props.rectangular ? 2 : 1}>
           <RectSettings />
           <PolarSettings />
         </Accordion>

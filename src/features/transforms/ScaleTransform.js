@@ -44,17 +44,17 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 class ScaleTransform extends Component {
   render() {
     const activeClassName = this.props.active ? 'active' : ''
-    const activeKey = this.props.active ? 0 : null
+    const activeKey = this.props.active ? 1 : null
 
     return (
       <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
-          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onGrow}>
+          <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onGrow}>
             <h3>Scale</h3>
             Grows or shrinks the shape
           </Accordion.Toggle>
 
-          <Accordion.Collapse eventKey={0}>
+          <Accordion.Collapse eventKey={1}>
             <Card.Body>
 
               <InputOption

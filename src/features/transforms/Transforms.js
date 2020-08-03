@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 class Transforms extends Component {
   render() {
     const activeClassName = this.props.active ? 'active' : ''
-    const activeKey = this.props.active ? 0 : null
+    const activeKey = this.props.active ? 1 : null
 
     return (
       <div className="transforms">
@@ -94,12 +94,12 @@ class Transforms extends Component {
 
         <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
-            <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onRepeat}>
+            <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onRepeat}>
               <h3>Loop and transform</h3>
               Draws the shape multiple times, transforming it each time.
             </Accordion.Toggle>
 
-            <Accordion.Collapse eventKey={0}>
+            <Accordion.Collapse eventKey={1}>
               <Card.Body>
                 <InputOption
                   onChange={this.props.onChange}
