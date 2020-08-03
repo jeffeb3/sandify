@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Button, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
+import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
+import { FaTrash, FaEye, FaEyeSlash, FaCopy, FaUpload } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
+import ReactGA from 'react-ga'
+import ThetaRhoImporter from '../importer/ThetaRhoImporter'
+import GCodeImporter from '../importer/GCodeImporter'
 import './Playlist.scss'
 
 const mapStateToProps = (state, ownProps) => {
@@ -32,6 +35,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onLayerAdded: (type) => {
       const attrs = registeredShapes[type].getInitialState()
+      dispatch(addLayer(attrs))
+    },
+    onLayerImport: (importProps) => {
+      const attrs = {
+          ...registeredShapes["file_import"].getInitialState(importProps),
+          name: importProps.fileName
+      }
+
       dispatch(addLayer(attrs))
     },
     onLayerCopied: (id) => {
@@ -109,7 +120,11 @@ const SortableList = SortableContainer(({layers, currentLayer, numLayers, onCopy
 class Playlist extends Component {
   constructor(props) {
     super(props)
-    this.state = {showNewLayer: false, showCopyLayer: false}
+    this.state = {
+        showNewLayer: false,
+        showImportLayer: false,
+        showCopyLayer: false
+    }
   }
 
   scrollToBottom() {
@@ -121,6 +136,43 @@ class Playlist extends Component {
 
   toggleNewModal() {
     this.setState({showNewLayer: !this.state.showNewLayer})
+  }
+
+  toggleImportModal() {
+    this.setState({showImportLayer: !this.state.showImportLayer})
+  }
+
+  onFileSelected(event) {
+    let file = event.target.files[0]
+    let reader = new FileReader()
+
+    reader.onload = (event) => {
+      this.startTime = performance.now()
+      var text = reader.result
+
+      let importer
+      if (file.name.toLowerCase().endsWith('.thr')) {
+        importer = new ThetaRhoImporter(file.name, text)
+      } else if (file.name.toLowerCase().endsWith('.gcode') || file.name.toLowerCase().endsWith('.nc')) {
+        importer = new GCodeImporter(file.name, text)
+      }
+
+      importer.import(this.onFileImported.bind(this))
+      this.toggleImportModal.bind(this)();
+    }
+
+    reader.readAsText(file)
+  }
+
+  onFileImported(importer, importerProps) {
+    this.props.onLayerImport(importerProps)
+
+    this.endTime = performance.now()
+    ReactGA.timing({
+      category: 'PatternImport',
+      variable: 'read' + importer.label,
+      value: this.endTime - this.startTime // in milliseconds
+    })
   }
 
   toggleCopyModal() {
@@ -172,6 +224,33 @@ class Playlist extends Component {
           </Modal.Footer>
         </Modal>
 
+        <Modal show={this.state.showImportLayer} onHide={this.toggleImportModal.bind(this)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Import new layer</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Accordion className="mb-4">
+              <Card>
+                <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
+                  <h3>Import</h3>
+                  Imports a pattern from a .thr, .gcode, or .nc file.
+                  <Form.Control
+                      id="fileUpload"
+                      type="file"
+                      accept=".thr,.gcode,.nc"
+                      onChange={this.onFileSelected.bind(this)}
+                      style={{ display: "none" }} />
+                </Card.Header>
+              </Card>
+            </Accordion>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button id="new-layer-close" variant="link" onClick={this.toggleImportModal.bind(this)}>Cancel</Button>
+          </Modal.Footer>
+        </Modal>
+
         <Modal show={this.state.showCopyLayer}
           onHide={this.toggleCopyModal.bind(this)}
           onEntered={() => namedInputRef.current.focus()}
@@ -215,7 +294,8 @@ class Playlist extends Component {
             onSortEnd={this.props.onLayerMoved}
             onToggleLayerVisible={this.props.onToggleLayerVisible}
           />
-          <Button className="mt-2" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleImportModal.bind(this)}><FaUpload/></Button>
         </div>
       </div>
     )

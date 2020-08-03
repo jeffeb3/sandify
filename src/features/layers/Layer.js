@@ -19,6 +19,7 @@ const mapStateToProps = (state, ownProps) => {
     shape: shape,
     options: shape.getOptions(),
     selectOptions: getShapeSelectOptions(),
+    showShapeSelectRender: layer.selectGroup !== "import",
     link: shape.link,
     linkText: shape.linkText
   }
@@ -86,16 +87,10 @@ class Layer extends Component {
         </div>
     }
 
-    return (
-      <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
-        <Row className="align-items-center mb-2">
-          <Col sm={5}>
-            <h2 className="panel m-0">Properties</h2>
-          </Col>
-          <Col sm={7}>
-            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
-          </Col>
-        </Row>
+    let shapeSelectRender = undefined
+
+    if (this.props.showShapeSelectRender) {
+      shapeSelectRender =
         <Row className="align-items-center">
           <Col sm={5}>
             Shape
@@ -109,6 +104,20 @@ class Layer extends Component {
               options={this.props.selectOptions} />
           </Col>
         </Row>
+    }
+
+    return (
+      <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
+        <Row className="align-items-center mb-2">
+          <Col sm={5}>
+            <h2 className="panel m-0">Properties</h2>
+          </Col>
+          <Col sm={7}>
+            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
+          </Col>
+        </Row>
+
+        { shapeSelectRender }
 
         { linkRender }
 

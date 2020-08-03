@@ -85,11 +85,11 @@ class Uploader extends Component {
         <Card className="p-3 pb-4">
           <Accordion className="mb-4">
             <Card>
-              <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
+              <Card.Header as={Form.Label} htmlFor="oldfileUpload" style={{ cursor: "pointer" }}>
                 <h3>Import</h3>
                 Imports a pattern from a .thr, .gcode, or .nc file.
                 <Form.Control
-                    id="fileUpload"
+                    id="oldfileUpload"
                     type="file"
                     accept=".thr,.gcode,.nc"
                     onChange={this.onFileSelected.bind(this)}

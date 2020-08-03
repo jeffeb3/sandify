@@ -40,6 +40,7 @@ class InputOption extends Component {
             min={!isNaN(minimum) ? minimum : ''}
             max={!isNaN(maximum) ? maximum : ''}
             value={model[this.props.optionKey]}
+            plaintext={option.plainText}
             onChange={(event) => {
               let attrs = {}
               let value = event.target.value
