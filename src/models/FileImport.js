@@ -26,7 +26,6 @@ export default class FileImport extends Shape {
   }
 
   getInitialState(importProps) {
-
     return {
       ...super.getInitialState(),
       ...{
@@ -74,7 +73,7 @@ export default class FileImport extends Shape {
     }
 
     return state.shape.vertices.map( (vertex) => {
-      return Victor( vertex.x * x_scale, vertex.y * y_scale )
+      return Victor(vertex.x * x_scale, vertex.y * y_scale)
     })
   }
 

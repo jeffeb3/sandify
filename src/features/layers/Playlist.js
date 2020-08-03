@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash, FaEye, FaEyeSlash, FaCopy, FaStickyNote, FaUpload } from 'react-icons/fa';
+import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape, getAnyShape } from '../../models/shapes'
@@ -233,10 +233,10 @@ class Playlist extends Component {
 
           <Modal.Body>
             <Accordion className="mb-4">
-              <Card>
+              <Card className="active mt-2">
                 <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
                   <h3>Import</h3>
-                  Imports a pattern from a .thr, .gcode, or .nc file.
+                  Imports a pattern file as a new layer. Supported formats are .thr, .gcode, and .nc.
                   <Form.Control
                       id="fileUpload"
                       type="file"
@@ -246,28 +246,35 @@ class Playlist extends Component {
                 </Card.Header>
               </Card>
             </Accordion>
-            <div className="p-4">
+            <div className="mt-2">
               <h3>Where to get .thr files</h3>
               Sisyphus machines use theta rho (.thr) files. There is a large community sharing them.
-              <ul className="list-unstyled">
-                <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
-                <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
-                <li><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></li>
-                <li><a href="https://reddit.com/r/SisyphusIndustries">Sisyphus on Reddit</a></li>
-                <li><a href="https://sisyphus-industries.com/community/community-tracks">Sisyphus Community</a></li>
-                <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
-              </ul>
+              <div className="row mt-2">
+                <div className="col-6">
+                  <ul className="list-unstyled">
+                    <li><a href="https://reddit.com/u/markyland">Markyland on Reddit</a></li>
+                    <li><a href="https://github.com/Dithermaster/sisyphus/">Dithermaster's github</a></li>
+                    <li><a href="https://github.com/SlightlyLoony/JSisyphus">JSisyphus by Slightly Loony</a></li>
+                  </ul>
+                </div>
+                <div className="col-6">
+                  <ul className="list-unstyled">
+                    <li><a href="https://reddit.com/r/SisyphusIndustries">Sisyphus on Reddit</a></li>
+                    <li><a href="https://sisyphus-industries.com/community/community-tracks">Sisyphus Community</a></li>
+                    <li><a href="http://thejuggler.net/sisyphus/">The Juggler</a></li>
+                  </ul>
+                </div>
+              </div>
 
-              <h4 className="mt-3">Note about copyrights</h4>
-              <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so).</p>
-              <p>If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
+              <h3 className="mt-3">About copyrights</h3>
+              <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so). If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
               <p>Someone posting the .thr file to a forum or subreddit probably wants it to be shared, and drawing it on your home table is probably OK. Just be careful if you want to use them for something significant without explicit permission.</p>
-              <p>I am not a lawyer.</p>
+              <p>P.S. I am not a lawyer.</p>
             </div>
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="new-layer-close" variant="link" onClick={this.toggleImportModal.bind(this)}>Cancel</Button>
+            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportModal.bind(this)}>Done</Button>
           </Modal.Footer>
         </Modal>
 
@@ -314,8 +321,8 @@ class Playlist extends Component {
             onSortEnd={this.props.onLayerMoved}
             onToggleLayerVisible={this.props.onToggleLayerVisible}
           />
-          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}><FaStickyNote/></Button>
-          <Button className="mt-2 newLayerButton" variant="outline-primary" size="sm" onClick={this.toggleImportModal.bind(this)}><FaUpload/></Button>
+          <Button className="mt-2 mr-1" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+          <Button className="mt-2" variant="outline-primary" size="sm" onClick={this.toggleImportModal.bind(this)}>Import</Button>
         </div>
       </div>
     )
