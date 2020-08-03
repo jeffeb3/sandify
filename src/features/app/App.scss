@@ -81,6 +81,10 @@ h2 {
   background-color: #A0D4EB;
 }
 
+.list-group-item.active {
+  background-color: #2d6da4;
+}
+
 .btn-group {
   .btn-light:focus, .btn-light.focus {
     background-color: #f8f9fa;

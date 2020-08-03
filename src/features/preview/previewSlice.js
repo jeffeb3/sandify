@@ -12,8 +12,8 @@ const previewSlice = createSlice({
       Object.assign(state, action.payload)
     },
     setPreviewSize(state, action) {
-      state.canvasHeight = action.payload
-      state.canvasWidth = action.payload
+      state.canvasHeight = action.payload.height
+      state.canvasWidth = action.payload.width
     },
   }
 })

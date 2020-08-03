@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Shape, { shapeOptions } from './Shape'
+import Shape from './Shape'
 
 export default class Point extends Shape {
   constructor() {

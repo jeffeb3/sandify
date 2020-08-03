@@ -18,7 +18,6 @@ export const relativeScale = (props) => {
     width = height = props.maxRadius * 2.0
   }
 
-  // keep it square
   return Math.min(props.canvasWidth / width, props.canvasHeight / height)
 }
 
@@ -70,10 +69,9 @@ class PreviewWindow extends Component {
   resize(wrapper) {
     const width = parseInt(getComputedStyle(wrapper).getPropertyValue('width'))
     const height = parseInt(getComputedStyle(wrapper).getPropertyValue('height'))
-    const size = Math.max(Math.min(width, height))
 
-    if (this.props.canvasWidth !== size) {
-      this.props.onResize(size)
+    if (this.props.canvasWidth !== width || this.props.canvasHeight !== height) {
+      this.props.onResize({width: width, height: height})
     }
   }
 
@@ -113,7 +111,6 @@ class PreviewWindow extends Component {
       return newSize
     }
 
-    const isSliding = this.props.sliderValue > 0
     const clipFunc = this.props.dragging ? (this.props.use_rect ? clipRect : clipCircle) : null
 
     return (
