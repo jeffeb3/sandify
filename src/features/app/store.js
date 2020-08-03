@@ -8,6 +8,15 @@ import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
 
+//const customizedMiddleware = getDefaultMiddleware({
+//  immutableCheck: {
+//    ignoredPaths: ['importer.vertices']
+//  },
+//  serializableCheck: {
+//    ignoredPaths: ['importer.vertices']
+//  }
+//})
+
 const store = configureStore({
   reducer: combineReducers({
     app: appReducer,
