@@ -132,7 +132,9 @@ export const makeGetPreviewVertices = layerId => {
           if (!nextLayer.dragging && nextLayer.visible) {
             // draw the stitch between the two layers
             const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
-            vertices = vertices.concat(nextVertices[0])
+            if (nextVertices[0]) {
+              vertices = vertices.concat(nextVertices[0])
+            }
           }
         }
       }
