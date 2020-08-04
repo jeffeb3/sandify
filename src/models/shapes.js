@@ -1,5 +1,6 @@
 import Circle from '../models/Circle'
 import Epicycloid from '../models/Epicycloid'
+import FileImport from '../models/FileImport'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
@@ -34,7 +35,8 @@ export const registeredShapes = {
   tessellation_twist: new TessellationTwist(),
   point: new Point(),
   wiper: new Wiper(),
-  space_filler: new SpaceFiller()
+  space_filler: new SpaceFiller(),
+  file_import: new FileImport()
 }
 
 export const getShape = (layer) => {
@@ -64,6 +66,10 @@ export const getShapeSelectOptions = () => {
       }
     }
     if (!found) {
+      if (shape.selectGroup === "import") {
+        // Users can't manually select this group.
+        continue
+      }
       const newOptions = [ optionLabel ]
       groupOptions.push( { label: shape.selectGroup, options: newOptions } )
     }

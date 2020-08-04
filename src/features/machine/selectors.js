@@ -5,8 +5,7 @@ import Color from 'color'
 import {
   transformShapes,
   transformShape,
-  polishVertices,
-  scaleImportedVertices
+  polishVertices
 } from './computer'
 import { getShape } from '../../models/shapes'
 import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
@@ -22,9 +21,7 @@ const getCacheKey = (state) => {
 }
 
 const getState = state => state
-const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getLayers = state => state.layers
-const getImporter = state => state.importer
 const getMachine = state => state.machine
 const getPreview = state => state.preview
 
@@ -32,14 +29,14 @@ const getPreview = state => state.preview
 // https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
 const cachedSelectors = {}
 
-// by returning null for shapes which can change size, this selector will ensure
+// by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
 const makeGetLayerMachine = layerId => {
   return createSelector(
     [ getLayers, getMachine ],
     (layers, machine) => {
       const layer = layers.byId[layerId]
-      return layer.canChangeSize ? null : machine
+      return layer.usesMachine ? machine : null
     }
   )
 }
@@ -134,7 +131,9 @@ export const makeGetPreviewVertices = layerId => {
           if (!nextLayer.dragging && nextLayer.visible) {
             // draw the stitch between the two layers
             const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
-            vertices = vertices.concat(nextVertices[0])
+            if (nextVertices[0]) {
+              vertices = vertices.concat(nextVertices[0])
+            }
           }
         }
       }
@@ -238,36 +237,24 @@ export const getSliderColors = createSelector(
 
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.
-export const getPreviewTrackVertices = createSelector(
-  getCurrentLayer,
-  (layer) => {
-    const numLoops = layer.numLoops
-    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
-    let trackVertices = []
+export const makeGetPreviewTrackVertices = layerId => {
+  return createSelector(
+    getLayers,
+    (layers) => {
+      const layer = layers.byId[layerId]
+      const numLoops = layer.numLoops
+      const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
+      let trackVertices = []
 
-    for (var i=0; i<numLoops; i++) {
-      if (layer.trackEnabled) {
-        trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+      for (var i=0; i<numLoops; i++) {
+        if (layer.trackEnabled) {
+          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+        }
       }
+
+      return trackVertices.map(vertex => {
+        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
+      })
     }
-
-    return trackVertices.map(vertex => {
-      return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
-    })
-  }
-)
-
-// OLD: DELETE ONCE IMPORT IS A LAYER
-
-// requires importer and machine state
-export const getImportedVertices = createSelector(
-  [
-    getImporter,
-    getMachine
-  ],
-  (importer, machine) => {
-    let vertices = scaleImportedVertices(importer, machine)
-    return polishVertices(vertices, machine)
-  }
-)
+  )}

@@ -124,31 +124,6 @@ export const polishVertices = (vertices, machine, layerInfo) => {
   return vertices
 }
 
-export const scaleImportedVertices = (importer, machine) => {
-  var x_scale = (machine.maxX - machine.minX)/2.0 * 0.01 * importer.zoom
-  var y_scale = (machine.maxY - machine.minY)/2.0 * 0.01 * importer.zoom
-
-  if (!machine.rectangular) {
-    x_scale = y_scale = machine.maxRadius * 0.01 * importer.zoom
-  }
-
-  if (importer.aspectRatio) {
-    const machine_aspect_ratio = y_scale / x_scale
-    if (importer.originalAspectRatio > machine_aspect_ratio) {
-      x_scale = x_scale / importer.originalAspectRatio * machine_aspect_ratio
-    } else {
-      y_scale = y_scale * importer.originalAspectRatio / machine_aspect_ratio
-    }
-  }
-
-  return importer.vertices.map( (vertex) => {
-    return {...vertex,
-      x: vertex.x * x_scale,
-      y: vertex.y * y_scale,
-    }
-  })
-}
-
 function reportTiming(time) {
   time = Math.max(time, 0.01)
   ReactGA.timing({

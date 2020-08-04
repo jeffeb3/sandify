@@ -5,6 +5,7 @@ import layers, {
   restoreDefaults,
   setCurrentLayer,
   setSelectedLayer,
+  setNewLayerType,
   setShapeType,
   updateLayer,
   toggleSpin,
@@ -48,6 +49,7 @@ describe('layers reducer', () => {
     trackLength: 0.2,
     trackNumLoops: 1,
     trackGrow: 50.0,
+    usesMachine: false,
     dragging: false,
     visible: true
   }
@@ -56,7 +58,9 @@ describe('layers reducer', () => {
     expect(layers(undefined, {})).toEqual({
       current: null,
       selected: null,
-      newLayerType: null,
+      newLayerType: 'polygon',
+      newLayerName: 'polygon',
+      newLayerNameOverride: false,
       copyLayerName: null,
       byId: {},
       allIds: []
@@ -82,6 +86,8 @@ describe('layers reducer', () => {
       allIds: ['layer-1'],
       current: 'layer-1',
       selected: 'layer-1',
+      newLayerName: undefined,
+      newLayerNameOverride: false
     })
   })
 
@@ -423,6 +429,20 @@ describe('layers reducer', () => {
           visible: false
         }
       }
+    })
+  })
+
+  it('should handle setNewLayerType', () => {
+    expect(
+      layers(
+        {
+          newLayerType: 'circle'
+        },
+        setNewLayerType('polygon')
+      )
+    ).toEqual({
+      newLayerType: 'polygon',
+      newLayerName: 'polygon'
     })
   })
 })

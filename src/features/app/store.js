@@ -1,7 +1,6 @@
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit"
+import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
 import appReducer from './appSlice'
-import importerReducer from '../importer/importerSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
 import previewReducer from '../preview/previewSlice'
@@ -9,25 +8,23 @@ import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
 
-const customizedMiddleware = getDefaultMiddleware({
-  immutableCheck: {
-    ignoredPaths: ['importer.vertices']
-  },
-  serializableCheck: {
-    ignoredPaths: ['importer.vertices']
-  }
-})
+//const customizedMiddleware = getDefaultMiddleware({
+//  immutableCheck: {
+//    ignoredPaths: ['importer.vertices']
+//  },
+//  serializableCheck: {
+//    ignoredPaths: ['importer.vertices']
+//  }
+//})
 
 const store = configureStore({
   reducer: combineReducers({
     app: appReducer,
     layers: layersReducer,
-    importer: importerReducer,
     exporter: exporterReducer,
     machine: machineReducer,
     preview: previewReducer
-  }),
-  middleware: customizedMiddleware
+  })
 })
 
 // set to true when running locally if you want to preserve your shape
@@ -51,7 +48,7 @@ if (persistState) {
   const layer = registeredShapes[currentShape].getInitialState()
 
   store.dispatch(addLayer(layer))
-  
+
   const state = store.getState()
   store.dispatch(setCurrentLayer(state.layers.byId[state.layers.allIds[0]].id))
 }

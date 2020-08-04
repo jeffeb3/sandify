@@ -3,14 +3,16 @@ import uniqueId from 'lodash/uniqueId'
 import arrayMove from 'array-move'
 import { getShape } from '../../models/shapes'
 
-const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'shouldCache']
+const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'usesMachine', 'shouldCache']
 
 const layersSlice = createSlice({
   name: 'layer',
   initialState: {
     current: null,
     selected: null,
-    newLayerType: null,
+    newLayerType: 'polygon',
+    newLayerName: 'polygon',
+    newLayerNameOverride: false,
     copyLayerName: null,
     byId: {},
     allIds: []
@@ -19,11 +21,13 @@ const layersSlice = createSlice({
     addLayer(state, action) {
       let layer = { ...action.payload }
       layer.id = uniqueId('layer-')
-      layer.name = layer.name || layer.id.split('-').join(' ')
+      layer.name = layer.name || state.newLayerName
       state.byId[layer.id] = layer
       state.allIds.push(layer.id)
       state.current = layer.id
       state.selected = layer.id
+      state.newLayerNameOverride = false
+      state.newLayerName = state.newLayerType
     },
     moveLayer(state, action) {
       const { oldIndex, newIndex } = action.payload
@@ -57,7 +61,7 @@ const layersSlice = createSlice({
     restoreDefaults(state, action) {
       const id = action.payload
       const layer = state.byId[id]
-      const defaults = getShape(layer).getInitialState()
+      const defaults = getShape(layer).getInitialState(layer)
 
       state.byId[layer.id] = {
         id: layer.id,
@@ -94,6 +98,14 @@ const layersSlice = createSlice({
       })
 
       state.byId[layer.id] = layer
+    },
+    setNewLayerType(state, action) {
+      let attrs = { newLayerType: action.payload }
+      if (!state.newLayerNameOverride) {
+        const shape = getShape({type: action.payload})
+        attrs.newLayerName = shape.name.toLowerCase()
+      }
+      Object.assign(state, attrs)
     },
     updateLayer(state, action) {
       const layer = action.payload
@@ -138,6 +150,7 @@ export const {
   setCurrentLayer,
   setSelectedLayer,
   setShapeType,
+  setNewLayerType,
   updateLayer,
   updateLayers,
   toggleRepeat,
