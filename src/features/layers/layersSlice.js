@@ -3,7 +3,7 @@ import uniqueId from 'lodash/uniqueId'
 import arrayMove from 'array-move'
 import { getShape } from '../../models/shapes'
 
-const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'shouldCache']
+const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'usesMachine', 'shouldCache']
 
 const layersSlice = createSlice({
   name: 'layer',
