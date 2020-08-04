@@ -21,7 +21,6 @@ const getCacheKey = (state) => {
 }
 
 const getState = state => state
-const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getLayers = state => state.layers
 const getMachine = state => state.machine
 const getPreview = state => state.preview
@@ -238,22 +237,25 @@ export const getSliderColors = createSelector(
 
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.
-export const getPreviewTrackVertices = createSelector(
-  getCurrentLayer,
-  (layer) => {
-    const numLoops = layer.numLoops
-    const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
-    let trackVertices = []
+export const makeGetPreviewTrackVertices = layerId => {
+  return createSelector(
+    getLayers,
+    (layers) => {
+      const layer = layers.byId[layerId]
+      console.log(layer)
+      const numLoops = layer.numLoops
+      const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
+      let trackVertices = []
 
-    for (var i=0; i<numLoops; i++) {
-      if (layer.trackEnabled) {
-        trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+      for (var i=0; i<numLoops; i++) {
+        if (layer.trackEnabled) {
+          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+        }
       }
-    }
 
-    return trackVertices.map(vertex => {
-      return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
-    })
-  }
-)
+      return trackVertices.map(vertex => {
+        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
+      })
+    }
+  )}

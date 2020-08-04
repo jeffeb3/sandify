@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
 import Victor from 'victor'
-import { getPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices, getSliderColors, getVertexOffsets, getAllPreviewVertices } from '../machine/selectors'
+import { makeGetPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices, getSliderColors, getVertexOffsets, getAllPreviewVertices } from '../machine/selectors'
 import { updateLayer, setSelectedLayer } from '../layers/layersSlice'
 import { getCurrentLayer, makeGetLayerIndex, getNumVisibleLayers } from '../layers/selectors'
 import { roundP } from '../../common/util'
@@ -27,7 +27,7 @@ const PreviewLayer = (ownProps) => {
       start: index === 0,
       end: index === numLayers - 1,
       currentLayer: getCurrentLayer(state),
-      trackVertices: getPreviewTrackVertices(state),
+      trackVertices: getCachedSelector(makeGetPreviewTrackVertices, layer.id)(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
       allVertices: getAllPreviewVertices(state),
       selected: state.layers.selected,
