@@ -5,8 +5,8 @@ import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
-import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
-import { registeredShapes, getShapeSelectOptions, getShape, getAnyShape } from '../../models/shapes'
+import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible, setNewLayerType } from '../layers/layersSlice'
+import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
 import ReactGA from 'react-ga'
 import ThetaRhoImporter from '../importer/ThetaRhoImporter'
 import GCodeImporter from '../importer/GCodeImporter'
@@ -22,9 +22,10 @@ const mapStateToProps = (state, ownProps) => {
     currentLayer: layer,
     shape: shape,
     newLayerType: state.layers.newLayerType,
+    newLayerName: state.layers.newLayerName,
+    newLayerNameOverride: state.layers.newLayerNameOverride,
     copyLayerName: state.layers.copyLayerName,
-    selectOptions: getShapeSelectOptions(),
-    defaultNewShape: getAnyShape(),
+    selectOptions: getShapeSelectOptions()
   }
 }
 
@@ -40,10 +41,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onLayerImport: (importProps) => {
       const attrs = {
-          ...registeredShapes["file_import"].getInitialState(importProps),
-          name: importProps.fileName
+        ...registeredShapes["file_import"].getInitialState(importProps),
+        name: importProps.fileName
       }
-
       dispatch(addLayer(attrs))
     },
     onLayerCopied: (id) => {
@@ -53,7 +53,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(removeLayer(event.target.closest('button').dataset.id))
     },
     onChangeNewType: (selected) => {
-      dispatch(updateLayers({ newLayerType: selected.value }))
+      dispatch(setNewLayerType(selected.value))
+    },
+    onChangeNewName: (event) => {
+      dispatch(updateLayers({ newLayerName: event.target.value, newLayerNameOverride: true }))
     },
     onChangeCopyName: (event) => {
       dispatch(updateLayers({ copyLayerName: event.target.value }))
@@ -122,9 +125,9 @@ class Playlist extends Component {
   constructor(props) {
     super(props)
     this.state = {
-        showNewLayer: false,
-        showImportLayer: false,
-        showCopyLayer: false
+      showNewLayer: false,
+      showImportLayer: false,
+      showCopyLayer: false
     }
   }
 
@@ -192,8 +195,7 @@ class Playlist extends Component {
   }
 
   render() {
-
-    const selectedShape = getShape({type: this.props.newLayerType}) || this.props.defaultNewShape
+    const selectedShape = getShape({type: this.props.newLayerType})
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
     const namedInputRef = React.createRef()
 
@@ -216,6 +218,18 @@ class Playlist extends Component {
                   styles={customStyles}
                   maxMenuHeight={305}
                   options={this.props.selectOptions} />
+              </Col>
+            </Row>
+            <Row className="align-items-center mt-2">
+              <Col sm={5}>
+                Name
+              </Col>
+              <Col sm={7}>
+                <Form.Control
+                  value={this.props.newLayerName}
+                  onFocus={this.handleNameFocus}
+                  onChange={this.props.onChangeNewName}
+                />
               </Col>
             </Row>
           </Modal.Body>

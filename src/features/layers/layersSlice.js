@@ -10,7 +10,9 @@ const layersSlice = createSlice({
   initialState: {
     current: null,
     selected: null,
-    newLayerType: null,
+    newLayerType: 'polygon',
+    newLayerName: 'polygon',
+    newLayerNameOverride: false,
     copyLayerName: null,
     byId: {},
     allIds: []
@@ -19,11 +21,13 @@ const layersSlice = createSlice({
     addLayer(state, action) {
       let layer = { ...action.payload }
       layer.id = uniqueId('layer-')
-      layer.name = layer.name || layer.id.split('-').join(' ')
+      layer.name = layer.name || state.newLayerName
       state.byId[layer.id] = layer
       state.allIds.push(layer.id)
       state.current = layer.id
       state.selected = layer.id
+      state.newLayerNameOverride = false
+      state.newLayerName = state.newLayerType
     },
     moveLayer(state, action) {
       const { oldIndex, newIndex } = action.payload
@@ -95,6 +99,14 @@ const layersSlice = createSlice({
 
       state.byId[layer.id] = layer
     },
+    setNewLayerType(state, action) {
+      let attrs = { newLayerType: action.payload }
+      if (!state.newLayerNameOverride) {
+        const shape = getShape({type: action.payload})
+        attrs.newLayerName = shape.name.toLowerCase()
+      }
+      Object.assign(state, attrs)
+    },
     updateLayer(state, action) {
       const layer = action.payload
       state.byId[layer.id] = {...state.byId[layer.id], ...layer}
@@ -138,6 +150,7 @@ export const {
   setCurrentLayer,
   setSelectedLayer,
   setShapeType,
+  setNewLayerType,
   updateLayer,
   updateLayers,
   toggleRepeat,
