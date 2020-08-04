@@ -37,7 +37,7 @@ export default class FileImport extends Shape {
         selectGroup: 'import',
         canTransform: false,
         canChangeSize: true,
-        usesMachine: false,
+        usesMachine: true,
         repeatEnabled: false
       },
       ...(importProps === undefined ? {} : {

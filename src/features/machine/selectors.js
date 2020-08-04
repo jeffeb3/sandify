@@ -37,7 +37,7 @@ const makeGetLayerMachine = layerId => {
     [ getLayers, getMachine ],
     (layers, machine) => {
       const layer = layers.byId[layerId]
-      return layer.usesMachine ? null : machine
+      return layer.usesMachine ? machine : null
     }
   )
 }
@@ -257,4 +257,3 @@ export const getPreviewTrackVertices = createSelector(
     })
   }
 )
-
