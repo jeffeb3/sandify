@@ -242,7 +242,6 @@ export const makeGetPreviewTrackVertices = layerId => {
     getLayers,
     (layers) => {
       const layer = layers.byId[layerId]
-      console.log(layer)
       const numLoops = layer.numLoops
       const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
       const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
