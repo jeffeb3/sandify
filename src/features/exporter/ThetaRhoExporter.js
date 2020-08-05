@@ -13,8 +13,9 @@ export default class ThetaRhoExporter extends Exporter {
     this.commentChar = '#'
   }
 
-  // adds lines mapping given vertices to the theta rho format
-  exportCode(vertices) {
+  // computes vertices compatible with the theta rho format, and replaces
+  // placeholder variables in pre/post blocks.
+  computeOutputVertices(vertices) {
     // First, downsample larger lines into smaller ones.
     const maxLength = 2.0
     let subsampledVertices = []
@@ -40,24 +41,29 @@ export default class ThetaRhoExporter extends Exporter {
       previous = next
     }
 
-    // Add in the end.
+    // Add in the end
     if (previous !== undefined) {
       subsampledVertices.push(vertices[vertices.length - 1])
     }
 
-    // Convert to Theta, Rho
-    let trVertices = []
+    // Convert to theta, rho
+    this.vertices = []
     let previousTheta = 0
     let previousRawTheta = 0
-
+    let mintheta = 1e9
+    let minrho   = 1e9
+    let maxtheta = -1e9
+    let maxrho   = -1e9
     for (next = 0; next < subsampledVertices.length; ++next) {
       // Normalize the radius
       const rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius
+      minrho = Math.min(rho, minrho)
+      maxrho = Math.max(rho, maxrho)
 
       // What is the basic theta for this point?
       let rawTheta = Math.atan2(subsampledVertices[next].x,
                                 subsampledVertices[next].y)
-      // Convert to [0,2pi]
+      // Convert to [0, 2pi]
       rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
       // Compute the difference to the last point.
@@ -72,11 +78,38 @@ export default class ThetaRhoExporter extends Exporter {
       }
 
       const theta = previousTheta + deltaTheta
+      mintheta = Math.min(theta, mintheta)
+      maxtheta = Math.max(theta, maxtheta)
       previousRawTheta = rawTheta
       previousTheta = theta
-      trVertices.push(new Victor(theta, rho))
+      this.vertices.push(new Victor(theta, rho))
     }
 
-    trVertices.map(thetarho).forEach(line => this.line(line))
+    let starttheta = this.vertices[0].x
+    let startrho   = this.vertices[0].y
+    let endtheta   = this.vertices[this.vertices.length-1].x
+    let endrho     = this.vertices[this.vertices.length-1].y
+
+    // Replace pre/post placeholder variables
+    this.pre  =  this.pre.replace(/{starttheta}/gi, starttheta.toFixed(3))
+    this.pre  =  this.pre.replace(/{startrho}/gi,   startrho.toFixed(3))
+    this.pre  =  this.pre.replace(/{endtheta}/gi,   endtheta.toFixed(3))
+    this.pre  =  this.pre.replace(/{endrho}/gi,     endrho.toFixed(3))
+    this.pre  =  this.pre.replace(/{mintheta}/gi,   mintheta.toFixed(3))
+    this.pre  =  this.pre.replace(/{minrho}/gi,     minrho.toFixed(3))
+    this.pre  =  this.pre.replace(/{maxtheta}/gi,   maxtheta.toFixed(3))
+    this.pre  =  this.pre.replace(/{maxrho}/gi,     maxrho.toFixed(3))
+    this.post = this.post.replace(/{starttheta}/gi, starttheta.toFixed(3))
+    this.post = this.post.replace(/{startrho}/gi,   startrho.toFixed(3))
+    this.post = this.post.replace(/{endtheta}/gi,   endtheta.toFixed(3))
+    this.post = this.post.replace(/{endrho}/gi,     endrho.toFixed(3))
+    this.post = this.post.replace(/{mintheta}/gi,   mintheta.toFixed(3))
+    this.post = this.post.replace(/{minrho}/gi,     minrho.toFixed(3))
+    this.post = this.post.replace(/{maxtheta}/gi,   maxtheta.toFixed(3))
+    this.post = this.post.replace(/{maxrho}/gi,     maxrho.toFixed(3))
+  }
+
+  exportCode(vertices) {
+    vertices.map(thetarho).forEach(line => this.line(line))
   }
 }
