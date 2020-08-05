@@ -30,7 +30,9 @@ const layersSlice = createSlice({
       state.selected = layer.id
       state.newLayerNameOverride = false
       state.newLayerName = layer.name
-      localStorage.setItem('currentShape', layer.type)
+      if (layer.type !== 'file_import') {
+        localStorage.setItem('currentShape', layer.type)
+      }
     },
     moveLayer(state, action) {
       const { oldIndex, newIndex } = action.payload
