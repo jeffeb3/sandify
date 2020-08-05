@@ -4,8 +4,8 @@ import arrayMove from 'array-move'
 import { getShape } from '../../models/shapes'
 
 const protectedAttrs = ['repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'usesMachine', 'shouldCache']
-const newLayerName = localStorage.getItem('currentShape') || 'polygon'
-const newLayerType = getShape({type: newLayerName}).name.toLowerCase()
+const newLayerType = localStorage.getItem('currentShape') || 'polygon'
+const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
 
 const layersSlice = createSlice({
   name: 'layer',
@@ -29,7 +29,7 @@ const layersSlice = createSlice({
       state.current = layer.id
       state.selected = layer.id
       state.newLayerNameOverride = false
-      state.newLayerName = state.newLayerType
+      state.newLayerName = layer.name
       localStorage.setItem('currentShape', layer.type)
     },
     moveLayer(state, action) {
