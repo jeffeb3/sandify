@@ -1,7 +1,7 @@
 {
   "name": "sandify",
   "homepage": "https://sandify.org",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.2.5",
