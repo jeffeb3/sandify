@@ -86,7 +86,7 @@ describe('layers reducer', () => {
       allIds: ['layer-1'],
       current: 'layer-1',
       selected: 'layer-1',
-      newLayerName: undefined,
+      newLayerName: 'foo',
       newLayerNameOverride: false
     })
   })
