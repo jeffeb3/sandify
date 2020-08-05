@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Button, Modal } from 'react-bootstrap'
+import { Button, Modal, Col, Row } from 'react-bootstrap'
 import DropdownOption from '../../components/DropdownOption'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
@@ -153,13 +153,6 @@ class Downloader extends Component {
               index={1}
               model={this.props} />
 
-            <p className="mt-2">
-              See
-                <a target="_blank" rel="noopener noreferrer"
-                 href="https://github.com/jeffeb3/sandify/wiki#export-variables"> the wiki </a>
-              for details on export variables.
-            </p>
-
             <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
@@ -176,13 +169,23 @@ class Downloader extends Component {
               index={3}
               model={this.props} />
 
-            <CheckboxOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="reverse"
-              key="reverse"
-              index={4}
-              model={this.props} />
+            <Row>
+              <Col sm={5}>
+              </Col>
+              <Col sm={7}>
+                See <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki#export-variables"> the wiki </a> for details on available program export variables.
+              </Col>
+            </Row>
+
+            <div className="mt-2">
+              <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="reverse"
+                key="reverse"
+                index={4}
+                model={this.props} />
+            </div>
           </Modal.Body>
 
           <Modal.Footer>
