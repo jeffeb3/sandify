@@ -153,6 +153,13 @@ class Downloader extends Component {
               index={1}
               model={this.props} />
 
+            <p className="mt-2">
+              See
+                <a target="_blank" rel="noopener noreferrer"
+                 href="https://github.com/jeffeb3/sandify/wiki#export-variables"> the wiki </a>
+              for details on export variables.
+            </p>
+
             <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
