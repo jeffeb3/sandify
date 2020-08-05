@@ -13,7 +13,8 @@ export default class ThetaRhoExporter extends Exporter {
     this.commentChar = '#'
   }
 
-  // adds lines mapping given vertices to the theta rho format
+  // computes vertices compatible with the theta rho format, and replaces
+  // placeholder variables in pre/post blocks.
   computeOutputVertices(vertices) {
     // First, downsample larger lines into smaller ones.
     const maxLength = 2.0
@@ -40,17 +41,15 @@ export default class ThetaRhoExporter extends Exporter {
       previous = next
     }
 
-    // Add in the end.
+    // Add in the end
     if (previous !== undefined) {
       subsampledVertices.push(vertices[vertices.length - 1])
     }
 
-    // Convert to Theta, Rho
+    // Convert to theta, rho
     this.vertices = []
     let previousTheta = 0
     let previousRawTheta = 0
-
-
     let mintheta = 1e9
     let minrho   = 1e9
     let maxtheta = -1e9
@@ -64,7 +63,7 @@ export default class ThetaRhoExporter extends Exporter {
       // What is the basic theta for this point?
       let rawTheta = Math.atan2(subsampledVertices[next].x,
                                 subsampledVertices[next].y)
-      // Convert to [0,2pi]
+      // Convert to [0, 2pi]
       rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
       // Compute the difference to the last point.
@@ -85,12 +84,13 @@ export default class ThetaRhoExporter extends Exporter {
       previousTheta = theta
       this.vertices.push(new Victor(theta, rho))
     }
+
     let starttheta = this.vertices[0].x
     let startrho   = this.vertices[0].y
     let endtheta   = this.vertices[this.vertices.length-1].x
     let endrho     = this.vertices[this.vertices.length-1].y
 
-    // Replace these strings.
+    // Replace pre/post placeholder variables
     this.pre  =  this.pre.replace(/{starttheta}/gi, starttheta.toFixed(3))
     this.pre  =  this.pre.replace(/{startrho}/gi,   startrho.toFixed(3))
     this.pre  =  this.pre.replace(/{endtheta}/gi,   endtheta.toFixed(3))

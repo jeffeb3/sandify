@@ -8,18 +8,19 @@ export default class Exporter {
     this.pre = this.props.pre
     this.post = this.props.post
     let vertices = this.props.vertices
+
     if (this.props.reverse) {
       vertices = vertices.reverse()
     }
     this.computeOutputVertices(vertices)
-
     this.header()
     this.startComments()
-    this.props.comments.forEach( comment => this.line(comment) )
+    this.props.comments.forEach(comment => this.line(comment))
     this.line()
     this.keyValueLine('File name', "'" + this.props.fileName + "'")
     this.line()
     this.endComments()
+
     if (this.pre !== '') {
       this.startComments()
       this.line('BEGIN PRE')

@@ -12,19 +12,22 @@ export default class GCodeExporter extends Exporter {
     vertices.map(this.gcode).forEach(line => this.line(line))
   }
 
+  // computes vertices compatible with the gcode format, and replaces
+  // placeholder variables in pre/post blocks.
   computeOutputVertices(vertices) {
     // Collect some statistics about these vertices.
     let minx = 1e9
     let miny = 1e9
     let maxx = -1e9
     let maxy = -1e9
-    this.vertices = vertices.map( (vertex) => {
+    this.vertices = vertices.map(vertex => {
       const x = vertex.x + this.props.offsetX
       const y = vertex.y + this.props.offsetY
       minx = Math.min(x, minx)
       miny = Math.min(y, miny)
       maxx = Math.max(x, maxx)
       maxy = Math.max(y, maxy)
+
       return {
         ...vertex,
         x: x,
@@ -36,7 +39,7 @@ export default class GCodeExporter extends Exporter {
     let endx = this.vertices[this.vertices.length-1].x
     let endy = this.vertices[this.vertices.length-1].y
 
-    // Replace these strings.
+    // Replace pre/post placeholder variables
     this.pre  =  this.pre.replace(/{startx}/gi, startx.toFixed(3))
     this.pre  =  this.pre.replace(/{starty}/gi, starty.toFixed(3))
     this.pre  =  this.pre.replace(/{endx}/gi,   endx.toFixed(3))
