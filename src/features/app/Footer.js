@@ -14,12 +14,21 @@ class Footer extends Component {
         </div>
 
         <div>
+          <h2>Instructions</h2>
+          <p>
+            Part of the fun of Sandify is playing it like you would a xylophone.
+            <br/>
+            Try it out first. The goal is to make it easy to make your first pattern by just clicking and scrolling, finding something you like.
+            <br/>
+            Check out <a href="https://github.com/jeffeb3/sandify/wiki">the wiki</a> for some features that you might miss the first time through.
+          </p>
+        </div>
+
+        <div>
           <h2>Sand Machine</h2>
           <p>Anything that uses gcode can be used with Sandify. But the machine this was designed for is the ZenXY from V1Engineering.com.</p>
           <p>
             <a href="https://docs.v1engineering.com/zenxy/">ZenXY on V1Engineering.com</a>
-            <br />
-            <a href="https://www.thingiverse.com/thing:2477901">ZenXY Thingiverse Page</a>
           </p>
           <p>
             ZenXY was inspired by the awesome Sisyphus kinetic art table by <a href="https://sisyphus-industries.com/">Sisyphus Industries</a>, which is also now supported.
@@ -33,7 +42,7 @@ class Footer extends Component {
         <div>
           <h2>Github</h2>
           <p>Sandify is hosted on Github <a href="https://github.com/jeffeb3/sandify">here</a>. Please post any problems, feature requests or comments in our <a href="https://github.com/jeffeb3/sandify/issues">issue tracker</a>.</p>
-          <p>Sandify is a community project. We want and need developers. <a href="https://github.com/jeffeb3/sandify/wiki#developer-info">Help Sandify</a>.</p>
+          <p>Sandify is a community project. We want and need collaborators. <a href="https://github.com/jeffeb3/sandify/blob/master/CONTRIBUTING.md">Help Sandify</a>.</p>
         </div>
 
         <div>
