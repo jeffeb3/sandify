@@ -29,11 +29,17 @@ const store = configureStore({
 
 // set to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const persistState = false
+const persistState = true
+
+// if you want to save a multiple temporary states, use these keys. The first time
+// you save a new state, change persistSaveKey. Make a change, then change
+// persistInitKey to the same value. It's like doing a "save as"
+const persistInitKey = 'state'
+const persistSaveKey = 'state'
 
 if (persistState) {
   // override default values with saved ones
-  const persistedState = loadState()
+  const persistedState = loadState(persistInitKey)
 
   if (persistedState) {
     persistedState.layers.allIds.forEach((id) => {
@@ -57,9 +63,7 @@ if (persistState) {
   store.subscribe(() => {
     const state = store.getState()
 
-    saveState({
-      layers: state.layers
-    })
+    saveState({ layers: state.layers }, persistSaveKey)
   })
 }
 
