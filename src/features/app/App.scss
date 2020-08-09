@@ -46,7 +46,9 @@ h2.panel {
  **/
 .card-header {
   background-color: rgba(0,0,0,.05);
+}
 
+.card {
   h3 {
     margin: 0;
     font-size: 1.25rem;
@@ -81,7 +83,7 @@ h2 {
   background-color: #A0D4EB;
 }
 
-.list-group-item.active {
+.list-group-item .active {
   background-color: #2d6da4;
 }
 

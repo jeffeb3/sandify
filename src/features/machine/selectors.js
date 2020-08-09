@@ -215,25 +215,41 @@ export const getVerticesStats = createSelector(
   }
 )
 
-export const getSliderColors = createSelector(
-  [getAllPreviewVertices, getPreview],
-  (vertices, preview) => {
-    const sliderValue = preview.sliderValue
-    const colors = {}
+// returns a hash of { index => color } that specifies the gradient color of the
+// line drawn at each index.
+export const getSliderColors = layerId => {
+  return createSelector(
+    [
+      getAllPreviewVertices,
+      getPreview,
+      getCachedSelector(makeGetPreviewVertices, layerId),
+      getVertexOffsets
+    ],
+    (vertices, preview, layerVertices, offsets) => {
+      const sliderValue = preview.sliderValue
+      const colors = {}
+      let start, end
 
-    if (sliderValue !== 0) {
-      let { start, end } = getSliderBounds(vertices, sliderValue)
+      if (sliderValue > 0) {
+        const bounds = getSliderBounds(vertices, sliderValue)
+        start = bounds.start
+        end = bounds.end
+      } else {
+        start = offsets[layerId]
+        end = start + layerVertices.length
+      }
+
       let startColor = Color('yellow')
       const colorStep = 3.0 / 8 / (end - start)
 
       for(let i=end; i>=start; i--) {
         colors[i] = startColor.darken(colorStep * (end-i)).hex()
       }
-    }
 
-    return colors
-  }
-)
+      return colors
+    }
+  )
+}
 
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.

@@ -9,3 +9,9 @@
 .cursor-move {
   cursor: move;
 }
+
+#playlist-group {
+  .list-group-item {
+    padding: 0.5rem 0.25rem;
+  }
+}

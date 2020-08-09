@@ -33,7 +33,7 @@ const PreviewLayer = (ownProps) => {
       selected: state.layers.selected,
       sliderValue: state.preview.sliderValue,
       showTrack: true,
-      colors: getSliderColors(state),
+      colors: state.layers.selected ? getSliderColors(state.layers.selected)(state) : [],
       offsets: getVertexOffsets(state)
     }
   }
@@ -82,7 +82,7 @@ const PreviewLayer = (ownProps) => {
   // draws a colored path when user is using slider
   function drawLayerVertices(context) {
     const { end } = getSliderBounds(props.allVertices, props.sliderValue)
-    const stationaryColor = isSelected ? selectedColor : unselectedColor
+    const stationaryColor = unselectedColor
     const defaultColor = isSliding ? backgroundUnselectedColor : stationaryColor
     let oldColor = defaultColor
     let currentColor = defaultColor
@@ -99,7 +99,6 @@ const PreviewLayer = (ownProps) => {
       let pathColor = isSliding ? (absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor) : stationaryColor
 
       currentColor = props.colors[absoluteI] || pathColor
-
       if (currentColor !== oldColor) {
         context.stroke()
         context.strokeStyle = currentColor
@@ -173,7 +172,9 @@ const PreviewLayer = (ownProps) => {
       }
 
       drawLayerVertices(context)
-      drawStartAndEndPoints(context)
+      if (props.start || props.end || isSelected) {
+        drawStartAndEndPoints(context)
+      }
       drawSliderEndPoint(context)
     }
 
@@ -208,7 +209,7 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack) {
+    if (props.layer.visible &&isSelected && props.layer.canChangeSize && props.showTrack) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
