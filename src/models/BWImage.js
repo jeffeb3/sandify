@@ -52,22 +52,14 @@ export default class BWImage extends Shape {
       ...{
         type: 'bwimage',
         imageFile: "false",
-        lineSpacing: 2,
-        colorDifferenceStep: 2,
+        lineSpacing: 4,
+        colorDifferenceStep: 4,
         darkness: 254/2,
         inversion: false,
         lineType: "Straight",
-        frequency: 20
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
-        startingSize: 1,
-        canChangeSize: false,             // need this to get the machine state and calculate the borders of the area
+        frequency: 20,
+        startingSize: 1,        
+        usesMachine: true,
         numLoops:1,                       // do not need to repeat the shape
         transformMethod: "intact",        // do not want to distort the shape
         repeatEnable: false 
@@ -215,6 +207,9 @@ export default class BWImage extends Shape {
       catch(err){
         console.log(err)
       }
+    }
+    if(points === []) {
+      points.push(new Victor(0,0))
     }
     return points
   }

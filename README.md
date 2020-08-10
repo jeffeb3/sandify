@@ -4,17 +4,14 @@ Sandify is working on a solution to turn your cold, empty hearted, emotionless s
 
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fjeffeb3%2Fsandify%2Fbadge&style=for-the-badge)](https://actions-badge.atrox.dev/jeffeb3/sandify/goto)
 
-The output of sandify is gcode you can run on your MPCNC based sand table. The requirements of this
-gcode are:
+The output of sandify is code you can run on your sand table. The requirements of this
+code are:
  - Continuous, since the ball can't lift to travel to another location
  - Can't exceed machine limits, since the firmware isn't smart enough about how the limits are
  handled.
  - Not a requirement, but the patterns would be better if they mostly cover the area.
 
-Different designs are possible, and input is welcome from the community. The inputs are currently in
-heavy development, but we hope to have a simple example that someone could follow to allow someone
-with limited programming experience help us develop new and interesting patterns as input. The
-sandify preview window, gcode generator, and machine limits will come to you for free.
+Different designs are possible, and input is welcome from the community.
 
 ## Using the tool
 
@@ -25,7 +22,9 @@ https://sandify.org
  - Visit the webpage
  - Adjust the machine limits to match your build
  - Play with the inputs until you have a pleasing pattern.
- - Save the gcode with the generate GCode button.
+ - Save the code with the export button.
+
+[Check out the wiki](https://github.com/jeffeb3/sandify/wiki)
 
 ## More info
 
@@ -40,6 +39,3 @@ AFAIK, the steps to replicate this on your machine are:
  - Install npm and node.js
  - Run 'npm install' from here
  - Run 'npm start' and it should open your browser to http://127.0.0.1:3000
-
-When we want to "deploy" the website, we can do so with 'npm run deploy' command. So much magic. 
-

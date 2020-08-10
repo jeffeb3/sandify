@@ -1,6 +1,15 @@
 import Exporter from './Exporter'
 import { path } from 'd3'
 
+const svgTrim = (svgString) => {
+  // Based on the svg trim method from msurguy (MIT):
+  //    https://github.com/msurguy/svg-file-downloader/blob/7d3409f60ca58fef90003f24bae2a85fdf324eb3/svg-file-downloader.js#L9
+  svgString = svgString.replace(/([+]?\d*\.\d{3,}([eE][+]?\d+)?)/g, function (x) {
+    return (+x).toFixed(2)
+  })
+  return svgString
+}
+
 export default class SvgExporter extends Exporter {
   constructor(props) {
     super(props)
@@ -29,7 +38,7 @@ export default class SvgExporter extends Exporter {
     this.line("       stroke=\"#000000\"")
     this.line("       stroke-width=\"0.4mm\"")
     this.line("       fill=\"none\"")
-    this.line("       d=\"" + svg.toString() + "\"/>")
+    this.line("       d=\"" + svgTrim(svg.toString()) + "\"/>")
   }
 
   header() {

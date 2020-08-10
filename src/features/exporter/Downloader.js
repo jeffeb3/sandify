@@ -1,15 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import {
-  Button,
-  Modal
-} from 'react-bootstrap'
+import { Button, Modal, Col, Row } from 'react-bootstrap'
 import DropdownOption from '../../components/DropdownOption'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import { updateExporter } from './exporterSlice'
 import { getComments } from './selectors'
-import { getVertices } from '../machine/selectors'
+import { getAllComputedVertices } from '../machine/selectors'
 import ReactGA from 'react-ga'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
@@ -25,10 +22,10 @@ const mapStateToProps = (state, ownProps) => {
   return {
     reverse: state.exporter.reverse,
     show: state.exporter.show,
-    vertices: getVertices(state),
+    vertices: getAllComputedVertices(state),
     comments: getComments(state),
     input: state.app.input,
-    shape: state.shapes.currentId,
+    layer: state.layers.current,
     offsetX: (state.machine.rectangular ? (state.machine.minX + state.machine.maxX) / 2.0 : state.machine.maxRadius),
     offsetY: (state.machine.rectangular ? (state.machine.minY + state.machine.maxY) / 2.0 : state.machine.maxRadius),
     width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
@@ -70,7 +67,7 @@ class Downloader extends Component {
   gaRecord(fileType) {
     let savedCode = 'Saved: ' + this.props.input
     if (this.props.input === 'shape' || this.props.input === 'Shape') {
-      savedCode = savedCode + ': ' + this.props.shape
+      savedCode = savedCode + ': ' + this.props.layer
     }
     ReactGA.event({
       category: fileType,
@@ -134,7 +131,7 @@ class Downloader extends Component {
     return (
       <div>
         <Button className="ml-2 mr-3" variant="primary" onClick={this.props.open}>Export</Button>
-        <Modal show={this.props.show} onHide={this.props.close}>
+        <Modal size="lg" show={this.props.show} onHide={this.props.close}>
           <Modal.Header closeButton>
             <Modal.Title>Export to a file</Modal.Title>
           </Modal.Header>
@@ -172,13 +169,23 @@ class Downloader extends Component {
               index={3}
               model={this.props} />
 
-            <CheckboxOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="reverse"
-              key="reverse"
-              index={4}
-              model={this.props} />
+            <Row>
+              <Col sm={5}>
+              </Col>
+              <Col sm={7}>
+                See <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki#export-variables"> the wiki </a> for details on available program export variables.
+              </Col>
+            </Row>
+
+            <div className="mt-2">
+              <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="reverse"
+                key="reverse"
+                index={4}
+                model={this.props} />
+            </div>
           </Modal.Body>
 
           <Modal.Footer>
