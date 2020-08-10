@@ -45,7 +45,7 @@ class ImageOption extends Component {
               let im = new Image()                // image object to write to canvas
               let canvas = document.getElementById(canvasId)  // get the canvas element
               let context = this                  // save it for the callback
-              let value
+              let value =  "" + Math.random()     // need to change the value of the option in order to update the shape 
               
               fr.onload = function(){             // filereader callback
                 im.onload = function(){           // image loaded callback
@@ -56,7 +56,6 @@ class ImageOption extends Component {
                   let yoffset = (canvas.height-im.height*scale)/2
                   
                   ctx.drawImage(im, xoffset, yoffset, im.width*scale, im.height*scale)
-                  value = true
                   
                   // need to set the state from the image handling callback otherwise the dataurl will be wrong
                   // set the canvas as visible

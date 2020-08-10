@@ -28,6 +28,11 @@ const options = {
       title: 'Invert dark and white',
       type: 'checkbox'
     },
+    lineType: {
+      title: 'Line type',
+      type: 'dropdown',
+      choices: ['Straight', 'Sine', 'Triangular'],
+    },
   }
 }
 
@@ -41,11 +46,12 @@ export default class BWImage extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'bwimage',
-        imageFile: false,
+        imageFile: "false",
         lineSpacing: 2,
-        colorDifferenceStep: 8,
+        colorDifferenceStep: 2,
         darkness: 254/2,
-        inversion: false
+        inversion: false,
+        lineType: "Straight"
       }
     }
   }
@@ -67,11 +73,14 @@ export default class BWImage extends Shape {
     const file_loaded = state.shape.imageFile
     let points = []
 
-    if (file_loaded){                     // produces points only if a file has been loaded
+    // produces points only if a file has been loaded. 
+    // To update the shape preview when changing picture also the input value must change: at the beginning the value is "false", the when a file is loaded is a random number
+    if (file_loaded !== "false"){
       try{
         const darknessThreshold = state.shape.darkness
         const darknessInversion = state.shape.inversion
-        const position_on_border = 2
+        const positionOnBorder = 2
+        const lineType = state.shape.lineType
 
         // get machine size
         const machine = state.machine
@@ -93,40 +102,49 @@ export default class BWImage extends Shape {
         const h = image.height
         const scale = Math.max(w/sizeX, h/sizeY)
         const spacing = state.shape.lineSpacing*scale || 1
-        const colorDifferenceStep = state.shape.colorDifferenceStep*scale
+        const colorDifferenceStep = state.shape.colorDifferenceStep*scale/h || 1
 
         let leftSidePoint = true
         let isDarkLine = false
-        let darkLineOffset = 0
-
+        let lastX = -positionOnBorder
+        
         // check if the first pixel is dark
         if ((this.getPixelDarkness(ctx.getImageData(w,0,1,1).data) < darknessThreshold) ^ darknessInversion){ 
-          darkLineOffset = colorDifferenceStep
           isDarkLine = true
         }
 
-        // map an image pixel to a pointo of the machine bed
+        // map an image pixel to a point of the machine bed
         function mapXY(state, x, y){
           return new Victor((x-0.5)*state.machine.maxX, (y-0.5)*state.machine.maxY)
         }
 
+        function addLine(state, startx, endx, centery){
+          if (lineType === "Straight") {
+            points.push(mapXY(state, startx, centery+colorDifferenceStep));
+            points.push(mapXY(state, endx,   centery+colorDifferenceStep));
+          }
+        }
+
         // border points function
-        function addBorderPoints(i, shape){
+        function addBorderPoints(i, isDarkLine){
           // create padding lines
-          let pos = position_on_border
+          let pos = positionOnBorder
           if(!leftSidePoint){
             pos = -pos
           }
-          points.push(mapXY(state, pos, (i+darkLineOffset-spacing)/h))
-          points.push(mapXY(state, pos, (i+darkLineOffset)/h))
+          if(isDarkLine){
+            addLine(state, lastX, pos, (i-spacing)/h)
+          }else{
+            points.push(mapXY(state, pos, (i-spacing)/h))
+          }
+          points.push(mapXY(state, pos, i/h))
+          lastX = pos
           
           // change direction of the scanning line
           leftSidePoint = !leftSidePoint
         }
 
-        // TODO center the image on creation
         // TODO check error with vertical lines
-        // TODO add padding to canvas to make the image smaller?
         // TODO add different line tipes for the colors (instead of straight use a different curve like sin or triangular)
         // TODO use different line density for the colors instead of line step
         // TODO add image rotation with respect to the lines
@@ -136,7 +154,7 @@ export default class BWImage extends Shape {
         // the cycle will add padding lines until i reaches 0 and when i is over h in order to add padding lines
         // the padding lines are necessary when the image is moved around
         for(let i=-h; i<2*h;  i+=spacing){              // iterating rows
-          addBorderPoints(i)
+          addBorderPoints(i, isDarkLine)
 
           if(i>0 && i<h+spacing){
             // if i is in the h range create vertex from the color change
@@ -146,16 +164,14 @@ export default class BWImage extends Shape {
               if ((this.getPixelDarkness(ctx.getImageData(tmpJ,h-i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
                 if(!isDarkLine){
                   isDarkLine = true
-                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
-                  darkLineOffset = colorDifferenceStep
-                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                  points.push(mapXY(state, tmpJ/w, i/h))
+                  lastX = tmpJ/w
                 }
               }else{
                 if(isDarkLine){
                   isDarkLine = false
-                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
-                  darkLineOffset = 0
-                  points.push(mapXY(state, tmpJ/w, (i+darkLineOffset)/h))
+                  addLine(state, lastX, tmpJ/w, i/h)
+                  points.push(mapXY(state, tmpJ/w, i/h))
                 }
               }
             }
