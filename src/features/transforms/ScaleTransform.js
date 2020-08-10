@@ -10,19 +10,16 @@ import {
   ToggleButtonGroup,
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
-import {
-  updateTransform,
-  toggleGrow
-} from './transformsSlice'
-import { getCurrentTransformSelector } from '../shapes/selectors'
+import { updateLayer, toggleGrow } from '../layers/layersSlice'
+import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
-  const transform = getCurrentTransformSelector(state)
+  const layer = getCurrentLayer(state)
 
   return {
-    transform: transform,
-    active: transform.growEnabled,
+    layer: layer,
+    active: layer.growEnabled,
     options: (new Transform()).getOptions()
   }
 }
@@ -33,10 +30,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (attrs) => {
       attrs.id = id
-      dispatch(updateTransform(attrs))
+      dispatch(updateLayer(attrs))
     },
     onGrowMethodChange: (value) => {
-      dispatch(updateTransform({ growMethod: value, id: id}))
+      dispatch(updateLayer({ growMethod: value, id: id}))
     },
     onGrow: () => {
       dispatch(toggleGrow({id: id}))
@@ -47,17 +44,17 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 class ScaleTransform extends Component {
   render() {
     const activeClassName = this.props.active ? 'active' : ''
-    const activeKey = this.props.active ? 0 : null
+    const activeKey = this.props.active ? 1 : null
 
     return (
       <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
         <Card className={`${activeClassName} overflow-auto`}>
-          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onGrow}>
+          <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onGrow}>
             <h3>Scale</h3>
             Grows or shrinks the shape
           </Accordion.Toggle>
 
-          <Accordion.Collapse eventKey={0}>
+          <Accordion.Collapse eventKey={1}>
             <Card.Body>
 
               <InputOption
@@ -66,8 +63,7 @@ class ScaleTransform extends Component {
                 key="growValue"
                 optionKey="growValue"
                 index={2}
-                model={this.props.transform} />
-
+                model={this.props.layer} />
               <Row className="align-items-center pb-2">
                 <Col sm={5}>
                   <Form.Label htmlFor="growMethod">
@@ -75,7 +71,7 @@ class ScaleTransform extends Component {
                   </Form.Label>
                 </Col>
                 <Col sm={7}>
-                  <ToggleButtonGroup id="growMethod" type="radio" name="growMethod" value={this.props.transform.growMethod} onChange={this.props.onGrowMethodChange}>
+                  <ToggleButtonGroup id="growMethod" type="radio" name="growMethod" value={this.props.layer.growMethod} onChange={this.props.onGrowMethodChange}>
                     <ToggleButton variant="light" value="constant">constant</ToggleButton>
                     <ToggleButton variant="light" value="function">function</ToggleButton>
                   </ToggleButtonGroup>
@@ -89,8 +85,7 @@ class ScaleTransform extends Component {
                 optionKey="growMathInput"
                 delayKey="growMath"
                 index={1}
-                model={this.props.transform} />
-
+                model={this.props.layer} />
             </Card.Body>
           </Accordion.Collapse>
         </Card>

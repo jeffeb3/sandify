@@ -13,6 +13,10 @@ const transformOptions = {
   rotation: {
     title: 'Rotate (degrees)'
   },
+  reverse: {
+    title: 'Reverse path',
+    type: 'checkbox'
+  },
   numLoops: {
     title: 'Number of loops',
     min: 1
@@ -86,36 +90,9 @@ const transformOptions = {
   },
 }
 
+// used as a way to keep a shape's transform settings separate. Actual state
+// is stored on Shape.
 export default class Transform {
-  getInitialState() {
-    return {
-      startingSize: 10,
-      offsetX: 0.0,
-      offsetY: 0.0,
-      rotation: 0,
-      numLoops: 10,
-      transformMethod: 'smear',
-      repeatEnabled: true,
-      growMethod: 'constant',
-      growMathInput: 'i+cos(i/2)',
-      growMath: 'i+cos(i/2)',
-      growEnabled: true,
-      growValue: 100,
-      spinMethod: 'constant',
-      spinMathInput: '10*sin(i/4)',
-      spinMath: '10*sin(i/4)',
-      spinEnabled: false,
-      spinValue: 2,
-      spinSwitchbacks: 0,
-      trackEnabled: false,
-      trackGrowEnabled: false,
-      trackValue: 10,
-      trackLength: 0.2,
-      trackNumLoops: 1,
-      trackGrow: 50.0
-    }
-  }
-
   getOptions() {
     return transformOptions
   }

@@ -8,18 +8,18 @@ import InputOption from '../../components/InputOption'
 import {
   toggleTrack,
   toggleTrackGrow,
-  updateTransform
-} from './transformsSlice'
-import { getCurrentTransformSelector } from '../shapes/selectors'
+  updateLayer
+} from '../layers/layersSlice'
+import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
 
 const mapStateToProps = (state, ownProps) => {
-  const transform = getCurrentTransformSelector(state)
+  const layer = getCurrentLayer(state)
 
   return {
-    transform: transform,
-    active: transform.trackEnabled,
-    activeGrow: transform.trackGrowEnabled,
+    layer: layer,
+    active: layer.trackEnabled,
+    activeGrow: layer.trackGrowEnabled,
     options: new Transform().getOptions()
   }
 }
@@ -30,7 +30,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onChange: (attrs) => {
       attrs.id = id
-      dispatch(updateTransform(attrs))
+      dispatch(updateLayer(attrs))
     },
     onTrack: () => {
       dispatch(toggleTrack({id: id}))
@@ -44,19 +44,19 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 class TrackTransform extends Component {
   render() {
     const activeClassName = this.props.active ? 'active' : ''
-    const activeKey = this.props.active ? 0 : null
+    const activeKey = this.props.active ? 1 : null
     const activeGrowClassName = this.props.activeGrow ? 'active' : ''
-    const activeGrowKey = this.props.activeGrow ? 0 : null
+    const activeGrowKey = this.props.activeGrow ? 1 : null
 
     return (
       <Accordion defaultActiveKey={activeKey} activeKey={activeKey}>
         <Card className={activeClassName}>
-          <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrack}>
+          <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onTrack}>
             <h3>Track</h3>
             Moves the shape along a track (shown in green)
           </Accordion.Toggle>
 
-          <Accordion.Collapse eventKey={0}>
+          <Accordion.Collapse eventKey={1}>
             <Card.Body>
               <InputOption
                 onChange={this.props.onChange}
@@ -64,7 +64,7 @@ class TrackTransform extends Component {
                 key="trackValue"
                 optionKey="trackValue"
                 index={0}
-                model={this.props.transform} />
+                model={this.props.layer} />
 
               <InputOption
                 onChange={this.props.onChange}
@@ -73,7 +73,7 @@ class TrackTransform extends Component {
                 optionKey="trackLength"
                 index={0}
                 step={0.05}
-                model={this.props.transform} />
+                model={this.props.layer} />
 
               <InputOption
                 onChange={this.props.onChange}
@@ -81,16 +81,16 @@ class TrackTransform extends Component {
                 key="trackNumLoops"
                 optionKey="trackNumLoops"
                 index={0}
-                model={this.props.transform} />
+                model={this.props.layer} />
 
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
                 <Card className={activeGrowClassName}>
-                  <Accordion.Toggle as={Card.Header} eventKey={0} onClick={this.props.onTrackGrow}>
+                  <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onTrackGrow}>
                     <h3>Scale track</h3>
                     Grows or shrinks the track
                   </Accordion.Toggle>
 
-                  <Accordion.Collapse eventKey={0}>
+                  <Accordion.Collapse eventKey={1}>
                     <Card.Body>
                       <InputOption
                         onChange={this.props.onChange}
@@ -98,7 +98,7 @@ class TrackTransform extends Component {
                         key="trackGrow"
                         optionKey="trackGrow"
                         index={0}
-                        model={this.props.transform} />
+                        model={this.props.layer} />
                     </Card.Body>
                   </Accordion.Collapse>
                 </Card>

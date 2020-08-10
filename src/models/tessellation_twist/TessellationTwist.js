@@ -92,15 +92,6 @@ export default class TessellationTwist extends Shape {
         tessellationTwistNumSides: 5,
         tessellationTwistIterations: 2,
         tessellationTwistRotate: 0,
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
-        startingSize: 110,
         repeatEnabled: false,
       }
     }
@@ -215,6 +206,13 @@ export default class TessellationTwist extends Shape {
       prevKey = key
     })
 
+    const scale = 10.5 // to normalize starting size
+    walkedVertices.forEach(point => {
+      if (!point.visited) {
+        point.multiply({x: scale, y: scale })
+        point.visited = true
+      }
+    })
     return walkedVertices
   }
 

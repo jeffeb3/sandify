@@ -3,10 +3,10 @@ import { connect, ReactReduxContext, Provider } from 'react-redux'
 import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
-import { updateTransform } from '../transforms/transformsSlice'
-import { getCurrentTransformSelector } from '../shapes/selectors'
+import { updateLayer } from '../layers/layersSlice'
+import { getCurrentLayer, getKonvaLayerIds, isDragging } from '../layers/selectors'
 import { roundP } from '../../common/util'
-import PreviewShape from './PreviewShape'
+import PreviewLayer from './PreviewLayer'
 
 export const relativeScale = (props) => {
   let width, height
@@ -18,17 +18,17 @@ export const relativeScale = (props) => {
     width = height = props.maxRadius * 2.0
   }
 
-  // keep it square
   return Math.min(props.canvasWidth / width, props.canvasHeight / height)
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const transform = getCurrentTransformSelector(state)
-
   return {
-    transform: transform,
-    selectedId: state.shapes.selectedId,
+    layers: state.layers,
+    currentLayer: getCurrentLayer(state),
+    selectedId: state.layers.selected,
+    konvaIds: getKonvaLayerIds(state),
     use_rect: state.machine.rectangular,
+    dragging: isDragging(state),
     minX: state.machine.minX,
     maxX: state.machine.maxX,
     minY: state.machine.minY,
@@ -47,8 +47,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChange: (attrs) => {
       dispatch(updatePreview(attrs))
     },
-    onTransformChange: (attrs) => {
-      dispatch(updateTransform(attrs))
+    onLayerChange: (attrs) => {
+      dispatch(updateLayer(attrs))
     }
   }
 }
@@ -69,10 +69,9 @@ class PreviewWindow extends Component {
   resize(wrapper) {
     const width = parseInt(getComputedStyle(wrapper).getPropertyValue('width'))
     const height = parseInt(getComputedStyle(wrapper).getPropertyValue('height'))
-    const size = Math.max(Math.min(width, height))
 
-    if (this.props.canvasWidth !== size) {
-      this.props.onResize(size)
+    if (this.props.canvasWidth !== width || this.props.canvasHeight !== height) {
+      this.props.onResize({width: width, height: height})
     }
   }
 
@@ -111,6 +110,9 @@ class PreviewWindow extends Component {
       }
       return newSize
     }
+
+    const clipFunc = this.props.dragging ? (this.props.use_rect ? clipRect : clipCircle) : null
+
     return (
       // the consumer wrapper is needed to pass the store down to our shape
       // which is not our usual React Component
@@ -128,15 +130,15 @@ class PreviewWindow extends Component {
             onWheel={e => {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {
-                this.props.onTransformChange({
-                  startingSize: scaleByWheel(this.props.transform.startingSize, e.evt.deltaY),
-                  id: this.props.selectedId
+                this.props.onLayerChange({
+                  startingSize: scaleByWheel(this.props.currentLayer.startingSize, e.evt.deltaY),
+                  id: this.props.currentLayer.id
                 })
               }
             }}
             >
             <Provider store={store}>
-              <Layer clipFunc={this.props.use_rect ? clipRect : clipCircle}>
+              <Layer clipFunc={clipFunc}>
                 {!this.props.use_rect && <Circle x={0} y={0} radius={radius}
                   fill="transparent"
                   stroke="gray"
@@ -147,7 +149,11 @@ class PreviewWindow extends Component {
                   offsetX={width/2}
                   offsetY={height/2}
                 />}
-                <PreviewShape />
+                {this.props.konvaIds.map((id, i) => {
+                  return (
+                    <PreviewLayer id={id} key={i} index={i} />
+                  )
+                })}
               </Layer>
             </Provider>
           </Stage>

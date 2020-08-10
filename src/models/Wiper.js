@@ -255,16 +255,8 @@ export default class Wiper extends Shape {
         selectGroup: 'Erasers',
         canTransform: false,
         shouldCache: false,
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
-        startingSize: 1,
         canChangeSize: false,
+        usesMachine: true,
         repeatEnabled: false,
       }
     }

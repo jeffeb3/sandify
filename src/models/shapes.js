@@ -1,10 +1,12 @@
 import Circle from '../models/Circle'
 import Epicycloid from '../models/Epicycloid'
+import FileImport from '../models/FileImport'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
+import Point from '../models/Point'
 import Polygon from '../models/Polygon'
 import Reuleaux from '../models/Reuleaux'
 import Rose from '../models/Rose'
@@ -32,7 +34,48 @@ export const registeredShapes = {
   lsystem: new LSystem(),
   fractal_spirograph: new FractalSpirograph(),
   tessellation_twist: new TessellationTwist(),
+  point: new Point(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
-  bwimage: new BWImage()
+  bwimage: new BWImage(),
+  file_import: new FileImport()
+}
+
+export const getShape = (layer) => {
+  return registeredShapes[layer.type]
+}
+
+export const getShapeDefaults = () => {
+  return Object.keys(registeredShapes).map(id => {
+    const state = registeredShapes[id].getInitialState()
+    state.name = registeredShapes[id].name
+    state.id = id
+    return state
+  })
+}
+
+export const getShapeSelectOptions = () => {
+  const groupOptions = []
+  const shapes = getShapeDefaults()
+
+  for (const shape of shapes) {
+    const optionLabel = { value: shape.id, label: shape.name }
+    var found = false
+    for (const group of groupOptions) {
+      if (group.label === shape.selectGroup) {
+        found = true
+        group.options.push(optionLabel)
+      }
+    }
+    if (!found) {
+      if (shape.selectGroup === "import") {
+        // Users can't manually select this group.
+        continue
+      }
+      const newOptions = [ optionLabel ]
+      groupOptions.push( { label: shape.selectGroup, options: newOptions } )
+    }
+  }
+
+  return groupOptions
 }

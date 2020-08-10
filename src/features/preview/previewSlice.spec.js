@@ -8,8 +8,7 @@ describe('preview reducer', () => {
     expect(preview(undefined, {})).toEqual({
       canvasWidth: 600,
       canvasHeight: 600,
-      sliderValue: 0,
-      dragging: false,
+      sliderValue: 0
     })
   })
 
@@ -28,7 +27,7 @@ describe('preview reducer', () => {
     expect(
       preview(
         {canvasWidth: 600, canvasHeight: 600},
-        setPreviewSize(800)
+        setPreviewSize({width: 800, height: 800})
       )
     ).toEqual({
       canvasWidth: 800,

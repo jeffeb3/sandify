@@ -47,16 +47,7 @@ export default class InputText extends Shape {
         inputText: 'Sandify',
         inputFont: 'Cursive',
         rotateDir: 'Center',
-      }
-    }
-  }
-
-  getInitialTransformState() {
-    return {
-      ...super.getInitialTransformState(),
-      ...{
-        repeatEnabled: false,
-        startingSize: 25
+        repeatEnabled: false
       }
     }
   }
@@ -66,6 +57,8 @@ export default class InputText extends Shape {
     let prevLetter = ''
     let x = 0.0
     let lines = []
+    let textPoints = []
+
     for (let chi = 0; chi < state.shape.inputText.length; chi++) {
       var nextLetter = state.shape.inputText[chi]
       if (prevLetter === 'b' || prevLetter === 'v' || prevLetter === 'o' || prevLetter === 'w') {
@@ -115,7 +108,6 @@ export default class InputText extends Shape {
     if (state.shape.rotateDir === 'Center') {
       // Starting Y offset
       let y = (lines.length - 1) * maxY / 2.0
-      let textPoints = []
 
       // Capture some wrap around points, to connect the lines.
       let connectorPoints = []
@@ -139,7 +131,6 @@ export default class InputText extends Shape {
         y -= maxY
         connectorPoints.push(new Victor(-1e9, y))
       })
-      return textPoints
     } else {
       // This variable controls "Top" vs. "Bottom"
       let direction = 1.0
@@ -147,9 +138,6 @@ export default class InputText extends Shape {
         direction = -1.0
         lines.reverse()
       }
-
-      // These are the vertices we will be using.
-      let textPoints = []
 
       // Some constants to rotate the letters.
       //
@@ -219,8 +207,11 @@ export default class InputText extends Shape {
         rPerY = direction * Math.sqrt(maxRPerY * rOffset / maxROffset)
         thetaPerX = -rPerY / rOffset
       })
-      return textPoints
     }
+
+    const scale = 2.5 // to normalize starting size
+    textPoints.forEach(point => point.multiply({x: scale, y: scale }))
+    return textPoints
   }
 
   getOptions() {
