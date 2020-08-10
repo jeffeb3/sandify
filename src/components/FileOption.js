@@ -5,6 +5,7 @@ import {
   Row
 } from 'react-bootstrap'
 import debounce from 'lodash/debounce'
+import './option.css'
 
 class ImageOption extends Component {
   constructor(props) {
@@ -51,12 +52,14 @@ class ImageOption extends Component {
                   let ctx = canvas.getContext('2d')
                   canvas.height = 150
                   let scale = Math.min(canvas.width/im.width, canvas.height/im.height)
-                  ctx.drawImage(im, 0, 0, im.width*scale, im.height*scale)
+                  let xoffset = (canvas.width-im.width*scale)/2
+                  let yoffset = (canvas.height-im.height*scale)/2
+                  
+                  ctx.drawImage(im, xoffset, yoffset, im.width*scale, im.height*scale)
                   value = true
                   
                   // need to set the state from the image handling callback otherwise the dataurl will be wrong
                   // set the canvas as visible
-                  // TODO add animation and use a better style for the canvas
                   context.props.options[context.props.optionKey].canvasVisible = true
 
                   attrs[context.props.optionKey] = value
@@ -75,13 +78,11 @@ class ImageOption extends Component {
             />
         </Col>
       </Row>
-      <Row className={"align-items-center pb-1 " + (canvasVisible && visible ? null : ' d-none')}>
-          <Col sm={5}>
-          </Col>
-          <Col sm={7}> 
-            <canvas id={canvasId} height="0"></canvas>
-          </Col>
-      </Row>
+          <Row className={"align-items-center pb-1 " + (canvasVisible && visible ? null : ' d-none')}>
+              <Col sm={7} className={"canvas-option"}> 
+                <canvas id={canvasId} height="0"></canvas>
+              </Col>
+          </Row>
       </div>
     )
   }
