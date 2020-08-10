@@ -31,7 +31,7 @@ const options = {
     lineType: {
       title: 'Line type',
       type: 'dropdown',
-      choices: ['Straight', 'Sine', 'Triangular'],
+      choices: ['Straight', 'Sine', 'Triangular', 'Density'],
     },
     frequency: {
       title: 'Frequency',
@@ -158,6 +158,10 @@ export default class BWImage extends Shape {
                 diff_sign *= -1
               }
             }
+          }else if (lineType === "Density"){
+            centery = (Math.floor(centery*1000*colorDifferenceStep))/(colorDifferenceStep*1000)-colorDifferenceStep/2
+            points.push(mapXY(state, startx, centery+colorDifferenceStep));
+            points.push(mapXY(state, endx,   centery+colorDifferenceStep));
           }
         }
 
@@ -179,11 +183,6 @@ export default class BWImage extends Shape {
           // change direction of the scanning line
           leftSidePoint = !leftSidePoint
         }
-
-        // TODO check error with vertical lines
-        // TODO add different line tipes for the colors (instead of straight use a different curve like sin or triangular)
-        // TODO use different line density for the colors instead of line step
-        // TODO add image rotation with respect to the lines
 
         // the cycle iterate from -h to +h in addition to the image size
         // the cycle will add padding lines until i reaches 0 and when i is over h in order to add padding lines
