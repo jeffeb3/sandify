@@ -33,6 +33,11 @@ const options = {
       type: 'dropdown',
       choices: ['Straight', 'Sine', 'Triangular'],
     },
+    frequency: {
+      title: 'Frequency',
+      min:1,
+      max: 200
+    }
   }
 }
 
@@ -51,7 +56,8 @@ export default class BWImage extends Shape {
         colorDifferenceStep: 2,
         darkness: 254/2,
         inversion: false,
-        lineType: "Straight"
+        lineType: "Straight",
+        frequency: 20
       }
     }
   }
@@ -81,6 +87,7 @@ export default class BWImage extends Shape {
         const darknessInversion = state.shape.inversion
         const positionOnBorder = 2
         const lineType = state.shape.lineType
+        const frequency = 2*Math.PI * (state.shape.frequency || 1 )
 
         // get machine size
         const machine = state.machine
@@ -102,7 +109,7 @@ export default class BWImage extends Shape {
         const h = image.height
         const scale = Math.max(w/sizeX, h/sizeY)
         const spacing = state.shape.lineSpacing*scale || 1
-        const colorDifferenceStep = state.shape.colorDifferenceStep*scale/h || 1
+        const colorDifferenceStep = (state.shape.colorDifferenceStep || 1)*scale/h
 
         let leftSidePoint = true
         let isDarkLine = false
@@ -122,6 +129,35 @@ export default class BWImage extends Shape {
           if (lineType === "Straight") {
             points.push(mapXY(state, startx, centery+colorDifferenceStep));
             points.push(mapXY(state, endx,   centery+colorDifferenceStep));
+          }else if (lineType === "Sine") {
+            if (startx < endx){
+              for(let s = startx; s <= endx; s+=1/(frequency)){
+                points.push(mapXY(state, s, centery + colorDifferenceStep*Math.sin(s*frequency)))
+              }
+            }else{
+              for(let s = startx; s >= endx; s-=1/(frequency)){
+                points.push(mapXY(state, s, centery + colorDifferenceStep*Math.sin(s*frequency)))
+              }
+            }
+          }else if (lineType === "Triangular"){
+            let diff_sign = 1
+            // aligning the waves
+            startx = Math.floor(startx*2*frequency)/(2*frequency)
+            if (Math.floor(startx*frequency)/(frequency) !== startx){
+              diff_sign *= -1
+            }
+            // creating the waves
+            if (startx < endx){
+              for(let s = startx; s <= endx; s+=1/(2*frequency)){
+                points.push(mapXY(state, s, centery + colorDifferenceStep/2*diff_sign))
+                diff_sign *= -1
+              }
+            }else{
+              for(let s = startx; s >= endx; s-=1/(2*frequency)){
+                points.push(mapXY(state, s, centery + colorDifferenceStep/2*diff_sign))
+                diff_sign *= -1
+              }
+            }
           }
         }
 
@@ -148,7 +184,6 @@ export default class BWImage extends Shape {
         // TODO add different line tipes for the colors (instead of straight use a different curve like sin or triangular)
         // TODO use different line density for the colors instead of line step
         // TODO add image rotation with respect to the lines
-        // TODO fix css/visualization for the canvas?
 
         // the cycle iterate from -h to +h in addition to the image size
         // the cycle will add padding lines until i reaches 0 and when i is over h in order to add padding lines
