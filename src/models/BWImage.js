@@ -6,6 +6,10 @@ const canvasId = 'bwimage_canvas'
 const options = {
   ...shapeOptions,
   ...{
+    comment: {
+      type: 'comment',
+      title: 'Load a 2 color image with different darkness to create the pattern'
+    },
     imageFile: {
       title: 'Load image',
       type: 'file',
@@ -31,7 +35,7 @@ const options = {
     lineType: {
       title: 'Line type',
       type: 'dropdown',
-      choices: ['Straight', 'Sine', 'Triangular', 'Density'],
+      choices: ['Straight', 'Sine', 'Triangular', 'Spiral', 'Density'],
     },
     frequency: {
       title: 'Frequency',
@@ -77,7 +81,7 @@ export default class BWImage extends Shape {
       try{
         const darknessThreshold = state.shape.darkness
         const darknessInversion = state.shape.inversion
-        const positionOnBorder = 2
+        const positionOnBorder = 1.5
         const lineType = state.shape.lineType
         const frequency = 2*Math.PI * (state.shape.frequency || 1 )
 
@@ -150,6 +154,16 @@ export default class BWImage extends Shape {
                 diff_sign *= -1
               }
             }
+          }else if(lineType === "Spiral"){
+            if (startx < endx){
+              for(let s = startx; s <= endx; s+=0.001){
+                points.push(mapXY(state, s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
+              }
+            }else{
+              for(let s = startx; s >= endx; s-=0.001){
+                points.push(mapXY(state, s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
+              }
+            }
           }else if (lineType === "Density"){
             centery = (Math.floor(centery*1000*colorDifferenceStep))/(colorDifferenceStep*1000)-colorDifferenceStep/2
             points.push(mapXY(state, startx, centery+colorDifferenceStep));
@@ -162,7 +176,7 @@ export default class BWImage extends Shape {
           // create padding lines
           let pos = positionOnBorder
           if(!leftSidePoint){
-            pos = -pos
+            pos = -pos+1
           }
           if(isDarkLine){
             addLine(state, lastX, pos, (i-spacing)/h)
