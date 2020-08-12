@@ -76,23 +76,23 @@ class Transforms extends Component {
           index={0}
           model={this.props.layer} />
 
-        <InputOption
+        {this.props.layer.canTransform && <InputOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="rotation"
           optionKey="rotation"
           index={0}
-          model={this.props.layer} />
+          model={this.props.layer} />}
 
-        <CheckboxOption
+        {this.props.layer.canTransform && <CheckboxOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="reverse"
           optionKey="reverse"
           index={0}
-          model={this.props.layer} />
+          model={this.props.layer} />}
 
-        <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
+        {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onRepeat}>
               <h3>Loop and transform</h3>
@@ -132,7 +132,7 @@ class Transforms extends Component {
               </Card.Body>
             </Accordion.Collapse>
           </Card>
-        </Accordion>
+        </Accordion>}
       </div>
     )
   }
