@@ -56,7 +56,11 @@ export default class ThetaRhoExporter extends Exporter {
     let maxrho   = -1e9
     for (next = 0; next < subsampledVertices.length; ++next) {
       // Normalize the radius
-      const rho = Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius
+      let rhoMax = parseFloat(this.props.polarRhoMax)
+      if (rhoMax < 0) { rhoMax = 0.1 }
+      if ( rhoMax > 1) { rhoMax = 1.0 }
+
+      const rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius) * rhoMax
       minrho = Math.min(rho, minrho)
       maxrho = Math.max(rho, maxrho)
 
