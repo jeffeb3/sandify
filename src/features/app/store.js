@@ -29,7 +29,7 @@ const store = configureStore({
 
 // set to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const persistState = true
+const persistState = false
 
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change

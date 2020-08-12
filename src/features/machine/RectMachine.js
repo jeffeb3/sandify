@@ -136,6 +136,15 @@ export default class RectMachine extends Machine {
     )
   }
 
+  // Returns the nearest perimeter vertex to the given vertex.
+  nearestPerimeterVertex(vertex) {
+    if (Math.abs(vertex.x) >= Math.abs(vertex.y)) {
+      return new Victor(Math.sign(vertex.x) * this.sizeX, vertex.y)
+    } else {
+      return new Victor(vertex.x, Math.sign(vertex.y) * this.sizeY)
+    }
+  }
+
   // The guts of logic for this limits enforcer. It will take a single line (defined by
   // start and end) and if the line goes out of bounds, returns the vertices around the
   // outside edge to follow around without messing up the shape of the vertices.

@@ -1,4 +1,5 @@
 import RectMachine from './RectMachine'
+import Victor from 'Victor'
 
 describe('rect machine', () => {
   let machine
@@ -9,38 +10,38 @@ describe('rect machine', () => {
 
   describe('onPerimeter', () => {
     it('when points on minX, returns true', () => {
-      let p1 = {x: -250, y: 0}
-      let p2 = {x: -250, y: 50}
+      const p1 = {x: -250, y: 0}
+      const p2 = {x: -250, y: 50}
       expect(machine.onPerimeter(p1, p2)).toEqual(true)
     })
 
     it('when points on different X, returns false', () => {
-      let p1 = {x: 250, y: 0}
-      let p2 = {x: -250, y: 50}
+      const p1 = {x: 250, y: 0}
+      const p2 = {x: -250, y: 50}
       expect(machine.onPerimeter(p1, p2)).toEqual(false)
     })
 
     it('when points on different X (same Y), returns false', () => {
-      let p1 = {x: 250, y: 50}
-      let p2 = {x: -250, y: 50}
+      const p1 = {x: 250, y: 50}
+      const p2 = {x: -250, y: 50}
       expect(machine.onPerimeter(p1, p2)).toEqual(false)
     })
 
     it('when points on minY, returns true', () => {
-      let p1 = {x: 0,  y: -250}
-      let p2 = {x: 50, y: -250}
+      const p1 = {x: 0,  y: -250}
+      const p2 = {x: 50, y: -250}
       expect(machine.onPerimeter(p1, p2)).toEqual(true)
     })
 
     it('when points on different Y, returns false', () => {
-      let p1 = {x: 0,  y: 250}
-      let p2 = {x: 50, y: -250}
+      const p1 = {x: 0,  y: 250}
+      const p2 = {x: 50, y: -250}
       expect(machine.onPerimeter(p1, p2)).toEqual(false)
     })
 
     it('when points on different Y (same X), returns false', () => {
-      let p1 = {x: 50, y: -250}
-      let p2 = {x: 50, y: 250}
+      const p1 = {x: 50, y: -250}
+      const p2 = {x: 50, y: 250}
       expect(machine.onPerimeter(p1, p2)).toEqual(false)
     })
 
@@ -48,8 +49,8 @@ describe('rect machine', () => {
 
   describe('tracePerimeter', () => {
     it('when points on the same line, no connecting points needed', () => {
-      let p1 = {x: 50, y: -250}
-      let p2 = {x: 100, y: -250}
+      const p1 = {x: 50, y: -250}
+      const p2 = {x: 100, y: -250}
       expect(machine.tracePerimeter(p1, p2)).toEqual([])
     })
 
@@ -66,6 +67,15 @@ describe('rect machine', () => {
       expect(machine.tracePerimeter({x: -250, y: 50}, {x: 250, y: 50})).toEqual([{x: -250, y: 250}, {x: 250, y: 250}])
       expect(machine.tracePerimeter({x: -250, y: -50}, {x: 250, y: -50})).toEqual([{x: -250, y: -250}, {x: 250, y: -250}])
       expect(machine.tracePerimeter({x: 250, y: -50}, {x: -250, y: -50})).toEqual([{x: 250, y: -250}, {x: -250, y: -250}])
+    })
+  })
+
+  describe('nearestPerimeterVertex', () => {
+    it('finds the nearest vertex', () => {
+      expect(machine.nearestPerimeterVertex({x: 10, y: 100})).toEqual(new Victor(10, 250))
+      expect(machine.nearestPerimeterVertex({x: 100, y: 10})).toEqual(new Victor(250, 10))
+      expect(machine.nearestPerimeterVertex({x: -10, y: -100})).toEqual(new Victor(-10, -250))
+      expect(machine.nearestPerimeterVertex({x: -100, y: -10})).toEqual(new Victor(-250, -10))             
     })
   })
 })

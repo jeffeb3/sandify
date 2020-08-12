@@ -72,6 +72,11 @@ export default class PolarMachine extends Machine {
     }
   }
 
+  // Returns the nearest perimeter vertex to the given vertex.
+  nearestPerimeterVertex(vertex) {
+    return new Victor(Math.cos(vertex.angle()) * this.settings.maxRadius, Math.sin(vertex.angle()) * this.settings.maxRadius)
+  }
+
   // Returns the distance along the perimeter between two points.
   perimeterDistance(v1, v2) {
     const startAngle = angle(v1)
@@ -104,7 +109,7 @@ export default class PolarMachine extends Machine {
     // move, or it will be incorrectly optimized out of the final vertices. The 3/50
     // ratio could likely be refined further (relative to maxRadius), but it seems to produce
     // accurate results at various machine sizes.
-    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/50
+    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/100
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by

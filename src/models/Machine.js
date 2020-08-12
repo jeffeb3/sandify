@@ -26,7 +26,7 @@ const machineOptions = {
   },
   polarStartPoint: {
     title: 'Start point'
-  }
+  },
 }
 
 export default class Machine {

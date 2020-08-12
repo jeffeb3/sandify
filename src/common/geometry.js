@@ -102,10 +102,10 @@ export const offset = (vertex, offsetX, offsetY) => {
   )
 }
 
-// given a set of vertices and a slider value, returns the start and end vertices
-// representing a preview slider moving through them.
+// given a set of vertices and a slider value, returns the indices of the
+// start and end vertices representing a preview slider moving through them.
 export const getSliderBounds = (vertices, sliderValue) => {
-  const slideSize = 10.0
+  const slideSize = 2.0
   const beginFraction = sliderValue / 100.0
   const endFraction = (slideSize + sliderValue) / 100.0
   let start = Math.round(vertices.length * beginFraction)

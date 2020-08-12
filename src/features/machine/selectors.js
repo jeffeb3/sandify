@@ -5,7 +5,8 @@ import Color from 'color'
 import {
   transformShapes,
   transformShape,
-  polishVertices
+  polishVertices,
+  getMachineInstance
 } from './computer'
 import { getShape } from '../../models/shapes'
 import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
@@ -90,9 +91,36 @@ const makeGetComputedVertices = layerId => {
       getCachedSelector(makeGetTransformedVertices, layerId),
       getCachedSelector(makeGetLayerIndex, layerId),
       getNumVisibleLayers,
+      getLayers,
+      getVisibleLayerIds,
       getMachine
     ],
-    (vertices, layerIndex, numLayers, machine) => {
+    (vertices, layerIndex, numLayers, layers, visibleLayerIds, machine) => {
+      const state = { layers: layers, machine: machine }
+      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
+
+      if (index < numLayers - 1) {
+        const nextLayerId = visibleLayerIds[index + 1]
+        const nextLayer = layers.byId[nextLayerId]
+
+        if (!nextLayer.dragging) {
+          const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
+          if (nextVertices[0]) {
+            const layer = layers.byId[layerId]
+            if (layer.connectionMethod === 'along perimeter') {
+              const start = vertices[vertices.length - 1]
+              const end = nextVertices[0]
+              const machineInstance = getMachineInstance([], machine)
+              const startPerimeter = machineInstance.nearestPerimeterVertex(start)
+              const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+              vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
+            } else {
+              vertices = vertices.concat(nextVertices[0])
+            }
+          }
+        }
+      }
+
       return polishVertices(vertices, machine, {
         start: layerIndex === 0,
         end: layerIndex === numLayers - 1
@@ -117,25 +145,11 @@ export const makeGetPreviewVertices = layerId => {
 
       let vertices
       const layer = layers.byId[layerId]
-      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
-      const numLayers = getNumVisibleLayers(state)
 
       if (layer.dragging) {
         vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
       } else {
         vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
-        if (index < numLayers - 1) {
-          const nextLayerId = visibleLayerIds[index + 1]
-          const nextLayer = layers.byId[nextLayerId]
-
-          if (!nextLayer.dragging && nextLayer.visible) {
-            // draw the stitch between the two layers
-            const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
-            if (nextVertices[0]) {
-              vertices = vertices.concat(nextVertices[0])
-            }
-          }
-        }
       }
 
       const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
@@ -183,9 +197,9 @@ export const getVertexOffsets = createSelector(
   (state, visibleLayerIds) => {
     let offsets = {}
     let offset = 0
+
     visibleLayerIds.forEach((id) => {
       const vertices = getCachedSelector(makeGetComputedVertices, id)(state)
-
       offsets[id] = offset
       offset += vertices.length + 1
     })
@@ -193,7 +207,7 @@ export const getVertexOffsets = createSelector(
   }
 )
 
-// statistics across all layers
+// returns statistics across all layers
 export const getVerticesStats = createSelector(
   getAllComputedVertices,
   (vertices) => {
@@ -273,4 +287,5 @@ export const makeGetPreviewTrackVertices = layerId => {
         return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
       })
     }
-  )}
+  )
+}

@@ -11,6 +11,7 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
+import DropdownOption from '../../components/DropdownOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
@@ -133,6 +134,49 @@ class Transforms extends Component {
             </Accordion.Collapse>
           </Card>
         </Accordion>}
+
+        <Card className="mt-4">
+          <Card.Body>
+            <h3 className="mb-3">Fine tuning (advanced)</h3>
+            <DropdownOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              optionKey="connectionMethod"
+              key="connectionMethod"
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="drawPortionPct"
+              optionKey="drawPortionPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="backtrackPct"
+              optionKey="backtrackPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="rotateStartingPct"
+              optionKey="rotateStartingPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+          </Card.Body>
+        </Card>
       </div>
     )
   }

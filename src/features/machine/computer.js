@@ -2,6 +2,7 @@ import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
 import { evaluate } from 'mathjs'
 import { distance, scale, rotate } from '../../common/geometry'
+import { arrayRotate } from '../../common/util'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
 import Victor from 'victor'
@@ -73,19 +74,21 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
 }
 
 function buildTrackLoop(vertices, transform, i, t) {
+  const numLoops = transform.repeatEnabled ? transform.numLoops : 1
   const numTrackLoops = transform.repeatEnabled ? transform.trackNumLoops : 1
   const nextTrackVertex = transformShape(transform, vertices[0], 0, i + 1, numTrackLoops)
   const backtrack = numTrackLoops > 1 && t === numTrackLoops - 1
-  let numVertices = vertices.length
   let trackVertices = []
   let trackDistances = []
+  const drawPortionPct = Math.round((transform.drawPortionPct || 100)/100.0 * vertices.length)
+  const completion = (i === numLoops - 1 && t === numTrackLoops - 1) ? drawPortionPct : vertices.length
 
-  for (var j=0; j<numVertices; j++) {
+  for (var j=0; j<completion; j++) {
     const amount = transform.transformMethod === 'smear' ? i + t + j/vertices.length : i + t
     const trackVertex = transformShape(transform, vertices[j], amount, i, numTrackLoops)
     trackVertices.push(trackVertex)
 
-    if (backtrack) {
+    if (backtrack && completion === vertices.length) {
       trackDistances.push(distance(nextTrackVertex, trackVertex))
     }
   }
@@ -115,10 +118,10 @@ function buildTrackLoop(vertices, transform, i, t) {
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
 export const polishVertices = (vertices, machine, layerInfo) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
-  const machineClass = machine.rectangular ? RectMachine : PolarMachine
 
   if (vertices.length > 0) {
-    vertices = new machineClass(vertices, machine, layerInfo).polish().vertices
+    const machineInstance = getMachineInstance(vertices, machine, layerInfo)
+    vertices = machineInstance.polish().vertices
   }
 
   return vertices
@@ -152,6 +155,18 @@ export const transformShapes = (vertices, transform) => {
     vertices.pop()
   }
 
+  if (transform.rotateStartingPct === undefined || transform.rotateStartingPct !== 0) {
+    const start = Math.round(vertices.length * transform.rotateStartingPct / 100.0)
+    vertices = arrayRotate(vertices, start)
+
+    // some patterns create a loop when drawn and transformMethod is 'intact'; in
+    // this case, rotateStartingPct will not draw the final vertex to complete the
+    // loop. Use rotateCompleteLoop to add it back in for specific shapes.
+    if (transform.rotateCompleteLoop) {
+      vertices.push(new Victor(vertices[0].x, vertices[0].y))
+    }
+  }
+
   if (transform.trackEnabled && numTrackLoops > 1) {
     for (var i=0; i<numLoops; i++) {
       for (var t=0; t<numTrackLoops; t++) {
@@ -160,11 +175,19 @@ export const transformShapes = (vertices, transform) => {
     }
   } else {
     for (i=0; i<numLoops; i++) {
-      for (var j=0; j<vertices.length; j++) {
+      const drawPortionPct = Math.round((transform.drawPortionPct || 100)/100.0 * vertices.length)
+      const completion = i === numLoops - 1 ? drawPortionPct : vertices.length
+
+      for (var j=0; j<completion; j++) {
         let amount = transform.transformMethod === 'smear' ? i + j/vertices.length : i
         outputVertices.push(transformShape(transform, vertices[j], amount, amount))
       }
     }
+  }
+
+  if (transform.backtrackPct) {
+    const backtrack = Math.round(vertices.length * transform.backtrackPct / 100.0)
+    outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
   }
 
   if (transform.reverse) {
@@ -175,4 +198,10 @@ export const transformShapes = (vertices, transform) => {
   throttledReportTiming(endTime - startTime)
 
   return outputVertices
+}
+
+// returns the appropriate machine class for given machine properties
+export const getMachineInstance = (vertices, settings, layerInfo) => {
+  const machineClass = settings.rectangular ? RectMachine : PolarMachine
+  return new machineClass(vertices, settings, layerInfo)
 }

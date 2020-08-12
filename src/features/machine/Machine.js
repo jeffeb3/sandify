@@ -10,7 +10,7 @@ export default class Machine {
 
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
-    
+
     return this
   }
 
@@ -78,7 +78,7 @@ export default class Machine {
       const current = segments[j]
 
       if (j > 0) {
-        // connect the two segments along the circle perimeter
+        // connect the two segments along the perimeter
         const prev = segments[j-1]
         connectedVertices.push(this.tracePerimeter(prev[prev.length-1], current[0]))
       }

@@ -42,6 +42,10 @@ export default class Shape {
       trackLength: 0.2,
       trackNumLoops: 1,
       trackGrow: 50.0,
+      connectionMethod: 'line',
+      drawPortionPct: 100,
+      backtrackPct: 0,
+      rotateStartingPct: 0,
       reverse: false,
       dragging: false,
       visible: true

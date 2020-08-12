@@ -21,3 +21,11 @@ export const reduce = (numerator, denominator) => {
   gcd = gcd(numerator, denominator)
   return [numerator/gcd, denominator/gcd]
 }
+
+// rotates an array count times
+// taken from https://stackoverflow.com/questions/1985260/rotate-the-elements-in-an-array-in-javascript#33451102
+export const arrayRotate = (arr, count) => {
+  count -= arr.length * Math.floor(count / arr.length)
+  arr.push.apply(arr, arr.splice(0, count))
+  return arr
+}
