@@ -1,5 +1,5 @@
 import RectMachine from './RectMachine'
-import Victor from 'Victor'
+import Victor from 'victor'
 
 describe('rect machine', () => {
   let machine
@@ -75,7 +75,7 @@ describe('rect machine', () => {
       expect(machine.nearestPerimeterVertex({x: 10, y: 100})).toEqual(new Victor(10, 250))
       expect(machine.nearestPerimeterVertex({x: 100, y: 10})).toEqual(new Victor(250, 10))
       expect(machine.nearestPerimeterVertex({x: -10, y: -100})).toEqual(new Victor(-10, -250))
-      expect(machine.nearestPerimeterVertex({x: -100, y: -10})).toEqual(new Victor(-250, -10))             
+      expect(machine.nearestPerimeterVertex({x: -100, y: -10})).toEqual(new Victor(-250, -10))
     })
   })
 })
