@@ -50,7 +50,7 @@ const transformOptions = {
     choices: ['smear', 'intact'],
   },
   growEnabled: {
-    title: 'Grow'
+    title: 'Scale'
   },
   growValue: {
     title: 'Scale (+/-)',
@@ -86,6 +86,7 @@ const transformOptions = {
     isVisible: state => { return state.spinMethod === 'function' },
   },
   spinMath: {
+    title: 'Spin function (i)',
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
@@ -95,7 +96,7 @@ const transformOptions = {
     title: 'Track'
   },
   trackGrowEnabled: {
-    title: 'Track grow'
+    title: 'Scale track'
   },
   rotateCompleteLoop: {
     title: 'Complete loop?'
@@ -112,7 +113,7 @@ const transformOptions = {
     step: 0.05
   },
   trackGrow: {
-    title: 'Scale step (+/-)',
+    title: 'Scale (+/-)',
   },
 }
 

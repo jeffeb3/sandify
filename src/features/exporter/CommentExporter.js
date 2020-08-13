@@ -43,15 +43,9 @@ export default class CommentExporter extends Exporter {
           this.keyValueLine('Shape', shape.name)
           this.optionLines(shape, layer, Object.keys(options))
           this.keyValueLine('Visible', layer.visible)
-          this.optionLines(transform, layer, ['offsetX', 'offsetY'])
-          this.optionLines(transform, layer, ['numLoops', 'transformMethod', 'spinEnabled'], layer.repeatEnabled)
-          this.indent()
-          this.optionLines(transform, layer, ['spinValue', 'spinMethod'], layer.repeatEnabled && layer.spinEnabled)
-          this.indent()
-          this.optionLine(transform, layer, 'spinMath', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'function')
-          this.optionLine(transform, layer, 'spinSwitchbacks', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'constant')
-          this.dedent()
-          this.dedent()
+          this.optionLines(transform, layer, ['startingSize', 'offsetX', 'offsetY', 'rotation', 'reverse'])
+          this.optionLines(transform, layer, ['numLoops', 'transformMethod'], layer.repeatEnabled)
+
           this.optionLine(transform, layer, 'growEnabled', layer.repeatEnabled)
           this.indent()
           this.optionLine(transform, layer, 'growValue', layer.repeatEnabled && layer.growEnabled)
@@ -60,6 +54,16 @@ export default class CommentExporter extends Exporter {
           this.optionLine(transform, layer, 'growMath', layer.repeatEnabled && layer.growEnabled && layer.growMethod === 'function')
           this.dedent()
           this.dedent()
+
+          this.optionLine(transform, layer, 'spinEnabled', layer.repeatEnabled)
+          this.indent()
+          this.optionLines(transform, layer, ['spinValue', 'spinMethod'], layer.repeatEnabled && layer.spinEnabled)
+          this.indent()
+          this.optionLine(transform, layer, 'spinMath', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'function')
+          this.optionLine(transform, layer, 'spinSwitchbacks', layer.repeatEnabled && layer.spinEnabled && layer.spinMethod === 'constant')
+          this.dedent()
+          this.dedent()
+
           this.optionLine(transform, layer, 'trackEnabled', layer.repeatEnabled)
           this.indent()
           this.optionLines(transform, layer, ['trackValue', 'trackLength', 'trackNumLoops'], layer.repeatEnabled && layer.trackEnabled)
@@ -67,6 +71,11 @@ export default class CommentExporter extends Exporter {
           this.indent()
           this.optionLine(transform, layer, 'trackGrow', layer.repeatEnabled && layer.trackGrowEnabled)
           this.dedent()
+          this.dedent()
+
+          this.line('Fine tuning:')
+          this.indent()
+          this.optionLines(transform, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
           this.dedent()
           this.dedent()
         })
@@ -77,7 +86,7 @@ export default class CommentExporter extends Exporter {
     }
 
     this.dedent()
-    this.keyValueLine('Path reversed', state.exporter.reverse)
+    this.keyValueLine('Reverse export path', state.exporter.reverse)
     return this.lines
   }
 }
