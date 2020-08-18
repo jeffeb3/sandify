@@ -115,22 +115,22 @@ export default class BWImage extends Shape {
         }
 
         // map an image pixel to a point of the machine bed
-        function mapXY(state, x, y){
+        function mapXY(x, y){
           return new Victor(x*w/(scale) + xoffset, y*h/(scale) + yoffset)
         }
 
-        function addLine(state, startx, endx, centery){
+        function addLine(startx, endx, centery){
           if (lineType === "Straight") {
-            points.push(mapXY(state, startx, centery+colorDifferenceStep));
-            points.push(mapXY(state, endx,   centery+colorDifferenceStep));
+            points.push(mapXY(startx, centery+colorDifferenceStep));
+            points.push(mapXY(endx,   centery+colorDifferenceStep));
           }else if (lineType === "Sine") {
             if (startx < endx){
               for(let s = startx; s <= endx; s+=1/(frequency)){
-                points.push(mapXY(state, s, centery + colorDifferenceStep*Math.sin(s*frequency)))
+                points.push(mapXY(s, centery + colorDifferenceStep*Math.sin(s*frequency)))
               }
             }else{
               for(let s = startx; s >= endx; s-=1/(frequency)){
-                points.push(mapXY(state, s, centery + colorDifferenceStep*Math.sin(s*frequency)))
+                points.push(mapXY(s, centery + colorDifferenceStep*Math.sin(s*frequency)))
               }
             }
           }else if (lineType === "Triangular"){
@@ -143,29 +143,29 @@ export default class BWImage extends Shape {
             // creating the waves
             if (startx < endx){
               for(let s = startx; s <= endx; s+=1/(2*frequency)){
-                points.push(mapXY(state, s, centery + colorDifferenceStep/2*diff_sign))
+                points.push(mapXY(s, centery + colorDifferenceStep/2*diff_sign))
                 diff_sign *= -1
               }
             }else{
               for(let s = startx; s >= endx; s-=1/(2*frequency)){
-                points.push(mapXY(state, s, centery + colorDifferenceStep/2*diff_sign))
+                points.push(mapXY(s, centery + colorDifferenceStep/2*diff_sign))
                 diff_sign *= -1
               }
             }
           }else if(lineType === "Spiral"){
             if (startx < endx){
               for(let s = startx; s <= endx; s+=0.001){
-                points.push(mapXY(state, s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
+                points.push(mapXY(s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
               }
             }else{
               for(let s = startx; s >= endx; s-=0.001){
-                points.push(mapXY(state, s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
+                points.push(mapXY(s + colorDifferenceStep*Math.cos(s*frequency*5), centery + colorDifferenceStep*Math.sin(s*frequency*5)))
               }
             }
           }else if (lineType === "Density"){
             centery = (Math.floor(centery*1000*colorDifferenceStep))/(colorDifferenceStep*1000)-colorDifferenceStep/2
-            points.push(mapXY(state, startx, centery+colorDifferenceStep));
-            points.push(mapXY(state, endx,   centery+colorDifferenceStep));
+            points.push(mapXY(startx, centery+colorDifferenceStep));
+            points.push(mapXY(endx,   centery+colorDifferenceStep));
           }
         }
 
@@ -177,11 +177,11 @@ export default class BWImage extends Shape {
             pos = -pos+1
           }
           if(isDarkLine){
-            addLine(state, lastX, pos, (i-spacing)/h)
+            addLine(lastX, pos, (i-spacing)/h)
           }else{
-            points.push(mapXY(state, pos, (i-spacing)/h))
+            points.push(mapXY(pos, (i-spacing)/h))
           }
-          points.push(mapXY(state, pos, i/h))
+          points.push(mapXY(pos, i/h))
           lastX = pos
           
           // change direction of the scanning line
@@ -202,14 +202,14 @@ export default class BWImage extends Shape {
               if ((this.getPixelDarkness(ctx.getImageData(tmpJ,h-i,1,1).data) < darknessThreshold) ^ darknessInversion){ 
                 if(!isDarkLine){
                   isDarkLine = true
-                  points.push(mapXY(state, tmpJ/w, i/h))
+                  points.push(mapXY(tmpJ/w, i/h))
                   lastX = tmpJ/w
                 }
               }else{
                 if(isDarkLine){
                   isDarkLine = false
-                  addLine(state, lastX, tmpJ/w, i/h)
-                  points.push(mapXY(state, tmpJ/w, i/h))
+                  addLine(lastX, tmpJ/w, i/h)
+                  points.push(mapXY(tmpJ/w, i/h))
                 }
               }
             }
