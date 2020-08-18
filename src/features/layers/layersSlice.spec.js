@@ -51,7 +51,8 @@ describe('layers reducer', () => {
     trackGrow: 50.0,
     usesMachine: false,
     dragging: false,
-    visible: true
+    visible: true,
+    addToLocalStorage: true
   }
 
   it('should handle initial state', () => {
