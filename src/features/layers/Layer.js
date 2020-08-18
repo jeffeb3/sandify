@@ -79,8 +79,7 @@ class Layer extends Component {
                   options={this.props.options}
                   optionKey={key}
                   key={key}
-                  index={index}
-                  model={this.props.shape} />
+                  index={index}/>
       } else {
         return  <InputOption
                   onChange={this.props.onChange}

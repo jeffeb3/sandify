@@ -6,10 +6,6 @@ const canvasId = 'bwimage_canvas'
 const options = {
   ...shapeOptions,
   ...{
-    comment: {
-      type: 'comment',
-      title: 'Load a 2 color image with different darkness to create the pattern'
-    },
     imageFile: {
       title: 'Load image',
       type: 'file',
@@ -19,9 +15,6 @@ const options = {
     lineSpacing: {
       title: 'Line spacing',
       min: 0.1
-    },
-    colorDifferenceStep: {
-      title: 'Line step'
     },
     darkness: {
       title: 'Darkness threshold',
@@ -41,6 +34,9 @@ const options = {
       title: 'Frequency',
       min:1,
       max: 200
+    },
+    colorDifferenceStep: {
+      title: 'Amplitude'
     }
   }
 }
@@ -66,7 +62,8 @@ export default class BWImage extends Shape {
         usesMachine: true,
         numLoops:1,                       // do not need to repeat the shape
         transformMethod: "intact",        // do not want to distort the shape
-        repeatEnable: false 
+        repeatEnable: false,
+        canTransform: false
       }
     }
   }
