@@ -349,12 +349,12 @@ class Playlist extends Component {
               <Card className="active mt-2">
                 <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
                   <h3>Import image</h3>
-                  Import an image as new layer. The only supported format at the moment is .png.
+                  Import an image as new layer. The file must be in .png or .jpg format.
 
                   <Form.Control
                       id="fileUpload"
                       type="file"
-                      accept=".png"
+                      accept=".png, .jpg"
                       onChange={this.onImageSelected.bind(this)}
                       style={{ display: "none" }} />
                 </Card.Header>
