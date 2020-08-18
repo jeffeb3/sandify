@@ -46,20 +46,21 @@ export default class BWImage extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'bwimage',
-        imageFile: "false",
         lineSpacing: 4,
         colorDifferenceStep: 4,
         darkness: 254/2,
         inversion: false,
         lineType: "Straight",
         frequency: 20,
-        startingSize: 1,        
+        startingSize: 1,
+        canvasId: 'false',
         usesMachine: true,
         numLoops:1,                       // do not need to repeat the shape
         transformMethod: "intact",        // do not want to distort the shape
         repeatEnable: false,
         canTransform: false,
-        selectGroup: "import"
+        selectGroup: "import",            // the user cannot select the image directly
+        addToLocalStorage: false
       }
     }
   }
@@ -74,7 +75,6 @@ export default class BWImage extends Shape {
       try{
         const darknessThreshold = state.shape.darkness
         const darknessInversion = state.shape.inversion
-        const positionOnBorder = 1.5
         const lineType = state.shape.lineType
         const frequency = 2*Math.PI * (state.shape.frequency || 1 )
 
@@ -97,8 +97,13 @@ export default class BWImage extends Shape {
         const w = image.width
         const h = image.height
         const scale = Math.max(w/sizeX, h/sizeY)
+        // calculate offsets to center the shape
+        // -0.5*xxxxx to center the shape to the bed (0, 0 is in the middle of the drawing)
+        const xoffset = -(w/scale)/2 
+        const yoffset = -(h/scale)/2
         const spacing = state.shape.lineSpacing*scale || 1
         const colorDifferenceStep = (state.shape.colorDifferenceStep || 1)*scale/h
+        const positionOnBorder = 2
 
         let leftSidePoint = true
         let isDarkLine = false
@@ -111,7 +116,7 @@ export default class BWImage extends Shape {
 
         // map an image pixel to a point of the machine bed
         function mapXY(state, x, y){
-          return new Victor((x-0.5)*state.machine.maxX, (y-0.5)*state.machine.maxY)
+          return new Victor(x*w/(scale) + xoffset, y*h/(scale) + yoffset)
         }
 
         function addLine(state, startx, endx, centery){
@@ -216,6 +221,7 @@ export default class BWImage extends Shape {
       }
     }
     if(points === []) {
+      points.push(new Victor(0,0))
       points.push(new Victor(0,0))
     }
     return points

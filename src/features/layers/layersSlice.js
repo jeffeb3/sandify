@@ -30,7 +30,7 @@ const layersSlice = createSlice({
       state.selected = layer.id
       state.newLayerNameOverride = false
       state.newLayerName = layer.name
-      if (layer.type !== 'file_import') {
+      if (layer.addToLocalStorage) {
         localStorage.setItem('currentShape', layer.type)
       }
     },

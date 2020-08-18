@@ -245,7 +245,6 @@ class Playlist extends Component {
     const selectedShape = getShape({type: this.props.newLayerType})
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
     const namedInputRef = React.createRef()
-    const showCanvas = true
 
     return (
       <div>
@@ -433,7 +432,7 @@ class Playlist extends Component {
             </Dropdown>
           </div>
           
-          <div id="file-canvas-data" className={showCanvas ? "" : "d-none"}>
+          <div id="file-canvas-data" className="d-none">
           </div>
         </div>
       </div>

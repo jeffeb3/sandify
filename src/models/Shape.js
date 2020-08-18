@@ -44,7 +44,8 @@ export default class Shape {
       trackGrow: 50.0,
       reverse: false,
       dragging: false,
-      visible: true
+      visible: true,
+      addToLocalStorage: true
     }
   }
 

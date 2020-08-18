@@ -38,7 +38,8 @@ export default class FileImport extends Shape {
         canTransform: false,
         canChangeSize: true,
         usesMachine: true,
-        repeatEnabled: false
+        repeatEnabled: false,
+        addToLocalStorage: false
       },
       ...(importProps === undefined ? {} : {
         fileName: importProps.fileName,
