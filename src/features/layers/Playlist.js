@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
+import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form, Dropdown} from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
@@ -43,6 +43,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       const attrs = {
         ...registeredShapes["file_import"].getInitialState(importProps),
         name: importProps.fileName
+      }
+      dispatch(addLayer(attrs))
+    },
+    onLayerImageImport: (importProps) => {
+      const attrs = {
+        ...registeredShapes["bwimage"].getInitialState(importProps),
+        name: importProps.fileName,
+        canvasId: importProps.canvasId
       }
       dispatch(addLayer(attrs))
     },
@@ -126,7 +134,7 @@ class Playlist extends Component {
     super(props)
     this.state = {
       showNewLayer: false,
-      showImportLayer: false,
+      showImportGcodeLayer: false,
       showCopyLayer: false
     }
   }
@@ -142,8 +150,8 @@ class Playlist extends Component {
     this.setState({showNewLayer: !this.state.showNewLayer})
   }
 
-  toggleImportModal() {
-    this.setState({showImportLayer: !this.state.showImportLayer})
+  toggleImportGcodeModal() {
+    this.setState({showImportGcodeLayer: !this.state.showImportGcodeLayer})
   }
 
   onFileSelected(event) {
@@ -162,7 +170,7 @@ class Playlist extends Component {
       }
 
       importer.import(this.onFileImported.bind(this))
-      this.toggleImportModal.bind(this)();
+      this.toggleImportGcodeModal.bind(this)();
     }
 
     reader.readAsText(file)
@@ -177,6 +185,45 @@ class Playlist extends Component {
       variable: 'read' + importer.label,
       value: this.endTime - this.startTime // in milliseconds
     })
+  }
+  
+  toggleImportImageModal() {
+    this.setState({showImportImageLayer: !this.state.showImportImageLayer})
+  }
+
+  onImageSelected(event){
+    let layerProps = {}
+    let file = event.target.files[0]                // get the loaded file
+    let fr = new FileReader()                       // prepare the file reader to load the image to an url
+    let im = new Image()                            // image object to write to canvas
+    layerProps.canvasId = "canvas" + Math.random()  // generate random id for the canvas
+    layerProps.fileName = file.name                 // save the filename
+    let canvas = document.createElement("canvas");  // create canvas
+    document.getElementById("file-canvas-data").appendChild(canvas)
+    canvas.setAttribute("id", layerProps.canvasId)  // set canvas id
+    
+    fr.onload  = (event) => {                       // filereader callback
+      this.startTime = performance.now()
+      im.onload  = (event) => {                     // image loaded callback
+        let ctx = canvas.getContext('2d')
+        canvas.height = im.height
+        canvas.width = im.width
+        
+        ctx.drawImage(im, 0, 0, im.width, im.height)
+        
+        this.props.onLayerImageImport(layerProps)
+
+        this.endTime = performance.now()
+        ReactGA.timing({
+          category: 'PatternImport',
+          variable: 'read' + layerProps.name,
+          value: this.endTime - this.startTime      // in milliseconds
+        })
+        this.toggleImportImageModal.bind(this)();
+      }
+      im.src = fr.result                            // set the image from url
+    };
+    fr.readAsDataURL(file)
   }
 
   toggleCopyModal() {
@@ -198,6 +245,7 @@ class Playlist extends Component {
     const selectedShape = getShape({type: this.props.newLayerType})
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
     const namedInputRef = React.createRef()
+    const showCanvas = true
 
     return (
       <div>
@@ -240,7 +288,7 @@ class Playlist extends Component {
           </Modal.Footer>
         </Modal>
 
-        <Modal size="lg" show={this.state.showImportLayer} onHide={this.toggleImportModal.bind(this)}>
+        <Modal size="lg" show={this.state.showImportGcodeLayer} onHide={this.toggleImportGcodeModal.bind(this)}>
           <Modal.Header closeButton>
             <Modal.Title>Import new layer</Modal.Title>
           </Modal.Header>
@@ -288,7 +336,43 @@ class Playlist extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportModal.bind(this)}>Done</Button>
+            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportGcodeModal.bind(this)}>Done</Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal size="lg" show={this.state.showImportImageLayer} onHide={this.toggleImportImageModal.bind(this)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Import new layer</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <Accordion className="mb-4">
+              <Card className="active mt-2">
+                <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
+                  <h3>Import image</h3>
+                  Import an image as new layer. The only supported format at the moment is .png.
+
+                  <Form.Control
+                      id="fileUpload"
+                      type="file"
+                      accept=".png"
+                      onChange={this.onImageSelected.bind(this)}
+                      style={{ display: "none" }} />
+                </Card.Header>
+              </Card>
+            </Accordion>
+            <div className="mt-2">
+              The image can be colored but the software will transform it to grayscale so the result may be different from the expectation.
+              If nothing appears after loading the image modify the darkness treshold in the image options.
+
+              <h3 className="mt-3">About copyrights</h3>
+              <p>Be careful and respectful. Understand that the original author put their labor, intensity, and ideas into this art. The creators have a right to own it (and they have a copyright, even if it doesn't say so). If you don't have permisson (a license) to use their art, then you shouldn't be. If you do have permission to use their art, then you should be thankful, and I'm sure they would appreciate you sending them a note of thanks. A picture of your table creating their shared art would probably make them smile.</p>
+              <p>P.S. I am not a lawyer.</p>
+            </div>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportImageModal.bind(this)}>Done</Button>
           </Modal.Footer>
         </Modal>
 
@@ -335,8 +419,22 @@ class Playlist extends Component {
             onSortEnd={this.props.onLayerMoved}
             onToggleLayerVisible={this.props.onToggleLayerVisible}
           />
-          <Button className="mt-2 mr-1" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
-          <Button className="mt-2" variant="outline-primary" size="sm" onClick={this.toggleImportModal.bind(this)}>Import</Button>
+
+          <div className="form-inline">
+            <Button className="mt-2 mr-1" variant="outline-primary" size="sm" onClick={this.toggleNewModal.bind(this)}>New</Button>
+            <Dropdown>
+              <Dropdown.Toggle className="mt-2 mr-1" id="file-import-dropdown" variant="outline-primary" size="sm">
+                Import file
+              </Dropdown.Toggle>
+              <Dropdown.Menu size="sm">
+                <Dropdown.Item id="file-import-gcode" onClick={this.toggleImportGcodeModal.bind(this)}>Import gcode file</Dropdown.Item>
+                <Dropdown.Item id="file-import-image" onClick={this.toggleImportImageModal.bind(this)}>Import image file</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+          
+          <div id="file-canvas-data" className={showCanvas ? "" : "d-none"}>
+          </div>
         </div>
       </div>
     )

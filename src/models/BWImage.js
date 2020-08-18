@@ -1,17 +1,9 @@
 import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
 
-const canvasId = 'bwimage_canvas'
-
 const options = {
   ...shapeOptions,
   ...{
-    imageFile: {
-      title: 'Load image',
-      type: 'file',
-      canvasId: canvasId,           // canvas element id
-      canvasVisible: false          // hide the canvas (will show up once an image is loaded)
-    },
     lineSpacing: {
       title: 'Line spacing',
       min: 0.1
@@ -37,6 +29,9 @@ const options = {
     },
     colorDifferenceStep: {
       title: 'Amplitude'
+    },
+    canvasId: {
+      isVisible: function(){return false}
     }
   }
 }
@@ -63,13 +58,14 @@ export default class BWImage extends Shape {
         numLoops:1,                       // do not need to repeat the shape
         transformMethod: "intact",        // do not want to distort the shape
         repeatEnable: false,
-        canTransform: false
+        canTransform: false,
+        selectGroup: "import"
       }
     }
   }
 
   getVertices(state) {
-    const file_loaded = state.shape.imageFile
+    const file_loaded = state.shape.canvasId
     let points = []
 
     // produces points only if a file has been loaded. 
@@ -94,7 +90,7 @@ export default class BWImage extends Shape {
 
         // need to save the file into a canvas and load from it
         // cannot save any value of the image into the state (because it is not serializable and it will slow down everything too much)
-        let canvas = document.getElementById(canvasId)
+        let canvas = document.getElementById(state.shape.canvasId)
         let ctx = canvas.getContext('2d')
         const image = ctx.getImageData(0, 0, canvas.width, canvas.height)
 

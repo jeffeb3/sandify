@@ -6,7 +6,6 @@ import CommentsBox from '../../components/CommentsBox'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
 import CheckboxOption from '../../components/CheckboxOption'
-import ImageOption from '../../components/ImageOption'
 import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
@@ -73,13 +72,6 @@ class Layer extends Component {
                   optionKey={key}
                   key={key}
                   comments={this.props.layer.comments} />
-      } else if (option.type === 'file') {
-        return <ImageOption
-                  onChange={this.props.onChange}
-                  options={this.props.options}
-                  optionKey={key}
-                  key={key}
-                  index={index}/>
       } else {
         return  <InputOption
                   onChange={this.props.onChange}
