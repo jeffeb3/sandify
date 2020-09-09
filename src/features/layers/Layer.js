@@ -130,7 +130,7 @@ class Layer extends Component {
 
         <div className="pt-1">
           { optionsListRender }
-          { this.props.layer.canTransform && <Transforms id={this.props.layer.id} />}
+          <Transforms id={this.props.layer.id} />
         </div>
       </Card>
     )

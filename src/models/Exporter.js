@@ -13,6 +13,11 @@ const exporterOptions = {
     type: 'dropdown',
     choices: [gcodeTypeName, thrTypeName, svgTypeName]
   },
+  polarRhoMax: {
+    title: 'Maximum rho value (0-1)',
+    min: 0,
+    max: 1
+  },
   post: {
     title: 'Program end code',
     type: 'textarea',

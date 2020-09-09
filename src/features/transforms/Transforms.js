@@ -11,6 +11,7 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
+import DropdownOption from '../../components/DropdownOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
@@ -76,23 +77,23 @@ class Transforms extends Component {
           index={0}
           model={this.props.layer} />
 
-        <InputOption
+        {this.props.layer.canTransform && <InputOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="rotation"
           optionKey="rotation"
           index={0}
-          model={this.props.layer} />
+          model={this.props.layer} />}
 
-        <CheckboxOption
+        {this.props.layer.canTransform && <CheckboxOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="reverse"
           optionKey="reverse"
           index={0}
-          model={this.props.layer} />
+          model={this.props.layer} />}
 
-        <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
+        {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
             <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onRepeat}>
               <h3>Loop and transform</h3>
@@ -132,7 +133,50 @@ class Transforms extends Component {
               </Card.Body>
             </Accordion.Collapse>
           </Card>
-        </Accordion>
+        </Accordion>}
+
+        <Card className="mt-4">
+          <Card.Body>
+            <h3 className="mb-3">Fine tuning (advanced)</h3>
+            <DropdownOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              optionKey="connectionMethod"
+              key="connectionMethod"
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="drawPortionPct"
+              optionKey="drawPortionPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="backtrackPct"
+              optionKey="backtrackPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+
+            <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="rotateStartingPct"
+              optionKey="rotateStartingPct"
+              min={0}
+              max={100}
+              index={0}
+              model={this.props.layer} />
+          </Card.Body>
+        </Card>
       </div>
     )
   }

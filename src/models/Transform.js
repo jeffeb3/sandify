@@ -13,6 +13,29 @@ const transformOptions = {
   rotation: {
     title: 'Rotate (degrees)'
   },
+  connectionMethod: {
+    title: 'Connect to next layer',
+    type: 'dropdown',
+    choices: ['line', 'along perimeter']
+  },
+  backtrackPct: {
+    title: 'Backtrack at end (%)',
+    min: 0,
+    max: 100,
+    step: 5
+  },
+  drawPortionPct: {
+    title: 'Draw portion of path (%)',
+    min: 0,
+    max: 100,
+    step: 5
+  },
+  rotateStartingPct: {
+    title: 'Rotate starting point (%)',
+    min: -100,
+    max: 100,
+    step: 5
+  },
   reverse: {
     title: 'Reverse path',
     type: 'checkbox'
@@ -27,7 +50,7 @@ const transformOptions = {
     choices: ['smear', 'intact'],
   },
   growEnabled: {
-    title: 'Grow'
+    title: 'Scale'
   },
   growValue: {
     title: 'Scale (+/-)',
@@ -63,6 +86,7 @@ const transformOptions = {
     isVisible: state => { return state.spinMethod === 'function' },
   },
   spinMath: {
+    title: 'Spin function (i)',
   },
   spinSwitchbacks: {
     title: 'Switchbacks',
@@ -72,7 +96,10 @@ const transformOptions = {
     title: 'Track'
   },
   trackGrowEnabled: {
-    title: 'Track grow'
+    title: 'Scale track'
+  },
+  rotateCompleteLoop: {
+    title: 'Complete loop?'
   },
   trackValue: {
     title: 'Track size',
@@ -86,7 +113,7 @@ const transformOptions = {
     step: 0.05
   },
   trackGrow: {
-    title: 'Scale step (+/-)',
+    title: 'Scale (+/-)',
   },
 }
 

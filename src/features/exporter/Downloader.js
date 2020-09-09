@@ -36,6 +36,7 @@ const mapStateToProps = (state, ownProps) => {
       state.machine.maxRadius),
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
+    polarRhoMax: state.exporter.polarRhoMax,
     pre: (state.exporter.fileType !== svgTypeName ? state.exporter.pre : ''),
     post: (state.exporter.fileType !== svgTypeName ? state.exporter.post : ''),
     options: new Exporter().getOptions()
@@ -153,12 +154,20 @@ class Downloader extends Component {
               index={1}
               model={this.props} />
 
+            {this.props.fileType === 'Theta Rho (.thr)' && <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="polarRhoMax"
+              optionKey="polarRhoMax"
+              index={2}
+              model={this.props} />}
+
             <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
               key="pre"
               optionKey="pre"
-              index={2}
+              index={3}
               model={this.props} />
 
             <InputOption
@@ -166,7 +175,7 @@ class Downloader extends Component {
               options={this.props.options}
               key="post"
               optionKey="post"
-              index={3}
+              index={4}
               model={this.props} />
 
             <Row>
@@ -183,7 +192,7 @@ class Downloader extends Component {
                 options={this.props.options}
                 optionKey="reverse"
                 key="reverse"
-                index={4}
+                index={5}
                 model={this.props} />
             </div>
           </Modal.Body>

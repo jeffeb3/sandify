@@ -7,6 +7,7 @@ describe('exporter reducer', () => {
     expect(exporter(undefined, {})).toEqual({
       fileName: 'sandify',
       fileType: 'GCode (.gcode)',
+      polarRhoMax: 1,
       pre: '',
       post: '',
       reverse: false,

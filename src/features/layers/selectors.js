@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect'
 
 const getLayers = state => state.layers
-const getCurrentLayerId = state => state.layers.current
+export const getCurrentLayerId = state => state.layers.current
 
 export const getCurrentLayer = createSelector(
   [ getCurrentLayerId, getLayers ],
@@ -26,17 +26,6 @@ export const makeGetLayerIndex = layerId => {
   )
 }
 
-// puts the current layer last in the list to ensure it can be rotated; else
-// the handle will not rotate
-export const getKonvaLayerIds = createSelector(
-  [ getLayers, getCurrentLayer ],
-  (layers, layer) => {
-      const kIds = layers.allIds.filter(id => id !== layer.id)
-      kIds.push(layer.id)
-      return kIds
-  }
-)
-
 export const getLayerInfo = createSelector(
   getLayers,
   (layers) => {
@@ -58,6 +47,18 @@ export const getVisibleLayerIds = createSelector(
   }
 )
 
+// puts the current layer last in the list to ensure it can be rotated; else
+// the handle will not rotate
+export const getKonvaLayerIds = createSelector(
+  [ getLayers, getCurrentLayer, getVisibleLayerIds ],
+  (layers, layer, visibleLayerIds) => {
+      const kIds = visibleLayerIds.filter(id => id !== layer.id)
+      if (layer.visible) {
+        kIds.push(layer.id)
+      }
+      return kIds
+  }
+)
 export const isDragging = createSelector(
   [ getLayers, getVisibleLayerIds ],
   (layers, visibleIds) => {

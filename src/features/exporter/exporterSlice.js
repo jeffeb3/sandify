@@ -20,7 +20,8 @@ const exporterSlice = createSlice({
     pre: localStorage.getItem('export_pre') ? localStorage.getItem('export_pre') : '',
     post: localStorage.getItem('export_post') ? localStorage.getItem('export_post') : '',
     reverse: false,
-    show: false
+    show: false,
+    polarRhoMax: 1.0
   },
   reducers: {
     updateExporter(state, action) {
