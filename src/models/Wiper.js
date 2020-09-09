@@ -89,13 +89,13 @@ function spiralVertices(state) {
     maxRadius = Math.sqrt(Math.pow(halfHeight, 2.0) + Math.pow(halfWidth, 2.0))
   }
 
-  var vertices = []
-
+  let vertices = []
   let emergencyBreak = 0
   let radius = 0.1
   let angle = 0
   const arcLength = 1.0
   const radiusPerAngle = state.shape.wiperSize / (2.0 * Math.PI)
+
   while (radius <= maxRadius) {
     // Save where we are right now.
     vertices.push(new Victor(radius * Math.cos(angle), radius * Math.sin(angle)))
@@ -121,8 +121,6 @@ function spiralVertices(state) {
 }
 
 function linearVertices(state) {
-  var outputVertices = []
-
   // Get the angle between 0,180
   let angle = (180.0 - (state.shape.wiperAngleDeg % 360)) % 180.0
   if (angle < 0.0) {
@@ -133,6 +131,7 @@ function linearVertices(state) {
   // Start with the defaults for 0,45
   let height = 1
   let width = 1
+  let outputVertices = []
   let machine = state.machine
   if (machine.rectangular) {
     height = machine.maxY - machine.minY
@@ -254,8 +253,9 @@ export default class Wiper extends Shape {
         wiperType: 'Lines',
         selectGroup: 'Erasers',
         canTransform: false,
-        shouldCache: false,
         canChangeSize: false,
+        shouldCache: false,
+        autosize: false,
         usesMachine: true,
         repeatEnabled: false,
       }

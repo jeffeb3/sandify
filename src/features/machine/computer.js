@@ -146,7 +146,7 @@ export const transformShapes = (vertices, transform) => {
 
   if (transform.canChangeSize) {
     vertices = vertices.map(vertex => {
-      return scale(vertex, 100.0 * transform.startingSize)
+      return scale(vertex, 100.0 * transform.startingWidth, 100 * transform.startingHeight)
     })
   }
 

@@ -152,11 +152,12 @@ export const makeGetPreviewVertices = layerId => {
         vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
       }
 
-      const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-      const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
+      const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
+      const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
 
       return vertices.map(vertex => {
-        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
+        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDeltaX, -konvaDeltaY)
       })
     }
   )
@@ -273,8 +274,9 @@ export const makeGetPreviewTrackVertices = layerId => {
     (layers) => {
       const layer = layers.byId[layerId]
       const numLoops = layer.numLoops
-      const konvaScale = 5 // our transformer is 5 times bigger than the actual starting shape
-      const konvaDelta = (konvaScale - 1)/2 * layer.startingSize
+      const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
+      const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
       let trackVertices = []
 
       for (var i=0; i<numLoops; i++) {
@@ -284,7 +286,7 @@ export const makeGetPreviewTrackVertices = layerId => {
       }
 
       return trackVertices.map(vertex => {
-        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDelta, -konvaDelta)
+        return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDeltaX, -konvaDeltaY)
       })
     }
   )

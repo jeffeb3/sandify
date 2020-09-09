@@ -43,7 +43,7 @@ export default class CommentExporter extends Exporter {
           this.keyValueLine('Shape', shape.name)
           this.optionLines(shape, layer, Object.keys(options))
           this.keyValueLine('Visible', layer.visible)
-          this.optionLines(transform, layer, ['startingSize', 'offsetX', 'offsetY', 'rotation', 'reverse'])
+          this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'offsetX', 'offsetY', 'rotation', 'reverse'])
           this.optionLines(transform, layer, ['numLoops', 'transformMethod'], layer.repeatEnabled)
 
           this.optionLine(transform, layer, 'growEnabled', layer.repeatEnabled)

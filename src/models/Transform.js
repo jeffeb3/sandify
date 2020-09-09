@@ -1,6 +1,11 @@
 const transformOptions = {
-  startingSize: {
-    title: 'Starting size',
+  startingWidth: {
+    title: 'Initial width',
+    min: 1,
+    isVisible: (state) => { return state.canChangeSize },
+  },
+  startingHeight: {
+    title: 'Initial height',
     min: 1,
     isVisible: (state) => { return state.canChangeSize },
   },

@@ -44,6 +44,11 @@ if (persistState) {
   if (persistedState) {
     persistedState.layers.allIds.forEach((id) => {
       let layer = persistedState.layers.byId[id]
+
+      if (layer.startingWidth === undefined) layer.startingWidth = layer.startingSize
+      if (layer.startingHeight === undefined) layer.startingHeight = layer.startingWidth
+      if (layer.autosize === undefined) layer.autosize = true
+
       store.dispatch(addLayer(layer))
     })
     store.dispatch(setCurrentLayer(persistedState.layers.current))

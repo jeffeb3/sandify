@@ -37,7 +37,7 @@ export default class Machine {
     return this
   }
 
-  // walk the given vertices, clipping as needed along the circle perimeter
+  // walk the given vertices, clipping as needed along the perimeter
   enforceLimits() {
     let cleanVertices = []
     let previous = null

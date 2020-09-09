@@ -40,7 +40,8 @@ const PreviewLayer = (ownProps) => {
 
   const props = useSelector(mapStateToProps, shallowEqual)
   const dispatch = useDispatch()
-  const startingSize = props.layer.startingSize
+  const startingWidth = props.layer.startingWidth
+  const startingHeight = props.layer.startingHeight
   const selectedColor = 'yellow'
   const unselectedColor = 'rgba(195, 214, 230, 0.65)'
   const backgroundSelectedColor = '#6E6E00'
@@ -49,14 +50,19 @@ const PreviewLayer = (ownProps) => {
   // our transformer is 5 times bigger than the actual starting shape, so we need
   // to account for it when drawing the preview; if you change this value, be sure
   // to change it in machine/selectors#getPreviewVertices,getPreviewTrackVertices
-  const konvaScale = 5
-  const konvaSize = startingSize * konvaScale
+  const konvaScale = props.layer.autosize ? 5 : 1
+  const konvaSizeX = startingWidth * konvaScale
+  const konvaSizeY = startingHeight * konvaScale
   const isSelected = props.selected === ownProps.id
   const isSliding = props.sliderValue !== 0
 
   function mmToPixels(vertex) {
     // y for pixels starts at the top, and goes down.
-    return new Victor(vertex.x + startingSize/2, -vertex.y + startingSize/2)
+    if (vertex) {
+      return new Victor(vertex.x + startingWidth/2, -vertex.y + startingHeight/2)
+    } else {
+      return new Victor(0, 0)
+    }
   }
 
   function moveTo_mm(context, vertex) {
@@ -209,7 +215,7 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.layer.visible &&isSelected && props.layer.canChangeSize && props.showTrack) {
+    if (props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
@@ -220,10 +226,10 @@ const PreviewLayer = (ownProps) => {
     <React.Fragment>
       {props.layer.visible && <Shape
         draggable={props.showTrack && props.layer.id === props.currentLayer.id}
-        width={konvaSize}
-        height={konvaSize}
-        offsetY={konvaSize/2}
-        offsetX={konvaSize/2}
+        width={konvaSizeX}
+        height={konvaSizeY}
+        offsetY={konvaSizeY/2}
+        offsetX={konvaSizeX/2}
         x={(props.showTrack && props.layer.offsetX) || 0}
         y={(props.showTrack && -props.layer.offsetY) || 0}
         onClick={onSelect}
@@ -250,7 +256,7 @@ const PreviewLayer = (ownProps) => {
         onTransformEnd={e => {
           const node = shapeRef.current
           const scaleX = node.scaleX()
-          // const scaleY = node.scaleY()
+          const scaleY = node.scaleY()
 
           // we will reset it back
           node.scaleX(1)
@@ -258,7 +264,8 @@ const PreviewLayer = (ownProps) => {
 
           onChange({
             dragging: false,
-            startingSize: roundP(Math.max(5, props.layer.startingSize * scaleX), 0),
+            startingWidth: roundP(Math.max(5, props.layer.startingWidth * scaleX), 0),
+            startingHeight: roundP(Math.max(5, props.layer.startingHeight * scaleY), 0),
             rotation: roundP(node.rotation(), 0)
           })
         }}
@@ -269,7 +276,7 @@ const PreviewLayer = (ownProps) => {
           centeredScaling={true}
           resizeEnabled={!props.layer.trackEnabled}
           rotationSnaps={[0, 90, 180, 270]}
-          enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+        //  enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
         />
       )}
     </React.Fragment>

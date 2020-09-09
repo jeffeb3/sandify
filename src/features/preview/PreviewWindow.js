@@ -131,7 +131,8 @@ class PreviewWindow extends Component {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {
                 this.props.onLayerChange({
-                  startingSize: scaleByWheel(this.props.currentLayer.startingSize, e.evt.deltaY),
+                  startingWidth: scaleByWheel(this.props.currentLayer.startingWidth, e.evt.deltaY),
+                  startingHeight: scaleByWheel(this.props.currentLayer.startingHeight, e.evt.deltaY),
                   id: this.props.currentLayer.id
                 })
               }
