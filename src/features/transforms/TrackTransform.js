@@ -83,6 +83,22 @@ class TrackTransform extends Component {
                 index={0}
                 model={this.props.layer} />
 
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="trackMathXInput"
+                optionKey="trackMathXInput"
+                index={0}
+                model={this.props.layer} />
+
+              <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                key="trackMathYInput"
+                optionKey="trackMathYInput"
+                index={0}
+                model={this.props.layer} />
+
               <Accordion defaultActiveKey={activeGrowKey} className="mt-3">
                 <Card className={activeGrowClassName}>
                   <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onTrackGrow}>

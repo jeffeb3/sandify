@@ -100,6 +100,14 @@ const transformOptions = {
   trackEnabled: {
     title: 'Track'
   },
+  trackMathXInput: {
+    title: 'Track X function (i)',
+    type: 'text',
+  },
+  trackMathYInput: {
+    title: 'Track Y function (i)',
+    type: 'text',
+  },
   trackGrowEnabled: {
     title: 'Scale track'
   },

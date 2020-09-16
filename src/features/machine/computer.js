@@ -14,9 +14,30 @@ function track(vertex, data, loopIndex) {
   if (data.trackGrowEnabled) {
     radius = 1.0 + loopIndex / 10.0 * data.trackGrow / 100.0
   }
+  let x = radius * data.trackValue * Math.cos(angle)
+  let y = radius * data.trackValue * Math.sin(angle)
+  if (data.trackMathXInput) {
+    try {
+      x = evaluate(data.trackMathXInput, {i: loopIndex})
+    }
+    catch (err) {
+      console.log("Error parsing grow function: " + err)
+      x = 0
+    }
+  }
+  if (data.trackMathYInput) {
+    try {
+      y = evaluate(data.trackMathYInput, {i: loopIndex})
+    }
+    catch (err) {
+      console.log("Error parsing grow function: " + err)
+      y = 0
+    }
+  }
+
   return new Victor(
-    vertex.x + radius * data.trackValue * Math.cos(angle),
-    vertex.y + radius * data.trackValue * Math.sin(angle)
+    vertex.x + x,
+    vertex.y + y
   )
 }
 

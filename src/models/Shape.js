@@ -39,6 +39,8 @@ export default class Shape {
       spinMath: '10*sin(i/4)',
       spinSwitchbacks: 0,
       trackEnabled: false,
+      trackMathXInput: '',
+      trackMathYInput: '',
       trackGrowEnabled: false,
       trackValue: 10,
       trackLength: 0.2,
