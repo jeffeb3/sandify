@@ -22,7 +22,7 @@ function track(vertex, data, loopIndex) {
 
 export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => {
   numLoops = numLoops || data.numLoops
-  let transformedVertex = vertex
+  let transformedVertex = vertex.clone()
 
   if (data.repeatEnabled && data.growEnabled) {
     let growAmount = 100
