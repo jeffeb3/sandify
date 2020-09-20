@@ -93,13 +93,13 @@ class Transforms extends Component {
           index={0}
           model={this.props.layer} />
 
-         {this.props.layer.type !== 'mask' && <CheckboxOption
+         <CheckboxOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="reverse"
           optionKey="reverse"
           index={0}
-          model={this.props.layer} />}
+          model={this.props.layer} />
 
         {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
@@ -144,7 +144,7 @@ class Transforms extends Component {
         </Accordion>
       }
 
-      {this.props.layer.type !== 'mask' && <Card className="mt-3">
+      <Card className="mt-3">
         <Card.Body>
           <h3 className="mb-3">Fine tuning (advanced)</h3>
           <DropdownOption
@@ -185,7 +185,7 @@ class Transforms extends Component {
             index={0}
             model={this.props.layer} />
         </Card.Body>
-      </Card>}
+      </Card>
     </div>
     )
   }
