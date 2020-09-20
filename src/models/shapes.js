@@ -6,6 +6,7 @@ import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
+import NoiseWave from '../models/NoiseWave'
 import Point from '../models/Point'
 import Polygon from '../models/Polygon'
 import Reuleaux from '../models/Reuleaux'
@@ -36,7 +37,8 @@ export const registeredShapes = {
   point: new Point(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
-  file_import: new FileImport()
+  noise_wave: new NoiseWave(),
+  file_import: new FileImport(),
 }
 
 export const getShape = (layer) => {
