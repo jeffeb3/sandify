@@ -138,60 +138,60 @@ function reportTiming(time) {
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
-export const transformShapes = (vertices, transform) => {
+export const transformShapes = (vertices, layer, nextLayer) => {
   const startTime = performance.now()
-  const numLoops = transform.repeatEnabled ? transform.numLoops : 1
-  const numTrackLoops = transform.repeatEnabled ? transform.trackNumLoops : 1
+  const numLoops = layer.repeatEnabled ? layer.numLoops : 1
+  const numTrackLoops = layer.repeatEnabled ? layer.trackNumLoops : 1
   let outputVertices = []
 
-  if (transform.canChangeSize) {
+  if (layer.autosize) {
     vertices = vertices.map(vertex => {
-      return scale(vertex, 100.0 * transform.startingWidth, 100 * transform.startingHeight)
+      return scale(vertex, 100.0 * layer.startingWidth, 100 * layer.startingHeight)
     })
   }
 
-  if (transform.transformMethod === 'smear' && transform.repeatEnabled) {
+  if (layer.transformMethod === 'smear' && layer.repeatEnabled) {
     // remove last vertex; we don't want to return to our starting point when completing the shape
     vertices.pop()
   }
 
-  if (transform.rotateStartingPct === undefined || transform.rotateStartingPct !== 0) {
-    const start = Math.round(vertices.length * transform.rotateStartingPct / 100.0)
+  if (layer.rotateStartingPct === undefined || layer.rotateStartingPct !== 0) {
+    const start = Math.round(vertices.length * layer.rotateStartingPct / 100.0)
     vertices = arrayRotate(vertices, start)
 
     // some patterns create a loop when drawn and transformMethod is 'intact'; in
     // this case, rotateStartingPct will not draw the final vertex to complete the
     // loop. Use rotateCompleteLoop to add it back in for specific shapes.
-    if (transform.rotateCompleteLoop) {
+    if (layer.rotateCompleteLoop) {
       vertices.push(new Victor(vertices[0].x, vertices[0].y))
     }
   }
 
-  if (transform.trackEnabled && numTrackLoops > 1) {
+  if (layer.trackEnabled && numTrackLoops > 1) {
     for (var i=0; i<numLoops; i++) {
       for (var t=0; t<numTrackLoops; t++) {
-        outputVertices = outputVertices.concat(buildTrackLoop(vertices, transform, i, t))
+        outputVertices = outputVertices.concat(buildTrackLoop(vertices, layer, i, t))
       }
     }
   } else {
     for (i=0; i<numLoops; i++) {
-      const drawPortionPct = Math.round((transform.drawPortionPct || 100)/100.0 * vertices.length)
+      const drawPortionPct = Math.round((layer.drawPortionPct || 100)/100.0 * vertices.length)
       const completion = i === numLoops - 1 ? drawPortionPct : vertices.length
 
       for (var j=0; j<completion; j++) {
-        let amount = transform.transformMethod === 'smear' ? i + j/vertices.length : i
-        outputVertices.push(transformShape(transform, vertices[j], amount, amount))
+        let amount = layer.transformMethod === 'smear' ? i + j/vertices.length : i
+        outputVertices.push(transformShape(layer, vertices[j], amount, amount))
       }
     }
   }
 
-  if (transform.backtrackPct) {
-    const backtrack = Math.round(vertices.length * transform.backtrackPct / 100.0)
-    outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
+  if (layer.reverse) {
+    outputVertices = outputVertices.reverse()
   }
 
-  if (transform.reverse) {
-    outputVertices = outputVertices.reverse()
+  if (layer.backtrackPct) {
+    const backtrack = Math.round(vertices.length * layer.backtrackPct / 100.0)
+    outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
   }
 
   const endTime = performance.now()
