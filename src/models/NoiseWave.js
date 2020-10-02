@@ -3,7 +3,6 @@ import { getMachineInstance } from '../features/machine/computer'
 import Victor from 'victor'
 import noise from '../common/noise'
 import seedrandom from 'seedrandom'
-import { shapeSimilarity } from 'curve-matcher'
 import { offset } from '../common/geometry'
 
 const options = {
@@ -28,12 +27,6 @@ const options = {
       type: 'dropdown',
       choices: ['Perlin', 'Simplex'],
     },
-    noiseSimilarity: {
-      title: 'Curve similarity % (lower value to draw fewer curves)',
-      min: 1,
-      max: 99,
-      step: 1
-    },
   }
 }
 
@@ -51,7 +44,6 @@ export default class NoiseWave extends Shape {
         seed: 1,
         noiseLevel: 0,
         noiseType: 'Perlin',
-        noiseSimilarity: 88,
         numParticles: 100,
         selectGroup: 'Erasers',
         canTransform: false,
@@ -120,25 +112,19 @@ export default class NoiseWave extends Shape {
       return group
     })
 
-    let prevCurve
     for (let j=0; j<particles.length; j=j+2) {
       const curve = this.getCurve(vertexGroups, j);
 
-      // Only use curves that are different enough from the previous 1 curve.
-      if (!prevCurve || shapeSimilarity(curve, prevCurve, { estimationPoints: 100, rotations: 0 }) < ((state.shape.noiseSimilarity || 88) / 100)) {
-        // Connect to the previous vertex, if there are any previous vertices.
-        if (vertices.length > 0) {
-          const start = vertices[vertices.length - 1]
-          const end = curve[0]
-          const startPerimeter = machineInstance.nearestPerimeterVertex(start)
-          const endPerimeter = machineInstance.nearestPerimeterVertex(end)
-          vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
-        }
-
-        vertices = vertices.concat(curve)
+      // Connect to the previous vertex, if there are any previous vertices.
+      if (vertices.length > 0) {
+        const start = vertices[vertices.length - 1]
+        const end = curve[0]
+        const startPerimeter = machineInstance.nearestPerimeterVertex(start)
+        const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+        vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
       }
 
-      prevCurve = curve
+      vertices = vertices.concat(curve)
     }
 
     vertices = vertices.map(vertex => {
