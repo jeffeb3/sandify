@@ -13,10 +13,6 @@ const options = {
       title: 'Number of waves',
       min: 1
     },
-    iterations: {
-      title: 'Iterations',
-      min: 1
-    },
     seed: {
       title: 'Random seed',
       min: 1
@@ -51,7 +47,6 @@ export default class NoiseWave extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'noise_wave',
-        iterations: 200,
         noise: 1,
         seed: 1,
         noiseLevel: 0,
@@ -81,11 +76,11 @@ export default class NoiseWave extends Shape {
       sizeX = sizeY = machine.maxRadius * 2.0
     }
 
+    const machineInstance = getMachineInstance([], machine)
+
     noise.seed(shape.seed)
 
     const particles = []
-    const vertexGroups = []
-
     for (let i=0; i<shape.numParticles; i++) {
       const p1 = {
         x: sizeX * rng() - sizeX/2,
@@ -100,15 +95,29 @@ export default class NoiseWave extends Shape {
         a: 2*Math.PI / 2
       })
 
-      vertexGroups.push([])
-      vertexGroups.push([])
     }
 
-    for (let iterations=0; iterations<=shape.iterations; iterations++) {
-      for (let j=0; j<particles.length; j++) {
-        vertexGroups[j].push(this.getParticleVertex(particles[j], shape))
+    const vertexGroups = particles.map( (particle) => {
+      let group = []
+      let wasInside = false
+
+      // Arbitrarily choose 1000 iterations. This will stop particles that don't ever intersect with
+      // the machine. It needs to be high enough to always leave the machine for particles that
+      // don't move very fast.
+      for (let iterations=0; iterations<=1000; iterations++) {
+        // This has side effects on the particle
+        const newVertex = this.getParticleVertex(particle, shape)
+        group.push(newVertex)
+
+        // Stop if we entered and then exited the machine coordinates.
+        const inside = machineInstance.inBounds(newVertex)
+        if (wasInside && !inside) {
+          break
+        }
+        wasInside = inside
       }
-    }
+      return group
+    })
 
     let prevCurve
     for (let j=0; j<particles.length; j=j+2) {

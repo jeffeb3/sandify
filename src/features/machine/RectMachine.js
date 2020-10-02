@@ -322,6 +322,10 @@ export default class RectMachine extends Machine {
     return location
   }
 
+  inBounds(point) {
+    return this.pointLocation(point) === 0b0000
+  }
+
   // Determines intersection with one of the sides.
   intersection(lineStart, lineEnd, sideStart, sideEnd) {
     let line = lineEnd.clone().subtract(lineStart)
