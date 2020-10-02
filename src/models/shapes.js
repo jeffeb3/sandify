@@ -15,6 +15,7 @@ import Star from '../models/Star'
 import TessellationTwist from '../models/tessellation_twist/TessellationTwist'
 import V1Engineering from '../models/v1_engineering/V1Engineering'
 import Wiper from '../models/Wiper'
+import BWImage from '../models/BWImage'
 
 /*----------------------------------------------
 Supported input shapes
@@ -36,6 +37,7 @@ export const registeredShapes = {
   point: new Point(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
+  bwimage: new BWImage(),
   file_import: new FileImport()
 }
 

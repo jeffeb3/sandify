@@ -1,0 +1,8 @@
+.canvas-option{ 
+    float: none;
+    margin: 0 auto;
+}
+.canvas-option canvas {
+    border: solid 1px gray;
+    border-radius: 3px;
+}
