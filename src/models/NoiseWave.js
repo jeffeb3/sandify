@@ -121,20 +121,19 @@ export default class NoiseWave extends Shape {
 
     let prevCurve
     for (let j=0; j<particles.length; j=j+2) {
-      let pEndVertices = vertexGroups[j]
-      let pStartVertices = vertexGroups[j+1]
-      let curve = pStartVertices.reverse().concat(pEndVertices)
+      const curve = this.getCurve(vertexGroups, j);
 
-      if (vertices.length > 0) {
-        const start = vertices[vertices.length - 1]
-        const end = curve[0]
-        const machineInstance = getMachineInstance([], machine)
-        const startPerimeter = machineInstance.nearestPerimeterVertex(start)
-        const endPerimeter = machineInstance.nearestPerimeterVertex(end)
-        vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
-      }
-
+      // Only use curves that are different enough from the previous 1 curve.
       if (!prevCurve || shapeSimilarity(curve, prevCurve, { estimationPoints: 100, rotations: 0 }) < ((state.shape.noiseSimilarity || 88) / 100)) {
+        // Connect to the previous vertex, if there are any previous vertices.
+        if (vertices.length > 0) {
+          const start = vertices[vertices.length - 1]
+          const end = curve[0]
+          const startPerimeter = machineInstance.nearestPerimeterVertex(start)
+          const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+          vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
+        }
+
         vertices = vertices.concat(curve)
       }
 
