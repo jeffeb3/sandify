@@ -50,6 +50,7 @@ export default class SpaceFiller extends Shape {
         fillerSubtype: 'Hilbert',
         repeatEnabled: false,
         canChangeSize: false,
+        autosize: false,
         usesMachine: true,
       }
     }

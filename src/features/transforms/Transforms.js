@@ -56,8 +56,16 @@ class Transforms extends Component {
         <InputOption
           onChange={this.props.onChange}
           options={this.props.options}
-          key="startingSize"
-          optionKey="startingSize"
+          key="startingWidth"
+          optionKey="startingWidth"
+          index={0}
+          model={this.props.layer} />
+
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          key="startingHeight"
+          optionKey="startingHeight"
           index={0}
           model={this.props.layer} />
 
@@ -77,21 +85,21 @@ class Transforms extends Component {
           index={0}
           model={this.props.layer} />
 
-        {this.props.layer.canTransform && <InputOption
+         <InputOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="rotation"
           optionKey="rotation"
           index={0}
-          model={this.props.layer} />}
+          model={this.props.layer} />
 
-        {this.props.layer.canTransform && <CheckboxOption
+         <CheckboxOption
           onChange={this.props.onChange}
           options={this.props.options}
           key="reverse"
           optionKey="reverse"
           index={0}
-          model={this.props.layer} />}
+          model={this.props.layer} />
 
         {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
           <Card className={activeClassName}>
@@ -133,51 +141,52 @@ class Transforms extends Component {
               </Card.Body>
             </Accordion.Collapse>
           </Card>
-        </Accordion>}
+        </Accordion>
+      }
 
-        <Card className="mt-4">
-          <Card.Body>
-            <h3 className="mb-3">Fine tuning (advanced)</h3>
-            <DropdownOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="connectionMethod"
-              key="connectionMethod"
-              index={0}
-              model={this.props.layer} />
+      <Card className="mt-3">
+        <Card.Body>
+          <h3 className="mb-3">Fine tuning (advanced)</h3>
+          <DropdownOption
+            onChange={this.props.onChange}
+            options={this.props.options}
+            optionKey="connectionMethod"
+            key="connectionMethod"
+            index={0}
+            model={this.props.layer} />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="drawPortionPct"
-              optionKey="drawPortionPct"
-              min={0}
-              max={100}
-              index={0}
-              model={this.props.layer} />
+          <InputOption
+            onChange={this.props.onChange}
+            options={this.props.options}
+            key="drawPortionPct"
+            optionKey="drawPortionPct"
+            min={0}
+            max={100}
+            index={0}
+            model={this.props.layer} />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="backtrackPct"
-              optionKey="backtrackPct"
-              min={0}
-              max={100}
-              index={0}
-              model={this.props.layer} />
+          <InputOption
+            onChange={this.props.onChange}
+            options={this.props.options}
+            key="backtrackPct"
+            optionKey="backtrackPct"
+            min={0}
+            max={100}
+            index={0}
+            model={this.props.layer} />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="rotateStartingPct"
-              optionKey="rotateStartingPct"
-              min={0}
-              max={100}
-              index={0}
-              model={this.props.layer} />
-          </Card.Body>
-        </Card>
-      </div>
+          <InputOption
+            onChange={this.props.onChange}
+            options={this.props.options}
+            key="rotateStartingPct"
+            optionKey="rotateStartingPct"
+            min={0}
+            max={100}
+            index={0}
+            model={this.props.layer} />
+        </Card.Body>
+      </Card>
+    </div>
     )
   }
 }
