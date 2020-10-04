@@ -6,6 +6,7 @@ import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
 import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible, setNewLayerType } from '../layers/layersSlice'
+import { showImportPattern, showImportImage, showImagePreview, setReverseImageIntensity, setImageThreshold } from '../importer/importerSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
 import ReactGA from 'react-ga'
 import ThetaRhoImporter from '../importer/ThetaRhoImporter'
@@ -25,7 +26,8 @@ const mapStateToProps = (state, ownProps) => {
     newLayerName: state.layers.newLayerName,
     newLayerNameOverride: state.layers.newLayerNameOverride,
     copyLayerName: state.layers.copyLayerName,
-    selectOptions: getShapeSelectOptions()
+    selectOptions: getShapeSelectOptions(),
+    importer: state.importer,
   }
 }
 
@@ -75,7 +77,26 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onToggleLayerVisible: (event) => {
       const id = event.target.closest('.list-group-item').id
       dispatch(toggleVisible({id: id}))
-    }
+    },
+    onHideImportPattern: () => {
+      dispatch(showImportPattern(false))
+    },
+    onShowImportPattern: () => {
+      dispatch(showImportPattern(true))
+    },
+    onHideImportImage: () => {
+      dispatch(showImportImage(false))
+    },
+    onShowImportImage: () => {
+      dispatch(showImportImage(true))
+    },
+    onHideImagePreview: () => {
+      dispatch(showImagePreview(false))
+    },
+    onShowImagePreview: () => {
+      console.log("show")
+      dispatch(showImagePreview(true))
+    },
   }
 }
 
@@ -134,7 +155,6 @@ class Playlist extends Component {
     super(props)
     this.state = {
       showNewLayer: false,
-      showImportGcodeLayer: false,
       showCopyLayer: false
     }
   }
@@ -148,10 +168,6 @@ class Playlist extends Component {
 
   toggleNewModal() {
     this.setState({showNewLayer: !this.state.showNewLayer})
-  }
-
-  toggleImportGcodeModal() {
-    this.setState({showImportGcodeLayer: !this.state.showImportGcodeLayer})
   }
 
   onFileSelected(event) {
@@ -170,7 +186,7 @@ class Playlist extends Component {
       }
 
       importer.import(this.onFileImported.bind(this))
-      this.toggleImportGcodeModal.bind(this)();
+      this.props.onHideImportPattern();
     }
 
     reader.readAsText(file)
@@ -186,12 +202,41 @@ class Playlist extends Component {
       value: this.endTime - this.startTime // in milliseconds
     })
   }
-  
-  toggleImportImageModal() {
-    this.setState({showImportImageLayer: !this.state.showImportImageLayer})
-  }
 
   onImageSelected(event){
+    let layerProps = {}
+    let file = event.target.files[0]                // get the loaded file
+    let fr = new FileReader()                       // prepare the file reader to load the image to an url
+    let im = new Image()                            // image object to write to canvas
+    layerProps.canvasId = "image-importer-canvas"   // generate random id for the canvas
+    layerProps.fileName = file.name                 // save the filename
+    let canvas = document.getElementById(layerProps.canvasId);  // create canvas
+
+    fr.onload  = (event) => {                       // filereader callback
+      this.startTime = performance.now()
+      im.onload  = (event) => {                     // image loaded callback
+        let ctx = canvas.getContext('2d')
+        canvas.height = im.height
+        canvas.width = im.width
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(im, 0, 0, im.width, im.height)
+
+        this.props.onLayerImageImport(layerProps)
+
+        this.endTime = performance.now()
+        ReactGA.timing({
+          category: 'ImageDraw',
+          variable: 'read' + layerProps.name,
+          value: this.endTime - this.startTime      // in milliseconds
+        })
+        this.props.onShowImagePreview();
+      }
+      im.src = fr.result                            // set the image from url
+    };
+    fr.readAsDataURL(file)
+  }
+
+  makeNewImageLayer(event){
     let layerProps = {}
     let file = event.target.files[0]                // get the loaded file
     let fr = new FileReader()                       // prepare the file reader to load the image to an url
@@ -201,16 +246,16 @@ class Playlist extends Component {
     let canvas = document.createElement("canvas");  // create canvas
     document.getElementById("file-canvas-data").appendChild(canvas)
     canvas.setAttribute("id", layerProps.canvasId)  // set canvas id
-    
+
     fr.onload  = (event) => {                       // filereader callback
       this.startTime = performance.now()
       im.onload  = (event) => {                     // image loaded callback
         let ctx = canvas.getContext('2d')
         canvas.height = im.height
         canvas.width = im.width
-        
+
         ctx.drawImage(im, 0, 0, im.width, im.height)
-        
+
         this.props.onLayerImageImport(layerProps)
 
         this.endTime = performance.now()
@@ -219,7 +264,8 @@ class Playlist extends Component {
           variable: 'read' + layerProps.name,
           value: this.endTime - this.startTime      // in milliseconds
         })
-        this.toggleImportImageModal.bind(this)();
+        this.props.onHideImportImage();
+        this.props.onHideImagePreview();
       }
       im.src = fr.result                            // set the image from url
     };
@@ -287,7 +333,7 @@ class Playlist extends Component {
           </Modal.Footer>
         </Modal>
 
-        <Modal size="lg" show={this.state.showImportGcodeLayer} onHide={this.toggleImportGcodeModal.bind(this)}>
+        <Modal size="lg" show={this.props.importer.showImportPattern} onHide={this.props.onHideImportPattern}>
           <Modal.Header closeButton>
             <Modal.Title>Import new layer</Modal.Title>
           </Modal.Header>
@@ -335,11 +381,11 @@ class Playlist extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportGcodeModal.bind(this)}>Done</Button>
+            <Button id="new-layer-close" variant="primary" onClick={this.props.onHideImportPattern}>Done</Button>
           </Modal.Footer>
         </Modal>
 
-        <Modal size="lg" show={this.state.showImportImageLayer} onHide={this.toggleImportImageModal.bind(this)}>
+        <Modal size="lg" show={this.props.importer.showImportImage} onHide={this.props.onHideImportImage}>
           <Modal.Header closeButton>
             <Modal.Title>Import new layer</Modal.Title>
           </Modal.Header>
@@ -348,8 +394,8 @@ class Playlist extends Component {
             <Accordion className="mb-4">
               <Card className="active mt-2">
                 <Card.Header as={Form.Label} htmlFor="fileUpload" style={{ cursor: "pointer" }}>
-                  <h3>Import image</h3>
-                  Import an image as new layer. The file must be in .png or .jpg format.
+                  <h3>Open</h3>
+                  Open an image as new layer. The file must be in .png or .jpg format.
 
                   <Form.Control
                       id="fileUpload"
@@ -358,6 +404,7 @@ class Playlist extends Component {
                       onChange={this.onImageSelected.bind(this)}
                       style={{ display: "none" }} />
                 </Card.Header>
+                <canvas id="image-importer-canvas" className={this.props.importer.showImagePreview ? "" : "d-none"}></canvas>
               </Card>
             </Accordion>
             <div className="mt-2">
@@ -371,7 +418,8 @@ class Playlist extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="new-layer-close" variant="primary" onClick={this.toggleImportImageModal.bind(this)}>Done</Button>
+            <Button id="new-layer-close" variant="primary" onClick={this.props.onHideImportImage}>Cancel</Button>
+            <Button id="new-layer-close" variant="primary" onClick={this.makeNewImageLayer.bind(this)}>Import</Button>
           </Modal.Footer>
         </Modal>
 
@@ -426,13 +474,10 @@ class Playlist extends Component {
                 Import file
               </Dropdown.Toggle>
               <Dropdown.Menu size="sm">
-                <Dropdown.Item id="file-import-gcode" onClick={this.toggleImportGcodeModal.bind(this)}>Import gcode file</Dropdown.Item>
-                <Dropdown.Item id="file-import-image" onClick={this.toggleImportImageModal.bind(this)}>Import image file</Dropdown.Item>
+                <Dropdown.Item id="file-import-gcode" onClick={this.props.onShowImportPattern}>Import pattern file</Dropdown.Item>
+                <Dropdown.Item id="file-import-image" onClick={this.props.onShowImportImage}>Import image file</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-          </div>
-          
-          <div id="file-canvas-data" className="d-none">
           </div>
         </div>
       </div>

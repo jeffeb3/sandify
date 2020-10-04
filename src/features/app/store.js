@@ -3,6 +3,7 @@ import { combineReducers } from 'redux'
 import appReducer from './appSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
+import importerReducer from '../importer/importerSlice'
 import previewReducer from '../preview/previewSlice'
 import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
@@ -22,6 +23,7 @@ const store = configureStore({
     app: appReducer,
     layers: layersReducer,
     exporter: exporterReducer,
+    importer: importerReducer,
     machine: machineReducer,
     preview: previewReducer
   })

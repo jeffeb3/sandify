@@ -6,7 +6,9 @@ const options = {
   ...{
     lineSpacing: {
       title: 'Line spacing',
-      min: 0.1
+      min: 1,
+      max: 100,
+      step: 1,
     },
     darkness: {
       title: 'Darkness threshold',
@@ -46,7 +48,7 @@ export default class BWImage extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'bwimage',
-        lineSpacing: 4,
+        lineSpacing: 12,
         colorDifferenceStep: 4,
         darkness: 254/2,
         inversion: false,
