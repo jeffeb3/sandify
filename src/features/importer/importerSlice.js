@@ -7,7 +7,7 @@ const importerSlice = createSlice({
     showImportImage: false,
     showImagePreview: false,
     reverseImageIntensity: false,
-    imageThreshold: 127,
+    imageThreshold: 126,
   },
   reducers: {
     showImportPattern(state, action) {

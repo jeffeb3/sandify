@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form, Dropdown} from 'react-bootstrap'
+import Switch from 'react-switch'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
@@ -12,6 +13,7 @@ import ReactGA from 'react-ga'
 import ThetaRhoImporter from '../importer/ThetaRhoImporter'
 import GCodeImporter from '../importer/GCodeImporter'
 import './Playlist.scss'
+import { Stage, Layer, Image } from "react-konva";
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
@@ -94,8 +96,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(showImagePreview(false))
     },
     onShowImagePreview: () => {
-      console.log("show")
       dispatch(showImagePreview(true))
+    },
+    onReverseImageIntensity: (checked) => {
+      dispatch(setReverseImageIntensity(checked))
+    },
+    onImageThreshold: (value) => {
+      dispatch(setImageThreshold(value))
     },
   }
 }
@@ -155,6 +162,7 @@ class Playlist extends Component {
     super(props)
     this.state = {
       showNewLayer: false,
+      invertImage: false,
       showCopyLayer: false
     }
   }
@@ -404,6 +412,40 @@ class Playlist extends Component {
                       onChange={this.onImageSelected.bind(this)}
                       style={{ display: "none" }} />
                 </Card.Header>
+                <Row className="align-items-center">
+                  <Col sm={5}>
+                  <Form.Label htmlFor="options-step">
+                    Reverse Image
+                  </Form.Label>
+                  </Col>
+                  <Col sm={7}>
+                    <Switch
+                      checked={this.props.importer.reverseImageIntensity}
+                      onChange={(checked) => {
+                        this.props.onReverseImageIntensity(checked)
+                      }} />
+                  </Col>
+                </Row>
+                <Row className={"align-items-center pb-1"}>
+                  <Col sm={5}>
+                    <Form.Label htmlFor="options-step">
+                      Image threshold
+                    </Form.Label>
+                  </Col>
+                  <Col sm={7}>
+                    <Form.Control
+                      step={5}
+                      min={1}
+                      max={255}
+                      type="number"
+                      value={this.props.importer.imageThreshold}
+                      onChange={(event) => {
+                        let value = event.target.value === '' ? '' : parseFloat(event.target.value)
+                        this.props.onImageThreshold(value)
+                      }}
+                      />
+                  </Col>
+                </Row>
                 <canvas id="image-importer-canvas" className={this.props.importer.showImagePreview ? "" : "d-none"}></canvas>
               </Card>
             </Accordion>

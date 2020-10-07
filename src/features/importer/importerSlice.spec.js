@@ -13,7 +13,7 @@ describe('importer reducer', () => {
       showImportImage: false,
       showImagePreview: false,
       reverseImageIntensity: false,
-      imageThreshold: 127,
+      imageThreshold: 126,
     })
   })
 
@@ -64,7 +64,7 @@ describe('importer reducer', () => {
   it('should handle setImageThreshold', () => {
     expect(
       importer(
-        {imageThreshold: 127},
+        {imageThreshold: 126},
         setImageThreshold(100)
       )
     ).toEqual({
