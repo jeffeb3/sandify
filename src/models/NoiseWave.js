@@ -13,7 +13,7 @@ const options = {
       min: 1
     },
     seed: {
-      title: 'Pattern number',
+      title: 'Random seed',
       min: 1
     },
     noiseLevel: {
