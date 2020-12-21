@@ -3,6 +3,7 @@ import { getMachineInstance } from '../features/machine/computer'
 import Victor from 'victor'
 import noise from '../common/noise'
 import seedrandom from 'seedrandom'
+import { shapeSimilarity } from 'curve-matcher'
 import { offset } from '../common/geometry'
 
 const options = {
@@ -112,6 +113,7 @@ export default class NoiseWave extends Shape {
       return group
     })
 
+    let prevCurve
     for (let j=0; j<particles.length; j=j+2) {
       const curve = this.getCurve(vertexGroups, j);
 
@@ -124,7 +126,10 @@ export default class NoiseWave extends Shape {
         vertices = vertices.concat([startPerimeter, machineInstance.tracePerimeter(startPerimeter, endPerimeter), endPerimeter, end].flat())
       }
 
-      vertices = vertices.concat(curve)
+      if (!prevCurve || shapeSimilarity(curve, prevCurve, { estimationPoints: 100, rotations: 0 }) < ((state.shape.noiseSimilarity || 88) / 100)) {
+        vertices = vertices.concat(curve)
+      }
+      prevCurve = curve
     }
 
     vertices = vertices.map(vertex => {
