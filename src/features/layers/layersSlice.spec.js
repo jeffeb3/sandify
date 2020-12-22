@@ -19,6 +19,7 @@ import layers, {
 describe('layers reducer', () => {
   const initialState = {
     circleLobes: 1,
+    circleDirection: 'clockwise',
     type: 'circle',
     repeatEnabled: true,
     canTransform: true,
@@ -37,6 +38,7 @@ describe('layers reducer', () => {
     connectionMethod: 'line',
     backtrackPct: 0,
     drawPortionPct: 100,
+    rotateCompleteLoop: false,
     rotateStartingPct: 0,
     growEnabled: true,
     growValue: 100,
