@@ -72,6 +72,10 @@ export default class PolarMachine extends Machine {
     }
   }
 
+  inBounds(vertex) {
+    return vertex.length() < this.settings.maxRadius
+  }
+
   // Returns the nearest perimeter vertex to the given vertex.
   nearestPerimeterVertex(vertex) {
     return new Victor(Math.cos(vertex.angle()) * this.settings.maxRadius, Math.sin(vertex.angle()) * this.settings.maxRadius)
