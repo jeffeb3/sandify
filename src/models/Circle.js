@@ -7,6 +7,11 @@ const options = {
     circleLobes: {
       title: 'Number of lobes',
       min: 1
+    },
+    circleDirection: {
+      title: 'Direction',
+      type: 'dropdown',
+      choices: ['clockwise', 'counterclockwise']
     }
   }
 }
@@ -21,17 +26,27 @@ export default class Circle extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'circle',
-        circleLobes: 1
-      }
+        circleLobes: 1,
+        circleDirection: 'clockwise'
+      },
     }
   }
 
   getVertices(state) {
     let points = []
-    for (let i=0; i<=128; i++) {
-      let angle = Math.PI * 2.0 / 128.0 * i
-      points.push(new Victor(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
+
+    if (state.shape.circleDirection === 'counterclockwise') {
+      for (let i=128; i>=0; i--) {
+        let angle = Math.PI * 2.0 / 128.0 * i
+        points.push(new Victor(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
+      }
+    } else {
+      for (let i=0; i<=128; i++) {
+        let angle = Math.PI * 2.0 / 128.0 * i
+        points.push(new Victor(Math.cos(angle), Math.sin(state.shape.circleLobes * angle)/state.shape.circleLobes))
+      }
     }
+
     return points
   }
 
