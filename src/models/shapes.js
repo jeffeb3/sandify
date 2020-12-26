@@ -6,6 +6,7 @@ import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
+import Mask from '../models/Mask'
 import NoiseWave from '../models/NoiseWave'
 import Point from '../models/Point'
 import Polygon from '../models/Polygon'
@@ -39,6 +40,7 @@ export const registeredShapes = {
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
+  mask: new Mask()
 }
 
 export const getShape = (layer) => {

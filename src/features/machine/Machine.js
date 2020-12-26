@@ -8,6 +8,7 @@ export default class Machine {
       .limitPrecision()
       .optimizePerimeter()
 
+    if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 

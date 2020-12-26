@@ -65,7 +65,11 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        return metashape.getVertices(state)
+        if (!state.shape.dragging && state.type === 'mask') {
+          return []
+        } else {
+          return metashape.getVertices(state)
+        }
       }
     }
   )
@@ -76,10 +80,22 @@ const makeGetTransformedVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetLayerVertices, layerId),
-      getCachedSelector(makeGetLayer, layerId)
+      getCachedSelector(makeGetLayer, layerId),
+      getNumVisibleLayers,
+      getLayers,
+      getVisibleLayerIds,
     ],
-    (vertices, layer) => {
-      return transformShapes(vertices, layer)
+    (vertices, layer, numLayers, layers, visibleLayerIds) => {
+      const state = { layers: layers }
+      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
+      let nextLayer = null
+
+      if (index < numLayers - 1) {
+        const nextLayerId = visibleLayerIds[index + 1]
+        nextLayer = layers.byId[nextLayerId]
+      }
+
+      return transformShapes(vertices, layer, nextLayer)
     }
   )
 }
@@ -98,13 +114,24 @@ const makeGetComputedVertices = layerId => {
     (vertices, layerIndex, numLayers, layers, visibleLayerIds, machine) => {
       const state = { layers: layers, machine: machine }
       const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
+      let nextLayer, nextLayerId
 
       if (index < numLayers - 1) {
-        const nextLayerId = visibleLayerIds[index + 1]
-        const nextLayer = layers.byId[nextLayerId]
+        nextLayerId = visibleLayerIds[index + 1]
+        nextLayer = layers.byId[nextLayerId]
 
-        if (!nextLayer.dragging) {
+        if (nextLayer.type === 'mask') {
+          if (index < numLayers - 2) {
+            nextLayerId = visibleLayerIds[index + 2]
+            nextLayer = layers.byId[nextLayerId]
+          } else {
+            nextLayer = null
+          }
+        }
+
+        if (nextLayer && !nextLayer.dragging) {
           const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
+
           if (nextVertices[0]) {
             const layer = layers.byId[layerId]
             if (layer.connectionMethod === 'along perimeter') {

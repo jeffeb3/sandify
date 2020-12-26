@@ -1,7 +1,7 @@
 import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
 import { evaluate } from 'mathjs'
-import { distance, scale, rotate } from '../../common/geometry'
+import { distance, scale, rotate, offset } from '../../common/geometry'
 import { arrayRotate } from '../../common/util'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
@@ -22,7 +22,7 @@ function track(vertex, data, loopIndex) {
 
 export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => {
   numLoops = numLoops || data.numLoops
-  let transformedVertex = vertex.clone()
+  let transformedVertex = vertex ? vertex.clone() : new Victor(0.0)
 
   if (data.repeatEnabled && data.growEnabled) {
     let growAmount = 100
@@ -116,7 +116,7 @@ function buildTrackLoop(vertices, transform, i, t) {
 }
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
-export const polishVertices = (vertices, machine, layerInfo) => {
+export const polishVertices = (vertices, machine, layerInfo={}) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
 
   if (vertices.length > 0) {
@@ -192,6 +192,25 @@ export const transformShapes = (vertices, layer, nextLayer) => {
   if (layer.backtrackPct) {
     const backtrack = Math.round(vertices.length * layer.backtrackPct / 100.0)
     outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
+  }
+
+  if (nextLayer && nextLayer.type === 'mask' && layer.type !== 'mask') {
+    const machineClass = nextLayer.maskMachine === 'circle' ? PolarMachine : RectMachine
+    outputVertices = outputVertices.map(vertex => {
+      return rotate(offset(vertex, -nextLayer.offsetX, -nextLayer.offsetY), nextLayer.rotation)
+    })
+
+    if (!layer.dragging && !nextLayer.dragging) {
+      const machine = new machineClass(
+        outputVertices,
+        { minX: 0, maxX: nextLayer.startingWidth, minY: 0, maxY: nextLayer.startingHeight, minimizeMoves: nextLayer.maskMinimizeMoves, maxRadius: nextLayer.startingWidth, mask: true },
+        { border: nextLayer.maskBorder })
+      outputVertices = machine.polish().vertices
+    }
+
+    outputVertices = outputVertices.map(vertex => {
+      return offset(rotate(vertex, -nextLayer.rotation), nextLayer.offsetX, nextLayer.offsetY)
+    })
   }
 
   const endTime = performance.now()

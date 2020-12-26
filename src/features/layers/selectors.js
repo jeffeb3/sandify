@@ -47,6 +47,13 @@ export const getVisibleLayerIds = createSelector(
   }
 )
 
+export const getComputedLayerIds = createSelector(
+  getLayers,
+  (layers) => {
+    return layers.allIds.filter(id => layers.byId[id].visible && layers.byId[id].type !== 'mask')
+  }
+)
+
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const getKonvaLayerIds = createSelector(
