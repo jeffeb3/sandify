@@ -20,8 +20,8 @@ const mapStateToProps = (state, ownProps) => {
     layer: layer,
     shape: shape,
     options: shape.getOptions(),
-    selectOptions: getShapeSelectOptions(),
-    showShapeSelectRender: layer.selectGroup !== "import",
+    selectOptions: getShapeSelectOptions(false),
+    showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
     link: shape.link,
     linkText: shape.linkText
   }

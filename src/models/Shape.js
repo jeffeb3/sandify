@@ -50,7 +50,8 @@ export default class Shape {
       rotateStartingPct: 0,
       reverse: false,
       dragging: false,
-      visible: true
+      visible: true,
+      effect: false
     }
   }
 

@@ -9,7 +9,7 @@ import {
   getMachineInstance
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
+import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds, makeGetNextLayerId, makeGetEffects } from '../layers/selectors'
 import { rotate, offset, getSliderBounds } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -65,7 +65,7 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        if (!state.shape.dragging && state.type === 'mask') {
+        if (!state.shape.dragging && state.shape.effect) {
           return []
         } else {
           return metashape.getVertices(state)
@@ -81,21 +81,16 @@ const makeGetTransformedVertices = layerId => {
     [
       getCachedSelector(makeGetLayerVertices, layerId),
       getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetEffects, layerId),
       getNumVisibleLayers,
       getLayers,
       getVisibleLayerIds,
     ],
-    (vertices, layer, numLayers, layers, visibleLayerIds) => {
+    (vertices, layer, effects, numLayers, layers, visibleLayerIds) => {
       const state = { layers: layers }
       const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
-      let nextLayer = null
 
-      if (index < numLayers - 1) {
-        const nextLayerId = visibleLayerIds[index + 1]
-        nextLayer = layers.byId[nextLayerId]
-      }
-
-      return transformShapes(vertices, layer, nextLayer)
+      return transformShapes(vertices, layer, effects)
     }
   )
 }
@@ -106,28 +101,18 @@ const makeGetComputedVertices = layerId => {
     [
       getCachedSelector(makeGetTransformedVertices, layerId),
       getCachedSelector(makeGetLayerIndex, layerId),
+      getCachedSelector(makeGetNextLayerId, layerId),
       getNumVisibleLayers,
       getLayers,
       getVisibleLayerIds,
       getMachine
     ],
-    (vertices, layerIndex, numLayers, layers, visibleLayerIds, machine) => {
+    (vertices, layerIndex, nextLayerId, numLayers, layers, visibleLayerIds, machine) => {
       const state = { layers: layers, machine: machine }
-      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
-      let nextLayer, nextLayerId
+      let nextLayer
 
-      if (index < numLayers - 1) {
-        nextLayerId = visibleLayerIds[index + 1]
-        nextLayer = layers.byId[nextLayerId]
-
-        if (nextLayer.type === 'mask') {
-          if (index < numLayers - 2) {
-            nextLayerId = visibleLayerIds[index + 2]
-            nextLayer = layers.byId[nextLayerId]
-          } else {
-            nextLayer = null
-          }
-        }
+      if (layerIndex < numLayers - 1) {
+        nextLayer = nextLayerId && layers.byId[nextLayerId]
 
         if (nextLayer && !nextLayer.dragging) {
           const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)

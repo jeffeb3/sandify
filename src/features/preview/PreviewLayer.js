@@ -275,8 +275,9 @@ const PreviewLayer = (ownProps) => {
           ref={trRef}
           centeredScaling={true}
           resizeEnabled={!props.layer.trackEnabled}
+          rotateEnabled={props.layer.maskMachine !== 'circle' }
           rotationSnaps={[0, 90, 180, 270]}
-        //  enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+          enabledAnchors={props.layer.maskMachine === 'circle' ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : null }
         />
       )}
     </React.Fragment>

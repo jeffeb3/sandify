@@ -73,10 +73,12 @@ export default class CommentExporter extends Exporter {
           this.dedent()
           this.dedent()
 
-          this.line('Fine tuning:')
-          this.indent()
-          this.optionLines(transform, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
-          this.dedent()
+          if (!layer.effect) {
+            this.line('Fine tuning:')
+            this.indent()
+            this.optionLines(transform, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
+            this.dedent()
+          }
           this.dedent()
         })
         break

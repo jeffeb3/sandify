@@ -5,6 +5,7 @@ import { distance, scale, rotate, offset } from '../../common/geometry'
 import { arrayRotate } from '../../common/util'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
+import { getShape } from '../../models/shapes'
 import Victor from 'victor'
 
 function track(vertex, data, loopIndex) {
@@ -138,7 +139,7 @@ function reportTiming(time) {
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
-export const transformShapes = (vertices, layer, nextLayer) => {
+export const transformShapes = (vertices, layer, effects) => {
   const startTime = performance.now()
   const numLoops = layer.repeatEnabled ? layer.numLoops : 1
   const numTrackLoops = layer.repeatEnabled ? layer.trackNumLoops : 1
@@ -194,22 +195,9 @@ export const transformShapes = (vertices, layer, nextLayer) => {
     outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
   }
 
-  if (nextLayer && nextLayer.type === 'mask' && layer.type !== 'mask') {
-    const machineClass = nextLayer.maskMachine === 'circle' ? PolarMachine : RectMachine
-    outputVertices = outputVertices.map(vertex => {
-      return rotate(offset(vertex, -nextLayer.offsetX, -nextLayer.offsetY), nextLayer.rotation)
-    })
-
-    if (!layer.dragging && !nextLayer.dragging) {
-      const machine = new machineClass(
-        outputVertices,
-        { minX: 0, maxX: nextLayer.startingWidth, minY: 0, maxY: nextLayer.startingHeight, minimizeMoves: nextLayer.maskMinimizeMoves, maxRadius: nextLayer.startingWidth, mask: true },
-        { border: nextLayer.maskBorder })
-      outputVertices = machine.polish().vertices
-    }
-
-    outputVertices = outputVertices.map(vertex => {
-      return offset(rotate(vertex, -nextLayer.rotation), nextLayer.offsetX, nextLayer.offsetY)
+  if (effects && effects.length > 0) {
+    effects.forEach(effect => {
+      outputVertices = getShape(effect).applyEffect(effect, layer, outputVertices)
     })
   }
 

@@ -79,15 +79,17 @@ const customStyles = {
   })
 }
 
-const SortableItem = SortableElement(({id, name, active, canRemove, visible, onCopyLayer, onLayerRemoved, onLayerSelected, onToggleLayerVisible}) => {
+const SortableItem = SortableElement(({id, name, active, effect, canRemove, visible, onCopyLayer, onLayerRemoved, onLayerSelected, onToggleLayerVisible}) => {
   const activeClass = active ? 'active' : ''
   const dragClass = canRemove ? 'cursor-move' : ''
+  const nameClass = effect ? 'no-select font-italic': 'no-select'
+
   return <ListGroup.Item className={[activeClass, dragClass, 'd-flex align-items-center'].join(' ')} key={id} id={id} onClick={onLayerSelected}>
     <Button className="layer-button" variant="link" data-id={id} onClick={onToggleLayerVisible}>
       {visible && <FaEye />}
       {!visible && <FaEyeSlash />}
     </Button>
-    <div className="no-select">{name}</div>
+    <div className={nameClass}>{effect && '\u2014'}{name}</div>
     <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onCopyLayer}>
       <FaCopy />
     </Button>
@@ -109,6 +111,7 @@ const SortableList = SortableContainer(({layers, currentLayer, numLayers, onCopy
             index={index}
             active={currentLayer.id === layer.id}
             visible={layer.visible}
+            effect={layer.effect}
             canRemove={numLayers > 1}
             onCopyLayer={onCopyLayer}
             onLayerSelected={onLayerSelected}
@@ -209,7 +212,7 @@ class Playlist extends Component {
           <Modal.Body>
             <Row className="align-items-center">
               <Col sm={5}>
-                Shape
+                Type
               </Col>
               <Col sm={7}>
                 <Select

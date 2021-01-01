@@ -37,6 +37,7 @@ describe('layers reducer', () => {
     connectionMethod: 'line',
     backtrackPct: 0,
     drawPortionPct: 100,
+    effect: false,
     rotateStartingPct: 0,
     growEnabled: true,
     growValue: 100,

@@ -56,13 +56,14 @@ export const getShapeDefaults = () => {
   })
 }
 
-export const getShapeSelectOptions = () => {
+export const getShapeSelectOptions = (includeEffects=true) => {
   const groupOptions = []
   const shapes = getShapeDefaults()
 
   for (const shape of shapes) {
     const optionLabel = { value: shape.id, label: shape.name }
     var found = false
+
     for (const group of groupOptions) {
       if (group.label === shape.selectGroup) {
         found = true
@@ -70,8 +71,10 @@ export const getShapeSelectOptions = () => {
       }
     }
     if (!found) {
-      if (shape.selectGroup === "import") {
+      if (shape.selectGroup === 'import') {
         // Users can't manually select this group.
+        continue
+      } else if (shape.selectGroup === 'effects' && !includeEffects) {
         continue
       }
       const newOptions = [ optionLabel ]
