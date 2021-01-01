@@ -10,9 +10,10 @@ class CheckboxOption extends Component {
   render() {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
+    const visible = option.isVisible === undefined ? true : option.isVisible(model)
 
     return (
-      <Row className="align-items-center">
+      <Row className={"align-items-center" + (visible ? '' : ' d-none')}>
         <Col sm={5}>
         <Form.Label htmlFor="options-step">
           {option.title}
