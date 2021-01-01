@@ -1,7 +1,7 @@
 import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
 import { evaluate } from 'mathjs'
-import { distance, scale, rotate, offset } from '../../common/geometry'
+import { distance, scale, rotate } from '../../common/geometry'
 import { arrayRotate } from '../../common/util'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'

@@ -81,15 +81,9 @@ const makeGetTransformedVertices = layerId => {
     [
       getCachedSelector(makeGetLayerVertices, layerId),
       getCachedSelector(makeGetLayer, layerId),
-      getCachedSelector(makeGetEffects, layerId),
-      getNumVisibleLayers,
-      getLayers,
-      getVisibleLayerIds,
+      getCachedSelector(makeGetEffects, layerId)
     ],
-    (vertices, layer, effects, numLayers, layers, visibleLayerIds) => {
-      const state = { layers: layers }
-      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
-
+    (vertices, layer, effects) => {
       return transformShapes(vertices, layer, effects)
     }
   )
