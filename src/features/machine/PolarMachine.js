@@ -101,9 +101,6 @@ export default class PolarMachine extends Machine {
 
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
-    //const s = start.angle ? start.angle() : start
-    //const e = end.angle ? end.angle() : end
-    //return traceCircle(s, e, this.settings.maxRadius)
     return traceCircle(start.angle(), end.angle(), this.settings.maxRadius)
   }
 
