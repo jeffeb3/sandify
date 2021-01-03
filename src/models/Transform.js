@@ -7,7 +7,7 @@ const transformOptions = {
   startingHeight: {
     title: 'Initial height',
     min: 1,
-    isVisible: (state) => { return state.canChangeSize && state.maskMachine !== 'circle' },
+    isVisible: (state) => { return state.canChangeSize && state.canChangeHeight },
   },
   offsetX: {
     title: 'X offset',
@@ -17,7 +17,7 @@ const transformOptions = {
   },
   rotation: {
     title: 'Rotate (degrees)',
-    isVisible: state => { return state.maskMachine !== 'circle'}
+    isVisible: state => { return state.canRotate }
   },
   connectionMethod: {
     title: 'Connect to next layer',

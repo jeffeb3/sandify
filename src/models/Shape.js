@@ -19,6 +19,8 @@ export default class Shape {
       shouldCache: true,
       autosize: true,
       canChangeSize: true,
+      canChangeHeight: true,
+      canRotate: true,
       usesMachine: false,
       startingWidth: 10,
       startingHeight: 10,

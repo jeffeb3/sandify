@@ -19,6 +19,11 @@ const options = {
           const size = Math.min(attrs.startingWidth, attrs.startingHeight)
           changes.startingHeight = size
           changes.startingWidth = size
+          changes.canRotate = false
+          changes.canChangeHeight = false
+        } else {
+          changes.canRotate = true
+          changes.canChangeHeight = true
         }
 
         return changes
@@ -45,7 +50,7 @@ export default class Mask extends Effect {
       ...super.getInitialState(),
       ...{
         type: 'mask',
-        selectGroup: 'effects',        
+        selectGroup: 'effects',
         startingWidth: 100,
         startingHeight: 100,
         maskMinimizeMoves: false,
