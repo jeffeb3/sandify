@@ -19,6 +19,7 @@ import layers, {
 describe('layers reducer', () => {
   const initialState = {
     circleLobes: 1,
+    circleDirection: 'clockwise',
     type: 'circle',
     repeatEnabled: true,
     canTransform: true,
@@ -40,6 +41,7 @@ describe('layers reducer', () => {
     backtrackPct: 0,
     drawPortionPct: 100,
     effect: false,
+    rotateCompleteLoop: false,
     rotateStartingPct: 0,
     growEnabled: true,
     growValue: 100,
@@ -60,8 +62,7 @@ describe('layers reducer', () => {
     trackGrow: 50.0,
     usesMachine: false,
     dragging: false,
-    visible: true,
-    rotateCompleteLoop: false
+    visible: true
   }
 
   it('should handle initial state', () => {
