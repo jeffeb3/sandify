@@ -89,7 +89,7 @@ const SortableItem = SortableElement(({id, name, active, effect, canRemove, visi
       {visible && <FaEye />}
       {!visible && <FaEyeSlash />}
     </Button>
-    <div className={nameClass}>{effect && '\u2014'}{name}</div>
+    <div className={nameClass}>{effect && '\u2937'} {name}</div>
     <Button className="ml-auto layer-button" variant="link" data-id={id} onClick={onCopyLayer}>
       <FaCopy />
     </Button>
