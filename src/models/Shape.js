@@ -47,6 +47,7 @@ export default class Shape {
       connectionMethod: 'line',
       drawPortionPct: 100,
       backtrackPct: 0,
+      rotateCompleteLoop: false,
       rotateStartingPct: 0,
       reverse: false,
       dragging: false,
