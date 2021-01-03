@@ -1,7 +1,7 @@
 import Victor from 'victor'
 import { shapeOptions } from './Shape'
 import Effect from './Effect'
-import { rotate, offset } from '../common/geometry'
+import { rotate, offset, circle } from '../common/geometry'
 import PolarMachine from '../features/machine/PolarMachine'
 import RectMachine from '../features/machine/RectMachine'
 
@@ -64,13 +64,17 @@ export default class Mask extends Effect {
     const width = state.shape.startingWidth
     const height = state.shape.startingHeight
 
-    return [
-      new Victor(-width/2, height/2),
-      new Victor(width/2, height/2),
-      new Victor(width/2, -height/2),
-      new Victor(-width/2, -height/2),
-      new Victor(-width/2, height/2),
-    ]
+    if (state.shape.dragging && state.shape.maskMachine === 'circle') {
+      return circle(width/2, 0)
+    } else {
+      return [
+        new Victor(-width/2, height/2),
+        new Victor(width/2, height/2),
+        new Victor(width/2, -height/2),
+        new Victor(-width/2, -height/2),
+        new Victor(-width/2, height/2),
+      ]
+    }
   }
 
   applyEffect(effect, layer, vertices) {
