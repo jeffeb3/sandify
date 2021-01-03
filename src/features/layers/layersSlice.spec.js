@@ -60,7 +60,8 @@ describe('layers reducer', () => {
     trackGrow: 50.0,
     usesMachine: false,
     dragging: false,
-    visible: true
+    visible: true,
+    rotateCompleteLoop: false
   }
 
   it('should handle initial state', () => {

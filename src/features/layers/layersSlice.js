@@ -5,7 +5,7 @@ import { getShape } from '../../models/shapes'
 
 const protectedAttrs = [
   'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
-  'usesMachine', 'shouldCache', 'rotateCompleteLoop'
+  'usesMachine', 'shouldCache', 'rotateCompleteLoop', 'canChangeHeight', 'canRotate'
 ]
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
 const newLayerName = getShape({type: newLayerType}).name.toLowerCase()

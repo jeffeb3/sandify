@@ -53,6 +53,7 @@ export default class Shape {
       reverse: false,
       dragging: false,
       visible: true,
+      rotateCompleteLoop: false,
       effect: false
     }
   }
