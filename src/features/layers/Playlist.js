@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
+import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
@@ -24,7 +24,9 @@ const mapStateToProps = (state, ownProps) => {
     newLayerType: state.layers.newLayerType,
     newLayerName: state.layers.newLayerName,
     newLayerNameOverride: state.layers.newLayerNameOverride,
+    newLayerInsert: state.layers.newLayerInsert,
     copyLayerName: state.layers.copyLayerName,
+    copyLayerInsert: state.layers.copyLayerInsert,
     selectOptions: getShapeSelectOptions()
   }
 }
@@ -58,8 +60,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChangeNewName: (event) => {
       dispatch(updateLayers({ newLayerName: event.target.value, newLayerNameOverride: true }))
     },
+    onChangeNewInsert: (value) => {
+      dispatch(updateLayers({ newLayerInsert: value }))
+    },
     onChangeCopyName: (event) => {
       dispatch(updateLayers({ copyLayerName: event.target.value }))
+    },
+    onChangeCopyInsert: (value) => {
+      dispatch(updateLayers({ copyLayerInsert: value }))
     },
     onLayerMoved: ({oldIndex, newIndex}) => {
       dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
@@ -235,6 +243,17 @@ class Playlist extends Component {
                 />
               </Col>
             </Row>
+            <Row className="align-items-center mt-2">
+              <Col sm={5}>
+                Insert layer
+              </Col>
+              <Col sm={7}>
+                <ToggleButtonGroup id="newLayerInsert" type="radio" name="newLayerInsert" value={this.props.newLayerInsert} onChange={this.props.onChangeNewInsert}>
+                  <ToggleButton variant="light" value="end">at end</ToggleButton>
+                  <ToggleButton variant="light" value="current">after current layer</ToggleButton>
+                </ToggleButtonGroup>
+              </Col>
+            </Row>
           </Modal.Body>
 
           <Modal.Footer>
@@ -315,6 +334,17 @@ class Playlist extends Component {
                   onFocus={this.handleNameFocus}
                   onChange={this.props.onChangeCopyName}
                 />
+              </Col>
+            </Row>
+            <Row className="align-items-center mt-2">
+              <Col sm={5}>
+                Insert layer
+              </Col>
+              <Col sm={7}>
+                <ToggleButtonGroup id="copyLayerInsert" type="radio" name="copyLayerInsert" value={this.props.copyLayerInsert} onChange={this.props.onChangeCopyInsert}>
+                  <ToggleButton variant="light" value="end">at end</ToggleButton>
+                  <ToggleButton variant="light" value="current">after current layer</ToggleButton>
+                </ToggleButtonGroup>
               </Col>
             </Row>
           </Modal.Body>

@@ -72,7 +72,9 @@ describe('layers reducer', () => {
       newLayerType: 'polygon',
       newLayerName: 'polygon',
       newLayerNameOverride: false,
+      newLayerInsert: 'end',
       copyLayerName: null,
+      copyLayerInsert: 'end',      
       byId: {},
       allIds: []
     })
