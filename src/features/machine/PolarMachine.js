@@ -1,4 +1,4 @@
-import { angle, onSegment } from '../../common/geometry'
+import { angle, onSegment, circle } from '../../common/geometry'
 import Machine from './Machine'
 import Victor from 'victor'
 
@@ -22,10 +22,11 @@ export const traceCircle = (startAngle, endAngle, size) => {
 }
 
 export default class PolarMachine extends Machine {
-  constructor(vertices, settings, layerInfo) {
+  constructor(vertices, settings, layerInfo={}) {
     super()
     this.vertices = vertices
-    this.settings = settings
+    this.settings = Object.assign({}, settings)
+    this.settings.perimeterConstant = 50
     this.layerInfo = layerInfo
   }
 
@@ -78,7 +79,11 @@ export default class PolarMachine extends Machine {
 
   // Returns the nearest perimeter vertex to the given vertex.
   nearestPerimeterVertex(vertex) {
-    return new Victor(Math.cos(vertex.angle()) * this.settings.maxRadius, Math.sin(vertex.angle()) * this.settings.maxRadius)
+    if (vertex) {
+      return new Victor(Math.cos(vertex.angle()) * this.settings.maxRadius, Math.sin(vertex.angle()) * this.settings.maxRadius)
+    } else {
+      return new Victor(0,0)
+    }
   }
 
   // Returns the distance along the perimeter between two points.
@@ -99,6 +104,15 @@ export default class PolarMachine extends Machine {
     return traceCircle(start.angle(), end.angle(), this.settings.maxRadius)
   }
 
+  outlinePerimeter() {
+    const last = this.vertices[this.vertices.length - 1]
+
+    if (last) {
+      this.vertices = this.vertices.concat(circle(this.settings.maxRadius, parseInt(last.angle()*64/Math.PI)))
+    }
+    return this
+  }
+
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta=1) {
     let rm = Math.pow(this.settings.maxRadius, 2)
@@ -113,7 +127,7 @@ export default class PolarMachine extends Machine {
     // move, or it will be incorrectly optimized out of the final vertices. The 3/50
     // ratio could likely be refined further (relative to maxRadius), but it seems to produce
     // accurate results at various machine sizes.
-    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/100
+    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/this.settings.perimeterConstant
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by

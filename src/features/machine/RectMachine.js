@@ -3,14 +3,21 @@ import Machine from './Machine'
 import { distance } from '../../common/geometry'
 
 export default class RectMachine extends Machine {
-  constructor(vertices, settings, layerInfo) {
+  constructor(vertices, settings, layerInfo={}) {
     super()
     this.vertices = vertices
     this.settings = settings
     this.layerInfo = layerInfo
     this.sizeX = Math.abs((settings.maxX - settings.minX) / 2.0)
     this.sizeY = Math.abs((settings.maxY - settings.minY) / 2.0)
+    this.corners = [
+      new Victor(-this.sizeX, -this.sizeY),
+      new Victor(-this.sizeX, this.sizeY),
+      new Victor(this.sizeX, this.sizeY),
+      new Victor(this.sizeX, -this.sizeY)
+    ]
   }
+
 
   addStartPoint() {
     return this
@@ -24,13 +31,6 @@ export default class RectMachine extends Machine {
       //
       // [0]   [3]
       const corner = this.settings.rectOrigin[0]
-      const corners = [
-        new Victor(-this.sizeX, -this.sizeY),
-        new Victor(-this.sizeX, this.sizeY),
-        new Victor(this.sizeX, this.sizeY),
-        new Victor(this.sizeX, -this.sizeY)
-      ]
-
       const first = this.vertices[0]
       const last = this.vertices[this.vertices.length-1]
       const maxRadius = Math.sqrt(Math.pow(2.0*this.sizeX, 2.0) + Math.pow(2.0*this.sizeY, 2.0)) / 2.0
@@ -51,9 +51,9 @@ export default class RectMachine extends Machine {
       )
       const newPoint = clipped[clipped.length - 1]
       if (outPoint === last) {
-        this.vertices = [this.vertices, this.tracePerimeter(newPoint, corners[corner], true)].flat()
+        this.vertices = [this.vertices, this.tracePerimeter(newPoint, this.corners[corner], true)].flat()
       } else {
-        this.vertices = [this.tracePerimeter(corners[corner], newPoint, true), this.vertices].flat()
+        this.vertices = [this.tracePerimeter(this.corners[corner], newPoint, true), this.vertices].flat()
       }
     }
 
@@ -73,6 +73,26 @@ export default class RectMachine extends Machine {
     const rDy = Math.abs(v1.y - v2.y)
 
     return (rDx < delta && dx < delta) || (rDy < delta && dy < delta)
+  }
+
+  outlinePerimeter() {
+    const last = this.vertices[this.vertices.length-1]
+
+    if (last) {
+      const s = this.nearestVertex(last)
+      const idx = this.nearestCornerIndex(s)
+      const corners = [
+        s,
+        this.corners[idx],
+        this.corners[(idx + 1) % 4],
+        this.corners[(idx + 2) % 4],
+        this.corners[(idx + 3) % 4],
+        this.corners[idx]
+      ]
+      this.vertices = this.vertices.concat(corners)
+    }
+
+    return this
   }
 
   // Given two perimeter points, traces the shortest valid path between them (stays on
@@ -143,6 +163,21 @@ export default class RectMachine extends Machine {
     } else {
       return new Victor(vertex.x, Math.sign(vertex.y) * this.sizeY)
     }
+  }
+
+  nearestCornerIndex(vertex) {
+    let n = null
+    let d = Number.MAX_SAFE_INTEGER
+
+    this.corners.forEach((corner, i) => {
+      const dc = distance(corner, vertex)
+      if (dc < d) {
+        d = dc
+        n = i
+      }
+    })
+
+    return n
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by

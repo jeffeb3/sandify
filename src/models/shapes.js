@@ -6,6 +6,7 @@ import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
+import Mask from '../models/Mask'
 import NoiseWave from '../models/NoiseWave'
 import Point from '../models/Point'
 import Polygon from '../models/Polygon'
@@ -39,6 +40,7 @@ export const registeredShapes = {
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
+  mask: new Mask()
 }
 
 export const getShape = (layer) => {
@@ -54,13 +56,14 @@ export const getShapeDefaults = () => {
   })
 }
 
-export const getShapeSelectOptions = () => {
+export const getShapeSelectOptions = (includeEffects=true) => {
   const groupOptions = []
   const shapes = getShapeDefaults()
 
   for (const shape of shapes) {
     const optionLabel = { value: shape.id, label: shape.name }
     var found = false
+
     for (const group of groupOptions) {
       if (group.label === shape.selectGroup) {
         found = true
@@ -68,8 +71,10 @@ export const getShapeSelectOptions = () => {
       }
     }
     if (!found) {
-      if (shape.selectGroup === "import") {
+      if (shape.selectGroup === 'import') {
         // Users can't manually select this group.
+        continue
+      } else if (shape.selectGroup === 'effects' && !includeEffects) {
         continue
       }
       const newOptions = [ optionLabel ]

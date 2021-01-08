@@ -144,7 +144,7 @@ class Transforms extends Component {
         </Accordion>
       }
 
-      <Card className="mt-3">
+      {!this.props.layer.effect && <Card className="mt-3">
         <Card.Body>
           <h3 className="mb-3">Fine tuning (advanced)</h3>
           <DropdownOption
@@ -185,7 +185,7 @@ class Transforms extends Component {
             index={0}
             model={this.props.layer} />
         </Card.Body>
-      </Card>
+      </Card>}
     </div>
     )
   }

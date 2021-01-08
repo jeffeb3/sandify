@@ -9,7 +9,7 @@ import {
   getMachineInstance
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds } from '../layers/selectors'
+import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds, makeGetNextLayerId, makeGetEffects } from '../layers/selectors'
 import { rotate, offset, getSliderBounds } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -65,7 +65,11 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        return metashape.getVertices(state)
+        if (!state.shape.dragging && state.shape.effect) {
+          return []
+        } else {
+          return metashape.getVertices(state)
+        }
       }
     }
   )
@@ -76,10 +80,11 @@ const makeGetTransformedVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetLayerVertices, layerId),
-      getCachedSelector(makeGetLayer, layerId)
+      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetEffects, layerId)
     ],
-    (vertices, layer) => {
-      return transformShapes(vertices, layer)
+    (vertices, layer, effects) => {
+      return transformShapes(vertices, layer, effects)
     }
   )
 }
@@ -90,21 +95,22 @@ const makeGetComputedVertices = layerId => {
     [
       getCachedSelector(makeGetTransformedVertices, layerId),
       getCachedSelector(makeGetLayerIndex, layerId),
+      getCachedSelector(makeGetNextLayerId, layerId),
       getNumVisibleLayers,
       getLayers,
       getVisibleLayerIds,
       getMachine
     ],
-    (vertices, layerIndex, numLayers, layers, visibleLayerIds, machine) => {
+    (vertices, layerIndex, nextLayerId, numLayers, layers, visibleLayerIds, machine) => {
       const state = { layers: layers, machine: machine }
-      const index = getCachedSelector(makeGetLayerIndex, layerId)(state)
+      let nextLayer
 
-      if (index < numLayers - 1) {
-        const nextLayerId = visibleLayerIds[index + 1]
-        const nextLayer = layers.byId[nextLayerId]
+      if (layerIndex < numLayers - 1) {
+        nextLayer = nextLayerId && layers.byId[nextLayerId]
 
-        if (!nextLayer.dragging) {
+        if (nextLayer && !nextLayer.dragging) {
           const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
+
           if (nextVertices[0]) {
             const layer = layers.byId[layerId]
             if (layer.connectionMethod === 'along perimeter') {

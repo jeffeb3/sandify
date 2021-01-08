@@ -2,7 +2,7 @@ export default class Exporter {
   constructor(props) {
     this.props = props
     this.lines = []
-    this.indentLevel = 0    
+    this.indentLevel = 0
   }
 
   export() {
@@ -87,7 +87,12 @@ export default class Exporter {
 
   optionLines(metamodel, instance, options, add=true) {
     options.forEach(option => {
-      this.optionLine(metamodel, instance, option, add)
+      const metaOption = metamodel.getOptions()[option]
+      const visible = metaOption.isVisible === undefined ? true : metaOption.isVisible(instance)
+
+      if (visible) {
+        this.optionLine(metamodel, instance, option, add)
+      }
     })
   }
 

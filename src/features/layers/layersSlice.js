@@ -5,7 +5,7 @@ import { getShape } from '../../models/shapes'
 
 const protectedAttrs = [
   'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
-  'usesMachine', 'shouldCache', 'rotateCompleteLoop'
+  'usesMachine', 'shouldCache', 'rotateCompleteLoop', 'canChangeHeight', 'canRotate'
 ]
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
 const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
@@ -33,7 +33,7 @@ const layersSlice = createSlice({
       state.selected = layer.id
       state.newLayerNameOverride = false
       state.newLayerName = layer.name
-      if (layer.type !== 'file_import') {
+      if (layer.type !== 'file_import' && !layer.effect) {
         localStorage.setItem('currentShape', layer.type)
       }
     },

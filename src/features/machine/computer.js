@@ -5,6 +5,7 @@ import { distance, scale, rotate } from '../../common/geometry'
 import { arrayRotate } from '../../common/util'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
+import { getShape } from '../../models/shapes'
 import Victor from 'victor'
 
 function track(vertex, data, loopIndex) {
@@ -22,7 +23,7 @@ function track(vertex, data, loopIndex) {
 
 export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => {
   numLoops = numLoops || data.numLoops
-  let transformedVertex = vertex.clone()
+  let transformedVertex = vertex ? vertex.clone() : new Victor(0.0)
 
   if (data.repeatEnabled && data.growEnabled) {
     let growAmount = 100
@@ -116,7 +117,7 @@ function buildTrackLoop(vertices, transform, i, t) {
 }
 
 // ensure vertices do not exceed machine boundary limits, and endpoints as needed
-export const polishVertices = (vertices, machine, layerInfo) => {
+export const polishVertices = (vertices, machine, layerInfo={}) => {
   vertices = vertices.map(vertex => Victor.fromObject(vertex))
 
   if (vertices.length > 0) {
@@ -138,7 +139,7 @@ function reportTiming(time) {
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
-export const transformShapes = (vertices, layer, nextLayer) => {
+export const transformShapes = (vertices, layer, effects) => {
   const startTime = performance.now()
   const numLoops = layer.repeatEnabled ? layer.numLoops : 1
   const numTrackLoops = layer.repeatEnabled ? layer.trackNumLoops : 1
@@ -192,6 +193,12 @@ export const transformShapes = (vertices, layer, nextLayer) => {
   if (layer.backtrackPct) {
     const backtrack = Math.round(vertices.length * layer.backtrackPct / 100.0)
     outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
+  }
+
+  if (effects && effects.length > 0) {
+    effects.forEach(effect => {
+      outputVertices = getShape(effect).applyEffect(effect, layer, outputVertices)
+    })
   }
 
   const endTime = performance.now()

@@ -7,7 +7,7 @@ const transformOptions = {
   startingHeight: {
     title: 'Initial height',
     min: 1,
-    isVisible: (state) => { return state.canChangeSize },
+    isVisible: (state) => { return state.canChangeSize && state.canChangeHeight },
   },
   offsetX: {
     title: 'X offset',
@@ -16,7 +16,8 @@ const transformOptions = {
     title: 'Y offset',
   },
   rotation: {
-    title: 'Rotate (degrees)'
+    title: 'Rotate (degrees)',
+    isVisible: state => { return state.canRotate }
   },
   connectionMethod: {
     title: 'Connect to next layer',
@@ -43,7 +44,8 @@ const transformOptions = {
   },
   reverse: {
     title: 'Reverse path',
-    type: 'checkbox'
+    type: 'checkbox',
+    isVisible: (state) => { return !state.effect }
   },
   numLoops: {
     title: 'Number of loops',

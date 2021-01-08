@@ -275,8 +275,9 @@ const PreviewLayer = (ownProps) => {
           ref={trRef}
           centeredScaling={true}
           resizeEnabled={!props.layer.trackEnabled}
+          rotateEnabled={props.layer.canRotate}
           rotationSnaps={[0, 90, 180, 270]}
-        //  enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+          enabledAnchors={!props.layer.canChangeHeight ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : null }
         />
       )}
     </React.Fragment>

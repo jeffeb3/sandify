@@ -126,3 +126,15 @@ export const getSliderBounds = (vertices, sliderValue) => {
 
   return { start: start, end: end }
 }
+
+// returns an array of points drawing a circle of a given radius
+export const circle = (radius=1, start=0) => {
+  let points = []
+
+  for (let i=start; i<=128+start; i++) {
+    let angle = Math.PI * 2.0 / 128.0 * i
+    points.push(new Victor(Math.cos(angle)*radius, Math.sin(angle)*radius))
+  }
+
+  return points
+}
