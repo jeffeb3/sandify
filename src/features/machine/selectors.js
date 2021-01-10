@@ -9,7 +9,7 @@ import {
   getMachineInstance
 } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds, makeGetNextLayerId, makeGetEffects } from '../layers/selectors'
+import { getLayersById, makeGetLayer, makeGetLayerIndex, getNumVisibleLayers, getVisibleLayerIds, makeGetNextLayerId, makeGetEffects } from '../layers/selectors'
 import { rotate, offset, getSliderBounds } from '../../common/geometry'
 
 const cache = new LRUCache({
@@ -22,7 +22,6 @@ const getCacheKey = (state) => {
 }
 
 const getState = state => state
-const getLayers = state => state.layers
 const getMachine = state => state.machine
 const getPreview = state => state.preview
 
@@ -34,9 +33,9 @@ const cachedSelectors = {}
 // transformed vertices are not redrawn when machine settings change
 const makeGetLayerMachine = layerId => {
   return createSelector(
-    [ getLayers, getMachine ],
+    [ getLayersById, getMachine ],
     (layers, machine) => {
-      const layer = layers.byId[layerId]
+      const layer = layers[layerId]
       return layer.usesMachine ? machine : null
     }
   )
@@ -45,7 +44,10 @@ const makeGetLayerMachine = layerId => {
 // creates a selector that returns shape vertices for a given layer
 const makeGetLayerVertices = layerId => {
   return createSelector(
-    [ getCachedSelector(makeGetLayer, layerId), getCachedSelector(makeGetLayerMachine, layerId) ],
+    [
+      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetLayerMachine, layerId)
+    ],
     (layer, machine) => {
       const state = {
         shape: layer,
@@ -97,22 +99,22 @@ const makeGetComputedVertices = layerId => {
       getCachedSelector(makeGetLayerIndex, layerId),
       getCachedSelector(makeGetNextLayerId, layerId),
       getNumVisibleLayers,
-      getLayers,
-      getVisibleLayerIds,
+      getLayersById,
       getMachine
     ],
-    (vertices, layerIndex, nextLayerId, numLayers, layers, visibleLayerIds, machine) => {
+    (vertices, layerIndex, nextLayerId, numLayers, layers, machine) => {
       const state = { layers: layers, machine: machine }
       let nextLayer
 
+      console.log('computed vertices for layer' + layerId)
       if (layerIndex < numLayers - 1) {
-        nextLayer = nextLayerId && layers.byId[nextLayerId]
+        nextLayer = nextLayerId && layers[nextLayerId]
 
         if (nextLayer && !nextLayer.dragging) {
           const nextVertices = getCachedSelector(makeGetComputedVertices, nextLayerId)(state)
 
           if (nextVertices[0]) {
-            const layer = layers.byId[layerId]
+            const layer = layers[layerId]
             if (layer.connectionMethod === 'along perimeter') {
               const start = vertices[vertices.length - 1]
               const end = nextVertices[0]
@@ -139,25 +141,14 @@ const makeGetComputedVertices = layerId => {
 export const makeGetPreviewVertices = layerId => {
   return createSelector(
     [
-        getLayers,
-        getVisibleLayerIds,
+        getLayersById,
         getMachine,
+        getCachedSelector(makeGetTransformedVertices, layerId),
+        getCachedSelector(makeGetComputedVertices, layerId)
     ],
-    (layers, visibleLayerIds, machine) => {
-      const state = {
-        layers: layers,
-        machine: machine
-      }
-
-      let vertices
-      const layer = layers.byId[layerId]
-
-      if (layer.dragging) {
-        vertices = getCachedSelector(makeGetTransformedVertices, layerId)(state)
-      } else {
-        vertices = getCachedSelector(makeGetComputedVertices, layerId)(state)
-      }
-
+    (layers, machine, transformedVertices, computedVertices) => {
+      const layer = layers[layerId]
+      const vertices = layer.dragging ? transformedVertices : computedVertices
       const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
       const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
       const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
@@ -276,9 +267,9 @@ export const getSliderColors = layerId => {
 // re-added by Konva transformer.
 export const makeGetPreviewTrackVertices = layerId => {
   return createSelector(
-    getLayers,
+    getLayersById,
     (layers) => {
-      const layer = layers.byId[layerId]
+      const layer = layers[layerId]
       const numLoops = layer.numLoops
       const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
       const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
