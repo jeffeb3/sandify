@@ -25,14 +25,16 @@ const layersSlice = createSlice({
   reducers: {
     addLayer(state, action) {
       let layer = { ...action.payload }
+
       layer.id = uniqueId('layer-')
       layer.name = layer.name || state.newLayerName
       state.byId[layer.id] = layer
-      state.allIds.push(layer.id)
+      state.allIds.splice(state.allIds.findIndex(id => id === state.current) + 1, 0, layer.id)
       state.current = layer.id
       state.selected = layer.id
       state.newLayerNameOverride = false
       state.newLayerName = layer.name
+
       if (layer.type !== 'file_import' && !layer.effect) {
         localStorage.setItem('currentShape', layer.type)
       }
@@ -44,9 +46,10 @@ const layersSlice = createSlice({
     copyLayer(state, action) {
       const source = state.byId[action.payload]
       const layer = { ...source, name: state.copyLayerName }
+
       layer.id = uniqueId('layer-')
       state.byId[layer.id] = layer
-      state.allIds.push(layer.id)
+      state.allIds.splice(state.allIds.findIndex(id => id === state.current) + 1, 0, layer.id)
       state.current = layer.id
       state.selected = layer.id
     },

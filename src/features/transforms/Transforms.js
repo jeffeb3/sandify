@@ -40,7 +40,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
     },
-    ontransformMethodChange: (value) => {
+    onTransformMethodChange: (value) => {
       dispatch(updateLayer({ transformMethod: value, id: id}))
     }
   }
@@ -126,7 +126,7 @@ class Transforms extends Component {
                     </Col>
 
                     <Col sm={7}>
-                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.layer.transformMethod} onChange={this.props.ontransformMethodChange}>
+                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.layer.transformMethod} onChange={this.props.onTransformMethodChange}>
                         <ToggleButton variant="light" value="smear">smear</ToggleButton>
                         <ToggleButton variant="light" value="intact">keep intact</ToggleButton>
                       </ToggleButtonGroup>

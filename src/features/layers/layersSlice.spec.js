@@ -126,7 +126,7 @@ describe('layers reducer', () => {
           name: 'foo'
         }
       },
-      allIds: ['layer-1', 'layer-2'],
+      allIds: ['layer-2', 'layer-1'],
       current: 'layer-2',
       selected: 'layer-2',
       copyLayerName: 'foo'
