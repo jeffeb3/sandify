@@ -17,24 +17,19 @@ const layersSlice = createSlice({
     selected: null,
     newLayerType: newLayerType,
     newLayerName: newLayerName,
-    newLayerInsert: 'end',
     newLayerNameOverride: false,
     copyLayerName: null,
-    copyLayerInsert: 'end',
     byId: {},
     allIds: []
   },
   reducers: {
     addLayer(state, action) {
       let layer = { ...action.payload }
-      const index = state.newLayerInsert === 'current' ?
-        state.allIds.findIndex(id => id === state.current) + 1 :
-        state.allIds.length
 
       layer.id = uniqueId('layer-')
       layer.name = layer.name || state.newLayerName
       state.byId[layer.id] = layer
-      state.allIds.splice(index, 0, layer.id)
+      state.allIds.splice(state.allIds.findIndex(id => id === state.current) + 1, 0, layer.id)
       state.current = layer.id
       state.selected = layer.id
       state.newLayerNameOverride = false
@@ -51,13 +46,10 @@ const layersSlice = createSlice({
     copyLayer(state, action) {
       const source = state.byId[action.payload]
       const layer = { ...source, name: state.copyLayerName }
-      const index = state.copyLayerInsert === 'current' ?
-        state.allIds.findIndex(id => id === state.current) + 1 :
-        state.allIds.length
 
       layer.id = uniqueId('layer-')
       state.byId[layer.id] = layer
-      state.allIds.splice(index, 0, layer.id)
+      state.allIds.splice(state.allIds.findIndex(id => id === state.current) + 1, 0, layer.id)
       state.current = layer.id
       state.selected = layer.id
     },
