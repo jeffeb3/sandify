@@ -112,6 +112,7 @@ describe('layers reducer', () => {
           }
         },
         allIds: ['layer-1'],
+        current: 'layer-1',
         copyLayerName: 'foo'
       },
       copyLayer('layer-1'))

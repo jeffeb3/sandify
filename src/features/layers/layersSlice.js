@@ -28,7 +28,10 @@ const layersSlice = createSlice({
       layer.id = uniqueId('layer-')
       layer.name = layer.name || state.newLayerName
       state.byId[layer.id] = layer
-      state.allIds.push(layer.id)
+
+      const index = state.allIds.findIndex(id => id === state.current) + 1
+      state.allIds.splice(index, 0, layer.id)
+
       state.current = layer.id
       state.selected = layer.id
       state.newLayerNameOverride = false
@@ -46,7 +49,10 @@ const layersSlice = createSlice({
       const layer = { ...source, name: state.copyLayerName }
       layer.id = uniqueId('layer-')
       state.byId[layer.id] = layer
-      state.allIds.push(layer.id)
+
+      const index = state.allIds.findIndex(id => id === state.current) + 1
+      state.allIds.splice(index, 0, layer.id)
+
       state.current = layer.id
       state.selected = layer.id
     },
