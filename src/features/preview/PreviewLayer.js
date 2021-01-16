@@ -33,7 +33,7 @@ const PreviewLayer = (ownProps) => {
       selected: state.layers.selected,
       sliderValue: state.preview.sliderValue,
       showTrack: true,
-      colors: state.layers.selected ? getSliderColors(state.layers.selected)(state) : [],
+      colors: state.layers.selected ? getSliderColors(state.layers.selected, state) : [],
       offsets: getVertexOffsets(state)
     }
   }
