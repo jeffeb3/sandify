@@ -106,7 +106,6 @@ const makeGetComputedVertices = layerId => {
       const state = { layers: layers, machine: machine }
       let nextLayer
 
-      console.log('computed vertices for layer' + layerId)
       if (layerIndex < numLayers - 1) {
         nextLayer = nextLayerId && layers[nextLayerId]
 
@@ -229,38 +228,36 @@ export const getVerticesStats = createSelector(
 
 // returns a hash of { index => color } that specifies the gradient color of the
 // line drawn at each index.
-export const getSliderColors = layerId => {
-  return createSelector(
-    [
-      getAllPreviewVertices,
-      getPreview,
-      getCachedSelector(makeGetPreviewVertices, layerId),
-      getVertexOffsets
-    ],
-    (vertices, preview, layerVertices, offsets) => {
-      const sliderValue = preview.sliderValue
-      const colors = {}
-      let start, end
+// NOTE: This was originally a selector factory, but was rewritten because its
+// inputs were constantly changing, making memoization useless; this is not ideal
+// but I'm not sure how to fix at the moment
+export const getSliderColors = (layerId, state) => {
+  const vertices = getAllPreviewVertices(state)
+  const preview = getPreview(state)
+  const layerVertices = getCachedSelector(makeGetPreviewVertices, layerId)(state)
+  const offsets = getVertexOffsets(state)
 
-      if (sliderValue > 0) {
-        const bounds = getSliderBounds(vertices, sliderValue)
-        start = bounds.start
-        end = bounds.end
-      } else {
-        start = offsets[layerId]
-        end = start + layerVertices.length
-      }
+  const sliderValue = preview.sliderValue
+  const colors = {}
+  let start, end
 
-      let startColor = Color('yellow')
-      const colorStep = 3.0 / 8 / (end - start)
+  if (sliderValue > 0) {
+    const bounds = getSliderBounds(vertices, sliderValue)
+    start = bounds.start
+    end = bounds.end
+  } else {
+    start = offsets[layerId]
+    end = start + layerVertices.length
+  }
 
-      for(let i=end; i>=start; i--) {
-        colors[i] = startColor.darken(colorStep * (end-i)).hex()
-      }
+  let startColor = Color('yellow')
+  const colorStep = 3.0 / 8 / (end - start)
 
-      return colors
-    }
-  )
+  for(let i=end; i>=start; i--) {
+    colors[i] = startColor.darken(colorStep * (end-i)).hex()
+  }
+
+  return colors
 }
 
 // used by the preview window; reverses rotation and offsets because they are
