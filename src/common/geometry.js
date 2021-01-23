@@ -213,3 +213,17 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
   return vertices
 }
+
+// Convert theta, rho vertices to goofy x, y, which really represent scara angles.
+export const toScaraGcode = (vertices) => {
+  const unitsPerRotation = 6.0
+  return vertices.map( thetaRho => {
+    const theta = thetaRho.x
+    const rho = thetaRho.y
+    const m1 = theta + Math.acos(rho)
+    const m2 = theta - Math.acos(rho)
+    const x = unitsPerRotation * m1 / (2*Math.PI)
+    const y = unitsPerRotation * m2 / (2*Math.PI)
+    return new Victor(x,y)
+  })
+}

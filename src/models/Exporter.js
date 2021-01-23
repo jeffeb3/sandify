@@ -18,6 +18,9 @@ const exporterOptions = {
     min: 0,
     max: 1
   },
+  scaraGcode: {
+    title: 'Scara GCode',
+  },
   post: {
     title: 'Program end code',
     type: 'textarea',

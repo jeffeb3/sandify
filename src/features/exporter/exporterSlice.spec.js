@@ -10,6 +10,7 @@ describe('exporter reducer', () => {
       polarRhoMax: 1,
       pre: '',
       post: '',
+      scaraGcode: false,
       reverse: false,
       show: false
     })

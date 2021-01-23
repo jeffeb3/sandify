@@ -19,6 +19,7 @@ const exporterSlice = createSlice({
     fileType: fileType,
     pre: localStorage.getItem('export_pre') ? localStorage.getItem('export_pre') : '',
     post: localStorage.getItem('export_post') ? localStorage.getItem('export_post') : '',
+    scaraGcode: localStorage.getItem('export_scaraGcode') ? localStorage.getItem('export_scaraGcode') === 'true' : false,
     reverse: false,
     show: false,
     polarRhoMax: 1.0

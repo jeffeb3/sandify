@@ -1,4 +1,5 @@
 import Exporter from './Exporter'
+import { subsample, toThetaRho, toScaraGcode } from '../../common/geometry'
 
 export default class GCodeExporter extends Exporter {
   constructor(props) {
@@ -15,14 +16,33 @@ export default class GCodeExporter extends Exporter {
   // computes vertices compatible with the gcode format, and replaces
   // placeholder variables in pre/post blocks.
   computeOutputVertices(vertices) {
+
+    if (this.props.scaraGcode) {
+      // First, downsample larger lines into smaller ones.
+      const maxLength = 2.0
+      const subsampledVertices = subsample(vertices, maxLength)
+
+      // Convert to theta, rho
+      vertices = toThetaRho(subsampledVertices, this.props.maxRadius, parseFloat(this.props.polarRhoMax))
+
+      vertices = toScaraGcode(vertices)
+    }
+
     // Collect some statistics about these vertices.
     let minx = 1e9
     let miny = 1e9
     let maxx = -1e9
     let maxy = -1e9
     this.vertices = vertices.map(vertex => {
-      const x = vertex.x + this.props.offsetX
-      const y = vertex.y + this.props.offsetY
+      let offsetX = this.props.offsetX
+      let offsetY = this.props.offsetY
+      if (this.props.scaraGcode) {
+        offsetX = 0
+        offsetY = 0
+      }
+
+      const x = vertex.x + offsetX
+      const y = vertex.y + offsetY
       minx = Math.min(x, minx)
       miny = Math.min(y, miny)
       maxx = Math.max(x, maxx)

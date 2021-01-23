@@ -21,6 +21,7 @@ import {
 const mapStateToProps = (state, ownProps) => {
   return {
     reverse: state.exporter.reverse,
+    scaraGcode: state.exporter.scaraGcode,
     show: state.exporter.show,
     vertices: getAllComputedVertices(state),
     comments: getComments(state),
@@ -161,6 +162,19 @@ class Downloader extends Component {
               optionKey="polarRhoMax"
               index={2}
               model={this.props} />}
+
+            {this.props.fileType === 'GCode (.gcode)' && <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="scaraGcode"
+                key="scaraGcode"
+                index={2}
+                model={this.props} />}
+            {this.props.fileType === 'GCode (.gcode)' && <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
+                    >More Information</a>}
 
             <InputOption
               onChange={this.props.onChange}
