@@ -1,6 +1,7 @@
 import Circle from '../models/Circle'
 import Epicycloid from '../models/Epicycloid'
 import FileImport from '../models/FileImport'
+import Fisheye from '../models/Fisheye'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
@@ -40,6 +41,7 @@ export const registeredShapes = {
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
+  fisheye: new Fisheye(),
   mask: new Mask()
 }
 

@@ -3,6 +3,12 @@ const transformOptions = {
     title: 'Initial width',
     min: 1,
     isVisible: (state) => { return state.canChangeSize },
+    onChange: (changes, attrs) => {
+      if (!attrs.canChangeHeight) {
+        changes.startingHeight = changes.startingWidth
+      }
+      return changes
+    }
   },
   startingHeight: {
     title: 'Initial height',
