@@ -11,6 +11,7 @@ const options = {
       title: 'Distortion',
       min: 1,
       max: 40,
+      step: 0.1,
     }
   }
 }
