@@ -14,6 +14,7 @@
     "gcode-toolpath": "^2.2.0",
     "jest-canvas-mock": "^2.2.0",
     "konva": "^5.0.2",
+    "liang-barsky": "^1.0.4",
     "lodash": "^4.17.19",
     "lru-cache": "^5.1.1",
     "mathjs": "^6.6.4",

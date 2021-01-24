@@ -1,7 +1,8 @@
 import { vertexRoundP } from '../../common/geometry'
 
-// base machine class
+// inherit all machine classes from this base class
 export default class Machine {
+  // given a set of vertices, ensure they adhere to the limits defined by the machine
   polish() {
     this.enforceLimits()
       .cleanVertices()
@@ -38,7 +39,7 @@ export default class Machine {
     return this
   }
 
-  // walk the given vertices, clipping as needed along the perimeter
+  // Walk the given vertices, removing all vertices that lie outside of the machine limits
   enforceLimits() {
     let cleanVertices = []
     let previous = null
@@ -59,6 +60,48 @@ export default class Machine {
       }
 
       previous = vertex
+    }
+
+    this.vertices = cleanVertices
+    return this
+  }
+
+// walk the given vertices, removing all vertices that lie within the machine limits
+  enforceInvertedLimits() {
+    if (this.vertices.length === 0) return
+
+    let cleanVertices = []
+    let currentIndex = 0
+    let curr = this.vertices[0]
+    let previous
+
+    // we may be starting inside bounds, in which case we only care about the
+    // last inside vertex
+    while (currentIndex < this.vertices.length && this.inBounds(curr)) {
+      currentIndex = currentIndex + 1
+      previous = curr
+      curr = this.vertices[currentIndex]
+    }
+
+    while (currentIndex < this.vertices.length) {
+      curr = this.vertices[currentIndex]
+
+      if (previous) {
+        const clipped = this.clipLine(previous, curr)
+
+        if (clipped.length > 0 && this.inBounds(previous) && cleanVertices.length > 0) {
+          const perimeter = this.tracePerimeter(cleanVertices[cleanVertices.length - 1], clipped[0])
+          cleanVertices = [...cleanVertices, ...perimeter]
+        }
+
+        cleanVertices = [...cleanVertices, ...clipped]
+
+      } else {
+        cleanVertices.push(curr)
+      }
+
+      previous = curr
+      currentIndex = currentIndex + 1
     }
 
     this.vertices = cleanVertices
