@@ -12,9 +12,10 @@ const options = {
       choices: ['angle', 'quad', 'circle'],
       onChange: (changes, attrs) => {
         if (changes.warpType === 'circle') {
-          changes.rotation = 45
+          changes.rotation = 0
           changes.canRotate = false
         } else {
+          changes.rotation = 45
           changes.canRotate = true
         }
 
