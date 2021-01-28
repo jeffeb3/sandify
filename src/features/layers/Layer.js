@@ -78,6 +78,7 @@ class Layer extends Component {
                   options={this.props.options}
                   optionKey={key}
                   key={key}
+                  delayKey={option.delayKey}
                   index={index}
                   model={this.props.layer} />
       }

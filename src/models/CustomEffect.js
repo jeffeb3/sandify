@@ -9,10 +9,12 @@ const options = {
   ...{
     xMathInput: {
       title: 'X(x,y)',
+      delayKey: 'xMath',
       type: 'text',
     },
     yMathInput: {
       title: 'Y(x,y)',
+      delayKey: 'yMath',
       type: 'text',
     },
     subsample: {
@@ -26,19 +28,21 @@ const options = {
   }
 }
 
-export default class FunctionEffect extends Effect {
+export default class CustomEffect extends Effect {
   constructor() {
-    super('Function')
+    super('Custom')
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'function',
+        type: 'custom',
         selectGroup: 'effects',
         xMathInput: 'x + 4*sin((x+y)/20)',
+        xMath: 'x + 4*sin((x+y)/20)',
         yMathInput: 'y + 4*sin((x-y)/20)',
+        yMath: 'y + 4*sin((x-y)/20)',
         subsample: true,
         useBounds: false,
         startingWidth: 100,
@@ -68,12 +72,12 @@ export default class FunctionEffect extends Effect {
         }
       }
       try {
-        const x = evaluate(effect.xMathInput, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
-        const y = evaluate(effect.yMathInput, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
+        const x = evaluate(effect.xMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
+        const y = evaluate(effect.yMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
         return new Victor(x + effect.offsetX, y + effect.offsetY)
       }
       catch (err) {
-        console.log("Error parsing function effect: " + err)
+        console.log("Error parsing custom effect: " + err)
         return vertex
       }
     })
