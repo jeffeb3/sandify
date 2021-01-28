@@ -9,9 +9,9 @@ const options = {
     warpType: {
       title: 'Warp Type',
       type: 'dropdown',
-      choices: ['angle', 'quad', 'circle'],
+      choices: ['angle', 'quad', 'circle', 'grid'],
       onChange: (changes, attrs) => {
-        if (changes.warpType === 'circle') {
+        if (changes.warpType === 'circle' || changes.warpType === 'grid') {
           changes.rotation = 0
           changes.canRotate = false
         } else {
@@ -110,6 +110,23 @@ export default class Warp extends Effect {
         const theta = Math.atan2(originaly,originalx)
         const x = originalx + effect.scale * Math.cos(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periodx)
         const y = originaly + effect.scale * Math.sin(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periody)
+        return new Victor(x + effect.offsetX, y + effect.offsetY)
+      })
+    }
+    if (effect.warpType === 'grid') {
+      const periodx = 10.0 * effect.period / (Math.PI * 2.0)
+      const periody = 10.0 * effect.period / (Math.PI * 2.0)
+      return subsamples.map(vertex => {
+        if (effect.useBounds) {
+          const center = new Victor(effect.offsetX, effect.offsetY)
+          if (distance(vertex, center) > 0.5*effect.startingWidth) {
+            return vertex
+          }
+        }
+        const originalx = vertex.x - effect.offsetX
+        const originaly = vertex.y - effect.offsetY
+        const x = originalx + effect.scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
+        const y = originaly + effect.scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
         return new Victor(x + effect.offsetX, y + effect.offsetY)
       })
     }
