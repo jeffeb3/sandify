@@ -2,21 +2,33 @@ import Victor from 'victor'
 import Effect from './Effect'
 import { shapeOptions } from './Shape'
 import { circle, distance, subsample } from '../common/geometry'
+import { evaluate } from 'mathjs'
 
 const options = {
   ...shapeOptions,
   ...{
-    warpType: {
-      title: 'Warp Type',
-      type: 'dropdown',
-      choices: ['angle', 'quad', 'circle', 'grid'],
+    startingWidth: {
+      title: 'Scale',
+      isVisible: (state) => { return state.canChangeSize },
       onChange: (changes, attrs) => {
-        if (changes.warpType === 'circle' || changes.warpType === 'grid') {
-          changes.rotation = 0
-          changes.canRotate = false
-        } else {
+        if (!attrs.canChangeHeight) {
+          changes.startingHeight = changes.startingWidth
+        }
+        return changes
+      }
+    },
+    warpType: {
+      title: 'Warp type',
+      type: 'dropdown',
+      choices: ['angle', 'quad', 'circle', 'grid', 'x-shear', 'y-shear', 'custom'],
+      onChange: (changes, attrs) => {
+        changes.canChangeSize = changes.warpType !== 'custom'
+        if (['angle', 'quad'].includes(changes.warpType)) {
           changes.rotation = 45
           changes.canRotate = true
+        } else {
+          changes.rotation = 0
+          changes.canRotate = false
         }
 
         return changes
@@ -24,18 +36,27 @@ const options = {
     },
     period: {
       title: 'Period',
-      step: 0.2
+      step: 0.2,
+      isVisible: (state) => { return !['custom', 'x-shear', 'y-shear'].includes(state.warpType) },
     },
-    scale: {
-      title: 'Scale',
-      step: 0.1
+    xMathInput: {
+      title: 'X(x,y)',
+      delayKey: 'xMath',
+      type: 'text',
+      isVisible: (state) => { return state.warpType === 'custom' },
+    },
+    yMathInput: {
+      title: 'Y(x,y)',
+      delayKey: 'yMath',
+      type: 'text',
+      isVisible: (state) => { return state.warpType === 'custom' },
     },
     subsample: {
-      title: 'Subsample Points',
+      title: 'Subsample points',
       type: 'checkbox',
     },
     useBounds: {
-      title: 'Use Bounding Circle',
+      title: 'Use bounding circle',
       type: 'checkbox',
     },
   }
@@ -43,7 +64,7 @@ const options = {
 
 export default class Warp extends Effect {
   constructor() {
-    super('Warp')
+    super('2D Transformation')
   }
 
   getInitialState() {
@@ -53,12 +74,15 @@ export default class Warp extends Effect {
         type: 'warp',
         selectGroup: 'effects',
         warpType: 'angle',
-        scale: 4.0,
         period: 10.0,
         subsample: true,
+        xMathInput: 'x + 4*sin((x+y)/20)',
+        xMath: 'x + 4*sin((x+y)/20)',
+        yMathInput: 'y + 4*sin((x-y)/20)',
+        yMath: 'y + 4*sin((x-y)/20)',
         useBounds: false,
-        startingWidth: 100,
-        startingHeight: 100,
+        startingWidth: 40,
+        startingHeight: 40,
         rotation: 45,
         canRotate: true,
         canChangeHeight: false
@@ -72,65 +96,120 @@ export default class Warp extends Effect {
   }
 
   applyEffect(effect, layer, vertices) {
-    let subsamples = vertices
     if (effect.subsample) {
-      subsamples = subsample(vertices, 2.0)
+      vertices = subsample(vertices, 2.0)
     }
 
     if (effect.warpType === 'angle' || effect.warpType === 'quad') {
-      const periodx = 10.0 * effect.period / (Math.PI * 2.0) / Math.cos(-effect.rotation / 180.0 * Math.PI)
-      const periody = 10.0 * effect.period / (Math.PI * 2.0) / Math.sin(-effect.rotation / 180.0 * Math.PI)
-      const ySign = effect.warpType === 'angle' ? +1.0 : -1.0
-      return subsamples.map(vertex => {
-        if (effect.useBounds) {
-          const center = new Victor(effect.offsetX, effect.offsetY)
-          if (distance(vertex, center) > 0.5*effect.startingWidth) {
-            return vertex
-          }
-        }
-        const originalx = vertex.x - effect.offsetX
-        const originaly = vertex.y - effect.offsetY
-        const x = originalx + effect.scale * Math.sin(originalx/periodx + originaly/periody)
-        const y = originaly + effect.scale * Math.sin(originalx/periodx + ySign * originaly/periody)
-        return new Victor(x + effect.offsetX, y + effect.offsetY)
-      })
+      return this.angle(effect.warpType === 'angle' ? +1.0 : -1.0, effect, vertices)
+    } else if (effect.warpType === 'circle') {
+      return this.circle(effect, vertices)
+    } else if (effect.warpType === 'grid') {
+      return this.grid(effect, vertices)
+    } else if (effect.warpType === 'x-shear') {
+      return this.xShear(effect, vertices)
+    } else if (effect.warpType === 'y-shear') {
+      return this.yShear(effect, vertices)
+    } else if (effect.warpType === 'custom') {
+      return this.custom(effect, vertices)
     }
-    if (effect.warpType === 'circle') {
-      const periodx = 10.0 * effect.period / (Math.PI * 2.0)
-      const periody = 10.0 * effect.period / (Math.PI * 2.0)
-      return subsamples.map(vertex=> {
-        if (effect.useBounds) {
-          const center = new Victor(effect.offsetX, effect.offsetY)
-          if (distance(vertex, center) > 0.5*effect.startingWidth) {
-            return vertex
-          }
-        }
-        const originalx = vertex.x - effect.offsetX
-        const originaly = vertex.y - effect.offsetY
-        const theta = Math.atan2(originaly,originalx)
-        const x = originalx + effect.scale * Math.cos(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periodx)
-        const y = originaly + effect.scale * Math.sin(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periody)
-        return new Victor(x + effect.offsetX, y + effect.offsetY)
-      })
-    }
-    if (effect.warpType === 'grid') {
-      const periodx = 10.0 * effect.period / (Math.PI * 2.0)
-      const periody = 10.0 * effect.period / (Math.PI * 2.0)
-      return subsamples.map(vertex => {
-        if (effect.useBounds) {
-          const center = new Victor(effect.offsetX, effect.offsetY)
-          if (distance(vertex, center) > 0.5*effect.startingWidth) {
-            return vertex
-          }
-        }
-        const originalx = vertex.x - effect.offsetX
-        const originaly = vertex.y - effect.offsetY
-        const x = originalx + effect.scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
-        const y = originaly + effect.scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
-        return new Victor(x + effect.offsetX, y + effect.offsetY)
-      })
-    }
+
     return vertices
+  }
+
+  angle(ySign, effect, vertices) {
+    const periodx = 10.0 * effect.period / (Math.PI * 2.0) / Math.cos(-effect.rotation / 180.0 * Math.PI)
+    const periody = 10.0 * effect.period / (Math.PI * 2.0) / Math.sin(-effect.rotation / 180.0 * Math.PI)
+    const scale = effect.startingWidth / 10.0
+
+    return vertices.map(vertex => {
+      if (effect.useBounds) {
+        const center = new Victor(effect.offsetX, effect.offsetY)
+        if (distance(vertex, center) > 0.5*effect.startingWidth) {
+          return vertex
+        }
+      }
+
+      const originalx = vertex.x - effect.offsetX
+      const originaly = vertex.y - effect.offsetY
+      const x = originalx + scale * Math.sin(originalx/periodx + originaly/periody)
+      const y = originaly + scale * Math.sin(originalx/periodx + ySign * originaly/periody)
+      return new Victor(x + effect.offsetX, y + effect.offsetY)
+    })
+  }
+
+  circle(effect, vertices) {
+    const periodx = 10.0 * effect.period / (Math.PI * 2.0)
+    const periody = 10.0 * effect.period / (Math.PI * 2.0)
+    const scale = effect.startingWidth / 10.0
+
+    return vertices.map(vertex=> {
+      if (effect.useBounds) {
+        const center = new Victor(effect.offsetX, effect.offsetY)
+        if (distance(vertex, center) > 0.5*effect.startingWidth) {
+          return vertex
+        }
+      }
+
+      const originalx = vertex.x - effect.offsetX
+      const originaly = vertex.y - effect.offsetY
+      const theta = Math.atan2(originaly,originalx)
+      const x = originalx + scale * Math.cos(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periodx)
+      const y = originaly + scale * Math.sin(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periody)
+      return new Victor(x + effect.offsetX, y + effect.offsetY)
+    })
+  }
+
+  grid(effect, vertices) {
+    const periodx = 10.0 * effect.period / (Math.PI * 2.0)
+    const periody = 10.0 * effect.period / (Math.PI * 2.0)
+    const scale = effect.startingWidth / 10.0
+
+    return vertices.map(vertex => {
+      if (effect.useBounds) {
+        const center = new Victor(effect.offsetX, effect.offsetY)
+        if (distance(vertex, center) > 0.5*effect.startingWidth) {
+          return vertex
+        }
+      }
+
+      const originalx = vertex.x - effect.offsetX
+      const originaly = vertex.y - effect.offsetY
+      const x = originalx + scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
+      const y = originaly + scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
+      return new Victor(x + effect.offsetX, y + effect.offsetY)
+    })
+  }
+
+  xShear(effect, vertices) {
+    const shear = (effect.startingWidth - 1)/ 100
+    return vertices.map(vertex => new Victor(vertex.x + shear * vertex.y, vertex.y))
+  }
+
+  yShear(effect, vertices) {
+    const shear = (effect.startingWidth - 1)/ 100
+    return vertices.map(vertex => new Victor(vertex.x, vertex.y + shear * vertex.x))
+  }
+
+  custom(effect, vertices) {
+    return vertices.map(vertex => {
+      if (effect.useBounds) {
+        const center = new Victor(effect.offsetX, effect.offsetY)
+        if (distance(vertex, center) > 0.5*effect.startingWidth) {
+          return vertex
+        }
+      }
+
+      try {
+        const x = evaluate(effect.xMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
+        const y = evaluate(effect.yMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
+        return new Victor(x + effect.offsetX, y + effect.offsetY)
+      }
+      catch (err) {
+        console.log("Error parsing custom effect: " + err)
+        return vertex
+      }
+    })
   }
 
   getOptions() {
