@@ -32,7 +32,6 @@ export default class Rose extends Shape {
         roseN: 3,
         roseD: 2,
         transformMethod: 'intact',
-        rotateCompleteLoop: true
       }
     }
   }

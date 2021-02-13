@@ -30,7 +30,6 @@ export default class Star extends Shape {
         type: 'hypocycloid',
         hypocycloidA: 6,
         hypocycloidB: 1,
-        rotateCompleteLoop: true        
       }
     }
   }

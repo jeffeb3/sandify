@@ -35,7 +35,6 @@ export default class Polygon extends Shape {
         polygonSides: 4,
         roundCorners: false,
         roundFraction: 0.25,
-        rotateCompleteLoop: true
       }
     }
   }

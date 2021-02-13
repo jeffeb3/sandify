@@ -177,7 +177,7 @@ export default class PolarMachine extends Machine {
     }
 
     // If both points are outside, but there's an intersection
-    if (radStart > size && radEnd > size) {
+    if (radStart > size + 1.0e-9 && radEnd > size + 1.0e-9) {
       let point = intersections.points[0].point
       let otherPoint = intersections.points[1].point
 

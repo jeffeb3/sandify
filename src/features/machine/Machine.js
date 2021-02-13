@@ -68,7 +68,7 @@ export default class Machine {
 
 // walk the given vertices, removing all vertices that lie within the machine limits
   enforceInvertedLimits() {
-    if (this.vertices.length === 0) return
+    if (this.vertices.length === 0) return this
 
     let cleanVertices = []
     let currentIndex = 0
