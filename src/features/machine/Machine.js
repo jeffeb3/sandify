@@ -94,7 +94,10 @@ export default class Machine {
           cleanVertices = [...cleanVertices, ...perimeter]
         }
 
-        cleanVertices = [...cleanVertices, ...clipped]
+        // slightly awkward syntax so that we can use splice to add our clipped
+        // array directly to cleanVertices and avoid a shallow array copy.
+        const args = [cleanVertices.length, 0].concat(clipped)
+        Array.prototype.splice.apply(cleanVertices, args)
 
       } else {
         cleanVertices.push(curr)

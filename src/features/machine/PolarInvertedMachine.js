@@ -40,7 +40,7 @@ export default class PolarInvertedMachine extends PolarMachine {
     const intersections = this.getIntersections(start, end)
     if (!intersections.intersection) {
       if (log) { console.log('line is outside limits') }
-      return [start, end]
+      return [end]
     }
 
     if (intersections.points[0].on && intersections.points[1].on) {
