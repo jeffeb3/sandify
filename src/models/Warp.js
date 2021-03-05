@@ -7,24 +7,14 @@ import { evaluate } from 'mathjs'
 const options = {
   ...shapeOptions,
   ...{
-    startingWidth: {
-      title: 'Scale',
-      isVisible: (state) => { return state.canChangeSize },
-      onChange: (changes, attrs) => {
-        if (!attrs.canChangeHeight) {
-          changes.startingHeight = changes.startingWidth
-        }
-        return changes
-      }
-    },
     warpType: {
       title: 'Warp type',
       type: 'dropdown',
-      choices: ['angle', 'quad', 'circle', 'grid', 'x-shear', 'y-shear', 'custom'],
+      choices: ['angle', 'quad', 'circle', 'grid', 'shear', 'custom'],
       onChange: (changes, attrs) => {
         changes.canChangeSize = changes.warpType !== 'custom'
-        if (['angle', 'quad'].includes(changes.warpType)) {
-          changes.rotation = 45
+        if (['angle', 'quad', 'shear'].includes(changes.warpType)) {
+          changes.rotation = changes.warpType === 'shear' ? 0 : 45
           changes.canRotate = true
         } else {
           changes.rotation = 0
@@ -37,7 +27,7 @@ const options = {
     period: {
       title: 'Period',
       step: 0.2,
-      isVisible: (state) => { return !['custom', 'x-shear', 'y-shear'].includes(state.warpType) },
+      isVisible: (state) => { return !['custom', 'shear'].includes(state.warpType) },
     },
     xMathInput: {
       title: 'X(x,y)',
@@ -55,16 +45,12 @@ const options = {
       title: 'Subsample points',
       type: 'checkbox',
     },
-    useBounds: {
-      title: 'Use bounding circle',
-      type: 'checkbox',
-    },
   }
 }
 
 export default class Warp extends Effect {
   constructor() {
-    super('2D Transformation')
+    super('Warp')
   }
 
   getInitialState() {
@@ -80,7 +66,6 @@ export default class Warp extends Effect {
         xMath: 'x + 4*sin((x+y)/20)',
         yMathInput: 'y + 4*sin((x-y)/20)',
         yMath: 'y + 4*sin((x-y)/20)',
-        useBounds: false,
         startingWidth: 40,
         startingHeight: 40,
         rotation: 45,
@@ -106,10 +91,8 @@ export default class Warp extends Effect {
       return this.circle(effect, vertices)
     } else if (effect.warpType === 'grid') {
       return this.grid(effect, vertices)
-    } else if (effect.warpType === 'x-shear') {
-      return this.xShear(effect, vertices)
-    } else if (effect.warpType === 'y-shear') {
-      return this.yShear(effect, vertices)
+    } else if (effect.warpType === 'shear') {
+      return this.shear(effect, vertices)
     } else if (effect.warpType === 'custom') {
       return this.custom(effect, vertices)
     }
@@ -123,13 +106,6 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex => {
-      if (effect.useBounds) {
-        const center = new Victor(effect.offsetX, effect.offsetY)
-        if (distance(vertex, center) > 0.5*effect.startingWidth) {
-          return vertex
-        }
-      }
-
       const originalx = vertex.x - effect.offsetX
       const originaly = vertex.y - effect.offsetY
       const x = originalx + scale * Math.sin(originalx/periodx + originaly/periody)
@@ -144,13 +120,6 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex=> {
-      if (effect.useBounds) {
-        const center = new Victor(effect.offsetX, effect.offsetY)
-        if (distance(vertex, center) > 0.5*effect.startingWidth) {
-          return vertex
-        }
-      }
-
       const originalx = vertex.x - effect.offsetX
       const originaly = vertex.y - effect.offsetY
       const theta = Math.atan2(originaly,originalx)
@@ -166,13 +135,6 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex => {
-      if (effect.useBounds) {
-        const center = new Victor(effect.offsetX, effect.offsetY)
-        if (distance(vertex, center) > 0.5*effect.startingWidth) {
-          return vertex
-        }
-      }
-
       const originalx = vertex.x - effect.offsetX
       const originaly = vertex.y - effect.offsetY
       const x = originalx + scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
@@ -181,25 +143,15 @@ export default class Warp extends Effect {
     })
   }
 
-  xShear(effect, vertices) {
+  shear(effect, vertices) {
     const shear = (effect.startingWidth - 1)/ 100
-    return vertices.map(vertex => new Victor(vertex.x + shear * vertex.y, vertex.y))
-  }
-
-  yShear(effect, vertices) {
-    const shear = (effect.startingWidth - 1)/ 100
-    return vertices.map(vertex => new Victor(vertex.x, vertex.y + shear * vertex.x))
+    const xShear = shear * Math.sin(effect.rotation / 180.0 * Math.PI)
+    const yShear = shear * Math.cos(effect.rotation / 180.0 * Math.PI)
+    return vertices.map(vertex => new Victor(vertex.x + xShear * vertex.y, vertex.y + yShear * vertex.x))
   }
 
   custom(effect, vertices) {
     return vertices.map(vertex => {
-      if (effect.useBounds) {
-        const center = new Victor(effect.offsetX, effect.offsetY)
-        if (distance(vertex, center) > 0.5*effect.startingWidth) {
-          return vertex
-        }
-      }
-
       try {
         const x = evaluate(effect.xMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
         const y = evaluate(effect.yMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
