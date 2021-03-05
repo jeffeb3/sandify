@@ -144,6 +144,17 @@ class Downloader extends Component {
               index={0}
               model={this.props} />
 
+            {this.props.fileType === SCARA &&
+              <Row>
+                <Col sm={5}>
+                </Col>
+                <Col sm={7}>
+                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode">
+                    More information</a> about SCARA GCode.
+                </Col>
+              </Row>
+            }
+
             <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
