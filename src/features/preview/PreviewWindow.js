@@ -25,7 +25,6 @@ const mapStateToProps = (state, ownProps) => {
   return {
     layers: state.layers,
     currentLayer: getCurrentLayer(state),
-    selectedId: state.layers.selected,
     konvaIds: getKonvaLayerIds(state),
     use_rect: state.machine.rectangular,
     dragging: isDragging(state),
@@ -84,21 +83,14 @@ class PreviewWindow extends Component {
     const height = this.props.use_rect ? maxY - minY : radius * 2
     const visibilityClass = `preview-wrapper ${this.visible ? 'd-flex align-items-center' : 'd-none'}`
 
-    const checkDeselect = e => {
-      // deselect when clicked on empty area
-      if (e.target.className !== undefined && e.target.className !== 'Rect') {
-        this.props.onChange({selectedId: null})
-      }
-     }
-
-     // define Konva clip functions that will let us clip vertices not bound by
-     // machine limits when dragging, and produce a visually seamless experience.
-     const clipCircle = ctx => {
-       ctx.arc(0, 0, radius, 0, Math.PI * 2, false)
-     }
-     const clipRect = ctx => {
-       ctx.rect(-width/2, -height/2, width, height)
-     }
+    // define Konva clip functions that will let us clip vertices not bound by
+    // machine limits when dragging, and produce a visually seamless experience.
+    const clipCircle = ctx => {
+     ctx.arc(0, 0, radius, 0, Math.PI * 2, false)
+    }
+    const clipRect = ctx => {
+     ctx.rect(-width/2, -height/2, width, height)
+    }
 
     const scaleByWheel = (size, deltaY) => {
       const sign = Math.sign(deltaY)
@@ -123,8 +115,6 @@ class PreviewWindow extends Component {
             scaleY={scale * reduceScale}
             height={height * scale}
             width={width * scale}
-            onMouseDown={checkDeselect}
-            onTouchStart={checkDeselect}
             offsetX={-width/2*(1/reduceScale)}
             offsetY={-height/2*(1/reduceScale)}
             onWheel={e => {
