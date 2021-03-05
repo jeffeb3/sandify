@@ -1,7 +1,10 @@
-
-export const gcodeTypeName = 'GCode (.gcode)'
-export const thrTypeName = 'Theta Rho (.thr)'
-export const svgTypeName = 'SVG (.svg)'
+export const [GCODE, THETARHO, SVG, SCARA] = ['gcode', 'thetarho', 'svg', 'scara']
+export const exportTypes = {
+  'gcode': 'GCode',
+  'thetarho': 'Theta Rho',
+  'svg': 'SVG',
+  'scara': 'Scara GCode (experimental)'
+}
 
 const exporterOptions = {
   fileName: {
@@ -11,25 +14,22 @@ const exporterOptions = {
   fileType: {
     title: 'Export as',
     type: 'dropdown',
-    choices: [gcodeTypeName, thrTypeName, svgTypeName]
+    choices: exportTypes
   },
   polarRhoMax: {
     title: 'Maximum rho value (0-1)',
     min: 0,
     max: 1
   },
-  scaraGcode: {
-    title: 'Scara GCode',
-  },
   post: {
     title: 'Program end code',
     type: 'textarea',
-    isVisible: (state) => { return state.fileType !== svgTypeName },
+    isVisible: (state) => { return state.fileType !== SVG },
   },
   pre: {
     title: 'Program start code',
     type: 'textarea',
-    isVisible: (state) => { return state.fileType !== svgTypeName },
+    isVisible: (state) => { return state.fileType !== SVG },
   },
   reverse: {
     title: 'Reverse path in the code',
