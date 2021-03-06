@@ -172,12 +172,8 @@ export const transformShapes = (vertices, layer, effects) => {
   }
 
   if (layer.rotateStartingPct === undefined || layer.rotateStartingPct !== 0) {
-    console.log('here!')
     const start = Math.round(outputVertices.length * layer.rotateStartingPct / 100.0)
-    console.log(outputVertices[0])
     outputVertices = arrayRotate(outputVertices, start)
-    console.log(start)
-    console.log(outputVertices[0])
   }
 
   if (layer.drawPortionPct !== undefined) {

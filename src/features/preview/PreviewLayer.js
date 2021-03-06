@@ -160,12 +160,13 @@ const PreviewLayer = (ownProps) => {
         moveTo_mm(context, sliderEnd)
         context.strokeStyle = selectedColor
         dot_mm(context, sliderEnd)
+
+        // START: uncomment these lines to show slider end point coordinates
+        // context.font = '12px Arial'
+        // context.fillText('(' + sliderEnd.x.toFixed(2) + ', ' + sliderEnd.y.toFixed(2) + ')', sliderEnd.x, -sliderEnd.y)
+        // END
       }
 
-      // START: uncomment these lines to show slider end point coordinates
-      // context.font = '20px Arial'
-      // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-      // END
       context.stroke()
     }
   }
