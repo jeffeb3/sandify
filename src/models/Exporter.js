@@ -3,7 +3,7 @@ export const exportTypes = {
   'gcode': 'GCode',
   'thetarho': 'Theta Rho',
   'svg': 'SVG',
-  'scara': 'Scara GCode (experimental)'
+  'scara': 'SCARA GCode (experimental)'
 }
 
 const exporterOptions = {

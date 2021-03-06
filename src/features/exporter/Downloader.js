@@ -148,9 +148,8 @@ class Downloader extends Component {
               <Row>
                 <Col sm={5}>
                 </Col>
-                <Col sm={7}>
-                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode">
-                    More information</a> about SCARA GCode.
+                <Col sm={7} className="mb-2">
+                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode">Read more</a> about SCARA GCode.
                 </Col>
               </Row>
             }
