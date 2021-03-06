@@ -1,7 +1,7 @@
 import Victor from 'victor'
 import Effect from './Effect'
 import { shapeOptions } from './Shape'
-import { circle, distance, subsample } from '../common/geometry'
+import { circle, subsample } from '../common/geometry'
 import { evaluate } from 'mathjs'
 
 const options = {
