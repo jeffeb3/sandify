@@ -5,8 +5,8 @@ export default class Machine {
   // given a set of vertices, ensure they adhere to the limits defined by the machine
   polish() {
     this.enforceLimits()
-      .cleanVertices()
       .limitPrecision()
+      .cleanVertices()
       .optimizePerimeter()
 
     if (this.layerInfo.border) this.outlinePerimeter()
@@ -16,22 +16,22 @@ export default class Machine {
     return this
   }
 
-  // clean the list of vertices and remove duplicate points
+  // clean the list of vertices and remove (nearly) duplicate points
   cleanVertices() {
     let previous = null
     let cleanVertices = []
 
     for (let i=0; i<this.vertices.length; i++) {
-      if (previous) {
-        let start = this.vertices[i]
-        let end = previous
+      const curr = this.vertices[i]
 
-        if (start.distance(end) > 0.001) {
-          cleanVertices.push(this.nearestVertex(this.vertices[i]))
+      if (previous) {
+        if (curr.distance(previous) > 0.001) {
+          cleanVertices.push(curr)
         }
       } else {
-        cleanVertices.push(this.nearestVertex(this.vertices[i]))
+        cleanVertices.push(curr)
       }
+
       previous = this.vertices[i]
     }
 
@@ -87,7 +87,8 @@ export default class Machine {
       curr = this.vertices[currentIndex]
 
       if (previous) {
-        const clipped = this.clipLine(previous, curr)
+        // rounding here to deal with some erratic perimeter lines
+        let clipped = this.clipLine(previous, curr).map(pt => vertexRoundP(pt, 3))
 
         if (clipped.length > 0 && this.inBounds(previous) && cleanVertices.length > 0) {
           const perimeter = this.tracePerimeter(cleanVertices[cleanVertices.length - 1], clipped[0])
