@@ -60,7 +60,8 @@ export default class ThetaRhoExporter extends Exporter {
       if (rhoMax < 0) { rhoMax = 0.1 }
       if ( rhoMax > 1) { rhoMax = 1.0 }
 
-      const rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius) * rhoMax
+      let rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius) * rhoMax
+      rho = Math.min(rho, rhoMax)
       minrho = Math.min(rho, minrho)
       maxrho = Math.max(rho, maxrho)
 

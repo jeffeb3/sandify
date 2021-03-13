@@ -5,7 +5,6 @@ export default class Machine {
   // given a set of vertices, ensure they adhere to the limits defined by the machine
   polish() {
     this.enforceLimits()
-      .limitPrecision()
       .cleanVertices()
       .optimizePerimeter()
 
@@ -13,7 +12,7 @@ export default class Machine {
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 
-    return this
+    return this.limitPrecision()
   }
 
   // clean the list of vertices and remove (nearly) duplicate points
@@ -52,7 +51,7 @@ export default class Machine {
 
         for (let pt=0; pt<line.length; pt++) {
           if (line[pt] !== previous) {
-            cleanVertices.push(line[pt])
+            cleanVertices.push(this.nearestVertex(line[pt]))
           }
         }
       } else {

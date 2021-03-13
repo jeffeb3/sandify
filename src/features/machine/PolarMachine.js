@@ -65,8 +65,11 @@ export default class PolarMachine extends Machine {
   nearestVertex(vertex) {
     const size = this.settings.maxRadius
 
-    if ( vertex.length() > size) {
-      const scale = size / vertex.length()
+    if (vertex.length() > size) {
+      // try to prevent floating point math from pushing us out of bounds
+      const precisionModifier = 0.0001
+      const scale = (size - precisionModifier) / vertex.length()
+
       return vertex.multiply(new Victor(scale, scale))
     } else {
       return vertex
