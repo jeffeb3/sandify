@@ -29,3 +29,9 @@ export const arrayRotate = (arr, count) => {
   arr.push.apply(arr, arr.splice(0, count))
   return arr
 }
+
+// set to true to turn on console logging
+const debug = false
+export const log = (message) => {
+  if (debug) { console.log(message) }
+}

@@ -78,7 +78,7 @@ class MachinePreview extends Component {
               <div className="p-3">
                   <Slider
                     value={this.props.sliderValue}
-                    step={0.05}
+                    step={1}
                     min={0.0}
                     max={100.0}
                     onChange={this.props.onSlider}

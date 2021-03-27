@@ -1,5 +1,25 @@
 import { createSelectorCreator, defaultMemoize, createSelector } from 'reselect'
+import { memoizeArrayProducingFn } from '../../common/selectors'
 import isEqual from 'lodash'
+import { log } from '../../common/util'
+
+// the make selector functions below are patterned after the comment here:
+// https://github.com/reduxjs/reselect/issues/74#issuecomment-472442728
+const cachedSelectors = {}
+
+// ensures we only create a single selector for a given layer
+export const getCachedSelector = (fn, ...layerIds) => {
+  if (!cachedSelectors[fn.name]) {
+    cachedSelectors[fn.name] = {}
+  }
+
+  const key = layerIds.join('-')
+  if (!cachedSelectors[fn.name][key]) {
+    cachedSelectors[fn.name][key] = fn.apply(null, layerIds)
+  }
+
+  return cachedSelectors[fn.name][key]
+}
 
 // does a deep equality check instead of checking immutability; used in cases
 // where a selector depends on another selector that returns a new object each time,
@@ -11,10 +31,7 @@ const getCurrentLayerId = state => { return state.layers.current }
 export const getLayersById = state => { return state.layers.byId }
 export const getLayerIds = state => { return state.layers.allIds }
 
-// "deep equal" selectors - do not use these selectors within another selector
-// unless you use createDeepEqualSelector, because otherwise the returned
-// arrays will be considered to be changed every time, defeating the purpose of
-// the selector.
+// derived selectors
 export const getVisibleLayerIds = createSelector(
   [ getLayerIds, getLayersById ],
   (layerIds, layers) => {
@@ -22,21 +39,13 @@ export const getVisibleLayerIds = createSelector(
   }
 )
 
-export const getVisibleNonEffectIds = createSelector(
-  [ getLayerIds, getLayersById ],
-  (layerIds, layers) => {
-    return layerIds.filter(id => layers[id].visible && !layers[id].effect)
-  }
-)
+ export const getVisibleNonEffectIds = createSelector(
+   [ getLayerIds, getLayersById ],
+   (layerIds, layers) => {
+     return layerIds.filter(id => layers[id].visible && !layers[id].effect)
+   }
+ )
 
-export const getVisibleEffectIds = createSelector(
-  [ getLayerIds, getLayersById ],
-  (layerIds, layers) => {
-    return layerIds.filter(id => layers[id].visible && layers[id].effect)
-  }
-)
-
-// derived selectors
 export const getCurrentLayer = createSelector(
   [ getLayersById, getCurrentLayerId ],
   (layers, current) => layers[current]
@@ -45,6 +54,7 @@ export const getCurrentLayer = createSelector(
 export const getAllLayersInfo = createSelector(
   [ getLayerIds, getLayersById ],
   (layerIds, layersById) => {
+    log("getAllLayersInfo")
     return layerIds.map(id => layersById[id])
   }
 )
@@ -52,6 +62,7 @@ export const getAllLayersInfo = createSelector(
 export const getNumLayers = createSelector(
   getLayerIds,
   (layerIds) => {
+    log("getNumLayer")
     return layerIds.length
   }
 )
@@ -72,6 +83,7 @@ export const getKonvaLayerIds = createSelector(
 export const isDragging = createSelector(
   [ getLayerIds, getLayersById ],
   (layerIds, layers) => {
+    log("isDragging")
     return layerIds.filter(id => layers[id].visible && layers[id].dragging).length > 0
   }
 )
@@ -83,16 +95,6 @@ export const getNumVisibleLayers = createDeepEqualSelector(
   }
 )
 
-// layer selectors
-export const makeGetLayer = layerId => {
-  return createSelector(
-    getLayersById,
-    (layers) => {
-      return layers[layerId]
-    }
-  )
-}
-
 export const makeGetLayerIndex = layerId => {
   return createDeepEqualSelector(
     getVisibleLayerIds,
@@ -102,41 +104,44 @@ export const makeGetLayerIndex = layerId => {
   )
 }
 
-// returns the next layer id, discounting layer effects
-export const makeGetNextLayerId = layerId => {
-  return createDeepEqualSelector(
-    [ getVisibleNonEffectIds ],
-    (visibleLayerIds) => {
-      let index = visibleLayerIds.findIndex(id => id === layerId)
-      return (index === visibleLayerIds.length - 1) ? null : index + 1
+export const makeGetLayer = layerId => {
+  return createSelector(
+    getLayersById,
+    (layers) => {
+      return layers[layerId]
     }
   )
 }
 
-// returns any effects tied to a given layer
+// returns any effects tied to a given layer; memoizeArrayProducingFn will ensure we
+// only recompute transformed vertices when an effect changes.
 export const makeGetEffects = layerId => {
   return createSelector(
-    [ getLayersById, getLayerIds ],
-    (layers, layerIds) => {
-      let visibleLayerIds = layerIds.filter(id => layers[id].visible)
-      let layer = layers[layerId]
-      let index = visibleLayerIds.findIndex(id => id === layerId)
+    [
+      getLayersById,
+      getVisibleLayerIds
+    ],
+    memoizeArrayProducingFn(
+      (layers, visibleLayerIds) => {
+        let index = visibleLayerIds.findIndex(id => id === layerId)
+        const layer = layers[layerId]
 
-      if (layer.effect || index === visibleLayerIds.length - 1) {
-        return null
-      } else {
-        index = index + 1
-        const effects = []
-        let id = visibleLayerIds[index]
-
-        while (id && layers[id].effect) {
-          effects.push(layers[id])
+        if (layer.effect || index === visibleLayerIds.length - 1) {
+          return []
+        } else {
           index = index + 1
-          id = visibleLayerIds[index]
-        }
+          const effects = []
+          let id = visibleLayerIds[index]
 
-        return effects
+          while (id && layers[id].effect) {
+            effects.push(layers[id])
+            index = index + 1
+            id = visibleLayerIds[index]
+          }
+
+          return effects
+        }
       }
-    }
+    )
   )
 }

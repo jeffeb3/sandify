@@ -11,6 +11,9 @@ export default class Point extends Shape {
       ...super.getInitialState(),
       ...{
         type: 'point',
+        autosize: false,
+        startingWidth: 1,
+        startingHeight: 1,
         canTransform: false,
         shouldCache: false,
         canChangeSize: false,
@@ -20,6 +23,6 @@ export default class Point extends Shape {
   }
 
   getVertices(state) {
-    return [new Victor(0.0, 0.0), new Victor(0.0, 0.1)]
+    return [new Victor(0.0, 0.0)]
   }
 }
