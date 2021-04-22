@@ -3,6 +3,12 @@ const transformOptions = {
     title: 'Initial width',
     min: 1,
     isVisible: (state) => { return state.canChangeSize },
+    onChange: (changes, attrs) => {
+      if (!attrs.canChangeHeight) {
+        changes.startingHeight = changes.startingWidth
+      }
+      return changes
+    }
   },
   startingHeight: {
     title: 'Initial height',
@@ -28,19 +34,19 @@ const transformOptions = {
     title: 'Backtrack at end (%)',
     min: 0,
     max: 100,
-    step: 5
+    step: 2
   },
   drawPortionPct: {
     title: 'Draw portion of path (%)',
     min: 0,
     max: 100,
-    step: 5
+    step: 2
   },
   rotateStartingPct: {
     title: 'Rotate starting point (%)',
     min: -100,
     max: 100,
-    step: 5
+    step: 2
   },
   reverse: {
     title: 'Reverse path',
@@ -104,9 +110,6 @@ const transformOptions = {
   },
   trackGrowEnabled: {
     title: 'Scale track'
-  },
-  rotateCompleteLoop: {
-    title: 'Complete loop?'
   },
   trackValue: {
     title: 'Track size',

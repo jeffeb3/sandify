@@ -185,7 +185,8 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
   for (let next = 0; next < subsampledVertices.length; ++next) {
 
-    const rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
+    let rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
+    rho = Math.min(rho, rhoMax)
 
     // What is the basic theta for this point?
     let rawTheta = Math.atan2(subsampledVertices[next].x,

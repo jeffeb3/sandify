@@ -3,7 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
 import Victor from 'victor'
 import { makeGetPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices, getSliderColors, getVertexOffsets, getAllPreviewVertices } from '../machine/selectors'
-import { updateLayer, setSelectedLayer } from '../layers/layersSlice'
+import { updateLayer } from '../layers/layersSlice'
 import { getCurrentLayer, makeGetLayerIndex, getNumVisibleLayers } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import { getSliderBounds } from '../../common/geometry'
@@ -160,12 +160,13 @@ const PreviewLayer = (ownProps) => {
         moveTo_mm(context, sliderEnd)
         context.strokeStyle = selectedColor
         dot_mm(context, sliderEnd)
+
+        // START: uncomment these lines to show slider end point coordinates
+        // context.font = '12px Arial'
+        // context.fillText('(' + sliderEnd.x.toFixed(2) + ', ' + sliderEnd.y.toFixed(2) + ')', sliderEnd.x, -sliderEnd.y)
+        // END
       }
 
-      // START: uncomment these lines to show slider end point coordinates
-      // context.font = '20px Arial'
-      // context.fillText('(' + sliderEndPoint.x.toFixed(2) + ', ' + sliderEndPoint.y.toFixed(2) + ')', 10, 50)
-      // END
       context.stroke()
     }
   }
@@ -208,7 +209,8 @@ const PreviewLayer = (ownProps) => {
   }
 
   function onSelect() {
-    dispatch(setSelectedLayer(props.selected == null ? props.currentLayer.id : null))
+    // deselection is currently disabled
+    // dispatch(setSelectedLayer(props.selected == null ? props.currentLayer.id : null))
   }
 
   const shapeRef = React.createRef()
