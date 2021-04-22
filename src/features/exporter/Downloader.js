@@ -41,6 +41,7 @@ const mapStateToProps = (state, ownProps) => {
     fileType: state.exporter.fileType,
     isGCode: state.exporter.fileType === GCODE || state.exporter.fileType === SCARA,
     polarRhoMax: state.exporter.polarRhoMax,
+    unitsPerCircle: state.exporter.unitsPerCircle,
     pre: (state.exporter.fileType !== SVG ? state.exporter.pre : ''),
     post: (state.exporter.fileType !== SVG ? state.exporter.post : ''),
     options: new Exporter().getOptions()
@@ -162,11 +163,19 @@ class Downloader extends Component {
               index={1}
               model={this.props} />
 
-            {this.props.fileType === THETARHO && <InputOption
+            {(this.props.fileType === THETARHO || this.props.fileType === SCARA ) && <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
               key="polarRhoMax"
               optionKey="polarRhoMax"
+              index={2}
+              model={this.props} />}
+
+            {this.props.fileType === SCARA && <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="unitsPerCircle"
+              optionKey="unitsPerCircle"
               index={2}
               model={this.props} />}
 

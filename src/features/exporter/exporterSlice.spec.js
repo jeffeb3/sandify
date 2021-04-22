@@ -8,6 +8,7 @@ describe('exporter reducer', () => {
       fileName: 'sandify',
       fileType: 'gcode',
       polarRhoMax: 1,
+      unitsPerCircle: 6,
       pre: '',
       post: '',
       reverse: false,

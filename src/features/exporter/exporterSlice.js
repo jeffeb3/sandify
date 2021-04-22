@@ -31,7 +31,8 @@ const exporterSlice = createSlice({
     post: localStorage.getItem('export_post') ? localStorage.getItem('export_post') : '',
     reverse: false,
     show: false,
-    polarRhoMax: 1.0
+    polarRhoMax: localStorage.getItem('export_polarRhoMax') ? localStorage.getItem('export_polarRhoMax') : 1.0,
+    unitsPerCircle: localStorage.getItem('export_unitsPerCircle') ? localStorage.getItem('export_unitsPerCircle') : 6.0
   },
   reducers: {
     updateExporter(state, action) {

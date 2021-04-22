@@ -14,8 +14,10 @@ export default class ScaraGCodeExporter extends GCodeExporter {
       toThetaRho(
         subsample(vertices, 2.0),
         this.props.maxRadius,
-        parseFloat(this.props.polarRhoMax)
-    ))
+        parseFloat(this.props.polarRhoMax),
+      ),
+      parseFloat(this.props.unitsPerCircle)
+    )
     return super.computeOutputVertices(vertices)
   }
 }

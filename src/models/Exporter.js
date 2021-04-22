@@ -21,6 +21,10 @@ const exporterOptions = {
     min: 0,
     max: 1
   },
+  unitsPerCircle: {
+    title: 'Units per circle',
+    type: 'number',
+  },
   post: {
     title: 'Program end code',
     type: 'textarea',
