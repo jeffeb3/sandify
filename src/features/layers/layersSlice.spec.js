@@ -41,7 +41,6 @@ describe('layers reducer', () => {
     backtrackPct: 0,
     drawPortionPct: 100,
     effect: false,
-    rotateCompleteLoop: false,
     rotateStartingPct: 0,
     growEnabled: true,
     growValue: 100,

@@ -156,18 +156,6 @@ export const transformShapes = (vertices, layer, effects) => {
     vertices.pop()
   }
 
-  if (layer.rotateStartingPct === undefined || layer.rotateStartingPct !== 0) {
-    const start = Math.round(vertices.length * layer.rotateStartingPct / 100.0)
-    vertices = arrayRotate(vertices, start)
-
-    // some patterns create a loop when drawn and transformMethod is 'intact'; in
-    // this case, rotateStartingPct will not draw the final vertex to complete the
-    // loop. Use rotateCompleteLoop to add it back in for specific shapes.
-    if (layer.rotateCompleteLoop) {
-      vertices.push(new Victor(vertices[0].x, vertices[0].y))
-    }
-  }
-
   if (layer.trackEnabled && numTrackLoops > 1) {
     for (var i=0; i<numLoops; i++) {
       for (var t=0; t<numTrackLoops; t++) {
@@ -176,14 +164,21 @@ export const transformShapes = (vertices, layer, effects) => {
     }
   } else {
     for (i=0; i<numLoops; i++) {
-      const drawPortionPct = Math.round((layer.drawPortionPct || 100)/100.0 * vertices.length)
-      const completion = i === numLoops - 1 ? drawPortionPct : vertices.length
-
-      for (var j=0; j<completion; j++) {
+      for (var j=0; j<vertices.length; j++) {
         let amount = layer.transformMethod === 'smear' ? i + j/vertices.length : i
         outputVertices.push(transformShape(layer, vertices[j], amount, amount))
       }
     }
+  }
+
+  if (layer.rotateStartingPct === undefined || layer.rotateStartingPct !== 0) {
+    const start = Math.round(outputVertices.length * layer.rotateStartingPct / 100.0)
+    outputVertices = arrayRotate(outputVertices, start)
+  }
+
+  if (layer.drawPortionPct !== undefined) {
+    const drawPortionPct = Math.round((parseInt(layer.drawPortionPct) || 100)/100.0 * outputVertices.length)
+    outputVertices = outputVertices.slice(0, drawPortionPct)
   }
 
   if (layer.reverse) {

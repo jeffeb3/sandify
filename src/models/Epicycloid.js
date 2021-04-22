@@ -30,7 +30,6 @@ export default class Epicycloid extends Shape {
         type: 'epicycloid',
         epicycloidA: 4,
         epicycloidB: 1,
-        rotateCompleteLoop: true
       }
     }
   }
