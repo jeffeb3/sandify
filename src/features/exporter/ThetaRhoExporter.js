@@ -1,5 +1,5 @@
-import Victor from 'victor'
 import Exporter from './Exporter'
+import { subsample, toThetaRho } from '../../common/geometry'
 
 function thetarho(vertex) {
   return '' + vertex.x.toFixed(5) + ' ' + vertex.y.toFixed(5)
@@ -18,81 +18,26 @@ export default class ThetaRhoExporter extends Exporter {
   computeOutputVertices(vertices) {
     // First, downsample larger lines into smaller ones.
     const maxLength = 2.0
-    let subsampledVertices = []
-    let previous = undefined
-    let next
-
-    for (next = 0; next < vertices.length; next++) {
-      if (previous !== undefined) {
-        const start = Victor.fromObject(vertices[previous])
-        const end = Victor.fromObject(vertices[next])
-
-        const delta = end.clone().subtract(start)
-        const deltaSegment = end.clone().subtract(start).normalize().multiply(Victor(maxLength, maxLength))
-
-        // This loads up (start, end].
-        for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
-          subsampledVertices.push(
-            new Victor(start.x + step * deltaSegment.x,
-                       start.y + step * deltaSegment.y))
-        }
-
-      }
-      previous = next
-    }
-
-    // Add in the end
-    if (previous !== undefined) {
-      subsampledVertices.push(vertices[vertices.length - 1])
-    }
+    const subsampledVertices = subsample(vertices, maxLength)
 
     // Convert to theta, rho
-    this.vertices = []
-    let previousTheta = 0
-    let previousRawTheta = 0
-    let mintheta = 1e9
-    let minrho   = 1e9
-    let maxtheta = -1e9
-    let maxrho   = -1e9
-    for (next = 0; next < subsampledVertices.length; ++next) {
-      // Normalize the radius
-      let rhoMax = parseFloat(this.props.polarRhoMax)
-      if (rhoMax < 0) { rhoMax = 0.1 }
-      if ( rhoMax > 1) { rhoMax = 1.0 }
-
-      const rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / this.props.maxRadius) * rhoMax
-      minrho = Math.min(rho, minrho)
-      maxrho = Math.max(rho, maxrho)
-
-      // What is the basic theta for this point?
-      let rawTheta = Math.atan2(subsampledVertices[next].x,
-                                subsampledVertices[next].y)
-      // Convert to [0, 2pi]
-      rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
-
-      // Compute the difference to the last point.
-      let deltaTheta = rawTheta - previousRawTheta
-
-      // Convert to [-pi,pi]
-      if (deltaTheta < -Math.PI) {
-        deltaTheta += 2.0 * Math.PI
-      }
-      if (deltaTheta > Math.PI) {
-        deltaTheta -= 2.0 * Math.PI
-      }
-
-      const theta = previousTheta + deltaTheta
-      mintheta = Math.min(theta, mintheta)
-      maxtheta = Math.max(theta, maxtheta)
-      previousRawTheta = rawTheta
-      previousTheta = theta
-      this.vertices.push(new Victor(theta, rho))
-    }
+    this.vertices = toThetaRho(subsampledVertices, this.props.maxRadius, parseFloat(this.props.polarRhoMax))
 
     let starttheta = this.vertices[0].x
     let startrho   = this.vertices[0].y
     let endtheta   = this.vertices[this.vertices.length-1].x
     let endrho     = this.vertices[this.vertices.length-1].y
+    let mintheta = 1e9
+    let minrho   = 1e9
+    let maxtheta = -1e9
+    let maxrho   = -1e9
+
+    this.vertices.forEach( thetarho => {
+      minrho = Math.min(thetarho.y, minrho)
+      maxrho = Math.max(thetarho.y, maxrho)
+      mintheta = Math.min(thetarho.x, mintheta)
+      maxtheta = Math.max(thetarho.x, maxtheta)
+    })
 
     // Replace pre/post placeholder variables
     this.pre  =  this.pre.replace(/{starttheta}/gi, starttheta.toFixed(3))
