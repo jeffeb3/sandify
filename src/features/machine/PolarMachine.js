@@ -65,8 +65,11 @@ export default class PolarMachine extends Machine {
   nearestVertex(vertex) {
     const size = this.settings.maxRadius
 
-    if ( vertex.length() > size) {
-      const scale = size / vertex.length()
+    if (vertex.length() > size) {
+      // try to prevent floating point math from pushing us out of bounds
+      const precisionModifier = 0.0001
+      const scale = (size - precisionModifier) / vertex.length()
+
       return vertex.multiply(new Victor(scale, scale))
     } else {
       return vertex
@@ -164,7 +167,8 @@ export default class PolarMachine extends Machine {
        return [this.nearestVertex(start)]
     }
 
-    let intersections = this.getIntersections(start, end)
+    const intersections = this.getIntersections(start, end)
+
     if (!intersections.intersection) {
       // The whole line is outside, just trace.
       return this.tracePerimeter(start, end)
@@ -189,12 +193,12 @@ export default class PolarMachine extends Machine {
 
     // If we're here, then one point is still in the circle.
     if (radStart <= size) {
-      let point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point
+      const point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point
 
       return [
         start,
         ...this.tracePerimeter(point1, end),
-        end
+        this.nearestPerimeterVertex(end)
       ]
     } else {
       const point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point
@@ -221,21 +225,30 @@ export default class PolarMachine extends Machine {
       }
     }
 
-    let dt = Math.sqrt(size*size - distanceToLine*distanceToLine)
-    let point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start)
-    let point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start)
+    const dt = Math.sqrt(size*size - distanceToLine*distanceToLine)
+    const point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start)
+    const point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start)
+    const s1 = onSegment(start, end, point1)
+    const s2 = onSegment(start, end, point2)
 
-    return {
-      intersection: true,
-      points: [
-        {
-          point: point1,
-          on: onSegment(start, end, point1),
-        },
-        {
-          point: point2,
-          on: onSegment(start, end, point2),
-        }
-      ]}
+    if (s1 || s2) {
+      return {
+        intersection: true,
+        points: [
+          {
+            point: point1,
+            on: s1
+          },
+          {
+            point: point2,
+            on: s2
+          }
+        ]}
+    } else {
+      return {
+        intersection: false,
+        points: [],
+      }
+    }
   }
 }

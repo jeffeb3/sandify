@@ -11,6 +11,16 @@ class DropdownOption extends Component {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
     const currentChoice = model[this.props.optionKey]
+    const choices = Array.isArray(option.choices) ?
+      option.choices.map((choice) => {
+        return { value: choice, label: choice }
+      }) :
+      Object.keys(option.choices).map((key) => {
+        return { value: key, label: option.choices[key] }
+      })
+    const currentLabel = Array.isArray(option.choices) ?
+      currentChoice :
+      option.choices[currentChoice]
 
     return (
       <Row className="align-items-center pb-2" key={this.props.index}>
@@ -22,7 +32,7 @@ class DropdownOption extends Component {
 
         <Col sm={7}>
           <Select
-            value={{value: currentChoice, label: currentChoice}}
+            value={{value: currentChoice, label: currentLabel}}
             onChange={(choice) => {
               const value = choice.value
               let attrs = {}
@@ -34,9 +44,7 @@ class DropdownOption extends Component {
 
               this.props.onChange(attrs)
             }}
-            options={option.choices.map((choice) => {
-              return { value: choice, label: choice}
-            })}
+            options={choices}
             />
         </Col>
       </Row>

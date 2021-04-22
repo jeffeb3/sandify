@@ -6,8 +6,9 @@ describe('exporter reducer', () => {
   it('should handle initial state', () => {
     expect(exporter(undefined, {})).toEqual({
       fileName: 'sandify',
-      fileType: 'GCode (.gcode)',
+      fileType: 'gcode',
       polarRhoMax: 1,
+      unitsPerCircle: 6,
       pre: '',
       post: '',
       reverse: false,

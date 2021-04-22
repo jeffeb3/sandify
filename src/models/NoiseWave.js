@@ -57,7 +57,18 @@ export default class NoiseWave extends Shape {
   }
 
   getVertices(state) {
-    const machine = state.machine
+    // without this adjustment, using an inverted circular mask causes clipping issues
+    const adjustment = .001
+
+    const machine = {
+      maxRadius: state.machine.maxRadius - adjustment,
+      rectangular: state.machine.rectangular,
+      minX: state.machine.minX,
+      maxX: state.machine.maxX,
+      minY: state.machine.minY,
+      maxY: state.machine.maxY
+    }
+
     const shape = state.shape
     const rng = seedrandom(shape.seed)
     let vertices = []

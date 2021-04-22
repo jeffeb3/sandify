@@ -28,7 +28,6 @@ export default class Star extends Shape {
         type: 'star',
         points: 5,
         starRatio: 0.5,
-        rotateCompleteLoop: true        
       }
     }
   }

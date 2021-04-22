@@ -6,6 +6,8 @@ export default class GCodeExporter extends Exporter {
     this.fileExtension = '.gcode'
     this.label = 'Gcode'
     this.commentChar = ';'
+    this.offsetX = this.props.offsetX
+    this.offsetY = this.props.offsetY
   }
 
   exportCode(vertices) {
@@ -21,8 +23,8 @@ export default class GCodeExporter extends Exporter {
     let maxx = -1e9
     let maxy = -1e9
     this.vertices = vertices.map(vertex => {
-      const x = vertex.x + this.props.offsetX
-      const y = vertex.y + this.props.offsetY
+      const x = vertex.x + this.offsetX
+      const y = vertex.y + this.offsetY
       minx = Math.min(x, minx)
       miny = Math.min(y, miny)
       maxx = Math.max(x, maxx)

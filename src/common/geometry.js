@@ -185,7 +185,8 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
   for (let next = 0; next < subsampledVertices.length; ++next) {
 
-    const rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
+    let rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
+    rho = Math.min(rho, rhoMax)
 
     // What is the basic theta for this point?
     let rawTheta = Math.atan2(subsampledVertices[next].x,
@@ -212,4 +213,17 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
   }
 
   return vertices
+}
+
+// Convert theta, rho vertices to goofy x, y, which really represent scara angles.
+export const toScaraGcode = (vertices, unitsPerCircle) => {
+  return vertices.map( thetaRho => {
+    const theta = thetaRho.x
+    const rho = thetaRho.y
+    const m1 = theta + Math.acos(rho)
+    const m2 = theta - Math.acos(rho)
+    const x = unitsPerCircle * m1 / (2*Math.PI)
+    const y = unitsPerCircle * m2 / (2*Math.PI)
+    return new Victor(x,y)
+  })
 }

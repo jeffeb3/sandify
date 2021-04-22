@@ -1,6 +1,6 @@
 import Victor from 'victor'
 import Machine from './Machine'
-import { distance } from '../../common/geometry'
+import { distance, vertexRoundP } from '../../common/geometry'
 
 export default class RectMachine extends Machine {
   constructor(vertices, settings, layerInfo={}) {
@@ -17,7 +17,6 @@ export default class RectMachine extends Machine {
       new Victor(this.sizeX, -this.sizeY)
     ]
   }
-
 
   addStartPoint() {
     return this
@@ -106,9 +105,12 @@ export default class RectMachine extends Machine {
       // on the same line; no connecting points needed
       points = []
     } else {
-      // horizontal or vertical orientation
-      let o1 = Math.abs(p1.x) === this.sizeX ? 'v' : 'h'
-      let o2 = Math.abs(p2.x) === this.sizeX ? 'v' : 'h'
+      // horizontal or vertical orientation; some gentle rounding to ensure we don't
+      // end up within incorrect reading
+      const lp1 = vertexRoundP(p1, 3)
+      const lp2 = vertexRoundP(p2, 3)
+      const o1 = Math.abs(lp1.x) === this.sizeX ? 'v' : 'h'
+      const o2 = Math.abs(lp2.x) === this.sizeX ? 'v' : 'h'
 
       if (o1 !== o2) {
         // connects via a single corner
@@ -183,37 +185,37 @@ export default class RectMachine extends Machine {
   // The guts of logic for this limits enforcer. It will take a single line (defined by
   // start and end) and if the line goes out of bounds, returns the vertices around the
   // outside edge to follow around without messing up the shape of the vertices.
-  clipLine(lineStart, lineEnd) {
-    var quadrantStart = this.pointLocation(lineStart)
-    var quadrantEnd = this.pointLocation(lineEnd)
+  clipLine(start, end) {
+    const quadrantStart = this.pointLocation(start)
+    const quadrantEnd = this.pointLocation(end)
 
     if (quadrantStart === 0b0000 && quadrantEnd === 0b0000) {
       // The line is inside the boundaries
-      return [lineStart, lineEnd]
+      return [start, end]
     }
 
     if (quadrantStart === quadrantEnd) {
       // We are in the same box, and we are out of bounds.
-      return [this.nearestVertex(lineStart), this.nearestVertex(lineEnd)]
+      return [this.nearestVertex(start), this.nearestVertex(end)]
     }
 
     if (quadrantStart & quadrantEnd) {
       // These points are all on one side of the box.
-      return [this.nearestVertex(lineStart), this.nearestVertex(lineEnd)]
+      return [this.nearestVertex(start), this.nearestVertex(end)]
     }
 
     if (quadrantStart === 0b000) {
       // We are exiting the box. Return the start, the intersection with the boundary, and the closest
       // boundary point to the exited point.
-      var line = [lineStart]
-      line.push(this.boundPoint(lineStart, lineEnd))
-      line.push(this.nearestVertex(lineEnd))
+      let line = [start]
+      line.push(this.boundPoint(start, end))
+      line.push(this.nearestVertex(end))
       return line
     }
 
     if (quadrantEnd === 0b000) {
       // We are re-entering the box.
-      return [this.boundPoint(lineEnd, lineStart), lineEnd]
+      return [this.boundPoint(end, start), end]
     }
 
     // We have reached a terrible place, where both points are oob, but it might intersect with the
@@ -230,10 +232,10 @@ export default class RectMachine extends Machine {
     ]
 
     // Count up the number of boundary lines intersect with our line segment.
-    var intersections = []
-    for (var s=0; s<sides.length; s++) {
-      var intPoint = this.intersection(lineStart,
-                                   lineEnd,
+    let intersections = []
+    for (let s=0; s<sides.length; s++) {
+      const intPoint = this.intersection(start,
+                                   end,
                                    sides[s][0],
                                    sides[s][1])
       if (intPoint) {
@@ -251,14 +253,14 @@ export default class RectMachine extends Machine {
 
       // The intersections are tested in some normal order, but the line could be going through them
       // in any direction. This check will flip the intersections if they are reversed somehow.
-      if (Victor.fromObject(intersections[0]).subtract(lineStart).lengthSq() >
-          Victor.fromObject(intersections[1]).subtract(lineStart).lengthSq()) {
-        var temp = intersections[0]
+      if (Victor.fromObject(intersections[0]).subtract(start).lengthSq() >
+          Victor.fromObject(intersections[1]).subtract(start).lengthSq()) {
+        let temp = intersections[0]
         intersections[0] = intersections[1]
         intersections[1] = temp
       }
 
-      return [...intersections, this.nearestVertex(lineEnd)]
+      return [...intersections, this.nearestVertex(end)]
     }
 
     // Damn. We got here because we have a start and end that are failing different boundary checks,
@@ -266,11 +268,11 @@ export default class RectMachine extends Machine {
     // box until we reach the other point.
     // Here, I'm going to split this line into two parts, and send each half line segment back
     // through the clipLine algorithm. Eventually, that should result in only one of the other cases.
-    var midpoint = Victor.fromObject(lineStart).add(lineEnd).multiply(new Victor(0.5, 0.5))
+    const midpoint = Victor.fromObject(start).add(end).multiply(new Victor(0.5, 0.5))
 
     // recurse, and find smaller segments until we don't end up in this place again.
-    return [...this.clipLine(lineStart, midpoint),
-            ...this.clipLine(midpoint, lineEnd)]
+    return [...this.clipLine(start, midpoint),
+            ...this.clipLine(midpoint, end)]
   }
 
   // Intersect the line with the boundary, and return the point exactly on the boundary.
@@ -362,8 +364,8 @@ export default class RectMachine extends Machine {
   }
 
   // Determines intersection with one of the sides.
-  intersection(lineStart, lineEnd, sideStart, sideEnd) {
-    let line = lineEnd.clone().subtract(lineStart)
+  intersection(start, end, sideStart, sideEnd) {
+    let line = end.clone().subtract(start)
     let side = sideEnd.clone().subtract(sideStart)
     let lineCrossSidePerp = line.x * side.y - line.y * side.x
 
@@ -372,7 +374,7 @@ export default class RectMachine extends Machine {
       return null
     }
 
-    const diff = sideStart.clone().subtract(lineStart)
+    const diff = sideStart.clone().subtract(start)
     let t = (diff.x * side.y - diff.y * side.x) / lineCrossSidePerp
     if (t < 0 || t >= 1) {
       return null
@@ -383,6 +385,6 @@ export default class RectMachine extends Machine {
       return null
     }
 
-    return lineStart.clone().add(line.clone().multiply(new Victor(t, t)))
+    return start.clone().add(line.clone().multiply(new Victor(t, t)))
   }
 }
