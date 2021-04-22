@@ -2,6 +2,7 @@ import Circle from '../models/Circle'
 import Epicycloid from '../models/Epicycloid'
 import FileImport from '../models/FileImport'
 import Fisheye from '../models/Fisheye'
+import Warp from '../models/Warp'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 // import Freeform from '../models/Freeform'
 import Heart from '../models/Heart'
@@ -44,7 +45,8 @@ export const registeredShapes = {
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
   fisheye: new Fisheye(),
-  mask: new Mask()
+  mask: new Mask(),
+  warp: new Warp()
 }
 
 export const getShape = (layer) => {
