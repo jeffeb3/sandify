@@ -8,15 +8,18 @@ import { updateExporter } from './exporterSlice'
 import { getComments } from './selectors'
 import { getAllComputedVertices } from '../machine/selectors'
 import ReactGA from 'react-ga'
-import ThetaRhoExporter from './ThetaRhoExporter'
 import GCodeExporter from './GCodeExporter'
+import ScaraGCodeExporter from './ScaraGCodeExporter'
 import SvgExporter from './SvgExporter'
-import {
-  gcodeTypeName,
-  thrTypeName,
-  svgTypeName,
-  Exporter,
-} from '../../models/Exporter'
+import ThetaRhoExporter from './ThetaRhoExporter'
+import { Exporter, GCODE, THETARHO, SVG, SCARA } from '../../models/Exporter'
+
+const exporters = {
+  [GCODE]: GCodeExporter,
+  [THETARHO]: ThetaRhoExporter,
+  [SVG]: SvgExporter,
+  [SCARA]: ScaraGCodeExporter
+}
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -36,17 +39,13 @@ const mapStateToProps = (state, ownProps) => {
       state.machine.maxRadius),
     fileName: state.exporter.fileName,
     fileType: state.exporter.fileType,
+    isGCode: state.exporter.fileType === GCODE || state.exporter.fileType === SCARA,
     polarRhoMax: state.exporter.polarRhoMax,
-    pre: (state.exporter.fileType !== svgTypeName ? state.exporter.pre : ''),
-    post: (state.exporter.fileType !== svgTypeName ? state.exporter.post : ''),
+    unitsPerCircle: state.exporter.unitsPerCircle,
+    pre: (state.exporter.fileType !== SVG ? state.exporter.pre : ''),
+    post: (state.exporter.fileType !== SVG ? state.exporter.post : ''),
     options: new Exporter().getOptions()
   }
-}
-
-const exporters = {
-  [gcodeTypeName]: GCodeExporter,
-  [thrTypeName]: ThetaRhoExporter,
-  [svgTypeName]: SvgExporter,
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -107,7 +106,7 @@ class Downloader extends Component {
     link.download = fileName
 
     let fileType = 'text/plain;charset=utf-8'
-    if (this.props.fileType === svgTypeName) {
+    if (this.props.fileType === SVG) {
       fileType = 'image/svg+xml;charset=utf-8'
     }
     let blob = new Blob([text],{type: fileType})
@@ -146,6 +145,16 @@ class Downloader extends Component {
               index={0}
               model={this.props} />
 
+            {this.props.fileType === SCARA &&
+              <Row>
+                <Col sm={5}>
+                </Col>
+                <Col sm={7} className="mb-2">
+                  <a target="_blank" rel="noopener noreferrer" href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode">Read more</a> about SCARA GCode.
+                </Col>
+              </Row>
+            }
+
             <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
@@ -154,11 +163,19 @@ class Downloader extends Component {
               index={1}
               model={this.props} />
 
-            {this.props.fileType === 'Theta Rho (.thr)' && <InputOption
+            {(this.props.fileType === THETARHO || this.props.fileType === SCARA ) && <InputOption
               onChange={this.props.onChange}
               options={this.props.options}
               key="polarRhoMax"
               optionKey="polarRhoMax"
+              index={2}
+              model={this.props} />}
+
+            {this.props.fileType === SCARA && <InputOption
+              onChange={this.props.onChange}
+              options={this.props.options}
+              key="unitsPerCircle"
+              optionKey="unitsPerCircle"
               index={2}
               model={this.props} />}
 

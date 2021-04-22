@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { GCODE, THETARHO, SVG } from '../../models/Exporter'
 
 // Determine default file type; this is a little fussy because we want to ensure
 // that if the user has a rectangular table, but somehow wants to export theta
@@ -6,10 +7,19 @@ import { createSlice } from '@reduxjs/toolkit'
 let fileType
 if (localStorage.getItem('export_fileType')) {
   fileType = localStorage.getItem('export_fileType')
+
+  // accommodate older type names
+  if (fileType === 'GCode (.gcode)') {
+    fileType = GCODE
+  } else if (fileType === 'Theta Rho (.thr)') {
+    fileType = THETARHO
+  } else if (fileType === 'SVG (.svg)') {
+    fileType = SVG
+  }
 } else if (localStorage.getItem('machine_rect_active')) {
-  fileType = localStorage.getItem('machine_rect_active') ? 'GCode (.gcode)' : 'Theta Rho (.thr)'
+  fileType = localStorage.getItem('machine_rect_active') ? GCODE : THETARHO
 } else {
-  fileType = 'GCode (.gcode)'
+  fileType = GCODE
 }
 
 const exporterSlice = createSlice({
@@ -21,7 +31,8 @@ const exporterSlice = createSlice({
     post: localStorage.getItem('export_post') ? localStorage.getItem('export_post') : '',
     reverse: false,
     show: false,
-    polarRhoMax: 1.0
+    polarRhoMax: localStorage.getItem('export_polarRhoMax') ? localStorage.getItem('export_polarRhoMax') : 1.0,
+    unitsPerCircle: localStorage.getItem('export_unitsPerCircle') ? localStorage.getItem('export_unitsPerCircle') : 6.0
   },
   reducers: {
     updateExporter(state, action) {
