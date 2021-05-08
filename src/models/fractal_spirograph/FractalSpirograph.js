@@ -49,7 +49,6 @@ export default class FractalSpirograph extends Shape {
         fractalSpirographRelativeSize: 3,
         fractalSpirographAlternateRotation: true,
         repeatEnabled: false,
-        rotateCompleteLoop: true        
       }
     }
   }

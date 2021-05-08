@@ -9,7 +9,7 @@ const options = {
   ...{
     fisheyeDistortion: {
       title: 'Distortion',
-      min: 1,
+      min: -2,
       max: 40,
       step: 0.1,
     }

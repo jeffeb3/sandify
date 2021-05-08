@@ -2,7 +2,9 @@ import Circle from '../models/Circle'
 import Epicycloid from '../models/Epicycloid'
 import FileImport from '../models/FileImport'
 import Fisheye from '../models/Fisheye'
+import Warp from '../models/Warp'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
+// import Freeform from '../models/Freeform'
 import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
@@ -37,12 +39,14 @@ export const registeredShapes = {
   fractal_spirograph: new FractalSpirograph(),
   tessellation_twist: new TessellationTwist(),
   point: new Point(),
+  // freeform: new Freeform(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
   fisheye: new Fisheye(),
-  mask: new Mask()
+  mask: new Mask(),
+  warp: new Warp()
 }
 
 export const getShape = (layer) => {

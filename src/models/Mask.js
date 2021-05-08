@@ -4,6 +4,8 @@ import Effect from './Effect'
 import { rotate, offset, circle } from '../common/geometry'
 import PolarMachine from '../features/machine/PolarMachine'
 import RectMachine from '../features/machine/RectMachine'
+import PolarInvertedMachine from '../features/machine/PolarInvertedMachine'
+import RectInvertedMachine from '../features/machine/RectInvertedMachine'
 
 const options = {
   ...shapeOptions,
@@ -33,6 +35,10 @@ const options = {
       title: 'Try to minimize perimeter moves',
       type: 'checkbox'
     },
+    maskInvert: {
+      title: 'Invert',
+      type: 'checkbox'
+    },
     maskBorder: {
       title: 'Draw border',
       type: 'checkbox'
@@ -55,7 +61,8 @@ export default class Mask extends Effect {
         startingHeight: 100,
         maskMinimizeMoves: false,
         maskMachine: 'rectangle',
-        maskBorder: false
+        maskBorder: false,
+        maskInvert: false
       }
     }
   }
@@ -83,7 +90,9 @@ export default class Mask extends Effect {
     })
 
     if (!layer.dragging && !effect.dragging) {
-      const machineClass = effect.maskMachine === 'circle' ? PolarMachine : RectMachine
+      const machineClass = effect.maskMachine === 'circle' ?
+        (effect.maskInvert ? PolarInvertedMachine : PolarMachine) :
+        (effect.maskInvert ? RectInvertedMachine : RectMachine)
 
       const machine = new machineClass(
         vertices,
