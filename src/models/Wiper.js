@@ -7,7 +7,7 @@ const options = {
   ...{
     wiperType: {
       title: 'Type',
-      type: 'dropdown',
+      type: 'togglebutton',
       choices: ['Lines', 'Spiral'],
     },
     wiperSize: {

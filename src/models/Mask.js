@@ -12,7 +12,7 @@ const options = {
   ...{
     maskMachine: {
       title: 'Mask shape',
-      type: 'dropdown',
+      type: 'togglebutton',
       choices: ['rectangle', 'circle'],
       onChange: (changes, attrs) => {
         if (changes.maskMachine === 'circle') {

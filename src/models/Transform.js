@@ -27,7 +27,6 @@ const transformOptions = {
   },
   connectionMethod: {
     title: 'Connect to next layer',
-    type: 'dropdown',
     choices: ['line', 'along perimeter']
   },
   backtrackPct: {
@@ -70,7 +69,6 @@ const transformOptions = {
   },
   growMethod: {
     title: 'Scale by',
-    type: 'dropdown',
     choices: ['constant', 'function']
   },
   growMathInput: {
