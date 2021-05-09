@@ -2,6 +2,7 @@ import { shapeOptions } from './Shape'
 import Victor from 'victor'
 import Effect from './Effect'
 import noise from '../common/noise'
+import { subsample } from '../common/geometry'
 
 const options = {
   ...shapeOptions,
@@ -70,7 +71,7 @@ export default class Noise extends Effect {
   applyEffect(effect, layer, vertices) {
     if (effect.noiseAmplitude > 0) {
       noise.seed(effect.seed)
-      vertices = this.subsampleVertices(effect, vertices)
+      vertices = subsample(vertices, 2.0)
 
       if (effect.noiseApplication === 'Linear') {
         return this.applyLinearEffect(effect, vertices)
