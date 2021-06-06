@@ -249,7 +249,7 @@ export default class Wiper extends Shape {
       ...{
         type: 'wiper',
         wiperAngleDeg: 15,
-        wiperSize: 12,
+        wiperSize: 4,
         wiperType: 'Lines',
         selectGroup: 'Erasers',
         canTransform: false,
