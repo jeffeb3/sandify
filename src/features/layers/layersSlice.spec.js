@@ -28,6 +28,7 @@ describe('layers reducer', () => {
     canRotate: true,
     canChangeSize: true,
     canChangeHeight: true,
+    canMove: true,
     autosize: true,
     startingWidth: 10,
     startingHeight: 10,

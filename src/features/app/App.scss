@@ -97,6 +97,10 @@ h2 {
   }
 }
 
+.btn-group>.btn.active, .btn-group>.btn:active, .btn-group>.btn:focus {
+  z-index: inherit;
+}
+
 .no-select {
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */

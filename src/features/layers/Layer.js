@@ -6,6 +6,7 @@ import CommentsBox from '../../components/CommentsBox'
 import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
 import CheckboxOption from '../../components/CheckboxOption'
+import ToggleButtonOption from '../../components/ToggleButtonOption'
 import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
@@ -48,40 +49,7 @@ class Layer extends Component {
   render() {
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
-      const option = this.props.options[key]
-
-      if (option.type === 'dropdown') {
-        return  <DropdownOption
-                  onChange={this.props.onChange}
-                  options={this.props.options}
-                  optionKey={key}
-                  key={key}
-                  index={index}
-                  model={this.props.layer} />
-      } else if (option.type === 'checkbox') {
-        return <CheckboxOption
-                  onChange={this.props.onChange}
-                  options={this.props.options}
-                  optionKey={key}
-                  key={key}
-                  index={index}
-                  model={this.props.layer} />
-      } else if (option.type === 'comments') {
-        return <CommentsBox
-                  options={this.props.options}
-                  optionKey={key}
-                  key={key}
-                  comments={this.props.layer.comments} />
-      } else {
-        return  <InputOption
-                  onChange={this.props.onChange}
-                  options={this.props.options}
-                  optionKey={key}
-                  key={key}
-                  delayKey={option.delayKey}
-                  index={index}
-                  model={this.props.layer} />
-      }
+      return this.getOptionComponent(key, index)
     })
 
     const linkText = this.props.linkText || this.props.link
@@ -135,6 +103,50 @@ class Layer extends Component {
         </div>
       </Card>
     )
+  }
+
+  getOptionComponent(key, index) {
+    const option = this.props.options[key]
+
+    if (option.type === 'dropdown') {
+      return  <DropdownOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey={key}
+                key={key}
+                index={index}
+                model={this.props.layer} />
+    } else if (option.type === 'checkbox') {
+      return  <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey={key}
+                key={key}
+                index={index}
+                model={this.props.layer} />
+    } else if (option.type === 'comments') {
+      return  <CommentsBox
+                options={this.props.options}
+                optionKey={key}
+                key={key}
+                comments={this.props.layer.comments} />
+    } else if (option.type === 'togglebutton') {
+      return  <ToggleButtonOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey={key}
+                key={key}
+                index={index}
+                model={this.props.layer} />
+    } else {
+      return  <InputOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey={key}
+                key={key}
+                index={index}
+                model={this.props.layer} />
+    }
   }
 }
 

@@ -10,6 +10,7 @@ import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
 import Mask from '../models/Mask'
+import Noise from '../models/Noise'
 import NoiseWave from '../models/NoiseWave'
 import Point from '../models/Point'
 import Polygon from '../models/Polygon'
@@ -46,6 +47,7 @@ export const registeredShapes = {
   file_import: new FileImport(),
   fisheye: new Fisheye(),
   mask: new Mask(),
+  noise: new Noise(),
   warp: new Warp()
 }
 

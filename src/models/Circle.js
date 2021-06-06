@@ -10,7 +10,7 @@ const options = {
     },
     circleDirection: {
       title: 'Direction',
-      type: 'dropdown',
+      type: 'togglebutton',
       choices: ['clockwise', 'counterclockwise']
     }
   }
