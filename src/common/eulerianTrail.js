@@ -1,6 +1,6 @@
 // adapted from https://github.com/mauriciopoppe/eulerian-trail/blob/master/lib/eulerian-trail.js
 // commented out thrown exceptions to return non-optimal eulerian paths
-export default function(options) {
+export const eulerianTrail = (options) => {
   var g = []
   var i
   var edgePointer = []
