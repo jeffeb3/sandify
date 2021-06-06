@@ -13,7 +13,7 @@ const options = {
     },
     noiseMagnification: {
       title: 'Magnification',
-      min: 0,
+      min: 1,
       max: 100,
       step: 1,
       isVisible: (state) => { return state.noiseApplication !== 'Linear' }
@@ -22,8 +22,7 @@ const options = {
       title: 'Amplitude',
       min: 0,
       max: 20,
-      step: 1,
-      isVisible: (state) => { return state.noiseApplication !== 'Contour 2' }
+      step: 1
     },
     noiseType: {
       title: 'Noise type',
@@ -32,12 +31,8 @@ const options = {
     },
     noiseApplication: {
       title: 'Application',
-      type: 'dropdown',
-      choices: ['Linear', 'Contour 1', 'Contour 2'],
-    },
-    subsample: {
-      title: 'Subsample points (increase resolution)',
-      type: 'checkbox',
+      type: 'togglebutton',
+      choices: ['Contour', 'Linear'],
     },
   }
 }
@@ -54,10 +49,10 @@ export default class Noise extends Effect {
         type: 'noise',
         selectGroup: 'effects',
         seed: 1,
-        noiseAmplitude: 5,
-        noiseMagnification: 3,
+        noiseAmplitude: 4,
+        noiseMagnification: 58,
         noiseType: 'Simplex',
-        noiseApplication: 'Contour 1',
+        noiseApplication: 'Contour',
         canTransform: false,
         repeatEnabled: false,
         canChangeSize: false,
@@ -75,10 +70,8 @@ export default class Noise extends Effect {
 
       if (effect.noiseApplication === 'Linear') {
         return this.applyLinearEffect(effect, vertices)
-      } else if (effect.noiseApplication === 'Contour 1') {
-        return this.applyRadialEffect(effect, vertices, this.contour1)
       } else {
-        return this.applyRadialEffect(effect, vertices, this.contour2)
+        return this.applyRadialEffect(effect, vertices, this.contour)
       }
     } else {
       return vertices
@@ -94,8 +87,8 @@ export default class Noise extends Effect {
 
   applyRadialEffect(effect, vertices, contourFn) {
     let periodDenominator = effect.noiseType === 'Simplex' ?
-      600 - 6 * effect.noiseMagnification :
-      300 - 3 * effect.noiseMagnification
+      100 + 6 * effect.noiseMagnification :
+      100 + effect.noiseMagnification
     if (periodDenominator === 0) periodDenominator = 1
     const period = 1/periodDenominator
 
@@ -124,12 +117,8 @@ export default class Noise extends Effect {
       return total
   }
 
-  contour1(a, vertex) {
+  contour(a, vertex) {
     return new Victor(vertex.x + Math.cos(a) * 5, vertex.y + Math.sin(a) * 5)
-  }
-
-  contour2(a, vertex) {
-    return new Victor(vertex.x + Math.atan(a) * 5, vertex.y + Math.atan(a) * 5)
   }
 
   getVertices(state) {
