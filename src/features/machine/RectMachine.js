@@ -160,10 +160,13 @@ export default class RectMachine extends Machine {
 
   // Returns the nearest perimeter vertex to the given vertex.
   nearestPerimeterVertex(vertex) {
+    // Math.sign(0) is 0, so assume positive if this happens to ensure we get a perimeter point
     if (Math.abs(vertex.x) >= Math.abs(vertex.y)) {
-      return new Victor(Math.sign(vertex.x) * this.sizeX, vertex.y)
+      const sign = Math.sign(vertex.x) || 1
+      return new Victor(sign * this.sizeX, vertex.y)
     } else {
-      return new Victor(vertex.x, Math.sign(vertex.y) * this.sizeY)
+      const sign = Math.sign(vertex.y) || 1
+      return new Victor(vertex.x, sign * this.sizeY)
     }
   }
 

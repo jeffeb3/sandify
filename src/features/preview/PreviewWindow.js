@@ -4,28 +4,17 @@ import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
-import { getCurrentLayer, getKonvaLayerIds, isDragging } from '../layers/selectors'
+import { getCurrentLayer, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import PreviewLayer from './PreviewLayer'
-
-export const relativeScale = (props) => {
-  let width, height
-
-  if (props.use_rect) {
-    width = props.maxX - props.minX
-    height = props.maxY - props.minY
-  } else {
-    width = height = props.maxRadius * 2.0
-  }
-
-  return Math.min(props.canvasWidth / width, props.canvasHeight / height)
-}
+import PreviewConnector from './PreviewConnector'
 
 const mapStateToProps = (state, ownProps) => {
   return {
     layers: state.layers,
     currentLayer: getCurrentLayer(state),
     konvaIds: getKonvaLayerIds(state),
+    layerIds: getVisibleNonEffectIds(state),
     use_rect: state.machine.rectangular,
     dragging: isDragging(state),
     minX: state.machine.minX,
@@ -34,7 +23,7 @@ const mapStateToProps = (state, ownProps) => {
     maxY: state.machine.maxY,
     maxRadius: state.machine.maxRadius,
     canvasWidth: state.preview.canvasWidth,
-    canvasHeight: state.preview.canvasHeight,
+    canvasHeight: state.preview.canvasHeight
   }
 }
 
@@ -77,8 +66,8 @@ class PreviewWindow extends Component {
   render() {
     const {minX, minY, maxX, maxY} = this.props
     const radius = this.props.maxRadius
-    const scale = relativeScale(this.props)
-    const reduceScale = 0.95
+    const scale = this.relativeScale(this.props)
+    const reduceScale = 0.9
     const width = this.props.use_rect ? maxX - minX : radius * 2
     const height = this.props.use_rect ? maxY - minY : radius * 2
     const visibilityClass = `preview-wrapper ${this.visible ? 'd-flex align-items-center' : 'd-none'}`
@@ -91,18 +80,6 @@ class PreviewWindow extends Component {
     const clipRect = ctx => {
      ctx.rect(-width/2, -height/2, width, height)
     }
-
-    const scaleByWheel = (size, deltaY) => {
-      const sign = Math.sign(deltaY)
-      const scale = 1 + Math.log(Math.abs(deltaY))/30 * sign
-      let newSize = Math.max(roundP(size * scale, 0), 1)
-      if (newSize === size) {
-        // If the log scaled value isn't big enough to move the scale.
-        newSize = Math.max(sign+size, 1)
-      }
-      return newSize
-    }
-
     const clipFunc = this.props.dragging ? (this.props.use_rect ? clipRect : clipCircle) : null
 
     return (
@@ -121,8 +98,8 @@ class PreviewWindow extends Component {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {
                 this.props.onLayerChange({
-                  startingWidth: scaleByWheel(this.props.currentLayer.startingWidth, e.evt.deltaY),
-                  startingHeight: scaleByWheel(this.props.currentLayer.startingHeight, e.evt.deltaY),
+                  startingWidth: this.scaleByWheel(this.props.currentLayer.startingWidth, e.evt.deltaY),
+                  startingHeight: this.scaleByWheel(this.props.currentLayer.startingHeight, e.evt.deltaY),
                   id: this.props.currentLayer.id
                 })
               }
@@ -141,16 +118,47 @@ class PreviewWindow extends Component {
                   offsetY={height/2}
                 />}
                 {this.props.konvaIds.map((id, i) => {
+                  const idx = this.props.layerIds.findIndex(layerId => layerId === id)
+                  const nextId = idx !== -1 && idx < this.props.layerIds.length - 1 ? this.props.layerIds[idx + 1] : null
                   return (
-                    <PreviewLayer id={id} key={i} index={i} />
+                    [
+                      nextId && <PreviewConnector startId={id} endId={nextId} key={'c-' + i} />,
+                      <PreviewLayer id={id} key={i} index={i} />
+                    ].filter(e => e !== null)
                   )
-                })}
+                }).flat()}
               </Layer>
             </Provider>
           </Stage>
         )}
       </ReactReduxContext.Consumer>
     )
+  }
+
+  relativeScale(props) {
+    let width, height
+
+    if (props.use_rect) {
+      width = props.maxX - props.minX
+      height = props.maxY - props.minY
+    } else {
+      width = height = props.maxRadius * 2.0
+    }
+
+    return Math.min(props.canvasWidth / width, props.canvasHeight / height)
+  }
+
+  scaleByWheel(size, deltaY) {
+    const sign = Math.sign(deltaY)
+    const scale = 1 + Math.log(Math.abs(deltaY))/30 * sign
+    let newSize = Math.max(roundP(size * scale, 0), 1)
+
+    if (newSize === size) {
+      // If the log scaled value isn't big enough to move the scale.
+      newSize = Math.max(sign+size, 1)
+    }
+
+    return newSize
   }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(PreviewWindow)
