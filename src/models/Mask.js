@@ -72,7 +72,7 @@ export default class Mask extends Effect {
     const height = state.shape.startingHeight
 
     if (state.shape.dragging && state.shape.maskMachine === 'circle') {
-      return circle(width/2, 0)
+      return circle(width/2)
     } else {
       return [
         new Victor(-width/2, height/2),
