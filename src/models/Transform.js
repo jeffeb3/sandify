@@ -17,9 +17,11 @@ const transformOptions = {
   },
   offsetX: {
     title: 'X offset',
+    isVisible: (state) => { return state.canMove }
   },
   offsetY: {
     title: 'Y offset',
+    isVisible: (state) => { return state.canMove }
   },
   rotation: {
     title: 'Rotate (degrees)',

@@ -9,9 +9,8 @@ import { circle, arc } from '../../common/geometry'
 import { getMachineInstance } from '../../features/machine/computer'
 import Victor from 'victor'
 
-const ROUNDS = 100 // number of rounds to attempt to create and grow circles
-const RECTANGULAR_ATTEMPTS_MULTIPLIER = 2
-const ATTEMPTS_MULTIPLIER = 2
+const ROUNDS = 100 // default number of rounds to attempt to create and grow circles
+const RECTANGULAR_ATTEMPTS_MULTIPLIER = 4
 const ATTEMPTS_MODIFIER = 5
 
 const options = {
@@ -52,14 +51,15 @@ export default class CirclePacker extends Shape {
         type: 'circle_packer',
         selectGroup: 'Erasers',
         seed: 1,
-        startingRadius: 5,
-        attempts: 30,
+        startingRadius: 4,
+        attempts: 20,
         canTransform: false,
         inBounds: false,
         usesMachine: true,
         repeatEnabled: false,
         canChangeSize: false,
         canRotate: false,
+        canMove: false,
         autosize: false,
       }
     }
@@ -106,12 +106,10 @@ export default class CirclePacker extends Shape {
     let attempts = this.settings.rectangular ?
       this.settings.attempts * RECTANGULAR_ATTEMPTS_MULTIPLIER :
       this.settings.attempts
-    attempts *= ATTEMPTS_MULTIPLIER
-    attempts += ATTEMPTS_MODIFIER
-    const rounds = Math.floor(ROUNDS * (100 / attempts))
+    const rounds = Math.floor(ROUNDS * (ROUNDS / attempts))
 
     for (let round=0; round<rounds; round++) {
-      for (let i=0; i<attempts; i++) {
+      for (let i=0; i<attempts + ATTEMPTS_MODIFIER; i++) {
         const possibleC = this.newCircle()
 
         if (possibleC) {
