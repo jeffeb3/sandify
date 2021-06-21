@@ -7,7 +7,8 @@ export class Circle extends Victor {
     this.y = y
     this.r = r || 30
     this.state = state
-    this.growing = true
+    this.growing = this.state.growing
+    if (this.growing == null) { this.growing = true }
     this.theta = null
     this.center = new Victor(0, 0)
   }

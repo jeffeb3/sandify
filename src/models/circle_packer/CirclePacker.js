@@ -93,11 +93,24 @@ export default class CirclePacker extends Shape {
       new Victor(-this.settings.width / 2, this.settings.height / 2),
     ]
 
+    // uncomment and modify this method to add hard-wired circles to the pattern before it starts
+    // this.setupCircles()
     this.createCircles()
     this.connectOrphans()
     this.drawCircles()
 
     return this.points
+  }
+
+  // experimental
+  setupCircles() {
+    const circles = [
+      new Circle(0, 0, 75, { ...this.settings, growing: false }),
+    ]
+
+    for (const c of circles) {
+      this.addCircle(c)
+    }
   }
 
   // generate random circles within machine bounds. Grow them incrementally. If a circle collides
@@ -106,6 +119,7 @@ export default class CirclePacker extends Shape {
     let attempts = this.settings.rectangular ?
       this.settings.attempts * RECTANGULAR_ATTEMPTS_MULTIPLIER :
       this.settings.attempts
+    if (attempts <= 0) { attempts = 1 }
     const rounds = Math.floor(ROUNDS * (ROUNDS / attempts))
 
     for (let round=0; round<rounds; round++) {
@@ -113,8 +127,7 @@ export default class CirclePacker extends Shape {
         const possibleC = this.newCircle()
 
         if (possibleC) {
-          this.circles.push(possibleC)
-          this.graph.addNode(possibleC)
+          this.addCircle(possibleC)
         }
       }
 
@@ -324,6 +337,11 @@ export default class CirclePacker extends Shape {
     } else {
       return c.intersection(this.boundaryCircle)[0]
     }
+  }
+
+  addCircle(c) {
+    this.circles.push(c)
+    this.graph.addNode(c)
   }
 
   // returns the point in arr that is farthest to a given point
