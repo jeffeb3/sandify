@@ -1,25 +1,6 @@
-import { angle, onSegment, circle } from '../../common/geometry'
+import { angle, onSegment, circle, arc } from '../../common/geometry'
 import Machine from './Machine'
 import Victor from 'victor'
-
-export const traceCircle = (startAngle, endAngle, size) => {
-  let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?
-  let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI)
-
-  if (deltaAngle > Math.PI) {
-    deltaAngle -= 2.0 * Math.PI
-  }
-  if (deltaAngle < 0.0) {
-    resolution *= -1.0
-  }
-
-  let tracePoints = []
-  for (let step = 0; step < (deltaAngle/resolution) ; step++) {
-    tracePoints.push(Victor(size * Math.cos(resolution * step + startAngle),
-                            size * Math.sin(resolution * step + startAngle)))
-  }
-  return tracePoints
-}
 
 export default class PolarMachine extends Machine {
   constructor(vertices, settings, layerInfo={}) {
@@ -104,7 +85,7 @@ export default class PolarMachine extends Machine {
 
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
-    return traceCircle(start.angle(), end.angle(), this.settings.maxRadius)
+    return arc(this.settings.maxRadius, start.angle(), end.angle())
   }
 
   outlinePerimeter() {

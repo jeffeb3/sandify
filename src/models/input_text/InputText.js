@@ -1,7 +1,7 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
 import Victor from 'victor'
 import Shape, { shapeOptions } from '../Shape'
-import { traceCircle } from '../../features/machine/PolarMachine'
+import { arc } from '../../common/geometry'
 
 const options = {
   ...shapeOptions,
@@ -192,7 +192,7 @@ export default class InputText extends Shape {
             r = rOffset + rPerY * points[0].y
           }
 
-          textPoints = [...textPoints, ...traceCircle(lastTheta, endTheta, r)]
+          textPoints = [...textPoints, ...arc(r, lastTheta, endTheta)]
         }
 
         // Transform the points and add them to textPoints.

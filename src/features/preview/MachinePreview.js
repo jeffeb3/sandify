@@ -32,20 +32,22 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onKeyDown: (event, currentLayer) => {
       let attrs = { id: currentLayer.id }
 
-      if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-        const delta = !!event.shiftKey ? 1 : 5
+      if (currentLayer.canMove) {
+        if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+          const delta = !!event.shiftKey ? 1 : 5
 
-        if (event.key === 'ArrowDown') {
-          attrs.offsetY = currentLayer.offsetY - delta
-        } else if (event.key === 'ArrowUp') {
-          attrs.offsetY = currentLayer.offsetY + delta
-        } else if (event.key === 'ArrowLeft') {
-          attrs.offsetX = currentLayer.offsetX - delta
-        } else if (event.key === 'ArrowRight') {
-          attrs.offsetX = currentLayer.offsetX + delta
+          if (event.key === 'ArrowDown') {
+            attrs.offsetY = currentLayer.offsetY - delta
+          } else if (event.key === 'ArrowUp') {
+            attrs.offsetY = currentLayer.offsetY + delta
+          } else if (event.key === 'ArrowLeft') {
+            attrs.offsetX = currentLayer.offsetX - delta
+          } else if (event.key === 'ArrowRight') {
+            attrs.offsetX = currentLayer.offsetX + delta
+          }
+
+          dispatch(updateLayer(attrs))
         }
-
-        dispatch(updateLayer(attrs))
       }
     }
   }

@@ -38,7 +38,7 @@ export default class Fisheye extends Effect {
 
   getVertices(state) {
     const width = state.shape.startingWidth
-    return circle(width/2, 0)
+    return circle(width/2)
   }
 
   applyEffect(effect, layer, vertices) {
