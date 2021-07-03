@@ -1,6 +1,3 @@
-// TODO
-// don't allow pattern to move
-
 import seedrandom from 'seedrandom'
 import Shape, { shapeOptions } from '../Shape'
 import { Circle } from './Circle'
