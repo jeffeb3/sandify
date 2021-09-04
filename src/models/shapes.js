@@ -3,6 +3,7 @@ import Epicycloid from '../models/Epicycloid'
 import FileImport from '../models/FileImport'
 import Fisheye from '../models/Fisheye'
 import Warp from '../models/Warp'
+import CirclePacker from '../models/circle_packer/CirclePacker'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 // import Freeform from '../models/Freeform'
 import Heart from '../models/Heart'
@@ -41,6 +42,7 @@ export const registeredShapes = {
   tessellation_twist: new TessellationTwist(),
   point: new Point(),
   // freeform: new Freeform(),
+  circle_packer: new CirclePacker(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),

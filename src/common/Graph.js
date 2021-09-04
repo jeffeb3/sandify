@@ -54,6 +54,10 @@ export default class Graph {
     return this.edgeMap[edgeKey]
   }
 
+  neighbors(node) {
+    return this.adjacencyList[node.toString()].map(hash => hash.node)
+  }
+
   dijkstraShortestPath(startNode, endNode) {
     let shortest = this.getCachedShortestPath(startNode, endNode)
 
