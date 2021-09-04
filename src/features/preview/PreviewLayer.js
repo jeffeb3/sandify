@@ -125,7 +125,7 @@ const PreviewLayer = (ownProps) => {
   // used by Konva to draw our custom shape
   function sceneFunc(context, shape) {
     if (props.vertices && props.vertices.length > 0) {
-      if (props.trackVertices && props.trackVertices.length > 0 && props.showTrack) {
+      if (props.trackVertices && props.trackVertices.length > 0) {
         drawTrackVertices(context)
       }
 
@@ -159,29 +159,29 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack) {
+    if (props.layer.visible && isSelected && props.layer.canChangeSize) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isSelected, props.layer, props.showTrack, shapeRef, trRef])
+  }, [isSelected, props.layer, props.currentLayer.canMove, shapeRef, trRef])
 
   return (
     <React.Fragment>
       {props.layer.visible && <Shape
-        draggable={props.showTrack && props.layer.id === props.currentLayer.id}
+        draggable={props.currentLayer.canMove && props.layer.id === props.currentLayer.id}
         width={konvaSizeX}
         height={konvaSizeY}
         offsetY={konvaSizeY/2}
         offsetX={konvaSizeX/2}
-        x={(props.showTrack && props.layer.offsetX) || 0}
-        y={(props.showTrack && -props.layer.offsetY) || 0}
+        x={props.layer.offsetX || 0}
+        y={-props.layer.offsetY || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
         {...props}
         strokeWidth={1}
-        rotation={(props.showTrack && props.layer.rotation) || 0}
+        rotation={props.layer.rotation || 0}
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
         onDragStart={e => {
@@ -214,7 +214,7 @@ const PreviewLayer = (ownProps) => {
           })
         }}
       />}
-      {props.layer.visible && isSelected && props.layer.canChangeSize && props.showTrack && (
+      {props.layer.visible && isSelected && props.layer.canChangeSize && (
         <Transformer
           ref={trRef}
           centeredScaling={true}

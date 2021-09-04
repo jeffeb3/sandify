@@ -3,6 +3,7 @@ import Epicycloid from '../models/Epicycloid'
 import FileImport from '../models/FileImport'
 import Fisheye from '../models/Fisheye'
 import Warp from '../models/Warp'
+import CirclePacker from '../models/circle_packer/CirclePacker'
 import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 // import Freeform from '../models/Freeform'
 import Heart from '../models/Heart'
@@ -10,6 +11,7 @@ import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
 import LSystem from '../models/lsystem/LSystem'
 import Mask from '../models/Mask'
+import Noise from '../models/Noise'
 import NoiseWave from '../models/NoiseWave'
 import Point from '../models/Point'
 import Polygon from '../models/Polygon'
@@ -40,12 +42,14 @@ export const registeredShapes = {
   tessellation_twist: new TessellationTwist(),
   point: new Point(),
   // freeform: new Freeform(),
+  circle_packer: new CirclePacker(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
   fisheye: new Fisheye(),
   mask: new Mask(),
+  noise: new Noise(),
   warp: new Warp()
 }
 

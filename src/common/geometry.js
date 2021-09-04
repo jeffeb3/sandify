@@ -106,15 +106,34 @@ export const offset = (vertex, offsetX, offsetY) => {
 }
 
 // returns an array of points drawing a circle of a given radius
-export const circle = (radius=1, start=0) => {
+export const circle = (radius, start=0, x=0, y=0) => {
   let points = []
 
-  for (let i=start; i<=128+start; i++) {
-    let angle = Math.PI * 2.0 / 128.0 * i
-    points.push(new Victor(Math.cos(angle)*radius, Math.sin(angle)*radius))
+  for (let i=0; i<=128; i++) {
+    let angle = Math.PI * 2.0 / 128.0 * i + start
+    points.push(new Victor(x + Math.cos(angle)*radius, y + Math.sin(angle)*radius))
   }
 
   return points
+}
+
+export const arc = (radius, startAngle, endAngle, x=0, y=0) => {
+  let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?
+  let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI)
+
+  if (deltaAngle > Math.PI) {
+    deltaAngle -= 2.0 * Math.PI
+  }
+  if (deltaAngle < 0.0) {
+    resolution *= -1.0
+  }
+
+  let tracePoints = []
+  for (let step = 0; step < (deltaAngle/resolution) ; step++) {
+    tracePoints.push(Victor(x + radius * Math.cos(resolution * step + startAngle),
+                            y + radius * Math.sin(resolution * step + startAngle)))
+  }
+  return tracePoints
 }
 
 // Subsample lines into smaller line segments

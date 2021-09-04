@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
-import DropdownOption from '../../components/DropdownOption'
+import ToggleButtonOption from '../../components/ToggleButtonOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
@@ -147,7 +147,7 @@ class Transforms extends Component {
       {!this.props.layer.effect && <Card className="mt-3">
         <Card.Body>
           <h3 className="mb-3">Fine tuning (advanced)</h3>
-          <DropdownOption
+          <ToggleButtonOption
             onChange={this.props.onChange}
             options={this.props.options}
             optionKey="connectionMethod"

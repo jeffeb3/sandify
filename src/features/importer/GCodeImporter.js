@@ -58,7 +58,7 @@ export default class GCodeImporter extends Importer {
       // @param {object} v0 A 3D vector of the fixed point.
       addArcCurve: (modal, v1, v2, v0) => {
         if (v1.x !== v2.x || v1.y !== v2.y) {
-          // We can't use traceCircle, we have to go a specific direction (not the shortest path).
+          // We can't use arc, we have to go a specific direction (not the shortest path).
           let startTheta = Math.atan2(v1.y-v0.y, v1.x-v0.x)
           let endTheta   = Math.atan2(v2.y-v0.y, v2.x-v0.x)
           let deltaTheta = endTheta - startTheta

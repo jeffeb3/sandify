@@ -6,12 +6,14 @@ export default class Machine {
   polish() {
     this.enforceLimits()
       .cleanVertices()
+      .limitPrecision()
       .optimizePerimeter()
 
     if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 
+    // second call to limit precision for final cleanup
     return this.limitPrecision()
   }
 
