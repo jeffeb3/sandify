@@ -1,25 +1,24 @@
 import { createSelector } from 'reselect'
+import { getAllLayersInfo } from '../../features/layers/selectors'
 import CommentExporter from './CommentExporter'
+import { log } from '../../common/util'
 
 const getApp = state => state.app
-const getLayers = state => state.layers
-const getCurrentLayer = state => state.layers.byId[state.layers.current]
 const getExporter = state => state.exporter
 const getMachine = state => state.machine
 
 export const getComments = createSelector(
   [
       getApp,
-      getLayers,
-      getCurrentLayer,
+      getAllLayersInfo,
       getExporter,
       getMachine,
   ],
-  (app, layers, layer, exporter, machine) => {
+  (app, layers, exporter, machine) => {
+    log("getComments")
     const state = {
       app: app,
       layers: layers,
-      layer: layer,
       exporter: exporter,
       machine: machine
     }

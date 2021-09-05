@@ -4,7 +4,7 @@ import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
-import { getLayerInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
+import { getAllLayersInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible, setNewLayerType } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
 import ReactGA from 'react-ga'
@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => {
   const shape = getShape(layer)
 
   return {
-    layers: getLayerInfo(state),
+    layers: getAllLayersInfo(state),
     numLayers: getNumLayers(state),
     currentLayer: layer,
     shape: shape,

@@ -1,12 +1,12 @@
 import React from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Shape, Transformer } from 'react-konva'
-import Victor from 'victor'
-import { makeGetPreviewTrackVertices, getCachedSelector, makeGetPreviewVertices, getSliderColors, getVertexOffsets, getAllPreviewVertices } from '../machine/selectors'
+import { makeGetPreviewTrackVertices, makeGetPreviewVertices, getSliderColors,
+  getVertexOffsets, getAllComputedVertices, getSliderBounds } from '../machine/selectors'
 import { updateLayer } from '../layers/layersSlice'
-import { getCurrentLayer, makeGetLayerIndex, getNumVisibleLayers } from '../layers/selectors'
+import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, getNumVisibleLayers, getCachedSelector } from '../layers/selectors'
 import { roundP } from '../../common/util'
-import { getSliderBounds } from '../../common/geometry'
+import PreviewHelper from './PreviewHelper'
 
 // Renders the shapes in the preview window and allows the user to interact with the shape.
 const PreviewLayer = (ownProps) => {
@@ -18,7 +18,7 @@ const PreviewLayer = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
-    const layer = state.layers.byId[ownProps.id] || getCurrentLayer(state)
+    const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayer(state)
     const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
 
@@ -29,11 +29,15 @@ const PreviewLayer = (ownProps) => {
       currentLayer: getCurrentLayer(state),
       trackVertices: getCachedSelector(makeGetPreviewTrackVertices, layer.id)(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
-      allVertices: getAllPreviewVertices(state),
+      allVertices: getAllComputedVertices(state),
       selected: state.layers.selected,
       sliderValue: state.preview.sliderValue,
-      colors: state.layers.selected ? getSliderColors(state.layers.selected)(state) : [],
-      offsets: getVertexOffsets(state)
+      showTrack: true,
+      colors: getSliderColors(state),
+      offsets: getVertexOffsets(state),
+      offsetId: layer.id,
+      bounds: getSliderBounds(state),
+      markCoordinates: false // debug feature: set to true to see coordinates while drawing
     }
   }
 
@@ -54,80 +58,56 @@ const PreviewLayer = (ownProps) => {
   const konvaSizeY = startingHeight * konvaScale
   const isSelected = props.selected === ownProps.id
   const isSliding = props.sliderValue !== 0
-
-  function mmToPixels(vertex) {
-    // y for pixels starts at the top, and goes down.
-    if (vertex) {
-      return new Victor(vertex.x + startingWidth/2, -vertex.y + startingHeight/2)
-    } else {
-      return new Victor(0, 0)
-    }
-  }
-
-  function moveTo_mm(context, vertex) {
-    var in_mm = mmToPixels(vertex)
-    context.moveTo(in_mm.x, in_mm.y)
-  }
-
-  function lineTo_mm(context, vertex) {
-    var in_mm = mmToPixels(vertex)
-    context.lineTo(in_mm.x, in_mm.y)
-  }
-
-  function dot_mm(context, vertex, radius=4) {
-    var in_mm = mmToPixels(vertex)
-    context.arc(in_mm.x, in_mm.y, radius, 0, 2 * Math.PI, true)
-    context.fillStyle = context.strokeStyle
-    context.fill()
-    context.lineWidth = 1
-    context.strokeStyle = isSelected ? 'yellow' : unselectedColor
-    context.stroke()
-  }
+  const helper = new PreviewHelper(props)
 
   // draws a colored path when user is using slider
-  function drawLayerVertices(context) {
-    const { end } = getSliderBounds(props.allVertices, props.sliderValue)
-    const stationaryColor = unselectedColor
-    const defaultColor = isSliding ? backgroundUnselectedColor : stationaryColor
-    let oldColor = defaultColor
-    let currentColor = defaultColor
+  function drawLayerVertices(context, bounds) {
+    const { end } = bounds
+    let oldColor = null
+    let currentColor = isSelected ? selectedColor : unselectedColor
 
     context.beginPath()
     context.lineWidth = 1
     context.strokeStyle = currentColor
-    moveTo_mm(context, props.vertices[0])
+    helper.moveTo(context, props.vertices[0])
     context.stroke()
 
     context.beginPath()
     for (let i=1; i<props.vertices.length; i++) {
-      let absoluteI = i + props.offsets[props.layer.id]
-      let pathColor = isSliding ? (absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor) : stationaryColor
+      if (isSliding) {
+        let absoluteI = i + props.offsets[props.layer.id].start
+        let pathColor = absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
-      currentColor = props.colors[absoluteI] || pathColor
-      if (currentColor !== oldColor) {
-        context.stroke()
-        context.strokeStyle = currentColor
-        oldColor = currentColor
-        context.beginPath()
+        currentColor = props.colors[absoluteI] || pathColor
+        if (currentColor !== oldColor) {
+          context.stroke()
+          context.strokeStyle = currentColor
+          oldColor = currentColor
+          context.beginPath()
+        }
       }
 
-      moveTo_mm(context, props.vertices[i-1])
-      lineTo_mm(context, props.vertices[i])
+      helper.moveTo(context, props.vertices[i-1])
+      helper.lineTo(context, props.vertices[i])
     }
     context.stroke()
   }
 
   function drawStartAndEndPoints(context) {
+    const start = props.vertices[0]
+    const end = props.vertices[props.vertices.length - 1]
+
     context.beginPath()
     context.strokeStyle = 'green'
-    dot_mm(context, props.vertices[0], props.start ? 5 : 3)
-    context.stroke()
+    helper.dot(context, start, props.start ? 5 : 3)
+    helper.markOriginalCoordinates(context, start)
 
-    let endOffset = (props.currentLayer.dragging || props.end) ? 1 : 2
-    context.beginPath()
-    context.strokeStyle = 'red'
-    dot_mm(context, props.vertices[props.vertices.length - endOffset], props.end ? 5 : 3)
-    context.stroke()
+    if (end) {
+      context.beginPath()
+      context.strokeStyle = 'red'
+      helper.dot(context, end, props.end ? 5 : 3)
+      helper.markOriginalCoordinates(context, end)
+    }
   }
 
   // draws the line representing the track the path follows
@@ -135,39 +115,11 @@ const PreviewLayer = (ownProps) => {
     context.beginPath()
     context.lineWidth = 4.0
     context.strokeStyle = 'green'
-    moveTo_mm(context, props.trackVertices[0])
+    helper.moveTo(context, props.trackVertices[0])
     for (let i=0; i<props.trackVertices.length; i++) {
-      lineTo_mm(context, props.trackVertices[i])
+      helper.lineTo(context, props.trackVertices[i])
     }
     context.stroke()
-  }
-
-  function drawSliderEndPoint(context) {
-    const { end } = getSliderBounds(props.allVertices, props.sliderValue)
-
-    // Draw a slider path end point if sliding
-    if (isSliding) {
-      let absoluteEnd = props.vertices.length + props.offsets[props.layer.id] - 1
-      let absoluteStart = props.offsets[props.layer.id]
-
-      if (end >= absoluteStart && end <= absoluteEnd) {
-        // end point is in this layer
-        const sliderEnd = props.allVertices[end]
-        context.beginPath()
-        context.strokeStyle = backgroundSelectedColor
-
-        moveTo_mm(context, sliderEnd)
-        context.strokeStyle = selectedColor
-        dot_mm(context, sliderEnd)
-
-        // START: uncomment these lines to show slider end point coordinates
-        // context.font = '12px Arial'
-        // context.fillText('(' + sliderEnd.x.toFixed(2) + ', ' + sliderEnd.y.toFixed(2) + ')', sliderEnd.x, -sliderEnd.y)
-        // END
-      }
-
-      context.stroke()
-    }
   }
 
   // used by Konva to draw our custom shape
@@ -177,11 +129,12 @@ const PreviewLayer = (ownProps) => {
         drawTrackVertices(context)
       }
 
-      drawLayerVertices(context)
+      drawLayerVertices(context, props.bounds)
+
       if (props.start || props.end || isSelected) {
         drawStartAndEndPoints(context)
       }
-      drawSliderEndPoint(context)
+      helper.drawSliderEndPoint(context)
     }
 
     context.fillStrokeShape(shape)
@@ -189,16 +142,6 @@ const PreviewLayer = (ownProps) => {
 
   // used by Konva to mark boundaries of shape
   function hitFunc(context) {
-    const vertices = props.vertices
-    if (vertices && vertices.length > 0) {
-      moveTo_mm(context, vertices[0])
-
-      for (let i=1; i<vertices.length; i++) {
-        moveTo_mm(context, vertices[i-1])
-        lineTo_mm(context, vertices[i])
-      }
-    }
-
     context.fillStrokeShape(this)
   }
 

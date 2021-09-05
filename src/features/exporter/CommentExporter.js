@@ -1,5 +1,4 @@
 import { getShape } from '../../models/shapes'
-import { getLayerInfo } from '../layers/selectors'
 import Machine from '../../models/Machine'
 import Transform from '../../models/Transform'
 import Exporter from './Exporter'
@@ -33,7 +32,7 @@ export default class CommentExporter extends Exporter {
 
     switch (state.app.input) {
       case 'shape': // shapes
-        const layers = getLayerInfo(state)
+        const layers = state.layers
         layers.forEach(layer => {
           const shape = getShape(layer)
           const options = shape.getOptions()
