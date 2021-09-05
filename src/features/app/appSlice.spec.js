@@ -3,7 +3,7 @@ import app, { chooseInput } from './appSlice'
 describe('app reducer', () => {
   it('should handle initial state', () => {
     expect(app(undefined, {})).toEqual({
-      sandifyVersion: "0.2.4", // Also change the version in package.json.
+      sandifyVersion: "0.2.6", // Also change the version in package.json.
       input: 'shape',
     })
   })
