@@ -4,6 +4,7 @@ import appReducer from './appSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
 import previewReducer from '../preview/previewSlice'
+import fontsReducer from '../fonts/fontsSlice'
 import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
@@ -23,7 +24,8 @@ const store = configureStore({
     layers: layersReducer,
     exporter: exporterReducer,
     machine: machineReducer,
-    preview: previewReducer
+    preview: previewReducer,
+    fonts: fontsReducer
   })
 })
 
@@ -36,6 +38,8 @@ const persistState = false
 // persistInitKey to the same value. It's like doing a "save as"
 const persistInitKey = 'state'
 const persistSaveKey = 'state'
+// const persistInitKey = 'bubble-rings'
+// const persistSaveKey = 'bubble-rings'
 
 // never persist state when running within a jest spec
 if (process.env.JEST_WORKER_ID === undefined && persistState) {

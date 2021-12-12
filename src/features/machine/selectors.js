@@ -21,6 +21,7 @@ const getCacheKey = (state) => {
 const getState = state => state
 const getMachine = state => state.machine
 const getPreview = state => state.preview
+const getFonts = state => state.fonts
 
 // by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
@@ -37,17 +38,34 @@ const makeGetLayerMachine = layerId => {
   )
 }
 
+// by returning null for shapes which don't use fonts, this selector will ensure
+// transformed vertices are not redrawn when fonts are loaded
+const makeGetLayerFonts = layerId => {
+  return createSelector(
+    [
+      getCachedSelector(makeGetLayer, layerId),
+      getFonts
+    ],
+    (layer, fonts) => {
+      log("makeGetLayerFonts " + layerId)
+      return layer.usesFonts ? fonts : null
+    }
+  )
+}
+
 // creates a selector that returns shape vertices for a given layer
 const makeGetLayerVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetLayer, layerId),
-      getCachedSelector(makeGetLayerMachine, layerId)
+      getCachedSelector(makeGetLayerMachine, layerId),
+      getCachedSelector(makeGetLayerFonts, layerId),
     ],
-    (layer, machine) => {
+    (layer, machine, fonts) => {
       const state = {
         shape: layer,
-        machine: machine
+        machine: machine,
+        fonts: fonts
       }
       log('makeGetLayerVertices ' + layerId)
       const metashape = getShape(layer)
@@ -81,7 +99,7 @@ const makeGetTransformedVertices = layerId => {
       getCachedSelector(makeGetLayer, layerId),
       getCachedSelector(makeGetEffects, layerId)
     ],
-    (vertices, layer, effects) => {
+    (vertices, layer, effects, fonts) => {
       log('makeGetTransformedVertices ' + layerId)
       return transformShapes(vertices, layer, effects)
     }

@@ -1,6 +1,7 @@
 import Victor from 'victor'
 import Machine from './Machine'
 import { distance, vertexRoundP } from '../../common/geometry'
+import clip from 'liang-barsky'
 
 export default class RectMachine extends Machine {
   constructor(vertices, settings, layerInfo={}) {
@@ -44,7 +45,7 @@ export default class RectMachine extends Machine {
         outPoint = first
       }
 
-      let clipped = this.clipLine(
+      let clipped = this.clipSegment(
         outPoint,
         Victor.fromObject(outPoint).multiply(new Victor(scale, scale))
       )
@@ -188,7 +189,7 @@ export default class RectMachine extends Machine {
   // The guts of logic for this limits enforcer. It will take a single line (defined by
   // start and end) and if the line goes out of bounds, returns the vertices around the
   // outside edge to follow around without messing up the shape of the vertices.
-  clipLine(start, end) {
+  clipSegment(start, end) {
     const quadrantStart = this.pointLocation(start)
     const quadrantEnd = this.pointLocation(end)
 
@@ -270,12 +271,12 @@ export default class RectMachine extends Machine {
     // and the line segment doesn't intersect the box. We have to crawl around the outside of the
     // box until we reach the other point.
     // Here, I'm going to split this line into two parts, and send each half line segment back
-    // through the clipLine algorithm. Eventually, that should result in only one of the other cases.
+    // through the clipSegment algorithm. Eventually, that should result in only one of the other cases.
     const midpoint = Victor.fromObject(start).add(end).multiply(new Victor(0.5, 0.5))
 
     // recurse, and find smaller segments until we don't end up in this place again.
-    return [...this.clipLine(start, midpoint),
-            ...this.clipLine(midpoint, end)]
+    return [...this.clipSegment(start, midpoint),
+            ...this.clipSegment(midpoint, end)]
   }
 
   // Intersect the line with the boundary, and return the point exactly on the boundary.
@@ -389,5 +390,15 @@ export default class RectMachine extends Machine {
     }
 
     return start.clone().add(line.clone().multiply(new Victor(t, t)))
+  }
+
+  // returns the points if any that intersect with the line represented by start and end
+  clipLine(start, end) {
+    const s = Victor.fromObject(start)
+    const e = Victor.fromObject(end)
+    const bounds = [-this.sizeX, -this.sizeY, this.sizeX, this.sizeY]
+
+    clip(s, e, bounds)
+    return [s, e]
   }
 }

@@ -105,6 +105,39 @@ export const offset = (vertex, offsetX, offsetY) => {
   )
 }
 
+// modifies the given array in place, centering the points on (0, 0)
+export const centerOnOrigin = (vertices, bounds) => {
+  bounds ||= findBounds(vertices)
+  const offsetX = (bounds[1].x + bounds[0].x) / 2
+  const offsetY = (bounds[1].y + bounds[0].y) / 2
+
+  vertices.forEach(v => v.add(new Victor(-offsetX, -offsetY)))
+  return vertices
+}
+
+const hAlignRight = (bounds) => -bounds[1].x
+const hAlignLeft = (bounds) => 0 - bounds[0].x
+const hAlignCenter = (bounds) => -(bounds[1].x - bounds[0].x)/2
+
+// aligns a group of selections, modifying vertices in place
+export const horizontalAlign = (selections, align = 'left') => {
+  const dFn = align === 'center' ?
+    hAlignCenter :
+    align ==='left' ? hAlignLeft : hAlignRight
+  const allBounds = findBounds(selections.flat())
+  const dAll = dFn(allBounds)
+
+  selections.forEach(selection => {
+    const bounds = findBounds(selection)
+    const d = dFn(bounds)
+
+    selection.forEach(vertex => {
+      vertex.add(new Victor(- dAll + d, 0))
+    })
+  })
+  return selections
+}
+
 // returns an array of points drawing a circle of a given radius
 export const circle = (radius, start=0, x=0, y=0) => {
   let points = []
@@ -171,7 +204,6 @@ export const subsample = (vertices, maxLength) => {
 
 // Convert x,y vertices to theta, rho vertices
 export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
-
   let vertices = []
   let previousTheta = 0
   let previousRawTheta = 0
@@ -210,6 +242,37 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
   }
 
   return vertices
+}
+
+export const maxY = (vertices) => {
+  return Math.max(...vertices.map(v => v.y))
+}
+
+export const minY = (vertices) => {
+  return Math.min(...vertices.map(v => v.y))
+}
+
+// returns the index of the vertex in arr that is closest to the given vertex
+export const nearestVertex = (vertex, arr) => {
+  return findVertex(vertex, arr, distance)
+}
+
+// returns the index of a vertex in arr that matches most closely based on a given
+// function. The lower the function value, the closer the match.
+export const findVertex = (value, arr, fn) => {
+  let dMin = Infinity
+  let found = null
+
+  arr.forEach((v, idx) => {
+    const d = fn(value, v)
+    if (d < dMin) {
+      dMin = d
+      found = idx
+      console.log("new d = " + dMin + ", " + idx)
+    }
+  })
+
+  return found
 }
 
 // Convert theta, rho vertices to goofy x, y, which really represent scara angles.

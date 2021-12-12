@@ -49,7 +49,7 @@ export default class Machine {
       const vertex = this.vertices[next]
 
       if (previous) {
-        const line = this.clipLine(previous, vertex)
+        const line = this.clipSegment(previous, vertex)
 
         for (let pt=0; pt<line.length; pt++) {
           if (line[pt] !== previous) {
@@ -89,7 +89,7 @@ export default class Machine {
 
       if (previous) {
         // rounding here to deal with some erratic perimeter lines
-        let clipped = this.clipLine(previous, curr).map(pt => vertexRoundP(pt, 3))
+        let clipped = this.clipSegment(previous, curr).map(pt => vertexRoundP(pt, 3))
 
         if (clipped.length > 0 && this.inBounds(previous) && cleanVertices.length > 0) {
           const perimeter = this.tracePerimeter(cleanVertices[cleanVertices.length - 1], clipped[0])

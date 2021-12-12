@@ -23,6 +23,7 @@ export default class Shape {
       canRotate: true,
       canMove: true,
       usesMachine: false,
+      usesFonts: false,
       startingWidth: 10,
       startingHeight: 10,
       offsetX: 0.0,
