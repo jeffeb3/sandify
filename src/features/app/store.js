@@ -38,8 +38,6 @@ const persistState = false
 // persistInitKey to the same value. It's like doing a "save as"
 const persistInitKey = 'state'
 const persistSaveKey = 'state'
-// const persistInitKey = 'bubble-rings'
-// const persistSaveKey = 'bubble-rings'
 
 // never persist state when running within a jest spec
 if (process.env.JEST_WORKER_ID === undefined && persistState) {
