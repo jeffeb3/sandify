@@ -5,7 +5,7 @@ import Color from 'color'
 import { transformShapes, transformShape, polishVertices, getMachineInstance } from './computer'
 import { getShape } from '../../models/shapes'
 import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers,
-  getVisibleNonEffectIds, makeGetEffects, getCachedSelector } from '../layers/selectors'
+  getVisibleNonEffectIds, makeGetEffects, getCachedSelector, makeGetNonEffectLayerIndex } from '../layers/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { log } from '../../common/util'
 
@@ -200,7 +200,8 @@ export const getAllComputedVertices = createSelector(
 // returns an array of vertices connecting a given layer to the next (if it exists)
 export const getConnectingVertices = (state, layerId) => {
   const visibleLayerIds = getVisibleNonEffectIds(state)
-  const idx = getCachedSelector(makeGetLayerIndex, layerId)(state)
+  const idx = getCachedSelector(makeGetNonEffectLayerIndex, layerId)(state)
+
   return idx < visibleLayerIds.length - 1 ?
     getCachedSelector(makeGetConnectorVertices, layerId, visibleLayerIds[idx + 1])(state) :
     null

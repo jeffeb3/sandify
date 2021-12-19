@@ -268,7 +268,6 @@ export const findVertex = (value, arr, fn) => {
     if (d < dMin) {
       dMin = d
       found = idx
-      console.log("new d = " + dMin + ", " + idx)
     }
   })
 

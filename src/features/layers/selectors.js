@@ -104,6 +104,15 @@ export const makeGetLayerIndex = layerId => {
   )
 }
 
+export const makeGetNonEffectLayerIndex = layerId => {
+  return createDeepEqualSelector(
+    getVisibleNonEffectIds,
+    (visibleLayerIds) => {
+      return visibleLayerIds.findIndex(id => id === layerId)
+    }
+  )
+}
+
 export const makeGetLayer = layerId => {
   return createSelector(
     getLayersById,
