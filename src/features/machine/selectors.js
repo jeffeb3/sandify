@@ -75,8 +75,11 @@ const makeGetLayerVertices = layerId => {
 
         if (!vertices) {
           vertices = metashape.getVertices(state)
-          cache.set(key, vertices)
-          log('caching shape...' + cache.length + ' ' + cache.itemCount)
+
+          if (vertices.length > 1) {
+            cache.set(key, vertices)
+            log('caching shape...' + cache.length + ' ' + cache.itemCount)
+          }
         }
 
         return vertices

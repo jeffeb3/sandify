@@ -1,6 +1,6 @@
 import Victor from 'victor'
 import Shape, { shapeOptions } from './Shape'
-import { subsample, centerOnOrigin, maxY, minY, horizontalAlign, findBounds, nearestVertex, findVertex } from '../common/geometry'
+import { subsample, centerOnOrigin, maxY, minY, horizontalAlign, findBounds, nearestVertex, findMinimumVertex } from '../common/geometry'
 import { arrayRotate } from '../common/util'
 import { pointsOnPath } from 'points-on-path'
 import { getFont, supportedFonts } from '../features/fonts/fontsSlice'
@@ -113,8 +113,8 @@ export default class FancyText extends Shape {
           newVertices.push(clipped2[0])
         } else {
           // connect the two rows by drawing a horizontal line in the middle of the two rows
-          const lowest = prevVertices[findVertex(null, prevVertices, (val, v) => v.y)]
-          const highest = currVertices[findVertex(null, currVertices, (val, v) => -v.y)]
+          const lowest = prevVertices[findMinimumVertex(null, prevVertices, (val, v) => v.y)]
+          const highest = currVertices[findMinimumVertex(null, currVertices, (val, v) => -v.y)]
           newVertices.push(new Victor(prev.x, lowest.y - (lowest.y - highest.y)/2))
           newVertices.push(new Victor(next.x, lowest.y - (lowest.y - highest.y)/2))
         }
@@ -167,8 +167,8 @@ export default class FancyText extends Shape {
 
       if (i === 0) {
         start = state.shape.fancyConnectLines === 'outside' ?
-          findVertex(null, points, (val, v) => v.x) :
-          start = findVertex(null, points, (val, v) => -v.y)
+          findMinimumVertex(null, points, (val, v) => v.x) :
+          start = findMinimumVertex(null, points, (val, v) => -v.y)
       }
 
       // draw path
@@ -198,8 +198,8 @@ export default class FancyText extends Shape {
         start = nextStart
       } else {
         const end = state.shape.fancyConnectLines === 'outside' ?
-          findVertex(null, loop, (val, v) => -v.x) :
-          findVertex(null, loop, (val, v) => v.y)
+          findMinimumVertex(null, loop, (val, v) => -v.x) :
+          findMinimumVertex(null, loop, (val, v) => v.y)
         pointsArr.push(this.shortestPathAroundLoop(start, end, loop))
       }
     }
@@ -307,8 +307,8 @@ export default class FancyText extends Shape {
       if (SPECIAL_CHILDREN.includes(word[i]) && paths.length > 1) {
         // when given a special child (e.g., "i"), we have to figure out which is the parent and
         // which is the child. The order can differ between fonts.
-        const h1 = findVertex(null, paths[0], (val, v) => -v.y)
-        const h2 = findVertex(null, paths[1], (val, v) => -v.y)
+        const h1 = findMinimumVertex(null, paths[0], (val, v) => -v.y)
+        const h2 = findMinimumVertex(null, paths[1], (val, v) => -v.y)
 
         if (paths[0][h1].y < paths[1][h2].y) {
           childMap[pos + 1] = pos

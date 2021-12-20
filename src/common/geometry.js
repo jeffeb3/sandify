@@ -254,12 +254,12 @@ export const minY = (vertices) => {
 
 // returns the index of the vertex in arr that is closest to the given vertex
 export const nearestVertex = (vertex, arr) => {
-  return findVertex(vertex, arr, distance)
+  return findMinimumVertex(vertex, arr, distance)
 }
 
 // returns the index of a vertex in arr that matches most closely based on a given
 // function. The lower the function value, the closer the match.
-export const findVertex = (value, arr, fn) => {
+export const findMinimumVertex = (value, arr, fn) => {
   let dMin = Infinity
   let found = null
 
