@@ -32,7 +32,7 @@ export const onMaxIterations = (subtype, state) => {
 }
 
 // Implements a Lindenmayer system (L-system). See https://en.wikipedia.org/wiki/L-system.
-// Adapted from http://bl.ocks.org/nitaku/ce638f8bd5e70cb809e1
+// Adapted from http://bl.ocks.org/nitaku/ce638f8bd5e70cb809e1. No license was specified.
 export const lsystem = (config) => {
   let input = config.axiom
   let output

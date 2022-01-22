@@ -78,7 +78,7 @@ const options = {
   }
 }
 
-// Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve.
+// Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve. See NOTICE for licensing details.
 export default class TessellationTwist extends Shape {
   constructor() {
     super('Tessellation Twist')
