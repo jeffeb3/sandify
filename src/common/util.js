@@ -30,8 +30,16 @@ export const arrayRotate = (arr, count) => {
   return arr
 }
 
-// set to true to turn on console logging
-const debug = false
-export const log = (message) => {
-  if (debug) { console.log(message) }
+const debug = false // set to true to turn on console logging
+
+// set to an array to limit which keys are shown
+// const keys = ['makeGetLayer']
+const keys = null
+
+export const log = (key, message) => {
+  if (debug) {
+    if (!keys || keys.includes(key)) {
+      console.log([key, message].filter(v => v).join(': '))
+    }
+  }
 }

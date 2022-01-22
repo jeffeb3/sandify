@@ -29,7 +29,7 @@ const makeGetLayerMachine = layerId => {
       getMachine
     ],
     (layer, machine) => {
-      log("makeGetLayerMachine " + layerId)
+      log('makeGetLayerMachine', layerId)
       return layer.usesMachine ? machine : null
     }
   )
@@ -44,7 +44,7 @@ const makeGetLayerFonts = layerId => {
       getLoadedFonts
     ],
     (layer, fonts) => {
-      log("makeGetLayerFonts " + layerId)
+      log('makeGetLayerFonts', layerId)
       return layer.usesFonts ? fonts : null
     }
   )
@@ -64,8 +64,9 @@ const makeGetLayerVertices = layerId => {
         machine: machine,
         fonts: fonts
       }
-      log('makeGetLayerVertices ' + layerId)
+      log('makeGetLayerVertices', layerId)
       const metashape = getShape(layer)
+
       if (layer.shouldCache) {
         const key = getCacheKey(state)
         let vertices = cache.get(key)
@@ -75,7 +76,7 @@ const makeGetLayerVertices = layerId => {
 
           if (vertices.length > 1) {
             cache.set(key, vertices)
-            log('caching shape...' + cache.length + ' ' + cache.itemCount)
+            log('caching shape', cache.length + ' ' + cache.itemCount)
           }
         }
 
@@ -100,7 +101,7 @@ const makeGetTransformedVertices = layerId => {
       getCachedSelector(makeGetEffects, layerId)
     ],
     (vertices, layer, effects, fonts) => {
-      log('makeGetTransformedVertices ' + layerId)
+      log('makeGetTransformedVertices', layerId)
       return transformShapes(vertices, layer, effects)
     }
   )
@@ -115,7 +116,7 @@ export const makeGetConnectorVertices = (startId, endId) => {
       getMachine
     ],
     (startLayer, startVertices, endVertices, machine) => {
-      log('makeGetConnectorVertices ' + startId + '-' + endId)
+      log('makeGetConnectorVertices', startId + '-' + endId)
       const start = startVertices[startVertices.length - 1]
       const end = endVertices[0]
 
@@ -153,12 +154,12 @@ const makeGetComputedVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetTransformedVertices, layerId),
-      getCachedSelector(makeGetLayerIndex, layerId),
+      getCachedSelector(makeGetNonEffectLayerIndex, layerId),
       getNumVisibleLayers,
       getMachine
     ],
     (vertices, layerIndex, numLayers, machine) => {
-      log("makeGetComputedVertices " + layerId)
+      log('makeGetComputedVertices', layerId)
       return polishVertices(vertices, machine, {
         start: layerIndex === 0,
         end: layerIndex === numLayers - 1
@@ -176,7 +177,7 @@ export const makeGetPreviewVertices = layerId => {
         getCachedSelector(makeGetLayer, layerId)
     ],
     (transformedVertices, computedVertices, layer) => {
-      log("makeGetPreviewVertices " + layerId)
+      log('makeGetPreviewVertices', layerId)
       const vertices = layer.dragging ? transformedVertices : computedVertices
       return previewTransform(layer, vertices)
     }
@@ -238,7 +239,7 @@ export const getVerticesStats = createSelector(
     let previous = null
 
     vertices.forEach((vertex) => {
-      if (previous) {
+      if (previous && vertex) {
         distance += Math.sqrt(Math.pow(vertex.x - previous.x, 2.0) +
                               Math.pow(vertex.y - previous.y, 2.0))
       }
@@ -313,7 +314,7 @@ export const makeGetPreviewTrackVertices = layerId => {
   return createSelector(
     getCachedSelector(makeGetLayer, layerId),
     (layer) => {
-      log("makeGetPreviewTrackVertices for layer " + layerId)
+      log('makeGetPreviewTrackVertices', layerId)
       const numLoops = layer.numLoops
       const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
       const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
