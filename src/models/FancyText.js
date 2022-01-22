@@ -55,7 +55,7 @@ export default class FancyText extends Shape {
         fancyText: 'Sandify',
         fancyFont: 'Garamond',
         fancyAlignment: 'left',
-        fancyConnectLines: 'outside',
+        fancyConnectLines: 'inside',
         fancyLineSpacing: 1.0,
         repeatEnabled: false,
         usesMachine: true,
