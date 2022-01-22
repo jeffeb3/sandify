@@ -41,8 +41,8 @@ export const fontsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(loadFont.fulfilled, (state, action) => {
+      state.loaded = state.fonts.length === Object.keys(supportedFonts).length - 1
       state.fonts.push(action.payload)
-      state.loaded = state.fonts.length === supportedFonts.length
     })
   }
 })

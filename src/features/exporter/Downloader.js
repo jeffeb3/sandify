@@ -7,6 +7,7 @@ import CheckboxOption from '../../components/CheckboxOption'
 import { updateExporter } from './exporterSlice'
 import { getComments } from './selectors'
 import { getAllComputedVertices } from '../machine/selectors'
+import { getLayers, getMain } from '../store/selectors'
 import ReactGA from 'react-ga'
 import GCodeExporter from './GCodeExporter'
 import ScaraGCodeExporter from './ScaraGCodeExporter'
@@ -22,28 +23,31 @@ const exporters = {
 }
 
 const mapStateToProps = (state, ownProps) => {
+  const main = getMain(state)
+  const layers = getLayers(state)
+
   return {
-    reverse: state.exporter.reverse,
-    show: state.exporter.show,
+    reverse: main.exporter.reverse,
+    show: main.exporter.show,
     vertices: getAllComputedVertices(state),
     comments: getComments(state),
-    input: state.app.input,
-    layer: state.layers.current,
-    offsetX: (state.machine.rectangular ? (state.machine.minX + state.machine.maxX) / 2.0 : state.machine.maxRadius),
-    offsetY: (state.machine.rectangular ? (state.machine.minY + state.machine.maxY) / 2.0 : state.machine.maxRadius),
-    width:   (state.machine.rectangular ? (state.machine.maxX - state.machine.minX) : (2.0 * state.machine.maxRadius)),
-    height:  (state.machine.rectangular ? (state.machine.maxY - state.machine.minY) : (2.0 * state.machine.maxRadius)),
-    maxRadius: (state.machine.rectangular ?
-      Math.sqrt(Math.pow(state.machine.maxX - state.machine.minX, 2.0) +
-                Math.pow(state.machine.maxY - state.machine.minY, 2.0)) :
-      state.machine.maxRadius),
-    fileName: state.exporter.fileName,
-    fileType: state.exporter.fileType,
-    isGCode: state.exporter.fileType === GCODE || state.exporter.fileType === SCARA,
-    polarRhoMax: state.exporter.polarRhoMax,
-    unitsPerCircle: state.exporter.unitsPerCircle,
-    pre: (state.exporter.fileType !== SVG ? state.exporter.pre : ''),
-    post: (state.exporter.fileType !== SVG ? state.exporter.post : ''),
+    input: main.app.input,
+    layer: layers.current,
+    offsetX: (main.machine.rectangular ? (main.machine.minX + main.machine.maxX) / 2.0 : main.machine.maxRadius),
+    offsetY: (main.machine.rectangular ? (main.machine.minY + main.machine.maxY) / 2.0 : main.machine.maxRadius),
+    width:   (main.machine.rectangular ? (main.machine.maxX - main.machine.minX) : (2.0 * main.machine.maxRadius)),
+    height:  (main.machine.rectangular ? (main.machine.maxY - main.machine.minY) : (2.0 * main.machine.maxRadius)),
+    maxRadius: (main.machine.rectangular ?
+      Math.sqrt(Math.pow(main.machine.maxX - main.machine.minX, 2.0) +
+                Math.pow(main.machine.maxY - main.machine.minY, 2.0)) :
+      main.machine.maxRadius),
+    fileName: main.exporter.fileName,
+    fileType: main.exporter.fileType,
+    isGCode: main.exporter.fileType === GCODE || main.exporter.fileType === SCARA,
+    polarRhoMax: main.exporter.polarRhoMax,
+    unitsPerCircle: main.exporter.unitsPerCircle,
+    pre: (main.exporter.fileType !== SVG ? main.exporter.pre : ''),
+    post: (main.exporter.fileType !== SVG ? main.exporter.post : ''),
     options: new Exporter().getOptions()
   }
 }

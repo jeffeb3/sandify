@@ -4,8 +4,10 @@ import Victor from 'victor'
 import Color from 'color'
 import { transformShapes, transformShape, polishVertices, getMachineInstance } from './computer'
 import { getShape } from '../../models/shapes'
-import { makeGetLayer, makeGetLayerIndex, getNumVisibleLayers,
-  getVisibleNonEffectIds, makeGetEffects, getCachedSelector, makeGetNonEffectLayerIndex } from '../layers/selectors'
+import { getMachine, getState, getPreview } from '../store/selectors'
+import { getLoadedFonts } from '../fonts/selectors'
+import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
+import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { log } from '../../common/util'
 
@@ -17,11 +19,6 @@ const cache = new LRUCache({
 const getCacheKey = (state) => {
   return JSON.stringify(state)
 }
-
-const getState = state => state
-const getMachine = state => state.machine
-const getPreview = state => state.preview
-const getFonts = state => state.fonts
 
 // by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
@@ -44,7 +41,7 @@ const makeGetLayerFonts = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetLayer, layerId),
-      getFonts
+      getLoadedFonts
     ],
     (layer, fonts) => {
       log("makeGetLayerFonts " + layerId)

@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import {
-    Accordion
-} from 'react-bootstrap'
+import { Accordion } from 'react-bootstrap'
 import RectSettings from './RectSettings'
 import PolarSettings from './PolarSettings'
+import { getMachine } from '../store/selectors'
 
 const mapStateToProps = (state, ownProps) => {
+  const machine = getMachine(state)
+
   return {
-    rectangular: state.machine.rectangular,
+    rectangular: machine.rectangular
   }
 }
 

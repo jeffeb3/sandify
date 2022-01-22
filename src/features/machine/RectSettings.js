@@ -18,17 +18,20 @@ import {
   toggleMachineRectExpanded,
   setMachineRectOrigin
 } from './machineSlice'
+import { getMachine } from '../store/selectors'
 
 const mapStateToProps = (state, ownProps) => {
+  const machine = getMachine(state)
+
   return {
-    expanded: state.machine.rectExpanded,
-    active:   state.machine.rectangular,
-    minX:    state.machine.minX,
-    maxX:    state.machine.maxX,
-    minY:    state.machine.minY,
-    maxY:    state.machine.maxY,
-    origin:   state.machine.rectOrigin,
-    minimizeMoves: state.machine.minimizeMoves,
+    expanded: machine.rectExpanded,
+    active:   machine.rectangular,
+    minX:    machine.minX,
+    maxX:    machine.maxX,
+    minY:    machine.minY,
+    maxY:    machine.maxY,
+    origin:   machine.rectOrigin,
+    minimizeMoves: machine.minimizeMoves,
     options: new Machine().getOptions()
   }
 }

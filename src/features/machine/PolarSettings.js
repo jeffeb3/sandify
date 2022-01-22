@@ -12,6 +12,7 @@ import {
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import Machine from '../../models/Machine'
+import { getMachine } from '../store/selectors'
 import {
   toggleMachinePolarExpanded,
   updateMachine,
@@ -19,13 +20,15 @@ import {
 } from './machineSlice'
 
 const mapStateToProps = (state, ownProps) => {
+  const machine = getMachine(state)
+
   return {
-    expanded: state.machine.polarExpanded,
-    active: !state.machine.rectangular,
-    maxRadius: state.machine.maxRadius,
-    startPoint: state.machine.polarStartPoint,
-    endPoint: state.machine.polarEndPoint,
-    minimizeMoves: state.machine.minimizeMoves,
+    expanded: machine.polarExpanded,
+    active: !machine.rectangular,
+    maxRadius: machine.maxRadius,
+    startPoint: machine.polarStartPoint,
+    endPoint: machine.polarEndPoint,
+    minimizeMoves: machine.minimizeMoves,
     options: new Machine().getOptions()
   }
 }
