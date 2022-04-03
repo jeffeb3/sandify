@@ -35,3 +35,5 @@ const debug = false
 export const log = (message) => {
   if (debug) { console.log(message) }
 }
+
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

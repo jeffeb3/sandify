@@ -131,7 +131,7 @@ const PreviewLayer = (ownProps) => {
 
       drawLayerVertices(context, props.bounds)
 
-      if (props.start || props.end || isSelected) {
+      if (!ownProps.exportMode && (props.start || props.end || isSelected)) {
         drawStartAndEndPoints(context)
       }
       helper.drawSliderEndPoint(context)
@@ -159,12 +159,12 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.layer.visible && isSelected && props.layer.canChangeSize) {
+    if (props.layer.visible && isSelected && props.layer.canChangeSize && !ownProps.exportMode) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isSelected, props.layer, props.currentLayer.canMove, shapeRef, trRef])
+  }, [isSelected, props.layer, props.currentLayer.canMove, shapeRef, trRef, ownProps.exportMode])
 
   return (
     <React.Fragment>
@@ -214,7 +214,7 @@ const PreviewLayer = (ownProps) => {
           })
         }}
       />}
-      {props.layer.visible && isSelected && props.layer.canChangeSize && (
+      {props.layer.visible && isSelected && props.layer.canChangeSize  && !ownProps.exportMode && (
         <Transformer
           ref={trRef}
           centeredScaling={true}

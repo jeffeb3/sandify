@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { saveAs } from 'file-saver';
 import { Button, Modal, Col, Row } from 'react-bootstrap'
 import DropdownOption from '../../components/DropdownOption'
 import InputOption from '../../components/InputOption'
@@ -13,6 +14,7 @@ import ScaraGCodeExporter from './ScaraGCodeExporter'
 import SvgExporter from './SvgExporter'
 import ThetaRhoExporter from './ThetaRhoExporter'
 import { Exporter, GCODE, THETARHO, SVG, SCARA } from '../../models/Exporter'
+import { exportCurrentPreviewWindow } from '../preview/PreviewWindow'
 
 const exporters = {
   [GCODE]: GCodeExporter,
@@ -24,6 +26,7 @@ const exporters = {
 const mapStateToProps = (state, ownProps) => {
   return {
     reverse: state.exporter.reverse,
+    pngPreview: state.exporter.pngPreview,
     show: state.exporter.show,
     vertices: getAllComputedVertices(state),
     comments: getComments(state),
@@ -75,7 +78,7 @@ class Downloader extends Component {
     })
   }
 
-  download() {
+  async download() {
     let exporter = new exporters[this.props.fileType](this.props)
     let startTime = performance.now()
     let fileName = this.props.fileName
@@ -87,7 +90,16 @@ class Downloader extends Component {
     }
 
     this.gaRecord(exporter.label)
-    this.downloadFile(fileName, exporter.lines.join("\n"))
+    saveAs(new Blob([exporter.lines.join("\n")], {
+      type: this.props.fileType === SVG ? 'image/svg+xml;charset=utf-8' : 'text/plain;charset=utf-8'
+    }), fileName);
+
+    if (this.props.pngPreview) {
+      const preview = await exportCurrentPreviewWindow();
+      if (preview) {
+        saveAs(preview, `${fileName.match(/(.*)\.\w+$/)[1]}.png`);
+      }
+    }
     this.props.close()
 
     let endTime = performance.now()
@@ -96,35 +108,6 @@ class Downloader extends Component {
       variable: 'Save Code',
       value: endTime - startTime, // in milliseconds
     })
-  }
-
-  // Helper function to take a string and make the user download a text file with that text as the
-  // content. I don't really understand this, but I took it from here, and it seems to work:
-  // https://stackoverflow.com/a/18197511
-  downloadFile(fileName, text) {
-    let link = document.createElement('a')
-    link.download = fileName
-
-    let fileType = 'text/plain;charset=utf-8'
-    if (this.props.fileType === SVG) {
-      fileType = 'image/svg+xml;charset=utf-8'
-    }
-    let blob = new Blob([text],{type: fileType})
-
-    // Windows Edge fix
-    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveOrOpenBlob(blob, fileName)
-    } else {
-      link.href = URL.createObjectURL(blob)
-      if (document.createEvent) {
-        var event = document.createEvent('MouseEvents')
-        event.initEvent('click', true, true)
-        link.dispatchEvent(event)
-      } else {
-        link.click()
-      }
-      URL.revokeObjectURL(link.href)
-    }
   }
 
   render() {
@@ -209,6 +192,15 @@ class Downloader extends Component {
                 options={this.props.options}
                 optionKey="reverse"
                 key="reverse"
+                index={5}
+                model={this.props} />
+            </div>
+            <div className="mt-2">
+              <CheckboxOption
+                onChange={this.props.onChange}
+                options={this.props.options}
+                optionKey="pngPreview"
+                key="pngPreview"
                 index={5}
                 model={this.props} />
             </div>

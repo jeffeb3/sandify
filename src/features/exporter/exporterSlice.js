@@ -30,6 +30,7 @@ const exporterSlice = createSlice({
     pre: localStorage.getItem('export_pre') ? localStorage.getItem('export_pre') : '',
     post: localStorage.getItem('export_post') ? localStorage.getItem('export_post') : '',
     reverse: false,
+    pngPreview: localStorage.getItem('export_pngPreview') !== null ? Boolean(localStorage.getItem('png_preview')) : false,
     show: false,
     polarRhoMax: localStorage.getItem('export_polarRhoMax') ? localStorage.getItem('export_polarRhoMax') : 1.0,
     unitsPerCircle: localStorage.getItem('export_unitsPerCircle') ? localStorage.getItem('export_unitsPerCircle') : 6.0

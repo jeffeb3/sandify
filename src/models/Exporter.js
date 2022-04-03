@@ -38,6 +38,9 @@ const exporterOptions = {
   reverse: {
     title: 'Reverse path in the code',
   },
+  pngPreview: {
+    title: 'Export the preview image',
+  },
 }
 
 export class Exporter {

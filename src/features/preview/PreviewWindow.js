@@ -5,9 +5,16 @@ import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
 import { getCurrentLayer, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
-import { roundP } from '../../common/util'
+import { roundP, sleep } from '../../common/util'
 import PreviewLayer from './PreviewLayer'
 import PreviewConnector from './PreviewConnector'
+
+let getPreview = null;
+export const exportCurrentPreviewWindow = () => {
+  if (getPreview) {
+    return getPreview();
+  }
+}
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -43,6 +50,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 // Contains the preview window, and any parameters for the machine.
 class PreviewWindow extends Component {
+  state = {exportMode: false};
+
   componentDidMount() {
     const wrapper = document.getElementById('preview-wrapper')
 
@@ -51,7 +60,15 @@ class PreviewWindow extends Component {
     setTimeout(() => {
       this.visible = true
       this.resize(wrapper)
-    }, 250)
+    }, 250);
+
+    getPreview = async () => {
+      this.setState({exportMode: true});
+      await sleep(0); // sleep to let react re-render the canvas before we export it
+      const preview = await new Promise((resolve) => this.stageRef.toCanvas().toBlob(resolve));
+      this.setState({exportMode: false});
+      return preview;
+    }
   }
 
   resize(wrapper) {
@@ -87,7 +104,7 @@ class PreviewWindow extends Component {
       // which is not our usual React Component
       <ReactReduxContext.Consumer>
         {({store}) => (
-          <Stage className={visibilityClass}
+          <Stage ref={(ref) => this.stageRef = ref} className={visibilityClass}
             scaleX={scale * reduceScale}
             scaleY={scale * reduceScale}
             height={height * scale}
@@ -123,7 +140,7 @@ class PreviewWindow extends Component {
                   return (
                     [
                       nextId && <PreviewConnector startId={id} endId={nextId} key={'c-' + i} />,
-                      <PreviewLayer id={id} key={i} index={i} />
+                      <PreviewLayer id={id} key={i} index={i} exportMode={this.state.exportMode} />
                     ].filter(e => e !== null)
                   )
                 }).flat()}
