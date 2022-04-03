@@ -4,7 +4,8 @@ import {
   Row,
   Form,
 } from 'react-bootstrap'
-import Switch from 'react-switch'
+import S from "react-switch";
+const Switch = S.default ? S.default: S; // Fix: https://github.com/vitejs/vite/issues/2139
 
 class CheckboxOption extends Component {
   render() {
