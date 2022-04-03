@@ -21,42 +21,38 @@
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
     "mathjs": "^9.3.2",
-    "node-sass": "^5.0.0",
     "rc-slider": "^9.7.2",
-    "react": "17.0.2",
+    "react": "^17.0.2",
     "react-bootstrap": "^1.5.2",
     "react-dev-utils": ">=11.0.4",
-    "react-dom": "17.0.2",
+    "react-dom": "^17.0.2",
     "react-ga": "^3.3.0",
     "react-icons": "^4.2.0",
     "react-konva": "^17.0.2-0",
     "react-redux": "^7.2.3",
-    "react-scripts": "^4.0.3",
     "react-select": "^4.3.0",
     "react-sortable-hoc": "^2.0",
     "react-switch": "^6.0.0",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.1.0",
     "reselect": "^4.0.0",
+    "sass": "^1.49.11",
     "seedrandom": "^3.0.5",
+    "stream-browserify": "^3.0.0",
     "victor": "^1.1.0"
   },
   "devDependencies": {
-    "eslint-plugin-flowtype": "^5.7.2",
-    "gh-pages": "^3.1.0",
-    "typescript": "^4.2.0",
-    "webpack-dev-server": "^3.11.1"
-  },
-  "peerDependencies": {
-    "@babel/core": "^7.14.0"
+    "@vitejs/plugin-react": "^1.0.7",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "gh-pages": "^3.2.3",
+    "vite": "^2.9.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"

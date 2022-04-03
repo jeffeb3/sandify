@@ -38,7 +38,7 @@ const persistInitKey = 'state'
 const persistSaveKey = 'state'
 
 // never persist state when running within a jest spec
-if (process.env.JEST_WORKER_ID === undefined && persistState) {
+if (import.meta.env.JEST_WORKER_ID === undefined && persistState) {
   // override default values with saved ones
   const persistedState = loadState(persistInitKey)
 
