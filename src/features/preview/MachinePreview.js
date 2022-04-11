@@ -34,7 +34,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       if (currentLayer.canMove) {
         if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-          const delta = !!event.shiftKey ? 1 : 5
+          const delta = event.shiftKey ? 1 : 5
 
           if (event.key === 'ArrowDown') {
             attrs.offsetY = currentLayer.offsetY - delta

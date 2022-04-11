@@ -8,7 +8,7 @@ class Footer extends Component {
           <h2>About</h2>
           <p>Sandify turns your cold, empty-hearted, emotionless sand tables into cold, empty-hearted, emotionless sand table robots with enchanting patterns.</p>
           <p>
-            Sandify is a labor of love, but if you'd like to support me financially,
+            Sandify is a labor of love, but if you&apos;d like to support me financially,
             I do have a <a href="https://github.com/sponsors/jeffeb3">Donation system set up with github</a>. Or just <a href="https://www.paypal.me/jeffeb3">PayPal</a>.
           </p>
         </div>

@@ -30,9 +30,9 @@ export default class CommentExporter extends Exporter {
 
     this.keyValueLine('Content type', state.app.input)
 
+    const layers = state.layers
     switch (state.app.input) {
       case 'shape': // shapes
-        const layers = state.layers
         layers.forEach(layer => {
           const shape = getShape(layer)
           const options = shape.getOptions()
