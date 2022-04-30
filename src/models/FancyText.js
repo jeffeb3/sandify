@@ -330,10 +330,13 @@ export default class FancyText extends Shape {
     // a possible (fully contained) child paths
     const graph = this.buildGraph(word, font)
 
-    return Object.keys(graph).sort((idx) => {
-      const points = graph[idx].points
-      return Math.min(...points.map(pt => pt.x))
-    }).map(key => graph[key])
+    return Object.keys(graph).sort(
+      (leftIndex, rightIndex) => {
+        const leftPoints = graph[leftIndex].points
+        const rightPoints = graph[rightIndex].points
+        return Math.min(...leftPoints.map(pt => pt.x)) - Math.min(...rightPoints.map(pt => pt.x))
+      })
+    .map(key => graph[key])
   }
 
   getOptions() {
