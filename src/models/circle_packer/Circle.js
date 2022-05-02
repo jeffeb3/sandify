@@ -67,9 +67,8 @@ export class Circle extends Victor {
     return ret
   }
 
-  // returns points of intersection between this circle and a line defined by two points
-  // adapted from
-  // https://cscheng.info/2016/06/09/calculate-circle-line-intersection-with-javascript-and-p5js.html
+  // Returns points of intersection between this circle and a line defined by two points
+  // Adapted from https://cscheng.info/2016/06/09/calculate-circle-line-intersection-with-javascript-and-p5js.html. No license was specified.
   // Added a special case for vertical lines not included in original algorithm.
   lineIntersection(p1, p2) {
     // circle: (x - h)^2 + (y - k)^2 = r^2

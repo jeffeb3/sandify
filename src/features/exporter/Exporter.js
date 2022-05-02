@@ -74,7 +74,7 @@ export default class Exporter {
           padding += '  '
         }
       }
-      this.lines.push(padding + content)
+      this.lines.push(padding + this.sanitizeValue(content))
     }
   }
 
@@ -111,5 +111,9 @@ export default class Exporter {
 
   endComments() {
     this.commenting = false
+  }
+
+  sanitizeValue(value) {
+    return value.replace("\n", ' ')
   }
 }

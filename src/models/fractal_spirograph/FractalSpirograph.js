@@ -31,6 +31,7 @@ const options = {
 }
 
 // Inspired/adapted from https://thecodingtrain.com/CodingChallenges/061-fractal-spirograph
+// No license was specified.
 export default class FractalSpirograph extends Shape {
   constructor() {
     super('Fractal Spirograph')

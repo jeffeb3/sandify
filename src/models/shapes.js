@@ -9,6 +9,7 @@ import FractalSpirograph from '../models/fractal_spirograph/FractalSpirograph'
 import Heart from '../models/Heart'
 import Hypocycloid from '../models/Hypocycloid'
 import InputText from '../models/input_text/InputText'
+import FancyText from '../models/FancyText'
 import LSystem from '../models/lsystem/LSystem'
 import Mask from '../models/Mask'
 import Noise from '../models/Noise'
@@ -36,6 +37,7 @@ export const registeredShapes = {
   hypocycloid: new Hypocycloid(),
   rose: new Rose(),
   inputText: new InputText(),
+  fancy_text: new FancyText(),
   v1Engineering: new V1Engineering(),
   lsystem: new LSystem(),
   fractal_spirograph: new FractalSpirograph(),

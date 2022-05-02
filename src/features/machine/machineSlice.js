@@ -7,6 +7,10 @@ const localMinY = parseFloat(localStorage.getItem('minY') || localStorage.getIte
 const localMaxY = parseFloat(localStorage.getItem('maxY') || localStorage.getItem('machine_max_y'))
 const localMaxRadius = parseFloat(localStorage.getItem('maxRadius') || localStorage.getItem('machine_radius'))
 
+let rectOrigin = localStorage.getItem('rectOrigin')
+if (rectOrigin) { rectOrigin = JSON.parse(rectOrigin) }
+if (!Array.isArray(rectOrigin)) { rectOrigin = [] }
+
 const machineSlice = createSlice({
   name: 'machine',
   initialState: {
@@ -19,9 +23,9 @@ const machineSlice = createSlice({
     maxY: localMaxY || 500,
     maxRadius: localMaxRadius || 250,
     minimizeMoves: JSON.parse(localStorage.getItem('minimizeMoves')) || false,
-    rectOrigin: [],
-    polarStartPoint: 'none',
-    polarEndPoint: 'none'
+    rectOrigin: rectOrigin,
+    polarStartPoint: localStorage.getItem('polarStartPoint') || 'none',
+    polarEndPoint: localStorage.getItem('polarEndPoint') || 'none'
   },
   reducers: {
     updateMachine(state, action) {
@@ -53,6 +57,7 @@ const machineSlice = createSlice({
         }
       }
       state.rectOrigin = newValue
+      localStorage.setItem('rectOrigin', JSON.stringify(newValue))
     },
     toggleMinimizeMoves(state, action) {
       state.minimizeMoves = !state.minimizeMoves

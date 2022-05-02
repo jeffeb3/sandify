@@ -4,6 +4,7 @@ import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
+import { getLayers } from '../store/selectors'
 import { getAllLayersInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible, setNewLayerType } from '../layers/layersSlice'
 import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
@@ -14,6 +15,7 @@ import './Playlist.scss'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
+  const layers = getLayers(state)
   const shape = getShape(layer)
 
   return {
@@ -21,10 +23,10 @@ const mapStateToProps = (state, ownProps) => {
     numLayers: getNumLayers(state),
     currentLayer: layer,
     shape: shape,
-    newLayerType: state.layers.newLayerType,
-    newLayerName: state.layers.newLayerName,
-    newLayerNameOverride: state.layers.newLayerNameOverride,
-    copyLayerName: state.layers.copyLayerName,
+    newLayerType: layers.newLayerType,
+    newLayerName: layers.newLayerName,
+    newLayerNameOverride: layers.newLayerNameOverride,
+    copyLayerName: layers.copyLayerName,
     selectOptions: getShapeSelectOptions()
   }
 }

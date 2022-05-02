@@ -44,7 +44,8 @@ export default class PreviewHelper {
     if (this.props.sliderValue !== 0) {
       const offsets = this.props.offsets[this.props.offsetId]
 
-      if (end >= offsets.start && end <= offsets.end) {
+      // If the offset is past the end, then we won't set the slider end
+      if (offsets && end >= offsets.start && end <= offsets.end) {
         const sliderEnd = this.props.vertices[end - offsets.start]
 
         if (sliderEnd) {

@@ -4,6 +4,7 @@ import appReducer from './appSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
 import previewReducer from '../preview/previewSlice'
+import fontsReducer from '../fonts/fontsSlice'
 import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
@@ -19,13 +20,39 @@ import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
 
 const store = configureStore({
   reducer: combineReducers({
-    app: appReducer,
-    layers: layersReducer,
-    exporter: exporterReducer,
-    machine: machineReducer,
-    preview: previewReducer
+    main: combineReducers({
+      app: appReducer,
+      layers: layersReducer,
+      exporter: exporterReducer,
+      machine: machineReducer,
+      preview: previewReducer
+    }),
+    fonts: fontsReducer
   })
 })
+
+const loadPersistedLayers = (layers) => {
+  layers.allIds.forEach((id) => {
+    let layer = layers.byId[id]
+
+    if (layer.startingWidth === undefined) layer.startingWidth = layer.startingSize
+    if (layer.startingHeight === undefined) layer.startingHeight = layer.startingWidth
+    if (layer.autosize === undefined) layer.autosize = true
+
+    store.dispatch(addLayer(layer))
+  })
+}
+
+const loadDefaultLayer = () => {
+  const storedShape = localStorage.getItem('currentShape')
+  const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
+  const layer = registeredShapes[currentShape].getInitialState()
+
+  store.dispatch(addLayer(layer))
+
+  const state = store.getState()
+  store.dispatch(setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id))
+}
 
 // set to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
@@ -42,33 +69,24 @@ if (typeof jest === 'undefined' && persistState) {
   const persistedState = loadState(persistInitKey)
 
   if (persistedState) {
-    persistedState.layers.allIds.forEach((id) => {
-      let layer = persistedState.layers.byId[id]
-
-      if (layer.startingWidth === undefined) layer.startingWidth = layer.startingSize
-      if (layer.startingHeight === undefined) layer.startingHeight = layer.startingWidth
-      if (layer.autosize === undefined) layer.autosize = true
-
-      store.dispatch(addLayer(layer))
-    })
-    store.dispatch(setCurrentLayer(persistedState.layers.current))
+    if (persistedState.main && persistedState.main.layers) {
+      loadPersistedLayers(persistedState.main.layers)
+      store.dispatch(setCurrentLayer(persistedState.main.layers.current))
+    } else if (persistedState.layers) {
+      loadPersistedLayers(persistedState.layers) // older store format
+      store.dispatch(setCurrentLayer(persistedState.layers.current))
+    }
+  } else {
+    loadDefaultLayer()
   }
 } else {
-  const storedShape = localStorage.getItem('currentShape')
-  const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
-  const layer = registeredShapes[currentShape].getInitialState()
-
-  store.dispatch(addLayer(layer))
-
-  const state = store.getState()
-  store.dispatch(setCurrentLayer(state.layers.byId[state.layers.allIds[0]].id))
+  loadDefaultLayer()
 }
 
 if (persistState) {
   store.subscribe(() => {
     const state = store.getState()
-
-    saveState({ layers: state.layers }, persistSaveKey)
+    saveState({ main: { layers: state.main.layers } }, persistSaveKey)
   })
 }
 

@@ -8,6 +8,7 @@ export default class PolarMachine extends Machine {
     this.vertices = vertices
     this.settings = Object.assign({}, settings)
     this.settings.perimeterConstant = 50
+    this.sizeX = this.settings.maxRadius * 2
     this.layerInfo = layerInfo
   }
 
@@ -117,7 +118,7 @@ export default class PolarMachine extends Machine {
   // The guts of logic for this limits enforcer. It will take a single line (defined by
   // start and end) and if the line goes out of bounds, returns the vertices around the
   // outside edge to follow around without messing up the shape of the vertices.
-  clipLine(start, end) {
+  clipSegment(start, end) {
     // Cases:
     // 1 - Entire line is inside
     //     return start, end
@@ -231,5 +232,10 @@ export default class PolarMachine extends Machine {
         points: [],
       }
     }
+  }
+
+  // returns the points if any that intersect with the line represented by start and end
+  clipLine(start, end) {
+    return this.getIntersections(start, end).points.map(pt => pt.point)
   }
 }

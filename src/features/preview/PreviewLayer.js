@@ -4,7 +4,9 @@ import { Shape, Transformer } from 'react-konva'
 import { makeGetPreviewTrackVertices, makeGetPreviewVertices, getSliderColors,
   getVertexOffsets, getAllComputedVertices, getSliderBounds } from '../machine/selectors'
 import { updateLayer } from '../layers/layersSlice'
-import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, getNumVisibleLayers, getCachedSelector } from '../layers/selectors'
+import { getLayers, getPreview } from '../store/selectors'
+import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, getNumVisibleLayers } from '../layers/selectors'
+import { getCachedSelector } from '../store/selectors'
 import { roundP } from '../../common/util'
 import PreviewHelper from './PreviewHelper'
 
@@ -18,9 +20,11 @@ const PreviewLayer = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
+    const layers = getLayers(state)
     const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayer(state)
     const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
+    const preview = getPreview(state)
 
     return {
       layer: layer,
@@ -30,8 +34,8 @@ const PreviewLayer = (ownProps) => {
       trackVertices: getCachedSelector(makeGetPreviewTrackVertices, layer.id)(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
       allVertices: getAllComputedVertices(state),
-      selected: state.layers.selected,
-      sliderValue: state.preview.sliderValue,
+      selected: layers.selected,
+      sliderValue: preview.sliderValue,
       showTrack: true,
       colors: getSliderColors(state),
       offsets: getVertexOffsets(state),
