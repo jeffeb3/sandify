@@ -12,7 +12,7 @@ export const eulerianTrail = (options) => {
   var idCount = 0
 
   function getId(x) {
-    if (!id.hasOwnProperty(x)) {
+    if (!id[x]) {
       edgePointer[idCount] = 0
       idReverse[idCount] = x
       id[x] = idCount++

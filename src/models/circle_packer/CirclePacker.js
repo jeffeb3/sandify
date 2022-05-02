@@ -311,7 +311,6 @@ export default class CirclePacker extends Shape {
   }
 
   connectAlongPerimeter(c, end, angle) {
-    debugger
     const intersection = this.boundaryIntersection(c)
     const intersection2 = this.boundaryIntersection(end)
 

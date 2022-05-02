@@ -1,4 +1,5 @@
 export const difference = (a, b) => {
+  // eslint-disable-next-line no-undef
   return new Set(
     [
       ...[...a].filter(x => !b.has(x)),

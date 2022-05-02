@@ -143,6 +143,7 @@ const raysolConverter = (vertices) => {
 
 export const MonospaceFont = (ch) => {
   let upper = ch.toUpperCase()
+  // eslint-disable-next-line no-prototype-builtins
   if (billsey.hasOwnProperty(upper)) {
     return billseyConverter(billsey[upper])
   } else {
@@ -151,6 +152,7 @@ export const MonospaceFont = (ch) => {
 }
 
 export const CursiveFont = (ch) => {
+  // eslint-disable-next-line no-prototype-builtins
   if (raysol_cursive.hasOwnProperty(ch)) {
     return raysolConverter(raysol_cursive[ch])
   } else {
@@ -159,6 +161,7 @@ export const CursiveFont = (ch) => {
 }
 
 export const SansSerifFont = (ch) => {
+  // eslint-disable-next-line no-prototype-builtins
   if (raysol_cursive.hasOwnProperty(ch)) {
     return raysolConverter(raysol_sanserif[ch])
   } else {
