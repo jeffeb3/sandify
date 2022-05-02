@@ -23,11 +23,11 @@ export const onSubtypeChange = (subtype, changes, attrs) => {
   return changes
 }
 
-export const onMinIterations = (subtype, state) => {
+export const onMinIterations = (subtype) => {
   return (subtype && subtype.minIterations) || 1
 }
 
-export const onMaxIterations = (subtype, state) => {
+export const onMaxIterations = (subtype) => {
   return (subtype && subtype.maxIterations) || 7
 }
 
