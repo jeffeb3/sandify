@@ -11,16 +11,23 @@ class DropdownOption extends Component {
     const option = this.props.options[this.props.optionKey]
     const model = this.props.model
     const currentChoice = model[this.props.optionKey]
-    const choices = Array.isArray(option.choices) ?
-      option.choices.map((choice) => {
+
+    let choices = option.choices
+    if (typeof choices === 'function') {
+      choices = choices()
+    }
+
+    choices = Array.isArray(choices) ?
+      choices.map((choice) => {
         return { value: choice, label: choice }
       }) :
-      Object.keys(option.choices).map((key) => {
+      Object.keys(choices).map((key) => {
         return { value: key, label: option.choices[key] }
       })
-    const currentLabel = Array.isArray(option.choices) ?
+
+    const currentLabel = Array.isArray(choices) ?
       currentChoice :
-      option.choices[currentChoice]
+      choices[currentChoice]
 
     return (
       <Row className="align-items-center pb-2" key={this.props.index}>

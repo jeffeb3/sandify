@@ -26,7 +26,6 @@ describe('layers reducer', () => {
     selectGroup: 'Shapes',
     shouldCache: true,
     canRotate: true,
-    canMove: true,
     canChangeSize: true,
     canChangeHeight: true,
     canMove: true,
@@ -62,6 +61,7 @@ describe('layers reducer', () => {
     trackNumLoops: 1,
     trackGrow: 50.0,
     usesMachine: false,
+    usesFonts: false,
     dragging: false,
     visible: true
   }

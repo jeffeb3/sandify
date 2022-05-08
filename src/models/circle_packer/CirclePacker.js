@@ -34,8 +34,8 @@ const options = {
   }
 }
 
-// adapted initially from Coding Challenge #50; Animated Circle Packing
-// https://www.youtube.com/watch?v=QHEQuoIKgNE
+// adapted initially from Coding Challenge #50; Animated Circle Packing, https://www.youtube.com/watch?v=QHEQuoIKgNE
+// no license was specified
 export default class CirclePacker extends Shape {
   constructor() {
     super('Circle Packer')
@@ -311,7 +311,6 @@ export default class CirclePacker extends Shape {
   }
 
   connectAlongPerimeter(c, end, angle) {
-    debugger
     const intersection = this.boundaryIntersection(c)
     const intersection2 = this.boundaryIntersection(end)
 

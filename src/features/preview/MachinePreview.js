@@ -5,18 +5,21 @@ import 'rc-slider/assets/index.css'
 import PreviewWindow from './PreviewWindow'
 import Downloader from '../exporter/Downloader'
 import { getCurrentLayer } from '../layers/selectors'
+import { getLayers, getPreview } from '../store/selectors'
 import { updateLayer } from '../layers/layersSlice'
 import { updatePreview } from './previewSlice'
 import { getVerticesStats } from '../machine/selectors'
 import './MachinePreview.scss'
 
 const mapStateToProps = (state, ownProps) => {
+  const preview = getPreview(state)
   const current = getCurrentLayer(state)
+  const layers = getLayers(state)
 
   return {
     currentLayer: current,
-    currentLayerSelected: state.layers.selected === current.id,
-    sliderValue: state.preview.sliderValue,
+    currentLayerSelected: layers.selected === current.id,
+    sliderValue: preview.sliderValue,
     verticesStats: getVerticesStats(state),
   }
 }
@@ -34,7 +37,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
       if (currentLayer.canMove) {
         if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-          const delta = !!event.shiftKey ? 1 : 5
+          const delta = event.shiftKey ? 1 : 5
 
           if (event.key === 'ArrowDown') {
             attrs.offsetY = currentLayer.offsetY - delta
@@ -61,13 +64,13 @@ class MachinePreview extends Component {
 
   render() {
     return (
-      <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview" ref={(el) => { this.el = el }} tabIndex={0} onKeyDown={e => {
-        if (this.props.currentLayerSelected) {
-          this.props.onKeyDown(e, this.props.currentLayer)
-        }
-      }}>
+      <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
         <div className="flex-grow-1 d-flex flex-column">
-          <div id="preview-wrapper" className="preview-wrapper d-flex flex-column align-items-center">
+          <div id="preview-wrapper" className="preview-wrapper d-flex flex-column align-items-center" ref={(el) => { this.el = el }} tabIndex={0} onKeyDown={e => {
+            if (this.props.currentLayerSelected) {
+              this.props.onKeyDown(e, this.props.currentLayer)
+            }
+          }}>
             <PreviewWindow />
           </div>
 

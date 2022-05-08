@@ -2,7 +2,9 @@ import React from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Shape } from 'react-konva'
 import { makeGetConnectorVertices, getSliderBounds, getSliderColors, getVertexOffsets } from '../machine/selectors'
-import { getCurrentLayer, getCachedSelector, makeGetLayer } from '../layers/selectors'
+import { getPreview, getLayers } from '../store/selectors'
+import { getCurrentLayer, makeGetLayer } from '../layers/selectors'
+import { getCachedSelector } from '../store/selectors'
 import PreviewHelper from './PreviewHelper'
 
 // Renders a connector between two layers.
@@ -20,13 +22,15 @@ const PreviewConnector = (ownProps) => {
     const vertices = startLayer === endLayer ?
       [] :
       getCachedSelector(makeGetConnectorVertices, startLayer.id, endLayer.id)(state)
+    const layers = getLayers(state)
+    const preview = getPreview(state)
 
     return {
       layer: startLayer,
       endLayer: endLayer,
       vertices: vertices,
-      sliderValue: state.preview.sliderValue,
-      selected: state.layers.selected,
+      sliderValue: preview.sliderValue,
+      selected: layers.selected,
       colors: getSliderColors(state),
       offsetId: startLayer.id + '-connector',
       offsets: getVertexOffsets(state),

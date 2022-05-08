@@ -4,6 +4,7 @@ import { Stage, Layer, Circle, Rect } from 'react-konva'
 import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
+import { getMachine, getLayers, getPreview } from '../store/selectors'
 import { getCurrentLayer, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
 import { roundP, sleep } from '../../common/util'
 import PreviewLayer from './PreviewLayer'
@@ -17,20 +18,24 @@ export const exportCurrentPreviewWindow = () => {
 }
 
 const mapStateToProps = (state, ownProps) => {
+  const layers = getLayers(state)
+  const preview = getPreview(state)
+  const machine = getMachine(state)
+
   return {
-    layers: state.layers,
+    layers: layers,
     currentLayer: getCurrentLayer(state),
     konvaIds: getKonvaLayerIds(state),
     layerIds: getVisibleNonEffectIds(state),
-    use_rect: state.machine.rectangular,
+    use_rect: machine.rectangular,
     dragging: isDragging(state),
-    minX: state.machine.minX,
-    maxX: state.machine.maxX,
-    minY: state.machine.minY,
-    maxY: state.machine.maxY,
-    maxRadius: state.machine.maxRadius,
-    canvasWidth: state.preview.canvasWidth,
-    canvasHeight: state.preview.canvasHeight
+    minX: machine.minX,
+    maxX: machine.maxX,
+    minY: machine.minY,
+    maxY: machine.maxY,
+    maxRadius: machine.maxRadius,
+    canvasWidth: preview.canvasWidth,
+    canvasHeight: preview.canvasHeight
   }
 }
 

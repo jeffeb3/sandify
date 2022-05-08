@@ -12,7 +12,7 @@ export default class RectInvertedMachine extends RectMachine {
     return this.enforceInvertedLimits()
   }
 
-  clipLine(start, end, log=false) {
+  clipSegment(start, end, log=false) {
     const quadrantStart = this.pointLocation(start)
     const quadrantEnd = this.pointLocation(end)
 

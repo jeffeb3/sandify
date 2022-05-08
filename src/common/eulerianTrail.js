@@ -1,4 +1,5 @@
 // adapted from https://github.com/mauriciopoppe/eulerian-trail/blob/master/lib/eulerian-trail.js
+// see NOTICE for license details
 // commented out thrown exceptions to return non-optimal eulerian paths
 export const eulerianTrail = (options) => {
   var g = []
@@ -12,7 +13,7 @@ export const eulerianTrail = (options) => {
   var idCount = 0
 
   function getId(x) {
-    if (!id.hasOwnProperty(x)) {
+    if (!id[x]) {
       edgePointer[idCount] = 0
       idReverse[idCount] = x
       id[x] = idCount++

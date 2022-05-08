@@ -27,7 +27,7 @@ export default class PolarInvertedMachine extends PolarMachine {
 
   // Take a given line, and if the line goes out of bounds, returns the vertices
   // around the outside edge to follow around without messing up the shape of the vertices.
-  clipLine(start, end, log=false) {
+  clipSegment(start, end, log=false) {
     const size = this.settings.maxRadius
     const radStart = start.magnitude()
     const radEnd = end.magnitude()

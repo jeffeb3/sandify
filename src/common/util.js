@@ -1,4 +1,5 @@
 export const difference = (a, b) => {
+  // eslint-disable-next-line no-undef
   return new Set(
     [
       ...[...a].filter(x => !b.has(x)),
@@ -30,10 +31,18 @@ export const arrayRotate = (arr, count) => {
   return arr
 }
 
-// set to true to turn on console logging
-const debug = false
-export const log = (message) => {
-  if (debug) { console.log(message) }
+const debug = false // set to true to turn on console logging
+
+// set to an array to limit which keys are shown
+// const keys = ['makeGetLayer']
+const keys = null
+
+export const log = (key, message) => {
+  if (debug) {
+    if (!keys || keys.includes(key)) {
+      console.log([key, message].filter(v => v).join(': '))
+    }
+  }
 }
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

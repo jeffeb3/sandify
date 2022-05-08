@@ -8,6 +8,7 @@ import Layer from '../layers/Layer'
 import Playlist from '../layers/Playlist'
 import { chooseInput } from '../app/appSlice'
 import { getCurrentLayer } from '../layers/selectors'
+import { loadFont, supportedFonts } from '../fonts/fontsSlice'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
@@ -17,18 +18,25 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-class InputTabs extends Component {
-  handleSelect(key) {
-    ReactGA.event({
-      category: 'InputTabs',
-      action: 'handleSelect: ' + key,
-    })
-    this.props.dispatch(chooseInput(key))
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    onLoadFont: (url) => {
+      dispatch(loadFont(url))
+    },
+    onTabSelected: (key) => {
+      ReactGA.event({
+        category: 'InputTabs',
+        action: 'handleSelect: ' + key,
+      })
+      dispatch(chooseInput(key))
+    }
   }
+}
 
+class InputTabs extends Component {
   render() {
     return (
-       <Tabs defaultActiveKey="shape" onSelect={this.handleSelect.bind(this)} id="input-tabs">
+       <Tabs defaultActiveKey="shape" onSelect={this.props.onTabSelected.bind(this)} id="input-tabs">
          <Tab eventKey="shape" title="Draw" className="full-page-tab">
            <div className="d-flex flex-column h-100">
              <Playlist />
@@ -46,6 +54,10 @@ class InputTabs extends Component {
        </Tabs>
     )
   }
+
+  componentDidMount() {
+    Object.keys(supportedFonts).forEach(url => this.props.onLoadFont(url))
+  }
 }
 
-export default connect(mapStateToProps, null)(InputTabs)
+export default connect(mapStateToProps, mapDispatchToProps)(InputTabs)

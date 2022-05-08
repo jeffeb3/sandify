@@ -23,16 +23,16 @@ export const onSubtypeChange = (subtype, changes, attrs) => {
   return changes
 }
 
-export const onMinIterations = (subtype, state) => {
+export const onMinIterations = (subtype) => {
   return (subtype && subtype.minIterations) || 1
 }
 
-export const onMaxIterations = (subtype, state) => {
+export const onMaxIterations = (subtype) => {
   return (subtype && subtype.maxIterations) || 7
 }
 
 // Implements a Lindenmayer system (L-system). See https://en.wikipedia.org/wiki/L-system.
-// Adapted from http://bl.ocks.org/nitaku/ce638f8bd5e70cb809e1
+// Adapted from http://bl.ocks.org/nitaku/ce638f8bd5e70cb809e1. No license was specified.
 export const lsystem = (config) => {
   let input = config.axiom
   let output
