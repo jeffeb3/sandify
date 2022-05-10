@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(setMachineRectOrigin(value))
     },
     toggleMinimizeMoves: () => {
-      dispatch(toggleMinimizeMoves());
+      dispatch(toggleMinimizeMoves())
     },
   }
 }

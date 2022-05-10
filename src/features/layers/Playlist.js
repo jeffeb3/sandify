@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Accordion, Button, Card, ListGroup, Modal, Row, Col, Form } from 'react-bootstrap'
 import Select from 'react-select'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa';
+import { FaTrash, FaEye, FaEyeSlash, FaCopy } from 'react-icons/fa'
 import { getLayers } from '../store/selectors'
 import { getAllLayersInfo, getCurrentLayer, getNumLayers } from '../layers/selectors'
 import { setCurrentLayer, addLayer, copyLayer, updateLayers, removeLayer, moveLayer, toggleVisible, setNewLayerType } from '../layers/layersSlice'
@@ -167,7 +167,7 @@ class Playlist extends Component {
       }
 
       importer.import(this.onFileImported.bind(this))
-      this.toggleImportModal.bind(this)();
+      this.toggleImportModal.bind(this)()
     }
 
     reader.readAsText(file)
@@ -323,7 +323,7 @@ class Playlist extends Component {
 
           <Modal.Footer>
             <Button id="copy-layer-close" variant="link" onClick={this.toggleCopyModal.bind(this)}>Cancel</Button>
-            <Button id="copy-layer-copy" variant="primary" onClick={() => { this.props.onLayerCopied(this.props.currentLayer.id); this.toggleCopyModal(); }}>Copy</Button>
+            <Button id="copy-layer-copy" variant="primary" onClick={() => { this.props.onLayerCopied(this.props.currentLayer.id); this.toggleCopyModal() }}>Copy</Button>
           </Modal.Footer>
         </Modal>
 

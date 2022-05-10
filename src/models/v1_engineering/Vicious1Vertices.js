@@ -419,7 +419,7 @@ let Vicious1Vertices = () => {
     new Victor(-0.776593639853, 0.330761710377),
     new Victor(-0.761093185246, 0.336423336564),
     new Victor(-0.745613252629, 0.342139688058),
-  ];
+  ]
 }
 
-export default Vicious1Vertices;
+export default Vicious1Vertices

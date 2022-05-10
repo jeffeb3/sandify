@@ -16,7 +16,7 @@ export const roundP = (n, p) => {
 // https://stackoverflow.com/a/4652513
 export const reduce = (numerator, denominator) => {
   let gcd = (a,b) => {
-    return b ? gcd(b, a%b) : a;
+    return b ? gcd(b, a%b) : a
   }
 
   gcd = gcd(numerator, denominator)

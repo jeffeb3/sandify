@@ -49,6 +49,7 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
+    "@typescript-eslint/parser": "^5.22.0",
     "@vitejs/plugin-react": "^1.0.7",
     "babel-jest": "^27.5.1",
     "eslint": "^8.13.0",
@@ -67,7 +68,8 @@
     "preview": "vite preview",
     "deploy": "gh-pages -d build",
     "test": "jest",
-    "lint": "eslint --ext .js --ignore-path .gitignore src"
+    "lint": "eslint --ext .js --ignore-path .gitignore --fix src",
+    "lint-ci": "eslint --ext .js --ignore-path .gitignore src"
   },
   "browserslist": [
     ">0.2%",

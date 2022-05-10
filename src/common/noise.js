@@ -271,36 +271,36 @@ class noise {
         var i2, j2, k2
         if (x0 >= y0) {
             if (y0 >= z0) {
-                i1=1; i2=1;
-                j1=0; j2=1;
-                k1=0; k2=0;
+                i1=1; i2=1
+                j1=0; j2=1
+                k1=0; k2=0
             }
             else if (x0 >= z0) {
-                i1=1; i2=1;
-                j1=0; j2=0;
-                k1=0; k2=1;
+                i1=1; i2=1
+                j1=0; j2=0
+                k1=0; k2=1
             }
             else {
-                i1=0; i2=1;
-                j1=0; j2=0;
-                k1=1; k2=1;
+                i1=0; i2=1
+                j1=0; j2=0
+                k1=1; k2=1
             }
         }
         else {
             if (y0 < z0) {
-                i1=0; i2=0;
-                j1=0; j2=1;
-                k1=1; k2=1;
+                i1=0; i2=0
+                j1=0; j2=1
+                k1=1; k2=1
             }
             else if (x0 < z0) {
-                i1=0; i2=0;
-                j1=1; j2=1;
-                k1=0; k2=1;
+                i1=0; i2=0
+                j1=1; j2=1
+                k1=0; k2=1
             }
             else {
-                i1=0; i2=1;
-                j1=1; j2=1;
-                k1=0; k2=0;
+                i1=0; i2=1
+                j1=1; j2=1
+                k1=0; k2=0
             }
         }
 
@@ -397,10 +397,10 @@ class noise {
         var X = Math.floor(x), Y = Math.floor(y)
 
         // Get relative xy coordinates of point within that cell
-        x = x - X; y = y - Y;
+        x = x - X; y = y - Y
 
         // Wrap the integer cells at 255 (smaller integer period can be introduced here)
-        X = X & 255; Y = Y & 255;
+        X = X & 255; Y = Y & 255
 
         // Calculate noise contributions from each of the four corners
         var n00 = gradP[X+perm[Y]].dot2(x, y)
@@ -435,10 +435,10 @@ class noise {
         var X = Math.floor(x), Y = Math.floor(y), Z = Math.floor(z)
 
         // Get relative xyz coordinates of point within that cell
-        x = x - X; y = y - Y; z = z - Z;
+        x = x - X; y = y - Y; z = z - Z
 
         // Wrap the integer cells at 255 (smaller integer period can be introduced here)
-        X = X & 255; Y = Y & 255; Z = Z & 255;
+        X = X & 255; Y = Y & 255; Z = Z & 255
 
         // Calculate noise contributions from each of the eight corners
         var n000 = gradP[X+  perm[Y+  perm[Z  ]]].dot3(x,   y,     z)

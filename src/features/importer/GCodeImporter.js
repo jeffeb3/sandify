@@ -1,5 +1,5 @@
 import Importer from './Importer'
-import Toolpath from 'gcode-toolpath';
+import Toolpath from 'gcode-toolpath'
 
 export default class GCodeImporter extends Importer {
   constructor(fileName, text) {
@@ -93,7 +93,7 @@ export default class GCodeImporter extends Importer {
           addVertex(v2.x, v2.y)
         }
       }
-    });
+    })
 
     toolpath.loadFromString(this.text, (err, results) => {
       callback(this, this.normalizeCoords(props))
