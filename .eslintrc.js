@@ -63,7 +63,8 @@ module.exports = {
     '@typescript-eslint/no-useless-constructor': 'warn',
     'react/no-unused-prop-types': 'off',
     'react-redux/no-unused-prop-types': 'warn',
-    'react-redux/prefer-separate-component-file': 'off'
+    'react-redux/prefer-separate-component-file': 'off',
+    semi: [ 'warn', 'never' ]
   },
   settings: {
     react: {
