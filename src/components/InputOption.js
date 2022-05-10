@@ -8,7 +8,7 @@ import debounce from 'lodash/debounce'
 
 class InputOption extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.delayedSet = debounce( (value, key, onChange) => {
       let attrs = {}
       attrs[key] = value

@@ -134,7 +134,7 @@ function reportTiming(time) {
     category: 'Compute',
     variable: 'transformShapes',
     value: time, // in milliseconds
-  });
+  })
 }
 
 const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })

@@ -118,7 +118,7 @@ const billseyConverter = (vertices) => {
     prevPoint = vertex
   })
 
-  const scale = 0.6;
+  const scale = 0.6
   const offset_y = -0.5
   const scaledVertices = newVertices.map( vertex => {
     return new Victor(scale * vertex.x, scale * vertex.y + offset_y)

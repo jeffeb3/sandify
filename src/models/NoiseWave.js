@@ -126,7 +126,7 @@ export default class NoiseWave extends Shape {
 
     let prevCurve
     for (let j=0; j<particles.length; j=j+2) {
-      const curve = this.getCurve(vertexGroups, j);
+      const curve = this.getCurve(vertexGroups, j)
 
       // Connect to the previous vertex, if there are any previous vertices.
       if (vertices.length > 0) {
