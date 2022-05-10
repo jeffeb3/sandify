@@ -68,8 +68,8 @@
     "preview": "vite preview",
     "deploy": "gh-pages -d build",
     "test": "jest",
-    "lint": "eslint --ext .js --ignore-path .gitignore src",
-    "lintfix": "eslint --ext .js --ignore-path .gitignore --fix src"
+    "lint": "eslint --ext .js --ignore-path .gitignore --fix src",
+    "lint-ci": "eslint --ext .js --ignore-path .gitignore src"
   },
   "browserslist": [
     ">0.2%",
