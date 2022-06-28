@@ -31,7 +31,7 @@
     "react-ga": "^3.3.0",
     "react-icons": "^4.2.0",
     "react-konva": "^17.0.2-0",
-    "react-redux": "^7.2.3",
+    "react-redux": "^8.0.0",
     "react-select": "^4.3.0",
     "react-sortable-hoc": "^2.0",
     "react-switch": "^6.0.0",
