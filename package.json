@@ -60,7 +60,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.5.1",
     "jest-canvas-mock": "^2.3.1",
-    "vite": "^2.9.0"
+    "vite": "^2.9.13"
   },
   "scripts": {
     "start": "vite",
