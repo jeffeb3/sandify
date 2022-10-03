@@ -1,0 +1,25 @@
+
+# build with:
+#   docker-compose build sandify
+#
+# install/update with:
+#   docker-compose run --entrypoint "npm install" sandify
+#
+# run with:
+#   docker-compose run sandify
+#
+# test with:
+#   docker-compose run --entrypoint "npm test" sandify
+#
+version: '3.7'
+
+services:
+  sandify:
+    image: sandify
+    build: .
+    container_name: sandify
+    ports:
+        - "3000:3000"
+    volumes:
+        - .:/srv/app
+    network_mode: "host"
