@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Col, Row } from 'react-bootstrap'
 import { Provider } from 'react-redux'
 import Header from './Header'
-import Notice from './Notice'
 import InputTabs from './InputTabs'
 import MachinePreview from '../preview/MachinePreview'
 import store from './store'
@@ -14,7 +13,6 @@ class App extends Component {
       <Provider store={store}>
         <div className="App">
           <Header />
-          <Notice />
 
           <main>
             <Row className="no-gutters">

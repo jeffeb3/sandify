@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import logo from './logo.svg'
 import './Notice.scss'
 
 class Notice extends Component {
