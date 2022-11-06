@@ -61,7 +61,7 @@ export default class GCodeExporter extends Exporter {
   }
 
   gcode(vertex) {
-    let command = 'G01' +
+    let command = 'G1' +
       ' X' + vertex.x.toFixed(3) +
       ' Y' + vertex.y.toFixed(3)
     return command
