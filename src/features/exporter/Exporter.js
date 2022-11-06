@@ -83,7 +83,9 @@ export default class Exporter {
   }
 
   optionLine(metamodel, instance, option, add=true) {
-    const val = instance[option].replace(/[\n\r]/g, ' ')
+    const val = typeof instance[option] == 'string' ?
+      instance[option].replace(/[\n\r]/g, ' ') :
+      instance[option]
     this.line(metamodel.getOptions()[option].title + ': ' + val, add)
   }
 
