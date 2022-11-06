@@ -40,7 +40,6 @@
     "reselect": "^4.0.0",
     "sass": "^1.49.11",
     "seedrandom": "^3.0.5",
-    "stream-browserify": "^3.0.0",
     "victor": "^1.1.0"
   },
   "devDependencies": {
@@ -48,6 +47,7 @@
     "@babel/plugin-transform-runtime": "^7.17.10",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.22.0",
     "@vitejs/plugin-react": "^1.0.7",
@@ -60,7 +60,8 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.5.1",
     "jest-canvas-mock": "^2.3.1",
-    "vite": "^2.9.13"
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "vite": "^3.2.2"
   },
   "scripts": {
     "start": "vite",
