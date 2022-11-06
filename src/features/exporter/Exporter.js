@@ -83,7 +83,8 @@ export default class Exporter {
   }
 
   optionLine(metamodel, instance, option, add=true) {
-    this.line(metamodel.getOptions()[option].title + ': ' + instance[option], add)
+    const val = instance[option].replace(/[\n\r]/g, ' ')
+    this.line(metamodel.getOptions()[option].title + ': ' + val, add)
   }
 
   optionLines(metamodel, instance, options, add=true) {
