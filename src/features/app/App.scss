@@ -97,6 +97,17 @@ h2 {
   }
 }
 
+.btn-light {
+  background-color: white;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgb(216 217 219 / 50%) !important;
+    border-color: #dae0e5 !important;
+  }
+}
+
 .btn-group>.btn.active, .btn-group>.btn:active, .btn-group>.btn:focus {
   z-index: inherit;
 }

@@ -219,7 +219,7 @@ class Downloader extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="code-close" variant="link" onClick={this.props.close}>Close</Button>
+            <Button id="code-close" variant="light" onClick={this.props.close}>Close</Button>
             <Button id="code-download" variant="primary" onClick={this.download.bind(this)}>Download</Button>
           </Modal.Footer>
         </Modal>
