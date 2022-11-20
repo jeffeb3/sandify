@@ -1,7 +1,7 @@
 import React from 'react'
 import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { Button, ListGroup } from 'react-bootstrap'
-import { FaEye, FaEyeSlash, FaChevronRight, FaChevronDown, FaLock, FaUnlock } from 'react-icons/fa'
+import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
 const SortableLayer = SortableElement((
   {
@@ -13,10 +13,9 @@ const SortableLayer = SortableElement((
     onEffectMoved,
     onSortStarted,
     onToggleLayerOpen,
-    onToggleLayerVisible,
-    onToggleLayerLocked
+    onToggleLayerVisible
   }) => {
-    const { name, id, visible, open, locked } = layer
+    const { name, id, visible } = layer
     const activeClass = active ? 'active' : ''
     const dragClass = numLayers > 1 ? 'cursor-move' : ''
     const visibleClass = visible ? '' : 'layer-hidden'

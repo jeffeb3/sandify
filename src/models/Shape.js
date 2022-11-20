@@ -28,6 +28,7 @@ export default class Shape {
       startingHeight: 10,
       offsetX: 0.0,
       offsetY: 0.0,
+      open: true,
       rotation: 0,
       numLoops: 10,
       transformMethod: 'smear',

@@ -1,5 +1,5 @@
 jest.mock('lodash/uniqueId')
-const uniqueId = require('lodash/uniqueId')
+const uniqueId = require('lodash/uniqueId') // eslint-disable-line @typescript-eslint/no-var-requires
 import mockUniqueId, { resetUniqueIds } from '../../common/mocks'
 import layers, {
   addLayer,
@@ -204,7 +204,7 @@ describe('layers reducer', () => {
         allIds: ['layer-0', 'layer-1'],
         current: 'layer-1',
         selected: 'layer-1',
-        copyLayerName: 'foo'
+        copyLayerName: null
       })
     })
 
@@ -254,7 +254,7 @@ describe('layers reducer', () => {
         allIds: ['layer', 'layer-1'],
         current: 'layer-1',
         selected: 'layer-1',
-        copyLayerName: 'foo'
+        copyLayerName: null
       })
     })
   })

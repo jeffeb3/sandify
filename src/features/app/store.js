@@ -80,8 +80,8 @@ const loadDefaultLayer = () => {
 
 // set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const usePersistedState = true
-const persistState = true
+const usePersistedState = false
+const persistState = false
 
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change
@@ -89,7 +89,7 @@ const persistState = true
 const persistInitKey = 'state'
 const persistSaveKey = 'state'
 
-if (typeof jest === 'undefined' && persistState) {
+if (typeof jest === 'undefined' && usePersistedState) {
   // override default values with saved ones
   const persistedState = loadState(persistInitKey)
 

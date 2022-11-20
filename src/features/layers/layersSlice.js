@@ -5,7 +5,7 @@ import { getShape } from '../../models/shapes'
 
 const protectedAttrs = [
   'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
-  'usesMachine', 'shouldCache', 'canChangeHeight', 'canRotate', 'usesFont'
+  'usesMachine', 'shouldCache', 'canChangeHeight', 'canRotate', 'usesFonts'
 ]
 
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
@@ -39,7 +39,6 @@ function deleteEffect(state, deleteId) {
 
   const idx = parent.effectIds.findIndex(id => id === deleteId)
   parent.effectIds.splice(idx, 1)
-  if (parent.effectIds.length === 0) parent.locked = false
 
   delete state.byId[deleteId]
   handleAfterDelete(state, deleteId, idx)
@@ -253,10 +252,6 @@ const layersSlice = createSlice({
       const layer = action.payload
       state.byId[layer.id].visible = !state.byId[layer.id].visible
     },
-    toggleLocked(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].locked = !state.byId[layer.id].locked
-    },
   }
 })
 
@@ -283,7 +278,6 @@ export const {
   toggleTrackGrow,
   toggleVisible,
   toggleOpen,
-  toggleLocked
 } = layersSlice.actions
 
 export default layersSlice.reducer

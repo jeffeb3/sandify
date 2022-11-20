@@ -2,10 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Button } from 'react-bootstrap'
 import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
-import { MdLibraryAdd, MdOutlineFileUpload } from 'react-icons/md'
+import { MdOutlineFileUpload } from 'react-icons/md'
 
 import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
-import { setCurrentLayer, addLayer, removeLayer, moveLayer, moveEffect, removeEffect, toggleVisible, toggleOpen, toggleLocked } from '../layers/layersSlice'
+import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
 import { registeredShapes, getShape } from '../../models/shapes'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
@@ -51,9 +51,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onToggleLayerVisible: (id) => {
       dispatch(toggleVisible({ id: id }))
     },
-    onToggleLayerLocked: (id) => {
-      dispatch(toggleLocked({ id: id }))
-    }
   }
 }
 
