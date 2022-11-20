@@ -1,5 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from 'redux'
+import uniqueId from 'lodash/uniqueId'
+
 import appReducer from './appSlice'
 import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
@@ -7,7 +9,7 @@ import previewReducer from '../preview/previewSlice'
 import fontsReducer from '../fonts/fontsSlice'
 import { registeredShapes } from '../../models/shapes'
 import { loadState, saveState } from '../../common/localStorage'
-import layersReducer, { setCurrentLayer, addLayer } from '../layers/layersSlice'
+import layersReducer, { setCurrentLayer, addLayer, addEffect, updateLayer } from '../layers/layersSlice'
 
 //const customizedMiddleware = getDefaultMiddleware({
 //  immutableCheck: {
@@ -32,14 +34,36 @@ const store = configureStore({
 })
 
 const loadPersistedLayers = (layers) => {
-  layers.allIds.forEach((id) => {
-    let layer = layers.byId[id]
+  layers.allIds.forEach(id => {
+    const layer = layers.byId[id]
 
-    if (layer.startingWidth === undefined) layer.startingWidth = layer.startingSize
-    if (layer.startingHeight === undefined) layer.startingHeight = layer.startingWidth
-    if (layer.autosize === undefined) layer.autosize = true
+    if (layer) {
+      const newLayer = {
+        ...layer,
+        id: uniqueId('layer-'),
+        restore: true,
+        startingWidth: layer.startingWidth || layer.startingSize,
+        startingHeight: layer.startingWidth || layer.startingSize,
+        autosize: layer.autosize === null ? true : layer.autosize
+      }
 
-    store.dispatch(addLayer(layer))
+      // for referential integrity, we have to explicitly generate ids and
+      // re-build relationships.
+      store.dispatch(addLayer(newLayer))
+      if (layer.effectIds) {
+        newLayer.effectIds = layer.effectIds.map(effectId => {
+          const effect = {
+            ...layers.byId[effectId],
+            id: uniqueId('layer-'),
+            restore: true,
+            parentId: newLayer.id
+          }
+          store.dispatch(addEffect(effect))
+          return effect.id
+        })
+        store.dispatch(updateLayer(newLayer))
+      }
+    }
   })
 }
 
@@ -54,9 +78,10 @@ const loadDefaultLayer = () => {
   store.dispatch(setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id))
 }
 
-// set to true when running locally if you want to preserve your shape
+// set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const persistState = false
+const usePersistedState = true
+const persistState = true
 
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change
