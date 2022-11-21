@@ -25,48 +25,9 @@ export const transformShape = (data, vertex, amount, trackIndex=0, numLoops) => 
   numLoops = numLoops || data.numLoops
   let transformedVertex = vertex ? vertex.clone() : new Victor(0.0)
 
-  if (data.repeatEnabled && data.growEnabled) {
-    let growAmount = 100
-    if (data.growMethod === 'function') {
-      try {
-        growAmount = data.growValue * evaluate(data.growMath, {i: amount})
-      }
-      catch (err) {
-        console.log("Error parsing grow function: " + err)
-        growAmount = 200
-      }
-    } else {
-      growAmount = 100.0 + (data.growValue * amount)
-    }
-    transformedVertex = scale(transformedVertex, growAmount)
-  }
-
-  if (data.repeatEnabled && data.spinEnabled) {
-    let spinAmount = 0
-    if (data.spinMethod === 'function') {
-      try {
-        spinAmount = data.spinValue * evaluate(data.spinMath, {i: amount})
-      }
-      catch (err) {
-        console.log("Error parsing spin function: " + err)
-        spinAmount = 0
-      }
-    } else {
-      const loopPeriod = numLoops / (parseInt(data.spinSwitchbacks) + 1)
-      const stage = amount/loopPeriod
-      const direction = (stage % 2 < 1 ? 1.0 : -1.0)
-      spinAmount = direction * (amount % loopPeriod) * data.spinValue
-      // Add in the amount it goes positive to the negatives, so they start at the same place.
-      if (direction < 0.0) {
-        spinAmount += loopPeriod * data.spinValue
-      }
-    }
-    transformedVertex = rotate(transformedVertex, spinAmount)
-  }
-
-  if (data.repeatEnabled && data.trackEnabled) {
-    transformedVertex = track(transformedVertex, data, trackIndex)
-  }
+  // if (data.repeatEnabled && data.trackEnabled) {
+  //   transformedVertex = track(transformedVertex, data, trackIndex)
+  // }
 
   transformedVertex.rotateDeg(-data.rotation)
   transformedVertex.addX({x: data.offsetX || 0}).addY({y: data.offsetY || 0})
@@ -151,11 +112,6 @@ export const transformShapes = (vertices, layer, effects) => {
     })
   }
 
-  if (layer.transformMethod === 'smear' && layer.repeatEnabled) {
-    // remove last vertex; we don't want to return to our starting point when completing the shape
-    vertices.pop()
-  }
-
   if (layer.trackEnabled && numTrackLoops > 1) {
     for (var i=0; i<numLoops; i++) {
       for (var t=0; t<numTrackLoops; t++) {
@@ -165,7 +121,7 @@ export const transformShapes = (vertices, layer, effects) => {
   } else {
     for (i=0; i<numLoops; i++) {
       for (var j=0; j<vertices.length; j++) {
-        let amount = layer.transformMethod === 'smear' ? i + j/vertices.length : i
+        let amount = i + j/vertices.length
         outputVertices.push(transformShape(layer, vertices[j], amount, amount))
       }
     }

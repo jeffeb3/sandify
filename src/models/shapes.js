@@ -23,6 +23,7 @@ import Star from '../models/Star'
 import TessellationTwist from '../models/tessellation_twist/TessellationTwist'
 import V1Engineering from '../models/v1_engineering/V1Engineering'
 import Wiper from '../models/Wiper'
+import Loop from './Loop'
 
 /*----------------------------------------------
 Supported input shapes
@@ -50,6 +51,7 @@ export const registeredShapes = {
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
   fisheye: new Fisheye(),
+  loop: new Loop(),
   mask: new Mask(),
   noise: new Noise(),
   warp: new Warp()

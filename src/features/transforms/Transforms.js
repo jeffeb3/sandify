@@ -15,8 +15,6 @@ import ToggleButtonOption from '../../components/ToggleButtonOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
-import ScaleTransform from './ScaleTransform'
-import RotationTransform from './RotationTransform'
 import TrackTransform from './TrackTransform'
 
 const mapStateToProps = (state, ownProps) => {
@@ -39,9 +37,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onRepeat: () => {
       dispatch(toggleRepeat({id: id}))
-    },
-    ontransformMethodChange: (value) => {
-      dispatch(updateLayer({ transformMethod: value, id: id}))
     }
   }
 }
@@ -100,49 +95,6 @@ class Transforms extends Component {
           optionKey="reverse"
           index={0}
           model={this.props.layer} />
-
-        {this.props.layer.canTransform && <Accordion className="mt-3" defaultActiveKey={activeKey} activeKey={activeKey}>
-          <Card className={activeClassName}>
-            <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.onRepeat}>
-              <h3>Loop and transform</h3>
-              Draws the shape multiple times, transforming it each time.
-            </Accordion.Toggle>
-
-            <Accordion.Collapse eventKey={1}>
-              <Card.Body>
-                <InputOption
-                  onChange={this.props.onChange}
-                  options={this.props.options}
-                  key="numLoops"
-                  optionKey="numLoops"
-                  index={0}
-                  model={this.props.layer} />
-
-                  <Row className="align-items-center pb-2">
-                    <Col sm={5}>
-                      <Form.Label htmlFor="transformMethod">
-                        When transforming shape
-                      </Form.Label>
-                    </Col>
-
-                    <Col sm={7}>
-                      <ToggleButtonGroup id="transformMethod" type="radio" name="transformMethod" value={this.props.layer.transformMethod} onChange={this.props.ontransformMethodChange}>
-                        <ToggleButton variant="light" value="smear">smear</ToggleButton>
-                        <ToggleButton variant="light" value="intact">keep intact</ToggleButton>
-                      </ToggleButtonGroup>
-                    </Col>
-                  </Row>
-
-                  <Accordion className="mt-3">
-                    <ScaleTransform id={this.props.layer.id} />
-                    <RotationTransform id={this.props.layer.id} />
-                    <TrackTransform id={this.props.layer.id} />
-                  </Accordion>
-              </Card.Body>
-            </Accordion.Collapse>
-          </Card>
-        </Accordion>
-      }
 
       {!this.props.layer.effect && <Card className="mt-3">
         <Card.Body>

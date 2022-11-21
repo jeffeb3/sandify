@@ -228,14 +228,6 @@ const layersSlice = createSlice({
       const layer = action.payload
       state.byId[layer.id].repeatEnabled = !state.byId[layer.id].repeatEnabled
     },
-    toggleGrow(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].growEnabled = !state.byId[layer.id].growEnabled
-    },
-    toggleSpin(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].spinEnabled = !state.byId[layer.id].spinEnabled
-    },
     toggleTrack(state, action) {
       const layer = action.payload
       state.byId[layer.id].trackEnabled = !state.byId[layer.id].trackEnabled
@@ -272,8 +264,6 @@ export const {
   updateLayer,
   updateLayers,
   toggleRepeat,
-  toggleSpin,
-  toggleGrow,
   toggleTrack,
   toggleTrackGrow,
   toggleVisible,

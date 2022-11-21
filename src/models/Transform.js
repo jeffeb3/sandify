@@ -58,53 +58,6 @@ const transformOptions = {
     title: 'Number of loops',
     min: 1
   },
-  transformMethod: {
-    title: 'When transforming shape',
-    type: 'dropdown',
-    choices: ['smear', 'intact'],
-  },
-  growEnabled: {
-    title: 'Scale'
-  },
-  growValue: {
-    title: 'Scale (+/-)',
-  },
-  growMethod: {
-    title: 'Scale by',
-    choices: ['constant', 'function']
-  },
-  growMathInput: {
-    title: 'Scale function (i)',
-    type: 'text',
-    isVisible: state => { return state.growMethod === 'function' },
-  },
-  growMath: {
-  },
-  spinEnabled: {
-    title: 'Spin',
-    isVisible: state => { return state.growMethod === 'constant'},
-  },
-  spinValue: {
-    title: 'Spin (+/-)',
-    step: 0.1,
-  },
-  spinMethod: {
-    title: 'Spin by',
-    type: 'dropdown',
-    choices: ['constant', 'function']
-  },
-  spinMathInput: {
-    title: 'Spin function (i)',
-    type: 'text',
-    isVisible: state => { return state.spinMethod === 'function' },
-  },
-  spinMath: {
-    title: 'Spin function (i)',
-  },
-  spinSwitchbacks: {
-    title: 'Switchbacks',
-    isVisible: state => { return state.spinMethod === 'constant'},
-  },
   trackEnabled: {
     title: 'Track'
   },

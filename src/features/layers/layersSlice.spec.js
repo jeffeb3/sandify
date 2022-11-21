@@ -16,8 +16,6 @@ import layers, {
   setNewEffectType,
   setShapeType,
   updateLayer,
-  toggleSpin,
-  toggleGrow,
   toggleOpen,
   toggleRepeat,
   toggleTrack,
@@ -58,17 +56,6 @@ describe('layers reducer', () => {
     drawPortionPct: 100,
     effect: false,
     rotateStartingPct: 0,
-    growEnabled: true,
-    growValue: 100,
-    growMethod: 'constant',
-    growMath: 'i+cos(i/2)',
-    growMathInput: 'i+cos(i/2)',
-    spinEnabled: false,
-    spinValue: 2,
-    spinMethod: 'constant',
-    spinMath: '10*sin(i/4)',
-    spinMathInput: '10*sin(i/4)',
-    spinSwitchbacks: 0,
     trackEnabled: false,
     trackGrowEnabled: false,
     trackValue: 10,
@@ -573,48 +560,6 @@ describe('layers reducer', () => {
         '1': {
           id: '1',
           name: 'bar'
-        }
-      }
-    })
-  })
-
-  it('should handle toggleGrow', () => {
-    expect(
-      layers(
-        {
-          byId: {
-            '1': {
-              growEnabled: false
-            }
-          }
-        },
-        toggleGrow({id: '1'})
-      )
-    ).toEqual({
-      byId: {
-        '1': {
-          growEnabled: true
-        }
-      }
-    })
-  })
-
-  it('should handle toggleSpin', () => {
-    expect(
-      layers(
-        {
-          byId: {
-            '1': {
-              spinEnabled: false
-            }
-          }
-        },
-        toggleSpin({id: '1'})
-      )
-    ).toEqual({
-      byId: {
-        '1': {
-          spinEnabled: true
         }
       }
     })
