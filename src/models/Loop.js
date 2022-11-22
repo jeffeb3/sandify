@@ -80,7 +80,7 @@ export default class Loop extends Effect {
         canRotate: false,
         canMove: false,
         effect: true,
-        
+
         // Loop Options
         transformMethod: 'smear',
         numLoops: 10,
@@ -104,6 +104,7 @@ export default class Loop extends Effect {
   }
 
   getVertices(state) {
+    // TODO Make this more reasonable
     return circle(25)
   }
 
