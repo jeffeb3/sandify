@@ -110,6 +110,11 @@ export default class Loop extends Effect {
 
   applyEffect(effect, layer, vertices) {
 
+    // Remove one point if we are smearing
+    if (effect.transformMethod === 'smear') {
+      vertices.pop()
+    }
+
     let outputVertices = []
 
     for (var i=0; i<effect.numLoops; i++) {
