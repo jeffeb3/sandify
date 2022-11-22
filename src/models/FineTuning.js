@@ -1,5 +1,6 @@
 import { shapeOptions } from './Shape'
 import { arrayRotate } from '../common/util'
+import { circle } from '../common/geometry'
 import Effect from './Effect'
 
 const options = {
