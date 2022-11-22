@@ -1,8 +1,6 @@
 import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
-import { evaluate } from 'mathjs'
-import { distance, scale, rotate } from '../../common/geometry'
-import { arrayRotate } from '../../common/util'
+import { distance, scale } from '../../common/geometry'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
 import { getShape } from '../../models/shapes'
@@ -127,23 +125,8 @@ export const transformShapes = (vertices, layer, effects) => {
     }
   }
 
-  if (layer.rotateStartingPct === undefined || layer.rotateStartingPct !== 0) {
-    const start = Math.round(outputVertices.length * layer.rotateStartingPct / 100.0)
-    outputVertices = arrayRotate(outputVertices, start)
-  }
-
-  if (layer.drawPortionPct !== undefined) {
-    const drawPortionPct = Math.round((parseInt(layer.drawPortionPct) || 100)/100.0 * outputVertices.length)
-    outputVertices = outputVertices.slice(0, drawPortionPct)
-  }
-
   if (layer.reverse) {
     outputVertices = outputVertices.reverse()
-  }
-
-  if (layer.backtrackPct) {
-    const backtrack = Math.round(vertices.length * layer.backtrackPct / 100.0)
-    outputVertices = outputVertices.concat(outputVertices.slice(outputVertices.length - backtrack).reverse())
   }
 
   if (effects && effects.length > 0) {

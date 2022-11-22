@@ -31,24 +31,6 @@ const transformOptions = {
     title: 'Connect to next layer',
     choices: ['line', 'along perimeter']
   },
-  backtrackPct: {
-    title: 'Backtrack at end (%)',
-    min: 0,
-    max: 100,
-    step: 2
-  },
-  drawPortionPct: {
-    title: 'Draw portion of path (%)',
-    min: 0,
-    max: 100,
-    step: 2
-  },
-  rotateStartingPct: {
-    title: 'Rotate starting point (%)',
-    min: -100,
-    max: 100,
-    step: 2
-  },
   reverse: {
     title: 'Reverse path',
     type: 'checkbox',

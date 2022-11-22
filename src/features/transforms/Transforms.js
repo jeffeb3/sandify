@@ -106,35 +106,6 @@ class Transforms extends Component {
             index={0}
             model={this.props.layer} />
 
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="drawPortionPct"
-            optionKey="drawPortionPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
-
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="backtrackPct"
-            optionKey="backtrackPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
-
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="rotateStartingPct"
-            optionKey="rotateStartingPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
         </Card.Body>
       </Card>}
     </div>

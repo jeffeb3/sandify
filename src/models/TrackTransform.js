@@ -1,7 +1,6 @@
 import { shapeOptions } from './Shape'
 import Effect from './Effect'
 import { offset, rotate, circle } from '../common/geometry'
-import Victor from 'victor'
 
 const options = {
   ...shapeOptions,

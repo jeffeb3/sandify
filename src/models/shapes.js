@@ -25,6 +25,7 @@ import V1Engineering from '../models/v1_engineering/V1Engineering'
 import Wiper from '../models/Wiper'
 import Loop from './Loop'
 import Track from './TrackTransform'
+import FineTuning from './FineTuning'
 
 /*----------------------------------------------
 Supported input shapes
@@ -56,7 +57,8 @@ export const registeredShapes = {
   track: new Track(),
   mask: new Mask(),
   noise: new Noise(),
-  warp: new Warp()
+  warp: new Warp(),
+  fineTuning: new FineTuning()
 }
 
 export const getShape = (layer) => {
