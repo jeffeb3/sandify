@@ -15,14 +15,13 @@ import ToggleButtonOption from '../../components/ToggleButtonOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
-import TrackTransform from './TrackTransform'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
 
   return {
     layer: layer,
-    active: layer.repeatEnabled,
+    active: true,
     options: (new Transform()).getOptions()
   }
 }

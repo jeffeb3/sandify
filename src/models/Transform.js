@@ -53,31 +53,7 @@ const transformOptions = {
     title: 'Reverse path',
     type: 'checkbox',
     isVisible: (state) => { return !state.effect }
-  },
-  numLoops: {
-    title: 'Number of loops',
-    min: 1
-  },
-  trackEnabled: {
-    title: 'Track'
-  },
-  trackGrowEnabled: {
-    title: 'Scale track'
-  },
-  trackValue: {
-    title: 'Track size',
-  },
-  trackNumLoops: {
-    title: 'Number of loops at each track position',
-    min: 1
-  },
-  trackLength: {
-    title: 'Track length',
-    step: 0.05
-  },
-  trackGrow: {
-    title: 'Scale (+/-)',
-  },
+  }
 }
 
 // used as a way to keep a shape's transform settings separate. Actual state
