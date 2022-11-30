@@ -44,19 +44,10 @@ export default class CommentExporter extends Exporter {
           this.keyValueLine('Visible', layer.visible)
           this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'offsetX', 'offsetY', 'rotation', 'reverse'])
 
-          // this.optionLine(transform, layer, 'trackEnabled', layer.repeatEnabled)
-          // this.indent()
-          // this.optionLines(transform, layer, ['trackValue', 'trackLength', 'trackNumLoops'], layer.repeatEnabled && layer.trackEnabled)
-          // this.optionLine(transform, layer, 'trackGrowEnabled', layer.repeatEnabled && layer.trackEnabled)
-          // this.indent()
-          // this.optionLine(transform, layer, 'trackGrow', layer.repeatEnabled && layer.trackGrowEnabled)
-          // this.dedent()
-          // this.dedent()
-
           if (!layer.effect) {
             this.line('Fine tuning:')
             this.indent()
-            this.optionLines(transform, layer, ['connectionMethod', 'drawPortionPct', 'backtrackPct', 'rotateStartingPct'])
+            this.optionLines(transform, layer, ['connectionMethod'])
             this.dedent()
           }
           this.dedent()

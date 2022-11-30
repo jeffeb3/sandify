@@ -13,7 +13,6 @@ export default class Shape {
 
   getInitialState() {
     return {
-      repeatEnabled: true,
       canTransform: true,
       selectGroup: 'Shapes',
       shouldCache: true,
@@ -30,17 +29,7 @@ export default class Shape {
       offsetY: 0.0,
       open: true,
       rotation: 0,
-      numLoops: 1,
-      trackEnabled: false,
-      trackGrowEnabled: false,
-      trackValue: 10,
-      trackLength: 0.2,
-      trackNumLoops: 1,
-      trackGrow: 50.0,
       connectionMethod: 'line',
-      drawPortionPct: 100,
-      backtrackPct: 0,
-      rotateStartingPct: 0,
       reverse: false,
       dragging: false,
       visible: true,

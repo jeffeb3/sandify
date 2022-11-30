@@ -15,14 +15,13 @@ import ToggleButtonOption from '../../components/ToggleButtonOption'
 import { updateLayer, toggleRepeat } from '../layers/layersSlice'
 import { getCurrentLayer } from '../layers/selectors'
 import Transform from '../../models/Transform'
-import TrackTransform from './TrackTransform'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
 
   return {
     layer: layer,
-    active: layer.repeatEnabled,
+    active: true,
     options: (new Transform()).getOptions()
   }
 }
@@ -107,35 +106,6 @@ class Transforms extends Component {
             index={0}
             model={this.props.layer} />
 
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="drawPortionPct"
-            optionKey="drawPortionPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
-
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="backtrackPct"
-            optionKey="backtrackPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
-
-          <InputOption
-            onChange={this.props.onChange}
-            options={this.props.options}
-            key="rotateStartingPct"
-            optionKey="rotateStartingPct"
-            min={0}
-            max={100}
-            index={0}
-            model={this.props.layer} />
         </Card.Body>
       </Card>}
     </div>
