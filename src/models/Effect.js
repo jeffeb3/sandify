@@ -1,15 +1,13 @@
-import Shape from './Shape'
+import Model from './Model'
 
-export default class Effect extends Shape {
+export default class Effect extends Model {
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
         effect: true,
-        canTransform: false,
         shouldCache: false,
         canChangeSize: true,
-        repeatEnabled: false,
         autosize: false
       }
     }

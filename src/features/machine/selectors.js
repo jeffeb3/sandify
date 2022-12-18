@@ -1,9 +1,8 @@
 import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
-import Victor from 'victor'
 import Color from 'color'
-import { transformShapes, transformShape, polishVertices, getMachineInstance } from './computer'
-import { getShape } from '../../models/shapes'
+import { transformShapes, polishVertices, getMachineInstance } from './computer'
+import { getModel } from '../../config/models'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
 import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
@@ -65,14 +64,15 @@ const makeGetLayerVertices = layerId => {
         fonts: fonts
       }
       log('makeGetLayerVertices', layerId)
-      const metashape = getShape(layer)
+      const metashape = getModel(layer)
 
+      // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
       if (layer.shouldCache) {
         const key = getCacheKey(state)
         let vertices = cache.get(key)
 
         if (!vertices) {
-          vertices = metashape.getVertices(state)
+          vertices = metashape.draw(state)
 
           if (vertices.length > 1) {
             cache.set(key, vertices)
@@ -315,17 +315,18 @@ export const makeGetPreviewTrackVertices = layerId => {
     getCachedSelector(makeGetLayer, layerId),
     (layer) => {
       log('makeGetPreviewTrackVertices', layerId)
-      const numLoops = layer.numLoops
+//      const numLoops = layer.numLoops
       const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
       const konvaDeltaX = (konvaScale - 1)/2 * layer.startingWidth
       const konvaDeltaY = (konvaScale - 1)/2 * layer.startingHeight
       let trackVertices = []
 
-      for (var i=0; i<numLoops; i++) {
-        if (layer.trackEnabled) {
-          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
-        }
-      }
+// TODO: re-implement display of track vertices
+//      for (var i=0; i<numLoops; i++) {
+//        if (layer.trackEnabled) {
+//          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+//        }
+//      }
 
       return trackVertices.map(vertex => {
         return offset(rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation), konvaDeltaX, -konvaDeltaY)

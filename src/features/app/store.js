@@ -7,7 +7,7 @@ import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
 import previewReducer from '../preview/previewSlice'
 import fontsReducer from '../fonts/fontsSlice'
-import { registeredShapes } from '../../models/shapes'
+import { registeredModels } from '../../config/models'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer, addEffect, updateLayer } from '../layers/layersSlice'
 
@@ -69,8 +69,8 @@ const loadPersistedLayers = (layers) => {
 
 const loadDefaultLayer = () => {
   const storedShape = localStorage.getItem('currentShape')
-  const currentShape = storedShape && registeredShapes[storedShape] ? storedShape : 'polygon'
-  const layer = registeredShapes[currentShape].getInitialState()
+  const currentShape = storedShape && registeredModels[storedShape] ? storedShape : 'polygon'
+  const layer = registeredModels[currentShape].getInitialState()
 
   store.dispatch(addLayer(layer))
 

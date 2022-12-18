@@ -7,21 +7,20 @@ import InputOption from '../../components/InputOption'
 import DropdownOption from '../../components/DropdownOption'
 import CheckboxOption from '../../components/CheckboxOption'
 import ToggleButtonOption from '../../components/ToggleButtonOption'
-import Transforms from '../transforms/Transforms'
 import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayer } from './selectors'
-import { getShape, getShapeSelectOptions } from '../../models/shapes'
+import { getModel, getModelSelectOptions } from '../../config/models'
 import './Layer.scss'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
-  const shape = getShape(layer)
+  const shape = getModel(layer)
 
   return {
     layer: layer,
     shape: shape,
     options: shape.getOptions(),
-    selectOptions: getShapeSelectOptions(false),
+    selectOptions: getModelSelectOptions(false),
     showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
     link: shape.link,
     linkText: shape.linkText
@@ -99,7 +98,6 @@ class Layer extends Component {
 
         <div className="pt-1">
           { optionsListRender }
-          <Transforms id={this.props.layer.id} />
         </div>
       </Card>
     )

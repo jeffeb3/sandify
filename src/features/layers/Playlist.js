@@ -6,7 +6,7 @@ import { MdOutlineFileUpload } from 'react-icons/md'
 
 import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
 import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
-import { registeredShapes, getShape } from '../../models/shapes'
+import { registeredModels, getModel } from '../../config/models'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
 import ImportLayer from './ImportLayer'
@@ -15,7 +15,7 @@ import './Playlist.scss'
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
-  const shape = getShape(layer)
+  const shape = getModel(layer)
   const numLayers = getNumLayers(state)
 
   return {
@@ -33,7 +33,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(setCurrentLayer(id))
     },
     onLayerAdded: (type) => {
-      const attrs = registeredShapes[type].getInitialState()
+      const attrs = registeredModels[type].getInitialState()
       dispatch(addLayer(attrs))
     },
     onLayerRemoved: (id) => {

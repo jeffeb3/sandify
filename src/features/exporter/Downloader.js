@@ -13,7 +13,7 @@ import GCodeExporter from './GCodeExporter'
 import ScaraGCodeExporter from './ScaraGCodeExporter'
 import SvgExporter from './SvgExporter'
 import ThetaRhoExporter from './ThetaRhoExporter'
-import { Exporter, GCODE, THETARHO, SVG, SCARA } from '../../models/Exporter'
+import { Exporter, GCODE, THETARHO, SVG, SCARA } from './options'
 
 const exporters = {
   [GCODE]: GCodeExporter,

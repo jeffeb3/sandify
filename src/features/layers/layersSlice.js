@@ -1,17 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 import uniqueId from 'lodash/uniqueId'
 import arrayMove from 'array-move'
-import { getShape } from '../../models/shapes'
+import { getModel } from '../../config/models'
 
 const protectedAttrs = [
-  'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
-  'usesMachine', 'shouldCache', 'canChangeHeight', 'canRotate', 'usesFonts'
+  'selectGroup', 'canChangeSize', 'autosize', 'usesMachine', 'shouldCache', 'canChangeHeight',
+  'canRotate', 'usesFonts'
 ]
 
 const newLayerType = localStorage.getItem('currentShape') || 'polygon'
-const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
+const newLayerName = getModel({type: newLayerType}).name.toLowerCase()
 const newEffectType = localStorage.getItem('currentEffect') || 'mask'
-const newEffectName = getShape({type: newEffectType}).name.toLowerCase()
+const newEffectName = getModel({type: newEffectType}).name.toLowerCase()
 
 function createLayer(state, attrs) {
   const restore = attrs.restore
@@ -163,7 +163,7 @@ const layersSlice = createSlice({
     restoreDefaults(state, action) {
       const id = action.payload
       const layer = state.byId[id]
-      const defaults = getShape(layer).getInitialState(layer)
+      const defaults = getModel(layer).getInitialState(layer)
 
       state.byId[layer.id] = {
         id: layer.id,
@@ -184,7 +184,7 @@ const layersSlice = createSlice({
     },
     setShapeType(state, action) {
       const changes = action.payload
-      const defaults = getShape(changes).getInitialState()
+      const defaults = getModel(changes).getInitialState()
       const layer = state.byId[changes.id]
 
       layer.type = changes.type
@@ -203,7 +203,7 @@ const layersSlice = createSlice({
     setNewLayerType(state, action) {
       let attrs = { newLayerType: action.payload }
       if (!state.newLayerNameOverride) {
-        const shape = getShape({type: action.payload})
+        const shape = getModel({type: action.payload})
         attrs.newLayerName = shape.name.toLowerCase()
       }
       Object.assign(state, attrs)
@@ -211,7 +211,7 @@ const layersSlice = createSlice({
     setNewEffectType(state, action) {
       let attrs = { newEffectType: action.payload }
       if (!state.newEffectNameOverride) {
-        const shape = getShape({type: action.payload})
+        const shape = getModel({type: action.payload})
         attrs.newEffectName = shape.name.toLowerCase()
       }
       Object.assign(state, attrs)
@@ -223,18 +223,6 @@ const layersSlice = createSlice({
     },
     updateLayers(state, action) {
       Object.assign(state, action.payload)
-    },
-    toggleRepeat(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].repeatEnabled = !state.byId[layer.id].repeatEnabled
-    },
-    toggleTrack(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].trackEnabled = !state.byId[layer.id].trackEnabled
-    },
-    toggleTrackGrow(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].trackGrowEnabled = !state.byId[layer.id].trackGrowEnabled
     },
     toggleOpen(state, action) {
       const layer = action.payload
@@ -263,9 +251,6 @@ export const {
   setNewEffectType,
   updateLayer,
   updateLayers,
-  toggleRepeat,
-  toggleTrack,
-  toggleTrackGrow,
   toggleVisible,
   toggleOpen,
 } = layersSlice.actions
