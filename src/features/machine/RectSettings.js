@@ -11,7 +11,6 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
-import Machine from '../../models/Machine'
 import {
   updateMachine,
   toggleMinimizeMoves,
@@ -19,6 +18,7 @@ import {
   setMachineRectOrigin
 } from './machineSlice'
 import { getMachine } from '../store/selectors'
+import { machineOptions } from './options'
 
 const mapStateToProps = (state, ownProps) => {
   const machine = getMachine(state)
@@ -32,7 +32,7 @@ const mapStateToProps = (state, ownProps) => {
     maxY:    machine.maxY,
     origin:   machine.rectOrigin,
     minimizeMoves: machine.minimizeMoves,
-    options: new Machine().getOptions()
+    options: machineOptions
   }
 }
 

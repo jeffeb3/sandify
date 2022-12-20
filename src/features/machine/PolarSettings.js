@@ -11,8 +11,8 @@ import {
 } from 'react-bootstrap'
 import InputOption from '../../components/InputOption'
 import CheckboxOption from '../../components/CheckboxOption'
-import Machine from '../../models/Machine'
 import { getMachine } from '../store/selectors'
+import { machineOptions } from './options'
 import {
   toggleMachinePolarExpanded,
   updateMachine,
@@ -29,7 +29,7 @@ const mapStateToProps = (state, ownProps) => {
     startPoint: machine.polarStartPoint,
     endPoint: machine.polarEndPoint,
     minimizeMoves: machine.minimizeMoves,
-    options: new Machine().getOptions()
+    options: machineOptions
   }
 }
 

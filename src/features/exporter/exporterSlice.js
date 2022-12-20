@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { GCODE, THETARHO, SVG } from '../../models/Exporter'
+import { GCODE, THETARHO, SVG } from './options'
 
 // Determine default file type; this is a little fussy because we want to ensure
 // that if the user has a rectangular table, but somehow wants to export theta

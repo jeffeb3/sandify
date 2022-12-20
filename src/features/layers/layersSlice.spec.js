@@ -17,9 +17,6 @@ import layers, {
   setShapeType,
   updateLayer,
   toggleOpen,
-  toggleRepeat,
-  toggleTrack,
-  toggleTrackGrow,
   toggleVisible
 } from './layersSlice'
 
@@ -33,7 +30,6 @@ describe('layers reducer', () => {
     circleLobes: 1,
     circleDirection: 'clockwise',
     type: 'circle',
-    canTransform: true,
     selectGroup: 'Shapes',
     shouldCache: true,
     canRotate: true,
@@ -512,7 +508,6 @@ describe('layers reducer', () => {
             byId: {
               'layer-1': {
                 id: 'layer-1',
-                repeatEnabled: false,
                 canChangeSize: false
               }
             }
@@ -548,69 +543,6 @@ describe('layers reducer', () => {
         '1': {
           id: '1',
           name: 'bar'
-        }
-      }
-    })
-  })
-
-  it('should handle toggleRepeat', () => {
-    expect(
-      layers(
-        {
-          byId: {
-            '1': {
-              repeatEnabled: false
-            }
-          }
-        },
-        toggleRepeat({id: '1'})
-      )
-    ).toEqual({
-      byId: {
-        '1': {
-          repeatEnabled: true
-        }
-      }
-    })
-  })
-
-  it('should handle toggleTrack', () => {
-    expect(
-      layers(
-        {
-          byId: {
-            '1': {
-              trackEnabled: false
-            }
-          }
-        },
-        toggleTrack({id: '1'})
-      )
-    ).toEqual({
-      byId: {
-        '1': {
-          trackEnabled: true
-        }
-      }
-    })
-  })
-
-  it('should handle toggleToggleGrow', () => {
-    expect(
-      layers(
-        {
-          byId: {
-            '1': {
-              trackGrowEnabled: false
-            }
-          }
-        },
-        toggleTrackGrow({id: '1'})
-      )
-    ).toEqual({
-      byId: {
-        '1': {
-          trackGrowEnabled: true
         }
       }
     })

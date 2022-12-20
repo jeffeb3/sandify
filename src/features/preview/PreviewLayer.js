@@ -222,7 +222,7 @@ const PreviewLayer = (ownProps) => {
         <Transformer
           ref={trRef}
           centeredScaling={true}
-          resizeEnabled={!props.layer.trackEnabled}
+          resizeEnabled={props.layer.canResize}
           rotateEnabled={props.layer.canRotate}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={!props.layer.canChangeHeight ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : null }

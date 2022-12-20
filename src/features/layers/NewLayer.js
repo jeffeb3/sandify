@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 
 import { getLayers } from '../store/selectors'
 import { getCurrentLayer } from '../layers/selectors'
-import { registeredShapes, getShapeSelectOptions, getShape } from '../../models/shapes'
+import { registeredModels, getModelSelectOptions, getModel } from '../../config/models'
 import { addLayer, updateLayers, setNewLayerType } from '../layers/layersSlice'
 
 const customStyles = {
@@ -24,7 +24,7 @@ const mapStateToProps = (state, ownProps) => {
     newLayerType: layers.newLayerType,
     newLayerName: layers.newLayerName,
     currentLayer: layer,
-    selectOptions: getShapeSelectOptions(false),
+    selectOptions: getModelSelectOptions(false),
     showModal: ownProps.showModal
   }
 }
@@ -38,7 +38,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(updateLayers({ newLayerName: event.target.value, newLayerNameOverride: true }))
     },
     onLayerAdded: (type) => {
-      const attrs = registeredShapes[type].getInitialState()
+      const attrs = registeredModels[type].getInitialState()
       dispatch(addLayer(attrs))
     },
     toggleModal: () => {
@@ -53,7 +53,7 @@ class NewLayer extends Component {
       newLayerType, currentLayer, toggleModal, showModal, selectOptions, newLayerName,
       onChangeNewType, onChangeNewName, onLayerAdded
     } = this.props
-    const selectedShape = getShape({type: newLayerType})
+    const selectedShape = getModel({type: newLayerType})
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
 
     return <Modal

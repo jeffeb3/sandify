@@ -5,7 +5,7 @@ import { connect } from 'react-redux'
 import ThetaRhoImporter from '../importer/ThetaRhoImporter'
 import GCodeImporter from '../importer/GCodeImporter'
 import { addLayer } from '../layers/layersSlice'
-import { registeredShapes } from '../../models/shapes'
+import { registeredModels } from '../../config/models'
 import ReactGA from 'react-ga'
 
 const mapStateToProps = (state, ownProps) => {
@@ -21,7 +21,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onLayerImport: (importProps) => {
       const attrs = {
-        ...registeredShapes["file_import"].getInitialState(importProps),
+        ...registeredModels["file_import"].getInitialState(importProps),
         name: importProps.fileName
       }
       dispatch(addLayer(attrs))
