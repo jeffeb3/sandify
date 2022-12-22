@@ -6,7 +6,11 @@ import { connect } from 'react-redux'
 import { getLayers } from '../store/selectors'
 import { getCurrentLayer } from '../layers/selectors'
 import { registeredModels, getModelSelectOptions, getModel } from '../../config/models'
-import { addLayer, updateLayers, setNewLayerType } from '../layers/layersSlice'
+import { addLayer } from '../layers/layersSlice'
+
+// Initialize these from local storage, or reasonable defaults
+const initialLayerType = localStorage.getItem('currentShape') || 'polygon'
+const initialLayerName = getModel({type: initialLayerType}).name.toLowerCase()
 
 const customStyles = {
   control: base => ({
@@ -17,28 +21,17 @@ const customStyles = {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const layers = getLayers(state)
-  const layer = getCurrentLayer(state)
-
   return {
-    newLayerType: layers.newLayerType,
-    newLayerName: layers.newLayerName,
-    currentLayer: layer,
-    selectOptions: getModelSelectOptions(false),
+    selectOptions: getModelSelectOptions(),
     showModal: ownProps.showModal
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onChangeNewType: (selected) => {
-      dispatch(setNewLayerType(selected.value))
-    },
-    onChangeNewName: (event) => {
-      dispatch(updateLayers({ newLayerName: event.target.value, newLayerNameOverride: true }))
-    },
-    onLayerAdded: (type) => {
+    onLayerAdded: (type, name) => {
       const attrs = registeredModels[type].getInitialState()
+      attrs.name = name
       dispatch(addLayer(attrs))
     },
     toggleModal: () => {
@@ -48,12 +41,19 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 }
 
 class NewLayer extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      newLayerType: initialLayerType,
+      newLayerName: initialLayerName,
+    }
+  }
+
   render() {
     const {
-      newLayerType, currentLayer, toggleModal, showModal, selectOptions, newLayerName,
-      onChangeNewType, onChangeNewName, onLayerAdded
+      toggleModal, showModal, selectOptions, onLayerAdded
     } = this.props
-    const selectedShape = getModel({type: newLayerType})
+    const selectedShape = getModel({type: this.state.newLayerType})
     const selectedOption = { value: selectedShape.id, label: selectedShape.name }
 
     return <Modal
@@ -72,7 +72,7 @@ class NewLayer extends Component {
           <Col sm={7}>
             <Select
               value={selectedOption}
-              onChange={onChangeNewType}
+              onChange={this.onChangeNewType.bind(this)}
               styles={customStyles}
               maxMenuHeight={305}
               options={selectOptions} />
@@ -84,9 +84,9 @@ class NewLayer extends Component {
           </Col>
           <Col sm={7}>
             <Form.Control
-              value={newLayerName}
+              value={this.state.newLayerName}
               onFocus={this.handleNameFocus}
-              onChange={onChangeNewName}
+              onChange={this.onChangeNewName.bind(this)}
             />
           </Col>
         </Row>
@@ -104,7 +104,7 @@ class NewLayer extends Component {
           id="new-layer-add"
           variant="primary"
           onClick={() => {
-            onLayerAdded(newLayerType || currentLayer.type)
+            onLayerAdded(this.state.newLayerType, this.state.newLayerName)
             toggleModal()
           }}
         >
@@ -117,6 +117,22 @@ class NewLayer extends Component {
   handleNameFocus(event) {
     event.target.select()
   }
+
+  onChangeNewType(selected) {
+    const shape = getModel({type: selected.value})
+    this.setState(
+      {
+        newLayerType: selected.value,
+        newLayerName: shape.name.toLowerCase()
+      })
+  }
+  onChangeNewName(event) {
+    this.setState(
+      {
+        newLayerName: event.target.value
+      })
+  }
+
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewLayer)

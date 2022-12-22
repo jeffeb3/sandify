@@ -8,8 +8,6 @@ const protectedAttrs = [
   'canRotate', 'usesFonts'
 ]
 
-const newLayerType = localStorage.getItem('currentShape') || 'polygon'
-const newLayerName = getModel({type: newLayerType}).name.toLowerCase()
 const newEffectType = localStorage.getItem('currentEffect') || 'mask'
 const newEffectName = getModel({type: newEffectType}).name.toLowerCase()
 
@@ -19,7 +17,7 @@ function createLayer(state, attrs) {
   const layer = {
     ...attrs,
     id: (restore && attrs.id) || uniqueId('layer-'),
-    name: attrs.name || state.newLayerName,
+    name: attrs.name,
   }
 
   state.byId[layer.id] = layer
@@ -84,9 +82,6 @@ const layersSlice = createSlice({
   initialState: {
     current: null,
     selected: null,
-    newLayerType: newLayerType,
-    newLayerName: newLayerName,
-    newLayerNameOverride: false,
     newEffectType: newEffectType,
     newEffectName: newEffectName,
     newEffectNameOverride: false,
@@ -101,7 +96,6 @@ const layersSlice = createSlice({
 
       state.allIds.splice(index, 0, layer.id)
       setCurrentId(state, layer.id)
-      state.newLayerNameOverride = false
       state.newLayerName = layer.name
 
       if (layer.type !== 'file_import') {
@@ -200,14 +194,6 @@ const layersSlice = createSlice({
 
       state.byId[layer.id] = layer
     },
-    setNewLayerType(state, action) {
-      let attrs = { newLayerType: action.payload }
-      if (!state.newLayerNameOverride) {
-        const shape = getModel({type: action.payload})
-        attrs.newLayerName = shape.name.toLowerCase()
-      }
-      Object.assign(state, attrs)
-    },
     setNewEffectType(state, action) {
       let attrs = { newEffectType: action.payload }
       if (!state.newEffectNameOverride) {
@@ -247,7 +233,6 @@ export const {
   setCurrentLayer,
   setSelectedLayer,
   setShapeType,
-  setNewLayerType,
   setNewEffectType,
   updateLayer,
   updateLayers,
