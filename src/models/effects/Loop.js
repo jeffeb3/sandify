@@ -76,7 +76,6 @@ export default class Loop extends Effect {
         canChangeSize: false,
         canRotate: false,
         canMove: false,
-        effect: true,
 
         // Loop Options
         transformMethod: 'smear',

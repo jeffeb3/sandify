@@ -10,7 +10,7 @@ import ToggleButtonOption from '../../components/ToggleButtonOption'
 import SortableEffects from './SortableEffects'
 import NewEffect from './NewEffect'
 import { updateLayer, updateShape, updateEffect, setShapeType, restoreDefaults } from '../layers/layersSlice'
-import { getCurrentLayerState, getCurrentLayerId, getCurrentEffectState, getCurrentEffectsStates, getCurrentLayerNumEffects } from './layersSlice'
+import { getCurrentLayerState, getCurrentLayerId, getCurrentEffectState, getCurrentEffectsStates, getCurrentLayerNumEffects, removeEffect } from './layersSlice'
 import { getModelFromLayer, getShapeSelectOptions } from '../../config/models'
 import { getEffectModel } from '../../config/effects'
 import { layerOptions } from '../../models/Layer'
@@ -62,6 +62,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onChangeType: (selected) => {
       dispatch(setShapeType({id: id, type: selected.value}))
     },
+    onEffectRemoved: (ids) => {
+      dispatch(removeEffect(ids))
+    },
     onRestoreDefaults: (event) => {
       dispatch(restoreDefaults(id))
     }
@@ -79,6 +82,10 @@ class LayerEditor extends Component {
     }
   }
   render() {
+    const {
+      onEffectRemoved
+    } = this.props
+
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.type }
     const shapeOptionsRender = Object.keys(this.props.shapeOptions).map((key, index) => {
       return this.getOptionComponent(key, index, this.props.shapeOptions, this.props.layer.shape, this.props.onChangeShape)
@@ -172,7 +179,7 @@ class LayerEditor extends Component {
                   className="layer-button"
                   variant="light"
                   data-tip="Delete layer"
-                  //onClick={onLayerRemoved.bind(this, currentLayer.id)}
+                  onClick={onEffectRemoved.bind(this, {effectId: this.props.effectState.id, layerId: this.props.layer.id})}
                 >
                   <FaTrash />
                 </Button>}

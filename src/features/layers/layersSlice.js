@@ -36,15 +36,21 @@ function deleteLayer(state, deleteId) {
   return idx
 }
 
-function deleteEffect(state, deleteId) {
-  const layer = state.layerById[deleteId]
-  const parent = state.layerById[layer.parentId]
+function deleteEffect(state, effectId, layerId) {
+  const layer = state.layerById[layerId]
+  const idx = layer.effectIds.findIndex(id => id === effectId)
+  layer.effectIds.splice(idx, 1)
 
-  const idx = parent.effectIds.findIndex(id => id === deleteId)
-  parent.effectIds.splice(idx, 1)
+  if (idx >= layer.effectIds.length) {
+    if (layer.effectIds.length === 0) {
+      setCurrentEffectId(state, undefined)
+    } else {
+      setCurrentEffectId(state, undefined)
+      setCurrentEffectId(state, layer.effectIds[idx-1])
+    }
+  }
 
-  delete state.layerById[deleteId]
-  handleAfterDelete(state, deleteId, idx)
+  delete state.effectsById[effectId]
 }
 
 function createEffect(state, parent, attrs) {
@@ -64,16 +70,6 @@ function createEffect(state, parent, attrs) {
   parent.effectIds = [...new Set(parent.effectIds)]
 
   return effect
-}
-
-function handleAfterDelete(state, deletedId, deletedIdx) {
-  if (deletedId === state.currentLayerId) {
-    if (deletedIdx === state.layerOrder.length) {
-      setCurrentId(state, state.layerOrder[deletedIdx-1])
-    } else {
-      setCurrentId(state, state.layerOrder[deletedIdx])
-    }
-  }
 }
 
 function currLayerIndex(state) {
@@ -144,13 +140,27 @@ const layersSlice = createSlice({
       const layer = state.layerById[id]
 
       if (layer.effectIds) {
+        // Remove effects so they don't become zombies
         layer.effectIds.forEach(effectId => {
-          deleteEffect(state, effectId)
+          deleteEffect(state, effectId, id)
         })
       }
 
-      const idx = deleteLayer(state, id)
-      handleAfterDelete(state, id, idx)
+      const idx = state.layerOrder.findIndex(layerId => layerId === id)
+      if (id === state.currentLayerId) {
+        if (idx === state.layerOrder.length-1) {
+          setCurrentId(state, state.layerOrder[idx-1])
+        } else {
+          setCurrentId(state, state.layerOrder[idx])
+        }
+        if (state.layerById[state.currentLayerId].effectIds.length !== 0) {
+          setCurrentEffectId(state, state.layerById[state.currentLayerId].effectIds[0])
+        } else {
+          setCurrentEffectId(state, undefined)
+        }
+      }
+
+      deleteLayer(state, id)
     },
     addEffect(state, action) {
       const parent = state.layerById[action.payload.parentId]
@@ -160,7 +170,7 @@ const layersSlice = createSlice({
       setCurrentEffectId(state, effect.id)
     },
     removeEffect(state, action) {
-      deleteEffect(state, action.payload)
+      deleteEffect(state, action.payload.effectId, action.payload.layerId)
     },
     moveEffect(state, action) {
       const { parentId, oldIndex, newIndex } = action.payload
