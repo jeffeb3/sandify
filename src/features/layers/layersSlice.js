@@ -214,6 +214,13 @@ const layersSlice = createSlice({
       const { oldIndex, newIndex } = action.payload
       state.layerById[state.currentLayerId].effectIds = arrayMove(state.layerById[state.currentLayerId].effectIds, oldIndex, newIndex)
     },
+    setCurrentEffect(state, action) {
+      const current = state.effectsById[action.payload]
+
+      if (current) {
+        setCurrentEffectId(state, current.id)
+      }
+    },
     updateLayer(state, action) {
       const layer = action.payload
       const currLayer = state.layerById[layer.id]
@@ -371,6 +378,7 @@ export const {
   moveEffect,
   restoreDefaults,
   setCurrentLayer,
+  setCurrentEffect,
   setSelectedLayer,
   setShapeType,
   updateLayer,

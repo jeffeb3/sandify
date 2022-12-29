@@ -10,7 +10,6 @@ const SortableLayer = SortableElement((
     layer,
     onLayerSelected,
     onEffectMoved,
-    onSortStarted,
     onToggleLayerOpen,
     onToggleLayerVisible
   }) => {

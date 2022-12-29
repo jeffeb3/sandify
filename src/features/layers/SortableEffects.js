@@ -8,7 +8,7 @@ const SortableEffect = SortableElement((
     active,
     numLayers,
     effect,
-    onLayerSelected,
+    onEffectSelected,
     onEffectMoved,
     onSortStarted,
     onToggleLayerOpen,
@@ -26,7 +26,7 @@ const SortableEffect = SortableElement((
     >
       <div
         className={[`layer-${activeClass}`, 'd-flex align-items-center'].join(' ')}
-        onClick={onLayerSelected}
+        onClick={onEffectSelected}
       >
         <div className="layer-left">
           <Button
@@ -50,8 +50,8 @@ const SortableEffect = SortableElement((
 
 const SortableEffects = SortableContainer((props) => {
   const {
+    effectState,
     effects,
-    currentEffect,
     ...other
   } = props
 
@@ -68,9 +68,8 @@ const SortableEffects = SortableContainer((props) => {
             key={effect.id}
             id={effect.id}
             index={index}
-            active={true}//currentEffect.id === effect.id}
+            active={effectState.id === effect.id}
             effect={effect}
-            currentEffect={currentEffect}
             {...other}
           />
         )

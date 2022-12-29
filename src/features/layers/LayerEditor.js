@@ -9,7 +9,7 @@ import CheckboxOption from '../../components/CheckboxOption'
 import ToggleButtonOption from '../../components/ToggleButtonOption'
 import SortableEffects from './SortableEffects'
 import NewEffect from './NewEffect'
-import { updateLayer, updateShape, updateEffect, setShapeType, restoreDefaults } from '../layers/layersSlice'
+import { setCurrentEffect, updateLayer, updateShape, updateEffect, setShapeType, restoreDefaults } from '../layers/layersSlice'
 import { getCurrentLayerState, getCurrentLayerId, getCurrentEffectState, getCurrentEffectsStates, getCurrentLayerNumEffects, removeEffect, moveEffect } from './layersSlice'
 import { getModelFromLayer, getShapeSelectOptions } from '../../config/models'
 import { getEffectModel } from '../../config/effects'
@@ -68,6 +68,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onEffectMoved: ({oldIndex, newIndex}) => {
       dispatch(moveEffect({oldIndex: oldIndex, newIndex: newIndex}))
     },
+    onEffectSelected: (event) => {
+      const id = event.target.closest('.list-group-item').id
+      dispatch(setCurrentEffect(id))
+    },
+    onSortStarted: ({node}) => {
+      dispatch(setCurrentEffect(node.id))
+    },
     onRestoreDefaults: (event) => {
       dispatch(restoreDefaults(id))
     }
@@ -86,7 +93,7 @@ class LayerEditor extends Component {
   }
   render() {
     const {
-      onEffectRemoved, onEffectMoved
+      onEffectRemoved, onEffectMoved, onSortStarted
     } = this.props
 
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.type }
@@ -163,7 +170,7 @@ class LayerEditor extends Component {
             <SortableEffects
               pressDelay={150}
               onSortEnd={onEffectMoved}
-              //updateBeforeSortStart={onSortStarted}
+              updateBeforeSortStart={onSortStarted}
               lockAxis="y"
               {...this.props}
             />
