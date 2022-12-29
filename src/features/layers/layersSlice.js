@@ -73,6 +73,13 @@ function nextLayerIndex(state) {
 
 // TODO: remove this function when you refactor to remove 'selected' feature; currently disabled
 function setCurrentId(state, id) {
+  if (state.layerById[id].effectIds.length === 0) {
+    // We don't have any effects on this layer
+    setCurrentEffectId(state, undefined)
+  } else if (state.currentLayerId !== id) {
+    setCurrentEffectId(state, state.layerById[id].effectIds[0])
+  }
+
   state.selected = id
   state.currentLayerId = id
 }
@@ -114,21 +121,20 @@ const layersSlice = createSlice({
     copyLayer(state, action) {
       const source = state.layerById[action.payload]
       const layer = createLayer(state, {
-        ...source,
+        ...source.shape,
         name: state.copyLayerName
       })
       delete layer.effectIds
 
       if (source.effectIds) {
         layer.effectIds = source.effectIds.map(effectId => {
-          return createEffect(state, layer, state.layerById[effectId]).id
+          return createEffect(state, layer, state.effectsById[effectId]).id
         })
       }
 
       const index = state.layerOrder.findIndex(id => id === state.currentLayerId) + 1
       state.layerOrder.splice(index, 0, layer.id)
       setCurrentId(state, layer.id)
-      state.copyLayerName = null
     },
     removeLayer(state, action) {
       const id = action.payload
@@ -136,22 +142,18 @@ const layersSlice = createSlice({
 
       if (layer.effectIds) {
         // Remove effects so they don't become zombies
-        layer.effectIds.forEach(effectId => {
+        const effectsIdsToRemove = layer.effectIds.map(effectId => effectId)
+        effectsIdsToRemove.forEach(effectId => {
           deleteEffect(state, effectId, id)
         })
       }
 
       const idx = deleteLayer(state, id)
       if (id === state.currentLayerId) {
-        if (idx === state.layerOrder.length-1) {
+        if (idx === state.layerOrder.length) {
           setCurrentId(state, state.layerOrder[idx-1])
         } else {
           setCurrentId(state, state.layerOrder[idx])
-        }
-        if (state.layerById[state.currentLayerId].effectIds.length !== 0) {
-          setCurrentEffectId(state, state.layerById[state.currentLayerId].effectIds[0])
-        } else {
-          setCurrentEffectId(state, undefined)
         }
       }
 
@@ -204,14 +206,17 @@ const layersSlice = createSlice({
       // set the next id
       if (idx >= layer.effectIds.length) {
         if (layer.effectIds.length === 0) {
+          log("no more effects, setting to undefined")
           setCurrentEffectId(state, undefined)
         } else {
           if (idx === layer.effectIds.length) {
+            log("removed end, setting to ", idx-1)
             setCurrentEffectId(state, layer.effectIds[idx-1])
-          } else {
-            setCurrentEffectId(state, layer.effectIds[idx])
           }
         }
+      } else {
+        log("removed middle, setting to ", idx)
+        setCurrentEffectId(state, layer.effectIds[idx])
       }
     },
     moveEffect(state, action) {
