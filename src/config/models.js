@@ -3,7 +3,6 @@ import CirclePacker from '@/models/shapes/circle_packer/CirclePacker'
 import Epicycloid from '@/models/shapes/Epicycloid'
 import FancyText from '@/models/shapes/FancyText'
 import FileImport from '@/models/shapes/FileImport'
-import Fisheye from '@/models/shapes/Fisheye'
 import FractalSpirograph from '@/models/shapes/fractal_spirograph/FractalSpirograph'
 // import Freeform from '../models/shapes/Freeform'
 import Heart from '@/models/shapes/Heart'
@@ -19,13 +18,6 @@ import SpaceFiller from '@/models/shapes/space_filler/SpaceFiller'
 import Star from '@/models/shapes/Star'
 import TessellationTwist from '@/models/shapes/tessellation_twist/TessellationTwist'
 import V1Engineering from '@/models/shapes/v1_engineering/V1Engineering'
-
-import FineTuning from '../models/effects/FineTuning'
-import Loop from '@/models/effects/Loop'
-import Mask from '@/models/effects/Mask'
-import Noise from '@/models/effects/Noise'
-import Track from '@/models/effects/Track'
-import Warp from '@/models/effects/Warp'
 import Wiper from '@/models/shapes/Wiper'
 
 
@@ -54,29 +46,30 @@ export const registeredModels = {
   space_filler: new SpaceFiller(),
   noise_wave: new NoiseWave(),
   file_import: new FileImport(),
-  fisheye: new Fisheye(),
-  loop: new Loop(),
-  track: new Track(),
-  mask: new Mask(),
-  noise: new Noise(),
-  warp: new Warp(),
-  fineTuning: new FineTuning()
 }
 
-export const getModel = (layer) => {
-  return registeredModels[layer.type]
+export const getModelFromType = (layer) => {
+  return registeredModels[layer]
+}
+
+export const getModelFromShape = (shape) => {
+  return getModelFromType(shape.type)
+}
+
+export const getModelFromLayer = (layer) => {
+  return getModelFromShape(layer.shape)
 }
 
 export const getModelDefaults = () => {
   return Object.keys(registeredModels).map(id => {
     const state = registeredModels[id].getInitialState()
-    state.name = registeredModels[id].name
+    state.name = registeredModels[id].type
     state.id = id
     return state
   })
 }
 
-export const getModelSelectOptions = () => {
+export const getShapeSelectOptions = () => {
   const groupOptions = []
   const shapes = getModelDefaults()
 
@@ -94,10 +87,6 @@ export const getModelSelectOptions = () => {
       if (shape.selectGroup === 'import') {
         // users can't manually select this group
         continue
-      } else if (shape.selectGroup === 'effects') {
-        // effects are added separately
-        // TODO: when effects can be added separately, uncomment the next line
-        // continue
       }
 
       const newOptions = [ optionLabel ]
@@ -107,3 +96,4 @@ export const getModelSelectOptions = () => {
 
   return groupOptions
 }
+

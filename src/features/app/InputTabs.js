@@ -4,14 +4,14 @@ import { Tab, Tabs } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import MachineSettings from '../machine/MachineSettings'
 import Footer from './Footer'
-import Layer from '../layers/Layer'
+import LayerEditor from '../layers/LayerEditor'
 import Playlist from '../layers/Playlist'
 import { chooseInput } from '../app/appSlice'
-import { getCurrentLayer } from '../layers/selectors'
+import { getCurrentLayerState } from '../layers/layersSlice'
 import { loadFont, supportedFonts } from '../fonts/fontsSlice'
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
+  const layer = getCurrentLayerState(state)
 
   return {
     layer: layer
@@ -40,7 +40,7 @@ class InputTabs extends Component {
          <Tab eventKey="shape" title="Draw" className="full-page-tab">
            <div className="d-flex flex-column h-100">
              <Playlist />
-             <Layer key={this.props.layer.id} id={this.props.layer.id} />
+             <LayerEditor key={this.props.layer.id} id={this.props.layer.id} />
             </div>
          </Tab>
 

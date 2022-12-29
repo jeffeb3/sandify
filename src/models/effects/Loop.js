@@ -1,10 +1,8 @@
-import { modelOptions } from '../Model'
 import Effect from '../Effect'
 import { scale, rotate, circle } from '@/common/geometry'
 import { evaluate } from 'mathjs'
 
 const options = {
-  ...modelOptions,
   ...{
     numLoops: {
       title: 'Number of loops',

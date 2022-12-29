@@ -4,9 +4,9 @@ import { Button } from 'react-bootstrap'
 import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
 import { MdOutlineFileUpload } from 'react-icons/md'
 
-import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
+import { getCurrentLayerState, getNumLayers, getAllLayersStates } from './layersSlice'
 import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
-import { registeredModels, getModel } from '../../config/models'
+import { registeredModels, getModelFromLayer } from '../../config/models'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
 import ImportLayer from './ImportLayer'
@@ -14,12 +14,12 @@ import SortableLayers from './SortableLayers'
 import './Playlist.scss'
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const shape = getModel(layer)
+  const layer = getCurrentLayerState(state)
+  const shape = getModelFromLayer(layer)
   const numLayers = getNumLayers(state)
 
   return {
-    layers: getAllLayersInfo(state),
+    layers: getAllLayersStates(state),
     numLayers: numLayers,
     currentLayer: layer,
     shape: shape
@@ -31,10 +31,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onLayerSelected: (event) => {
       const id = event.target.closest('.list-group-item').id
       dispatch(setCurrentLayer(id))
-    },
-    onLayerAdded: (type) => {
-      const attrs = registeredModels[type].getInitialState()
-      dispatch(addLayer(attrs))
     },
     onLayerRemoved: (id) => {
       dispatch(removeLayer(id))

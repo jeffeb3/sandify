@@ -1,15 +1,18 @@
-import Model from './Model'
+import { morphOptions, initialMorphState } from './Morph'
 
-export default class Effect extends Model {
+export const effectOptions = {
+  ...morphOptions
+}
+
+export default class Effect {
+  constructor(type) {
+    this.type = type
+  }
+
   getInitialState() {
     return {
-      ...super.getInitialState(),
-      ...{
-        effect: true,
-        shouldCache: false,
-        canChangeSize: true,
-        autosize: false
-      }
+      ...initialMorphState(),
     }
   }
+
 }

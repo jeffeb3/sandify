@@ -7,7 +7,7 @@ import machineReducer from '../machine/machineSlice'
 import exporterReducer from '../exporter/exporterSlice'
 import previewReducer from '../preview/previewSlice'
 import fontsReducer from '../fonts/fontsSlice'
-import { registeredModels, getModel } from '../../config/models'
+import { registeredModels, getModelFromType } from '../../config/models'
 import { loadState, saveState } from '../../common/localStorage'
 import layersReducer, { setCurrentLayer, addLayer, addEffect, updateLayer } from '../layers/layersSlice'
 
@@ -33,44 +33,45 @@ const store = configureStore({
   })
 })
 
-const loadPersistedLayers = (layers) => {
-  layers.allIds.forEach(id => {
-    const layer = layers.byId[id]
-
-    if (layer) {
-      const newLayer = {
-        ...layer,
-        id: uniqueId('layer-'),
-        restore: true,
-        startingWidth: layer.startingWidth || layer.startingSize,
-        startingHeight: layer.startingWidth || layer.startingSize,
-        autosize: layer.autosize === null ? true : layer.autosize
-      }
-
-      // for referential integrity, we have to explicitly generate ids and
-      // re-build relationships.
-      store.dispatch(addLayer(newLayer))
-      if (layer.effectIds) {
-        newLayer.effectIds = layer.effectIds.map(effectId => {
-          const effect = {
-            ...layers.byId[effectId],
-            id: uniqueId('layer-'),
-            restore: true,
-            parentId: newLayer.id
-          }
-          store.dispatch(addEffect(effect))
-          return effect.id
-        })
-        store.dispatch(updateLayer(newLayer))
-      }
-    }
-  })
-}
+// TODO I'm breaking this.
+//const loadPersistedLayers = (layers) => {
+//  layers.layerIds.forEach(id => {
+//    const layer = layers.layerById[id]
+//
+//    if (layer) {
+//      const newLayer = {
+//        ...layer,
+//        id: uniqueId('layer-'),
+//        restore: true,
+//        startingWidth: layer.startingWidth || layer.startingSize,
+//        startingHeight: layer.startingWidth || layer.startingSize,
+//        autosize: layer.autosize === null ? true : layer.autosize
+//      }
+//
+//      // for referential integrity, we have to explicitly generate ids and
+//      // re-build relationships.
+//      store.dispatch(addLayer(newLayer))
+//      if (layer.effectIds) {
+//        newLayer.effectIds = layer.effectIds.map(effectId => {
+//          const effect = {
+//            ...layers.layerById[effectId],
+//            id: uniqueId('layer-'),
+//            restore: true,
+//            parentId: newLayer.id
+//          }
+//          store.dispatch(addEffect(effect))
+//          return effect.id
+//        })
+//        store.dispatch(updateLayer(newLayer))
+//      }
+//    }
+//  })
+//}
 
 const loadDefaultLayer = () => {
   const storedShape = localStorage.getItem('currentShape')
   const currentShape = storedShape && registeredModels[storedShape] ? storedShape : 'polygon'
-  const currentName = currentShape && getModel({type: currentShape}).name.toLowerCase()
+  const currentName = currentShape && getModelFromType(currentShape).type.toLowerCase()
   const layer = {
       ...registeredModels[currentShape].getInitialState(),
       name: currentName
@@ -79,7 +80,8 @@ const loadDefaultLayer = () => {
   store.dispatch(addLayer(layer))
 
   const state = store.getState()
-  store.dispatch(setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id))
+  // TODO shouldn't this be using a selector?
+  store.dispatch(setCurrentLayer(state.main.layers.layerById[state.main.layers.layerOrder[0]].id))
 }
 
 // set both to true when running locally if you want to preserve your shape
@@ -97,17 +99,17 @@ if (typeof jest === 'undefined' && usePersistedState) {
   // override default values with saved ones
   const persistedState = loadState(persistInitKey)
 
-  if (persistedState) {
-    if (persistedState.main && persistedState.main.layers) {
-      loadPersistedLayers(persistedState.main.layers)
-      store.dispatch(setCurrentLayer(persistedState.main.layers.current))
-    } else if (persistedState.layers) {
-      loadPersistedLayers(persistedState.layers) // older store format
-      store.dispatch(setCurrentLayer(persistedState.layers.current))
-    }
-  } else {
+  //if (persistedState) {
+  //  if (persistedState.main && persistedState.main.layers) {
+  //    loadPersistedLayers(persistedState.main.layers)
+  //    store.dispatch(setCurrentLayer(persistedState.main.layers.current))
+  //  } else if (persistedState.layers) {
+  //    loadPersistedLayers(persistedState.layers) // older store format
+  //    store.dispatch(setCurrentLayer(persistedState.layers.current))
+  //  }
+  //} else {
     loadDefaultLayer()
-  }
+  //}
 } else {
   loadDefaultLayer()
 }

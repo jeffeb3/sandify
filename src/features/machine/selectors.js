@@ -2,10 +2,13 @@ import LRUCache from 'lru-cache'
 import { createSelector } from 'reselect'
 import Color from 'color'
 import { transformShapes, polishVertices, getMachineInstance } from './computer'
-import { getModel } from '../../config/models'
+import { morphVertices } from '../../models/Morph'
+import { getModelFromShape } from '../../config/models'
+import { getEffectModel } from '../../config/effects'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
-import { makeGetLayer, getNumVisibleLayers, getVisibleNonEffectIds, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
+import { makeGetLayer, getNumVisibleLayers, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
+import { getCurrentLayerEffectIdsInOrder, makeGetLayerEffectStatesInOrder, getVisibleLayerIdsInOrder } from '../layers/layersSlice'
 import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { log } from '../../common/util'
@@ -50,29 +53,29 @@ const makeGetLayerFonts = layerId => {
 }
 
 // creates a selector that returns shape vertices for a given layer
-const makeGetLayerVertices = layerId => {
+const makeGetShapeVertices = layerId => {
   return createSelector(
     [
-      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetLayer, layerId), // This should be smaller, just the shape
       getCachedSelector(makeGetLayerMachine, layerId),
       getCachedSelector(makeGetLayerFonts, layerId),
     ],
     (layer, machine, fonts) => {
       const state = {
-        shape: layer,
+        shape: layer.shape,
         machine: machine,
         fonts: fonts
       }
-      log('makeGetLayerVertices', layerId)
-      const metashape = getModel(layer)
+      log('makeGetShapeVertices', layerId)
+      const shapeModel = getModelFromShape(state.shape)
 
-      // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
       if (layer.shouldCache) {
         const key = getCacheKey(state)
         let vertices = cache.get(key)
 
         if (!vertices) {
-          vertices = metashape.draw(state)
+          vertices = shapeModel.getVertices(state)
+          log("uncached vertices")
 
           if (vertices.length > 1) {
             cache.set(key, vertices)
@@ -82,12 +85,34 @@ const makeGetLayerVertices = layerId => {
 
         return vertices
       } else {
-        if (!state.shape.dragging && state.shape.effect) {
-          return []
-        } else {
-          return metashape.getVertices(state)
-        }
+        return shapeModel.getVertices(state)
       }
+    }
+  )
+}
+
+// creates a selector that returns vertices for a given layer, including shapes and effects.
+const makeGetLayerVertices = layerId => {
+  return createSelector(
+    [
+      getCachedSelector(makeGetShapeVertices, layerId),
+      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetLayerEffectStatesInOrder, layerId),
+    ],
+    (shapeVertices, layer, effectStates) => {
+      // TODO fix caching of effects, it probably matters a lot more than shape caches.
+      // We can also create an incremental state/cacheKey by adding the state from each effect that
+      // has been computed.
+      log('makeGetLayerVertices', layerId)
+
+      let vertices = shapeVertices.slice()
+      for (const effectState of effectStates) {
+        const effectModel = getEffectModel(effectState)
+        vertices = effectModel.applyEffect(effectState, layer, vertices)
+      }
+
+      const morphed = morphVertices(layer,vertices)
+      return morphVertices(layer, vertices)
     }
   )
 }
@@ -186,7 +211,7 @@ export const makeGetPreviewVertices = layerId => {
 
 // returns a flattened array of all visible computed vertices and connectors (across layers)
 export const getAllComputedVertices = createSelector(
-  [getState, getVisibleNonEffectIds],
+  [getState, getVisibleLayerIdsInOrder],
   (state, visibleLayerIds) => {
     log("getAllComputedVertices")
     return visibleLayerIds.map((id, idx) => {
@@ -200,7 +225,7 @@ export const getAllComputedVertices = createSelector(
 
 // returns an array of vertices connecting a given layer to the next (if it exists)
 export const getConnectingVertices = (state, layerId) => {
-  const visibleLayerIds = getVisibleNonEffectIds(state)
+  const visibleLayerIds = getVisibleLayerIdsInOrder(state)
   const idx = getCachedSelector(makeGetNonEffectLayerIndex, layerId)(state)
 
   return idx < visibleLayerIds.length - 1 ?
@@ -210,7 +235,7 @@ export const getConnectingVertices = (state, layerId) => {
 
 // returns the starting offset for each layer, given previous layers
 export const getVertexOffsets = createSelector(
-  [getState, getVisibleNonEffectIds],
+  [getState, getVisibleLayerIdsInOrder],
   (state, visibleLayerIds) => {
     log('getVertexOffsets')
     let offsets = {}

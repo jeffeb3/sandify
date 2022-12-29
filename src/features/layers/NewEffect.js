@@ -3,15 +3,12 @@ import Select from 'react-select'
 import { Button, Modal, Row, Col, Form } from 'react-bootstrap'
 import { connect } from 'react-redux'
 
-import { registeredModels, getShapeSelectOptions, getModelFromType } from '../../config/models'
-import { addLayer } from '../layers/layersSlice'
+import { registeredEffectModels, getEffectSelectOptions, getEffectModel } from '../../config/effects'
+import { addEffect, getCurrentLayerId } from './layersSlice'
 
 // Initialize these from local storage, or reasonable defaults
-let initialLayerType = localStorage.getItem('currentShape') || 'polygon'
-if (initialLayerType === 'undefined') {
-  initialLayerType = 'polygon'
-}
-const initialLayerName = getModelFromType(initialLayerType).type.toLowerCase()
+const initialEffectType = localStorage.getItem('currentEffect') || 'loop'
+const initialEffectName = getEffectModel({type: initialEffectType}).type.toLowerCase()
 
 const customStyles = {
   control: base => ({
@@ -23,17 +20,19 @@ const customStyles = {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    selectOptions: getShapeSelectOptions(),
+    currentLayerId: getCurrentLayerId(state),
+    selectOptions: getEffectSelectOptions(),
     showModal: ownProps.showModal
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onLayerAdded: (type, name) => {
-      const attrs = registeredModels[type].getInitialState()
+    onEffectAdded: (type, name, parentId) => {
+      const attrs = registeredEffectModels[type].getInitialState()
       attrs.name = name
-      dispatch(addLayer(attrs))
+      attrs.parentId = parentId
+      dispatch(addEffect(attrs))
     },
     toggleModal: () => {
       ownProps.toggleModal()
@@ -41,28 +40,28 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-class NewLayer extends Component {
+class NewEffect extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      newLayerType: initialLayerType,
-      newLayerName: initialLayerName,
+      newEffectType: initialEffectType,
+      newEffectName: initialEffectName,
     }
   }
 
   render() {
     const {
-      toggleModal, showModal, selectOptions, onLayerAdded
+      toggleModal, showModal, selectOptions, onEffectAdded
     } = this.props
-    const selectedShape = getModelFromType(this.state.newLayerType)
-    const selectedOption = { value: selectedShape.id, label: selectedShape.name }
+    const selectedEffect = getEffectModel({type: this.state.newEffectType})
+    const selectedOption = { value: selectedEffect.id, label: selectedEffect.type }
 
     return <Modal
       show={showModal}
       onHide={toggleModal}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create new layer</Modal.Title>
+        <Modal.Title>Create new effect</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -85,7 +84,7 @@ class NewLayer extends Component {
           </Col>
           <Col sm={7}>
             <Form.Control
-              value={this.state.newLayerName}
+              value={this.state.newEffectName}
               onFocus={this.handleNameFocus}
               onChange={this.onChangeNewName.bind(this)}
             />
@@ -105,7 +104,7 @@ class NewLayer extends Component {
           id="new-layer-add"
           variant="primary"
           onClick={() => {
-            onLayerAdded(this.state.newLayerType, this.state.newLayerName)
+            onEffectAdded(this.state.newEffectType, this.state.newEffectName, this.props.currentLayerId)
             toggleModal()
           }}
         >
@@ -120,20 +119,20 @@ class NewLayer extends Component {
   }
 
   onChangeNewType(selected) {
-    const shape = getModelFromType(selected.value)
+    const effect = getEffectModel({type: selected.value})
     this.setState(
       {
-        newLayerType: selected.value,
-        newLayerName: shape.type.toLowerCase()
+        newEffectType: selected.value,
+        newEffectName: effect.type.toLowerCase()
       })
   }
   onChangeNewName(event) {
     this.setState(
       {
-        newLayerName: event.target.value
+        newEffectName: event.target.value
       })
   }
 
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewLayer)
+export default connect(mapStateToProps, mapDispatchToProps)(NewEffect)

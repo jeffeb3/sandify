@@ -1,6 +1,6 @@
 import Victor from 'victor'
 import { modelOptions } from '../Model'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import { rotate, offset, circle } from '@/common/geometry'
 import PolarMachine from '@/features/machine/PolarMachine'
 import RectMachine from '@/features/machine/RectMachine'
@@ -8,7 +8,7 @@ import PolarInvertedMachine from '@/features/machine/PolarInvertedMachine'
 import RectInvertedMachine from '@/features/machine/RectInvertedMachine'
 
 const options = {
-  ...modelOptions,
+  ...effectOptions,
   ...{
     maskMachine: {
       title: 'Mask shape',

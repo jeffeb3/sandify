@@ -6,15 +6,15 @@ import isEqual from 'lodash'
 const cachedSelectors = {}
 
 // ensures we only create a single selector for a given layer
-export const getCachedSelector = (fn, ...layerIds) => {
-  const key = layerIds.join('-')
+export const getCachedSelector = (fn, ...layerOrder) => {
+  const key = layerOrder.join('-')
 
   if (!cachedSelectors[fn.name]) {
     cachedSelectors[fn.name] = {}
   }
 
   if (!cachedSelectors[fn.name][key]) {
-    cachedSelectors[fn.name][key] = fn.apply(null, layerIds)
+    cachedSelectors[fn.name][key] = fn.apply(null, layerOrder)
   }
 
   return cachedSelectors[fn.name][key]

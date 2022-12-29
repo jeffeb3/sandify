@@ -3,18 +3,18 @@ import { SortableContainer, SortableElement } from 'react-sortable-hoc'
 import { Button, ListGroup } from 'react-bootstrap'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
-const SortableLayer = SortableElement((
+const SortableEffect = SortableElement((
   {
     active,
     numLayers,
-    layer,
+    effect,
     onLayerSelected,
     onEffectMoved,
     onSortStarted,
     onToggleLayerOpen,
     onToggleLayerVisible
   }) => {
-    const { name, id, visible } = layer
+    const { name, id, visible } = effect
     const activeClass = active ? 'active' : ''
     const dragClass = numLayers > 1 ? 'cursor-move' : ''
     const visibleClass = visible ? '' : 'layer-hidden'
@@ -33,7 +33,7 @@ const SortableLayer = SortableElement((
             className="layer-button"
             variant="light"
             data-id={id}
-            onClick={onToggleLayerVisible.bind(this, id)}
+            //onClick={onToggleLayerVisible.bind(this, id)}
           >
             {visible && <FaEye size="0.8em" />}
             {!visible && <FaEyeSlash size="0.8em" />}
@@ -48,10 +48,10 @@ const SortableLayer = SortableElement((
   }
 )
 
-const SortableLayers = SortableContainer((props) => {
+const SortableEffects = SortableContainer((props) => {
   const {
-    layers,
-    currentLayer,
+    effects,
+    currentEffect,
     ...other
   } = props
 
@@ -62,14 +62,15 @@ const SortableLayers = SortableContainer((props) => {
       className="border overflow-auto"
       id="playlist-group"
     >
-      {layers.map((layer, index) => {
+      {effects.map((effect, index) => {
         return (
-          <SortableLayer
-            key={layer.id}
-            id={layer.id}
+          <SortableEffect
+            key={effect.id}
+            id={effect.id}
             index={index}
-            active={currentLayer.id === layer.id}
-            layer={layer}
+            active={true}//currentEffect.id === effect.id}
+            effect={effect}
+            currentEffect={currentEffect}
             {...other}
           />
         )
@@ -78,4 +79,4 @@ const SortableLayers = SortableContainer((props) => {
   )
 })
 
-export default SortableLayers
+export default SortableEffects

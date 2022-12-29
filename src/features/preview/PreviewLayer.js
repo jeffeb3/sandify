@@ -5,7 +5,8 @@ import { makeGetPreviewTrackVertices, makeGetPreviewVertices, getSliderColors,
   getVertexOffsets, getAllComputedVertices, getSliderBounds } from '../machine/selectors'
 import { updateLayer } from '../layers/layersSlice'
 import { getLayers, getPreview } from '../store/selectors'
-import { getCurrentLayer, makeGetLayerIndex, makeGetLayer, getNumVisibleLayers } from '../layers/selectors'
+import { makeGetLayerIndex, makeGetLayer, getNumVisibleLayers } from '../layers/selectors'
+import { getCurrentLayerState } from '../layers/layersSlice'
 import { getCachedSelector } from '../store/selectors'
 import { roundP } from '../../common/util'
 import PreviewHelper from './PreviewHelper'
@@ -21,7 +22,7 @@ const PreviewLayer = (ownProps) => {
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
     const layers = getLayers(state)
-    const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayer(state)
+    const layer = getCachedSelector(makeGetLayer, ownProps.id)(state) || getCurrentLayerState(state)
     const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
     const preview = getPreview(state)
@@ -30,7 +31,7 @@ const PreviewLayer = (ownProps) => {
       layer: layer,
       start: index === 0,
       end: index === numLayers - 1,
-      currentLayer: getCurrentLayer(state),
+      currentLayer: getCurrentLayerState(state),
       trackVertices: getCachedSelector(makeGetPreviewTrackVertices, layer.id)(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
       allVertices: getAllComputedVertices(state),

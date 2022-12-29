@@ -2,7 +2,6 @@ import ReactGA from 'react-ga'
 import throttle from 'lodash/throttle'
 import PolarMachine from './PolarMachine'
 import RectMachine from './RectMachine'
-import { getModel } from '../../config/models'
 import Victor from 'victor'
 
 //function track(vertex, data, loopIndex) {
@@ -86,39 +85,11 @@ const throttledReportTiming = throttle(reportTiming, 1000, {trailing: true })
 
 export const transformShapes = (vertices, layer, effects) => {
   const startTime = performance.now()
-//  const numLoops = layer.repeatEnabled ? layer.numLoops : 1
-//  const numTrackLoops = layer.repeatEnabled ? layer.trackNumLoops : 1
-  let outputVertices = vertices.map(vertex => vertex.clone())
-//  if (layer.autosize) {
-//    vertices = vertices.map(vertex => {
-//      return scale(vertex, 100.0 * layer.startingWidth, 100 * layer.startingHeight)
-//    })
-//  }
 
-// TODO: remove this
-//  if (layer.trackEnabled && numTrackLoops > 1) {
-//    for (var i=0; i<numLoops; i++) {
-//      for (var t=0; t<numTrackLoops; t++) {
-//        outputVertices = outputVertices.concat(buildTrackLoop(vertices, layer, i, t))
-//      }
-//    }
-//  } else {
-//    for (let i=0; i<numLoops; i++) {
-//  for (var j=0; j<vertices.length; j++) {
-//    let amount = j/vertices.length
-//    outputVertices.push(transformShape(layer, vertices[j], amount, amount))
-//  }
-//    }
-//  }
+  let outputVertices = vertices.map(vertex => vertex.clone())
 
   if (layer.reverse) {
     outputVertices = outputVertices.reverse()
-  }
-
-  if (effects && effects.length > 0) {
-    effects.forEach(effect => {
-      outputVertices = getModel(effect).applyEffect(effect, layer, outputVertices)
-    })
   }
 
   const endTime = performance.now()
