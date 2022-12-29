@@ -41,19 +41,11 @@ function deleteEffect(state, effectId, layerId) {
   const idx = layer.effectIds.findIndex(id => id === effectId)
   layer.effectIds.splice(idx, 1)
 
-  if (idx >= layer.effectIds.length) {
-    if (layer.effectIds.length === 0) {
-      setCurrentEffectId(state, undefined)
-    } else {
-      setCurrentEffectId(state, undefined)
-      setCurrentEffectId(state, layer.effectIds[idx-1])
-    }
-  }
-
   delete state.effectsById[effectId]
+  return idx
 }
 
-function createEffect(state, parent, attrs) {
+function createEffect(state, layer, attrs) {
   const restore = attrs.restore
   delete attrs.restore
   const effect = {
@@ -64,10 +56,9 @@ function createEffect(state, parent, attrs) {
 
   state.effectsById[effect.id] = effect
 
-  effect.parentId = parent.id
-  parent.effectIds ||= []
-  parent.effectIds.push(effect.id)
-  parent.effectIds = [...new Set(parent.effectIds)]
+  layer.effectIds ||= []
+  layer.effectIds.push(effect.id)
+  layer.effectIds = [...new Set(layer.effectIds)]
 
   return effect
 }
@@ -146,7 +137,7 @@ const layersSlice = createSlice({
         })
       }
 
-      const idx = state.layerOrder.findIndex(layerId => layerId === id)
+      const idx = deleteLayer(state, id)
       if (id === state.currentLayerId) {
         if (idx === state.layerOrder.length-1) {
           setCurrentId(state, state.layerOrder[idx-1])
@@ -160,32 +151,19 @@ const layersSlice = createSlice({
         }
       }
 
-      deleteLayer(state, id)
-    },
-    addEffect(state, action) {
-      const parent = state.layerById[action.payload.parentId]
-      if (parent === undefined) return
-
-      const effect = createEffect(state, parent, action.payload)
-      setCurrentEffectId(state, effect.id)
-    },
-    removeEffect(state, action) {
-      deleteEffect(state, action.payload.effectId, action.payload.layerId)
-    },
-    moveEffect(state, action) {
-      const { parentId, oldIndex, newIndex } = action.payload
-      const parent = state.layerById[parentId]
-      parent.effectIds = arrayMove(parent.effectIds, oldIndex, newIndex)
     },
     restoreDefaults(state, action) {
       const id = action.payload
       const layer = state.layerById[id]
-      const defaults = getModelFromLayer(layer).getInitialState(layer)
+      const shapeModel = getModelFromLayer(layer)
+      const shapeDefaults = shapeModel.getInitialState()
 
       state.layerById[layer.id] = {
         id: layer.id,
         name: layer.name,
-        ...defaults
+        shape: shapeDefaults,
+        effectIds: layer.effectIds.slice(),
+        ...(new Layer()).getInitialState(),
       }
     },
     setCurrentLayer(state, action) {
@@ -204,18 +182,37 @@ const layersSlice = createSlice({
       const defaults = getModelFromType(changes.type).getInitialState()
       const layer = state.layerById[changes.id]
 
-      layer.shape.type = changes.type
-      Object.keys(defaults).forEach(attr => {
-        if (layer.shape[attr] === undefined) {
-          layer.shape[attr] = defaults[attr]
+      layer.shape =  {
+          ...defaults
+      }
+    },
+    addEffect(state, action) {
+      const layer = state.layerById[action.payload.parentId]
+      if (layer === undefined) return
+
+      const effect = createEffect(state, layer, action.payload)
+      setCurrentEffectId(state, effect.id)
+    },
+    removeEffect(state, action) {
+      const idx = deleteEffect(state, action.payload.effectId, action.payload.layerId)
+      const layer = state.layerById[action.payload.layerId]
+
+      // set the next id
+      if (idx >= layer.effectIds.length) {
+        if (layer.effectIds.length === 0) {
+          setCurrentEffectId(state, undefined)
+        } else {
+          if (idx === layer.effectIds.length) {
+            setCurrentEffectId(state, layer.effectIds[idx-1])
+          } else {
+            setCurrentEffectId(state, layer.effectIds[idx])
+          }
         }
-      })
-
-      protectedAttrs.forEach(attr => {
-        layer.shape[attr] = defaults[attr]
-      })
-
-      state.layerById[layer.id] = layer
+      }
+    },
+    moveEffect(state, action) {
+      const { oldIndex, newIndex } = action.payload
+      state.layerById[state.currentLayerId].effectIds = arrayMove(state.layerById[state.currentLayerId].effectIds, oldIndex, newIndex)
     },
     updateLayer(state, action) {
       const layer = action.payload

@@ -10,7 +10,7 @@ import ToggleButtonOption from '../../components/ToggleButtonOption'
 import SortableEffects from './SortableEffects'
 import NewEffect from './NewEffect'
 import { updateLayer, updateShape, updateEffect, setShapeType, restoreDefaults } from '../layers/layersSlice'
-import { getCurrentLayerState, getCurrentLayerId, getCurrentEffectState, getCurrentEffectsStates, getCurrentLayerNumEffects, removeEffect } from './layersSlice'
+import { getCurrentLayerState, getCurrentLayerId, getCurrentEffectState, getCurrentEffectsStates, getCurrentLayerNumEffects, removeEffect, moveEffect } from './layersSlice'
 import { getModelFromLayer, getShapeSelectOptions } from '../../config/models'
 import { getEffectModel } from '../../config/effects'
 import { layerOptions } from '../../models/Layer'
@@ -65,6 +65,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onEffectRemoved: (ids) => {
       dispatch(removeEffect(ids))
     },
+    onEffectMoved: ({oldIndex, newIndex}) => {
+      dispatch(moveEffect({oldIndex: oldIndex, newIndex: newIndex}))
+    },
     onRestoreDefaults: (event) => {
       dispatch(restoreDefaults(id))
     }
@@ -83,7 +86,7 @@ class LayerEditor extends Component {
   }
   render() {
     const {
-      onEffectRemoved
+      onEffectRemoved, onEffectMoved
     } = this.props
 
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.type }
@@ -159,7 +162,7 @@ class LayerEditor extends Component {
             <h2 className="panel">Effects ({this.props.numEffects})</h2>
             <SortableEffects
               pressDelay={150}
-              //onSortEnd={onLayerMoved}
+              onSortEnd={onEffectMoved}
               //updateBeforeSortStart={onSortStarted}
               lockAxis="y"
               {...this.props}
