@@ -1,7 +1,7 @@
 
 // effects
 import FineTuning from '../models/effects/FineTuning'
-import Fisheye from '@/models/shapes/Fisheye'
+import Fisheye from '@/models/effects/Fisheye'
 import Loop from '@/models/effects/Loop'
 import Mask from '@/models/effects/Mask'
 import Noise from '@/models/effects/Noise'
