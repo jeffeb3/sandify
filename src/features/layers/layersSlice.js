@@ -4,6 +4,7 @@ import uniqueId from 'lodash/uniqueId'
 import arrayMove from 'array-move'
 import { getLayers, createDeepEqualSelector } from '../store/selectors'
 import { getModelFromLayer, getModelFromType } from '../../config/models'
+import { getEffectModel } from '../../config/effects'
 import Layer from '../../models/Layer'
 import { log } from '../../common/util'
 
@@ -51,7 +52,6 @@ function createEffect(state, layer, attrs) {
   const effect = {
     ...attrs,
     id: (restore && attrs.id) || uniqueId('effect-'),
-    name: attrs.name
   }
 
   state.effectsById[effect.id] = effect
@@ -63,8 +63,12 @@ function createEffect(state, layer, attrs) {
   return effect
 }
 
-function currLayerIndex(state) {
-  return state.layerOrder.findIndex(id => id === state.currentLayerId)
+function nextLayerIndex(state) {
+  if (state.currentLayerId) {
+    return state.layerOrder.findIndex(id => id === state.currentLayerId) + 1
+  } else {
+    return 0
+  }
 }
 
 // TODO: remove this function when you refactor to remove 'selected' feature; currently disabled
@@ -92,7 +96,7 @@ const layersSlice = createSlice({
   reducers: {
     // The shape initial state is always in action.payload
     addLayer(state, action) {
-      const index = state.currentLayerId ? currLayerIndex(state) + 1 : 0
+      const index = nextLayerIndex(state)
       const layer = createLayer(state, action.payload)
 
       state.layerOrder.splice(index, 0, layer.id)

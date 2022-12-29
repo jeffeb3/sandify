@@ -53,10 +53,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       attrs.id = id
       dispatch(updateShape(attrs))
     },
-    onChangeEffect: (attrs) => {
-      // Doesn't work. How do I get state here?
-      attrs.id = effectState.id
-      console.log(attrs)
+    onChangeEffect: (effectId, attrs) => {
+      attrs.id = effectId
       dispatch(updateEffect(attrs))
     },
     onChangeType: (selected) => {
@@ -104,7 +102,9 @@ class LayerEditor extends Component {
       return this.getOptionComponent(key, index, this.props.layerOptions, this.props.layer, this.props.onChangeLayer)
     })
     const effectOptionsRender = Object.keys(this.props.effectOptions).map((key, index) => {
-      return this.getOptionComponent(key, index, this.props.effectOptions, this.props.effectState, this.props.onChangeEffect)
+      // Bind this up to make the effect ID get passed through
+      const onChangeMethod = this.props.onChangeEffect.bind(this, this.props.effectState.id)
+      return this.getOptionComponent(key, index, this.props.effectOptions, this.props.effectState, onChangeMethod)
     })
 
     const linkText = this.props.linkText || this.props.link

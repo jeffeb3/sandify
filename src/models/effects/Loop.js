@@ -1,8 +1,9 @@
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import { scale, rotate, circle } from '@/common/geometry'
 import { evaluate } from 'mathjs'
 
 const options = {
+  ...effectOptions,
   ...{
     numLoops: {
       title: 'Number of loops',
@@ -72,10 +73,6 @@ export default class Loop extends Effect {
       ...{
         // Inherited
         type: 'loop',
-        selectGroup: 'effects',
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
 
         // Loop Options
         transformMethod: 'smear',

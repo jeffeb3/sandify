@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import { shapeOptions } from '../Shape'
 import { circle } from '@/common/geometry'
 import * as d3Fisheye from 'd3-fisheye'
@@ -26,12 +26,9 @@ export default class Fisheye extends Effect {
       ...super.getInitialState(),
       ...{
         type: 'fisheye',
-        selectGroup: 'effects',
         fisheyeDistortion: 3,
         startingWidth: 100,
         startingHeight: 100,
-        canRotate: false,
-        canChangeHeight: false
       }
     }
   }

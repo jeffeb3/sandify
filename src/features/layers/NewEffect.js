@@ -8,7 +8,6 @@ import { addEffect, getCurrentLayerId } from './layersSlice'
 
 // Initialize these from local storage, or reasonable defaults
 const initialEffectType = localStorage.getItem('currentEffect') || 'loop'
-const initialEffectName = getEffectModel({type: initialEffectType}).type.toLowerCase()
 
 const customStyles = {
   control: base => ({
@@ -28,9 +27,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onEffectAdded: (type, name, parentId) => {
+    onEffectAdded: (type, parentId) => {
       const attrs = registeredEffectModels[type].getInitialState()
-      attrs.name = name
+      attrs.name = registeredEffectModels[type].type
       attrs.parentId = parentId
       dispatch(addEffect(attrs))
     },
@@ -45,7 +44,6 @@ class NewEffect extends Component {
     super(props)
     this.state = {
       newEffectType: initialEffectType,
-      newEffectName: initialEffectName,
     }
   }
 
@@ -78,18 +76,6 @@ class NewEffect extends Component {
               options={selectOptions} />
           </Col>
         </Row>
-        <Row className="align-items-center mt-2">
-          <Col sm={5}>
-            Name
-          </Col>
-          <Col sm={7}>
-            <Form.Control
-              value={this.state.newEffectName}
-              onFocus={this.handleNameFocus}
-              onChange={this.onChangeNewName.bind(this)}
-            />
-          </Col>
-        </Row>
       </Modal.Body>
 
       <Modal.Footer>
@@ -104,7 +90,7 @@ class NewEffect extends Component {
           id="new-layer-add"
           variant="primary"
           onClick={() => {
-            onEffectAdded(this.state.newEffectType, this.state.newEffectName, this.props.currentLayerId)
+            onEffectAdded(this.state.newEffectType, this.props.currentLayerId)
             toggleModal()
           }}
         >
@@ -114,25 +100,13 @@ class NewEffect extends Component {
     </Modal>
   }
 
-  handleNameFocus(event) {
-    event.target.select()
-  }
-
   onChangeNewType(selected) {
     const effect = getEffectModel({type: selected.value})
     this.setState(
       {
         newEffectType: selected.value,
-        newEffectName: effect.type.toLowerCase()
       })
   }
-  onChangeNewName(event) {
-    this.setState(
-      {
-        newEffectName: event.target.value
-      })
-  }
-
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewEffect)

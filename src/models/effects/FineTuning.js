@@ -1,10 +1,9 @@
-import { modelOptions } from '../Model'
 import { arrayRotate } from '@/common/util'
 import { circle } from '@/common/geometry'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 
 const options = {
-  ...modelOptions,
+  ...effectOptions,
   ...{
     backtrackPct: {
       title: 'Backtrack at end (%)',
@@ -38,11 +37,6 @@ export default class FineTuning extends Effect {
       ...{
         // Inherited
         type: 'fineTuning',
-        selectGroup: 'effects',
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        effect: true,
 
         // Fine Tuning Options
         drawPortionPct: 100,

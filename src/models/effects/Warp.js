@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import { modelOptions } from '../Model'
 import { circle, subsample } from '@/common/geometry'
 import { evaluate } from 'mathjs'
@@ -58,7 +58,6 @@ export default class Warp extends Effect {
       ...super.getInitialState(),
       ...{
         type: 'warp',
-        selectGroup: 'effects',
         warpType: 'angle',
         period: 10.0,
         subsample: true,
@@ -66,11 +65,6 @@ export default class Warp extends Effect {
         xMath: 'x + 4*sin((x+y)/20)',
         yMathInput: 'y + 4*sin((x-y)/20)',
         yMath: 'y + 4*sin((x-y)/20)',
-        startingWidth: 40,
-        startingHeight: 40,
-        rotation: 45,
-        canRotate: true,
-        canChangeHeight: false
       }
     }
   }

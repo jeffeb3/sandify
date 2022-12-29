@@ -1,6 +1,6 @@
 import { modelOptions } from '../Model'
 import Victor from 'victor'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import noise from '@/common/noise'
 import { subsample } from '@/common/geometry'
 
@@ -47,16 +47,11 @@ export default class Noise extends Effect {
       ...super.getInitialState(),
       ...{
         type: 'noise',
-        selectGroup: 'effects',
         seed: 1,
         noiseAmplitude: 4,
         noiseMagnification: 58,
         noiseType: 'Simplex',
         noiseApplication: 'Contour',
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        subsample: true
       }
     }
   }

@@ -14,12 +14,12 @@ import Wiper from '@/models/shapes/Wiper'
 Supported effects
 -----------------------------------------------*/
 export const registeredEffectModels = {
-  fisheye: new Fisheye(),
   loop: new Loop(),
-  track: new Track(),
+  fisheye: new Fisheye(),
   mask: new Mask(),
   noise: new Noise(),
   warp: new Warp(),
+  track: new Track(),
   fineTuning: new FineTuning()
 }
 

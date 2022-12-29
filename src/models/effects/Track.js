@@ -1,5 +1,5 @@
 import { modelOptions } from '../Model'
-import Effect from '../Effect'
+import Effect, { effectOptions } from '../Effect'
 import { offset, rotate, circle } from '@/common/geometry'
 
 const options = {
@@ -33,11 +33,6 @@ export default class Track extends Effect {
       ...{
         // Inherited
         type: 'track',
-        selectGroup: 'effects',
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        effect: true,
 
         // Track Options
         trackRadius: 10,

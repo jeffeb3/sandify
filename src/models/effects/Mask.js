@@ -56,9 +56,6 @@ export default class Mask extends Effect {
       ...super.getInitialState(),
       ...{
         type: 'mask',
-        selectGroup: 'effects',
-        startingWidth: 100,
-        startingHeight: 100,
         maskMinimizeMoves: false,
         maskMachine: 'rectangle',
         maskBorder: false,
