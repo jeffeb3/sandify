@@ -87,14 +87,10 @@ export const rotate = (vertex, angleDeg) => {
   )
 }
 
-export const scale = (vertex, pctX, pctY) => {
-  const scaleX = pctX / 100.0
-  if (pctY === undefined) pctY = pctX
-  const scaleY = pctY / 100.0
-
+export const scale = (vertex, scaleX, scaleY) => {
   return new Victor(
     vertex.x * scaleX,
-    vertex.y * scaleY
+    vertex.y * (scaleY === undefined ? scaleX : scaleY)
   )
 }
 

@@ -142,7 +142,7 @@ export default class Loop extends Effect {
           }
 
           // Actually do the growing
-          vertex = scale(vertex, growAmount)
+          vertex = scale(vertex, growAmount/100.0)
         }
 
         if (effect.spinEnabled) {
