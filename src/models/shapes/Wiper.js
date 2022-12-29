@@ -1,9 +1,9 @@
 import { degToRad } from '@/common/geometry'
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
+import Eraser, { eraserOptions, eraserAttrs } from '../Eraser'
 
 const options = {
-  ...shapeOptions,
+  ...eraserOptions,
   ...{
     wiperType: {
       title: 'Type',
@@ -238,7 +238,7 @@ function linearVertices(state) {
   return outputVertices
 }
 
-export default class Wiper extends Shape {
+export default class Wiper extends Eraser {
   constructor() {
     super('Wiper')
   }
@@ -251,11 +251,6 @@ export default class Wiper extends Shape {
         wiperAngleDeg: 15,
         wiperSize: 4,
         wiperType: 'Lines',
-        selectGroup: 'Erasers',
-        canChangeSize: false,
-        shouldCache: false,
-        autosize: false,
-        usesMachine: true,
       }
     }
   }

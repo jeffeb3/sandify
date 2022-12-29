@@ -42,15 +42,8 @@ export const initialMorphState = () => {
   }
 
 export const morphVertices = (state, shapeVertices) => {
-
-    const { startingWidth, startingHeight, autosize, offsetX, offsetY, rotation } = state
-    if (autosize) {
-      return shapeVertices.map(vertex => {
-        return rotate(offset(scale(vertex, startingWidth, startingHeight), offsetX, offsetY), rotation)
-      })
-    } else {
-      return shapeVertices.map(vertex => {
-        return rotate(offset(vertex, effect.offsetX, effect.offsetY), effect.rotation)
-      })
-    }
-  }
+  const { startingWidth, startingHeight, offsetX, offsetY, rotation } = state
+  return shapeVertices.map(vertex => {
+    return rotate(offset(scale(vertex, startingWidth, startingHeight), offsetX, offsetY), rotation)
+  })
+}

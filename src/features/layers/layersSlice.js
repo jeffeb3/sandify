@@ -8,7 +8,7 @@ import Layer from '../../models/Layer'
 import { log } from '../../common/util'
 
 const protectedAttrs = [
-  'selectGroup', 'canChangeSize', 'autosize', 'usesMachine', 'shouldCache', 'canChangeHeight',
+  'selectGroup', 'canChangeSize', 'autosize', 'usesMachine', 'canChangeHeight',
   'canRotate', 'usesFonts'
 ]
 
@@ -286,6 +286,15 @@ export const getVisibleLayerIdsInOrder = createSelector(
     return layerOrder.filter(id => layers[id].visible)
   }
 )
+
+export const makeGetShapeAttrs = layerId => {
+  return createSelector(
+    getLayersById,
+    (layers) => {
+      return getModelFromLayer(layers[layerId]).getAttrs()
+    }
+  )
+}
 
 // Effects
 const getEffectsById = createSelector(

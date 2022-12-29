@@ -64,6 +64,7 @@ export const getModelDefaults = () => {
   return Object.keys(registeredModels).map(id => {
     const state = registeredModels[id].getInitialState()
     state.name = registeredModels[id].type
+    state.selectGroup = registeredModels[id].getAttrs().selectGroup
     state.id = id
     return state
   })

@@ -35,7 +35,7 @@ const mapStateToProps = (state, ownProps) => {
     effects: getCurrentEffectsStates(state), // lists of effect options?
     effectOptions: effectOptions,
     numEffects: getCurrentLayerNumEffects(state),
-    showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
+    showShapeSelectRender: shape.getAttrs().selectGroup !== 'import' && !layer.effect,
     link: shape.link,
     linkText: shape.linkText
   }

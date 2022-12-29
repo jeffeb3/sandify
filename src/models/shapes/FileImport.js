@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
+import Shape, { shapeOptions, shapeAttrs } from '../Shape'
 
 const options = {
   ...shapeOptions,
@@ -20,6 +20,14 @@ const options = {
   }
 }
 
+const attrs = {
+  ...shapeAttrs,
+  ...{
+    selectGroup: 'import',
+    usesMachine: true,
+  }
+}
+
 export default class FileImport extends Shape {
   constructor() {
     super('FileImport')
@@ -34,8 +42,6 @@ export default class FileImport extends Shape {
         originalAspectRatio: 1.0,
         vertices: [],
         comments: [],
-        selectGroup: 'import',
-        usesMachine: true,
       },
       ...(importProps === undefined ? {} : {
         fileName: importProps.fileName,
@@ -76,5 +82,9 @@ export default class FileImport extends Shape {
 
   getOptions() {
     return options
+  }
+
+  getAttrs() {
+    return attrs
   }
 }

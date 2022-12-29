@@ -31,9 +31,9 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onLayerAdded: (type, name) => {
-      const attrs = registeredModels[type].getInitialState()
-      attrs.name = name
-      dispatch(addLayer(attrs))
+      const state = registeredModels[type].getInitialState()
+      state.name = name
+      dispatch(addLayer(state))
     },
     toggleModal: () => {
       ownProps.toggleModal()
@@ -55,7 +55,7 @@ class NewLayer extends Component {
       toggleModal, showModal, selectOptions, onLayerAdded
     } = this.props
     const selectedShape = getModelFromType(this.state.newLayerType)
-    const selectedOption = { value: selectedShape.id, label: selectedShape.name }
+    const selectedOption = { value: selectedShape.id, label: selectedShape.type }
 
     return <Modal
       show={showModal}

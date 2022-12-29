@@ -1,4 +1,4 @@
-import Shape, { shapeOptions } from '../Shape'
+import Eraser, { eraserOptions } from '../Eraser'
 import { getMachineInstance } from '@/features/machine/computer'
 import Victor from 'victor'
 import noise from '@/common/noise'
@@ -7,7 +7,7 @@ import { shapeSimilarity } from 'curve-matcher'
 import { offset } from '@/common/geometry'
 
 const options = {
-  ...shapeOptions,
+  ...eraserOptions,
   ...{
     numParticles: {
       title: 'Number of waves',
@@ -31,7 +31,7 @@ const options = {
   }
 }
 
-export default class NoiseWave extends Shape {
+export default class NoiseWave extends Eraser {
   constructor() {
     super('Noise Waves')
   }
@@ -47,9 +47,6 @@ export default class NoiseWave extends Shape {
         noiseType: 'Perlin',
         numParticles: 100,
         selectGroup: 'Erasers',
-        canChangeSize: false,
-        autosize: false,
-        usesMachine: true,
       }
     }
   }
@@ -141,9 +138,11 @@ export default class NoiseWave extends Shape {
       prevCurve = curve
     }
 
-    vertices = vertices.map(vertex => {
-      return offset(vertex, -state.shape.offsetX, -state.shape.offsetY)
-    })
+    // TODO This shape is the only one (that I know of, so far) that uses offsetX and offsetY in the
+    // getVertices function.
+    //vertices = vertices.map(vertex => {
+    //  return offset(vertex, -state.shape.offsetX, -state.shape.offsetY)
+    //})
 
     return vertices
   }
@@ -164,7 +163,9 @@ export default class NoiseWave extends Shape {
     p.x += Math.cos(a) * 5
     p.y += Math.sin(a) * 5
 
-    return new Victor(p.x + options.offsetX, p.y + options.offsetY)
+    return new Victor(p.x, p.y)
+    // Also part of the TODO higher up
+    //return new Victor(p.x + options.offsetX, p.y + options.offsetY)
   }
 
   getOptions() {

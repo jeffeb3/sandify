@@ -1,4 +1,4 @@
-import Shape, { shapeOptions } from '../../Shape'
+import Eraser, { eraserOptions } from '../../Eraser'
 import {
   lsystem,
   lsystemPath,
@@ -10,7 +10,7 @@ import { resizeVertices } from '@/common/geometry'
 import { subtypes } from './subtypes'
 
 const options = {
-  ...shapeOptions,
+  ...eraserOptions,
   ...{
     fillerSubtype: {
       title: 'Type',
@@ -32,7 +32,7 @@ const options = {
   }
 }
 
-export default class SpaceFiller extends Shape {
+export default class SpaceFiller extends Eraser {
   constructor() {
     super('Space Filler')
     this.linkText = 'Fractal charm: space filling curves'
@@ -47,9 +47,6 @@ export default class SpaceFiller extends Shape {
         selectGroup: 'Erasers',
         iterations: 6,
         fillerSubtype: 'Hilbert',
-        canChangeSize: false,
-        autosize: false,
-        usesMachine: true,
       }
     }
   }

@@ -8,7 +8,7 @@ import { getEffectModel } from '../../config/effects'
 import { getMachine, getState, getPreview } from '../store/selectors'
 import { getLoadedFonts } from '../fonts/selectors'
 import { makeGetLayer, getNumVisibleLayers, makeGetEffects, makeGetNonEffectLayerIndex } from '../layers/selectors'
-import { getCurrentLayerEffectIdsInOrder, makeGetLayerEffectStatesInOrder, getVisibleLayerIdsInOrder } from '../layers/layersSlice'
+import { makeGetShapeAttrs, getCurrentLayerEffectIdsInOrder, makeGetLayerEffectStatesInOrder, getVisibleLayerIdsInOrder } from '../layers/layersSlice'
 import { getCachedSelector } from '../store/selectors'
 import { rotate, offset } from '../../common/geometry'
 import { log } from '../../common/util'
@@ -27,12 +27,12 @@ const getCacheKey = (state) => {
 const makeGetLayerMachine = layerId => {
   return createSelector(
     [
-      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetShapeAttrs, layerId),
       getMachine
     ],
-    (layer, machine) => {
+    (shapeAttrs, machine) => {
       log('makeGetLayerMachine', layerId)
-      return layer.usesMachine ? machine : null
+      return shapeAttrs.usesMachine ? machine : null
     }
   )
 }
@@ -42,12 +42,12 @@ const makeGetLayerMachine = layerId => {
 const makeGetLayerFonts = layerId => {
   return createSelector(
     [
-      getCachedSelector(makeGetLayer, layerId),
+      getCachedSelector(makeGetShapeAttrs, layerId),
       getLoadedFonts
     ],
-    (layer, fonts) => {
+    (shapeAttrs, fonts) => {
       log('makeGetLayerFonts', layerId)
-      return layer.usesFonts ? fonts : null
+      return shapeAttrs.usesFonts ? fonts : null
     }
   )
 }
@@ -69,24 +69,20 @@ const makeGetShapeVertices = layerId => {
       log('makeGetShapeVertices', layerId)
       const shapeModel = getModelFromShape(state.shape)
 
-      if (layer.shouldCache) {
-        const key = getCacheKey(state)
-        let vertices = cache.get(key)
+      const key = getCacheKey(state)
+      let vertices = cache.get(key)
 
-        if (!vertices) {
-          vertices = shapeModel.getVertices(state)
-          log("uncached vertices")
+      if (!vertices) {
+        vertices = shapeModel.getVertices(state)
+        log("uncached vertices")
 
-          if (vertices.length > 1) {
-            cache.set(key, vertices)
-            log('caching shape', cache.length + ' ' + cache.itemCount)
-          }
+        if (vertices.length > 1) {
+          cache.set(key, vertices)
+          log('caching shape', cache.length + ' ' + cache.itemCount)
         }
-
-        return vertices
-      } else {
-        return shapeModel.getVertices(state)
       }
+
+      return vertices
     }
   )
 }
@@ -96,11 +92,13 @@ const makeGetLayerVertices = layerId => {
   return createSelector(
     [
       getCachedSelector(makeGetShapeVertices, layerId),
+      getCachedSelector(makeGetShapeAttrs, layerId),
       getCachedSelector(makeGetLayer, layerId),
       getCachedSelector(makeGetLayerEffectStatesInOrder, layerId),
     ],
-    (shapeVertices, layer, effectStates) => {
-      // TODO fix caching of effects, it probably matters a lot more than shape caches.
+    (shapeVertices, shapeAttrs, layer, effectStates) => {
+      // TODO fix caching of effects, it probably saves a lot more than time shape caches, but is
+      // invalidated a lot more often too.
       // We can also create an incremental state/cacheKey by adding the state from each effect that
       // has been computed.
       log('makeGetLayerVertices', layerId)
@@ -111,8 +109,11 @@ const makeGetLayerVertices = layerId => {
         vertices = effectModel.applyEffect(effectState, layer, vertices)
       }
 
-      const morphed = morphVertices(layer,vertices)
-      return morphVertices(layer, vertices)
+      // This looks funny, but we want the case of 'undefined' to be the same as true
+      if (shapeAttrs.canMorph !== false) {
+        vertices = morphVertices(layer,vertices)
+      }
+      return vertices
     }
   )
 }

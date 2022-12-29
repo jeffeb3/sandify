@@ -1,5 +1,5 @@
 import seedrandom from 'seedrandom'
-import Shape, { shapeOptions } from '../../Shape'
+import Eraser, { eraserOptions } from '../../Eraser'
 import { Circle } from './Circle'
 import Graph from '@/common/Graph'
 import { circle, arc } from '@/common/geometry'
@@ -11,7 +11,7 @@ const RECTANGULAR_ATTEMPTS_MULTIPLIER = 4
 const ATTEMPTS_MODIFIER = 5
 
 const options = {
-  ...shapeOptions,
+  ...eraserOptions,
   ...{
     seed: {
       title: 'Random seed',
@@ -36,7 +36,7 @@ const options = {
 
 // adapted initially from Coding Challenge #50; Animated Circle Packing, https://www.youtube.com/watch?v=QHEQuoIKgNE
 // no license was specified
-export default class CirclePacker extends Shape {
+export default class CirclePacker extends Eraser {
   constructor() {
     super('Circle Packer')
   }
@@ -52,10 +52,6 @@ export default class CirclePacker extends Shape {
         attempts: 20,
         inBounds: false,
         usesMachine: true,
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        autosize: false,
       }
     }
   }
