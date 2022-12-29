@@ -5,7 +5,7 @@ import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
 import { MdOutlineFileUpload } from 'react-icons/md'
 
 import { getCurrentLayerState, getNumLayers, getAllLayersStates } from './layersSlice'
-import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
+import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible } from '../layers/layersSlice'
 import { registeredModels, getModelFromLayer } from '../../config/models'
 import NewLayer from './NewLayer'
 import CopyLayer from './CopyLayer'
@@ -40,9 +40,6 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     onSortStarted: ({node}) => {
       dispatch(setCurrentLayer(node.id))
-    },
-    onToggleLayerOpen: (id) => {
-      dispatch(toggleOpen({ id: id }))
     },
     onToggleLayerVisible: (id) => {
       dispatch(toggleVisible({ id: id }))

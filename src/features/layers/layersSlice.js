@@ -225,10 +225,6 @@ const layersSlice = createSlice({
     updateLayers(state, action) {
       Object.assign(state, action.payload)
     },
-    toggleOpen(state, action) {
-      const layer = action.payload
-      state.layerById[layer.id].open = !state.layerById[layer.id].open
-    },
     toggleVisible(state, action) {
       const layer = action.payload
       state.layerById[layer.id].visible = !state.layerById[layer.id].visible
@@ -375,7 +371,6 @@ export const {
   updateEffect,
   updateLayers,
   toggleVisible,
-  toggleOpen,
 } = layersSlice.actions
 
 export default layersSlice.reducer
