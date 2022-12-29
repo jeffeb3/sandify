@@ -42,6 +42,10 @@ const options = {
   }
 }
 
+export const attrs = {
+  usesMachine: true,
+  usesFonts: true
+}
 export default class FancyText extends Shape {
   constructor() {
     super('Fancy Text')
@@ -57,8 +61,6 @@ export default class FancyText extends Shape {
         fancyAlignment: 'left',
         fancyConnectLines: 'inside',
         fancyLineSpacing: 1.0,
-        usesMachine: true,
-        usesFonts: true
       }
     }
   }
@@ -341,4 +343,9 @@ export default class FancyText extends Shape {
   getOptions() {
     return options
   }
+
+  getAttrs() {
+    return attrs
+  }
+
 }
