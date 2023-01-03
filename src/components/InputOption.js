@@ -54,8 +54,8 @@ class InputOption extends Component {
                 attrs = option.onChange(attrs, model)
               }
               this.props.onChange(attrs)
-              if (this.props.delayKey !== undefined) {
-                this.delayedSet(value, this.props.delayKey, this.props.onChange)
+              if (option.delayKey !== undefined) {
+                this.delayedSet(value, option.delayKey, this.props.onChange)
               }
             }}
             />

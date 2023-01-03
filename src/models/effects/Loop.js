@@ -29,10 +29,8 @@ const options = {
     growMathInput: {
       title: 'Scale function (i)',
       type: 'text',
+      delayKey: 'growMath',
       isVisible: state => { return state.growMethod === 'function' },
-    },
-    growMath: {
-      isVisible: state => { return false }
     },
     spinEnabled: {
       title: 'Spin',
@@ -50,10 +48,8 @@ const options = {
     spinMathInput: {
       title: 'Spin function (i)',
       type: 'text',
+      delayKey: 'spinMath',
       isVisible: state => { return state.spinMethod === 'function' },
-    },
-    spinMath: {
-      isVisible: state => { return false }
     },
     spinSwitchbacks: {
       title: 'Switchbacks',
