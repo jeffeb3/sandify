@@ -9,7 +9,7 @@ import {
 
 class ToggleButtonOption extends Component {
   render() {
-    const option = this.props.options[this.props.optionKey]
+    const option = this.props.optionDefinition
     const model = this.props.model
     const currentChoice = model[this.props.optionKey]
     const visible = option.isVisible === undefined ? true : option.isVisible(model)

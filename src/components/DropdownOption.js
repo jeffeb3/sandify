@@ -8,7 +8,7 @@ import Select from 'react-select'
 
 class DropdownOption extends Component {
   render() {
-    const option = this.props.options[this.props.optionKey]
+    const option = this.props.optionDefinition
     const model = this.props.model
     const currentChoice = model[this.props.optionKey]
 

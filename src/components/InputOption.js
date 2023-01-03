@@ -17,7 +17,7 @@ class InputOption extends Component {
   }
 
   render() {
-    const option = this.props.options[this.props.optionKey]
+    const option = this.props.optionDefinition
     const model = this.props.model
     const optionType = option.type || 'number'
     const minimum = (typeof option.min === 'function') ? option.min(model) : parseFloat(option.min)

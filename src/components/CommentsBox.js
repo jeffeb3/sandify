@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 class CommentsBox extends Component {
 
   render() {
-    const option = this.props.options[this.props.optionKey]
+    const option = this.props.optionDefinition
     const commentsRender = this.props.comments.map((comment, index) => {
       return <span key={index}>{comment}<br/></span>
     })

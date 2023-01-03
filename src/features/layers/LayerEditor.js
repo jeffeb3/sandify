@@ -96,15 +96,15 @@ class LayerEditor extends Component {
 
     const selectedOption = { value: this.props.shape.id, label: this.props.shape.type }
     const shapeOptionsRender = Object.keys(this.props.shapeOptions).map((key, index) => {
-      return this.getOptionComponent(key, index, this.props.shapeOptions, this.props.layer.shape, this.props.onChangeShape)
+      return this.getOptionComponent(key, index, this.props.shapeOptions[key], this.props.layer.shape, this.props.onChangeShape)
     })
     const layerOptionsRender = Object.keys(this.props.layerOptions).map((key, index) => {
-      return this.getOptionComponent(key, index, this.props.layerOptions, this.props.layer, this.props.onChangeLayer)
+      return this.getOptionComponent(key, index, this.props.layerOptions[key], this.props.layer, this.props.onChangeLayer)
     })
     const effectOptionsRender = Object.keys(this.props.effectOptions).map((key, index) => {
       // Bind this up to make the effect ID get passed through
       const onChangeMethod = this.props.onChangeEffect.bind(this, this.props.effectState.id)
-      return this.getOptionComponent(key, index, this.props.effectOptions, this.props.effectState, onChangeMethod)
+      return this.getOptionComponent(key, index, this.props.effectOptions[key], this.props.effectState, onChangeMethod)
     })
 
     const linkText = this.props.linkText || this.props.link
@@ -212,35 +212,35 @@ class LayerEditor extends Component {
     )
   }
 
-  getOptionComponent(key, index, options, model, onChangeMethod) {
-    const option = options[key]
+  getOptionComponent(key, index, option, model, onChangeMethod) {
+    const optionType = option.type
 
-    if (option.type === 'dropdown') {
+    if (optionType === 'dropdown') {
       return  <DropdownOption
                 onChange={onChangeMethod}
-                options={options}
+                optionDefinition={option}
                 optionKey={key}
                 key={key}
                 index={index}
                 model={model} />
-    } else if (option.type === 'checkbox') {
+    } else if (optionType === 'checkbox') {
       return  <CheckboxOption
                 onChange={onChangeMethod}
-                options={options}
+                optionDefinition={option}
                 optionKey={key}
                 key={key}
                 index={index}
                 model={model} />
-    } else if (option.type === 'comments') {
+    } else if (optionType === 'comments') {
       return  <CommentsBox
-                options={options}
+                optionDefinition={option}
                 optionKey={key}
                 key={key}
                 comments={model.comments} />
-    } else if (option.type === 'togglebutton') {
+    } else if (optionType === 'togglebutton') {
       return  <ToggleButtonOption
                 onChange={onChangeMethod}
-                options={options}
+                optionDefinition={option}
                 optionKey={key}
                 key={key}
                 index={index}
@@ -248,7 +248,7 @@ class LayerEditor extends Component {
     } else {
       return  <InputOption
                 onChange={onChangeMethod}
-                options={options}
+                optionDefinition={option}
                 optionKey={key}
                 key={key}
                 index={index}

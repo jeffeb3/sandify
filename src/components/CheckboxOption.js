@@ -9,7 +9,7 @@ const Switch = S.default ? S.default: S // Fix: https://github.com/vitejs/vite/i
 
 class CheckboxOption extends Component {
   render() {
-    const option = this.props.options[this.props.optionKey]
+    const option = this.props.optionDefinition
     const model = this.props.model
     const visible = option.isVisible === undefined ? true : option.isVisible(model)
 

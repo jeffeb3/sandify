@@ -68,7 +68,7 @@ class PolarSettings extends Component {
           <Card.Body>
             <InputOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["maxRadius"]}
               key="maxRadius"
               optionKey="maxRadius"
               index={0}
@@ -108,7 +108,7 @@ class PolarSettings extends Component {
 
             <CheckboxOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["minimizeMoves"]}
               optionKey="minimizeMoves"
               key="minimizeMoves"
               index={0}

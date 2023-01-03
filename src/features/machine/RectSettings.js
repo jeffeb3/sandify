@@ -68,7 +68,7 @@ class RectSettings extends Component {
           <Card.Body>
             <InputOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["minX"]}
               key="minX"
               optionKey="minX"
               index={0}
@@ -76,7 +76,7 @@ class RectSettings extends Component {
 
             <InputOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["maxX"]}
               key="maxX"
               optionKey="maxX"
               index={0}
@@ -84,7 +84,7 @@ class RectSettings extends Component {
 
             <InputOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["minY"]}
               key="minY"
               optionKey="minY"
               index={0}
@@ -92,7 +92,7 @@ class RectSettings extends Component {
 
             <InputOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["maxY"]}
               key="maxY"
               optionKey="maxY"
               index={0}
@@ -117,7 +117,7 @@ class RectSettings extends Component {
 
             <CheckboxOption
               onChange={this.props.onChange}
-              options={this.props.options}
+              optionDefinition={this.props.options["minimizeMoves"]}
               optionKey="minimizeMoves"
               key="minimizeMoves"
               index={0}
