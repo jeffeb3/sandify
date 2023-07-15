@@ -1,35 +1,46 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { Button } from 'react-bootstrap'
-import { FaTrash, FaCopy, FaPlusSquare } from 'react-icons/fa'
-import { MdOutlineFileUpload } from 'react-icons/md'
+import React, { Component } from "react"
+import { connect } from "react-redux"
+import { Button } from "react-bootstrap"
+import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
+import { MdOutlineFileUpload } from "react-icons/md"
 
-import { getCurrentLayer, getNumLayers, getAllLayersInfo } from '../layers/selectors'
-import { setCurrentLayer, addLayer, removeLayer, moveLayer, toggleVisible, toggleOpen } from '../layers/layersSlice'
-import { registeredModels, getModel } from '../../config/models'
-import NewLayer from './NewLayer'
-import CopyLayer from './CopyLayer'
-import ImportLayer from './ImportLayer'
-import SortableLayers from './SortableLayers'
-import './Playlist.scss'
+import {
+  getCurrentLayer,
+  getNumLayers,
+  getAllLayersInfo,
+} from "../layers/selectors"
+import {
+  setCurrentLayer,
+  addLayer,
+  removeLayer,
+  moveLayer,
+  toggleVisible,
+  toggleOpen,
+} from "../layers/layersSlice"
+import { registeredModels, getModel } from "../../config/models"
+import NewLayer from "./NewLayer"
+import CopyLayer from "./CopyLayer"
+import ImportLayer from "./ImportLayer"
+import SortableLayers from "./SortableLayers"
+import "./Playlist.scss"
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
-  const shape = getModel(layer)
+  const shape = getModel(layer.type)
   const numLayers = getNumLayers(state)
 
   return {
     layers: getAllLayersInfo(state),
     numLayers: numLayers,
     currentLayer: layer,
-    shape: shape
+    shape: shape,
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onLayerSelected: (event) => {
-      const id = event.target.closest('.list-group-item').id
+      const id = event.target.closest(".list-group-item").id
       dispatch(setCurrentLayer(id))
     },
     onLayerAdded: (type) => {
@@ -39,10 +50,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     onLayerRemoved: (id) => {
       dispatch(removeLayer(id))
     },
-    onLayerMoved: ({oldIndex, newIndex}) => {
-      dispatch(moveLayer({oldIndex: oldIndex, newIndex: newIndex}))
+    onLayerMoved: ({ oldIndex, newIndex }) => {
+      dispatch(moveLayer({ oldIndex: oldIndex, newIndex: newIndex }))
     },
-    onSortStarted: ({node}) => {
+    onSortStarted: ({ node }) => {
       dispatch(setCurrentLayer(node.id))
     },
     onToggleLayerOpen: (id) => {
@@ -61,27 +72,27 @@ class Playlist extends Component {
     this.state = {
       showNewLayer: false,
       showImportLayer: false,
-      showCopyLayer: false
+      showCopyLayer: false,
     }
   }
 
   scrollToBottom() {
     // we're not supposed to directly access DOM with React, with instead use a ref. That said, I can't figure
     // out how to get the nested ref in an elegant way.
-    const el = document.getElementById('playlist-group')
+    const el = document.getElementById("playlist-group")
     el.scrollTop = el.scrollHeight
   }
 
   toggleNewLayerModal() {
-    this.setState({showNewLayer: !this.state.showNewLayer})
+    this.setState({ showNewLayer: !this.state.showNewLayer })
   }
 
   toggleImportModal() {
-    this.setState({showImportLayer: !this.state.showImportLayer})
+    this.setState({ showImportLayer: !this.state.showImportLayer })
   }
 
   toggleCopyModal() {
-    this.setState({showCopyLayer: !this.state.showCopyLayer})
+    this.setState({ showCopyLayer: !this.state.showCopyLayer })
   }
 
   componentDidUpdate(prevProps) {
@@ -93,7 +104,11 @@ class Playlist extends Component {
 
   render() {
     const {
-      currentLayer, numLayers, onLayerMoved, onLayerRemoved, onSortStarted
+      currentLayer,
+      numLayers,
+      onLayerMoved,
+      onLayerRemoved,
+      onSortStarted,
     } = this.props
     const canRemove = numLayers > 1
 
@@ -142,14 +157,16 @@ class Playlist extends Component {
               <MdOutlineFileUpload />
             </Button>
             <div className="ml-auto">
-              {canRemove && <Button
-                className="layer-button"
-                variant="light"
-                data-tip="Delete layer"
-                onClick={onLayerRemoved.bind(this, currentLayer.id)}
-              >
-                <FaTrash />
-              </Button>}
+              {canRemove && (
+                <Button
+                  className="layer-button"
+                  variant="light"
+                  data-tip="Delete layer"
+                  onClick={onLayerRemoved.bind(this, currentLayer.id)}
+                >
+                  <FaTrash />
+                </Button>
+              )}
               <Button
                 className="layer-button"
                 variant="light"

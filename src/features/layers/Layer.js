@@ -1,29 +1,33 @@
-import { connect } from 'react-redux'
-import React, { Component } from 'react'
-import { Button, Card, Row, Col } from 'react-bootstrap'
-import Select from 'react-select'
-import CommentsBox from '../../components/CommentsBox'
-import InputOption from '../../components/InputOption'
-import DropdownOption from '../../components/DropdownOption'
-import CheckboxOption from '../../components/CheckboxOption'
-import ToggleButtonOption from '../../components/ToggleButtonOption'
-import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
-import { getCurrentLayer } from './selectors'
-import { getModel, getModelSelectOptions } from '../../config/models'
-import './Layer.scss'
+import { connect } from "react-redux"
+import React, { Component } from "react"
+import { Button, Card, Row, Col } from "react-bootstrap"
+import Select from "react-select"
+import CommentsBox from "../../components/CommentsBox"
+import InputOption from "../../components/InputOption"
+import DropdownOption from "../../components/DropdownOption"
+import CheckboxOption from "../../components/CheckboxOption"
+import ToggleButtonOption from "../../components/ToggleButtonOption"
+import {
+  updateLayer,
+  setShapeType,
+  restoreDefaults,
+} from "../layers/layersSlice"
+import { getCurrentLayer } from "./selectors"
+import { getModel, getModelSelectOptions } from "../../config/models"
+import "./Layer.scss"
 
 const mapStateToProps = (state, ownProps) => {
   const layer = getCurrentLayer(state)
-  const shape = getModel(layer)
+  const shape = getModel(layer.type)
 
   return {
     layer: layer,
     shape: shape,
     options: shape.getOptions(),
     selectOptions: getModelSelectOptions(false),
-    showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
+    showShapeSelectRender: layer.selectGroup !== "import" && !layer.effect,
     link: shape.link,
-    linkText: shape.linkText
+    linkText: shape.linkText,
   }
 }
 
@@ -36,69 +40,90 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(updateLayer(attrs))
     },
     onChangeType: (selected) => {
-      dispatch(setShapeType({id: id, type: selected.value}))
+      dispatch(setShapeType({ id: id, type: selected.value }))
     },
     onRestoreDefaults: (event) => {
       dispatch(restoreDefaults(id))
-    }
+    },
   }
 }
 
 class Layer extends Component {
   render() {
-    const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
+    const selectedOption = {
+      value: this.props.shape.id,
+      label: this.props.shape.name,
+    }
     const optionsRender = Object.keys(this.props.options).map((key, index) => {
       return this.getOptionComponent(key, index)
     })
 
     const linkText = this.props.linkText || this.props.link
-    const linkRender = this.props.link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p></Col></Row> : undefined
+    const linkRender = this.props.link ? (
+      <Row>
+        <Col sm={5}></Col>
+        <Col sm={7}>
+          <p className="mt-2">
+            See{" "}
+            <a target="_blank" rel="noopener noreferrer" href={this.props.link}>
+              {linkText}
+            </a>{" "}
+            for ideas.
+          </p>
+        </Col>
+      </Row>
+    ) : undefined
     let optionsListRender = undefined
 
     if (Object.entries(this.props.options).length > 0) {
-      optionsListRender =
-        <div className="m-0">
-          {optionsRender}
-        </div>
+      optionsListRender = <div className="m-0">{optionsRender}</div>
     }
 
     let shapeSelectRender = undefined
 
     if (this.props.showShapeSelectRender) {
-      shapeSelectRender =
+      shapeSelectRender = (
         <Row className="align-items-center">
-          <Col sm={5}>
-            Shape
-          </Col>
+          <Col sm={5}>Shape</Col>
 
           <Col sm={7}>
             <Select
               value={selectedOption}
               onChange={this.props.onChangeType}
               maxMenuHeight={305}
-              options={this.props.selectOptions} />
+              options={this.props.selectOptions}
+            />
           </Col>
         </Row>
+      )
     }
 
     return (
-      <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
+      <Card
+        className="p-3 overflow-auto flex-grow-1"
+        style={{ borderTop: "1px solid #aaa", borderBottom: "none" }}
+      >
         <Row className="align-items-center mb-2">
           <Col sm={5}>
             <h2 className="panel m-0">Properties</h2>
           </Col>
           <Col sm={7}>
-            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
+            <Button
+              className="ml-auto"
+              variant="outline-primary"
+              size="sm"
+              onClick={this.props.onRestoreDefaults}
+            >
+              Restore defaults
+            </Button>
           </Col>
         </Row>
 
-        { shapeSelectRender }
+        {shapeSelectRender}
 
-        { linkRender }
+        {linkRender}
 
-        <div className="pt-1">
-          { optionsListRender }
-        </div>
+        <div className="pt-1">{optionsListRender}</div>
       </Card>
     )
   }
@@ -106,44 +131,59 @@ class Layer extends Component {
   getOptionComponent(key, index) {
     const option = this.props.options[key]
 
-    if (option.type === 'dropdown') {
-      return  <DropdownOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
-    } else if (option.type === 'checkbox') {
-      return  <CheckboxOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
-    } else if (option.type === 'comments') {
-      return  <CommentsBox
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                comments={this.props.layer.comments} />
-    } else if (option.type === 'togglebutton') {
-      return  <ToggleButtonOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
+    if (option.type === "dropdown") {
+      return (
+        <DropdownOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          optionKey={key}
+          key={key}
+          index={index}
+          model={this.props.layer}
+        />
+      )
+    } else if (option.type === "checkbox") {
+      return (
+        <CheckboxOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          optionKey={key}
+          key={key}
+          index={index}
+          model={this.props.layer}
+        />
+      )
+    } else if (option.type === "comments") {
+      return (
+        <CommentsBox
+          options={this.props.options}
+          optionKey={key}
+          key={key}
+          comments={this.props.layer.comments}
+        />
+      )
+    } else if (option.type === "togglebutton") {
+      return (
+        <ToggleButtonOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          optionKey={key}
+          key={key}
+          index={index}
+          model={this.props.layer}
+        />
+      )
     } else {
-      return  <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
+      return (
+        <InputOption
+          onChange={this.props.onChange}
+          options={this.props.options}
+          optionKey={key}
+          key={key}
+          index={index}
+          model={this.props.layer}
+        />
+      )
     }
   }
 }

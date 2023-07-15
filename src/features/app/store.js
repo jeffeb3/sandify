@@ -1,15 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit"
-import { combineReducers } from 'redux'
-import uniqueId from 'lodash/uniqueId'
+import { combineReducers } from "redux"
+import uniqueId from "lodash/uniqueId"
 
-import appReducer from './appSlice'
-import machineReducer from '../machine/machineSlice'
-import exporterReducer from '../exporter/exporterSlice'
-import previewReducer from '../preview/previewSlice'
-import fontsReducer from '../fonts/fontsSlice'
-import { registeredModels } from '../../config/models'
-import { loadState, saveState } from '../../common/localStorage'
-import layersReducer, { setCurrentLayer, addLayer, addEffect, updateLayer } from '../layers/layersSlice'
+import appReducer from "./appSlice"
+import machineReducer from "../machine/machineSlice"
+import exporterReducer from "../exporter/exporterSlice"
+import previewReducer from "../preview/previewSlice"
+import fontsReducer from "../fonts/fontsSlice"
+import { registeredModels, getModel } from "../../config/models"
+import { loadState, saveState } from "../../common/localStorage"
+import layersReducer, {
+  setCurrentLayer,
+  addLayer,
+  addEffect,
+  updateLayer,
+} from "../layers/layersSlice"
 
 //const customizedMiddleware = getDefaultMiddleware({
 //  immutableCheck: {
@@ -27,36 +32,36 @@ const store = configureStore({
       layers: layersReducer,
       exporter: exporterReducer,
       machine: machineReducer,
-      preview: previewReducer
+      preview: previewReducer,
     }),
-    fonts: fontsReducer
-  })
+    fonts: fontsReducer,
+  }),
 })
 
 const loadPersistedLayers = (layers) => {
-  layers.allIds.forEach(id => {
+  layers.allIds.forEach((id) => {
     const layer = layers.byId[id]
 
     if (layer) {
       const newLayer = {
         ...layer,
-        id: uniqueId('layer-'),
+        id: uniqueId("layer-"),
         restore: true,
         startingWidth: layer.startingWidth || layer.startingSize,
         startingHeight: layer.startingWidth || layer.startingSize,
-        autosize: layer.autosize === null ? true : layer.autosize
+        autosize: layer.autosize === null ? true : layer.autosize,
       }
 
       // for referential integrity, we have to explicitly generate ids and
       // re-build relationships.
       store.dispatch(addLayer(newLayer))
       if (layer.effectIds) {
-        newLayer.effectIds = layer.effectIds.map(effectId => {
+        newLayer.effectIds = layer.effectIds.map((effectId) => {
           const effect = {
             ...layers.byId[effectId],
-            id: uniqueId('layer-'),
+            id: uniqueId("layer-"),
             restore: true,
-            parentId: newLayer.id
+            parentId: newLayer.id,
           }
           store.dispatch(addEffect(effect))
           return effect.id
@@ -68,14 +73,21 @@ const loadPersistedLayers = (layers) => {
 }
 
 const loadDefaultLayer = () => {
-  const storedShape = localStorage.getItem('currentShape')
-  const currentShape = storedShape && registeredModels[storedShape] ? storedShape : 'polygon'
-  const layer = registeredModels[currentShape].getInitialState()
+  const storedShape = localStorage.getItem("currentShape")
+  const currentShape =
+    storedShape && registeredModels[storedShape] ? storedShape : "polygon"
+  const currentName = getModel(currentShape).name.toLowerCase()
+  const layer = {
+    ...registeredModels[currentShape].getInitialState(),
+    name: currentName,
+  }
 
   store.dispatch(addLayer(layer))
 
   const state = store.getState()
-  store.dispatch(setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id))
+  store.dispatch(
+    setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id),
+  )
 }
 
 // set both to true when running locally if you want to preserve your shape
@@ -86,10 +98,10 @@ const persistState = false
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change
 // persistInitKey to the same value. It's like doing a "save as"
-const persistInitKey = 'state'
-const persistSaveKey = 'state'
+const persistInitKey = "state"
+const persistSaveKey = "state"
 
-if (typeof jest === 'undefined' && usePersistedState) {
+if (typeof jest === "undefined" && usePersistedState) {
   // override default values with saved ones
   const persistedState = loadState(persistInitKey)
 
