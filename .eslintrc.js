@@ -20,7 +20,8 @@ module.exports = {
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react-redux/recommended",
-    'plugin:@typescript-eslint/recommended'
+    'plugin:@typescript-eslint/recommended',
+    "plugin:prettier/recommended"
   ],
   rules: {
     // override/add rules settings here, such as:
@@ -64,6 +65,7 @@ module.exports = {
     'react/no-unused-prop-types': 'off',
     'react-redux/no-unused-prop-types': 'warn',
     'react-redux/prefer-separate-component-file': 'off',
+    "prettier/prettier": "error",
     semi: [ 'warn', 'never' ]
   },
   settings: {
@@ -106,6 +108,7 @@ module.exports = {
   plugins: [
      "react",
      "react-redux",
-     "@typescript-eslint"
+     "@typescript-eslint",
+     "prettier"
    ]
 }
