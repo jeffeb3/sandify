@@ -1,14 +1,14 @@
-import Victor from 'victor'
-import { roundP } from './util'
+import Victor from "victor"
+import { roundP } from "./util"
 
 // convert degrees to radians
 export const degToRad = (deg) => {
-  return deg / 180.0 * Math.PI
+  return (deg / 180.0) * Math.PI
 }
 
 // convert radians to degrees
 export const radToDeg = (rad) => {
-  return rad * 180.0 / Math.PI
+  return (rad * 180.0) / Math.PI
 }
 
 export const distance = (v1, v2) => {
@@ -26,7 +26,9 @@ export const angle = (point) => {
 
 // returns whether a point is on the segment defined by start and end
 export const onSegment = (start, end, point) => {
-  return start.distance(point) + end.distance(point) - start.distance(end) < 0.001
+  return (
+    start.distance(point) + end.distance(point) - start.distance(end) < 0.001
+  )
 }
 
 export const slope = (v1, v2) => {
@@ -48,7 +50,7 @@ export const findBounds = (vertices) => {
   let loY = vertices[0].y
   let hiY = vertices[0].y
 
-  for(let i=1; i<n; ++i) {
+  for (let i = 1; i < n; ++i) {
     let p = vertices[i]
     loX = Math.min(loX, p.x)
     hiX = Math.max(hiX, p.x)
@@ -64,13 +66,20 @@ export const resizeVertices = (vertices, sizeX, sizeY) => {
   let size = Math.max(sizeX, sizeY)
   let bounds = findBounds(vertices)
   let curveSize = Math.max(bounds[1].y - bounds[0].y, bounds[1].x - bounds[0].x)
-  let scale = size/curveSize
+  let scale = size / curveSize
+  let scaledBounds = [
+    bounds[0].multiply({ x: scale, y: scale }),
+    bounds[1].multiply({ x: scale, y: scale }),
+  ]
+  let deltaX = scaledBounds[1].x - (scaledBounds[1].x - scaledBounds[0].x) / 2
+  let deltaY = scaledBounds[1].y - (scaledBounds[1].y - scaledBounds[0].y) / 2
 
-  let scaledBounds = [bounds[0].multiply({x: scale, y: scale}), bounds[1].multiply({x: scale, y: scale})]
-  let deltaX = scaledBounds[1].x - (scaledBounds[1].x - scaledBounds[0].x)/2
-  let deltaY = scaledBounds[1].y - (scaledBounds[1].y - scaledBounds[0].y)/2
-
-  return vertices.map(vertex => vertex.clone().multiply({x: scale, y: scale}).add({x: -deltaX, y: -deltaY}))
+  return vertices.map((vertex) =>
+    vertex
+      .clone()
+      .multiply({ x: scale, y: scale })
+      .add({ x: -deltaX, y: -deltaY }),
+  )
 }
 
 // returns a vertex with x and y rounded to p number of digits
@@ -80,29 +89,22 @@ export const vertexRoundP = (v, p) => {
 
 // Transform functions
 export const rotate = (vertex, angleDeg) => {
-  const angle = Math.PI / 180.0 * angleDeg
+  const angle = (Math.PI / 180.0) * angleDeg
   return new Victor(
-   vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
-   vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle)
+    vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
+    vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
   )
 }
 
-export const scale = (vertex, pctX, pctY) => {
-  const scaleX = pctX / 100.0
-  if (pctY === undefined) pctY = pctX
-  const scaleY = pctY / 100.0
-
+export const scale = (vertex, scaleX, scaleY) => {
   return new Victor(
     vertex.x * scaleX,
-    vertex.y * scaleY
+    vertex.y * (scaleY === undefined ? scaleX : scaleY),
   )
 }
 
 export const offset = (vertex, offsetX, offsetY) => {
-  return new Victor(
-    vertex.x + offsetX,
-    vertex.y + offsetY
-  )
+  return new Victor(vertex.x + offsetX, vertex.y + offsetY)
 }
 
 // modifies the given array in place, centering the points on (0, 0)
@@ -111,60 +113,70 @@ export const centerOnOrigin = (vertices, bounds) => {
   const offsetX = (bounds[1].x + bounds[0].x) / 2
   const offsetY = (bounds[1].y + bounds[0].y) / 2
 
-  vertices.forEach(v => v.add(new Victor(-offsetX, -offsetY)))
+  vertices.forEach((v) => v.add(new Victor(-offsetX, -offsetY)))
   return vertices
 }
 
 const hAlignRight = (bounds) => -bounds[1].x
 const hAlignLeft = (bounds) => 0 - bounds[0].x
-const hAlignCenter = (bounds) => -(bounds[1].x - bounds[0].x)/2
+const hAlignCenter = (bounds) => -(bounds[1].x - bounds[0].x) / 2
 
 // aligns a group of selections, modifying vertices in place
-export const horizontalAlign = (selections, align = 'left') => {
-  const dFn = align === 'center' ?
-    hAlignCenter :
-    align ==='left' ? hAlignLeft : hAlignRight
+export const horizontalAlign = (selections, align = "left") => {
+  const dFn =
+    align === "center"
+      ? hAlignCenter
+      : align === "left"
+      ? hAlignLeft
+      : hAlignRight
   const allBounds = findBounds(selections.flat())
   const dAll = dFn(allBounds)
 
-  selections.forEach(selection => {
+  selections.forEach((selection) => {
     const bounds = findBounds(selection)
     const d = dFn(bounds)
 
-    selection.forEach(vertex => {
-      vertex.add(new Victor(- dAll + d, 0))
+    selection.forEach((vertex) => {
+      vertex.add(new Victor(-dAll + d, 0))
     })
   })
   return selections
 }
 
 // returns an array of points drawing a circle of a given radius
-export const circle = (radius, start=0, x=0, y=0) => {
+export const circle = (radius, start = 0, x = 0, y = 0) => {
   let points = []
 
-  for (let i=0; i<=128; i++) {
-    let angle = Math.PI * 2.0 / 128.0 * i + start
-    points.push(new Victor(x + Math.cos(angle)*radius, y + Math.sin(angle)*radius))
+  for (let i = 0; i <= 128; i++) {
+    let angle = ((Math.PI * 2.0) / 128.0) * i + start
+    points.push(
+      new Victor(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius),
+    )
   }
 
   return points
 }
 
-export const arc = (radius, startAngle, endAngle, x=0, y=0) => {
-  let resolution = (Math.PI*2.0) / 128.0 // 128 segments per circle. Enough?
-  let deltaAngle = ((endAngle - startAngle) + 2.0 * Math.PI) % (2.0 * Math.PI)
+export const arc = (radius, startAngle, endAngle, x = 0, y = 0) => {
+  let resolution = (Math.PI * 2.0) / 128.0 // 128 segments per circle. Enough?
+  let deltaAngle = (endAngle - startAngle + 2.0 * Math.PI) % (2.0 * Math.PI)
 
   if (deltaAngle > Math.PI) {
     deltaAngle -= 2.0 * Math.PI
   }
+
   if (deltaAngle < 0.0) {
     resolution *= -1.0
   }
 
   let tracePoints = []
-  for (let step = 0; step < (deltaAngle/resolution) ; step++) {
-    tracePoints.push(Victor(x + radius * Math.cos(resolution * step + startAngle),
-                            y + radius * Math.sin(resolution * step + startAngle)))
+  for (let step = 0; step < deltaAngle / resolution; step++) {
+    tracePoints.push(
+      Victor(
+        x + radius * Math.cos(resolution * step + startAngle),
+        y + radius * Math.sin(resolution * step + startAngle),
+      ),
+    )
   }
   return tracePoints
 }
@@ -181,15 +193,21 @@ export const subsample = (vertices, maxLength) => {
       const end = Victor.fromObject(vertices[next])
 
       const delta = end.clone().subtract(start)
-      const deltaSegment = end.clone().subtract(start).normalize().multiply(Victor(maxLength, maxLength))
+      const deltaSegment = end
+        .clone()
+        .subtract(start)
+        .normalize()
+        .multiply(Victor(maxLength, maxLength))
 
       // This loads up (start, end].
-      for (let step = 0; step < (delta.magnitude() / maxLength) ; step++) {
+      for (let step = 0; step < delta.magnitude() / maxLength; step++) {
         subsampledVertices.push(
-          new Victor(start.x + step * deltaSegment.x,
-                     start.y + step * deltaSegment.y))
+          new Victor(
+            start.x + step * deltaSegment.x,
+            start.y + step * deltaSegment.y,
+          ),
+        )
       }
-
     }
     previous = next
   }
@@ -209,17 +227,24 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
   let previousRawTheta = 0
 
   // Normalize the radius
-  if (rhoMax < 0) { rhoMax = 0.1 }
-  if ( rhoMax > 1) { rhoMax = 1.0 }
+  if (rhoMax < 0) {
+    rhoMax = 0.1
+  }
+  if (rhoMax > 1) {
+    rhoMax = 1.0
+  }
 
   for (let next = 0; next < subsampledVertices.length; ++next) {
-
-    let rho = (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
+    let rho =
+      (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) *
+      rhoMax
     rho = Math.min(rho, rhoMax)
 
     // What is the basic theta for this point?
-    let rawTheta = Math.atan2(subsampledVertices[next].x,
-                              subsampledVertices[next].y)
+    let rawTheta = Math.atan2(
+      subsampledVertices[next].x,
+      subsampledVertices[next].y,
+    )
     // Convert to [0, 2pi]
     rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
@@ -245,11 +270,11 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 }
 
 export const maxY = (vertices) => {
-  return Math.max(...vertices.map(v => v.y))
+  return Math.max(...vertices.map((v) => v.y))
 }
 
 export const minY = (vertices) => {
-  return Math.min(...vertices.map(v => v.y))
+  return Math.min(...vertices.map((v) => v.y))
 }
 
 // returns the index of the vertex in arr that is closest to the given vertex
@@ -276,13 +301,14 @@ export const findMinimumVertex = (value, arr, fn) => {
 
 // Convert theta, rho vertices to goofy x, y, which really represent scara angles.
 export const toScaraGcode = (vertices, unitsPerCircle) => {
-  return vertices.map( thetaRho => {
+  return vertices.map((thetaRho) => {
     const theta = thetaRho.x
     const rho = thetaRho.y
     const m1 = theta + Math.acos(rho)
     const m2 = theta - Math.acos(rho)
-    const x = unitsPerCircle * m1 / (2*Math.PI)
-    const y = unitsPerCircle * m2 / (2*Math.PI)
-    return new Victor(x,y)
+    const x = (unitsPerCircle * m1) / (2 * Math.PI)
+    const y = (unitsPerCircle * m2) / (2 * Math.PI)
+
+    return new Victor(x, y)
   })
 }
