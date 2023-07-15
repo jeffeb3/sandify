@@ -12,13 +12,13 @@ import {
   setShapeType,
   restoreDefaults,
 } from "../layers/layersSlice"
-import { getCurrentLayer } from "./selectors"
-import { getModel, getModelSelectOptions } from "../../config/models"
-import "./Layer.scss"
+import { getCurrentLayerState } from "./selectors"
+import { getModelFromType, getModelSelectOptions } from "../../config/models"
+import "./LayerEditor.scss"
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const shape = getModel(layer.type)
+  const layer = getCurrentLayerState(state)
+  const shape = getModelFromType(layer.type)
 
   return {
     layer: layer,

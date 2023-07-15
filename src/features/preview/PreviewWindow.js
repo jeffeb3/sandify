@@ -5,7 +5,7 @@ import throttle from 'lodash/throttle'
 import { setPreviewSize, updatePreview } from './previewSlice'
 import { updateLayer } from '../layers/layersSlice'
 import { getMachine, getLayers, getPreview } from '../store/selectors'
-import { getCurrentLayer, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
+import { getCurrentLayerState, getKonvaLayerIds, getVisibleNonEffectIds, isDragging } from '../layers/selectors'
 import { roundP } from '../../common/util'
 import PreviewLayer from './PreviewLayer'
 import PreviewConnector from './PreviewConnector'
@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     layers: layers,
-    currentLayer: getCurrentLayer(state),
+    currentLayer: getCurrentLayerState(state),
     konvaIds: getKonvaLayerIds(state),
     layerIds: getVisibleNonEffectIds(state),
     use_rect: machine.rectangular,

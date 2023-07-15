@@ -1,4 +1,4 @@
-import { getModel } from "../../config/models"
+import { getModelFromType } from "../../config/models"
 //import Machine from '../../models/Machine'
 import Exporter from "./Exporter"
 
@@ -37,7 +37,7 @@ export default class CommentExporter extends Exporter {
     switch (state.app.input) {
       case "shape": // shapes
         layers.forEach((layer) => {
-          const shape = getModel(layer.type)
+          const shape = getModelFromType(layer.type)
           const options = shape.getOptions()
 
           this.line("Layer:")

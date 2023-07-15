@@ -11,8 +11,8 @@ import Hypocycloid from "@/models/shapes/Hypocycloid"
 import InputText from "@/models/shapes/input_text/InputText"
 import LSystem from "@/models/shapes/lsystem/LSystem"
 import NoiseWave from "@/models/shapes/NoiseWave"
-import Polygon from "@/models/shapes/Polygon"
 import Point from "@/models/shapes/Point"
+import Polygon from "@/models/shapes/Polygon"
 import Reuleaux from "@/models/shapes/Reuleaux"
 import Rose from "@/models/shapes/Rose"
 import SpaceFiller from "@/models/shapes/space_filler/SpaceFiller"
@@ -28,9 +28,6 @@ import Track from "@/models/effects/Track"
 import Warp from "@/models/effects/Warp"
 import Wiper from "@/models/shapes/Wiper"
 
-/*----------------------------------------------
-Supported input shapes
------------------------------------------------*/
 export const registeredModels = {
   polygon: new Polygon(),
   star: new Star(),
@@ -62,7 +59,7 @@ export const registeredModels = {
   fineTuning: new FineTuning(),
 }
 
-export const getModel = (type) => {
+export const getModelFromType = (type) => {
   return registeredModels[type]
 }
 

@@ -7,7 +7,7 @@ import machineReducer from "../machine/machineSlice"
 import exporterReducer from "../exporter/exporterSlice"
 import previewReducer from "../preview/previewSlice"
 import fontsReducer from "../fonts/fontsSlice"
-import { registeredModels, getModel } from "../../config/models"
+import { registeredModels, getModelFromType } from "../../config/models"
 import { loadState, saveState } from "../../common/localStorage"
 import layersReducer, {
   setCurrentLayer,
@@ -76,7 +76,7 @@ const loadDefaultLayer = () => {
   const storedShape = localStorage.getItem("currentShape")
   const currentShape =
     storedShape && registeredModels[storedShape] ? storedShape : "polygon"
-  const currentName = getModel(currentShape).name.toLowerCase()
+  const currentName = getModelFromType(currentShape).name.toLowerCase()
   const layer = {
     ...registeredModels[currentShape].getInitialState(),
     name: currentName,

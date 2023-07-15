@@ -2,7 +2,7 @@ import LRUCache from "lru-cache"
 import { createSelector } from "reselect"
 import Color from "color"
 import { transformShapes, polishVertices, getMachineInstance } from "./computer"
-import { getModel } from "../../config/models"
+import { getModelFromType } from "../../config/models"
 import { getMachine, getState, getPreview } from "../store/selectors"
 import { getLoadedFonts } from "../fonts/selectors"
 import {
@@ -66,7 +66,7 @@ const makeGetLayerVertices = (layerId) => {
         fonts: fonts,
       }
       log("makeGetLayerVertices", layerId)
-      const metashape = getModel(layer.type)
+      const metashape = getModelFromType(layer.type)
 
       // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
       if (layer.shouldCache) {

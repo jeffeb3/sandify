@@ -5,9 +5,9 @@ import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
 
 import {
-  getCurrentLayer,
+  getCurrentLayerState,
   getNumLayers,
-  getAllLayersInfo,
+  getAllLayerStates,
 } from "../layers/selectors"
 import {
   setCurrentLayer,
@@ -17,7 +17,7 @@ import {
   toggleVisible,
   toggleOpen,
 } from "../layers/layersSlice"
-import { registeredModels, getModel } from "../../config/models"
+import { registeredModels, getModelFromType } from "../../config/models"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import ImportLayer from "./ImportLayer"
@@ -25,12 +25,12 @@ import SortableLayers from "./SortableLayers"
 import "./Playlist.scss"
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const shape = getModel(layer.type)
+  const layer = getCurrentLayerState(state)
+  const shape = getModelFromType(layer.type)
   const numLayers = getNumLayers(state)
 
   return {
-    layers: getAllLayersInfo(state),
+    layers: getAllLayerStates(state),
     numLayers: numLayers,
     currentLayer: layer,
     shape: shape,

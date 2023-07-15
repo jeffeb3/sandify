@@ -13,42 +13,42 @@ const getLayersById = createSelector(
   (layers) => layers.byId
 )
 
-const getLayerIds = createSelector(
+const getOrderedLayerIds = createSelector(
   getLayers,
   (layers) => layers.allIds
 )
 
-export const getVisibleLayerIds = createSelector(
-  [ getLayerIds, getLayersById ],
+export const getVisibleOrderedLayerIds = createSelector(
+  [ getOrderedLayerIds, getLayersById ],
   (layerIds, layers) => {
     return layerIds.filter(id => layers[id].visible)
   }
 )
 
  export const getVisibleNonEffectIds = createSelector(
-   [ getVisibleLayerIds, getLayersById ],
+   [ getVisibleOrderedLayerIds, getLayersById ],
    (layerIds, layers) => {
      return layerIds.filter(id => !layers[id].effect)
    }
  )
 
-export const getCurrentLayer = createSelector(
+export const getCurrentLayerState = createSelector(
   [ getLayersById, getCurrentLayerId ],
   (layers, current) => {
     return layers[current]
   }
 )
 
-export const getAllLayersInfo = createSelector(
-  [ getLayerIds, getLayersById ],
+export const getAllLayerStates = createSelector(
+  [ getOrderedLayerIds, getLayersById ],
   (layerIds, layersById) => {
-    log("getAllLayersInfo")
+    log("getAllLayerStates")
     return layerIds.map(id => layersById[id])
   }
 )
 
 export const getNumLayers = createSelector(
-  getLayerIds,
+  getOrderedLayerIds,
   (layerIds) => {
     log("getNumLayer")
     return layerIds.length
@@ -58,7 +58,7 @@ export const getNumLayers = createSelector(
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const getKonvaLayerIds = createSelector(
-  [ getCurrentLayer, getVisibleLayerIds ],
+  [ getCurrentLayerState, getVisibleOrderedLayerIds ],
   (currentLayer, visibleLayerIds) => {
       const kIds = visibleLayerIds.filter(id => id !== currentLayer.id)
       if (currentLayer.visible) {
@@ -69,7 +69,7 @@ export const getKonvaLayerIds = createSelector(
 )
 
 export const isDragging = createSelector(
-  [ getLayerIds, getLayersById ],
+  [ getOrderedLayerIds, getLayersById ],
   (layerIds, layers) => {
     log("isDragging")
     return layerIds.filter(id => layers[id].visible && layers[id].dragging).length > 0
@@ -85,7 +85,7 @@ export const getNumVisibleLayers = createSelector(
 
 export const makeGetLayerIndex = layerId => {
   return createDeepEqualSelector(
-    getVisibleLayerIds,
+    getVisibleOrderedLayerIds,
     (visibleLayerIds) => {
       return visibleLayerIds.findIndex(id => id === layerId)
     }
@@ -116,7 +116,7 @@ export const makeGetEffects = layerId => {
   return createSelector(
     [
       getLayersById,
-      getVisibleLayerIds
+      getVisibleOrderedLayerIds
     ],
     memoizeArrayProducingFn(
       (layers, visibleLayerIds) => {

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit"
 import uniqueId from "lodash/uniqueId"
 import arrayMove from "array-move"
-import { getModel } from "../../config/models"
+import { getModelFromType } from "../../config/models"
 
 const protectedAttrs = [
   "selectGroup",
@@ -15,7 +15,7 @@ const protectedAttrs = [
 ]
 
 const newEffectType = localStorage.getItem("currentEffect") || "mask"
-const newEffectName = getModel(newEffectType).name.toLowerCase()
+const newEffectName = getModelFromType(newEffectType).name.toLowerCase()
 
 function createLayer(state, attrs) {
   const restore = attrs.restore
@@ -166,7 +166,7 @@ const layersSlice = createSlice({
     restoreDefaults(state, action) {
       const id = action.payload
       const layer = state.byId[id]
-      const defaults = getModel(layer.type).getInitialState(layer)
+      const defaults = getModelFromType(layer.type).getInitialState(layer)
 
       state.byId[layer.id] = {
         id: layer.id,
@@ -187,7 +187,7 @@ const layersSlice = createSlice({
     },
     setShapeType(state, action) {
       const changes = action.payload
-      const defaults = getModel(changes.type).getInitialState()
+      const defaults = getModelFromType(changes.type).getInitialState()
       const layer = state.byId[changes.id]
 
       layer.type = changes.type
@@ -206,7 +206,7 @@ const layersSlice = createSlice({
     setNewEffectType(state, action) {
       let attrs = { newEffectType: action.payload }
       if (!state.newEffectNameOverride) {
-        const shape = getModel(action.payload)
+        const shape = getModelFromType(action.payload)
         attrs.newEffectName = shape.name.toLowerCase()
       }
       Object.assign(state, attrs)

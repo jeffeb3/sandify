@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Shape } from 'react-konva'
 import { makeGetConnectorVertices, getSliderBounds, getSliderColors, getVertexOffsets } from '../machine/selectors'
 import { getPreview, getLayers } from '../store/selectors'
-import { getCurrentLayer, makeGetLayer } from '../layers/selectors'
+import { getCurrentLayerState, makeGetLayer } from '../layers/selectors'
 import { getCachedSelector } from '../store/selectors'
 import PreviewHelper from './PreviewHelper'
 
@@ -17,8 +17,8 @@ const PreviewConnector = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
-    const startLayer = getCachedSelector(makeGetLayer, ownProps.startId)(state) || getCurrentLayer(state)
-    const endLayer = getCachedSelector(makeGetLayer, ownProps.endId)(state) || getCurrentLayer(state)
+    const startLayer = getCachedSelector(makeGetLayer, ownProps.startId)(state) || getCurrentLayerState(state)
+    const endLayer = getCachedSelector(makeGetLayer, ownProps.endId)(state) || getCurrentLayerState(state)
     const vertices = startLayer === endLayer ?
       [] :
       getCachedSelector(makeGetConnectorVertices, startLayer.id, endLayer.id)(state)

@@ -2,7 +2,7 @@ import ReactGA from "react-ga"
 import throttle from "lodash/throttle"
 import PolarMachine from "./PolarMachine"
 import RectMachine from "./RectMachine"
-import { getModel } from "../../config/models"
+import { getModelFromType } from "../../config/models"
 import Victor from "victor"
 
 //function track(vertex, data, loopIndex) {
@@ -117,7 +117,7 @@ export const transformShapes = (vertices, layer, effects) => {
 
   if (effects && effects.length > 0) {
     effects.forEach((effect) => {
-      outputVertices = getModel(effect.type).applyEffect(
+      outputVertices = getModelFromType(effect.type).applyEffect(
         effect,
         layer,
         outputVertices,
