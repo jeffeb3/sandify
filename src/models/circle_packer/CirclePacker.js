@@ -1,5 +1,5 @@
 import seedrandom from 'seedrandom'
-import Shape, { shapeOptions } from '../../Shape'
+import Shape, { shapeOptions } from '../Shape'
 import { Circle } from './Circle'
 import Graph from '@/common/Graph'
 import { circle, arc } from '@/common/geometry'

@@ -46,7 +46,7 @@ export default class CommentExporter extends Exporter {
           this.optionLines(shape, layer, Object.keys(options))
           this.keyValueLine("Visible", layer.visible)
           // TODO: fix
-          // this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'offsetX', 'offsetY', 'rotation', 'reverse'])
+          // this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'x', 'y', 'rotation', 'reverse'])
 
           if (!layer.effect) {
             this.line("Fine tuning:")

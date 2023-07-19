@@ -119,7 +119,7 @@ export default class Loop extends Effect {
 
   applyEffect(effect, layer, vertices) {
     const outputVertices = []
-    const { offsetX, offsetY, rotation } = layer
+    const { x, y, rotation } = layer
 
     // remove first point if we are smearing
     if (effect.transformMethod === "smear") {
@@ -128,7 +128,7 @@ export default class Loop extends Effect {
 
     // remove rotation and offsets; will add back at end
     vertices.forEach((vertex) => {
-      vertex.addX({ x: -offsetX || 0 }).addY({ y: -offsetY || 0 })
+      vertex.addX({ x: -x || 0 }).addY({ y: -y || 0 })
       vertex.rotateDeg(rotation)
     })
 
@@ -190,7 +190,7 @@ export default class Loop extends Effect {
     // add rotation and offsets
     outputVertices.forEach((vertex) => {
       vertex.rotateDeg(-rotation)
-      vertex.addX({ x: offsetX || 0 }).addY({ y: offsetY || 0 })
+      vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })
 
     return outputVertices

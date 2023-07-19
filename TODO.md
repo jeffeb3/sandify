@@ -1,3 +1,54 @@
+6/15/23
+---
+
+- BUG: Likely non-constant options causing re-render every time a property changes
+- refactor model classes to reflect Jeff's thinking
+- build a top menu; layout evolution; hamburger for smaller media
+- move effects out of playlist into a new pane
+- what are we doing with tracks?
+- upgrade to Bootstrap 5 and rebuild the UI
+
+Model
+ - options (editable)
+ - attrs (readonly)
+
+Effect > Model
+
+Layer
+ - options (editable)
+  - reverse
+  - connectionMethod
+  - name
+
+Shape > Layer
+ - options (editable)
+  - x-offset
+  - y-offset
+  - width
+  - height
+
+ - effects
+ - shape
+ - parent (if in group)
+
+Group > Layer
+ - children (layers)
+ - dynamic attributes that user can set which recalculate children
+  - width
+  - height
+
+Store
+ - main
+  - app
+  - layers
+   - idMap
+   - orderedIds
+  - exporter
+  - machine
+  - preview
+ - fonts
+
+
 TODO
 ---
 - DONE model: move effects into layers; add tests

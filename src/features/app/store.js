@@ -1,14 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from "redux"
 import uniqueId from "lodash/uniqueId"
-
 import appReducer from "./appSlice"
 import machineReducer from "../machine/machineSlice"
 import exporterReducer from "../exporter/exporterSlice"
 import previewReducer from "../preview/previewSlice"
 import fontsReducer from "../fonts/fontsSlice"
-import { registeredModels, getModelFromType } from "../../config/models"
+import { getDefaultModelType } from "../../config/models"
 import { loadState, saveState } from "../../common/localStorage"
+import Layer from "../layers/Layer"
 import layersReducer, {
   setCurrentLayer,
   addLayer,
@@ -47,9 +47,6 @@ const loadPersistedLayers = (layers) => {
         ...layer,
         id: uniqueId("layer-"),
         restore: true,
-        startingWidth: layer.startingWidth || layer.startingSize,
-        startingHeight: layer.startingWidth || layer.startingSize,
-        autosize: layer.autosize === null ? true : layer.autosize,
       }
 
       // for referential integrity, we have to explicitly generate ids and
@@ -73,16 +70,8 @@ const loadPersistedLayers = (layers) => {
 }
 
 const loadDefaultLayer = () => {
-  const storedShape = localStorage.getItem("currentShape")
-  const currentShape =
-    storedShape && registeredModels[storedShape] ? storedShape : "polygon"
-  const currentName = getModelFromType(currentShape).name.toLowerCase()
-  const layer = {
-    ...registeredModels[currentShape].getInitialState(),
-    name: currentName,
-  }
-
-  store.dispatch(addLayer(layer))
+  const layer = new Layer(getDefaultModelType())
+  store.dispatch(addLayer(layer.getInitialState()))
 
   const state = store.getState()
   store.dispatch(
@@ -92,8 +81,8 @@ const loadDefaultLayer = () => {
 
 // set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
-const usePersistedState = false
-const persistState = false
+const usePersistedState = true
+const persistState = true
 
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change

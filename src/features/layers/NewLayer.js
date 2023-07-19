@@ -4,16 +4,13 @@ import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import { connect } from "react-redux"
 
 import { getLayers } from "../store/selectors"
-import {
-  registeredModels,
-  getModelSelectOptions,
-  getModelFromType,
-} from "../../config/models"
+import { getModelSelectOptions, getDefaultModel } from "../../config/models"
 import { addLayer } from "../layers/layersSlice"
 
 // Initialize these from local storage, or reasonable defaults
-const initialLayerType = localStorage.getItem("currentShape") || "polygon"
-const initialLayerName = getModelFromType(initialLayerType).name.toLowerCase()
+const defaultModel = getDefaultModel()
+const initialLayerName = defaultModel.label
+const initialLayerType = defaultModel.type
 
 const customStyles = {
   control: (base) => ({
@@ -54,11 +51,12 @@ class NewLayer extends Component {
 
   render() {
     const { toggleModal, showModal, selectOptions, onLayerAdded } = this.props
-    const selectedShape = getModelFromType(this.state.newLayerType)
-    const selectedOption = {
-      value: selectedShape.id,
-      label: selectedShape.name,
-    }
+    //    const selectedShape = getModelFromType(this.state.newLayerType)
+    //    const selectedOption = {
+    //      value: selectedShape.id,
+    //      label: selectedShape.name,
+    //    }
+    const selectedOption = null
 
     return (
       <Modal show={showModal} onHide={toggleModal}>

@@ -1,15 +1,11 @@
-import Model from './Model'
+import Model from "./Model"
 
 export default class Effect extends Model {
-  getInitialState() {
-    return {
-      ...super.getInitialState(),
-      ...{
-        effect: true,
-        shouldCache: false,
-        canChangeSize: true,
-        autosize: false
-      }
-    }
+  constructor() {
+    super()
+    this.shouldCache = false
+    this.canChangeSize = true
+    this.autosize = false
+    this.effect = true
   }
 }

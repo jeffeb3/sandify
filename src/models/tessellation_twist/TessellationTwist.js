@@ -2,7 +2,7 @@ import Victor from 'victor'
 import Graph, { mix } from '@/common/Graph'
 import { eulerianTrail } from '@/common/eulerianTrail'
 import { difference } from '@/common/util'
-import Shape, { shapeOptions } from '../../Shape'
+import Shape, { shapeOptions } from '../Shape'
 
 const vecTriangle = [
   new Victor(-0.85, -0.4907477295),

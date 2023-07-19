@@ -1,36 +1,35 @@
-import Circle from "@/models/shapes/Circle"
-import CirclePacker from "@/models/shapes/circle_packer/CirclePacker"
-import Epicycloid from "@/models/shapes/Epicycloid"
-import FancyText from "@/models/shapes/FancyText"
-import FileImport from "@/models/shapes/FileImport"
-import Fisheye from "@/models/shapes/Fisheye"
-import FractalSpirograph from "@/models/shapes/fractal_spirograph/FractalSpirograph"
-// import Freeform from "../models/shapes/Freeform"
-import Heart from "@/models/shapes/Heart"
-import Hypocycloid from "@/models/shapes/Hypocycloid"
-import InputText from "@/models/shapes/input_text/InputText"
-import LSystem from "@/models/shapes/lsystem/LSystem"
-import NoiseWave from "@/models/shapes/NoiseWave"
-import Point from "@/models/shapes/Point"
-import Polygon from "@/models/shapes/Polygon"
-import Reuleaux from "@/models/shapes/Reuleaux"
-import Rose from "@/models/shapes/Rose"
-import SpaceFiller from "@/models/shapes/space_filler/SpaceFiller"
-import Star from "@/models/shapes/Star"
-import TessellationTwist from "@/models/shapes/tessellation_twist/TessellationTwist"
-import V1Engineering from "@/models/shapes/v1_engineering/V1Engineering"
+//import Circle from "@/models/Circle"
+//import CirclePacker from "@/models/circle_packer/CirclePacker"
+//import Epicycloid from "@/models/Epicycloid"
+//import FancyText from "@/models/FancyText"
+//import FileImport from "@/models/FileImport"
+//import FractalSpirograph from "@/models/fractal_spirograph/FractalSpirograph"
+//import Heart from "@/models/Heart"
+//import Hypocycloid from "@/models/Hypocycloid"
+//import InputText from "@/models/input_text/InputText"
+//import LSystem from "@/models/lsystem/LSystem"
+//import NoiseWave from "@/models/NoiseWave"
+//import Point from "@/models/Point"
+import Polygon from "@/models/Polygon"
+//import Reuleaux from "@/models/Reuleaux"
+//import Rose from "@/models/Rose"
+//import SpaceFiller from "@/models/space_filler/SpaceFiller"
+//import Star from "@/models/Star"
+//import TessellationTwist from "@/models/tessellation_twist/TessellationTwist"
+//import V1Engineering from "@/models/v1_engineering/V1Engineering"
+//import Wiper from "@/models/Wiper"
 
-import FineTuning from "../models/effects/FineTuning"
-import Loop from "@/models/effects/Loop"
+//import FineTuning from "../models/effects/FineTuning"
+//import Fisheye from "@/models/effects/Fisheye"
+//import Loop from "@/models/effects/Loop"
 import Mask from "@/models/effects/Mask"
-import Noise from "@/models/effects/Noise"
-import Track from "@/models/effects/Track"
-import Warp from "@/models/effects/Warp"
-import Wiper from "@/models/shapes/Wiper"
+//import Noise from "@/models/effects/Noise"
+//import Track from "@/models/effects/Track"
+//import Warp from "@/models/effects/Warp"
 
 export const registeredModels = {
   polygon: new Polygon(),
-  star: new Star(),
+  /*  star: new Star(),
   circle: new Circle(),
   heart: new Heart(),
   reuleaux: new Reuleaux(),
@@ -44,7 +43,6 @@ export const registeredModels = {
   fractal_spirograph: new FractalSpirograph(),
   tessellation_twist: new TessellationTwist(),
   point: new Point(),
-  // freeform: new Freeform(),
   circle_packer: new CirclePacker(),
   wiper: new Wiper(),
   space_filler: new SpaceFiller(),
@@ -53,14 +51,23 @@ export const registeredModels = {
   fisheye: new Fisheye(),
   loop: new Loop(),
   track: new Track(),
-  mask: new Mask(),
   noise: new Noise(),
   warp: new Warp(),
-  fineTuning: new FineTuning(),
+  fineTuning: new FineTuning(), */
+  mask: new Mask(),
 }
 
 export const getModelFromType = (type) => {
   return registeredModels[type]
+}
+
+export const getDefaultModelType = () => {
+  const defaultType = localStorage.getItem("defaultModelType")
+  return getModelFromType(defaultType) ? defaultType : "polygon"
+}
+
+export const getDefaultModel = () => {
+  return registeredModels[getDefaultModelType()]
 }
 
 export const getModelDefaults = () => {
@@ -74,30 +81,31 @@ export const getModelDefaults = () => {
 
 export const getModelSelectOptions = () => {
   const groupOptions = []
-  const shapes = getModelDefaults()
+  const types = Object.keys(registeredModels)
 
-  for (const shape of shapes) {
-    const optionLabel = { value: shape.id, label: shape.name }
-    var found = false
+  for (const type of types) {
+    const model = registeredModels[type]
+    const optionLabel = { value: type, label: model.label }
 
+    let found = false
     for (const group of groupOptions) {
-      if (group.label === shape.selectGroup) {
+      if (group.label === model.selectGroup) {
         found = true
         group.options.push(optionLabel)
       }
     }
     if (!found) {
-      if (shape.selectGroup === "import") {
+      if (model.selectGroup === "import") {
         // users can't manually select this group
         continue
-      } else if (shape.selectGroup === "effects") {
+      } else if (model.selectGroup === "effects") {
         // effects are added separately
         // TODO: when effects can be added separately, uncomment the next line
-        // continue
+        continue
       }
 
       const newOptions = [optionLabel]
-      groupOptions.push({ label: shape.selectGroup, options: newOptions })
+      groupOptions.push({ label: model.selectGroup, options: newOptions })
     }
   }
 

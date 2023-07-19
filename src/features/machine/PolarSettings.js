@@ -1,23 +1,23 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { Component } from "react"
+import { connect } from "react-redux"
 import {
-    Accordion,
-    Col,
-    Row,
-    Form,
-    Card,
-    ToggleButton,
-    ToggleButtonGroup
-} from 'react-bootstrap'
-import InputOption from '../../components/InputOption'
-import CheckboxOption from '../../components/CheckboxOption'
-import { getMachine } from '../store/selectors'
-import { machineOptions } from './options'
+  Accordion,
+  Col,
+  Row,
+  Form,
+  Card,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-bootstrap"
+import InputOption from "../../components/InputOption"
+import CheckboxOption from "../../components/CheckboxOption"
+import { getMachine } from "../store/selectors"
+import { machineOptions } from "./options"
 import {
   toggleMachinePolarExpanded,
   updateMachine,
-  toggleMinimizeMoves
-} from './machineSlice'
+  toggleMinimizeMoves,
+} from "./machineSlice"
 
 const mapStateToProps = (state, ownProps) => {
   const machine = getMachine(state)
@@ -29,7 +29,7 @@ const mapStateToProps = (state, ownProps) => {
     startPoint: machine.polarStartPoint,
     endPoint: machine.polarEndPoint,
     minimizeMoves: machine.minimizeMoves,
-    options: machineOptions
+    options: machineOptions,
   }
 }
 
@@ -42,10 +42,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(updateMachine(attrs))
     },
     onStartPointChange: (value) => {
-      dispatch(updateMachine({polarStartPoint: value}))
+      dispatch(updateMachine({ polarStartPoint: value }))
     },
     onEndPointChange: (value) => {
-      dispatch(updateMachine({polarEndPoint: value}))
+      dispatch(updateMachine({ polarEndPoint: value }))
     },
     toggleMinimizeMoves: () => {
       dispatch(toggleMinimizeMoves())
@@ -55,11 +55,15 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 class PolarSettings extends Component {
   render() {
-    var activeClassName = this.props.active ? 'active' : ''
+    var activeClassName = this.props.active ? "active" : ""
 
     return (
       <Card className={`${activeClassName} overflow-auto`}>
-        <Accordion.Toggle as={Card.Header} eventKey={1} onClick={this.props.activeCallback}>
+        <Accordion.Toggle
+          as={Card.Header}
+          eventKey={1}
+          onClick={this.props.activeCallback}
+        >
           <h3>Polar machine</h3>
           Polar machines like Sisyphus
         </Accordion.Toggle>
@@ -72,36 +76,57 @@ class PolarSettings extends Component {
               key="maxRadius"
               optionKey="maxRadius"
               index={0}
-              model={this.props} />
+              data={this.props}
+            />
 
             <Row className="align-items-center pb-2">
               <Col sm={5}>
-                <Form.Label htmlFor="forceStart">
-                  Start point
-                </Form.Label>
+                <Form.Label htmlFor="forceStart">Start point</Form.Label>
               </Col>
 
               <Col sm={7}>
-                <ToggleButtonGroup id="startPoint" type="radio" name="startPoint" value={this.props.startPoint} onChange={this.props.onStartPointChange}>
-                  <ToggleButton variant="light" value="none">none</ToggleButton>
-                  <ToggleButton variant="light" value="center">center</ToggleButton>
-                  <ToggleButton variant="light" value="perimeter">perimeter</ToggleButton>
+                <ToggleButtonGroup
+                  id="startPoint"
+                  type="radio"
+                  name="startPoint"
+                  value={this.props.startPoint}
+                  onChange={this.props.onStartPointChange}
+                >
+                  <ToggleButton variant="light" value="none">
+                    none
+                  </ToggleButton>
+                  <ToggleButton variant="light" value="center">
+                    center
+                  </ToggleButton>
+                  <ToggleButton variant="light" value="perimeter">
+                    perimeter
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Col>
             </Row>
 
             <Row className="align-items-center pb-2">
               <Col sm={5}>
-                <Form.Label htmlFor="endPoint">
-                  End point
-                </Form.Label>
+                <Form.Label htmlFor="endPoint">End point</Form.Label>
               </Col>
 
               <Col sm={7}>
-                <ToggleButtonGroup id="endPoint" type="radio" name="endPoint" value={this.props.endPoint} onChange={this.props.onEndPointChange}>
-                  <ToggleButton variant="light" value="none">none</ToggleButton>
-                  <ToggleButton variant="light" value="center">center</ToggleButton>
-                  <ToggleButton variant="light" value="perimeter">perimeter</ToggleButton>
+                <ToggleButtonGroup
+                  id="endPoint"
+                  type="radio"
+                  name="endPoint"
+                  value={this.props.endPoint}
+                  onChange={this.props.onEndPointChange}
+                >
+                  <ToggleButton variant="light" value="none">
+                    none
+                  </ToggleButton>
+                  <ToggleButton variant="light" value="center">
+                    center
+                  </ToggleButton>
+                  <ToggleButton variant="light" value="perimeter">
+                    perimeter
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Col>
             </Row>
@@ -112,7 +137,8 @@ class PolarSettings extends Component {
               optionKey="minimizeMoves"
               key="minimizeMoves"
               index={0}
-              model={this.props} />
+              data={this.props}
+            />
           </Card.Body>
         </Accordion.Collapse>
       </Card>

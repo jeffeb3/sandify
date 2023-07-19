@@ -118,3 +118,12 @@ h2 {
   -ms-user-select: none; /* IE10+/Edge */
   user-select: none; /* Standard */
 }
+
+.accordion-arrow {
+  transition: transform 0.3s ease;
+  transform: rotate(0deg);
+}
+
+.accordion .show .accordion-arrow {
+  transform: rotate(90deg);
+}

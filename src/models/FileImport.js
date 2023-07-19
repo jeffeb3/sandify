@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
+import Shape, { shapeOptions } from './Shape'
 
 const options = {
   ...shapeOptions,

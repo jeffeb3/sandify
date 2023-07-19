@@ -45,7 +45,7 @@ export default class Fisheye extends Effect {
     const fisheye = d3Fisheye.radial()
       .radius(effect.startingWidth/2)
       .distortion(effect.fisheyeDistortion/2)
-    fisheye.focus([effect.offsetX, effect.offsetY])
+    fisheye.focus([effect.x, effect.y])
 
     return vertices.map(vertex => {
       const warped = fisheye([vertex.x, vertex.y])

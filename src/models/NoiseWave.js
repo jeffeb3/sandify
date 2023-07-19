@@ -1,4 +1,4 @@
-import Shape, { shapeOptions } from '../Shape'
+import Shape, { shapeOptions } from './Shape'
 import { getMachineInstance } from '@/features/machine/computer'
 import Victor from 'victor'
 import noise from '@/common/noise'
@@ -142,7 +142,7 @@ export default class NoiseWave extends Shape {
     }
 
     vertices = vertices.map(vertex => {
-      return offset(vertex, -state.shape.offsetX, -state.shape.offsetY)
+      return offset(vertex, -state.shape.x, -state.shape.y)
     })
 
     return vertices
@@ -164,7 +164,7 @@ export default class NoiseWave extends Shape {
     p.x += Math.cos(a) * 5
     p.y += Math.sin(a) * 5
 
-    return new Victor(p.x + options.offsetX, p.y + options.offsetY)
+    return new Victor(p.x + options.x, p.y + options.y)
   }
 
   getOptions() {

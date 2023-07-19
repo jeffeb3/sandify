@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
+import Shape, { shapeOptions } from './Shape'
 import { subsample, centerOnOrigin, maxY, minY, horizontalAlign, findBounds, nearestVertex, findMinimumVertex } from '@/common/geometry'
 import { arrayRotate } from '@/common/util'
 import { pointsOnPath } from 'points-on-path'

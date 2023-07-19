@@ -1,30 +1,29 @@
+import Model from './Model'
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
+//import Shape, { shapeOptions } from './Shape'
 
 const options = {
-  ...shapeOptions,
-  ...{
-    polygonSides: {
-      title: 'Number of sides',
-      min: 3
-    },
-    roundCorners: {
-      title: 'Round corners',
-      type: 'checkbox',
-    },
-    roundFraction: {
-      title: 'Round fraction',
-      min: 0.05,
-      max: 0.5,
-      step: 0.025,
-      isVisible: (state) => { return state.roundCorners }
-    },
-  }
+  polygonSides: {
+    title: 'Number of sides',
+    min: 3
+  },
+  roundCorners: {
+    title: 'Round corners',
+    type: 'checkbox',
+  },
+  roundFraction: {
+    title: 'Round fraction',
+    min: 0.05,
+    max: 0.5,
+    step: 0.025,
+    isVisible: (state) => { return state.roundCorners }
+  },
 }
 
-export default class Polygon extends Shape {
+export default class Polygon extends Model {
   constructor() {
-    super('Polygon')
+    super()
+    this.label = 'Polygon'
   }
 
   getInitialState() {
@@ -39,15 +38,8 @@ export default class Polygon extends Shape {
     }
   }
 
-  // Returns a list of points from (start, end] along the line.
-  getLineVertices(startPoint, endPoint, numberOfPoints) {
-    const resolution = 1.0/numberOfPoints
-    let points = []
-    for (let d=resolution; d<=1.0; d+=resolution) {
-      points.push(new Victor(startPoint.x + (endPoint.x - startPoint.x)*d,
-                             startPoint.y + (endPoint.y - startPoint.y)*d))
-    }
-    return points
+  getOptions() {
+    return options
   }
 
   getVertices(state) {
@@ -86,7 +78,14 @@ export default class Polygon extends Shape {
     return points
   }
 
-  getOptions() {
-    return options
+  // Returns a list of points from (start, end] along the line.
+  getLineVertices(startPoint, endPoint, numberOfPoints) {
+    const resolution = 1.0/numberOfPoints
+    let points = []
+    for (let d=resolution; d<=1.0; d+=resolution) {
+      points.push(new Victor(startPoint.x + (endPoint.x - startPoint.x)*d,
+                             startPoint.y + (endPoint.y - startPoint.y)*d))
+    }
+    return points
   }
 }

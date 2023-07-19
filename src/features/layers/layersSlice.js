@@ -84,7 +84,7 @@ function setCurrentId(state, id) {
 }
 
 const layersSlice = createSlice({
-  name: "layer",
+  name: "layers",
   initialState: {
     current: null,
     selected: null,

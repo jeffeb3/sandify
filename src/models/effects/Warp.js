@@ -106,11 +106,11 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex => {
-      const originalx = vertex.x - effect.offsetX
-      const originaly = vertex.y - effect.offsetY
+      const originalx = vertex.x - effect.x
+      const originaly = vertex.y - effect.y
       const x = originalx + scale * Math.sin(originalx/periodx + originaly/periody)
       const y = originaly + scale * Math.sin(originalx/periodx + ySign * originaly/periody)
-      return new Victor(x + effect.offsetX, y + effect.offsetY)
+      return new Victor(x + effect.x, y + effect.y)
     })
   }
 
@@ -120,12 +120,12 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex=> {
-      const originalx = vertex.x - effect.offsetX
-      const originaly = vertex.y - effect.offsetY
+      const originalx = vertex.x - effect.x
+      const originaly = vertex.y - effect.y
       const theta = Math.atan2(originaly,originalx)
       const x = originalx + scale * Math.cos(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periodx)
       const y = originaly + scale * Math.sin(theta) * Math.cos(Math.sqrt(originalx*originalx + originaly*originaly)/periody)
-      return new Victor(x + effect.offsetX, y + effect.offsetY)
+      return new Victor(x + effect.x, y + effect.y)
     })
   }
 
@@ -135,11 +135,11 @@ export default class Warp extends Effect {
     const scale = effect.startingWidth / 10.0
 
     return vertices.map(vertex => {
-      const originalx = vertex.x - effect.offsetX
-      const originaly = vertex.y - effect.offsetY
+      const originalx = vertex.x - effect.x
+      const originaly = vertex.y - effect.y
       const x = originalx + scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
       const y = originaly + scale * Math.sin(originalx/periodx) * Math.sin(originaly/periody)
-      return new Victor(x + effect.offsetX, y + effect.offsetY)
+      return new Victor(x + effect.x, y + effect.y)
     })
   }
 
@@ -153,9 +153,9 @@ export default class Warp extends Effect {
   custom(effect, vertices) {
     return vertices.map(vertex => {
       try {
-        const x = evaluate(effect.xMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
-        const y = evaluate(effect.yMath, {x: vertex.x - effect.offsetX, y: vertex.y - effect.offsetY})
-        return new Victor(x + effect.offsetX, y + effect.offsetY)
+        const x = evaluate(effect.xMath, {x: vertex.x - effect.x, y: vertex.y - effect.y})
+        const y = evaluate(effect.yMath, {x: vertex.x - effect.x, y: vertex.y - effect.y})
+        return new Victor(x + effect.x, y + effect.y)
       }
       catch (err) {
         console.log("Error parsing custom effect: " + err)

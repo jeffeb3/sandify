@@ -1,4 +1,4 @@
-import Shape, { shapeOptions } from '../../Shape'
+import Shape, { shapeOptions } from '../Shape'
 import {
   lsystem,
   lsystemPath,

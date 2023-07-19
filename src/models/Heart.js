@@ -1,5 +1,5 @@
 import Victor from 'victor'
-import Shape from '../Shape'
+import Shape from './Shape'
 
 export default class Heart extends Shape {
   constructor() {

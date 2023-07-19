@@ -1,5 +1,5 @@
 import Vicious1Vertices from './Vicious1Vertices'
-import Shape from '../../Shape'
+import Shape from '../Shape'
 
 export default class V1Engineering extends Shape {
   constructor() {

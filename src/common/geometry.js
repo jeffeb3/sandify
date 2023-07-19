@@ -103,8 +103,8 @@ export const scale = (vertex, scaleX, scaleY) => {
   )
 }
 
-export const offset = (vertex, offsetX, offsetY) => {
-  return new Victor(vertex.x + offsetX, vertex.y + offsetY)
+export const offset = (vertex, x, y) => {
+  return new Victor(vertex.x + x, vertex.y + y)
 }
 
 // modifies the given array in place, centering the points on (0, 0)

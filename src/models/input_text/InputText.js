@@ -1,6 +1,6 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
 import Victor from 'victor'
-import Shape, { shapeOptions } from '../../Shape'
+import Shape, { shapeOptions } from '../Shape'
 import { arc } from '@/common/geometry'
 
 const options = {
