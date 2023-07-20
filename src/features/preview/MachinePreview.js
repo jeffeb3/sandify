@@ -40,13 +40,13 @@ const mapDispatchToProps = (dispatch, ownProps) => {
           const delta = event.shiftKey ? 1 : 5
 
           if (event.key === 'ArrowDown') {
-            attrs.offsetY = currentLayer.offsetY - delta
+            attrs.y = currentLayer.y - delta
           } else if (event.key === 'ArrowUp') {
-            attrs.offsetY = currentLayer.offsetY + delta
+            attrs.y = currentLayer.y + delta
           } else if (event.key === 'ArrowLeft') {
-            attrs.offsetX = currentLayer.offsetX - delta
+            attrs.x = currentLayer.x - delta
           } else if (event.key === 'ArrowRight') {
-            attrs.offsetX = currentLayer.offsetX + delta
+            attrs.x = currentLayer.x + delta
           }
 
           dispatch(updateLayer(attrs))

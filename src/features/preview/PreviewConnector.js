@@ -94,8 +94,8 @@ const PreviewConnector = (ownProps) => {
   return (
     <React.Fragment>
       {!props.layer.dragging && !props.endLayer.dragging && <Shape
-        offsetX={props.layer.startingWidth/2}
-        offsetY={props.layer.startingHeight/2}
+        x={props.layer.startingWidth/2}
+        y={props.layer.startingHeight/2}
         sceneFunc={sceneFunc}
         hitFunc={hitFunc}
       >

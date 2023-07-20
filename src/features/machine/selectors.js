@@ -12,6 +12,7 @@ import {
   makeGetEffects,
   makeGetNonEffectLayerIndex,
 } from "../layers/selectors"
+import Layer from "../layers/Layer"
 import { getCachedSelector } from "../store/selectors"
 import { rotate, offset } from "../../common/geometry"
 import { log } from "../../common/util"
@@ -59,14 +60,14 @@ const makeGetLayerVertices = (layerId) => {
       getCachedSelector(makeGetLayerMachine, layerId),
       getCachedSelector(makeGetLayerFonts, layerId),
     ],
-    (layer, machine, fonts) => {
+    (layerState, machine, fonts) => {
       const state = {
-        shape: layer,
+        shape: layerState,
         machine: machine,
         fonts: fonts,
       }
       log("makeGetLayerVertices", layerId)
-      const metashape = getModelFromType(layer.type)
+      const layer = new Layer(layerState.type)
 
       // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
       if (layer.shouldCache) {
@@ -74,7 +75,7 @@ const makeGetLayerVertices = (layerId) => {
         let vertices = cache.get(key)
 
         if (!vertices) {
-          vertices = metashape.draw(state)
+          vertices = layer.getVertices(state)
 
           if (vertices.length > 1) {
             cache.set(key, vertices)
@@ -87,7 +88,7 @@ const makeGetLayerVertices = (layerId) => {
         if (!state.shape.dragging && state.shape.effect) {
           return []
         } else {
-          return metashape.getVertices(state)
+          return layer.getVertices(state)
         }
       }
     },
@@ -154,7 +155,7 @@ const previewTransform = (layer, vertices) => {
   return vertices.map((vertex) => {
     // store original coordinates before transforming
     let previewVertex = offset(
-      rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation),
+      rotate(offset(vertex, -layer.x, -layer.y), layer.rotation),
       konvaDeltaX,
       -konvaDeltaY,
     )
@@ -349,7 +350,7 @@ export const makeGetPreviewTrackVertices = (layerId) => {
 
     return trackVertices.map((vertex) => {
       return offset(
-        rotate(offset(vertex, -layer.offsetX, -layer.offsetY), layer.rotation),
+        rotate(offset(vertex, -layer.x, -layer.y), layer.rotation),
         konvaDeltaX,
         -konvaDeltaY,
       )

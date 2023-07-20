@@ -76,7 +76,7 @@ class RectSettings extends Component {
               key="minX"
               optionKey="minX"
               index={0}
-              data={this.props}
+              model={this.props}
             />
 
             <InputOption
@@ -85,7 +85,7 @@ class RectSettings extends Component {
               key="maxX"
               optionKey="maxX"
               index={0}
-              data={this.props}
+              model={this.props}
             />
 
             <InputOption
@@ -94,7 +94,7 @@ class RectSettings extends Component {
               key="minY"
               optionKey="minY"
               index={0}
-              data={this.props}
+              model={this.props}
             />
 
             <InputOption
@@ -103,7 +103,7 @@ class RectSettings extends Component {
               key="maxY"
               optionKey="maxY"
               index={0}
-              data={this.props}
+              model={this.props}
             />
 
             <Row className="align-items-center pb-2">
@@ -142,7 +142,7 @@ class RectSettings extends Component {
               optionKey="minimizeMoves"
               key="minimizeMoves"
               index={0}
-              data={this.props}
+              model={this.props}
             />
           </Card.Body>
         </Accordion.Collapse>

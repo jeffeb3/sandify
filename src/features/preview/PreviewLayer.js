@@ -178,8 +178,8 @@ const PreviewLayer = (ownProps) => {
         height={konvaSizeY}
         offsetY={konvaSizeY/2}
         offsetX={konvaSizeX/2}
-        x={props.layer.offsetX || 0}
-        y={-props.layer.offsetY || 0}
+        x={props.layer.x || 0}
+        y={-props.layer.y || 0}
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
@@ -194,8 +194,8 @@ const PreviewLayer = (ownProps) => {
         onDragEnd={e => {
           onChange({
             dragging: false,
-            offsetX: roundP(e.target.x(), 0),
-            offsetY: roundP(-e.target.y(), 0)
+            x: roundP(e.target.x(), 0),
+            y: roundP(-e.target.y(), 0)
           })
         }}
         onTransformStart={e => {

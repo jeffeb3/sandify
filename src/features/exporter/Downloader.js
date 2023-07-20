@@ -164,7 +164,7 @@ class Downloader extends Component {
               optionKey="fileType"
               key="fileType"
               index={0}
-              data={this.props}
+              model={this.props}
             />
 
             {this.props.fileType === SCARA && (
@@ -189,7 +189,7 @@ class Downloader extends Component {
               key="fileName"
               optionKey="fileName"
               index={1}
-              data={this.props}
+              model={this.props}
             />
 
             {(this.props.fileType === THETARHO ||
@@ -200,7 +200,7 @@ class Downloader extends Component {
                 key="polarRhoMax"
                 optionKey="polarRhoMax"
                 index={2}
-                data={this.props}
+                model={this.props}
               />
             )}
 
@@ -211,7 +211,7 @@ class Downloader extends Component {
                 key="unitsPerCircle"
                 optionKey="unitsPerCircle"
                 index={2}
-                data={this.props}
+                model={this.props}
               />
             )}
 
@@ -221,7 +221,7 @@ class Downloader extends Component {
               key="pre"
               optionKey="pre"
               index={3}
-              data={this.props}
+              model={this.props}
             />
 
             <InputOption
@@ -230,7 +230,7 @@ class Downloader extends Component {
               key="post"
               optionKey="post"
               index={4}
-              data={this.props}
+              model={this.props}
             />
 
             <Row>
@@ -256,7 +256,7 @@ class Downloader extends Component {
                 optionKey="reverse"
                 key="reverse"
                 index={5}
-                data={this.props}
+                model={this.props}
               />
             </div>
           </Modal.Body>
