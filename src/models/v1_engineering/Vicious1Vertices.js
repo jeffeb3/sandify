@@ -1,4 +1,4 @@
-import Victor from 'victor'
+import Victor from "victor"
 
 let Vicious1Vertices = () => {
   return [

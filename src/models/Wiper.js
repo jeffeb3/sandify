@@ -1,37 +1,36 @@
-import { degToRad } from '@/common/geometry'
-import Victor from 'victor'
-import Shape, { shapeOptions } from './Shape'
+import { degToRad } from "@/common/geometry"
+import Victor from "victor"
+import Model from "./Model"
 
 const options = {
-  ...shapeOptions,
-  ...{
-    wiperType: {
-      title: 'Type',
-      type: 'togglebutton',
-      choices: ['Lines', 'Spiral'],
+  wiperType: {
+    title: "Type",
+    type: "togglebutton",
+    choices: ["Lines", "Spiral"],
+  },
+  wiperSize: {
+    title: "Wiper size",
+    min: 1,
+  },
+  wiperAngleDeg: {
+    title: "Wiper angle",
+    isVisible: (layer, state) => {
+      return state.wiperType === "Lines"
     },
-    wiperSize: {
-      title: 'Wiper size',
-      min: 1
-    },
-    wiperAngleDeg: {
-      title: 'Wiper angle',
-      isVisible: (state) => { return state.wiperType === 'Lines' },
-    },
-  }
+  },
 }
 
 const outOfBounds = (point, width, height) => {
-  if (point.x < -width/2.0) {
+  if (point.x < -width / 2.0) {
     return true
   }
-  if (point.y < -height/2.0) {
+  if (point.y < -height / 2.0) {
     return true
   }
-  if (point.x > width/2.0) {
+  if (point.x > width / 2.0) {
     return true
   }
-  if (point.y > height/2.0) {
+  if (point.y > height / 2.0) {
     return true
   }
   return false
@@ -84,8 +83,8 @@ function spiralVertices(state) {
   // Determine the max radius
   let maxRadius = state.machine.maxRadius
   if (state.machine.rectangular) {
-    const halfHeight = (state.machine.maxY - state.machine.minY)/2.0
-    const halfWidth = (state.machine.maxX - state.machine.minX)/2.0
+    const halfHeight = (state.machine.maxY - state.machine.minY) / 2.0
+    const halfWidth = (state.machine.maxX - state.machine.minX) / 2.0
     maxRadius = Math.sqrt(Math.pow(halfHeight, 2.0) + Math.pow(halfWidth, 2.0))
   }
 
@@ -98,10 +97,12 @@ function spiralVertices(state) {
 
   while (radius <= maxRadius) {
     // Save where we are right now.
-    vertices.push(new Victor(radius * Math.cos(angle), radius * Math.sin(angle)))
+    vertices.push(
+      new Victor(radius * Math.cos(angle), radius * Math.sin(angle)),
+    )
 
     // We want to have the next point be about the right arc length.
-    let deltaAngle = arcLength / radius * 2.0 * Math.PI
+    let deltaAngle = (arcLength / radius) * 2.0 * Math.PI
 
     // Limit this at small radii
     deltaAngle = Math.min(deltaAngle, 0.1)
@@ -141,7 +142,7 @@ function linearVertices(state) {
     width = height
   }
 
-  let startLocation = Victor(-width/2.0, height/2.0)
+  let startLocation = Victor(-width / 2.0, height / 2.0)
   let cosa = Math.cos(angle)
   let sina = Math.sin(angle)
 
@@ -155,14 +156,14 @@ function linearVertices(state) {
   let orig_delta_w = Victor(state.shape.wiperSize / cosa, 0.0)
   let orig_delta_h = Victor(0.0, -state.shape.wiperSize / sina)
 
-  if (angle > Math.PI/4.0 && angle < 0.75 * Math.PI) {
+  if (angle > Math.PI / 4.0 && angle < 0.75 * Math.PI) {
     // flip the logic of x,y
     let temp = orig_delta_w.clone()
     orig_delta_w = orig_delta_h.clone()
     orig_delta_h = temp
   }
-  if (angle > Math.PI/2.0) {
-    startLocation = Victor(-width/2.0, -height/2.0)
+  if (angle > Math.PI / 2.0) {
+    startLocation = Victor(-width / 2.0, -height / 2.0)
     orig_delta_w = orig_delta_w.clone().multiply(Victor(-1.0, -1.0))
     orig_delta_h = orig_delta_h.clone().multiply(Victor(-1.0, -1.0))
   }
@@ -180,12 +181,22 @@ function linearVertices(state) {
     // "right"
     nextWidthPoint = nextWidthPoint.clone().add(delta_w)
     if (outOfBounds(nextWidthPoint, width, height)) {
-      let corner = boundPoint(nextWidthPoint.clone().subtract(delta_w), nextWidthPoint, width/2.0, height/2.0)
+      let corner = boundPoint(
+        nextWidthPoint.clone().subtract(delta_w),
+        nextWidthPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       outputVertices.push(corner)
       if (nearEnough(endLocation, corner)) {
         break
       }
-      nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0)
+      nextWidthPoint = boundPoint(
+        nextHeightPoint,
+        nextWidthPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       delta_w = orig_delta_h
     }
     outputVertices.push(nextWidthPoint)
@@ -196,7 +207,12 @@ function linearVertices(state) {
     // "down-left"
     nextHeightPoint = nextHeightPoint.clone().add(delta_h)
     if (outOfBounds(nextHeightPoint, width, height)) {
-      nextHeightPoint = boundPoint(nextWidthPoint, nextHeightPoint, width/2.0, height/2.0)
+      nextHeightPoint = boundPoint(
+        nextWidthPoint,
+        nextHeightPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       delta_h = orig_delta_w
     }
     outputVertices.push(nextHeightPoint)
@@ -211,12 +227,22 @@ function linearVertices(state) {
       break
     }
     if (outOfBounds(nextHeightPoint, width, height)) {
-      let corner = boundPoint(nextHeightPoint.clone().subtract(delta_h), nextHeightPoint, width/2.0, height/2.0)
+      let corner = boundPoint(
+        nextHeightPoint.clone().subtract(delta_h),
+        nextHeightPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       outputVertices.push(corner)
       if (nearEnough(endLocation, corner)) {
         break
       }
-      nextHeightPoint = boundPoint(nextWidthPoint, nextHeightPoint, width/2.0, height/2.0)
+      nextHeightPoint = boundPoint(
+        nextWidthPoint,
+        nextHeightPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       delta_h = orig_delta_w
     }
     outputVertices.push(nextHeightPoint)
@@ -231,37 +257,50 @@ function linearVertices(state) {
       break
     }
     if (outOfBounds(nextWidthPoint, width, height)) {
-      nextWidthPoint = boundPoint(nextHeightPoint, nextWidthPoint, width/2.0, height/2.0)
+      nextWidthPoint = boundPoint(
+        nextHeightPoint,
+        nextWidthPoint,
+        width / 2.0,
+        height / 2.0,
+      )
       delta_w = orig_delta_h
     }
   }
   return outputVertices
 }
 
-export default class Wiper extends Shape {
+export default class Wiper extends Model {
   constructor() {
-    super('Wiper')
+    super('wiper')
+    this.label = "Wiper"
+    this.selectGroup = "Erasers"
+    this.usesMachine = true
+    this.shouldCache = false
+    this.autosize = false
+    this.canMove = false
+  }
+
+  canChangeSize(state) {
+    return false
+  }
+
+  canRotate(state) {
+    return false
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'wiper',
         wiperAngleDeg: 15,
         wiperSize: 4,
-        wiperType: 'Lines',
-        selectGroup: 'Erasers',
-        canChangeSize: false,
-        shouldCache: false,
-        autosize: false,
-        usesMachine: true,
-      }
+        wiperType: "Lines",
+      },
     }
   }
 
   getVertices(state) {
-    if (state.shape.wiperType === 'Lines') {
+    if (state.shape.wiperType === "Lines") {
       return linearVertices(state)
     } else {
       return spiralVertices(state)

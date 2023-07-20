@@ -1,36 +1,33 @@
-import Victor from 'victor'
-import Shape, { shapeOptions } from './Shape'
-import { reduce } from '@/common/util'
+import Victor from "victor"
+import Model from "./Model"
+import { reduce } from "@/common/util"
 
 const options = {
-  ...shapeOptions,
-  ...{
-    epicycloidA: {
-      title: "Large circle radius",
-      min: 1
-    },
-    epicycloidB: {
-      title: "Small circle radius",
-      min: 1
-    },
-  }
+  epicycloidA: {
+    title: "Large circle radius",
+    min: 1,
+  },
+  epicycloidB: {
+    title: "Small circle radius",
+    min: 1,
+  },
 }
 
-export default class Epicycloid extends Shape {
+export default class Epicycloid extends Model {
   constructor() {
-    super('Clover')
-    this.link = 'http://mathworld.wolfram.com/Epicycloid.html'
-    this.linkText = 'Wolfram Mathworld'
+    super('epicycloid')
+    this.label = "Clover"
+    this.link = "http://mathworld.wolfram.com/Epicycloid.html"
+    this.linkText = "Wolfram Mathworld"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'epicycloid',
         epicycloidA: 4,
         epicycloidB: 1,
-      }
+      },
     }
   }
 
@@ -41,16 +38,16 @@ export default class Epicycloid extends Shape {
     let reduced = reduce(a, b)
     a = reduced[0]
     b = reduced[1]
-    let rotations = Number.isInteger(a/b) ? 1 : b
-    let scale = 1/(a + 2*b)
+    let rotations = Number.isInteger(a / b) ? 1 : b
+    let scale = 1 / (a + 2 * b)
 
-    for (let i=0; i<128*rotations; i++) {
-      let angle = Math.PI * 2.0 / 128.0 * i
+    for (let i = 0; i < 128 * rotations; i++) {
+      let angle = ((Math.PI * 2.0) / 128.0) * i
       points.push(
         new Victor(
           (a + b) * Math.cos(angle) - b * Math.cos(((a + b) / b) * angle),
-          (a + b) * Math.sin(angle) - b * Math.sin(((a + b) / b) * angle)
-        ).multiply({x: scale, y: scale})
+          (a + b) * Math.sin(angle) - b * Math.sin(((a + b) / b) * angle),
+        ).multiply({ x: scale, y: scale }),
       )
     }
 

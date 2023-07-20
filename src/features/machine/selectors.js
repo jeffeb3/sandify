@@ -2,7 +2,6 @@ import LRUCache from "lru-cache"
 import { createSelector } from "reselect"
 import Color from "color"
 import { transformShapes, polishVertices, getMachineInstance } from "./computer"
-import { getModelFromType } from "../../config/models"
 import { getMachine, getState, getPreview } from "../store/selectors"
 import { getLoadedFonts } from "../fonts/selectors"
 import {
@@ -33,9 +32,10 @@ const getCacheKey = (state) => {
 const makeGetLayerMachine = (layerId) => {
   return createSelector(
     [getCachedSelector(makeGetLayer, layerId), getMachine],
-    (layer, machine) => {
+    (layerState, machine) => {
       log("makeGetLayerMachine", layerId)
-      return layer.usesMachine ? machine : null
+      const layer = new Layer(layerState.type)
+      return layer.model.usesMachine ? machine : null
     },
   )
 }
@@ -45,8 +45,9 @@ const makeGetLayerMachine = (layerId) => {
 const makeGetLayerFonts = (layerId) => {
   return createSelector(
     [getCachedSelector(makeGetLayer, layerId), getLoadedFonts],
-    (layer, fonts) => {
+    (layerState, fonts) => {
       log("makeGetLayerFonts", layerId)
+      const layer = new Layer(layerState.type)
       return layer.usesFonts ? fonts : null
     },
   )
@@ -63,8 +64,8 @@ const makeGetLayerVertices = (layerId) => {
     (layerState, machine, fonts) => {
       const state = {
         shape: layerState,
-        machine: machine,
-        fonts: fonts,
+        machine,
+        fonts,
       }
       log("makeGetLayerVertices", layerId)
       const layer = new Layer(layerState.type)
@@ -147,20 +148,21 @@ export const makeGetConnectorVertices = (startId, endId) => {
 }
 
 // transform a given list of vertices as needed to be displayed in a preview layer
-const previewTransform = (layer, vertices) => {
-  const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
-  const konvaDeltaX = ((konvaScale - 1) / 2) * layer.startingWidth
-  const konvaDeltaY = ((konvaScale - 1) / 2) * layer.startingHeight
+const previewTransform = (layerState, vertices) => {
+  const konvaScale = 1 //layer.model.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+  const konvaDeltaX = ((konvaScale - 1) / 2) * layerState.width
+  const konvaDeltaY = ((konvaScale - 1) / 2) * layerState.height
 
   return vertices.map((vertex) => {
     // store original coordinates before transforming
     let previewVertex = offset(
-      rotate(offset(vertex, -layer.x, -layer.y), layer.rotation),
+      rotate(offset(vertex, -layerState.x, -layerState.y), layerState.rotation),
       konvaDeltaX,
       -konvaDeltaY,
     )
     previewVertex.origX = vertex.x
     previewVertex.origY = vertex.y
+
     return previewVertex
   })
 }
@@ -304,7 +306,7 @@ export const getSliderBounds = createSelector(
       }
     }
 
-    return { start: start, end: end }
+    return { start, end }
   },
 )
 
@@ -333,27 +335,33 @@ export const getSliderColors = createSelector(
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.
 export const makeGetPreviewTrackVertices = (layerId) => {
-  return createSelector(getCachedSelector(makeGetLayer, layerId), (layer) => {
-    log("makeGetPreviewTrackVertices", layerId)
-    //      const numLoops = layer.numLoops
-    const konvaScale = layer.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
-    const konvaDeltaX = ((konvaScale - 1) / 2) * layer.startingWidth
-    const konvaDeltaY = ((konvaScale - 1) / 2) * layer.startingHeight
-    let trackVertices = []
+  return createSelector(
+    getCachedSelector(makeGetLayer, layerId),
+    (layerState) => {
+      log("makeGetPreviewTrackVertices", layerId)
+      //      const numLoops = layer.numLoops
+      const konvaScale = 1 //layer.model.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
+      const konvaDeltaX = ((konvaScale - 1) / 2) * layerState.width
+      const konvaDeltaY = ((konvaScale - 1) / 2) * layerState.height
+      let trackVertices = []
 
-    // TODO: re-implement display of track vertices
-    //      for (var i=0; i<numLoops; i++) {
-    //        if (layer.trackEnabled) {
-    //          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
-    //        }
-    //      }
+      // TODO: re-implement display of track vertices
+      //      for (var i=0; i<numLoops; i++) {
+      //        if (layer.trackEnabled) {
+      //          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+      //        }
+      //      }
 
-    return trackVertices.map((vertex) => {
-      return offset(
-        rotate(offset(vertex, -layer.x, -layer.y), layer.rotation),
-        konvaDeltaX,
-        -konvaDeltaY,
-      )
-    })
-  })
+      return trackVertices.map((vertex) => {
+        return offset(
+          rotate(
+            offset(vertex, -layerState.x, -layerState.y),
+            layerState.rotation,
+          ),
+          konvaDeltaX,
+          -konvaDeltaY,
+        )
+      })
+    },
+  )
 }

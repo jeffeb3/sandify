@@ -14,7 +14,7 @@ export default class CommentExporter extends Exporter {
     const state = this.props
     // TODO: fix
     // const machine = new Machine()
-    let instance = state.machine
+    // let instance = state.machine
 
     this.line("Created by Sandify")
     this.line("https://sandify.org")
@@ -46,7 +46,7 @@ export default class CommentExporter extends Exporter {
           this.optionLines(shape, layer, Object.keys(options))
           this.keyValueLine("Visible", layer.visible)
           // TODO: fix
-          // this.optionLines(transform, layer, ['startingWidth', 'startingHeight', 'x', 'y', 'rotation', 'reverse'])
+          // this.optionLines(transform, layer, ['width', 'height', 'x', 'y', 'rotation', 'reverse'])
 
           if (!layer.effect) {
             this.line("Fine tuning:")

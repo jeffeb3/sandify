@@ -1,23 +1,23 @@
-import Victor from 'victor'
-import Graph, { mix } from '@/common/Graph'
-import { eulerianTrail } from '@/common/eulerianTrail'
-import { difference } from '@/common/util'
-import Shape, { shapeOptions } from '../Shape'
+import Victor from "victor"
+import Graph, { mix } from "@/common/Graph"
+import { eulerianTrail } from "@/common/eulerianTrail"
+import { difference } from "@/common/util"
+import Model from "../Model"
 
 const vecTriangle = [
   new Victor(-0.85, -0.4907477295),
   new Victor(0.85, -0.4907477295),
-  new Victor(0.0,  0.9814954573),
+  new Victor(0.0, 0.9814954573),
 ]
 
 const vecSquare = [
   new Victor(-0.7, -0.7),
-  new Victor( 0.7,  0.7),
-  new Victor(-0.7,  0.7),
+  new Victor(0.7, 0.7),
+  new Victor(-0.7, 0.7),
 
   new Victor(-0.7, -0.7),
-  new Victor(0.7,  0.7),
-  new Victor(0.7, -0.7)
+  new Victor(0.7, 0.7),
+  new Victor(0.7, -0.7),
 ]
 
 function getEdges(edges, a, b, c, count, settings) {
@@ -25,24 +25,33 @@ function getEdges(edges, a, b, c, count, settings) {
 
   if (count === 0) {
     if (settings.rotate > 0) {
-      da = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2)) * (settings.rotate * Math.PI / 180.0)
-      db = Math.sqrt(Math.pow(b.x, 2) + Math.pow(b.y, 2)) * (settings.rotate * Math.PI / 180.0)
-      dc = Math.sqrt(Math.pow(c.x, 2) + Math.pow(c.y, 2)) * (settings.rotate * Math.PI / 180.0)
+      da =
+        Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2)) *
+        ((settings.rotate * Math.PI) / 180.0)
+      db =
+        Math.sqrt(Math.pow(b.x, 2) + Math.pow(b.y, 2)) *
+        ((settings.rotate * Math.PI) / 180.0)
+      dc =
+        Math.sqrt(Math.pow(c.x, 2) + Math.pow(c.y, 2)) *
+        ((settings.rotate * Math.PI) / 180.0)
     } else {
-      da = (settings.rotate * Math.PI / 180.0)
-      db = (settings.rotate * Math.PI / 180.0)
-      dc = (settings.rotate * Math.PI / 180.0)
+      da = (settings.rotate * Math.PI) / 180.0
+      db = (settings.rotate * Math.PI) / 180.0
+      dc = (settings.rotate * Math.PI) / 180.0
     }
 
     let ap = new Victor(
-      (a.x * Math.cos(da)) - (a.y * Math.sin(da)),
-      (a.x * Math.sin(da)) + (a.y * Math.cos(da)))
+      a.x * Math.cos(da) - a.y * Math.sin(da),
+      a.x * Math.sin(da) + a.y * Math.cos(da),
+    )
     let bp = new Victor(
-      (b.x * Math.cos(db)) - (b.y * Math.sin(db)),
-      (b.x * Math.sin(db)) + (b.y * Math.cos(db)))
+      b.x * Math.cos(db) - b.y * Math.sin(db),
+      b.x * Math.sin(db) + b.y * Math.cos(db),
+    )
     let cp = new Victor(
-      (c.x * Math.cos(dc)) - (c.y * Math.sin(dc)),
-      (c.x * Math.sin(dc)) + (c.y * Math.cos(dc)))
+      c.x * Math.cos(dc) - c.y * Math.sin(dc),
+      c.x * Math.sin(dc) + c.y * Math.cos(dc),
+    )
 
     edges.push([ap, bp], [ap, cp], [bp, cp])
     return
@@ -59,48 +68,45 @@ function getEdges(edges, a, b, c, count, settings) {
 }
 
 const options = {
-  ...shapeOptions,
-  ...{
-    tessellationTwistNumSides: {
-      title: "Number of sides",
-      min: 3
-    },
-    tessellationTwistIterations: {
-      title: "Iterations",
-      min: 0,
-      max: 4
-    },
-    tessellationTwistRotate: {
-      title: "Rotate and twist",
-      step: 5,
-      min: 0
-    }
-  }
+  tessellationTwistNumSides: {
+    title: "Number of sides",
+    min: 3,
+  },
+  tessellationTwistIterations: {
+    title: "Iterations",
+    min: 0,
+    max: 4,
+  },
+  tessellationTwistRotate: {
+    title: "Rotate and twist",
+    step: 5,
+    min: 0,
+  },
 }
 
 // Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve. See NOTICE for licensing details.
-export default class TessellationTwist extends Shape {
+export default class TessellationTwist extends Model {
   constructor() {
-    super('Tessellation Twist')
+    super("tessellationTwist")
+    this.label = "Tessellation Twist"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'tessellation_twist',
         tessellationTwistNumSides: 5,
         tessellationTwistIterations: 2,
         tessellationTwistRotate: 0,
-      }
+      },
     }
   }
 
   getShapeVertices(numSides) {
     let vertices = []
-    for (let i=0; i<=numSides; i++) {
-      let angle = Math.PI * 2.0 / numSides * (0.5 + i)
-      let angle2 = Math.PI * 2.0 / numSides * (0.5 + ((i + 1) % numSides))
+    for (let i = 0; i <= numSides; i++) {
+      let angle = ((Math.PI * 2.0) / numSides) * (0.5 + i)
+      let angle2 = ((Math.PI * 2.0) / numSides) * (0.5 + ((i + 1) % numSides))
 
       vertices.push(new Victor(0, 0))
       vertices.push(new Victor(Math.cos(angle), Math.sin(angle)))
@@ -129,8 +135,14 @@ export default class TessellationTwist extends Shape {
 
     // build our tessellations
     for (var i = 0; i < vertices.length; i += 3) {
-      getEdges(edges, vertices[i + 0], vertices[i + 1], vertices[i + 2],
-        tessellation, { rotate: parseInt(state.shape.tessellationTwistRotate) })
+      getEdges(
+        edges,
+        vertices[i + 0],
+        vertices[i + 1],
+        vertices[i + 2],
+        tessellation,
+        { rotate: parseInt(state.shape.tessellationTwistRotate) },
+      )
     }
 
     // build edge and adjacency maps; this serves to ensure unique
@@ -149,7 +161,7 @@ export default class TessellationTwist extends Shape {
 
     // build a graph
     // find the eulerian trail that efficiently visits all of the vertices
-    let trail = eulerianTrail({edges: Object.values(graph.edgeMap)})
+    let trail = eulerianTrail({ edges: Object.values(graph.edgeMap) })
 
     let prevKey
     let walkedVertices = []
@@ -160,15 +172,17 @@ export default class TessellationTwist extends Shape {
     // the missing nodes and create edges for them. There is a complex algorithm
     // (chinese postman) that can be used to do this for the general case, but
     // it's computationally expensive and overkill for our situation.
-    for (i = 0; i < trail.length-1; i++) {
-      let edge = [trail[i], trail[i+1]].sort().toString()
+    for (i = 0; i < trail.length - 1; i++) {
+      let edge = [trail[i], trail[i + 1]].sort().toString()
       walkedEdges.push(edge)
     }
     walkedEdges = new Set(walkedEdges)
 
-    let missingEdges = Array.from(difference(walkedEdges, graph.edgeKeys)).reduce((hash, d) => {
-      d = d.split(',')
-      hash[d[0] + ',' + d[1]] = d[2] + ',' + d[3]
+    let missingEdges = Array.from(
+      difference(walkedEdges, graph.edgeKeys),
+    ).reduce((hash, d) => {
+      d = d.split(",")
+      hash[d[0] + "," + d[1]] = d[2] + "," + d[3]
       return hash
     }, {})
 
@@ -180,7 +194,7 @@ export default class TessellationTwist extends Shape {
           // non-eulerian move, so we'll walk the shortest valid path between them
           let path = graph.dijkstraShortestPath(prevKey, key)
           path.shift()
-          path.forEach(node => walkedVertices.push(node))
+          path.forEach((node) => walkedVertices.push(node))
           walkedVertices.push(vertex)
         } else {
           walkedVertices.push(vertex)
@@ -206,9 +220,9 @@ export default class TessellationTwist extends Shape {
     })
 
     const scale = 10.5 // to normalize starting size
-    walkedVertices.forEach(point => {
+    walkedVertices.forEach((point) => {
       if (!point.visited) {
-        point.multiply({x: scale, y: scale })
+        point.multiply({ x: scale, y: scale })
         point.visited = true
       }
     })

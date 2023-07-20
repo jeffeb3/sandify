@@ -11,18 +11,13 @@ const options = {
     title: "Mask shape",
     type: "togglebutton",
     choices: ["rectangle", "circle"],
-    onChange: (changes, attrs) => {
+    onChange: (model, changes, state) => {
       if (changes.maskMachine === "circle") {
         changes.rotation = 0
 
-        const size = Math.min(attrs.startingWidth, attrs.startingHeight)
-        changes.startingHeight = size
-        changes.startingWidth = size
-        changes.canRotate = false
-        changes.canChangeHeight = false
-      } else {
-        changes.canRotate = true
-        changes.canChangeHeight = true
+        const size = Math.min(changes.width, changes.height)
+        changes.height = size
+        changes.width = size
       }
 
       return changes
@@ -44,18 +39,25 @@ const options = {
 
 export default class Mask extends Effect {
   constructor() {
-    super()
+    super("mask")
     this.label = "Mask"
     this.selectGroup = "effects"
+  }
+
+  canRotate(state) {
+    return state.maskMachine != "circle"
+  }
+
+  canChangeHeight(state) {
+    return state.maskMachine != "circle"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: "mask",
-        startingWidth: 100,
-        startingHeight: 100,
+        width: 100,
+        height: 100,
         maskMinimizeMoves: false,
         maskMachine: "rectangle",
         maskBorder: false,
@@ -69,8 +71,8 @@ export default class Mask extends Effect {
   }
 
   getVertices(state) {
-    const width = state.shape.startingWidth
-    const height = state.shape.startingHeight
+    const width = state.shape.width
+    const height = state.shape.height
 
     if (state.shape.dragging && state.shape.maskMachine === "circle") {
       return circle(width / 2)
@@ -87,10 +89,7 @@ export default class Mask extends Effect {
 
   applyEffect(effect, layer, vertices) {
     vertices = vertices.map((vertex) => {
-      return rotate(
-        offset(vertex, -effect.x, -effect.y),
-        effect.rotation,
-      )
+      return rotate(offset(vertex, -effect.x, -effect.y), effect.rotation)
     })
 
     if (!layer.dragging && !effect.dragging) {
@@ -107,11 +106,11 @@ export default class Mask extends Effect {
         vertices,
         {
           minX: 0,
-          maxX: effect.startingWidth,
+          maxX: effect.width,
           minY: 0,
-          maxY: effect.startingHeight,
+          maxY: effect.height,
           minimizeMoves: effect.maskMinimizeMoves,
-          maxRadius: effect.startingWidth / 2,
+          maxRadius: effect.width / 2,
           perimeterConstant: effect.maskPerimeterConstant,
           mask: true,
         },
@@ -121,11 +120,7 @@ export default class Mask extends Effect {
     }
 
     return vertices.map((vertex) => {
-      return offset(
-        rotate(vertex, -effect.rotation),
-        effect.x,
-        effect.y,
-      )
+      return offset(rotate(vertex, -effect.rotation), effect.x, effect.y)
     })
   }
 }

@@ -1,4 +1,5 @@
 import { getModelFromType } from "../../config/models"
+import { resizeVertices } from "@/common/geometry"
 
 export const layerOptions = {
   name: {
@@ -8,48 +9,51 @@ export const layerOptions = {
   x: {
     title: "X",
     inline: true,
-    isVisible: (model) => {
+    isVisible: (model, state) => {
       return model.canMove
     },
   },
   y: {
     title: "Y",
     inline: true,
-    isVisible: (model) => {
+    isVisible: (model, state) => {
       return model.canMove
     },
   },
-  startingWidth: {
-    title: "Initial width",
+  width: {
+    title: "W",
     min: 1,
-    isVisible: (model) => {
-      return model.canChangeSize
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canChangeSize(state)
     },
-    onChange: (changes, attrs) => {
-      if (!attrs.canChangeHeight) {
-        changes.startingHeight = changes.startingWidth
+    onChange: (model, changes, state) => {
+      if (!model.canChangeHeight(state)) {
+        changes.height = changes.width
       }
       return changes
     },
   },
-  startingHeight: {
-    title: "Initial height",
+  height: {
+    title: "H",
     min: 1,
-    isVisible: (model) => {
-      return model.canChangeSize && model.canChangeHeight
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canChangeSize(state) && model.canChangeHeight(state)
     },
   },
   reverse: {
     title: "Reverse path",
     type: "checkbox",
-    isVisible: (model) => {
+    isVisible: (model, state) => {
       return !model.effect
     },
   },
   rotation: {
     title: "Rotate (degrees)",
-    isVisible: (model) => {
-      return model.canRotate
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canRotate(state)
     },
   },
   connectionMethod: {
@@ -64,13 +68,16 @@ export default class Layer {
     this.model = getModelFromType(type)
   }
 
-  getInitialState() {
+  getInitialState(props) {
     return {
-      ...this.model.getInitialState(),
+      ...this.model.getInitialState(props),
       ...{
+        type: this.model.type,
         connectionMethod: "line",
         x: 0.0,
         y: 0.0,
+        width: this.model.startingWidth,
+        height: this.model.startingHeight,
         rotation: 0,
         reverse: false,
         visible: true,
@@ -84,18 +91,13 @@ export default class Layer {
   }
 
   getVertices(state) {
-    const {
-      startingWidth,
-      startingHeight,
-      autosize,
-      x,
-      y,
-      rotation,
-    } = state.shape
+    const { width, height, x, y, rotation } = state.shape
     let vertices = this.model.getVertices(state)
 
     vertices.forEach((vertex) => {
-      vertex.multiply({ x: startingWidth, y: startingHeight })
+      if (this.model.autosize) {
+        vertices = resizeVertices(vertices, width, height, false)
+      }
       vertex.rotateDeg(-rotation)
       vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })

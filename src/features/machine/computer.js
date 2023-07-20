@@ -91,7 +91,7 @@ export const transformShapes = (vertices, layer, effects) => {
   let outputVertices = vertices.map((vertex) => vertex.clone())
   //  if (layer.autosize) {
   //    vertices = vertices.map(vertex => {
-  //      return scale(vertex, 100.0 * layer.startingWidth, 100 * layer.startingHeight)
+  //      return scale(vertex, 100.0 * layer.width, 100 * layer.height)
   //    })
   //  }
 

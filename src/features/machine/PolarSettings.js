@@ -76,7 +76,7 @@ class PolarSettings extends Component {
               key="maxRadius"
               optionKey="maxRadius"
               index={0}
-              model={this.props}
+              data={this.props}
             />
 
             <Row className="align-items-center pb-2">
@@ -137,7 +137,7 @@ class PolarSettings extends Component {
               optionKey="minimizeMoves"
               key="minimizeMoves"
               index={0}
-              model={this.props}
+              data={this.props}
             />
           </Card.Body>
         </Accordion.Collapse>

@@ -1,65 +1,71 @@
-import Victor from 'victor'
-import Shape, { shapeOptions } from './Shape'
-import { subsample, centerOnOrigin, maxY, minY, horizontalAlign, findBounds, nearestVertex, findMinimumVertex } from '@/common/geometry'
-import { arrayRotate } from '@/common/util'
-import { pointsOnPath } from 'points-on-path'
-import { getFont, supportedFonts } from '@/features/fonts/fontsSlice'
-import { getMachineInstance } from '@/features/machine/computer'
-import pointInPolygon from 'point-in-polygon'
+import Victor from "victor"
+import Model from "./Model"
+import {
+  subsample,
+  centerOnOrigin,
+  maxY,
+  minY,
+  horizontalAlign,
+  findBounds,
+  nearestVertex,
+  findMinimumVertex,
+} from "@/common/geometry"
+import { arrayRotate } from "@/common/util"
+import { pointsOnPath } from "points-on-path"
+import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
+import { getMachineInstance } from "@/features/machine/computer"
+import pointInPolygon from "point-in-polygon"
 
 const MIN_SPACING_MULTIPLIER = 1.2
-const SPECIAL_CHILDREN = ['i', 'j', '?']
+const SPECIAL_CHILDREN = ["i", "j", "?"]
 
 const options = {
-  ...shapeOptions,
-  ...{
-    fancyText: {
-      title: 'Text',
-      type: 'textarea',
+  fancyText: {
+    title: "Text",
+    type: "textarea",
+  },
+  fancyFont: {
+    title: "Font",
+    type: "dropdown",
+    choices: () => {
+      return Object.values(supportedFonts)
     },
-    fancyFont: {
-      title: 'Font',
-      type: 'dropdown',
-      choices: () => {
-        return Object.values(supportedFonts)
-      },
-    },
-    fancyLineSpacing: {
-      title: 'Line spacing',
-      type: 'number',
-      step: 0.1
-    },
-    fancyConnectLines: {
-      title: 'Connect rows',
-      type: 'togglebutton',
-      choices: [ 'inside', 'outside' ]
-    },
-    fancyAlignment: {
-      title: 'Alignment',
-      type: 'togglebutton',
-      choices: [ 'left', 'center', 'right' ]
-    }
-  }
+  },
+  fancyLineSpacing: {
+    title: "Line spacing",
+    type: "number",
+    step: 0.1,
+  },
+  fancyConnectLines: {
+    title: "Connect rows",
+    type: "togglebutton",
+    choices: ["inside", "outside"],
+  },
+  fancyAlignment: {
+    title: "Alignment",
+    type: "togglebutton",
+    choices: ["left", "center", "right"],
+  },
 }
 
-export default class FancyText extends Shape {
+export default class FancyText extends Model {
   constructor() {
-    super('Fancy Text')
+    super('fancyText')
+    this.label = "Fancy Text"
+    this.usesMachine = true
+    this.usesFonts = true
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'fancy_text',
-        fancyText: 'Sandify',
-        fancyFont: 'Garamond',
-        fancyAlignment: 'left',
-        fancyConnectLines: 'inside',
+        fancyText: "Sandify",
+        fancyFont: "Garamond",
+        fancyAlignment: "left",
+        fancyConnectLines: "inside",
         fancyLineSpacing: 1.0,
-        usesMachine: true,
-        usesFonts: true
-      }
+      },
     }
   }
 
@@ -67,16 +73,19 @@ export default class FancyText extends Shape {
     const font = getFont(state.shape.fancyFont)
 
     if (font) {
-      let words = state.shape.fancyText.split("\n").filter(word => word.length > 0)
-      if (words.length === 0) { return [new Victor(0,0)] }
+      let words = state.shape.fancyText
+        .split("\n")
+        .filter((word) => word.length > 0)
+      if (words.length === 0) {
+        return [new Victor(0, 0)]
+      }
 
-      words = words.map(word => this.drawWord(word, font, state))
+      words = words.map((word) => this.drawWord(word, font, state))
       let { offsets, vertices } = this.addVerticalSpacing(words, font, state)
 
       horizontalAlign(vertices, state.shape.fancyAlignment)
       this.centerOnOrigin(vertices)
       return this.connectWords(vertices, offsets, state).flat()
-
     } else {
       return [new Victor(0, 0)]
     }
@@ -84,7 +93,7 @@ export default class FancyText extends Shape {
 
   centerOnOrigin(vertices) {
     const bounds = findBounds(vertices.flat())
-    vertices.forEach(vs => centerOnOrigin(vs, bounds))
+    vertices.forEach((vs) => centerOnOrigin(vs, bounds))
   }
 
   // use the specified connection method to draw lines to connect each row in a multi-row phrase
@@ -92,7 +101,7 @@ export default class FancyText extends Shape {
     const machine = getMachineInstance([], state.machine)
     let newVertices = []
 
-    for (let i=0; i<vertices.length; i++) {
+    for (let i = 0; i < vertices.length; i++) {
       const currVertices = vertices[i]
 
       if (i > 0) {
@@ -100,22 +109,34 @@ export default class FancyText extends Shape {
         const next = currVertices[0]
         const prev = prevVertices[prevVertices.length - 1]
 
-        if (state.shape.fancyConnectLines === 'outside') {
+        if (state.shape.fancyConnectLines === "outside") {
           // connect the two rows along the perimeter
-          const clipped = machine.clipLine(new Victor(prev.x - machine.sizeX*2, prev.y),
-            new Victor(prev.x + machine.sizeX*2, prev.y))
-          const clipped2 = machine.clipLine(new Victor(next.x - machine.sizeX*2, next.y),
-            new Victor(next.x + machine.sizeX*2, next.y))
+          const clipped = machine.clipLine(
+            new Victor(prev.x - machine.sizeX * 2, prev.y),
+            new Victor(prev.x + machine.sizeX * 2, prev.y),
+          )
+          const clipped2 = machine.clipLine(
+            new Victor(next.x - machine.sizeX * 2, next.y),
+            new Victor(next.x + machine.sizeX * 2, next.y),
+          )
 
           newVertices.push(clipped[1])
           newVertices.push(machine.tracePerimeter(clipped[1], clipped2[0]))
           newVertices.push(clipped2[0])
         } else {
           // connect the two rows by drawing a horizontal line in the middle of the two rows
-          const lowest = prevVertices[findMinimumVertex(null, prevVertices, (val, v) => v.y)]
-          const highest = currVertices[findMinimumVertex(null, currVertices, (val, v) => -v.y)]
-          newVertices.push(new Victor(prev.x, lowest.y - (lowest.y - highest.y)/2))
-          newVertices.push(new Victor(next.x, lowest.y - (lowest.y - highest.y)/2))
+          const lowest =
+            prevVertices[findMinimumVertex(null, prevVertices, (val, v) => v.y)]
+          const highest =
+            currVertices[
+              findMinimumVertex(null, currVertices, (val, v) => -v.y)
+            ]
+          newVertices.push(
+            new Victor(prev.x, lowest.y - (lowest.y - highest.y) / 2),
+          )
+          newVertices.push(
+            new Victor(next.x, lowest.y - (lowest.y - highest.y) / 2),
+          )
         }
       }
       newVertices.push(currVertices)
@@ -129,24 +150,26 @@ export default class FancyText extends Shape {
     let yOffset = 0
     const offsets = []
 
-    const letterA = this.drawWord('A', font, state)
+    const letterA = this.drawWord("A", font, state)
     const minHeight = (maxY(letterA) - minY(letterA)) * MIN_SPACING_MULTIPLIER
 
-    for (let i=0; i<vertices.length; i++) {
+    for (let i = 0; i < vertices.length; i++) {
       const currWord = vertices[i]
       const tempOffset = yOffset // avoid unsafe inclusion warning in next loop
 
-      newVertices.push(currWord.map(v => new Victor(v.x, v.y - tempOffset)))
+      newVertices.push(currWord.map((v) => new Victor(v.x, v.y - tempOffset)))
 
       // offset height of each word by a fixed amount
-      const offset = Math.max(maxY(currWord) - minY(currWord), minHeight) + state.shape.fancyLineSpacing
+      const offset =
+        Math.max(maxY(currWord) - minY(currWord), minHeight) +
+        state.shape.fancyLineSpacing
       yOffset += offset
       offsets.push(offset)
     }
 
     return {
       vertices: newVertices,
-      offsets: offsets
+      offsets,
     }
   }
 
@@ -158,16 +181,17 @@ export default class FancyText extends Shape {
     const sortedPaths = this.buildOrderedPaths(word, font)
 
     // draw paths, and connect them together
-    for (let i=0; i<sortedPaths.length; i++) {
+    for (let i = 0; i < sortedPaths.length; i++) {
       const path = sortedPaths[i]
       let points = path.points
-      const nextPath = sortedPaths[i+1]
+      const nextPath = sortedPaths[i + 1]
       const childPaths = path.children
 
       if (i === 0) {
-        start = state.shape.fancyConnectLines === 'outside' ?
-          findMinimumVertex(null, points, (val, v) => v.x) :
-          start = findMinimumVertex(null, points, (val, v) => -v.y)
+        start =
+          state.shape.fancyConnectLines === "outside"
+            ? findMinimumVertex(null, points, (val, v) => v.x)
+            : (start = findMinimumVertex(null, points, (val, v) => -v.y))
       }
 
       // draw path
@@ -177,9 +201,13 @@ export default class FancyText extends Shape {
 
       // draw children
       if (childPaths) {
-        for (let j=0; j<childPaths.length; j++) {
+        for (let j = 0; j < childPaths.length; j++) {
           const childPoints = childPaths[j]
-          const { segment, end, nextStart } = this.connectPaths(start, points, childPoints)
+          const { segment, end, nextStart } = this.connectPaths(
+            start,
+            points,
+            childPoints,
+          )
 
           pointsArr.push(segment)
           pointsArr.push(this.rotateLoop(nextStart, childPoints))
@@ -191,14 +219,19 @@ export default class FancyText extends Shape {
       // draw connection to next path
       if (nextPath) {
         const nextPoints = nextPath.points
-        const { segment, nextStart } = this.connectPaths(start, points, nextPoints)
+        const { segment, nextStart } = this.connectPaths(
+          start,
+          points,
+          nextPoints,
+        )
 
         pointsArr.push(segment)
         start = nextStart
       } else {
-        const end = state.shape.fancyConnectLines === 'outside' ?
-          findMinimumVertex(null, loop, (val, v) => -v.x) :
-          findMinimumVertex(null, loop, (val, v) => v.y)
+        const end =
+          state.shape.fancyConnectLines === "outside"
+            ? findMinimumVertex(null, loop, (val, v) => -v.x)
+            : findMinimumVertex(null, loop, (val, v) => v.y)
         pointsArr.push(this.shortestPathAroundLoop(start, end, loop))
       }
     }
@@ -224,7 +257,7 @@ export default class FancyText extends Shape {
     const segment = this.shortestPathAroundLoop(start, end, points)
 
     segment.push(new Victor(next.x, next.y))
-    return { segment: segment, end: end, nextStart: nextStart }
+    return { segment, end, nextStart }
   }
 
   // renders text using an OpenType font and converts it to points we can draw
@@ -238,7 +271,10 @@ export default class FancyText extends Shape {
 
     const path = font.getPath(text, x, y, fSize).toPathData()
     return pointsOnPath(path, tolerance, distance).map((path) => {
-      return subsample(path.map(pt => new Victor(pt[0], -pt[1])), .2)
+      return subsample(
+        path.map((pt) => new Victor(pt[0], -pt[1])),
+        0.2,
+      )
     })
   }
 
@@ -255,7 +291,10 @@ export default class FancyText extends Shape {
     } else {
       if (Math.abs(start - end) > loop.length / 2) {
         // go the other way around
-        return loop.slice(end, loop.length - 1).concat(loop.slice(0, start + 1)).reverse()
+        return loop
+          .slice(end, loop.length - 1)
+          .concat(loop.slice(0, start + 1))
+          .reverse()
       } else {
         return loop.slice(start, end + 1)
       }
@@ -266,10 +305,12 @@ export default class FancyText extends Shape {
     const graph = {}
     const points = this.convertTextToPoints(word, font)
     const childMap = this.findExternalChildren(word, font)
-    const polygons = points.map(pts => pts.map((pt) => [pt.x, pt.y]))
+    const polygons = points.map((pts) => pts.map((pt) => [pt.x, pt.y]))
 
-    for (let i=0; i<points.length; i++) {
-      if (graph[i]) { continue }
+    for (let i = 0; i < points.length; i++) {
+      if (graph[i]) {
+        continue
+      }
 
       // figure out which polygons are top-level letters and which are
       // children; children are mostly internal to the parent letter (e.g.,
@@ -278,7 +319,7 @@ export default class FancyText extends Shape {
       const samplePoint = [points[i][0].x, points[i][0].y]
       let idx = childMap[i]
       if (idx === undefined) {
-        idx = polygons.findIndex(polygon => {
+        idx = polygons.findIndex((polygon) => {
           return pointInPolygon(samplePoint, polygon)
         })
       }
@@ -300,7 +341,7 @@ export default class FancyText extends Shape {
     const childMap = {}
     let pos = 0
 
-    for (let i=0; i<word.length; i++) {
+    for (let i = 0; i < word.length; i++) {
       const paths = this.convertTextToPoints(word[i], font)
 
       if (SPECIAL_CHILDREN.includes(word[i]) && paths.length > 1) {
@@ -319,7 +360,6 @@ export default class FancyText extends Shape {
       pos += paths.length
     }
 
-
     return childMap
   }
 
@@ -329,13 +369,16 @@ export default class FancyText extends Shape {
     // a possible (fully contained) child paths
     const graph = this.buildGraph(word, font)
 
-    return Object.keys(graph).sort(
-      (leftIndex, rightIndex) => {
+    return Object.keys(graph)
+      .sort((leftIndex, rightIndex) => {
         const leftPoints = graph[leftIndex].points
         const rightPoints = graph[rightIndex].points
-        return Math.min(...leftPoints.map(pt => pt.x)) - Math.min(...rightPoints.map(pt => pt.x))
+        return (
+          Math.min(...leftPoints.map((pt) => pt.x)) -
+          Math.min(...rightPoints.map((pt) => pt.x))
+        )
       })
-    .map(key => graph[key])
+      .map((key) => graph[key])
   }
 
   getOptions() {

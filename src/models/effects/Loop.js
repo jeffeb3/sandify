@@ -1,107 +1,107 @@
-import { modelOptions } from "../Model"
 import Effect from "../Effect"
 import { scale, rotate, circle } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
-  ...modelOptions,
-  ...{
-    numLoops: {
-      title: "Number of loops",
-      min: 1,
+  numLoops: {
+    title: "Number of loops",
+    min: 1,
+  },
+  transformMethod: {
+    title: "When transforming shape",
+    type: "togglebutton",
+    choices: ["smear", "intact"],
+  },
+  growEnabled: {
+    title: "Scale",
+    type: "checkbox",
+  },
+  growValue: {
+    title: "Scale (+/-)",
+  },
+  growMethod: {
+    title: "Scale by",
+    type: "togglebutton",
+    choices: ["constant", "function"],
+  },
+  growMathInput: {
+    title: "Scale function (i)",
+    type: "text",
+    isVisible: (layer, state) => {
+      return state.growMethod === "function"
     },
-    transformMethod: {
-      title: "When transforming shape",
-      type: "togglebutton",
-      choices: ["smear", "intact"],
+  },
+  growMath: {
+    isVisible: (layer, state) => {
+      return false
     },
-    growEnabled: {
-      title: "Scale",
-      type: "checkbox",
+  },
+  spinEnabled: {
+    title: "Spin",
+    type: "checkbox",
+  },
+  spinValue: {
+    title: "Spin (+/-)",
+    step: 0.1,
+  },
+  spinMethod: {
+    title: "Spin by",
+    type: "togglebutton",
+    choices: ["constant", "function"],
+  },
+  spinMathInput: {
+    title: "Spin function (i)",
+    type: "text",
+    isVisible: (layer, state) => {
+      return state.spinMethod === "function"
     },
-    growValue: {
-      title: "Scale (+/-)",
+  },
+  spinMath: {
+    isVisible: (layer, state) => {
+      return false
     },
-    growMethod: {
-      title: "Scale by",
-      type: "togglebutton",
-      choices: ["constant", "function"],
-    },
-    growMathInput: {
-      title: "Scale function (i)",
-      type: "text",
-      isVisible: (state) => {
-        return state.growMethod === "function"
-      },
-    },
-    growMath: {
-      isVisible: (state) => {
-        return false
-      },
-    },
-    spinEnabled: {
-      title: "Spin",
-      type: "checkbox",
-    },
-    spinValue: {
-      title: "Spin (+/-)",
-      step: 0.1,
-    },
-    spinMethod: {
-      title: "Spin by",
-      type: "togglebutton",
-      choices: ["constant", "function"],
-    },
-    spinMathInput: {
-      title: "Spin function (i)",
-      type: "text",
-      isVisible: (state) => {
-        return state.spinMethod === "function"
-      },
-    },
-    spinMath: {
-      isVisible: (state) => {
-        return false
-      },
-    },
-    spinSwitchbacks: {
-      title: "Switchbacks",
-      isVisible: (state) => {
-        return state.spinMethod === "constant"
-      },
+  },
+  spinSwitchbacks: {
+    title: "Switchbacks",
+    isVisible: (layer, state) => {
+      return state.spinMethod === "constant"
     },
   },
 }
 
 export default class Loop extends Effect {
   constructor() {
-    super("Loop")
+    super("loop")
+    this.label = "Loop"
+    this.selectGroup = "effects"
+    this.canMove = false
+    this.effect = true
+  }
+
+  canRotate(state) {
+    return false
+  }
+
+  canChangeSize(state) {
+    return false
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        // Inherited
-        type: "loop",
-        selectGroup: "effects",
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        effect: true,
-
-        // Loop Options
+        // loop Options
         transformMethod: "smear",
         numLoops: 10,
 
-        // Grow options
+        // grow options
         growEnabled: true,
         growValue: 100,
         growMethod: "constant",
         growMathInput: "i+cos(i/2)",
         growMath: "i+cos(i/2)",
 
-        // Spin Options
+        // spin options
         spinEnabled: false,
         spinValue: 2,
         spinMethod: "constant",

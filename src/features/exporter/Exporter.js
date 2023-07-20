@@ -16,20 +16,20 @@ export default class Exporter {
     this.computeOutputVertices(vertices)
     this.header()
     this.startComments()
-    this.props.comments.forEach(comment => this.line(comment))
+    this.props.comments.forEach((comment) => this.line(comment))
     this.line()
-    this.keyValueLine('File name', "'" + this.props.fileName + "'")
-    this.keyValueLine('File type', this.props.fileType)
+    this.keyValueLine("File name", "'" + this.props.fileName + "'")
+    this.keyValueLine("File type", this.props.fileType)
     this.line()
     this.endComments()
 
-    if (this.pre !== '') {
+    if (this.pre !== "") {
       this.startComments()
-      this.line('BEGIN PRE')
+      this.line("BEGIN PRE")
       this.endComments()
-      this.line(this.pre, this.pre !== '')
+      this.line(this.pre, this.pre !== "")
       this.startComments()
-      this.line('END PRE')
+      this.line("END PRE")
       this.endComments()
     }
 
@@ -37,13 +37,13 @@ export default class Exporter {
     this.exportCode(this.vertices)
     this.line()
 
-    if (this.post !== '') {
+    if (this.post !== "") {
       this.startComments()
-      this.line('BEGIN POST')
+      this.line("BEGIN POST")
       this.endComments()
-      this.line(this.post, this.post !== '')
+      this.line(this.post, this.post !== "")
       this.startComments()
-      this.line('END POST')
+      this.line("END POST")
       this.endComments()
     }
     this.footer()
@@ -65,34 +65,39 @@ export default class Exporter {
     this.vertices = vertices
   }
 
-  line(content='', add=true) {
+  line(content = "", add = true) {
     if (add) {
-      let padding = ''
+      let padding = ""
       if (this.commenting) {
-        padding = this.commentChar + (content.length > 0 ? ' ' : '')
-        for (let i=0; i<this.indentLevel; i++) {
-          padding += '  '
+        padding = this.commentChar + (content.length > 0 ? " " : "")
+        for (let i = 0; i < this.indentLevel; i++) {
+          padding += "  "
         }
       }
       this.lines.push(padding + this.sanitizeValue(content))
     }
   }
 
-  keyValueLine(key, value, add=true) {
-    this.line(key + ': ' + value, add)
+  keyValueLine(key, value, add = true) {
+    this.line(key + ": " + value, add)
   }
 
-  optionLine(metamodel, instance, option, add=true) {
-    const val = typeof instance[option] == 'string' ?
-      instance[option].replace(/[\n\r]/g, ' ') :
-      instance[option]
-    this.line(metamodel.getOptions()[option].title + ': ' + val, add)
+  optionLine(metamodel, instance, option, add = true) {
+    const val =
+      typeof instance[option] == "string"
+        ? instance[option].replace(/[\n\r]/g, " ")
+        : instance[option]
+    this.line(metamodel.getOptions()[option].title + ": " + val, add)
   }
 
-  optionLines(metamodel, instance, options, add=true) {
-    options.forEach(option => {
+  optionLines(metamodel, instance, options, add = true) {
+    options.forEach((option) => {
       const metaOption = metamodel.getOptions()[option]
-      const visible = metaOption.isVisible === undefined ? true : metaOption.isVisible(instance)
+      // TODO: fix
+      const visible =
+        metaOption.isVisible === undefined
+          ? true
+          : metaOption.isVisible(instance, instance)
 
       if (visible) {
         this.optionLine(metamodel, instance, option, add)
@@ -117,6 +122,6 @@ export default class Exporter {
   }
 
   sanitizeValue(value) {
-    return value.replace("\n", ' ')
+    return value.replace("\n", " ")
   }
 }

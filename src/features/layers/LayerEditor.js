@@ -1,33 +1,23 @@
-import { connect } from "react-redux"
 import React, { Component } from "react"
-import { Button, Card, Row, Col } from "react-bootstrap"
+import { connect } from "react-redux"
+import { Button, Card, Row, Col, Accordion } from "react-bootstrap"
 import Select from "react-select"
-import CommentsBox from "../../components/CommentsBox"
-import InputOption from "../../components/InputOption"
-import DropdownOption from "../../components/DropdownOption"
-import CheckboxOption from "../../components/CheckboxOption"
-import ToggleButtonOption from "../../components/ToggleButtonOption"
-import {
-  updateLayer,
-  setShapeType,
-  restoreDefaults,
-} from "../layers/layersSlice"
+import { IconContext } from "react-icons"
+import { AiOutlineRotateRight } from "react-icons/ai"
+import CommentsBox from "@/components/CommentsBox"
+import InputOption from "@/components/InputOption"
+import DropdownOption from "@/components/DropdownOption"
+import CheckboxOption from "@/components/CheckboxOption"
+import ToggleButtonOption from "@/components/ToggleButtonOption"
 import { getCurrentLayerState } from "./selectors"
-import { getModelFromType, getModelSelectOptions } from "../../config/models"
+import { getModelSelectOptions } from "@/config/models"
+import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
+import Layer from "./Layer"
 import "./LayerEditor.scss"
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayerState(state)
-  const shape = getModelFromType(layer.type)
-
   return {
-    layer: layer,
-    shape: shape,
-    options: shape.getOptions(),
-    selectOptions: getModelSelectOptions(false),
-    showShapeSelectRender: layer.selectGroup !== "import" && !layer.effect,
-    link: shape.link,
-    linkText: shape.linkText,
+    state: getCurrentLayerState(state),
   }
 }
 
@@ -40,7 +30,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(updateLayer(attrs))
     },
     onChangeType: (selected) => {
-      dispatch(setShapeType({ id: id, type: selected.value }))
+      dispatch(changeModelType({ id, type: selected.value }))
     },
     onRestoreDefaults: (event) => {
       dispatch(restoreDefaults(id))
@@ -48,24 +38,44 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-class Layer extends Component {
+class LayerEditor extends Component {
   render() {
+    const { state } = this.props
+    const layer = new Layer(state.type)
+    const model = layer.model
+    const layerOptions = layer.getOptions()
+    const modelOptions = model.getOptions()
+    const selectOptions = getModelSelectOptions()
+    const allowModelSelection = model.selectGroup !== "import" && !model.effect
+
     const selectedOption = {
-      value: this.props.shape.id,
-      label: this.props.shape.name,
+      value: model.type,
+      label: model.label,
     }
-    const optionsRender = Object.keys(this.props.options).map((key, index) => {
-      return this.getOptionComponent(key, index)
+    const link = model.link
+    const linkText = model.linkText || link
+    const renderedModelOptions = Object.keys(modelOptions).map((key) => {
+      return (
+        <div
+          className="mt-1"
+          key={key}
+        >
+          {this.getOptionComponent(model, modelOptions, key)}
+        </div>
+      )
     })
 
-    const linkText = this.props.linkText || this.props.link
-    const linkRender = this.props.link ? (
+    const renderedLink = link ? (
       <Row>
         <Col sm={5}></Col>
         <Col sm={7}>
           <p className="mt-2">
             See{" "}
-            <a target="_blank" rel="noopener noreferrer" href={this.props.link}>
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={link}
+            >
               {linkText}
             </a>{" "}
             for ideas.
@@ -73,119 +83,168 @@ class Layer extends Component {
         </Col>
       </Row>
     ) : undefined
-    let optionsListRender = undefined
+    const renderedModelSelection = allowModelSelection && (
+      <Row className="align-items-center">
+        <Col sm={5}>Type</Col>
 
-    if (Object.entries(this.props.options).length > 0) {
-      optionsListRender = <div className="m-0">{optionsRender}</div>
-    }
-
-    let shapeSelectRender = undefined
-
-    if (this.props.showShapeSelectRender) {
-      shapeSelectRender = (
-        <Row className="align-items-center">
-          <Col sm={5}>Shape</Col>
-
-          <Col sm={7}>
-            <Select
-              value={selectedOption}
-              onChange={this.props.onChangeType}
-              maxMenuHeight={305}
-              options={this.props.selectOptions}
-            />
-          </Col>
-        </Row>
-      )
-    }
+        <Col sm={7}>
+          <Select
+            value={selectedOption}
+            onChange={this.props.onChangeType}
+            maxMenuHeight={305}
+            options={selectOptions}
+          />
+        </Col>
+      </Row>
+    )
 
     return (
       <Card
         className="p-3 overflow-auto flex-grow-1"
         style={{ borderTop: "1px solid #aaa", borderBottom: "none" }}
       >
-        <Row className="align-items-center mb-2">
-          <Col sm={5}>
-            <h2 className="panel m-0">Properties</h2>
-          </Col>
-          <Col sm={7}>
-            <Button
-              className="ml-auto"
-              variant="outline-primary"
-              size="sm"
-              onClick={this.props.onRestoreDefaults}
-            >
-              Restore defaults
-            </Button>
-          </Col>
-        </Row>
+        <Accordion
+          key={1}
+          defaultActiveKey={1}
+        >
+          <Card>
+            <Card.Header>
+              <Accordion.Toggle
+                as={Button}
+                variant="link"
+                eventKey={1}
+              >
+                Layer
+              </Accordion.Toggle>
+            </Card.Header>
+            <Accordion.Collapse eventKey={1}>
+              <Card.Body>
+                {this.getOptionComponent(model, layerOptions, "name")}
+                {model.canTransform(state) && (
+                  <Row className="align-items-center">
+                    <Col sm={5}>Transform</Col>
+                    <Col sm={7}>
+                      {model.canMove && (
+                        <Row>
+                          <Col xs={6}>
+                            {this.getOptionComponent(model, layerOptions, "x")}
+                          </Col>
+                          <Col xs={6}>
+                            {this.getOptionComponent(model, layerOptions, "y")}
+                          </Col>
+                        </Row>
+                      )}
+                      {model.canChangeSize(state) && model.autosize && (
+                        <Row className="mt-1">
+                          <Col xs={6}>
+                            {this.getOptionComponent(
+                              model,
+                              layerOptions,
+                              "width",
+                            )}
+                          </Col>
+                          <Col xs={6}>
+                            {this.getOptionComponent(
+                              model,
+                              layerOptions,
+                              "height",
+                            )}
+                          </Col>
+                        </Row>
+                      )}
+                      {model.canRotate(state) && (
+                        <Row className="mt-1">
+                          <Col xs={6}>
+                            <div className="d-flex align-items-center">
+                              <div className="mr-1">
+                                <IconContext.Provider
+                                  value={{ size: "1.3rem" }}
+                                >
+                                  <AiOutlineRotateRight />
+                                </IconContext.Provider>
+                              </div>
+                              {this.getOptionComponent(
+                                model,
+                                layerOptions,
+                                "rotation",
+                                false,
+                              )}
+                            </div>
+                          </Col>
+                        </Row>
+                      )}
+                    </Col>
+                  </Row>
+                )}
+                {this.getOptionComponent(model, layerOptions, "reverse")}
+              </Card.Body>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
 
-        {shapeSelectRender}
-
-        {linkRender}
-
-        <div className="pt-1">{optionsListRender}</div>
+        <Accordion
+          key={2}
+          defaultActiveKey={2}
+          className="mt-3"
+        >
+          <Card>
+            <Card.Header className="d-flex">
+              <Accordion.Toggle
+                as={Button}
+                variant="link"
+                eventKey={1}
+              >
+                Shape
+              </Accordion.Toggle>
+              <Button
+                className="ml-auto"
+                variant="outline-primary"
+                size="sm"
+                onClick={this.props.onRestoreDefaults}
+              >
+                Restore defaults
+              </Button>
+            </Card.Header>
+            <Accordion.Collapse eventKey={2}>
+              <Card.Body>
+                {renderedModelSelection}
+                {renderedModelOptions}
+                {renderedLink}
+              </Card.Body>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
       </Card>
     )
   }
 
-  getOptionComponent(key, index) {
-    const option = this.props.options[key]
+  getOptionComponent(model, options, key, label = true) {
+    const option = options[key]
+    const { state, onChange } = this.props
+    const props = {
+      options,
+      label,
+      key,
+      onChange,
+      optionKey: key,
+      data: state,
+      object: model,
+      comments: state.comments,
+    }
 
-    if (option.type === "dropdown") {
-      return (
-        <DropdownOption
-          onChange={this.props.onChange}
-          options={this.props.options}
-          optionKey={key}
-          key={key}
-          index={index}
-          model={this.props.layer}
-        />
-      )
-    } else if (option.type === "checkbox") {
-      return (
-        <CheckboxOption
-          onChange={this.props.onChange}
-          options={this.props.options}
-          optionKey={key}
-          key={key}
-          index={index}
-          model={this.props.layer}
-        />
-      )
-    } else if (option.type === "comments") {
-      return (
-        <CommentsBox
-          options={this.props.options}
-          optionKey={key}
-          key={key}
-          comments={this.props.layer.comments}
-        />
-      )
-    } else if (option.type === "togglebutton") {
-      return (
-        <ToggleButtonOption
-          onChange={this.props.onChange}
-          options={this.props.options}
-          optionKey={key}
-          key={key}
-          index={index}
-          model={this.props.layer}
-        />
-      )
-    } else {
-      return (
-        <InputOption
-          onChange={this.props.onChange}
-          options={this.props.options}
-          optionKey={key}
-          key={key}
-          index={index}
-          model={this.props.layer}
-        />
-      )
+    switch (option.type) {
+      case "dropdown":
+        return <DropdownOption {...props} />
+      case "checkbox":
+        return <CheckboxOption {...props} />
+      case "comments":
+        return <CommentsBox {...props} />
+      case "togglebutton":
+        return <ToggleButtonOption {...props} />
+      default:
+        return <InputOption {...props} />
     }
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Layer)
+export default connect(mapStateToProps, mapDispatchToProps)(LayerEditor)

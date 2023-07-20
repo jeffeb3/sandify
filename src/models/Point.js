@@ -1,22 +1,26 @@
-import Victor from 'victor'
-import Shape from './Shape'
+import Victor from "victor"
+import Model from "./Model"
 
-export default class Point extends Shape {
+export default class Point extends Model {
   constructor() {
-    super('Point')
+    super('point')
+    this.label = "Point"
+    this.startingWidth = 1
+    this.startingHeight = 1
+    this.shouldCache = false
+    this.autosize = false
+  }
+
+  canChangeSize(state) {
+    return false
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'point',
-        autosize: false,
-        startingWidth: 1,
-        startingHeight: 1,
-        shouldCache: false,
-        canChangeSize: false,
-      }
+        // no custom attributes
+      },
     }
   }
 

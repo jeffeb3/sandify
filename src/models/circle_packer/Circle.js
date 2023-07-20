@@ -1,4 +1,4 @@
-import Victor from 'victor'
+import Victor from "victor"
 
 export class Circle extends Victor {
   constructor(x, y, r, state) {
@@ -8,7 +8,9 @@ export class Circle extends Victor {
     this.r = r || 30
     this.state = state
     this.growing = this.state.growing
-    if (this.growing == null) { this.growing = true }
+    if (this.growing == null) {
+      this.growing = true
+    }
     this.theta = null
     this.center = new Victor(0, 0)
   }
@@ -22,7 +24,9 @@ export class Circle extends Victor {
 
   outOfBounds(radius) {
     radius ||= this.state.inBounds ? this.r : 0
-    return this.state.rectangular ? this.outOfRectangularBounds(radius) : this.outOfPolarBounds(radius)
+    return this.state.rectangular
+      ? this.outOfRectangularBounds(radius)
+      : this.outOfPolarBounds(radius)
   }
 
   outOfPolarBounds(radius) {
@@ -48,13 +52,20 @@ export class Circle extends Victor {
   intersection(circle) {
     let a = circle.r
     var b = this.r
-    var c = Math.sqrt((this.x-circle.x)*(this.x-circle.x)+(this.y-circle.y)*(this.y-circle.y))
-    var d = (b*b+c*c-a*a)/(2*c)
-    var h = Math.sqrt(b*b-d*d)
-    const i1 = (circle.x-this.x)*d/c + (circle.y-this.y)*h/c +  this.x
-    const i2 = (circle.y-this.y)*d/c - (circle.x-this.x)*h/c +  this.y
-    const i3 = (circle.x-this.x)*d/c - (circle.y-this.y)*h/c +  this.x
-    const i4 = (circle.y-this.y)*d/c + (circle.x-this.x)*h/c +  this.y
+    var c = Math.sqrt(
+      (this.x - circle.x) * (this.x - circle.x) +
+        (this.y - circle.y) * (this.y - circle.y),
+    )
+    var d = (b * b + c * c - a * a) / (2 * c)
+    var h = Math.sqrt(b * b - d * d)
+    const i1 =
+      ((circle.x - this.x) * d) / c + ((circle.y - this.y) * h) / c + this.x
+    const i2 =
+      ((circle.y - this.y) * d) / c - ((circle.x - this.x) * h) / c + this.y
+    const i3 =
+      ((circle.x - this.x) * d) / c - ((circle.y - this.y) * h) / c + this.x
+    const i4 =
+      ((circle.y - this.y) * d) / c + ((circle.x - this.x) * h) / c + this.y
     const ret = []
 
     if (!isNaN(i1)) {
@@ -91,7 +102,7 @@ export class Circle extends Victor {
       c = sq(this.y) + sq(p1.x - this.x) - sq(this.r)
     } else {
       a = 1 + sq(m)
-      b = -this.x * 2 + (m * (n - this.y)) * 2
+      b = -this.x * 2 + m * (n - this.y) * 2
       c = sq(this.x) + sq(n - this.y) - sq(this.r)
     }
 
@@ -101,7 +112,7 @@ export class Circle extends Victor {
       // insert into quadratic formula
       let intersections = [
         (-b + Math.sqrt(sq(b) - 4 * a * c)) / (2 * a),
-        (-b - Math.sqrt(sq(b) - 4 * a * c)) / (2 * a)
+        (-b - Math.sqrt(sq(b) - 4 * a * c)) / (2 * a),
       ]
 
       if (d === 0) {
@@ -109,9 +120,9 @@ export class Circle extends Victor {
       }
 
       if (p2.x - p1.x === 0) {
-        return intersections.map(y => new Victor(p1.x, y))
+        return intersections.map((y) => new Victor(p1.x, y))
       } else {
-        return intersections.map(x => new Victor(x, m * x + n))
+        return intersections.map((x) => new Victor(x, m * x + n))
       }
     }
 
@@ -126,7 +137,9 @@ export class Circle extends Victor {
       this.lineIntersection(p1, p2),
       this.lineIntersection(p2, p3),
       this.lineIntersection(p3, p4),
-      this.lineIntersection(p4, p1)
-    ].flat().filter(n => n && n.y !== Infinity && n.y !== -Infinity)
+      this.lineIntersection(p4, p1),
+    ]
+      .flat()
+      .filter((n) => n && n.y !== Infinity && n.y !== -Infinity)
   }
 }

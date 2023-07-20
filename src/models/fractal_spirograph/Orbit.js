@@ -4,12 +4,15 @@ export default class Orbit {
     this.y = y
     this.r = r
     this.child = null
-    this.angle = Math.PI/2
+    this.angle = Math.PI / 2
     this.level = level
     this.settings = settings
 
     let sign = this.settings.alternateRotation ? -1 : 1
-    this.speed = Math.pow(settings.velocity * sign, this.level - 1) * Math.PI / 180 / settings.resolution
+    this.speed =
+      (Math.pow(settings.velocity * sign, this.level - 1) * Math.PI) /
+      180 /
+      settings.resolution
     this.parent = parent
   }
 
@@ -17,7 +20,14 @@ export default class Orbit {
     let newr = this.r / this.settings.relativeSize
     let newx = this.x + this.r + newr
     let newy = this.y
-    this.child = new Orbit(newx, newy, newr, this.level + 1, this.settings, this)
+    this.child = new Orbit(
+      newx,
+      newy,
+      newr,
+      this.level + 1,
+      this.settings,
+      this,
+    )
     return this.child
   }
 

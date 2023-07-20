@@ -1,11 +1,16 @@
-import React from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
-import { Shape } from 'react-konva'
-import { makeGetConnectorVertices, getSliderBounds, getSliderColors, getVertexOffsets } from '../machine/selectors'
-import { getPreview, getLayers } from '../store/selectors'
-import { getCurrentLayerState, makeGetLayer } from '../layers/selectors'
-import { getCachedSelector } from '../store/selectors'
-import PreviewHelper from './PreviewHelper'
+import React from "react"
+import { useSelector, shallowEqual } from "react-redux"
+import { Shape } from "react-konva"
+import {
+  makeGetConnectorVertices,
+  getSliderBounds,
+  getSliderColors,
+  getVertexOffsets,
+} from "../machine/selectors"
+import { getPreview, getLayers } from "../store/selectors"
+import { getCurrentLayerState, makeGetLayer } from "../layers/selectors"
+import { getCachedSelector } from "../store/selectors"
+import PreviewHelper from "./PreviewHelper"
 
 // Renders a connector between two layers.
 const PreviewConnector = (ownProps) => {
@@ -17,33 +22,42 @@ const PreviewConnector = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
-    const startLayer = getCachedSelector(makeGetLayer, ownProps.startId)(state) || getCurrentLayerState(state)
-    const endLayer = getCachedSelector(makeGetLayer, ownProps.endId)(state) || getCurrentLayerState(state)
-    const vertices = startLayer === endLayer ?
-      [] :
-      getCachedSelector(makeGetConnectorVertices, startLayer.id, endLayer.id)(state)
+    const startLayer =
+      getCachedSelector(makeGetLayer, ownProps.startId)(state) ||
+      getCurrentLayerState(state)
+    const endLayer =
+      getCachedSelector(makeGetLayer, ownProps.endId)(state) ||
+      getCurrentLayerState(state)
+    const vertices =
+      startLayer === endLayer
+        ? []
+        : getCachedSelector(
+            makeGetConnectorVertices,
+            startLayer.id,
+            endLayer.id,
+          )(state)
     const layers = getLayers(state)
     const preview = getPreview(state)
 
     return {
       layer: startLayer,
-      endLayer: endLayer,
-      vertices: vertices,
+      endLayer,
+      vertices,
       sliderValue: preview.sliderValue,
       selected: layers.selected,
       colors: getSliderColors(state),
-      offsetId: startLayer.id + '-connector',
+      offsetId: startLayer.id + "-connector",
       offsets: getVertexOffsets(state),
-      bounds: getSliderBounds(state)
+      bounds: getSliderBounds(state),
     }
   }
 
   const props = useSelector(mapStateToProps, shallowEqual)
   const helper = new PreviewHelper(props)
-  const selectedColor = 'yellow'
-  const unselectedColor = 'rgba(195, 214, 230, 0.65)'
-  const backgroundSelectedColor = '#6E6E00'
-  const backgroundUnselectedColor = 'rgba(195, 214, 230, 0.4)'
+  const selectedColor = "yellow"
+  const unselectedColor = "rgba(195, 214, 230, 0.65)"
+  const backgroundSelectedColor = "#6E6E00"
+  const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = props.sliderValue !== 0
   const isSelected = props.selected === ownProps.endId
 
@@ -71,10 +85,12 @@ const PreviewConnector = (ownProps) => {
     context.stroke()
 
     context.beginPath()
-    for (let i=1; i<props.vertices.length; i++) {
+    for (let i = 1; i < props.vertices.length; i++) {
       if (isSliding) {
-        let absoluteI = props.offsets[props.endLayer.id].start - props.vertices.length + i
-        let pathColor = (absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor)
+        let absoluteI =
+          props.offsets[props.endLayer.id].start - props.vertices.length + i
+        let pathColor =
+          absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
         currentColor = props.colors[absoluteI] || pathColor
         if (currentColor !== oldColor) {
@@ -85,7 +101,7 @@ const PreviewConnector = (ownProps) => {
         }
       }
 
-      helper.moveTo(context, props.vertices[i-1])
+      helper.moveTo(context, props.vertices[i - 1])
       helper.lineTo(context, props.vertices[i])
     }
     context.stroke()
@@ -93,13 +109,14 @@ const PreviewConnector = (ownProps) => {
 
   return (
     <React.Fragment>
-      {!props.layer.dragging && !props.endLayer.dragging && <Shape
-        x={props.layer.startingWidth/2}
-        y={props.layer.startingHeight/2}
-        sceneFunc={sceneFunc}
-        hitFunc={hitFunc}
-      >
-      </Shape>}
+      {!props.layer.dragging && !props.endLayer.dragging && (
+        <Shape
+          x={props.layer.width / 2}
+          y={props.layer.height / 2}
+          sceneFunc={sceneFunc}
+          hitFunc={hitFunc}
+        ></Shape>
+      )}
     </React.Fragment>
   )
 }

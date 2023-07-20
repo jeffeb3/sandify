@@ -1,32 +1,29 @@
-import { CursiveFont, SansSerifFont, MonospaceFont } from './Fonts'
-import Victor from 'victor'
-import Shape, { shapeOptions } from '../Shape'
-import { arc } from '@/common/geometry'
+import { CursiveFont, SansSerifFont, MonospaceFont } from "./Fonts"
+import Victor from "victor"
+import Model from "@/models/Model"
+import { arc } from "@/common/geometry"
 
 const options = {
-  ...shapeOptions,
-  ...{
-    inputText: {
-      title: 'Text',
-      type: 'textarea',
-    },
-    inputFont: {
-      title: 'Font',
-      type: 'dropdown',
-      choices: ['Cursive', 'Sans Serif', 'Monospace'],
-    },
-    rotateDir: {
-      title: 'Rotate',
-      type: 'dropdown',
-      choices: ['Top', 'Center', 'Bottom'],
-    },
-  }
+  inputText: {
+    title: "Text",
+    type: "textarea",
+  },
+  inputFont: {
+    title: "Font",
+    type: "dropdown",
+    choices: ["Cursive", "Sans Serif", "Monospace"],
+  },
+  rotateDir: {
+    title: "Rotate",
+    type: "dropdown",
+    choices: ["Top", "Center", "Bottom"],
+  },
 }
 
 function getMaxX(points) {
   // Measure the width of the line
   let maxX = 0
-  points.forEach( (point) => {
+  points.forEach((point) => {
     if (point.x > maxX) {
       maxX = point.x
     }
@@ -34,45 +31,51 @@ function getMaxX(points) {
   return maxX
 }
 
-export default class InputText extends Shape {
+export default class InputText extends Model {
   constructor() {
-    super('Text')
+    super("inputText")
+    this.label = "Text"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'inputText',
-        inputText: 'Sandify',
-        inputFont: 'Cursive',
-        rotateDir: 'Center',
-      }
+        inputText: "Sandify",
+        inputFont: "Cursive",
+        rotateDir: "Center",
+      },
     }
   }
 
   getVertices(state) {
     let points = []
-    let prevLetter = ''
+    let prevLetter = ""
     let x = 0.0
     let lines = []
     let textPoints = []
 
     for (let chi = 0; chi < state.shape.inputText.length; chi++) {
       var nextLetter = state.shape.inputText[chi]
-      if (prevLetter === 'b' || prevLetter === 'v' || prevLetter === 'o' || prevLetter === 'w') {
+      if (
+        prevLetter === "b" ||
+        prevLetter === "v" ||
+        prevLetter === "o" ||
+        prevLetter === "w"
+      ) {
         // Save this letter before we possibly add in a '*'
         prevLetter = nextLetter
-        if (nextLetter.search('[a-z]+') !== -1 && state.shape.inputFont === 'Cursive')
-        {
-          nextLetter = nextLetter + '*'
+        if (
+          nextLetter.search("[a-z]+") !== -1 &&
+          state.shape.inputFont === "Cursive"
+        ) {
+          nextLetter = nextLetter + "*"
         }
-      }
-      else {
+      } else {
         prevLetter = nextLetter
       }
 
-      if (nextLetter === '\n') {
+      if (nextLetter === "\n") {
         // New line
         lines.push(points)
         points = []
@@ -81,11 +84,11 @@ export default class InputText extends Shape {
       }
 
       var shape = undefined
-      if (state.shape.inputFont === 'Cursive') {
+      if (state.shape.inputFont === "Cursive") {
         shape = CursiveFont(nextLetter)
-      } else if (state.shape.inputFont === 'Sans Serif') {
+      } else if (state.shape.inputFont === "Sans Serif") {
         shape = SansSerifFont(nextLetter)
-      } else if (state.shape.inputFont === 'Monospace') {
+      } else if (state.shape.inputFont === "Monospace") {
         shape = MonospaceFont(nextLetter)
       } else {
         // Internal error, but I'm going to just recover
@@ -96,7 +99,7 @@ export default class InputText extends Shape {
       for (let vi = 0; vi < shape.vertices.length; vi++) {
         points.push(new Victor(shape.vertices[vi].x + x, shape.vertices[vi].y))
       }
-      x += shape.vertices[shape.vertices.length-1].x
+      x += shape.vertices[shape.vertices.length - 1].x
     }
     // Save the last line we were working on.
     lines.push(points)
@@ -104,13 +107,13 @@ export default class InputText extends Shape {
     // The height of a row of text, including the space above.
     const maxY = 2.4
 
-    if (state.shape.rotateDir === 'Center') {
+    if (state.shape.rotateDir === "Center") {
       // Starting Y offset
-      let y = (lines.length - 1) * maxY / 2.0
+      let y = ((lines.length - 1) * maxY) / 2.0
 
       // Capture some wrap around points, to connect the lines.
       let connectorPoints = []
-      lines.forEach( (points) => {
+      lines.forEach((points) => {
         let maxX = getMaxX(points)
         let widthOffset = maxX / 2.0
 
@@ -119,9 +122,12 @@ export default class InputText extends Shape {
         connectorPoints = []
 
         // offset the line's vertices
-        textPoints = [...textPoints, ...points.map( (point) => {
-          return new Victor(point.x - widthOffset, point.y + y)
-        })]
+        textPoints = [
+          ...textPoints,
+          ...points.map((point) => {
+            return new Victor(point.x - widthOffset, point.y + y)
+          }),
+        ]
 
         // Add in some points way off, so to wrap around for this line.
         connectorPoints.push(new Victor(1e9, y))
@@ -133,7 +139,7 @@ export default class InputText extends Shape {
     } else {
       // This variable controls "Top" vs. "Bottom"
       let direction = 1.0
-      if (state.shape.rotateDir === 'Bottom') {
+      if (state.shape.rotateDir === "Bottom") {
         direction = -1.0
         lines.reverse()
       }
@@ -159,7 +165,7 @@ export default class InputText extends Shape {
       //
       const maxRPerY = 0.8
       let rPerY = direction * maxRPerY
-      let thetaCenter = direction * Math.PI / 2.0
+      let thetaCenter = (direction * Math.PI) / 2.0
       const maxROffset = maxY * 2.0
       let rOffset = maxROffset
       const rOffsetPerLine = rOffset / lines.length
@@ -168,8 +174,7 @@ export default class InputText extends Shape {
       // This captures the previous angle, so we can track around for the next line.
       let lastTheta
 
-      lines.forEach( (points) => {
-
+      lines.forEach((points) => {
         let maxX = getMaxX(points)
         // This widthOffset is in X.
         let widthOffset = maxX / 2.0
@@ -177,7 +182,7 @@ export default class InputText extends Shape {
         // Scale the size of the words to fit within one circle.
         if (Math.PI * 2.0 < Math.abs(thetaPerX * maxX)) {
           // We are going to roll all the way around
-          thetaPerX = direction * -Math.PI * 2.0 / maxX
+          thetaPerX = (direction * -Math.PI * 2.0) / maxX
           rPerY = -thetaPerX * rOffset
         }
 
@@ -195,21 +200,24 @@ export default class InputText extends Shape {
         }
 
         // Transform the points and add them to textPoints.
-        textPoints = [...textPoints, ...points.map( (point) => {
-          const r = rOffset + rPerY * point.y
-          lastTheta = thetaCenter + thetaPerX * (point.x - widthOffset)
-          return new Victor(r * Math.cos(lastTheta), r * Math.sin(lastTheta))
-        })]
+        textPoints = [
+          ...textPoints,
+          ...points.map((point) => {
+            const r = rOffset + rPerY * point.y
+            lastTheta = thetaCenter + thetaPerX * (point.x - widthOffset)
+            return new Victor(r * Math.cos(lastTheta), r * Math.sin(lastTheta))
+          }),
+        ]
 
         // Set up for the next line.
         rOffset -= rOffsetPerLine
-        rPerY = direction * Math.sqrt(maxRPerY * rOffset / maxROffset)
+        rPerY = direction * Math.sqrt((maxRPerY * rOffset) / maxROffset)
         thetaPerX = -rPerY / rOffset
       })
     }
 
     const scale = 2.5 // to normalize starting size
-    textPoints.forEach(point => point.multiply({x: scale, y: scale }))
+    textPoints.forEach((point) => point.multiply({ x: scale, y: scale }))
     return textPoints
   }
 

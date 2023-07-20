@@ -1,52 +1,49 @@
-import Shape, { shapeOptions } from '../Shape'
+import Model from "../Model"
 import {
   lsystem,
   lsystemPath,
   onSubtypeChange,
   onMinIterations,
-  onMaxIterations
-} from '@/common/lindenmayer'
-import { subtypes } from './subtypes'
-import { resizeVertices } from '@/common/geometry'
+  onMaxIterations,
+} from "@/common/lindenmayer"
+import { subtypes } from "./subtypes"
+import { resizeVertices } from "@/common/geometry"
 
 const options = {
-  ...shapeOptions,
-  ...{
-    subtype: {
-      title: 'Type',
-      type: 'dropdown',
-      choices: Object.keys(subtypes),
-      onChange: (changes, attrs) => {
-        return onSubtypeChange(subtypes[changes.subtype], changes, attrs)
-      }
+  subtype: {
+    title: "Type",
+    type: "dropdown",
+    choices: Object.keys(subtypes),
+    onChange: (model, changes, state) => {
+      return onSubtypeChange(subtypes[changes.subtype], changes, state)
     },
-    iterations: {
-      title: 'Iterations',
-      min: (state) => {
-        return onMinIterations(subtypes[state.subtype], state)
-      },
-      max: (state) => {
-        return onMaxIterations(subtypes[state.subtype], state)
-      }
+  },
+  iterations: {
+    title: "Iterations",
+    min: (state) => {
+      return onMinIterations(subtypes[state.subtype], state)
     },
-  }
+    max: (state) => {
+      return onMaxIterations(subtypes[state.subtype], state)
+    },
+  },
 }
 
-export default class LSystem extends Shape {
+export default class LSystem extends Model {
   constructor() {
-    super('Fractal Line Writer')
-    this.link = 'https://en.wikipedia.org/wiki/L-system'
-    this.linkText = 'L-systems on Wikipedia'
+    super("lsystem")
+    this.label = "Fractal Line Writer"
+    this.link = "https://en.wikipedia.org/wiki/L-system"
+    this.linkText = "L-systems on Wikipedia"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'lsystem',
         iterations: 3,
-        subtype: 'McWorter\'s Pentadendrite',
-      }
+        subtype: "McWorter's Pentadendrite",
+      },
     }
   }
 
@@ -59,7 +56,9 @@ export default class LSystem extends Shape {
     config.iterations = iterations
     config.side = 5
 
-    if (config.angle === undefined) { config.angle = Math.PI/2 }
+    if (config.angle === undefined) {
+      config.angle = Math.PI / 2
+    }
 
     let curve = lsystemPath(lsystem(config), config)
     const scale = 18.0 // to normalize starting size

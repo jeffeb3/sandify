@@ -1,21 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit"
 import uniqueId from "lodash/uniqueId"
 import arrayMove from "array-move"
-import { getModelFromType } from "../../config/models"
+import { getModelFromType } from "@/config/models"
+import Layer from "./Layer"
 
-const protectedAttrs = [
-  "selectGroup",
-  "canChangeSize",
-  "autosize",
-  "usesMachine",
-  "shouldCache",
-  "canChangeHeight",
-  "canRotate",
-  "usesFonts",
-]
-
+const notCopiedWhenTypeChanges = ["type", "height", "width"]
 const newEffectType = localStorage.getItem("currentEffect") || "mask"
-const newEffectName = getModelFromType(newEffectType).name.toLowerCase()
+const newEffectName = getModelFromType(newEffectType).label.toLowerCase()
 
 function createLayer(state, attrs) {
   const restore = attrs.restore
@@ -88,8 +79,8 @@ const layersSlice = createSlice({
   initialState: {
     current: null,
     selected: null,
-    newEffectType: newEffectType,
-    newEffectName: newEffectName,
+    newEffectType,
+    newEffectName,
     newEffectNameOverride: false,
     copyLayerName: null,
     byId: {},
@@ -104,9 +95,9 @@ const layersSlice = createSlice({
       setCurrentId(state, layer.id)
       state.newLayerName = layer.name
 
-      if (layer.type !== "file_import") {
+      if (layer.type !== "fileImport") {
         localStorage.setItem(
-          layer.effect ? "currentEffect" : "currentShape",
+          layer.effect ? "defaultEffect" : "defaultModel",
           layer.type,
         )
       }
@@ -165,13 +156,13 @@ const layersSlice = createSlice({
     },
     restoreDefaults(state, action) {
       const id = action.payload
-      const layer = state.byId[id]
-      const defaults = getModelFromType(layer.type).getInitialState(layer)
+      const currentLayerState = state.byId[id]
+      const layer = new Layer(currentLayerState.type)
 
-      state.byId[layer.id] = {
-        id: layer.id,
-        name: layer.name,
-        ...defaults,
+      state.byId[id] = {
+        id,
+        name: currentLayerState.name,
+        ...layer.getInitialState(),
       }
     },
     setCurrentLayer(state, action) {
@@ -185,23 +176,28 @@ const layersSlice = createSlice({
     setSelectedLayer(state, action) {
       state.selected = action.payload
     },
-    setShapeType(state, action) {
-      const changes = action.payload
-      const defaults = getModelFromType(changes.type).getInitialState()
-      const layer = state.byId[changes.id]
+    changeModelType(state, action) {
+      const { type, id } = action.payload
+      const newLayer = new Layer(type)
+      const layerState = state.byId[id]
+      const newLayerState = newLayer.getInitialState()
 
-      layer.type = changes.type
-      Object.keys(defaults).forEach((attr) => {
-        if (layer[attr] === undefined) {
-          layer[attr] = defaults[attr]
+      Object.keys(newLayerState).forEach((attr) => {
+        if (
+          !notCopiedWhenTypeChanges.includes(attr) &&
+          layerState[attr] != undefined
+        ) {
+          newLayerState[attr] = layerState[attr]
         }
       })
 
-      protectedAttrs.forEach((attr) => {
-        layer[attr] = defaults[attr]
-      })
+      newLayerState.id = id
+      if (!newLayer.canMove) {
+        newLayerState.x = 0
+        newLayerState.y = 0
+      }
 
-      state.byId[layer.id] = layer
+      state.byId[id] = newLayerState
     },
     setNewEffectType(state, action) {
       let attrs = { newEffectType: action.payload }
@@ -241,7 +237,7 @@ export const {
   restoreDefaults,
   setCurrentLayer,
   setSelectedLayer,
-  setShapeType,
+  changeModelType,
   setNewEffectType,
   updateLayer,
   updateLayers,

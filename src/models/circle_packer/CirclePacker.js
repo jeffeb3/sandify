@@ -1,62 +1,65 @@
-import seedrandom from 'seedrandom'
-import Shape, { shapeOptions } from '../Shape'
-import { Circle } from './Circle'
-import Graph from '@/common/Graph'
-import { circle, arc } from '@/common/geometry'
-import { getMachineInstance } from '@/features/machine/computer'
-import Victor from 'victor'
+import seedrandom from "seedrandom"
+import Model from "../Model"
+import { Circle } from "./Circle"
+import Graph from "@/common/Graph"
+import { circle, arc } from "@/common/geometry"
+import { getMachineInstance } from "@/features/machine/computer"
+import Victor from "victor"
 
 const ROUNDS = 100 // default number of rounds to attempt to create and grow circles
 const RECTANGULAR_ATTEMPTS_MULTIPLIER = 4
 const ATTEMPTS_MODIFIER = 5
 
 const options = {
-  ...shapeOptions,
-  ...{
-    seed: {
-      title: 'Random seed',
-      min: 1
-    },
-    startingRadius: {
-      title: 'Minimum radius',
-      min: 3
-    },
-    attempts: {
-      title: 'Circle uniformity',
-      min: 1,
-      max: 100,
-      step: 4
-    },
-    inBounds: {
-      title: 'Stay in bounds',
-      type: 'checkbox'
-    }
-  }
+  seed: {
+    title: "Random seed",
+    min: 1,
+  },
+  startingRadius: {
+    title: "Minimum radius",
+    min: 3,
+  },
+  attempts: {
+    title: "Circle uniformity",
+    min: 1,
+    max: 100,
+    step: 4,
+  },
+  inBounds: {
+    title: "Stay in bounds",
+    type: "checkbox",
+  },
 }
 
 // adapted initially from Coding Challenge #50; Animated Circle Packing, https://www.youtube.com/watch?v=QHEQuoIKgNE
 // no license was specified
-export default class CirclePacker extends Shape {
+export default class CirclePacker extends Model {
   constructor() {
-    super('Circle Packer')
+    super("circlePacker")
+    this.label = "Circle Packer"
+    this.usesMachine = true
+    this.canMove = false
+    this.autosize = false
+    this.selectGroup = "Erasers"
+  }
+
+  canChangeSize(state) {
+    return false
+  }
+
+  canRotate(state) {
+    return false
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'circle_packer',
-        selectGroup: 'Erasers',
         seed: 1,
         startingRadius: 4,
         attempts: 20,
         inBounds: false,
-        usesMachine: true,
-        canChangeSize: false,
-        canRotate: false,
-        canMove: false,
-        autosize: false,
-      }
+      },
     }
   }
 
@@ -78,9 +81,14 @@ export default class CirclePacker extends Shape {
       rectangular: machine.rectangular,
       attempts: state.shape.attempts,
       r: state.shape.startingRadius,
-      inBounds: state.shape.inBounds
+      inBounds: state.shape.inBounds,
     }
-    this.boundaryCircle = new Circle(0, 0, this.settings.maxRadius, this.settings)
+    this.boundaryCircle = new Circle(
+      0,
+      0,
+      this.settings.maxRadius,
+      this.settings,
+    )
     this.boundaryRectangle = [
       new Victor(-this.settings.width / 2, -this.settings.height / 2),
       new Victor(this.settings.width / 2, -this.settings.height / 2),
@@ -99,9 +107,7 @@ export default class CirclePacker extends Shape {
 
   // experimental
   setupCircles() {
-    const circles = [
-      new Circle(0, 0, 75, { ...this.settings, growing: false }),
-    ]
+    const circles = [new Circle(0, 0, 75, { ...this.settings, growing: false })]
 
     for (const c of circles) {
       this.addCircle(c)
@@ -111,14 +117,16 @@ export default class CirclePacker extends Shape {
   // generate random circles within machine bounds. Grow them incrementally. If a circle collides
   // with another, stop them growing. Repeat.
   createCircles() {
-    let attempts = this.settings.rectangular ?
-      this.settings.attempts * RECTANGULAR_ATTEMPTS_MULTIPLIER :
-      this.settings.attempts
-    if (attempts <= 0) { attempts = 1 }
+    let attempts = this.settings.rectangular
+      ? this.settings.attempts * RECTANGULAR_ATTEMPTS_MULTIPLIER
+      : this.settings.attempts
+    if (attempts <= 0) {
+      attempts = 1
+    }
     const rounds = Math.floor(ROUNDS * (ROUNDS / attempts))
 
-    for (let round=0; round<rounds; round++) {
-      for (let i=0; i<attempts + ATTEMPTS_MODIFIER; i++) {
+    for (let round = 0; round < rounds; round++) {
+      for (let i = 0; i < attempts + ATTEMPTS_MODIFIER; i++) {
         const possibleC = this.newCircle()
 
         if (possibleC) {
@@ -129,18 +137,18 @@ export default class CirclePacker extends Shape {
       this.growCircles()
     }
 
-    this.perimeterCircles = this.circles.filter(circle => circle.perimeter)
+    this.perimeterCircles = this.circles.filter((circle) => circle.perimeter)
   }
 
   // ensure that we have a fully connected graph to walk
   connectOrphans() {
-    this.perimeterCircles.forEach (circle => this.markConnected(circle))
+    this.perimeterCircles.forEach((circle) => this.markConnected(circle))
 
     const center = new Victor(0, 0)
-    let orphans = this.circles.filter(circle => !circle.connected)
-    let connected = this.circles.filter(circle => circle.connected)
+    let orphans = this.circles.filter((circle) => !circle.connected)
+    let connected = this.circles.filter((circle) => circle.connected)
 
-    while(orphans.length > 0) {
+    while (orphans.length > 0) {
       // find orphan furthest from center (closest to perimeter)
       const orphan = this.farthest(orphans, center)
 
@@ -152,14 +160,14 @@ export default class CirclePacker extends Shape {
       this.markConnected(orphan)
 
       // repeat
-      orphans = orphans.filter(circle => !circle.connected)
-      connected = this.circles.filter(circle => circle.connected)
+      orphans = orphans.filter((circle) => !circle.connected)
+      connected = this.circles.filter((circle) => circle.connected)
     }
   }
 
   // start with a perimeter circle, draw it and any neighboring circles recursively. Repeat.
   drawCircles() {
-    let curr = this.circles.find(circle => circle.perimeter)
+    let curr = this.circles.find((circle) => circle.perimeter)
     let prev = curr
     let intersection = this.boundaryIntersection(curr)
     let angle = Math.atan2(intersection.y - curr.y, intersection.x - curr.x)
@@ -169,7 +177,7 @@ export default class CirclePacker extends Shape {
       this.drawCircle(curr, angle)
       angle = this.walk(curr, angle, stack)
       prev = curr
-      curr = this.perimeterCircles.find(circle => !circle.walked)
+      curr = this.perimeterCircles.find((circle) => !circle.walked)
 
       if (curr) {
         angle = this.connectAlongPerimeter(prev, curr, angle)
@@ -199,11 +207,11 @@ export default class CirclePacker extends Shape {
     let valid = !possibleC.outOfBounds()
 
     if (valid) {
-      for (let i=0; i< this.circles.length; i++) {
+      for (let i = 0; i < this.circles.length; i++) {
         const c = this.circles[i]
         let d = possibleC.distance(c)
 
-        if (d < (c.r + possibleC.r)) {
+        if (d < c.r + possibleC.r) {
           valid = false
           break
         }
@@ -215,13 +223,13 @@ export default class CirclePacker extends Shape {
 
   growCircles() {
     if (this.circles.length > 1) {
-      while (this.circles.filter(circle => circle.growing).length > 0) {
-        this.circles.forEach(c => {
+      while (this.circles.filter((circle) => circle.growing).length > 0) {
+        this.circles.forEach((c) => {
           if (c.growing) {
             if (c.outOfBounds()) {
               c.growing = false
             } else {
-              this.circles.forEach(other => {
+              this.circles.forEach((other) => {
                 if (c !== other) {
                   let d = c.distance(other)
                   if (d < c.r + other.r) {
@@ -340,12 +348,18 @@ export default class CirclePacker extends Shape {
 
   // returns the point in arr that is farthest to a given point
   farthest(arr, point) {
-    return arr.reduce((max, x, i, arr) => x.distance(point) > max.distance(point) ? x : max, arr[0])
+    return arr.reduce(
+      (max, x, i, arr) => (x.distance(point) > max.distance(point) ? x : max),
+      arr[0],
+    )
   }
 
   // returns the point in arr that is closest to a given point
   closest(arr, point) {
-    return arr.reduce((max, x, i, arr) => x.distance(point) < max.distance(point) ? x : max, arr[0])
+    return arr.reduce(
+      (max, x, i, arr) => (x.distance(point) < max.distance(point) ? x : max),
+      arr[0],
+    )
   }
 
   getOptions() {

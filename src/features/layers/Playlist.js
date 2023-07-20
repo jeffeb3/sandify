@@ -31,9 +31,9 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     layers: getAllLayerStates(state),
-    numLayers: numLayers,
+    numLayers,
     currentLayer: layer,
-    shape: shape,
+    shape,
   }
 }
 
@@ -51,16 +51,16 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       dispatch(removeLayer(id))
     },
     onLayerMoved: ({ oldIndex, newIndex }) => {
-      dispatch(moveLayer({ oldIndex: oldIndex, newIndex: newIndex }))
+      dispatch(moveLayer({ oldIndex, newIndex }))
     },
     onSortStarted: ({ node }) => {
       dispatch(setCurrentLayer(node.id))
     },
     onToggleLayerOpen: (id) => {
-      dispatch(toggleOpen({ id: id }))
+      dispatch(toggleOpen({ id }))
     },
     onToggleLayerVisible: (id) => {
-      dispatch(toggleVisible({ id: id }))
+      dispatch(toggleVisible({ id }))
     },
   }
 }
@@ -130,7 +130,6 @@ class Playlist extends Component {
         />
 
         <div className="p-3">
-          <h2 className="panel">Layers ({numLayers})</h2>
           <SortableLayers
             pressDelay={150}
             onSortEnd={onLayerMoved}

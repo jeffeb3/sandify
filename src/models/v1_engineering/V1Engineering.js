@@ -1,17 +1,18 @@
-import Vicious1Vertices from './Vicious1Vertices'
-import Shape from '../Shape'
+import Vicious1Vertices from "./Vicious1Vertices"
+import Model from "../Model"
 
-export default class V1Engineering extends Shape {
+export default class V1Engineering extends Model {
   constructor() {
-    super('V1Engineering')
+    super("v1Engineering")
+    this.label = "V1Engineering"
   }
 
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
-        type: 'v1Engineering',
-      }
+        // no custom attributes
+      },
     }
   }
 
