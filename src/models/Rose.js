@@ -16,10 +16,11 @@ const options = {
 
 export default class Rose extends Model {
   constructor() {
-    super('rose')
+    super("rose")
     this.label = "Rose"
     this.link = "http://mathworld.wolfram.com/Rose.html"
-    this.linkText = "Wolfram Mathworld"
+    this.linkText = "Rose at Wolfram Mathworld"
+    this.startingAspectRatioLocked = false // force a square shape
   }
 
   getInitialState() {

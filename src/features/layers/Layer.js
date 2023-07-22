@@ -1,5 +1,5 @@
 import { getModelFromType } from "../../config/models"
-import { resizeVertices } from "@/common/geometry"
+import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 
 export const layerOptions = {
   name: {
@@ -69,6 +69,8 @@ export default class Layer {
   }
 
   getInitialState(props) {
+    const dimensions = this.model.initialDimensions(props)
+
     return {
       ...this.model.getInitialState(props),
       ...{
@@ -76,8 +78,8 @@ export default class Layer {
         connectionMethod: "line",
         x: 0.0,
         y: 0.0,
-        width: this.model.startingWidth,
-        height: this.model.startingHeight,
+        width: dimensions.width,
+        height: dimensions.height,
         rotation: 0,
         reverse: false,
         visible: true,
@@ -94,10 +96,12 @@ export default class Layer {
     const { width, height, x, y, rotation } = state.shape
     let vertices = this.model.getVertices(state)
 
+    if (this.model.autosize) {
+      vertices = resizeVertices(vertices, width, height, false)
+      centerOnOrigin(vertices)
+    }
+
     vertices.forEach((vertex) => {
-      if (this.model.autosize) {
-        vertices = resizeVertices(vertices, width, height, false)
-      }
       vertex.rotateDeg(-rotation)
       vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })

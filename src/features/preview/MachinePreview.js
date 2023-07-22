@@ -1,15 +1,15 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import Slider from 'rc-slider'
-import 'rc-slider/assets/index.css'
-import PreviewWindow from './PreviewWindow'
-import Downloader from '../exporter/Downloader'
-import { getCurrentLayerState } from '../layers/selectors'
-import { getLayers, getPreview } from '../store/selectors'
-import { updateLayer } from '../layers/layersSlice'
-import { updatePreview } from './previewSlice'
-import { getVerticesStats } from '../machine/selectors'
-import './MachinePreview.scss'
+import React, { Component } from "react"
+import { connect } from "react-redux"
+import Slider from "rc-slider"
+import "rc-slider/assets/index.css"
+import PreviewWindow from "./PreviewWindow"
+import Downloader from "../exporter/Downloader"
+import { getCurrentLayerState } from "../layers/selectors"
+import { getLayers, getPreview } from "../store/selectors"
+import { updateLayer } from "../layers/layersSlice"
+import { updatePreview } from "./previewSlice"
+import { getVerticesStats } from "../machine/selectors"
+import "./MachinePreview.scss"
 
 const mapStateToProps = (state, ownProps) => {
   const preview = getPreview(state)
@@ -27,7 +27,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onSlider: (value) => {
-      dispatch(updatePreview({sliderValue: value}))
+      dispatch(updatePreview({ sliderValue: value }))
     },
     onLayerChange: (attrs) => {
       dispatch(updateLayer(attrs))
@@ -36,23 +36,27 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       let attrs = { id: currentLayer.id }
 
       if (currentLayer.canMove) {
-        if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        if (
+          ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(
+            event.key,
+          )
+        ) {
           const delta = event.shiftKey ? 1 : 5
 
-          if (event.key === 'ArrowDown') {
+          if (event.key === "ArrowDown") {
             attrs.y = currentLayer.y - delta
-          } else if (event.key === 'ArrowUp') {
+          } else if (event.key === "ArrowUp") {
             attrs.y = currentLayer.y + delta
-          } else if (event.key === 'ArrowLeft') {
+          } else if (event.key === "ArrowLeft") {
             attrs.x = currentLayer.x - delta
-          } else if (event.key === 'ArrowRight') {
+          } else if (event.key === "ArrowRight") {
             attrs.x = currentLayer.x + delta
           }
 
           dispatch(updateLayer(attrs))
         }
       }
-    }
+    },
   }
 }
 
@@ -64,30 +68,42 @@ class MachinePreview extends Component {
 
   render() {
     return (
-      <div className="machine-preview d-flex flex-grow-1 flex-column" id="machine-preview">
+      <div
+        className="machine-preview d-flex flex-grow-1 flex-column"
+        id="machine-preview"
+      >
         <div className="flex-grow-1 d-flex flex-column">
-          <div id="preview-wrapper" className="preview-wrapper d-flex flex-column align-items-center" ref={(el) => { this.el = el }} tabIndex={0} onKeyDown={e => {
-            if (this.props.currentLayerSelected) {
-              this.props.onKeyDown(e, this.props.currentLayer)
-            }
-          }}>
+          <div
+            id="preview-wrapper"
+            className="preview-wrapper d-flex flex-column align-items-center"
+            ref={(el) => {
+              this.el = el
+            }}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (this.props.currentLayerSelected) {
+                this.props.onKeyDown(e, this.props.currentLayer)
+              }
+            }}
+          >
             <PreviewWindow />
           </div>
 
           <div className="mt-auto pt-2 bg-white d-flex align-items-center">
             <div className="flex-grow-1">
               <div className="mx-2">
-                Points: {this.props.verticesStats.numPoints}, Distance: {this.props.verticesStats.distance}
+                Points: {this.props.verticesStats.numPoints}, Distance:{" "}
+                {this.props.verticesStats.distance}
               </div>
 
               <div className="p-3">
-                  <Slider
-                    value={this.props.sliderValue}
-                    step={1}
-                    min={0.0}
-                    max={100.0}
-                    onChange={this.props.onSlider}
-                  />
+                <Slider
+                  value={this.props.sliderValue}
+                  step={1}
+                  min={0.0}
+                  max={100.0}
+                  onChange={this.props.onSlider}
+                />
               </div>
             </div>
             <Downloader />

@@ -35,7 +35,7 @@ export default class FractalSpirograph extends Model {
     this.label = "Fractal Spirograph"
     this.link =
       "https://benice-equation.blogspot.com/2012/01/fractal-spirograph.html"
-    this.linkText = "Fun math art (pictures) - benice equation"
+    this.linkText = "this blog post on benice equations"
   }
 
   getInitialState() {

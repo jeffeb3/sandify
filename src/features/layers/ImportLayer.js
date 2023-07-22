@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import { Button, Modal, Form, Accordion, Card } from "react-bootstrap"
 import { connect } from "react-redux"
 
+import { getMachine } from '@/features/store/selectors'
 import ThetaRhoImporter from "../importer/ThetaRhoImporter"
 import GCodeImporter from "../importer/GCodeImporter"
 import { addLayer } from "../layers/layersSlice"
@@ -10,6 +11,7 @@ import ReactGA from "react-ga"
 
 const mapStateToProps = (state, ownProps) => {
   return {
+    machineState: getMachine(state),
     showModal: ownProps.showModal,
   }
 }
@@ -19,11 +21,11 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     toggleModal: () => {
       ownProps.toggleModal()
     },
-    onLayerImport: (importProps) => {
+    onLayerImport: (props) => {
       const layer = new Layer("fileImport")
       const attrs = {
-        ...layer.getInitialState(importProps),
-        name: importProps.fileName,
+        ...layer.getInitialState(props),
+        name: props.fileName,
       }
       dispatch(addLayer(attrs))
     },
@@ -168,7 +170,11 @@ class ImportLayer extends Component {
   }
 
   onFileImported(importer, importerProps) {
-    this.props.onLayerImport(importerProps)
+    const layerProps = {
+      ...importerProps,
+      machine: this.props.machineState,
+    }
+    this.props.onLayerImport(layerProps)
 
     this.endTime = performance.now()
     ReactGA.timing({

@@ -1,3 +1,5 @@
+import { resizeVertices, dimensions } from "@/common/geometry"
+
 const options = []
 
 export default class Model {
@@ -8,7 +10,7 @@ export default class Model {
     Object.assign(this, {
       selectGroup: "Shapes",
       shouldCache: true,
-      autosize: true, // TODO: do we need this?
+      autosize: true,
       canMove: true,
       usesMachine: false,
       usesFonts: false,
@@ -16,6 +18,36 @@ export default class Model {
       effect: false,
       startingWidth: 100,
       startingHeight: 100,
+      startingAspectRatioLocked: true,
+    })
+  }
+
+  // calculates the initial dimensions of the model
+  initialDimensions(props) {
+    if (this.autosize) {
+      const vertices = this.initialVertices(props)
+
+      resizeVertices(
+        vertices,
+        this.startingWidth,
+        this.startingHeight,
+        this.startingAspectRatioLocked,
+      )
+
+      return dimensions(vertices)
+    } else {
+      return {
+        width: this.startingWidth,
+        height: this.startingHeight,
+      }
+    }
+  }
+
+  // returns an array of vertices used to calculate the initial width and height of a model
+  initialVertices(props) {
+    return this.getVertices({
+      shape: this.getInitialState(props),
+      creating: true,
     })
   }
 

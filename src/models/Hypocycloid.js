@@ -15,10 +15,10 @@ const options = {
 
 export default class Star extends Model {
   constructor() {
-    super('hypocycloid')
+    super("hypocycloid")
     this.label = "Web"
     this.link = "http://mathworld.wolfram.com/Hypocycloid.html"
-    this.linkText = "Wolfram Mathworld"
+    this.linkText = "Hypocycloid at Wolfram Mathworld"
   }
 
   getInitialState() {

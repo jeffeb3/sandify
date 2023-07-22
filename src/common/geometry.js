@@ -61,25 +61,45 @@ export const findBounds = (vertices) => {
   return [new Victor(loX, loY), new Victor(hiX, hiY)]
 }
 
-// resizes each vertex in a list to the specified dimensions. Will not stretch the shape.
-export const resizeVertices = (vertices, sizeX, sizeY) => {
-  let size = Math.max(sizeX, sizeY)
-  let bounds = findBounds(vertices)
-  let curveSize = Math.max(bounds[1].y - bounds[0].y, bounds[1].x - bounds[0].x)
-  let scale = size / curveSize
-  let scaledBounds = [
-    bounds[0].multiply({ x: scale, y: scale }),
-    bounds[1].multiply({ x: scale, y: scale }),
-  ]
-  let deltaX = scaledBounds[1].x - (scaledBounds[1].x - scaledBounds[0].x) / 2
-  let deltaY = scaledBounds[1].y - (scaledBounds[1].y - scaledBounds[0].y) / 2
+export const dimensions = (vertices) => {
+  const bounds = findBounds(vertices)
 
-  return vertices.map((vertex) =>
-    vertex
-      .clone()
-      .multiply({ x: scale, y: scale })
-      .add({ x: -deltaX, y: -deltaY }),
-  )
+  return {
+    width: Math.round(bounds[1].x - bounds[0].x, 0),
+    height: Math.round(bounds[1].y - bounds[0].y, 0),
+  }
+}
+
+// resizes each vertex in a list to the specified dimensions.
+// If lock = true, will not stretch the shape.
+// resizes each vertex in a list to the specified dimensions. Will not stretch the shape.
+export const resizeVertices = (vertices, sizeX, sizeY, lock = true) => {
+  let scaleX, scaleY, deltaX, deltaY
+  const bounds = findBounds(vertices)
+  const oldSizeX = bounds[1].x - bounds[0].x
+  const oldSizeY = bounds[1].y - bounds[0].y
+
+  if (lock) {
+    const size = Math.max(sizeX, sizeY)
+    const oldSize = Math.max(oldSizeX, oldSizeY)
+    scaleX = size / oldSize
+    scaleY = size / oldSize
+    bounds[0].multiply({ x: scaleX, y: scaleY })
+    bounds[1].multiply({ x: scaleX, y: scaleY })
+    deltaX = bounds[0].x / 2
+    deltaY = bounds[0].y / 2
+  } else {
+    scaleX = sizeX / oldSizeX
+    scaleY = sizeY / oldSizeY
+    deltaX = 0
+    deltaY = 0
+  }
+
+  vertices.forEach((vertex) => {
+    vertex.multiply({ x: scaleX, y: scaleY }).add({ x: -deltaX, y: -deltaY })
+  })
+
+  return vertices
 }
 
 // returns a vertex with x and y rounded to p number of digits

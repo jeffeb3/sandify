@@ -53,7 +53,7 @@ class LayerEditor extends Component {
       label: model.label,
     }
     const link = model.link
-    const linkText = model.linkText || link
+    const linkText = model.linkText || "here"
     const renderedModelOptions = Object.keys(modelOptions).map((key) => {
       return (
         <div
@@ -66,22 +66,17 @@ class LayerEditor extends Component {
     })
 
     const renderedLink = link ? (
-      <Row>
-        <Col sm={5}></Col>
-        <Col sm={7}>
-          <p className="mt-2">
-            See{" "}
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href={link}
-            >
-              {linkText}
-            </a>{" "}
-            for ideas.
-          </p>
-        </Col>
-      </Row>
+      <div className="mt-4">
+        See{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href={link}
+        >
+          {linkText}
+        </a>{" "}
+        for ideas.
+      </div>
     ) : undefined
     const renderedModelSelection = allowModelSelection && (
       <Row className="align-items-center">

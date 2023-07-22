@@ -15,10 +15,10 @@ const options = {
 
 export default class Epicycloid extends Model {
   constructor() {
-    super('epicycloid')
+    super("epicycloid")
     this.label = "Clover"
     this.link = "http://mathworld.wolfram.com/Epicycloid.html"
-    this.linkText = "Wolfram Mathworld"
+    this.linkText = "Epicycloid at Wolfram Mathworld"
   }
 
   getInitialState() {

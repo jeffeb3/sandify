@@ -1,4 +1,5 @@
 import Victor from "victor"
+import { dimensions } from '@/common/geometry'
 import Model from "./Model"
 
 const options = {
@@ -25,7 +26,7 @@ export default class FileImport extends Model {
     this.selectGroup = "import"
   }
 
-  getInitialState(importProps) {
+  getInitialState(props) {
     return {
       ...super.getInitialState(),
       ...{
@@ -34,44 +35,48 @@ export default class FileImport extends Model {
         vertices: [],
         comments: [],
       },
-      ...(importProps === undefined
+      ...(props === undefined
         ? {}
         : {
-            fileName: importProps.fileName,
-            vertices: importProps.vertices,
-            originalAspectRatio: importProps.originalAspectRatio,
-            comments: importProps.comments,
+            fileName: props.fileName,
+            vertices: props.vertices,
+            originalAspectRatio: props.originalAspectRatio,
+            comments: props.comments,
           }),
     }
   }
 
-  getVertices(state) {
-    if (state.shape.vertices.length < 1) {
-      // During initialization, this function gets called, but the machine isn't created right yet.
-      return [new Victor(0.0, 0.0), new Victor(0.0, 0.1)]
+  initialDimensions(props) {
+    return dimensions(this.initialVertices(props))
+  }
+
+  // returns an array of vertices used to calculate the initial width and height of a model;
+  // in this case, the props contain vertices newly imported from a file and we'll resize
+  // them to machine dimensions.
+  initialVertices(props) {
+    const { machine, vertices, originalAspectRatio } = props
+
+    let x_scale = (machine.maxX - machine.minX) / 2.0
+    let y_scale = (machine.maxY - machine.minY) / 2.0
+
+    if (!machine.rectangular) {
+      x_scale = y_scale = machine.maxRadius * 0.1
     }
 
-    let x_scale = (state.machine.maxX - state.machine.minX) / 2.0
-    let y_scale = (state.machine.maxY - state.machine.minY) / 2.0
-
-    if (!state.machine.rectangular) {
-      x_scale = y_scale = state.machine.maxRadius * 0.1
+    const machineAspectRatio = y_scale / x_scale
+    if (originalAspectRatio > machineAspectRatio) {
+      x_scale = (x_scale / originalAspectRatio) * machineAspectRatio
+    } else {
+      y_scale = (y_scale * originalAspectRatio) / machineAspectRatio
     }
 
-    if (state.shape.aspectRatio) {
-      const machine_aspect_ratio = y_scale / x_scale
-      if (state.shape.originalAspectRatio > machine_aspect_ratio) {
-        x_scale =
-          (x_scale / state.shape.originalAspectRatio) * machine_aspect_ratio
-      } else {
-        y_scale =
-          (y_scale * state.shape.originalAspectRatio) / machine_aspect_ratio
-      }
-    }
-
-    return state.shape.vertices.map((vertex) => {
+    return vertices.map((vertex) => {
       return new Victor(vertex.x * x_scale, vertex.y * y_scale)
     })
+  }
+
+  getVertices(state) {
+    return state.shape.vertices.map(vertex => new Victor(vertex.x, vertex.y))
   }
 
   getOptions() {

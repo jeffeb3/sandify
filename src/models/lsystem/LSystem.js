@@ -34,7 +34,7 @@ export default class LSystem extends Model {
     super("lsystem")
     this.label = "Fractal Line Writer"
     this.link = "https://en.wikipedia.org/wiki/L-system"
-    this.linkText = "L-systems on Wikipedia"
+    this.linkText = "L-systems at Wikipedia"
   }
 
   getInitialState() {

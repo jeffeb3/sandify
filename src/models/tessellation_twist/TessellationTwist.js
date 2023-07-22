@@ -9,12 +9,10 @@ const vecTriangle = [
   new Victor(0.85, -0.4907477295),
   new Victor(0.0, 0.9814954573),
 ]
-
 const vecSquare = [
   new Victor(-0.7, -0.7),
   new Victor(0.7, 0.7),
   new Victor(-0.7, 0.7),
-
   new Victor(-0.7, -0.7),
   new Victor(0.7, 0.7),
   new Victor(0.7, -0.7),
@@ -103,7 +101,8 @@ export default class TessellationTwist extends Model {
   }
 
   getShapeVertices(numSides) {
-    let vertices = []
+    const vertices = []
+
     for (let i = 0; i <= numSides; i++) {
       let angle = ((Math.PI * 2.0) / numSides) * (0.5 + i)
       let angle2 = ((Math.PI * 2.0) / numSides) * (0.5 + ((i + 1) % numSides))
@@ -112,6 +111,7 @@ export default class TessellationTwist extends Model {
       vertices.push(new Victor(Math.cos(angle), Math.sin(angle)))
       vertices.push(new Victor(Math.cos(angle2), Math.sin(angle2)))
     }
+
     return vertices
   }
 
@@ -226,7 +226,9 @@ export default class TessellationTwist extends Model {
         point.visited = true
       }
     })
-    return walkedVertices
+
+    // cloned because some vertices are included multiple times and we need to de-dupe
+    return walkedVertices.map((vertex) => vertex.clone())
   }
 
   getOptions() {

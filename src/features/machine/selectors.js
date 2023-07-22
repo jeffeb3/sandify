@@ -12,6 +12,7 @@ import {
   makeGetNonEffectLayerIndex,
 } from "../layers/selectors"
 import Layer from "../layers/Layer"
+import { getModelFromType } from "@/config/models"
 import { getCachedSelector } from "../store/selectors"
 import { rotate, offset } from "../../common/geometry"
 import { log } from "../../common/util"
@@ -47,8 +48,7 @@ const makeGetLayerFonts = (layerId) => {
     [getCachedSelector(makeGetLayer, layerId), getLoadedFonts],
     (layerState, fonts) => {
       log("makeGetLayerFonts", layerId)
-      const layer = new Layer(layerState.type)
-      return layer.usesFonts ? fonts : null
+      return getModelFromType(layerState.type).usesFonts ? fonts : null
     },
   )
 }
@@ -71,7 +71,7 @@ const makeGetLayerVertices = (layerId) => {
       const layer = new Layer(layerState.type)
 
       // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
-      if (layer.shouldCache) {
+      if (layer.model.shouldCache) {
         const key = getCacheKey(state)
         let vertices = cache.get(key)
 
@@ -149,17 +149,13 @@ export const makeGetConnectorVertices = (startId, endId) => {
 
 // transform a given list of vertices as needed to be displayed in a preview layer
 const previewTransform = (layerState, vertices) => {
-  const konvaScale = 1 //layer.model.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
-  const konvaDeltaX = ((konvaScale - 1) / 2) * layerState.width
-  const konvaDeltaY = ((konvaScale - 1) / 2) * layerState.height
-
   return vertices.map((vertex) => {
     // store original coordinates before transforming
-    let previewVertex = offset(
-      rotate(offset(vertex, -layerState.x, -layerState.y), layerState.rotation),
-      konvaDeltaX,
-      -konvaDeltaY,
+    let previewVertex = rotate(
+      offset(vertex, -layerState.x, -layerState.y),
+      layerState.rotation,
     )
+
     previewVertex.origX = vertex.x
     previewVertex.origY = vertex.y
 
@@ -339,13 +335,10 @@ export const makeGetPreviewTrackVertices = (layerId) => {
     getCachedSelector(makeGetLayer, layerId),
     (layerState) => {
       log("makeGetPreviewTrackVertices", layerId)
-      //      const numLoops = layer.numLoops
-      const konvaScale = 1 //layer.model.autosize ? 5 : 1 // our transformer is 5 times bigger than the actual starting shape
-      const konvaDeltaX = ((konvaScale - 1) / 2) * layerState.width
-      const konvaDeltaY = ((konvaScale - 1) / 2) * layerState.height
       let trackVertices = []
 
       // TODO: re-implement display of track vertices
+      //      const numLoops = layer.numLoops
       //      for (var i=0; i<numLoops; i++) {
       //        if (layer.trackEnabled) {
       //          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
@@ -353,13 +346,9 @@ export const makeGetPreviewTrackVertices = (layerId) => {
       //      }
 
       return trackVertices.map((vertex) => {
-        return offset(
-          rotate(
-            offset(vertex, -layerState.x, -layerState.y),
-            layerState.rotation,
-          ),
-          konvaDeltaX,
-          -konvaDeltaY,
+        return rotate(
+          offset(vertex, -layerState.x, -layerState.y),
+          layerState.rotation,
         )
       })
     },

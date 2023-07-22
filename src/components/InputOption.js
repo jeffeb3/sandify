@@ -44,6 +44,7 @@ class InputOption extends Component {
         min={!isNaN(minimum) ? minimum : ""}
         max={!isNaN(maximum) ? maximum : ""}
         value={data[optionKey]}
+        autoComplete="off"
         plaintext={option.plainText}
         onChange={(event) => {
           let attrs = {}
