@@ -2,7 +2,7 @@ import React from "react"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import {
-  makeGetPreviewTrackVertices,
+  //  makeGetPreviewTrackVertices,
   makeGetPreviewVertices,
   getSliderColors,
   getVertexOffsets,
@@ -41,19 +41,18 @@ const PreviewLayer = (ownProps) => {
     const preview = getPreview(state)
 
     return {
-      layer: layerState,
+      layerState,
       start: index === 0,
       end: index === numLayers - 1,
       currentLayer: getCurrentLayerState(state),
-      trackVertices: getCachedSelector(
-        makeGetPreviewTrackVertices,
-        layerState.id,
-      )(state),
+      //      trackVertices: getCachedSelector(
+      //        makeGetPreviewTrackVertices,
+      //        layerState.id,
+      //      )(state),
       vertices: getCachedSelector(makeGetPreviewVertices, layerState.id)(state),
       allVertices: getAllComputedVertices(state),
       selected: layers.selected,
       sliderValue: preview.sliderValue,
-      showTrack: true,
       colors: getSliderColors(state),
       offsets: getVertexOffsets(state),
       offsetId: layerState.id,
@@ -63,24 +62,29 @@ const PreviewLayer = (ownProps) => {
   }
 
   const props = useSelector(mapStateToProps, shallowEqual)
-  const layer = new Layer(props.layer.type)
+  const {
+    layerState,
+    selected,
+    sliderValue,
+    vertices,
+    offsets,
+    start,
+    end,
+    currentLayer,
+    colors,
+    bounds,
+  } = props
+  const layer = new Layer(layerState.type)
   const model = layer.model
   const dispatch = useDispatch()
-  const width = props.layer.width
-  const height = props.layer.height
+  const width = layerState.width
+  const height = layerState.height
   const selectedColor = "yellow"
   const unselectedColor = "rgba(195, 214, 230, 0.65)"
   const backgroundSelectedColor = "#6E6E00"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
-
-  // our transformer is 5 times bigger than the actual starting shape, so we need
-  // to account for it when drawing the preview; if you change this value, be sure
-  // to change it in machine/selectors#getPreviewVertices,getPreviewTrackVertices
-  const konvaScale = 1 //layer.model.autosize ? 5 : 1
-  const konvaSizeX = width * konvaScale
-  const konvaSizeY = height * konvaScale
-  const isSelected = props.selected === ownProps.id
-  const isSliding = props.sliderValue !== 0
+  const isSelected = selected === ownProps.id
+  const isSliding = sliderValue !== 0
   const helper = new PreviewHelper(props)
 
   // draws a colored path when user is using slider
@@ -92,17 +96,17 @@ const PreviewLayer = (ownProps) => {
     context.beginPath()
     context.lineWidth = 1
     context.strokeStyle = currentColor
-    helper.moveTo(context, props.vertices[0])
+    helper.moveTo(context, vertices[0])
     context.stroke()
 
     context.beginPath()
-    for (let i = 1; i < props.vertices.length; i++) {
+    for (let i = 1; i < vertices.length; i++) {
       if (isSliding) {
-        let absoluteI = i + props.offsets[props.layer.id].start
+        let absoluteI = i + offsets[layerState.id].start
         let pathColor =
           absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
-        currentColor = props.colors[absoluteI] || pathColor
+        currentColor = colors[absoluteI] || pathColor
         if (currentColor !== oldColor) {
           context.stroke()
           context.strokeStyle = currentColor
@@ -111,51 +115,53 @@ const PreviewLayer = (ownProps) => {
         }
       }
 
-      helper.moveTo(context, props.vertices[i - 1])
-      helper.lineTo(context, props.vertices[i])
+      helper.moveTo(context, vertices[i - 1])
+      helper.lineTo(context, vertices[i])
     }
     context.stroke()
   }
 
   function drawStartAndEndPoints(context) {
-    const start = props.vertices[0]
-    const end = props.vertices[props.vertices.length - 1]
+    const start = vertices[0]
+    const end = vertices[vertices.length - 1]
 
     context.beginPath()
     context.strokeStyle = "green"
-    helper.dot(context, start, props.start ? 5 : 3)
+    helper.dot(context, start, start ? 5 : 3)
     helper.markOriginalCoordinates(context, start)
 
     if (end) {
       context.beginPath()
       context.strokeStyle = "red"
-      helper.dot(context, end, props.end ? 5 : 3)
+      helper.dot(context, end, end ? 5 : 3)
       helper.markOriginalCoordinates(context, end)
     }
   }
 
+  // TODO: fix or remove
   // draws the line representing the track the path follows
-  function drawTrackVertices(context) {
-    context.beginPath()
-    context.lineWidth = 4.0
-    context.strokeStyle = "green"
-    helper.moveTo(context, props.trackVertices[0])
-    for (let i = 0; i < props.trackVertices.length; i++) {
-      helper.lineTo(context, props.trackVertices[i])
-    }
-    context.stroke()
-  }
+  //  function drawTrackVertices(context) {
+  //    context.beginPath()
+  //    context.lineWidth = 4.0
+  //    context.strokeStyle = "green"
+  //    helper.moveTo(context, props.trackVertices[0])
+  //    for (let i = 0; i < props.trackVertices.length; i++) {
+  //      helper.lineTo(context, props.trackVertices[i])
+  //    }
+  //    context.stroke()
+  //  }
 
   // used by Konva to draw our custom shape
   function sceneFunc(context, shape) {
-    if (props.vertices && props.vertices.length > 0) {
-      if (props.trackVertices && props.trackVertices.length > 0) {
-        drawTrackVertices(context)
-      }
+    if (vertices && vertices.length > 0) {
+      // TODO: fix or remove
+      //      if (props.trackVertices && props.trackVertices.length > 0) {
+      //        drawTrackVertices(context)
+      //      }
 
-      drawLayerVertices(context, props.bounds)
+      drawLayerVertices(context, bounds)
 
-      if (props.start || props.end || isSelected) {
+      if (start || end || isSelected) {
         drawStartAndEndPoints(context)
       }
       helper.drawSliderEndPoint(context)
@@ -170,43 +176,43 @@ const PreviewLayer = (ownProps) => {
   }
 
   function onChange(attrs) {
-    attrs.id = props.layer.id
+    attrs.id = layerState.id
     dispatch(updateLayer(attrs))
   }
 
   function onSelect() {
     // deselection is currently disabled
-    // dispatch(setSelectedLayer(props.selected == null ? props.currentLayer.id : null))
+    // dispatch(setSelectedLayer(selected == null ? currentLayer.id : null))
   }
 
   const shapeRef = React.createRef()
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (props.layer.visible && isSelected && model.canChangeSize(props.layer)) {
+    if (layerState.visible && isSelected && model.canChangeSize(layerState)) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isSelected, props.layer, model.canMove, shapeRef, trRef])
+  }, [isSelected, layerState, model.canMove, shapeRef, trRef])
 
   return (
     <React.Fragment>
-      {props.layer.visible && (
+      {layerState.visible && (
         <Shape
-          draggable={model.canMove && props.layer.id === props.currentLayer.id}
-          width={konvaSizeX}
-          height={konvaSizeY}
-          offsetY={konvaSizeY / 2}
-          offsetX={konvaSizeX / 2}
-          x={props.layer.x || 0}
-          y={-props.layer.y || 0}
+          {...props}
+          draggable={model.canMove && layerState.id === currentLayer.id}
+          width={width}
+          height={height}
+          offsetY={height / 2}
+          offsetX={width / 2}
+          x={layerState.x || 0}
+          y={-layerState.y || 0}
           onClick={onSelect}
           onTap={onSelect}
           ref={shapeRef}
-          {...props}
           strokeWidth={1}
-          rotation={props.layer.rotation || 0}
+          rotation={layerState.rotation || 0}
           sceneFunc={sceneFunc}
           hitFunc={hitFunc}
           onDragStart={(e) => {
@@ -233,29 +239,27 @@ const PreviewLayer = (ownProps) => {
 
             onChange({
               dragging: false,
-              width: roundP(Math.max(5, props.layer.width * scaleX), 0),
-              height: roundP(Math.max(5, props.layer.height * scaleY), 0),
+              width: roundP(Math.max(5, layerState.width * scaleX), 0),
+              height: roundP(Math.max(5, layerState.height * scaleY), 0),
               rotation: roundP(node.rotation(), 0),
             })
           }}
         />
       )}
-      {props.layer.visible &&
-        isSelected &&
-        model.canChangeSize(props.layer) && (
-          <Transformer
-            ref={trRef}
-            centeredScaling={true}
-            resizeEnabled={model.canResize}
-            rotateEnabled={model.canRotate(props.layer)}
-            rotationSnaps={[0, 90, 180, 270]}
-            enabledAnchors={
-              !model.canChangeHeight(props.layer)
-                ? ["top-left", "top-right", "bottom-left", "bottom-right"]
-                : null
-            }
-          />
-        )}
+      {layerState.visible && isSelected && model.canChangeSize(layerState) && (
+        <Transformer
+          ref={trRef}
+          centeredScaling={true}
+          resizeEnabled={model.canResize}
+          rotateEnabled={model.canRotate(layerState)}
+          rotationSnaps={[0, 90, 180, 270]}
+          enabledAnchors={
+            !model.canChangeHeight(layerState)
+              ? ["top-left", "top-right", "bottom-left", "bottom-right"]
+              : null
+          }
+        />
+      )}
     </React.Fragment>
   )
 }

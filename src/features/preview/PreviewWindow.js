@@ -56,9 +56,9 @@ class PreviewWindow extends Component {
   componentDidMount() {
     const wrapper = document.getElementById("preview-wrapper")
 
-    this.throttledResize = throttle(this.resize, 200, { trailing: true }).bind(
-      this,
-    )
+    this.throttledResize = throttle(this.resize, 200, {
+      trailing: true,
+    }).bind(this)
     window.addEventListener(
       "resize",
       () => {
@@ -90,7 +90,6 @@ class PreviewWindow extends Component {
     const { minX, minY, maxX, maxY } = this.props
     const radius = this.props.maxRadius
     const scale = this.relativeScale(this.props)
-    const reduceScale = 0.9
     const width = this.props.use_rect ? maxX - minX : radius * 2
     const height = this.props.use_rect ? maxY - minY : radius * 2
     const visibilityClass = `preview-wrapper ${
@@ -118,12 +117,12 @@ class PreviewWindow extends Component {
         {({ store }) => (
           <Stage
             className={visibilityClass}
-            scaleX={scale * reduceScale}
-            scaleY={scale * reduceScale}
+            scaleX={scale}
+            scaleY={scale}
             height={height * scale}
             width={width * scale}
-            offsetX={(-width / 2) * (1 / reduceScale)}
-            offsetY={(-height / 2) * (1 / reduceScale)}
+            offsetX={-width / 2}
+            offsetY={-height / 2}
             onWheel={(e) => {
               e.evt.preventDefault()
               if (Math.abs(e.evt.deltaY) > 0) {

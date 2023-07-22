@@ -4,8 +4,8 @@ import Victor from "victor"
 export default class PreviewHelper {
   constructor(props) {
     this.props = props
-    this.width = this.props.layer.width || 0
-    this.height = this.props.layer.height || 0
+    this.width = this.props.layerState.width || 0
+    this.height = this.props.layerState.height || 0
   }
 
   toPixels(vertex) {
