@@ -4,7 +4,7 @@ import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import PreviewWindow from "./PreviewWindow"
 import Downloader from "../exporter/Downloader"
-import { getCurrentLayerState } from "../layers/selectors"
+import { getCurrentLayer } from "../layers/selectors"
 import { getLayers, getPreview } from "../store/selectors"
 import { updateLayer } from "../layers/layersSlice"
 import { updatePreview } from "./previewSlice"
@@ -13,7 +13,7 @@ import "./MachinePreview.scss"
 
 const mapStateToProps = (state, ownProps) => {
   const preview = getPreview(state)
-  const current = getCurrentLayerState(state)
+  const current = getCurrentLayer(state)
   const layers = getLayers(state)
 
   return {

@@ -4,11 +4,11 @@ import { connect } from 'react-redux'
 
 import { getLayers } from '../store/selectors'
 import { copyLayer, updateLayers } from '../layers/layersSlice'
-import { getCurrentLayerState } from '../layers/selectors'
+import { getCurrentLayer } from '../layers/selectors'
 
 const mapStateToProps = (state, ownProps) => {
   const layers = getLayers(state)
-  const current = getCurrentLayerState(state)
+  const current = getCurrentLayer(state)
 
   return {
     copyLayerName: layers.copyLayerName || current.name,

@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect'
-import { getAllLayerStates } from '../../features/layers/selectors'
+import { getAllLayers } from '../../features/layers/selectors'
 import CommentExporter from './CommentExporter'
 import { log } from '../../common/util'
 import { getApp, getExporter, getMachine } from '../store/selectors'
@@ -7,7 +7,7 @@ import { getApp, getExporter, getMachine } from '../store/selectors'
 export const getComments = createSelector(
   [
       getApp,
-      getAllLayerStates,
+      getAllLayers,
       getExporter,
       getMachine,
   ],

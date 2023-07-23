@@ -32,17 +32,17 @@ export const getVisibleOrderedLayerIds = createSelector(
    }
  )
 
-export const getCurrentLayerState = createSelector(
+export const getCurrentLayer = createSelector(
   [ getLayersById, getCurrentLayerId ],
   (layers, current) => {
     return layers[current]
   }
 )
 
-export const getAllLayerStates = createSelector(
+export const getAllLayers = createSelector(
   [ getOrderedLayerIds, getLayersById ],
   (layerIds, layersById) => {
-    log("getAllLayerStates")
+    log("getAllLayers")
     return layerIds.map(id => layersById[id])
   }
 )
@@ -58,7 +58,7 @@ export const getNumLayers = createSelector(
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const getKonvaLayerIds = createSelector(
-  [ getCurrentLayerState, getVisibleOrderedLayerIds ],
+  [ getCurrentLayer, getVisibleOrderedLayerIds ],
   (currentLayer, visibleLayerIds) => {
       const kIds = visibleLayerIds.filter(id => id !== currentLayer.id)
       if (currentLayer.visible) {

@@ -156,12 +156,12 @@ const layersSlice = createSlice({
     },
     restoreDefaults(state, action) {
       const id = action.payload
-      const currentLayerState = state.byId[id]
-      const layer = new Layer(currentLayerState.type)
+      const currentLayer = state.byId[id]
+      const layer = new Layer(currentLayer.type)
 
       state.byId[id] = {
         id,
-        name: currentLayerState.name,
+        name: currentLayer.name,
         ...layer.getInitialState(),
       }
     },
@@ -178,26 +178,25 @@ const layersSlice = createSlice({
     },
     changeModelType(state, action) {
       const { type, id } = action.payload
-      const newLayer = new Layer(type)
-      const layerState = state.byId[id]
-      const newLayerState = newLayer.getInitialState()
+      const newLayer = new Layer(type).getInitialState()
+      const layer = state.byId[id]
 
-      Object.keys(newLayerState).forEach((attr) => {
+      Object.keys(newLayer).forEach((attr) => {
         if (
           !notCopiedWhenTypeChanges.includes(attr) &&
-          layerState[attr] != undefined
+          layer[attr] != undefined
         ) {
-          newLayerState[attr] = layerState[attr]
+          newLayer[attr] = layer[attr]
         }
       })
 
-      newLayerState.id = id
+      newLayer.id = id
       if (!newLayer.canMove) {
-        newLayerState.x = 0
-        newLayerState.y = 0
+        newLayer.x = 0
+        newLayer.y = 0
       }
 
-      state.byId[id] = newLayerState
+      state.byId[id] = newLayer
     },
     setNewEffectType(state, action) {
       let attrs = { newEffectType: action.payload }

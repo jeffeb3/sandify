@@ -7,11 +7,11 @@ import Footer from './Footer'
 import LayerEditor from '../layers/LayerEditor'
 import Playlist from '../layers/Playlist'
 import { chooseInput } from '../app/appSlice'
-import { getCurrentLayerState } from '../layers/selectors'
+import { getCurrentLayer } from '../layers/selectors'
 import { loadFont, supportedFonts } from '../fonts/fontsSlice'
 
 const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayerState(state)
+  const layer = getCurrentLayer(state)
 
   return {
     layer: layer

@@ -6,7 +6,7 @@ import { setPreviewSize, updatePreview } from "./previewSlice"
 import { updateLayer } from "../layers/layersSlice"
 import { getMachine, getLayers, getPreview } from "../store/selectors"
 import {
-  getCurrentLayerState,
+  getCurrentLayer,
   getKonvaLayerIds,
   getVisibleNonEffectIds,
   isDragging,
@@ -22,7 +22,7 @@ const mapStateToProps = (state, ownProps) => {
 
   return {
     layers,
-    currentLayer: getCurrentLayerState(state),
+    currentLayer: getCurrentLayer(state),
     konvaIds: getKonvaLayerIds(state),
     layerIds: getVisibleNonEffectIds(state),
     use_rect: machine.rectangular,

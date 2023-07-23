@@ -12,8 +12,9 @@ import {
 import { updateLayer } from "../layers/layersSlice"
 import { getLayers, getPreview } from "../store/selectors"
 import Layer from "@/features/layers/Layer"
+import { getModelFromType } from "@/config/models"
 import {
-  getCurrentLayerState,
+  getCurrentLayer,
   makeGetLayerIndex,
   makeGetLayer,
   getNumVisibleLayers,
@@ -33,29 +34,29 @@ const PreviewLayer = (ownProps) => {
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
     const layers = getLayers(state)
-    const layerState =
+    const layer =
       getCachedSelector(makeGetLayer, ownProps.id)(state) ||
-      getCurrentLayerState(state)
-    const index = getCachedSelector(makeGetLayerIndex, layerState.id)(state)
+      getCurrentLayer(state)
+    const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
     const numLayers = getNumVisibleLayers(state)
     const preview = getPreview(state)
 
     return {
-      layerState,
+      layer,
       start: index === 0,
       end: index === numLayers - 1,
-      currentLayer: getCurrentLayerState(state),
+      currentLayer: getCurrentLayer(state),
       //      trackVertices: getCachedSelector(
       //        makeGetPreviewTrackVertices,
       //        layerState.id,
       //      )(state),
-      vertices: getCachedSelector(makeGetPreviewVertices, layerState.id)(state),
+      vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
       allVertices: getAllComputedVertices(state),
       selected: layers.selected,
       sliderValue: preview.sliderValue,
       colors: getSliderColors(state),
       offsets: getVertexOffsets(state),
-      offsetId: layerState.id,
+      offsetId: layer.id,
       bounds: getSliderBounds(state),
       markCoordinates: false, // debug feature: set to true to see coordinates while drawing
     }
@@ -63,7 +64,7 @@ const PreviewLayer = (ownProps) => {
 
   const props = useSelector(mapStateToProps, shallowEqual)
   const {
-    layerState,
+    layer,
     selected,
     sliderValue,
     vertices,
@@ -74,11 +75,11 @@ const PreviewLayer = (ownProps) => {
     colors,
     bounds,
   } = props
-  const layer = new Layer(layerState.type)
-  const model = layer.model
+  //const layer = new Layer(layerState.type)
+  const model = getModelFromType(layer.type)
   const dispatch = useDispatch()
-  const width = layerState.width
-  const height = layerState.height
+  const width = layer.width
+  const height = layer.height
   const selectedColor = "yellow"
   const unselectedColor = "rgba(195, 214, 230, 0.65)"
   const backgroundSelectedColor = "#6E6E00"
@@ -102,7 +103,7 @@ const PreviewLayer = (ownProps) => {
     context.beginPath()
     for (let i = 1; i < vertices.length; i++) {
       if (isSliding) {
-        let absoluteI = i + offsets[layerState.id].start
+        let absoluteI = i + offsets[layer.id].start
         let pathColor =
           absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
@@ -176,7 +177,7 @@ const PreviewLayer = (ownProps) => {
   }
 
   function onChange(attrs) {
-    attrs.id = layerState.id
+    attrs.id = layer.id
     dispatch(updateLayer(attrs))
   }
 
@@ -189,30 +190,30 @@ const PreviewLayer = (ownProps) => {
   const trRef = React.createRef()
 
   React.useEffect(() => {
-    if (layerState.visible && isSelected && model.canChangeSize(layerState)) {
+    if (layer.visible && isSelected && model.canChangeSize(layer)) {
       // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isSelected, layerState, model.canMove, shapeRef, trRef])
+  }, [isSelected, layer, model.canMove, shapeRef, trRef])
 
   return (
     <React.Fragment>
-      {layerState.visible && (
+      {layer.visible && (
         <Shape
           {...props}
-          draggable={model.canMove && layerState.id === currentLayer.id}
+          draggable={model.canMove && layer.id === currentLayer.id}
           width={width}
           height={height}
           offsetY={height / 2}
           offsetX={width / 2}
-          x={layerState.x || 0}
-          y={-layerState.y || 0}
+          x={layer.x || 0}
+          y={-layer.y || 0}
           onClick={onSelect}
           onTap={onSelect}
           ref={shapeRef}
           strokeWidth={1}
-          rotation={layerState.rotation || 0}
+          rotation={layer.rotation || 0}
           sceneFunc={sceneFunc}
           hitFunc={hitFunc}
           onDragStart={(e) => {
@@ -239,22 +240,22 @@ const PreviewLayer = (ownProps) => {
 
             onChange({
               dragging: false,
-              width: roundP(Math.max(5, layerState.width * scaleX), 0),
-              height: roundP(Math.max(5, layerState.height * scaleY), 0),
+              width: roundP(Math.max(5, layer.width * scaleX), 0),
+              height: roundP(Math.max(5, layer.height * scaleY), 0),
               rotation: roundP(node.rotation(), 0),
             })
           }}
         />
       )}
-      {layerState.visible && isSelected && model.canChangeSize(layerState) && (
+      {layer.visible && isSelected && model.canChangeSize(layer) && (
         <Transformer
           ref={trRef}
           centeredScaling={true}
           resizeEnabled={model.canResize}
-          rotateEnabled={model.canRotate(layerState)}
+          rotateEnabled={model.canRotate(layer)}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={
-            !model.canChangeHeight(layerState)
+            !model.canChangeHeight(layer)
               ? ["top-left", "top-right", "bottom-left", "bottom-right"]
               : null
           }

@@ -33,10 +33,10 @@ const getCacheKey = (state) => {
 const makeGetLayerMachine = (layerId) => {
   return createSelector(
     [getCachedSelector(makeGetLayer, layerId), getMachine],
-    (layerState, machine) => {
+    (layer, machine) => {
       log("makeGetLayerMachine", layerId)
-      const layer = new Layer(layerState.type)
-      return layer.model.usesMachine ? machine : null
+      const model = getModelFromType(layer.type)
+      return model.usesMachine ? machine : null
     },
   )
 }
@@ -46,9 +46,9 @@ const makeGetLayerMachine = (layerId) => {
 const makeGetLayerFonts = (layerId) => {
   return createSelector(
     [getCachedSelector(makeGetLayer, layerId), getLoadedFonts],
-    (layerState, fonts) => {
+    (layer, fonts) => {
       log("makeGetLayerFonts", layerId)
-      return getModelFromType(layerState.type).usesFonts ? fonts : null
+      return getModelFromType(layer.type).usesFonts ? fonts : null
     },
   )
 }
@@ -61,22 +61,22 @@ const makeGetLayerVertices = (layerId) => {
       getCachedSelector(makeGetLayerMachine, layerId),
       getCachedSelector(makeGetLayerFonts, layerId),
     ],
-    (layerState, machine, fonts) => {
+    (layer, machine, fonts) => {
       const state = {
-        shape: layerState,
+        shape: layer,
         machine,
         fonts,
       }
       log("makeGetLayerVertices", layerId)
-      const layer = new Layer(layerState.type)
+      const layerInstance = new Layer(layer.type)
 
       // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
-      if (layer.model.shouldCache) {
+      if (layerInstance.model.shouldCache) {
         const key = getCacheKey(state)
         let vertices = cache.get(key)
 
         if (!vertices) {
-          vertices = layer.getVertices(state)
+          vertices = layerInstance.getVertices(state)
 
           if (vertices.length > 1) {
             cache.set(key, vertices)
@@ -148,12 +148,12 @@ export const makeGetConnectorVertices = (startId, endId) => {
 }
 
 // transform a given list of vertices as needed to be displayed in a preview layer
-const previewTransform = (layerState, vertices) => {
+const previewTransform = (layer, vertices) => {
   return vertices.map((vertex) => {
     // store original coordinates before transforming
     let previewVertex = rotate(
-      offset(vertex, -layerState.x, -layerState.y),
-      layerState.rotation,
+      offset(vertex, -layer.x, -layer.y),
+      layer.rotation,
     )
 
     previewVertex.origX = vertex.x
@@ -333,7 +333,7 @@ export const getSliderColors = createSelector(
 export const makeGetPreviewTrackVertices = (layerId) => {
   return createSelector(
     getCachedSelector(makeGetLayer, layerId),
-    (layerState) => {
+    (layer) => {
       log("makeGetPreviewTrackVertices", layerId)
       let trackVertices = []
 
@@ -347,8 +347,8 @@ export const makeGetPreviewTrackVertices = (layerId) => {
 
       return trackVertices.map((vertex) => {
         return rotate(
-          offset(vertex, -layerState.x, -layerState.y),
-          layerState.rotation,
+          offset(vertex, -layer.x, -layer.y),
+          layer.rotation,
         )
       })
     },
