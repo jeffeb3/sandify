@@ -2,20 +2,19 @@ import LRUCache from "lru-cache"
 import { createSelector } from "reselect"
 import Color from "color"
 import { transformShapes, polishVertices, getMachineInstance } from "./computer"
-import { getMachine, getState, getPreview } from "../store/selectors"
-import { getLoadedFonts } from "../fonts/selectors"
+import { getMachineState, getState, getPreviewState } from "../store/selectors"
+import { createCachedSelector } from "re-reselect"
 import {
-  makeGetLayer,
+  getLayer,
   getNumVisibleLayers,
   getVisibleNonEffectIds,
-  makeGetEffects,
-  makeGetNonEffectLayerIndex,
+  getLayerEffects,
+  getNonEffectLayerIndex,
 } from "../layers/selectors"
 import Layer from "../layers/Layer"
 import { getModelFromType } from "@/config/models"
-import { getCachedSelector } from "../store/selectors"
 import { rotate, offset } from "../../common/geometry"
-import { log } from "../../common/util"
+import { log } from "../../common/debugging"
 
 const cache = new LRUCache({
   length: (n, key) => {
@@ -30,122 +29,65 @@ const getCacheKey = (state) => {
 
 // by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
-const makeGetLayerMachine = (layerId) => {
-  return createSelector(
-    [getCachedSelector(makeGetLayer, layerId), getMachine],
-    (layer, machine) => {
-      log("makeGetLayerMachine", layerId)
-      const model = getModelFromType(layer.type)
-      return model.usesMachine ? machine : null
-    },
-  )
-}
 
-// by returning null for shapes which don't use fonts, this selector will ensure
-// transformed vertices are not redrawn when fonts are loaded
-const makeGetLayerFonts = (layerId) => {
-  return createSelector(
-    [getCachedSelector(makeGetLayer, layerId), getLoadedFonts],
-    (layer, fonts) => {
-      log("makeGetLayerFonts", layerId)
-      return getModelFromType(layer.type).usesFonts ? fonts : null
-    },
-  )
-}
+export const getLayerMachine = createCachedSelector(
+  getLayer,
+  getMachineState,
+  (layer, machine) => {
+    const model = getModelFromType(layer.type)
+    return model.usesMachine ? machine : null
+  },
+)((state, id) => id)
 
 // creates a selector that returns shape vertices for a given layer
-const makeGetLayerVertices = (layerId) => {
-  return createSelector(
-    [
-      getCachedSelector(makeGetLayer, layerId),
-      getCachedSelector(makeGetLayerMachine, layerId),
-      getCachedSelector(makeGetLayerFonts, layerId),
-    ],
-    (layer, machine, fonts) => {
-      const state = {
-        shape: layer,
-        machine,
-        fonts,
-      }
-      log("makeGetLayerVertices", layerId)
-      const layerInstance = new Layer(layer.type)
+export const getLayerVertices = createCachedSelector(
+  getLayer,
+  getLayerMachine,
+  (layer, machine) => {
+    const state = {
+      shape: layer,
+      machine,
+    }
+    log("getLayerVertices", layer.id)
+    const layerInstance = new Layer(layer.type)
 
-      // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
-      if (layerInstance.model.shouldCache) {
-        const key = getCacheKey(state)
-        let vertices = cache.get(key)
+    // TODO: fix this; move cache into model? Should be caching vertices only, not transforms
+    if (layerInstance.model.shouldCache) {
+      const key = getCacheKey(state)
+      let vertices = cache.get(key)
 
-        if (!vertices) {
-          vertices = layerInstance.getVertices(state)
+      if (!vertices) {
+        vertices = layerInstance.getVertices(state)
 
-          if (vertices.length > 1) {
-            cache.set(key, vertices)
-            log("caching shape", cache.length + " " + cache.itemCount)
-          }
+        if (vertices.length > 1) {
+          cache.set(key, vertices)
+          log(
+            `caching shape - ${cache.length} vertices / ${cache.itemCount} items`,
+          )
         }
+      }
 
-        return vertices
+      return vertices
+    } else {
+      if (!state.shape.dragging && state.shape.effect) {
+        return []
       } else {
-        if (!state.shape.dragging && state.shape.effect) {
-          return []
-        } else {
-          return layer.getVertices(state)
-        }
+        return layer.getVertices(state)
       }
-    },
-  )
-}
+    }
+  },
+)((state, id) => id)
 
 // creates a selector that returns transformed vertices for a given layer
-const makeGetTransformedVertices = (layerId) => {
-  return createSelector(
-    [
-      getCachedSelector(makeGetLayerVertices, layerId),
-      getCachedSelector(makeGetLayer, layerId),
-      getCachedSelector(makeGetEffects, layerId),
-    ],
-    (vertices, layer, effects, fonts) => {
-      log("makeGetTransformedVertices", layerId)
-      return transformShapes(vertices, layer, effects)
-    },
-  )
-}
-
-export const makeGetConnectorVertices = (startId, endId) => {
-  return createSelector(
-    [
-      getCachedSelector(makeGetLayer, startId),
-      getCachedSelector(makeGetComputedVertices, startId),
-      getCachedSelector(makeGetComputedVertices, endId),
-      getMachine,
-    ],
-    (startLayer, startVertices, endVertices, machine) => {
-      log("makeGetConnectorVertices", startId + "-" + endId)
-      const start = startVertices[startVertices.length - 1]
-      const end = endVertices[0]
-
-      if (startLayer.connectionMethod === "along perimeter") {
-        const machineInstance = getMachineInstance([], machine)
-        const startPerimeter = machineInstance.nearestPerimeterVertex(start)
-        const endPerimeter = machineInstance.nearestPerimeterVertex(end)
-        const perimeterConnection = machineInstance.tracePerimeter(
-          startPerimeter,
-          endPerimeter,
-        )
-
-        return [
-          start,
-          startPerimeter,
-          perimeterConnection,
-          endPerimeter,
-          end,
-        ].flat()
-      } else {
-        return [start, end]
-      }
-    },
-  )
-}
+const getTransformedVertices = createCachedSelector(
+  getLayerVertices,
+  getLayer,
+  getLayerEffects,
+  (vertices, layer, effects) => {
+    log("getTransformedVertices", layer.id)
+    return transformShapes(vertices, layer, effects)
+  },
+)((state, id) => id)
 
 // transform a given list of vertices as needed to be displayed in a preview layer
 const previewTransform = (layer, vertices) => {
@@ -164,95 +106,113 @@ const previewTransform = (layer, vertices) => {
 }
 
 // creates a selector that returns computed (machine-bound) vertices for a given layer
-const makeGetComputedVertices = (layerId) => {
-  return createSelector(
-    [
-      getCachedSelector(makeGetTransformedVertices, layerId),
-      getCachedSelector(makeGetNonEffectLayerIndex, layerId),
-      getNumVisibleLayers,
-      getMachine,
-    ],
-    (vertices, layerIndex, numLayers, machine) => {
-      log("makeGetComputedVertices", layerId)
-      return polishVertices(vertices, machine, {
-        start: layerIndex === 0,
-        end: layerIndex === numLayers - 1,
-      })
-    },
-  )
-}
+const getComputedVertices = createCachedSelector(
+  (state, id) => id,
+  getTransformedVertices,
+  getNonEffectLayerIndex,
+  getNumVisibleLayers,
+  getMachineState,
+  (id, vertices, layerIndex, numLayers, machine) => {
+    log("getComputedVertices", id)
+    return polishVertices(vertices, machine, {
+      start: layerIndex === 0,
+      end: layerIndex === numLayers - 1,
+    })
+  },
+)((state, id) => id)
 
 // creates a selector that returns previewable vertices for a given layer
-export const makeGetPreviewVertices = (layerId) => {
-  return createSelector(
-    [
-      getCachedSelector(makeGetTransformedVertices, layerId),
-      getCachedSelector(makeGetComputedVertices, layerId),
-      getCachedSelector(makeGetLayer, layerId),
-    ],
-    (transformedVertices, computedVertices, layer) => {
-      log("makeGetPreviewVertices", layerId)
-      const vertices = layer.dragging ? transformedVertices : computedVertices
-      return previewTransform(layer, vertices)
-    },
-  )
-}
+export const getPreviewVertices = createCachedSelector(
+  getTransformedVertices,
+  getComputedVertices,
+  getLayer,
+  (transformedVertices, computedVertices, layer, foo, bar) => {
+    log("getPreviewVertices", layer.id)
+    const vertices = layer.dragging ? transformedVertices : computedVertices
+    return previewTransform(layer, vertices)
+  },
+)((state, id) => id)
 
 // returns a flattened array of all visible computed vertices and connectors (across layers)
-export const getAllComputedVertices = createSelector(
-  [getState, getVisibleNonEffectIds],
-  (state, visibleLayerIds) => {
-    log("getAllComputedVertices")
-    return visibleLayerIds
-      .map((id, idx) => {
-        const connector = getConnectingVertices(state, id)
-        let vertices = getCachedSelector(makeGetComputedVertices, id)(state)
-        if (connector) vertices = [...vertices, ...connector]
-        return vertices
-      })
-      .flat()
-  },
-)
+export const getAllComputedVertices = createSelector([getState], (state) => {
+  log("getAllComputedVertices")
+  const visibleLayerIds = getVisibleNonEffectIds(state)
+
+  return visibleLayerIds
+    .map((id, idx) => {
+      const vertices = getComputedVertices(state, id)
+      const connector = getConnectingVertices(state, id)
+      return [...vertices, ...connector]
+    })
+    .flat()
+})
 
 // returns an array of vertices connecting a given layer to the next (if it exists)
-export const getConnectingVertices = (state, layerId) => {
-  const visibleLayerIds = getVisibleNonEffectIds(state)
-  const idx = getCachedSelector(makeGetNonEffectLayerIndex, layerId)(state)
+export const getConnectingVertices = createCachedSelector(
+  (state, id) => id,
+  getState,
+  (layerId, state) => {
+    log("getConnectingVertices")
+    const visibleLayerIds = getVisibleNonEffectIds(state)
+    const idx = getNonEffectLayerIndex(state, layerId)
 
-  return idx < visibleLayerIds.length - 1
-    ? getCachedSelector(
-        makeGetConnectorVertices,
-        layerId,
-        visibleLayerIds[idx + 1],
-      )(state)
-    : null
-}
+    if (idx > visibleLayerIds.length - 2) {
+      return []
+    }
+
+    const endId = visibleLayerIds[idx + 1]
+    const startLayer = getLayer(state, layerId) //|| getCurrentLayer(state)
+    const endLayer = getLayer(state, endId) //|| getCurrentLayer(state)
+    const startVertices = getLayerVertices(state, startLayer.id)
+    const endVertices = getLayerVertices(state, endLayer.id)
+    const start = startVertices[startVertices.length - 1]
+    const end = endVertices[0]
+
+    if (startLayer.connectionMethod === "along perimeter") {
+      const machineInstance = getMachineInstance([], state.machine)
+      const startPerimeter = machineInstance.nearestPerimeterVertex(start)
+      const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+      const perimeterConnection = machineInstance.tracePerimeter(
+        startPerimeter,
+        endPerimeter,
+      )
+
+      return [
+        start,
+        startPerimeter,
+        perimeterConnection,
+        endPerimeter,
+        end,
+      ].flat()
+    } else {
+      return [start, end]
+    }
+  },
+)((state, id) => id)
 
 // returns the starting offset for each layer, given previous layers
-export const getVertexOffsets = createSelector(
-  [getState, getVisibleNonEffectIds],
-  (state, visibleLayerIds) => {
-    log("getVertexOffsets")
-    let offsets = {}
-    let offset = 0
+export const getVertexOffsets = createSelector([getState], (state) => {
+  log("getVertexOffsets")
+  const visibleLayerIds = getVisibleNonEffectIds(state)
+  let offsets = {}
+  let offset = 0
 
-    visibleLayerIds.forEach((id) => {
-      const vertices = getCachedSelector(makeGetComputedVertices, id)(state)
-      const connector = getConnectingVertices(state, id) || []
-      offsets[id] = { start: offset, end: offset + vertices.length - 1 }
+  visibleLayerIds.forEach((id) => {
+    const vertices = getComputedVertices(state, id)
+    const connector = getConnectingVertices(state, id)
+    offsets[id] = { start: offset, end: offset + vertices.length - 1 }
 
-      if (connector.length > 0) {
-        offsets[id + "-connector"] = {
-          start: offset + vertices.length,
-          end: offset + vertices.length + connector.length - 1,
-        }
-        offset += vertices.length + connector.length
+    if (connector.length > 0) {
+      offsets[id + "-connector"] = {
+        start: offset + vertices.length,
+        end: offset + vertices.length + connector.length - 1,
       }
-    })
+      offset += vertices.length + connector.length
+    }
+  })
 
-    return offsets
-  },
-)
+  return offsets
+})
 
 // returns statistics across all layers
 export const getVerticesStats = createSelector(
@@ -282,7 +242,7 @@ export const getVerticesStats = createSelector(
 // given a set of vertices and a slider value, returns the indices of the
 // start and end vertices representing a preview slider moving through them.
 export const getSliderBounds = createSelector(
-  [getAllComputedVertices, getPreview],
+  [getAllComputedVertices, getPreviewState],
   (vertices, preview) => {
     const slideSize = 2.0
     const beginFraction = preview.sliderValue / 100.0
@@ -328,8 +288,10 @@ export const getSliderColors = createSelector(
   },
 )
 
+// TODO: fix or remove
 // used by the preview window; reverses rotation and offsets because they are
 // re-added by Konva transformer.
+/*
 export const makeGetPreviewTrackVertices = (layerId) => {
   return createSelector(
     getCachedSelector(makeGetLayer, layerId),
@@ -337,20 +299,17 @@ export const makeGetPreviewTrackVertices = (layerId) => {
       log("makeGetPreviewTrackVertices", layerId)
       let trackVertices = []
 
-      // TODO: re-implement display of track vertices
-      //      const numLoops = layer.numLoops
-      //      for (var i=0; i<numLoops; i++) {
-      //        if (layer.trackEnabled) {
-      //          trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
-      //        }
-      //      }
+      const numLoops = layer.numLoops
+      for (var i=0; i<numLoops; i++) {
+      if (layer.trackEnabled) {
+      trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+      }
+    }
 
       return trackVertices.map((vertex) => {
-        return rotate(
-          offset(vertex, -layer.x, -layer.y),
-          layer.rotation,
-        )
+        return rotate(offset(vertex, -layer.x, -layer.y), layer.rotation)
       })
     },
   )
 }
+*/

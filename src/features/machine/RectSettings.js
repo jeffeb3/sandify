@@ -17,11 +17,11 @@ import {
   toggleMachineRectExpanded,
   setMachineRectOrigin,
 } from "./machineSlice"
-import { getMachine } from "../store/selectors"
+import { getMachineState } from "../store/selectors"
 import { machineOptions } from "./options"
 
 const mapStateToProps = (state, ownProps) => {
-  const machine = getMachine(state)
+  const machine = getMachineState(state)
 
   return {
     expanded: machine.rectExpanded,
@@ -120,16 +120,28 @@ class RectSettings extends Component {
                   value={this.props.origin}
                   onChange={this.props.onOriginChange}
                 >
-                  <ToggleButton variant="light" value={1}>
+                  <ToggleButton
+                    variant="light"
+                    value={1}
+                  >
                     upper left
                   </ToggleButton>
-                  <ToggleButton variant="light" value={2}>
+                  <ToggleButton
+                    variant="light"
+                    value={2}
+                  >
                     upper right
                   </ToggleButton>
-                  <ToggleButton variant="light" value={0}>
+                  <ToggleButton
+                    variant="light"
+                    value={0}
+                  >
                     lower left
                   </ToggleButton>
-                  <ToggleButton variant="light" value={3}>
+                  <ToggleButton
+                    variant="light"
+                    value={3}
+                  >
                     lower right
                   </ToggleButton>
                 </ToggleButtonGroup>

@@ -1,15 +1,14 @@
 import React from "react"
-import { useSelector, shallowEqual } from "react-redux"
+import { useSelector } from "react-redux"
 import { Shape } from "react-konva"
 import {
-  makeGetConnectorVertices,
   getSliderBounds,
   getSliderColors,
   getVertexOffsets,
+  getConnectingVertices,
 } from "../machine/selectors"
-import { getPreview, getLayers } from "../store/selectors"
-import { getCurrentLayer, makeGetLayer } from "../layers/selectors"
-import { getCachedSelector } from "../store/selectors"
+import { getPreviewState } from "../store/selectors"
+import { getCurrentLayer, getLayer } from "../layers/selectors"
 import PreviewHelper from "./PreviewHelper"
 
 // Renders a connector between two layers.
@@ -22,44 +21,35 @@ const PreviewConnector = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
-    const layer =
-      getCachedSelector(makeGetLayer, ownProps.startId)(state) ||
-      getCurrentLayer(state)
-    const endLayer =
-      getCachedSelector(makeGetLayer, ownProps.endId)(state) ||
-      getCurrentLayer(state)
-    const vertices =
-      layer === endLayer
-        ? []
-        : getCachedSelector(
-            makeGetConnectorVertices,
-            layer.id,
-            endLayer.id,
-          )(state)
-    const layers = getLayers(state)
-    const preview = getPreview(state)
+    const { startId, endId } = ownProps
+    const currentLayer = getCurrentLayer(state)
+    const startLayer = getLayer(state, startId) || getCurrentLayer(state)
+    const endLayer = getLayer(state, endId)
+    const vertices = getConnectingVertices(state, startId)
+    const preview = getPreviewState(state)
 
     return {
-      layer,
+      currentLayer,
+      startLayer,
       endLayer,
       vertices,
+      layer: startLayer, // renamed for preview helper
       sliderValue: preview.sliderValue,
-      selected: layers.selected,
       colors: getSliderColors(state),
-      offsetId: layer.id + "-connector",
+      offsetId: startId + "-connector",
       offsets: getVertexOffsets(state),
       bounds: getSliderBounds(state),
     }
   }
 
-  const props = useSelector(mapStateToProps, shallowEqual)
+  const props = useSelector(mapStateToProps)
   const {
-    layer,
+    currentLayer,
+    startLayer,
     endLayer,
     vertices,
     offsets,
     colors,
-    selected,
     bounds,
     sliderValue,
   } = props
@@ -69,7 +59,7 @@ const PreviewConnector = (ownProps) => {
   const backgroundSelectedColor = "#6E6E00"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = sliderValue !== 0
-  const isSelected = selected === ownProps.endId
+  const isSelected = currentLayer.id === endLayer.id
 
   // used by Konva to draw shape
   function sceneFunc(context, shape) {
@@ -90,7 +80,7 @@ const PreviewConnector = (ownProps) => {
 
     context.beginPath()
     context.lineWidth = 1
-    context.strokeStyle = currentColor
+    context.strokeStyle = unselectedColor
     helper.moveTo(context, vertices[0])
     context.stroke()
 
@@ -118,10 +108,10 @@ const PreviewConnector = (ownProps) => {
 
   return (
     <React.Fragment>
-      {!layer.dragging && !endLayer.dragging && (
+      {endLayer && !startLayer.dragging && !endLayer.dragging && (
         <Shape
-          offsetX={layer.width / 2}
-          offsetY={layer.height / 2}
+          offsetX={startLayer.width / 2}
+          offsetY={startLayer.height / 2}
           sceneFunc={sceneFunc}
           hitFunc={hitFunc}
         ></Shape>

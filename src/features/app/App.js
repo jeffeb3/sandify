@@ -3,7 +3,7 @@ import { Col, Row } from 'react-bootstrap'
 import { Provider } from 'react-redux'
 import Header from './Header'
 import InputTabs from './InputTabs'
-import MachinePreview from '../preview/MachinePreview'
+import Preview from '../preview/Preview'
 import store from './store'
 import './App.scss'
 
@@ -17,7 +17,7 @@ class App extends Component {
           <main>
             <Row className="no-gutters">
               <Col className="full-page d-flex flex-column">
-                <MachinePreview />
+                <Preview />
               </Col>
 
               <div id="sidebar">

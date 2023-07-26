@@ -1,144 +1,137 @@
-import { getLayers, createDeepEqualSelector } from '../store/selectors'
-import { createSelector } from 'reselect'
-import { memoizeArrayProducingFn } from '../../common/selectors'
-import { log } from '../../common/util'
+import { getLayersState, createDeepEqualSelector } from "../store/selectors"
+import { createSelector } from "reselect"
+import { createCachedSelector } from "re-reselect"
+import { memoizeArrayProducingFn } from "../../common/selectors"
+import { log } from "../../common/debugging"
 
 const getCurrentLayerId = createSelector(
-  getLayers,
-  (layers) => layers.current
+  getLayersState,
+  (layers) => layers.current,
 )
 
-const getLayersById = createSelector(
-  getLayers,
-  (layers) => layers.byId
-)
+const getLayersById = createSelector(getLayersState, (layers) => {
+  return layers.byId
+})
 
 const getOrderedLayerIds = createSelector(
-  getLayers,
-  (layers) => layers.allIds
+  getLayersState,
+  (layers) => layers.allIds,
 )
 
 export const getVisibleOrderedLayerIds = createSelector(
-  [ getOrderedLayerIds, getLayersById ],
+  [getOrderedLayerIds, getLayersById],
   (layerIds, layers) => {
-    return layerIds.filter(id => layers[id].visible)
-  }
+    return layerIds.filter((id) => layers[id].visible)
+  },
 )
 
- export const getVisibleNonEffectIds = createSelector(
-   [ getVisibleOrderedLayerIds, getLayersById ],
-   (layerIds, layers) => {
-     return layerIds.filter(id => !layers[id].effect)
-   }
- )
+export const getVisibleNonEffectIds = createSelector(
+  [getVisibleOrderedLayerIds, getLayersById],
+  (layerIds, layers) => {
+    return layerIds.filter((id) => !layers[id].effect)
+  },
+)
 
 export const getCurrentLayer = createSelector(
-  [ getLayersById, getCurrentLayerId ],
+  [getLayersById, getCurrentLayerId],
   (layers, current) => {
     return layers[current]
-  }
+  },
 )
 
 export const getAllLayers = createSelector(
-  [ getOrderedLayerIds, getLayersById ],
+  [getOrderedLayerIds, getLayersById],
   (layerIds, layersById) => {
     log("getAllLayers")
-    return layerIds.map(id => layersById[id])
-  }
+    return layerIds.map((id) => layersById[id])
+  },
 )
 
-export const getNumLayers = createSelector(
-  getOrderedLayerIds,
-  (layerIds) => {
-    log("getNumLayer")
-    return layerIds.length
-  }
-)
+export const getNumLayers = createSelector(getOrderedLayerIds, (layerIds) => {
+  log("getNumLayer")
+  return layerIds.length
+})
 
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const getKonvaLayerIds = createSelector(
-  [ getCurrentLayer, getVisibleOrderedLayerIds ],
+  [getCurrentLayer, getVisibleOrderedLayerIds],
   (currentLayer, visibleLayerIds) => {
-      const kIds = visibleLayerIds.filter(id => id !== currentLayer.id)
-      if (currentLayer.visible) {
-        kIds.push(currentLayer.id)
-      }
-      return kIds
-  }
+    const kIds = visibleLayerIds.filter((id) => id !== currentLayer.id)
+    if (currentLayer.visible) {
+      kIds.push(currentLayer.id)
+    }
+    return kIds
+  },
 )
 
 export const isDragging = createSelector(
-  [ getOrderedLayerIds, getLayersById ],
+  [getOrderedLayerIds, getLayersById],
   (layerIds, layers) => {
     log("isDragging")
-    return layerIds.filter(id => layers[id].visible && layers[id].dragging).length > 0
-  }
+    return (
+      layerIds.filter((id) => layers[id].visible && layers[id].dragging)
+        .length > 0
+    )
+  },
 )
 
 export const getNumVisibleLayers = createSelector(
   getVisibleNonEffectIds,
   (layers) => {
     return layers.length
-  }
+  },
 )
 
-export const makeGetLayerIndex = layerId => {
-  return createDeepEqualSelector(
-    getVisibleOrderedLayerIds,
-    (visibleLayerIds) => {
-      return visibleLayerIds.findIndex(id => id === layerId)
-    }
-  )
-}
+export const getLayerIndex = createCachedSelector(
+  (state, id) => id,
+  getVisibleOrderedLayerIds,
+  (layerId, visibleLayerIds) => {
+    return visibleLayerIds.findIndex((id) => id === layerId)
+  },
+)({
+  selectorCreator: createDeepEqualSelector,
+  keySelector: (state, id) => id,
+})
 
-export const makeGetNonEffectLayerIndex = layerId => {
-  return createDeepEqualSelector(
-    getVisibleNonEffectIds,
-    (visibleLayerIds) => {
-      return visibleLayerIds.findIndex(id => id === layerId)
-    }
-  )
-}
+export const getNonEffectLayerIndex = createCachedSelector(
+  getVisibleNonEffectIds,
+  (state, id) => id,
+  (visibleLayerIds, layerId) => {
+    return visibleLayerIds.findIndex((id) => id === layerId)
+  },
+)((state, id) => id)
 
-export const makeGetLayer = layerId => {
-  return createSelector(
-    getLayersById,
-    (layers) => {
-      return layers[layerId]
-    }
-  )
-}
+export const getLayer = createCachedSelector(
+  getLayersState,
+  (state, id) => id,
+  (layers, id) => layers.byId[id],
+)((state, id) => id)
 
 // returns any effects tied to a given layer; memoizeArrayProducingFn will ensure we
 // only recompute transformed vertices when an effect changes.
-export const makeGetEffects = layerId => {
-  return createSelector(
-    [
-      getLayersById,
-      getVisibleOrderedLayerIds
-    ],
-    memoizeArrayProducingFn(
-      (layers, visibleLayerIds) => {
-        let index = visibleLayerIds.findIndex(id => id === layerId)
-        const layer = layers[layerId]
+export const getLayerEffects = createCachedSelector(
+  (state, id) => id,
+  getLayersById,
+  getVisibleOrderedLayerIds,
+  memoizeArrayProducingFn((layerId, layers, visibleLayerIds) => {
+    let index = visibleLayerIds.findIndex((id) => id === layerId)
+    const layer = layers[layerId]
 
-        if (layer.effect || index === visibleLayerIds.length - 1) {
-          return []
-        } else {
-          index = index + 1
-          const effects = []
-          let id = visibleLayerIds[index]
+    if (layer.effect || index === visibleLayerIds.length - 1) {
+      return []
+    } else {
+      index = index + 1
+      const effects = []
+      let id = visibleLayerIds[index]
 
-          while (id && layers[id].effect) {
-            effects.push(layers[id])
-            index = index + 1
-            id = visibleLayerIds[index]
-          }
-
-          return effects
-        }
+      while (id && layers[id].effect) {
+        effects.push(layers[id])
+        index = index + 1
+        id = visibleLayerIds[index]
       }
-    )
-  )
-}
+
+      return effects
+    }
+  }),
+)((state, id) => id)

@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { Button, Modal, Form, Accordion, Card } from "react-bootstrap"
 import { connect } from "react-redux"
 
-import { getMachine } from '@/features/store/selectors'
+import { getMachineState } from "@/features/store/selectors"
 import ThetaRhoImporter from "../importer/ThetaRhoImporter"
 import GCodeImporter from "../importer/GCodeImporter"
 import { addLayer } from "../layers/layersSlice"
@@ -11,7 +11,7 @@ import ReactGA from "react-ga"
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    machineState: getMachine(state),
+    machineState: getMachineState(state),
     showModal: ownProps.showModal,
   }
 }

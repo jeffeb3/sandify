@@ -2,24 +2,21 @@ import React from "react"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import {
-  //  makeGetPreviewTrackVertices,
-  makeGetPreviewVertices,
+  getPreviewVertices,
   getSliderColors,
   getVertexOffsets,
   getAllComputedVertices,
   getSliderBounds,
 } from "../machine/selectors"
 import { updateLayer } from "../layers/layersSlice"
-import { getLayers, getPreview } from "../store/selectors"
-import Layer from "@/features/layers/Layer"
+import { getLayersState, getPreviewState } from "../store/selectors"
 import { getModelFromType } from "@/config/models"
 import {
   getCurrentLayer,
-  makeGetLayerIndex,
-  makeGetLayer,
+  getLayerIndex,
+  getLayer,
   getNumVisibleLayers,
 } from "../layers/selectors"
-import { getCachedSelector } from "../store/selectors"
 import { roundP } from "../../common/util"
 import PreviewHelper from "./PreviewHelper"
 
@@ -33,24 +30,19 @@ const PreviewLayer = (ownProps) => {
     // hooks, and the solution for now is to render the current layer instead.
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
-    const layers = getLayers(state)
-    const layer =
-      getCachedSelector(makeGetLayer, ownProps.id)(state) ||
-      getCurrentLayer(state)
-    const index = getCachedSelector(makeGetLayerIndex, layer.id)(state)
+    const layers = getLayersState(state)
+    const layer = getLayer(state, ownProps.id) || getCurrentLayer(state)
+    const index = getLayerIndex(state, layer.id)
     const numLayers = getNumVisibleLayers(state)
-    const preview = getPreview(state)
+    const preview = getPreviewState(state)
+    //    const test = getLayers(state, ['layer-1', 'layer-2'])
 
     return {
       layer,
       start: index === 0,
       end: index === numLayers - 1,
       currentLayer: getCurrentLayer(state),
-      //      trackVertices: getCachedSelector(
-      //        makeGetPreviewTrackVertices,
-      //        layerState.id,
-      //      )(state),
-      vertices: getCachedSelector(makeGetPreviewVertices, layer.id)(state),
+      vertices: getPreviewVertices(state, layer.id, "1"),
       allVertices: getAllComputedVertices(state),
       selected: layers.selected,
       sliderValue: preview.sliderValue,
@@ -75,7 +67,6 @@ const PreviewLayer = (ownProps) => {
     colors,
     bounds,
   } = props
-  //const layer = new Layer(layerState.type)
   const model = getModelFromType(layer.type)
   const dispatch = useDispatch()
   const width = layer.width
@@ -86,6 +77,7 @@ const PreviewLayer = (ownProps) => {
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSelected = selected === ownProps.id
   const isSliding = sliderValue !== 0
+  const isCurrent = layer.id === currentLayer.id
   const helper = new PreviewHelper(props)
 
   // draws a colored path when user is using slider
@@ -186,6 +178,14 @@ const PreviewLayer = (ownProps) => {
     // dispatch(setSelectedLayer(selected == null ? currentLayer.id : null))
   }
 
+  function onDragStart() {
+    console.log(currentLayer.id + " " + layer.id)
+
+    if (isCurrent) {
+      onChange({ dragging: true })
+    }
+  }
+
   const shapeRef = React.createRef()
   const trRef = React.createRef()
 
@@ -202,7 +202,7 @@ const PreviewLayer = (ownProps) => {
       {layer.visible && (
         <Shape
           {...props}
-          draggable={model.canMove && layer.id === currentLayer.id}
+          draggable={model.canMove && isCurrent}
           width={width}
           height={height}
           offsetY={height / 2}
@@ -216,9 +216,7 @@ const PreviewLayer = (ownProps) => {
           rotation={layer.rotation || 0}
           sceneFunc={sceneFunc}
           hitFunc={hitFunc}
-          onDragStart={(e) => {
-            onChange({ dragging: true })
-          }}
+          onDragStart={onDragStart}
           onDragEnd={(e) => {
             onChange({
               dragging: false,

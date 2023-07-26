@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap"
 import InputOption from "../../components/InputOption"
 import CheckboxOption from "../../components/CheckboxOption"
-import { getMachine } from "../store/selectors"
+import { getMachineState } from "../store/selectors"
 import { machineOptions } from "./options"
 import {
   toggleMachinePolarExpanded,
@@ -20,7 +20,7 @@ import {
 } from "./machineSlice"
 
 const mapStateToProps = (state, ownProps) => {
-  const machine = getMachine(state)
+  const machine = getMachineState(state)
 
   return {
     expanded: machine.polarExpanded,
@@ -92,13 +92,22 @@ class PolarSettings extends Component {
                   value={this.props.startPoint}
                   onChange={this.props.onStartPointChange}
                 >
-                  <ToggleButton variant="light" value="none">
+                  <ToggleButton
+                    variant="light"
+                    value="none"
+                  >
                     none
                   </ToggleButton>
-                  <ToggleButton variant="light" value="center">
+                  <ToggleButton
+                    variant="light"
+                    value="center"
+                  >
                     center
                   </ToggleButton>
-                  <ToggleButton variant="light" value="perimeter">
+                  <ToggleButton
+                    variant="light"
+                    value="perimeter"
+                  >
                     perimeter
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -118,13 +127,22 @@ class PolarSettings extends Component {
                   value={this.props.endPoint}
                   onChange={this.props.onEndPointChange}
                 >
-                  <ToggleButton variant="light" value="none">
+                  <ToggleButton
+                    variant="light"
+                    value="none"
+                  >
                     none
                   </ToggleButton>
-                  <ToggleButton variant="light" value="center">
+                  <ToggleButton
+                    variant="light"
+                    value="center"
+                  >
                     center
                   </ToggleButton>
-                  <ToggleButton variant="light" value="perimeter">
+                  <ToggleButton
+                    variant="light"
+                    value="perimeter"
+                  >
                     perimeter
                   </ToggleButton>
                 </ToggleButtonGroup>

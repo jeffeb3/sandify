@@ -7,7 +7,7 @@ import CheckboxOption from "../../components/CheckboxOption"
 import { updateExporter } from "./exporterSlice"
 import { getComments } from "./selectors"
 import { getAllComputedVertices } from "../machine/selectors"
-import { getLayers, getMain } from "../store/selectors"
+import { getLayersState, getMainState } from "../store/selectors"
 import ReactGA from "react-ga"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"
@@ -23,8 +23,8 @@ const exporters = {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const main = getMain(state)
-  const layers = getLayers(state)
+  const main = getMainState(state)
+  const layers = getLayersState(state)
 
   return {
     reverse: main.exporter.reverse,
@@ -152,7 +152,11 @@ class Downloader extends Component {
         >
           Export
         </Button>
-        <Modal size="lg" show={this.props.show} onHide={this.props.close}>
+        <Modal
+          size="lg"
+          show={this.props.show}
+          onHide={this.props.close}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Export to a file</Modal.Title>
           </Modal.Header>
@@ -170,7 +174,10 @@ class Downloader extends Component {
             {this.props.fileType === SCARA && (
               <Row>
                 <Col sm={5}></Col>
-                <Col sm={7} className="mb-2">
+                <Col
+                  sm={7}
+                  className="mb-2"
+                >
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
@@ -262,7 +269,11 @@ class Downloader extends Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button id="code-close" variant="light" onClick={this.props.close}>
+            <Button
+              id="code-close"
+              variant="light"
+              onClick={this.props.close}
+            >
               Close
             </Button>
             <Button

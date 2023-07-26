@@ -4,7 +4,11 @@ import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { setPreviewSize, updatePreview } from "./previewSlice"
 import { updateLayer } from "../layers/layersSlice"
-import { getMachine, getLayers, getPreview } from "../store/selectors"
+import {
+  getMachineState,
+  getLayersState,
+  getPreviewState,
+} from "../store/selectors"
 import {
   getCurrentLayer,
   getKonvaLayerIds,
@@ -16,9 +20,9 @@ import PreviewLayer from "./PreviewLayer"
 import PreviewConnector from "./PreviewConnector"
 
 const mapStateToProps = (state, ownProps) => {
-  const layers = getLayers(state)
-  const preview = getPreview(state)
-  const machine = getMachine(state)
+  const layers = getLayersState(state)
+  const preview = getPreviewState(state)
+  const machine = getMachineState(state)
 
   return {
     layers,
@@ -66,10 +70,6 @@ class PreviewWindow extends Component {
       },
       false,
     )
-    setTimeout(() => {
-      this.visible = true
-      this.resize(wrapper)
-    }, 250)
   }
 
   resize(wrapper) {
@@ -92,9 +92,6 @@ class PreviewWindow extends Component {
     const scale = this.relativeScale(this.props)
     const width = this.props.use_rect ? maxX - minX : radius * 2
     const height = this.props.use_rect ? maxY - minY : radius * 2
-    const visibilityClass = `preview-wrapper ${
-      this.visible ? "d-flex align-items-center" : "d-none"
-    }`
 
     // define Konva clip functions that will let us clip vertices not bound by
     // machine limits when dragging, and produce a visually seamless experience.
@@ -116,7 +113,7 @@ class PreviewWindow extends Component {
       <ReactReduxContext.Consumer>
         {({ store }) => (
           <Stage
-            className={visibilityClass}
+            className="preview-wrapper d-flex align-items-center"
             scaleX={scale}
             scaleY={scale}
             height={height * scale}

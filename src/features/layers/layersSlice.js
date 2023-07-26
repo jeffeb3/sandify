@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit"
 import uniqueId from "lodash/uniqueId"
 import arrayMove from "array-move"
-import { getModelFromType } from "@/config/models"
+import { getModelFromType, getDefaultModelType } from "@/config/models"
 import Layer from "./Layer"
 
 const notCopiedWhenTypeChanges = ["type", "height", "width"]
@@ -74,17 +74,26 @@ function setCurrentId(state, id) {
   state.current = id
 }
 
+const defaultLayer = new Layer(getDefaultModelType())
+const defaultLayerId = uniqueId("layer-")
+const layerState = {
+  id: defaultLayerId,
+  ...defaultLayer.getInitialState(),
+}
+
 const layersSlice = createSlice({
   name: "layers",
   initialState: {
-    current: null,
-    selected: null,
+    current: defaultLayerId,
+    selected: defaultLayerId,
     newEffectType,
     newEffectName,
     newEffectNameOverride: false,
     copyLayerName: null,
-    byId: {},
-    allIds: [],
+    byId: {
+      [defaultLayerId]: layerState,
+    },
+    allIds: [defaultLayerId],
   },
   reducers: {
     addLayer(state, action) {

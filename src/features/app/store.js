@@ -1,83 +1,23 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from "redux"
-import uniqueId from "lodash/uniqueId"
 import appReducer from "./appSlice"
-import machineReducer from "../machine/machineSlice"
-import exporterReducer from "../exporter/exporterSlice"
-import previewReducer from "../preview/previewSlice"
-import fontsReducer from "../fonts/fontsSlice"
-import { getDefaultModelType } from "../../config/models"
+import machineReducer from "@/features/machine/machineSlice"
+import exporterReducer from "@/features/exporter/exporterSlice"
+import previewReducer from "@/features/preview/previewSlice"
+import fontsReducer from "@/features/fonts/fontsSlice"
+import layersReducer from "@/features/layers/layersSlice"
 import { loadState, saveState } from "../../common/localStorage"
-import Layer from "../layers/Layer"
-import layersReducer, {
-  setCurrentLayer,
-  addLayer,
-  addEffect,
-  updateLayer,
-} from "../layers/layersSlice"
 
-//const customizedMiddleware = getDefaultMiddleware({
-//  immutableCheck: {
-//    ignoredPaths: ['importer.vertices']
-//  },
-//  serializableCheck: {
-//    ignoredPaths: ['importer.vertices']
-//  }
-//})
-
-const store = configureStore({
-  reducer: combineReducers({
-    main: combineReducers({
-      app: appReducer,
-      layers: layersReducer,
-      exporter: exporterReducer,
-      machine: machineReducer,
-      preview: previewReducer,
-    }),
-    fonts: fontsReducer,
-  }),
+/*
+const customizedMiddleware = getDefaultMiddleware({
+  immutableCheck: {
+    ignoredPaths: ['importer.vertices']
+  },
+  serializableCheck: {
+    ignoredPaths: ['importer.vertices']
+  }
 })
-
-const loadPersistedLayers = (layers) => {
-  layers.allIds.forEach((id) => {
-    const layer = layers.byId[id]
-
-    if (layer) {
-      const newLayer = {
-        ...layer,
-        id: uniqueId("layer-"),
-        restore: true,
-      }
-
-      // for referential integrity, we have to explicitly generate ids and
-      // re-build relationships.
-      store.dispatch(addLayer(newLayer))
-      if (layer.effectIds) {
-        newLayer.effectIds = layer.effectIds.map((effectId) => {
-          const effect = {
-            ...layers.byId[effectId],
-            id: uniqueId("layer-"),
-            restore: true,
-            parentId: newLayer.id,
-          }
-          store.dispatch(addEffect(effect))
-          return effect.id
-        })
-        store.dispatch(updateLayer(newLayer))
-      }
-    }
-  })
-}
-
-const loadDefaultLayer = () => {
-  const layer = new Layer(getDefaultModelType())
-  store.dispatch(addLayer(layer.getInitialState()))
-
-  const state = store.getState()
-  store.dispatch(
-    setCurrentLayer(state.main.layers.byId[state.main.layers.allIds[0]].id),
-  )
-}
+*/
 
 // set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
@@ -90,29 +30,30 @@ const persistState = true
 const persistInitKey = "state"
 const persistSaveKey = "state"
 
-if (typeof jest === "undefined" && usePersistedState) {
-  // override default values with saved ones
-  const persistedState = loadState(persistInitKey)
+const persistedState =
+  typeof jest === "undefined" && usePersistedState
+    ? loadState(persistInitKey) || undefined
+    : undefined
+// reset some values
+persistedState.fonts.loaded = false
 
-  if (persistedState) {
-    if (persistedState.main && persistedState.main.layers) {
-      loadPersistedLayers(persistedState.main.layers)
-      store.dispatch(setCurrentLayer(persistedState.main.layers.current))
-    } else if (persistedState.layers) {
-      loadPersistedLayers(persistedState.layers) // older store format
-      store.dispatch(setCurrentLayer(persistedState.layers.current))
-    }
-  } else {
-    loadDefaultLayer()
-  }
-} else {
-  loadDefaultLayer()
-}
+const store = configureStore({
+  reducer: combineReducers({
+    main: combineReducers({
+      app: appReducer,
+      layers: layersReducer,
+      exporter: exporterReducer,
+      machine: machineReducer,
+      preview: previewReducer,
+    }),
+    fonts: fontsReducer,
+  }),
+  preloadedState: persistedState,
+})
 
 if (persistState) {
   store.subscribe(() => {
-    const state = store.getState()
-    saveState({ main: { layers: state.main.layers } }, persistSaveKey)
+    saveState(store.getState(), persistSaveKey)
   })
 }
 
