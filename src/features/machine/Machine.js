@@ -1,13 +1,10 @@
-import { vertexRoundP } from '../../common/geometry'
+import { vertexRoundP } from "@/common/geometry"
 
 // inherit all machine classes from this base class
 export default class Machine {
   // given a set of vertices, ensure they adhere to the limits defined by the machine
   polish() {
-    this.enforceLimits()
-      .cleanVertices()
-      .limitPrecision()
-      .optimizePerimeter()
+    this.enforceLimits().cleanVertices().limitPrecision().optimizePerimeter()
 
     if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
@@ -22,7 +19,7 @@ export default class Machine {
     let previous = null
     let cleanVertices = []
 
-    for (let i=0; i<this.vertices.length; i++) {
+    for (let i = 0; i < this.vertices.length; i++) {
       const curr = this.vertices[i]
 
       if (previous) {
@@ -45,13 +42,13 @@ export default class Machine {
     let cleanVertices = []
     let previous = null
 
-    for (let next=0; next<this.vertices.length; next++) {
+    for (let next = 0; next < this.vertices.length; next++) {
       const vertex = this.vertices[next]
 
       if (previous) {
         const line = this.clipSegment(previous, vertex)
 
-        for (let pt=0; pt<line.length; pt++) {
+        for (let pt = 0; pt < line.length; pt++) {
           if (line[pt] !== previous) {
             cleanVertices.push(this.nearestVertex(line[pt]))
           }
@@ -67,7 +64,7 @@ export default class Machine {
     return this
   }
 
-// walk the given vertices, removing all vertices that lie within the machine limits
+  // walk the given vertices, removing all vertices that lie within the machine limits
   enforceInvertedLimits() {
     if (this.vertices.length === 0) return this
 
@@ -89,10 +86,19 @@ export default class Machine {
 
       if (previous) {
         // rounding here to deal with some erratic perimeter lines
-        let clipped = this.clipSegment(previous, curr).map(pt => vertexRoundP(pt, 3))
+        let clipped = this.clipSegment(previous, curr).map((pt) =>
+          vertexRoundP(pt, 3),
+        )
 
-        if (clipped.length > 0 && this.inBounds(previous) && cleanVertices.length > 0) {
-          const perimeter = this.tracePerimeter(cleanVertices[cleanVertices.length - 1], clipped[0])
+        if (
+          clipped.length > 0 &&
+          this.inBounds(previous) &&
+          cleanVertices.length > 0
+        ) {
+          const perimeter = this.tracePerimeter(
+            cleanVertices[cleanVertices.length - 1],
+            clipped[0],
+          )
           cleanVertices = [...cleanVertices, ...perimeter]
         }
 
@@ -100,7 +106,6 @@ export default class Machine {
         // array directly to cleanVertices and avoid a shallow array copy.
         const args = [cleanVertices.length, 0].concat(clipped)
         Array.prototype.splice.apply(cleanVertices, args)
-
       } else {
         cleanVertices.push(curr)
       }
@@ -123,13 +128,15 @@ export default class Machine {
 
     // connect the segments together
     let connectedVertices = []
-    for (let j=0; j<segments.length; j++) {
+    for (let j = 0; j < segments.length; j++) {
       const current = segments[j]
 
       if (j > 0) {
         // connect the two segments along the perimeter
-        const prev = segments[j-1]
-        connectedVertices.push(this.tracePerimeter(prev[prev.length-1], current[0]))
+        const prev = segments[j - 1]
+        connectedVertices.push(
+          this.tracePerimeter(prev[prev.length - 1], current[0]),
+        )
       }
       connectedVertices.push(current)
     }
@@ -145,12 +152,14 @@ export default class Machine {
     let segment = []
     let perimeter = null
 
-    for (let i=0; i<this.vertices.length; i++) {
+    for (let i = 0; i < this.vertices.length; i++) {
       const curr = this.vertices[i]
-      const prev = this.vertices[i-1]
+      const prev = this.vertices[i - 1]
 
       if (!prev || !this.onPerimeter(curr, prev)) {
-        if (perimeter) { segment.push(perimeter) }
+        if (perimeter) {
+          segment.push(perimeter)
+        }
         segment.push(curr)
         perimeter = null
       } else {
@@ -191,8 +200,11 @@ export default class Machine {
       /* eslint-disable no-loop-func */
       segments.forEach((segment, index) => {
         const dist = Math.min(
-          this.perimeterDistance(current[current.length-1], segment[0]),
-          this.perimeterDistance(current[current.length-1], segment[segment.length-1])
+          this.perimeterDistance(current[current.length - 1], segment[0]),
+          this.perimeterDistance(
+            current[current.length - 1],
+            segment[segment.length - 1],
+          ),
         )
 
         if (dist < minDist) {
@@ -204,7 +216,13 @@ export default class Machine {
 
       // reverse if needed to connect
       current = segments.splice(currentIndex, 1)[0]
-      if (this.perimeterDistance(prev[prev.length-1], current[0]) > this.perimeterDistance(prev[prev.length-1], current[current.length-1])) {
+      if (
+        this.perimeterDistance(prev[prev.length - 1], current[0]) >
+        this.perimeterDistance(
+          prev[prev.length - 1],
+          current[current.length - 1],
+        )
+      ) {
         current = current.reverse()
       }
       walked.push(current)
@@ -220,7 +238,7 @@ export default class Machine {
   // round each vertex to the nearest .001. This eliminates floating point
   // math errors and allows us to do accurate equality comparisons.
   limitPrecision() {
-    this.vertices = this.vertices.map(vertex => vertexRoundP(vertex, 3))
+    this.vertices = this.vertices.map((vertex) => vertexRoundP(vertex, 3))
     return this
   }
 }

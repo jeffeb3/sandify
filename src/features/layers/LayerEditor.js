@@ -9,10 +9,10 @@ import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
-import { getCurrentLayer } from "./selectors"
 import { getModelSelectOptions } from "@/config/models"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
+import { getCurrentLayer } from "./selectors"
 import "./LayerEditor.scss"
 
 const mapStateToProps = (state, ownProps) => {

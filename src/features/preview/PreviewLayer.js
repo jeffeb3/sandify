@@ -8,16 +8,16 @@ import {
   getAllComputedVertices,
   getSliderBounds,
 } from "../machine/selectors"
-import { updateLayer } from "../layers/layersSlice"
-import { getLayersState, getPreviewState } from "../store/selectors"
+import { updateLayer } from "@/features/layers/layersSlice"
+import { getLayersState, getPreviewState } from "@/features/store/selectors"
 import { getModelFromType } from "@/config/models"
 import {
   getCurrentLayer,
   getLayerIndex,
   getLayer,
   getNumVisibleLayers,
-} from "../layers/selectors"
-import { roundP } from "../../common/util"
+} from "@/features/layers/selectors"
+import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 
 // Renders the shapes in the preview window and allows the user to interact with the shape.

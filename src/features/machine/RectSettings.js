@@ -9,15 +9,15 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "react-bootstrap"
-import InputOption from "../../components/InputOption"
-import CheckboxOption from "../../components/CheckboxOption"
+import InputOption from "@/components/InputOption"
+import CheckboxOption from "@/components/CheckboxOption"
+import { getMachineState } from "@/features/store/selectors"
 import {
   updateMachine,
   toggleMinimizeMoves,
   toggleMachineRectExpanded,
   setMachineRectOrigin,
 } from "./machineSlice"
-import { getMachineState } from "../store/selectors"
 import { machineOptions } from "./options"
 
 const mapStateToProps = (state, ownProps) => {

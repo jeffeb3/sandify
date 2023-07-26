@@ -8,7 +8,7 @@ import {
   getCurrentLayer,
   getNumLayers,
   getAllLayers,
-} from "../layers/selectors"
+} from "@/features/layers/selectors"
 import {
   setCurrentLayer,
   addLayer,
@@ -16,8 +16,8 @@ import {
   moveLayer,
   toggleVisible,
   toggleOpen,
-} from "../layers/layersSlice"
-import { registeredModels, getModelFromType } from "../../config/models"
+} from "@/features/layers/layersSlice"
+import { registeredModels, getModelFromType } from "@/config/models"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import ImportLayer from "./ImportLayer"

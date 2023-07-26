@@ -2,7 +2,7 @@ import ReactGA from "react-ga"
 import throttle from "lodash/throttle"
 import PolarMachine from "./PolarMachine"
 import RectMachine from "./RectMachine"
-import { getModelFromType } from "../../config/models"
+import { getModelFromType } from "@/config/models"
 import Victor from "victor"
 
 //function track(vertex, data, loopIndex) {

@@ -1,5 +1,5 @@
-import GCodeExporter from './GCodeExporter'
-import { subsample, toThetaRho, toScaraGcode } from '../../common/geometry'
+import GCodeExporter from "./GCodeExporter"
+import { subsample, toThetaRho, toScaraGcode } from "@/common/geometry"
 
 export default class ScaraGCodeExporter extends GCodeExporter {
   constructor(props) {
@@ -16,7 +16,7 @@ export default class ScaraGCodeExporter extends GCodeExporter {
         this.props.maxRadius,
         parseFloat(this.props.polarRhoMax),
       ),
-      parseFloat(this.props.unitsPerCircle)
+      parseFloat(this.props.unitsPerCircle),
     )
     return super.computeOutputVertices(vertices)
   }

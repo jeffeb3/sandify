@@ -1,8 +1,11 @@
 import LRUCache from "lru-cache"
 import { createSelector } from "reselect"
 import Color from "color"
-import { transformShapes, polishVertices, getMachineInstance } from "./computer"
-import { getMachineState, getState, getPreviewState } from "../store/selectors"
+import {
+  getMachineState,
+  getState,
+  getPreviewState,
+} from "@/features/store/selectors"
 import { createCachedSelector } from "re-reselect"
 import {
   getLayer,
@@ -10,11 +13,12 @@ import {
   getVisibleNonEffectIds,
   getLayerEffects,
   getNonEffectLayerIndex,
-} from "../layers/selectors"
-import Layer from "../layers/Layer"
+} from "@/features/layers/selectors"
+import Layer from "@/features/layers/Layer"
 import { getModelFromType } from "@/config/models"
-import { rotate, offset } from "../../common/geometry"
-import { log } from "../../common/debugging"
+import { rotate, offset } from "@/common/geometry"
+import { log } from "@/common/debugging"
+import { transformShapes, polishVertices, getMachineInstance } from "./computer"
 
 const cache = new LRUCache({
   length: (n, key) => {

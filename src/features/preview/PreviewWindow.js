@@ -2,22 +2,22 @@ import React, { Component } from "react"
 import { connect, ReactReduxContext, Provider } from "react-redux"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
-import { setPreviewSize, updatePreview } from "./previewSlice"
-import { updateLayer } from "../layers/layersSlice"
+import { updateLayer } from "@/features/layers/layersSlice"
 import {
   getMachineState,
   getLayersState,
   getPreviewState,
-} from "../store/selectors"
+} from "@/features/store/selectors"
 import {
   getCurrentLayer,
   getKonvaLayerIds,
   getVisibleNonEffectIds,
   isDragging,
-} from "../layers/selectors"
-import { roundP } from "../../common/util"
+} from "@/features/layers/selectors"
+import { roundP } from "@/common/util"
 import PreviewLayer from "./PreviewLayer"
 import PreviewConnector from "./PreviewConnector"
+import { setPreviewSize, updatePreview } from "./previewSlice"
 
 const mapStateToProps = (state, ownProps) => {
   const layers = getLayersState(state)

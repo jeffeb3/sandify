@@ -1,10 +1,10 @@
-import Victor from 'victor'
-import Machine from './Machine'
-import { distance, vertexRoundP } from '../../common/geometry'
-import clip from 'liang-barsky'
+import Victor from "victor"
+import Machine from "./Machine"
+import { distance, vertexRoundP } from "@/common/geometry"
+import clip from "liang-barsky"
 
 export default class RectMachine extends Machine {
-  constructor(vertices, settings, layerInfo={}) {
+  constructor(vertices, settings, layerInfo = {}) {
     super()
     this.vertices = vertices
     this.settings = settings
@@ -15,7 +15,7 @@ export default class RectMachine extends Machine {
       new Victor(-this.sizeX, -this.sizeY),
       new Victor(-this.sizeX, this.sizeY),
       new Victor(this.sizeX, this.sizeY),
-      new Victor(this.sizeX, -this.sizeY)
+      new Victor(this.sizeX, -this.sizeY),
     ]
   }
 
@@ -32,8 +32,11 @@ export default class RectMachine extends Machine {
       // [0]   [3]
       const corner = this.settings.rectOrigin[0]
       const first = this.vertices[0]
-      const last = this.vertices[this.vertices.length-1]
-      const maxRadius = Math.sqrt(Math.pow(2.0*this.sizeX, 2.0) + Math.pow(2.0*this.sizeY, 2.0)) / 2.0
+      const last = this.vertices[this.vertices.length - 1]
+      const maxRadius =
+        Math.sqrt(
+          Math.pow(2.0 * this.sizeX, 2.0) + Math.pow(2.0 * this.sizeY, 2.0),
+        ) / 2.0
       let scale, outPoint
 
       if (first.magnitude() <= last.magnitude()) {
@@ -47,13 +50,19 @@ export default class RectMachine extends Machine {
 
       let clipped = this.clipSegment(
         outPoint,
-        Victor.fromObject(outPoint).multiply(new Victor(scale, scale))
+        Victor.fromObject(outPoint).multiply(new Victor(scale, scale)),
       )
       const newPoint = clipped[clipped.length - 1]
       if (outPoint === last) {
-        this.vertices = [this.vertices, this.tracePerimeter(newPoint, this.corners[corner], true)].flat()
+        this.vertices = [
+          this.vertices,
+          this.tracePerimeter(newPoint, this.corners[corner], true),
+        ].flat()
       } else {
-        this.vertices = [this.tracePerimeter(this.corners[corner], newPoint, true), this.vertices].flat()
+        this.vertices = [
+          this.tracePerimeter(this.corners[corner], newPoint, true),
+          this.vertices,
+        ].flat()
       }
     }
 
@@ -66,7 +75,7 @@ export default class RectMachine extends Machine {
   }
 
   // Returns whether a given path lies on the perimeter of the rectangle
-  onPerimeter(v1, v2, delta=.0001) {
+  onPerimeter(v1, v2, delta = 0.0001) {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)
     const dy = Math.abs(Math.abs(v1.y) - this.sizeY)
     const rDx = Math.abs(v1.x - v2.x)
@@ -76,7 +85,7 @@ export default class RectMachine extends Machine {
   }
 
   outlinePerimeter() {
-    const last = this.vertices[this.vertices.length-1]
+    const last = this.vertices[this.vertices.length - 1]
 
     if (last) {
       const s = this.nearestVertex(last)
@@ -87,7 +96,7 @@ export default class RectMachine extends Machine {
         this.corners[(idx + 1) % 4],
         this.corners[(idx + 2) % 4],
         this.corners[(idx + 3) % 4],
-        this.corners[idx]
+        this.corners[idx],
       ]
       this.vertices = this.vertices.concat(corners)
     }
@@ -99,10 +108,13 @@ export default class RectMachine extends Machine {
   // perimeter). Returns a list of intermediate points on that path (if any).
   // On further consideration, this could be redone using Dijsktra's algorithm, I believe,
   // but this works and is, I believe, reasonably efficient.
-  tracePerimeter(p1, p2, includeOriginalPoints=false) {
+  tracePerimeter(p1, p2, includeOriginalPoints = false) {
     let points
 
-    if ((p1.x === p2.x && Math.abs(p1.x) === this.sizeX) || (p1.y === p2.y && (Math.abs(p1.y) === this.sizeY))) {
+    if (
+      (p1.x === p2.x && Math.abs(p1.x) === this.sizeX) ||
+      (p1.y === p2.y && Math.abs(p1.y) === this.sizeY)
+    ) {
       // on the same line; no connecting points needed
       points = []
     } else {
@@ -110,33 +122,44 @@ export default class RectMachine extends Machine {
       // end up within incorrect reading
       const lp1 = vertexRoundP(p1, 3)
       const lp2 = vertexRoundP(p2, 3)
-      const o1 = Math.abs(lp1.x) === this.sizeX ? 'v' : 'h'
-      const o2 = Math.abs(lp2.x) === this.sizeX ? 'v' : 'h'
+      const o1 = Math.abs(lp1.x) === this.sizeX ? "v" : "h"
+      const o2 = Math.abs(lp2.x) === this.sizeX ? "v" : "h"
 
       if (o1 !== o2) {
         // connects via a single corner
-        points = (o1 === 'h') ?
-          [new Victor(p2.x, p1.y)] :
-          [new Victor(p1.x, p2.y)]
+        points =
+          o1 === "h" ? [new Victor(p2.x, p1.y)] : [new Victor(p1.x, p2.y)]
       } else {
         // connects via two corners; find the shortest way around
-        if (o1 === 'h') {
-          let d1 = -2*this.sizeX - p1.x - p2.x
-          let d2 = 2*this.sizeX - p1.x - p2.x
+        if (o1 === "h") {
+          let d1 = -2 * this.sizeX - p1.x - p2.x
+          let d2 = 2 * this.sizeX - p1.x - p2.x
           let xSign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
 
           points = [
-            new Victor(Math.sign(xSign)*this.sizeX, Math.sign(p1.y)*this.sizeY),
-            new Victor(Math.sign(xSign)*this.sizeX, -Math.sign(p1.y)*this.sizeY)
+            new Victor(
+              Math.sign(xSign) * this.sizeX,
+              Math.sign(p1.y) * this.sizeY,
+            ),
+            new Victor(
+              Math.sign(xSign) * this.sizeX,
+              -Math.sign(p1.y) * this.sizeY,
+            ),
           ]
         } else {
-          let d1 = -2*this.sizeY - p1.y - p2.y
-          let d2 = 2*this.sizeY - p1.y - p2.y
+          let d1 = -2 * this.sizeY - p1.y - p2.y
+          let d2 = 2 * this.sizeY - p1.y - p2.y
           let ySign = Math.abs(d1) > Math.abs(d2) ? 1 : -1
 
           points = [
-            new Victor(Math.sign(p1.x)*this.sizeX, Math.sign(ySign)*this.sizeY),
-            new Victor(-Math.sign(p1.x)*this.sizeX, Math.sign(ySign)*this.sizeY),
+            new Victor(
+              Math.sign(p1.x) * this.sizeX,
+              Math.sign(ySign) * this.sizeY,
+            ),
+            new Victor(
+              -Math.sign(p1.x) * this.sizeX,
+              Math.sign(ySign) * this.sizeY,
+            ),
           ]
         }
       }
@@ -155,7 +178,7 @@ export default class RectMachine extends Machine {
   nearestVertex(vertex) {
     return new Victor(
       Math.min(this.sizeX, Math.max(-this.sizeX, vertex.x)),
-      Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y))
+      Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y)),
     )
   }
 
@@ -230,18 +253,18 @@ export default class RectMachine extends Machine {
       // right
       [new Victor(this.sizeX, -this.sizeY), new Victor(this.sizeX, this.sizeY)],
       // bottom
-      [new Victor(-this.sizeX, -this.sizeY), new Victor(this.sizeX, -this.sizeY)],
+      [
+        new Victor(-this.sizeX, -this.sizeY),
+        new Victor(this.sizeX, -this.sizeY),
+      ],
       // top
       [new Victor(-this.sizeX, this.sizeY), new Victor(this.sizeX, this.sizeY)],
     ]
 
     // Count up the number of boundary lines intersect with our line segment.
     let intersections = []
-    for (let s=0; s<sides.length; s++) {
-      const intPoint = this.intersection(start,
-                                   end,
-                                   sides[s][0],
-                                   sides[s][1])
+    for (let s = 0; s < sides.length; s++) {
+      const intPoint = this.intersection(start, end, sides[s][0], sides[s][1])
       if (intPoint) {
         intersections.push(new Victor(intPoint.x, intPoint.y))
       }
@@ -257,8 +280,10 @@ export default class RectMachine extends Machine {
 
       // The intersections are tested in some normal order, but the line could be going through them
       // in any direction. This check will flip the intersections if they are reversed somehow.
-      if (Victor.fromObject(intersections[0]).subtract(start).lengthSq() >
-          Victor.fromObject(intersections[1]).subtract(start).lengthSq()) {
+      if (
+        Victor.fromObject(intersections[0]).subtract(start).lengthSq() >
+        Victor.fromObject(intersections[1]).subtract(start).lengthSq()
+      ) {
         let temp = intersections[0]
         intersections[0] = intersections[1]
         intersections[1] = temp
@@ -272,11 +297,15 @@ export default class RectMachine extends Machine {
     // box until we reach the other point.
     // Here, I'm going to split this line into two parts, and send each half line segment back
     // through the clipSegment algorithm. Eventually, that should result in only one of the other cases.
-    const midpoint = Victor.fromObject(start).add(end).multiply(new Victor(0.5, 0.5))
+    const midpoint = Victor.fromObject(start)
+      .add(end)
+      .multiply(new Victor(0.5, 0.5))
 
     // recurse, and find smaller segments until we don't end up in this place again.
-    return [...this.clipSegment(start, midpoint),
-            ...this.clipSegment(midpoint, end)]
+    return [
+      ...this.clipSegment(start, midpoint),
+      ...this.clipSegment(midpoint, end),
+    ]
   }
 
   // Intersect the line with the boundary, and return the point exactly on the boundary.
@@ -323,8 +352,8 @@ export default class RectMachine extends Machine {
   // Returns the distance walked from the first vertex to the last vertex.
   distance(vertices) {
     let d = 0
-    for(let i=0; i<vertices.length; i++) {
-      if (i > 0) d = d + distance(vertices[i], vertices[i-1])
+    for (let i = 0; i < vertices.length; i++) {
+      if (i > 0) d = d + distance(vertices[i], vertices[i - 1])
     }
 
     return d

@@ -1,6 +1,6 @@
 jest.mock("lodash/uniqueId")
 const uniqueId = require("lodash/uniqueId") // eslint-disable-line @typescript-eslint/no-var-requires
-import mockUniqueId, { resetUniqueIds } from "../../common/mocks"
+import mockUniqueId, { resetUniqueIds } from "@/common/mocks"
 import layers, {
   addLayer,
   removeLayer,

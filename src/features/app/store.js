@@ -1,12 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from "redux"
-import appReducer from "./appSlice"
 import machineReducer from "@/features/machine/machineSlice"
 import exporterReducer from "@/features/exporter/exporterSlice"
 import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
-import { loadState, saveState } from "../../common/localStorage"
+import { loadState, saveState } from "@/common/localStorage"
+import appReducer from "./appSlice"
 
 /*
 const customizedMiddleware = getDefaultMiddleware({

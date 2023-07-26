@@ -6,7 +6,7 @@ import {
   getModelSelectOptions,
   getDefaultModel,
   getModelFromType,
-} from "../../config/models"
+} from "@/config/models"
 import Layer from "./Layer"
 import { addLayer } from "./layersSlice"
 

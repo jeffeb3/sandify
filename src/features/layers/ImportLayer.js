@@ -1,13 +1,12 @@
 import React, { Component } from "react"
 import { Button, Modal, Form, Accordion, Card } from "react-bootstrap"
 import { connect } from "react-redux"
-
-import { getMachineState } from "@/features/store/selectors"
-import ThetaRhoImporter from "../importer/ThetaRhoImporter"
-import GCodeImporter from "../importer/GCodeImporter"
-import { addLayer } from "../layers/layersSlice"
-import Layer from "@/features/layers/layer"
 import ReactGA from "react-ga"
+import { getMachineState } from "@/features/store/selectors"
+import ThetaRhoImporter from "@/features/importer/ThetaRhoImporter"
+import GCodeImporter from "@/features/importer/GCodeImporter"
+import { addLayer } from "./layersSlice"
+import Layer from "./layer"
 
 const mapStateToProps = (state, ownProps) => {
   return {

@@ -9,9 +9,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "react-bootstrap"
-import InputOption from "../../components/InputOption"
-import CheckboxOption from "../../components/CheckboxOption"
-import { getMachineState } from "../store/selectors"
+import InputOption from "@/components/InputOption"
+import CheckboxOption from "@/components/CheckboxOption"
+import { getMachineState } from "@/features/store/selectors"
 import { machineOptions } from "./options"
 import {
   toggleMachinePolarExpanded,

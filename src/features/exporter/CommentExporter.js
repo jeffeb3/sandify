@@ -1,5 +1,5 @@
-import { getModelFromType } from "../../config/models"
-//import Machine from '../../models/Machine'
+import { getModelFromType } from "@/config/models"
+// import Machine from '@/models/Machine'
 import Exporter from "./Exporter"
 
 export default class CommentExporter extends Exporter {

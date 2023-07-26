@@ -1,9 +1,9 @@
-import { angle, onSegment, circle, arc } from '../../common/geometry'
-import Machine from './Machine'
-import Victor from 'victor'
+import { angle, onSegment, circle, arc } from "@/common/geometry"
+import Machine from "./Machine"
+import Victor from "victor"
 
 export default class PolarMachine extends Machine {
-  constructor(vertices, settings, layerInfo={}) {
+  constructor(vertices, settings, layerInfo = {}) {
     super()
     this.vertices = vertices
     this.settings = Object.assign({}, settings)
@@ -15,13 +15,15 @@ export default class PolarMachine extends Machine {
   addStartPoint() {
     const maxRadius = this.settings.maxRadius
 
-    if (this.settings.polarStartPoint !== 'none') {
-      if (this.settings.polarStartPoint === 'center') {
+    if (this.settings.polarStartPoint !== "none") {
+      if (this.settings.polarStartPoint === "center") {
         this.vertices.unshift(new Victor(0.0, 0.0))
       } else {
         const first = this.vertices[0]
         const scale = maxRadius / first.magnitude()
-        const startPoint = Victor.fromObject(first).multiply(new Victor(scale, scale))
+        const startPoint = Victor.fromObject(first).multiply(
+          new Victor(scale, scale),
+        )
         this.vertices.unshift(new Victor(startPoint.x, startPoint.y))
       }
     }
@@ -30,13 +32,15 @@ export default class PolarMachine extends Machine {
   addEndPoint() {
     const maxRadius = this.settings.maxRadius
 
-    if (this.settings.polarEndPoint !== 'none') {
-      if (this.settings.polarEndPoint === 'center') {
+    if (this.settings.polarEndPoint !== "none") {
+      if (this.settings.polarEndPoint === "center") {
         this.vertices.push(new Victor(0.0, 0.0))
       } else {
-        const last = this.vertices[this.vertices.length-1]
+        const last = this.vertices[this.vertices.length - 1]
         const scale = maxRadius / last.magnitude()
-        const endPoint =  Victor.fromObject(last).multiply(new Victor(scale, scale))
+        const endPoint = Victor.fromObject(last).multiply(
+          new Victor(scale, scale),
+        )
         this.vertices.push(new Victor(endPoint.x, endPoint.y))
       }
     }
@@ -65,9 +69,12 @@ export default class PolarMachine extends Machine {
   // Returns the nearest perimeter vertex to the given vertex.
   nearestPerimeterVertex(vertex) {
     if (vertex) {
-      return new Victor(Math.cos(vertex.angle()) * this.settings.maxRadius, Math.sin(vertex.angle()) * this.settings.maxRadius)
+      return new Victor(
+        Math.cos(vertex.angle()) * this.settings.maxRadius,
+        Math.sin(vertex.angle()) * this.settings.maxRadius,
+      )
     } else {
-      return new Victor(0,0)
+      return new Victor(0, 0)
     }
   }
 
@@ -93,13 +100,18 @@ export default class PolarMachine extends Machine {
     const last = this.vertices[this.vertices.length - 1]
 
     if (last) {
-      this.vertices = this.vertices.concat(circle(this.settings.maxRadius, parseInt(last.angle()*64/Math.PI)))
+      this.vertices = this.vertices.concat(
+        circle(
+          this.settings.maxRadius,
+          parseInt((last.angle() * 64) / Math.PI),
+        ),
+      )
     }
     return this
   }
 
   // Returns whether a given path lies on the perimeter of the circle.
-  onPerimeter(v1, v2, delta=1) {
+  onPerimeter(v1, v2, delta = 1) {
     let rm = Math.pow(this.settings.maxRadius, 2)
     let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
     let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
@@ -112,7 +124,11 @@ export default class PolarMachine extends Machine {
     // move, or it will be incorrectly optimized out of the final vertices. The 3/50
     // ratio could likely be refined further (relative to maxRadius), but it seems to produce
     // accurate results at various machine sizes.
-    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta && d < 3*this.settings.maxRadius/this.settings.perimeterConstant
+    return (
+      Math.abs(r1 - rm) < delta &&
+      Math.abs(r2 - rm) < delta &&
+      d < (3 * this.settings.maxRadius) / this.settings.perimeterConstant
+    )
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by
@@ -146,7 +162,7 @@ export default class PolarMachine extends Machine {
 
     // Check for the odd case of coincident points
     if (start.distance(end) < 0.00001) {
-       return [this.nearestVertex(start)]
+      return [this.nearestVertex(start)]
     }
 
     const intersections = this.getIntersections(start, end)
@@ -169,27 +185,29 @@ export default class PolarMachine extends Machine {
       return [
         ...this.tracePerimeter(start, point),
         point,
-        ...this.tracePerimeter(otherPoint, end)
+        ...this.tracePerimeter(otherPoint, end),
       ]
     }
 
     // If we're here, then one point is still in the circle.
     if (radStart <= size) {
-      const point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point
+      const point1 =
+        intersections.points[0].on &&
+        Math.abs(intersections.points[0].point - start) > 0.0001
+          ? intersections.points[0].point
+          : intersections.points[1].point
 
       return [
         start,
         ...this.tracePerimeter(point1, end),
-        this.nearestPerimeterVertex(end)
+        this.nearestPerimeterVertex(end),
       ]
     } else {
-      const point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point
+      const point1 = intersections.points[0].on
+        ? intersections.points[0].point
+        : intersections.points[1].point
 
-      return [
-        ...this.tracePerimeter(start, point1),
-        point1,
-        end
-      ]
+      return [...this.tracePerimeter(start, point1), point1, end]
     }
   }
 
@@ -197,7 +215,7 @@ export default class PolarMachine extends Machine {
     const size = this.settings.maxRadius
     let direction = end.clone().subtract(start).clone().normalize()
     let t = direction.x * -1.0 * start.x + direction.y * -1.0 * start.y
-    let e = direction.clone().multiply(Victor(t,t)).add(start)
+    let e = direction.clone().multiply(Victor(t, t)).add(start)
     let distanceToLine = e.magnitude()
 
     if (distanceToLine >= size) {
@@ -207,9 +225,15 @@ export default class PolarMachine extends Machine {
       }
     }
 
-    const dt = Math.sqrt(size*size - distanceToLine*distanceToLine)
-    const point1 = direction.clone().multiply(Victor(t - dt,t - dt)).add(start)
-    const point2 = direction.clone().multiply(Victor(t + dt,t + dt)).add(start)
+    const dt = Math.sqrt(size * size - distanceToLine * distanceToLine)
+    const point1 = direction
+      .clone()
+      .multiply(Victor(t - dt, t - dt))
+      .add(start)
+    const point2 = direction
+      .clone()
+      .multiply(Victor(t + dt, t + dt))
+      .add(start)
     const s1 = onSegment(start, end, point1)
     const s2 = onSegment(start, end, point2)
 
@@ -219,13 +243,14 @@ export default class PolarMachine extends Machine {
         points: [
           {
             point: point1,
-            on: s1
+            on: s1,
           },
           {
             point: point2,
-            on: s2
-          }
-        ]}
+            on: s2,
+          },
+        ],
+      }
     } else {
       return {
         intersection: false,
@@ -236,6 +261,6 @@ export default class PolarMachine extends Machine {
 
   // returns the points if any that intersect with the line represented by start and end
   clipLine(start, end) {
-    return this.getIntersections(start, end).points.map(pt => pt.point)
+    return this.getIntersections(start, end).points.map((pt) => pt.point)
   }
 }

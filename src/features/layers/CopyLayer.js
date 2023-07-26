@@ -1,10 +1,9 @@
 import React, { Component } from "react"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import { connect } from "react-redux"
-
-import { getLayersState } from "../store/selectors"
-import { copyLayer, updateLayers } from "../layers/layersSlice"
-import { getCurrentLayer } from "../layers/selectors"
+import { getLayersState } from "@/features/store/selectors"
+import { copyLayer, updateLayers } from "./layersSlice"
+import { getCurrentLayer } from "./selectors"
 
 const mapStateToProps = (state, ownProps) => {
   const layers = getLayersState(state)

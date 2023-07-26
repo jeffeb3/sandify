@@ -1,8 +1,11 @@
-import { getLayersState, createDeepEqualSelector } from "../store/selectors"
+import {
+  getLayersState,
+  createDeepEqualSelector,
+} from "@/features/store/selectors"
 import { createSelector } from "reselect"
 import { createCachedSelector } from "re-reselect"
-import { memoizeArrayProducingFn } from "../../common/selectors"
-import { log } from "../../common/debugging"
+import { memoizeArrayProducingFn } from "@/common/selectors"
+import { log } from "@/common/debugging"
 
 const getCurrentLayerId = createSelector(
   getLayersState,
