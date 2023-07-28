@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import uniqueId from "lodash/uniqueId"
+import { v4 as uuidv4 } from "uuid"
 import arrayMove from "array-move"
 import { getModelFromType, getDefaultModelType } from "@/config/models"
 import Layer from "./Layer"
@@ -13,7 +13,7 @@ function createLayer(state, attrs) {
   delete attrs.restore
   const layer = {
     ...attrs,
-    id: (restore && attrs.id) || uniqueId("layer-"),
+    id: (restore && attrs.id) || uuidv4(),
     name: attrs.name,
   }
 
@@ -75,7 +75,7 @@ function setCurrentId(state, id) {
 }
 
 const defaultLayer = new Layer(getDefaultModelType())
-const defaultLayerId = uniqueId("layer-")
+const defaultLayerId = uuidv4()
 const layerState = {
   id: defaultLayerId,
   ...defaultLayer.getInitialState(),
@@ -132,7 +132,6 @@ const layersSlice = createSlice({
       const index = state.allIds.findIndex((id) => id === state.current) + 1
       state.allIds.splice(index, 0, layer.id)
       setCurrentId(state, layer.id)
-      state.copyLayerName = null
     },
     removeLayer(state, action) {
       const id = action.payload
@@ -179,7 +178,6 @@ const layersSlice = createSlice({
 
       if (current) {
         setCurrentId(state, current.id)
-        state.copyLayerName = current.name
       }
     },
     setSelectedLayer(state, action) {
