@@ -1,97 +1,79 @@
-import React, { Component } from "react"
+import React, { useRef, useState } from "react"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
-import { connect } from "react-redux"
-import { getLayersState } from "@/features/store/selectors"
-import { copyLayer, updateLayers } from "./layersSlice"
+import { useDispatch, useSelector } from "react-redux"
+import { copyLayer } from "./layersSlice"
 import { getCurrentLayer } from "./selectors"
 
-const mapStateToProps = (state, ownProps) => {
-  const layers = getLayersState(state)
-  const current = getCurrentLayer(state)
+const CopyLayer = ({ toggleModal, showModal }) => {
+  const dispatch = useDispatch()
+  const currentLayer = useSelector(getCurrentLayer)
+  const namedInputRef = useRef(null)
+  const [copyLayerName, setCopyLayerName] = useState(currentLayer.name)
 
-  return {
-    copyLayerName: layers.copyLayerName || current.name,
-    showModal: ownProps.showModal,
-    currentLayer: current,
-  }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    toggleModal: () => {
-      ownProps.toggleModal()
-    },
-    onChangeCopyName: (event) => {
-      dispatch(updateLayers({ copyLayerName: event.target.value }))
-    },
-    onLayerCopied: (id) => {
-      dispatch(copyLayer(id))
-    },
-  }
-}
-
-class CopyLayer extends Component {
-  render() {
-    const namedInputRef = React.createRef()
-    const {
-      currentLayer,
-      copyLayerName,
-      onChangeCopyName,
-      onLayerCopied,
-      toggleModal,
-      showModal,
-    } = this.props
-
-    return (
-      <Modal
-        show={showModal}
-        onHide={toggleModal}
-        onEntered={() => namedInputRef.current.focus()}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Copy {currentLayer.name}</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Row className="align-items-center">
-            <Col sm={5}>Name</Col>
-            <Col sm={7}>
-              <Form.Control
-                ref={namedInputRef}
-                value={copyLayerName}
-                onFocus={this.handleNameFocus}
-                onChange={onChangeCopyName}
-              />
-            </Col>
-          </Row>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            id="copy-layer-close"
-            variant="light"
-            onClick={toggleModal}
-          >
-            Cancel
-          </Button>
-          <Button
-            id="copy-layer-copy"
-            variant="primary"
-            onClick={() => {
-              onLayerCopied(currentLayer.id)
-              toggleModal()
-            }}
-          >
-            Copy
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    )
+  const handleChangeCopyLayerName = (event) => {
+    setCopyLayerName(event.target.value)
   }
 
-  handleNameFocus(event) {
+  const handleNameFocus = (event) => {
     event.target.select()
   }
+
+  const handleCopyLayer = () => {
+    dispatch(
+      copyLayer({
+        id: currentLayer.id,
+        name: copyLayerName,
+      }),
+    )
+    toggleModal()
+  }
+
+  const handleInitialFocus = () => {
+    namedInputRef.current.focus()
+  }
+
+  return (
+    <Modal
+      show={showModal}
+      onHide={toggleModal}
+      onEntered={handleInitialFocus}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Copy {currentLayer.name}</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        <Row className="align-items-center">
+          <Col sm={5}>Name</Col>
+          <Col sm={7}>
+            <Form.Control
+              ref={namedInputRef}
+              value={copyLayerName}
+              onFocus={handleNameFocus}
+              onChange={handleChangeCopyLayerName}
+            />
+          </Col>
+        </Row>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button
+          id="copy-layer-close"
+          variant="light"
+          onClick={toggleModal}
+        >
+          Cancel
+        </Button>
+        <Button
+          id="copy-layer-copy"
+          variant="primary"
+          onClick={handleCopyLayer}
+        >
+          Copy
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CopyLayer)
+export default CopyLayer

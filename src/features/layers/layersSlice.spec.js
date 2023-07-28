@@ -52,7 +52,6 @@ describe("layers reducer", () => {
       newEffectNameOverride: false,
       newEffectName: "mask",
       newEffectType: "mask",
-      copyLayerName: null,
       byId: {},
       allIds: [],
     })
@@ -97,7 +96,6 @@ describe("layers reducer", () => {
             },
             allIds: ["layer-1"],
             current: "layer-1",
-            copyLayerName: "foo",
           },
           removeLayer("layer-1"),
         ),
@@ -106,7 +104,6 @@ describe("layers reducer", () => {
         allIds: [],
         current: undefined,
         selected: undefined,
-        copyLayerName: "foo",
       })
     })
 
@@ -155,7 +152,6 @@ describe("layers reducer", () => {
             },
             allIds: ["layer-0"],
             current: "layer-0",
-            copyLayerName: "foo",
           },
           copyLayer("layer-0"),
         ),
@@ -173,7 +169,6 @@ describe("layers reducer", () => {
         allIds: ["layer-0", "layer-1"],
         current: "layer-1",
         selected: "layer-1",
-        copyLayerName: null,
       })
     })
 
@@ -195,7 +190,6 @@ describe("layers reducer", () => {
             },
             allIds: ["layer"],
             current: "layer",
-            copyLayerName: "foo",
           },
           copyLayer("layer"),
         ),
@@ -225,7 +219,6 @@ describe("layers reducer", () => {
         allIds: ["layer", "layer-1"],
         current: "layer-1",
         selected: "layer-1",
-        copyLayerName: null,
       })
     })
   })

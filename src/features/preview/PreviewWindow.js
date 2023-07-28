@@ -1,13 +1,10 @@
-import React, { Component } from "react"
-import { connect, ReactReduxContext, Provider } from "react-redux"
+import React, { useEffect, useRef } from "react"
+import { useSelector, useDispatch, useStore } from "react-redux"
+import { Provider } from "react-redux"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { updateLayer } from "@/features/layers/layersSlice"
-import {
-  getMachineState,
-  getLayersState,
-  getPreviewState,
-} from "@/features/store/selectors"
+import { getMachineState, getPreviewState } from "@/features/store/selectors"
 import {
   getCurrentLayer,
   getKonvaLayerIds,
@@ -17,206 +14,160 @@ import {
 import { roundP } from "@/common/util"
 import PreviewLayer from "./PreviewLayer"
 import PreviewConnector from "./PreviewConnector"
-import { setPreviewSize, updatePreview } from "./previewSlice"
+import { setPreviewSize } from "./previewSlice"
 
-const mapStateToProps = (state, ownProps) => {
-  const layers = getLayersState(state)
-  const preview = getPreviewState(state)
-  const machine = getMachineState(state)
+const PreviewWindow = () => {
+  const dispatch = useDispatch()
+  const store = useStore()
+  const previewElement = useRef(null)
+  const { use_rect, minX, minY, maxX, maxY, maxRadius } = useSelector((state) =>
+    getMachineState(state),
+  )
+  const { canvasWidth, canvasHeight } = useSelector((state) =>
+    getPreviewState(state),
+  )
+  const currentLayer = useSelector(getCurrentLayer)
+  const konvaIds = useSelector(getKonvaLayerIds)
+  const layerIds = useSelector(getVisibleNonEffectIds)
+  const dragging = useSelector(isDragging)
 
-  return {
-    layers,
-    currentLayer: getCurrentLayer(state),
-    konvaIds: getKonvaLayerIds(state),
-    layerIds: getVisibleNonEffectIds(state),
-    use_rect: machine.rectangular,
-    dragging: isDragging(state),
-    minX: machine.minX,
-    maxX: machine.maxX,
-    minY: machine.minY,
-    maxY: machine.maxY,
-    maxRadius: machine.maxRadius,
-    canvasWidth: preview.canvasWidth,
-    canvasHeight: preview.canvasHeight,
-  }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onResize: (size) => {
-      dispatch(setPreviewSize(size))
-    },
-    onChange: (attrs) => {
-      dispatch(updatePreview(attrs))
-    },
-    onLayerChange: (attrs) => {
-      dispatch(updateLayer(attrs))
-    },
-  }
-}
-
-// Contains the preview window, and any parameters for the machine.
-class PreviewWindow extends Component {
-  componentDidMount() {
+  useEffect(() => {
     const wrapper = document.getElementById("preview-wrapper")
+    const resize = () => {
+      const width = parseInt(
+        getComputedStyle(wrapper).getPropertyValue("width"),
+      )
+      const height = parseInt(
+        getComputedStyle(wrapper).getPropertyValue("height"),
+      )
 
-    this.throttledResize = throttle(this.resize, 200, {
+      if (canvasWidth !== width || canvasHeight !== height) {
+        dispatch(setPreviewSize({ width, height }))
+      }
+    }
+    const throttledResize = throttle(resize, 200, {
       trailing: true,
-    }).bind(this)
-    window.addEventListener(
-      "resize",
-      () => {
-        this.throttledResize(wrapper)
-      },
-      false,
-    )
-  }
+    })
 
-  resize(wrapper) {
-    const width = parseInt(getComputedStyle(wrapper).getPropertyValue("width"))
-    const height = parseInt(
-      getComputedStyle(wrapper).getPropertyValue("height"),
-    )
+    window.addEventListener("resize", throttledResize, false)
 
-    if (
-      this.props.canvasWidth !== width ||
-      this.props.canvasHeight !== height
-    ) {
-      this.props.onResize({ width, height })
+    return () => {
+      window.removeEventListener("resize", throttledResize, false)
     }
-  }
+  }, [dispatch, canvasWidth, canvasHeight])
 
-  render() {
-    const { minX, minY, maxX, maxY } = this.props
-    const radius = this.props.maxRadius
-    const scale = this.relativeScale(this.props)
-    const width = this.props.use_rect ? maxX - minX : radius * 2
-    const height = this.props.use_rect ? maxY - minY : radius * 2
-
-    // define Konva clip functions that will let us clip vertices not bound by
-    // machine limits when dragging, and produce a visually seamless experience.
-    const clipCircle = (ctx) => {
-      ctx.arc(0, 0, radius, 0, Math.PI * 2, false)
-    }
-    const clipRect = (ctx) => {
-      ctx.rect(-width / 2, -height / 2, width, height)
-    }
-    const clipFunc = this.props.dragging
-      ? this.props.use_rect
-        ? clipRect
-        : clipCircle
-      : null
-
-    return (
-      // the consumer wrapper is needed to pass the store down to our shape
-      // which is not our usual React Component
-      <ReactReduxContext.Consumer>
-        {({ store }) => (
-          <Stage
-            className="preview-wrapper d-flex align-items-center"
-            scaleX={scale}
-            scaleY={scale}
-            height={height * scale}
-            width={width * scale}
-            offsetX={-width / 2}
-            offsetY={-height / 2}
-            onWheel={(e) => {
-              e.evt.preventDefault()
-              if (Math.abs(e.evt.deltaY) > 0) {
-                this.props.onLayerChange({
-                  width: this.scaleByWheel(
-                    this.props.currentLayer.width,
-                    e.evt.deltaY,
-                  ),
-                  height: this.scaleByWheel(
-                    this.props.currentLayer.height,
-                    e.evt.deltaY,
-                  ),
-                  id: this.props.currentLayer.id,
-                })
-              }
-            }}
-          >
-            <Provider store={store}>
-              <Layer clipFunc={clipFunc}>
-                {!this.props.use_rect && (
-                  <Circle
-                    x={0}
-                    y={0}
-                    radius={radius}
-                    fill="transparent"
-                    stroke="gray"
-                  />
-                )}
-                {this.props.use_rect && (
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={width}
-                    height={height}
-                    fill="transparent"
-                    stroke="gray"
-                    offsetX={width / 2}
-                    offsetY={height / 2}
-                  />
-                )}
-                {this.props.konvaIds
-                  .map((id, i) => {
-                    const idx = this.props.layerIds.findIndex(
-                      (layerId) => layerId === id,
-                    )
-                    const nextId =
-                      idx !== -1 && idx < this.props.layerIds.length - 1
-                        ? this.props.layerIds[idx + 1]
-                        : null
-                    return [
-                      nextId && (
-                        <PreviewConnector
-                          startId={id}
-                          endId={nextId}
-                          key={"c-" + i}
-                        />
-                      ),
-                      <PreviewLayer
-                        id={id}
-                        key={i}
-                        index={i}
-                      />,
-                    ].filter((e) => e !== null)
-                  })
-                  .flat()}
-              </Layer>
-            </Provider>
-          </Stage>
-        )}
-      </ReactReduxContext.Consumer>
-    )
-  }
-
-  relativeScale(props) {
+  const relativeScale = () => {
     let width, height
 
-    if (props.use_rect) {
-      width = props.maxX - props.minX
-      height = props.maxY - props.minY
+    if (use_rect) {
+      width = maxX - minX
+      height = maxY - minY
     } else {
-      width = height = props.maxRadius * 2.0
+      width = height = maxRadius * 2.0
     }
 
-    return Math.min(props.canvasWidth / width, props.canvasHeight / height)
+    return Math.min(canvasWidth / width, canvasHeight / height)
   }
 
-  scaleByWheel(size, deltaY) {
+  const scaleByWheel = (size, deltaY) => {
     const sign = Math.sign(deltaY)
     const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * sign
     let newSize = Math.max(roundP(size * scale, 0), 1)
 
     if (newSize === size) {
-      // If the log scaled value isn't big enough to move the scale.
+      // if the log scaled value isn't big enough to move the scale
       newSize = Math.max(sign + size, 1)
     }
 
     return newSize
   }
+
+  const clipCircle = (ctx) => {
+    ctx.arc(0, 0, maxRadius, 0, Math.PI * 2, false)
+  }
+
+  const clipRect = (ctx) => {
+    ctx.rect(-width / 2, -height / 2, width, height)
+  }
+
+  const handleWheel = (e) => {
+    e.evt.preventDefault()
+
+    if (Math.abs(e.evt.deltaY) > 0) {
+      dispatch(
+        updateLayer({
+          width: scaleByWheel(currentLayer.width, e.evt.deltaY),
+          height: scaleByWheel(currentLayer.height, e.evt.deltaY),
+          id: currentLayer.id,
+        }),
+      )
+    }
+  }
+
+  const clipFunc = dragging ? (use_rect ? clipRect : clipCircle) : null
+  const width = use_rect ? maxX - minX : maxRadius * 2
+  const height = use_rect ? maxY - minY : maxRadius * 2
+  const scale = relativeScale()
+
+  return (
+    <Stage
+      id="preview-wrapper"
+      ref={previewElement}
+      className="preview-wrapper d-flex align-items-center"
+      scaleX={scale}
+      scaleY={scale}
+      height={height * scale}
+      width={width * scale}
+      offsetX={-width / 2}
+      offsetY={-height / 2}
+      onWheel={handleWheel}
+    >
+      <Provider store={store}>
+        <Layer clipFunc={clipFunc}>
+          {!use_rect && (
+            <Circle
+              x={0}
+              y={0}
+              radius={maxRadius}
+              fill="transparent"
+              stroke="gray"
+            />
+          )}
+          {use_rect && (
+            <Rect
+              x={0}
+              y={0}
+              width={width}
+              height={height}
+              fill="transparent"
+              stroke="gray"
+              offsetX={width / 2}
+              offsetY={height / 2}
+            />
+          )}
+          {konvaIds.map((id, i) => {
+            const idx = layerIds.findIndex((layerId) => layerId === id)
+            const nextId =
+              idx !== -1 && idx < layerIds.length - 1 ? layerIds[idx + 1] : null
+            return [
+              nextId && (
+                <PreviewConnector
+                  startId={id}
+                  endId={nextId}
+                  key={"c-" + i}
+                />
+              ),
+              <PreviewLayer
+                id={id}
+                key={i}
+                index={i}
+              />,
+            ].filter((e) => e !== null)
+          })}
+        </Layer>
+      </Provider>
+    </Stage>
+  )
 }
-export default connect(mapStateToProps, mapDispatchToProps)(PreviewWindow)
+
+export default PreviewWindow

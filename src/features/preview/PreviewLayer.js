@@ -1,11 +1,10 @@
-import React from "react"
-import { useSelector, useDispatch, shallowEqual } from "react-redux"
+import React, { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import {
   getPreviewVertices,
   getSliderColors,
   getVertexOffsets,
-  getAllComputedVertices,
   getSliderBounds,
 } from "../machine/selectors"
 import { updateLayer } from "@/features/layers/layersSlice"
@@ -20,55 +19,27 @@ import {
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 
-// Renders the shapes in the preview window and allows the user to interact with the shape.
 const PreviewLayer = (ownProps) => {
-  const mapStateToProps = (state) => {
-    // if a layer matching this shape's id does not exist, we have a zombie
-    // child. It has to do with a child (preview shape) subscribing to the store
-    // before its parent (preview window), and trying to render first after a
-    // layer is removed. This is a tangled, but well-known problem with React-Redux
-    // hooks, and the solution for now is to render the current layer instead.
-    // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
-    // It's quite likely there is a more elegant/proper way around this.
-    const layers = getLayersState(state)
-    const layer = getLayer(state, ownProps.id) || getCurrentLayer(state)
-    const index = getLayerIndex(state, layer.id)
-    const numLayers = getNumVisibleLayers(state)
-    const preview = getPreviewState(state)
-    //    const test = getLayers(state, ['layer-1', 'layer-2'])
-
-    return {
-      layer,
-      start: index === 0,
-      end: index === numLayers - 1,
-      currentLayer: getCurrentLayer(state),
-      vertices: getPreviewVertices(state, layer.id, "1"),
-      allVertices: getAllComputedVertices(state),
-      selected: layers.selected,
-      sliderValue: preview.sliderValue,
-      colors: getSliderColors(state),
-      offsets: getVertexOffsets(state),
-      offsetId: layer.id,
-      bounds: getSliderBounds(state),
-      markCoordinates: false, // debug feature: set to true to see coordinates while drawing
-    }
-  }
-
-  const props = useSelector(mapStateToProps, shallowEqual)
-  const {
-    layer,
-    selected,
-    sliderValue,
-    vertices,
-    offsets,
-    start,
-    end,
-    currentLayer,
-    colors,
-    bounds,
-  } = props
-  const model = getModelFromType(layer.type)
   const dispatch = useDispatch()
+  const layers = useSelector(getLayersState)
+  const currentLayer = useSelector(getCurrentLayer)
+  const layer =
+    useSelector((state) => getLayer(state, ownProps.id)) || currentLayer
+  const index = useSelector((state) => getLayerIndex(state, layer.id))
+  const numLayers = useSelector(getNumVisibleLayers)
+  const preview = useSelector(getPreviewState)
+  const vertices = useSelector((state) =>
+    getPreviewVertices(state, layer.id, "1"),
+  )
+  const colors = useSelector(getSliderColors)
+  const offsets = useSelector(getVertexOffsets)
+  const bounds = useSelector(getSliderBounds)
+
+  const selected = layers.selected
+  const sliderValue = preview.sliderValue
+  const model = getModelFromType(layer.type)
+  const start = index === 0
+  const end = index === numLayers - 1
   const width = layer.width
   const height = layer.height
   const selectedColor = "yellow"
@@ -78,10 +49,9 @@ const PreviewLayer = (ownProps) => {
   const isSelected = selected === ownProps.id
   const isSliding = sliderValue !== 0
   const isCurrent = layer.id === currentLayer.id
-  const helper = new PreviewHelper(props)
+  const helper = new PreviewHelper({ layer, vertices, offsets, bounds, colors })
 
-  // draws a colored path when user is using slider
-  function drawLayerVertices(context, bounds) {
+  const drawLayerVertices = (context, bounds) => {
     const { end } = bounds
     let oldColor = null
     let currentColor = isSelected ? selectedColor : unselectedColor
@@ -114,7 +84,7 @@ const PreviewLayer = (ownProps) => {
     context.stroke()
   }
 
-  function drawStartAndEndPoints(context) {
+  const drawStartAndEndPoints = (context) => {
     const start = vertices[0]
     const end = vertices[vertices.length - 1]
 
@@ -133,7 +103,7 @@ const PreviewLayer = (ownProps) => {
 
   // TODO: fix or remove
   // draws the line representing the track the path follows
-  //  function drawTrackVertices(context) {
+  //  const drawTrackVertices = (context) => {
   //    context.beginPath()
   //    context.lineWidth = 4.0
   //    context.strokeStyle = "green"
@@ -144,14 +114,12 @@ const PreviewLayer = (ownProps) => {
   //    context.stroke()
   //  }
 
-  // used by Konva to draw our custom shape
-  function sceneFunc(context, shape) {
+  const sceneFunc = (context, shape) => {
     if (vertices && vertices.length > 0) {
       // TODO: fix or remove
       //      if (props.trackVertices && props.trackVertices.length > 0) {
       //        drawTrackVertices(context)
       //      }
-
       drawLayerVertices(context, bounds)
 
       if (start || end || isSelected) {
@@ -163,45 +131,69 @@ const PreviewLayer = (ownProps) => {
     context.fillStrokeShape(shape)
   }
 
-  // used by Konva to mark boundaries of shape
   function hitFunc(context) {
     context.fillStrokeShape(this)
   }
 
-  function onChange(attrs) {
+  const handleChange = (attrs) => {
     attrs.id = layer.id
     dispatch(updateLayer(attrs))
   }
 
-  function onSelect() {
+  const handleSelect = () => {
     // deselection is currently disabled
     // dispatch(setSelectedLayer(selected == null ? currentLayer.id : null))
   }
 
-  function onDragStart() {
-    console.log(currentLayer.id + " " + layer.id)
-
+  const handleDragStart = () => {
     if (isCurrent) {
-      onChange({ dragging: true })
+      handleChange({ dragging: true })
     }
   }
 
-  const shapeRef = React.createRef()
-  const trRef = React.createRef()
+  const handleDragEnd = (e) => {
+    handleChange({
+      dragging: false,
+      x: roundP(e.target.x(), 0),
+      y: roundP(-e.target.y(), 0),
+    })
+  }
 
-  React.useEffect(() => {
+  const handleTransformStart = (e) => {
+    handleChange({ dragging: true })
+  }
+
+  const handleTransformEnd = (e) => {
+    const node = shapeRef.current
+    const scaleX = node.scaleX()
+    const scaleY = node.scaleY()
+
+    node.scaleX(1)
+    node.scaleY(1)
+
+    handleChange({
+      dragging: false,
+      width: roundP(Math.max(5, layer.width * scaleX), 0),
+      height: roundP(Math.max(5, layer.height * scaleY), 0),
+      rotation: roundP(node.rotation(), 0),
+    })
+  }
+
+  const shapeRef = React.useRef()
+  const trRef = React.useRef()
+
+  useEffect(() => {
     if (layer.visible && isSelected && model.canChangeSize(layer)) {
-      // we need to attach transformer manually
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
   }, [isSelected, layer, model.canMove, shapeRef, trRef])
 
   return (
-    <React.Fragment>
+    <>
       {layer.visible && (
         <Shape
-          {...props}
+          {...ownProps}
           draggable={model.canMove && isCurrent}
           width={width}
           height={height}
@@ -209,40 +201,17 @@ const PreviewLayer = (ownProps) => {
           offsetX={width / 2}
           x={layer.x || 0}
           y={-layer.y || 0}
-          onClick={onSelect}
-          onTap={onSelect}
+          onClick={handleSelect}
+          onTap={handleSelect}
           ref={shapeRef}
           strokeWidth={1}
           rotation={layer.rotation || 0}
           sceneFunc={sceneFunc}
           hitFunc={hitFunc}
-          onDragStart={onDragStart}
-          onDragEnd={(e) => {
-            onChange({
-              dragging: false,
-              x: roundP(e.target.x(), 0),
-              y: roundP(-e.target.y(), 0),
-            })
-          }}
-          onTransformStart={(e) => {
-            onChange({ dragging: true })
-          }}
-          onTransformEnd={(e) => {
-            const node = shapeRef.current
-            const scaleX = node.scaleX()
-            const scaleY = node.scaleY()
-
-            // we will reset it back
-            node.scaleX(1)
-            node.scaleY(1)
-
-            onChange({
-              dragging: false,
-              width: roundP(Math.max(5, layer.width * scaleX), 0),
-              height: roundP(Math.max(5, layer.height * scaleY), 0),
-              rotation: roundP(node.rotation(), 0),
-            })
-          }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onTransformStart={handleTransformStart}
+          onTransformEnd={handleTransformEnd}
         />
       )}
       {layer.visible && isSelected && model.canChangeSize(layer) && (
@@ -259,7 +228,7 @@ const PreviewLayer = (ownProps) => {
           }
         />
       )}
-    </React.Fragment>
+    </>
   )
 }
 

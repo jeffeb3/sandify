@@ -35,6 +35,7 @@ module.exports = {
     "no-redeclare": "off",
     "@typescript-eslint/no-redeclare": "warn",
     "no-use-before-define": "off",
+    "react-redux/useSelector-prefer-selectors": "off",
     "@typescript-eslint/no-use-before-define": [
       "warn",
       {

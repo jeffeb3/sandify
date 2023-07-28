@@ -1,60 +1,63 @@
-import React, { Component } from "react"
+import React from "react"
 import { Col, Form, Row } from "react-bootstrap"
 import Select from "react-select"
 
-class DropdownOption extends Component {
-  render() {
-    const option = this.props.options[this.props.optionKey]
-    const data = this.props.data
-    const object = this.props.object || data
-    const currentChoice = data[this.props.optionKey]
+const DropdownOption = ({
+  options,
+  optionKey,
+  data,
+  object,
+  handleChange,
+  index,
+}) => {
+  const option = options[optionKey]
+  const currentChoice = data[optionKey]
 
-    let choices = option.choices
-    if (typeof choices === "function") {
-      choices = choices()
-    }
-
-    choices = Array.isArray(choices)
-      ? choices.map((choice) => {
-          return { value: choice, label: choice }
-        })
-      : Object.keys(choices).map((key) => {
-          return { value: key, label: option.choices[key] }
-        })
-
-    const currentLabel = Array.isArray(choices)
-      ? currentChoice
-      : choices[currentChoice]
-
-    return (
-      <Row
-        className="align-items-center pb-2"
-        key={this.props.index}
-      >
-        <Col sm={5}>
-          <Form.Label htmlFor="options-dropdown">{option.title}</Form.Label>
-        </Col>
-
-        <Col sm={7}>
-          <Select
-            value={{ value: currentChoice, label: currentLabel }}
-            onChange={(choice) => {
-              const value = choice.value
-              let attrs = {}
-              attrs[this.props.optionKey] = value
-
-              if (option.onChange !== undefined) {
-                attrs = option.onChange(object, attrs, data)
-              }
-
-              this.props.onChange(attrs)
-            }}
-            options={choices}
-          />
-        </Col>
-      </Row>
-    )
+  let choices = option.choices
+  if (typeof choices === "function") {
+    choices = choices()
   }
+
+  choices = Array.isArray(choices)
+    ? choices.map((choice) => {
+        return { value: choice, label: choice }
+      })
+    : Object.keys(choices).map((key) => {
+        return { value: key, label: option.choices[key] }
+      })
+
+  const currentLabel = Array.isArray(choices)
+    ? currentChoice
+    : choices[currentChoice]
+
+  return (
+    <Row
+      className="align-items-center pb-2"
+      key={index}
+    >
+      <Col sm={5}>
+        <Form.Label htmlFor="options-dropdown">{option.title}</Form.Label>
+      </Col>
+
+      <Col sm={7}>
+        <Select
+          value={{ value: currentChoice, label: currentLabel }}
+          onChange={(choice) => {
+            const value = choice.value
+            let attrs = {}
+            attrs[optionKey] = value
+
+            if (option.handleChange !== undefined) {
+              attrs = option.handleChange(object, attrs, data)
+            }
+
+            handleChange(attrs)
+          }}
+          options={choices}
+        />
+      </Col>
+    </Row>
+  )
 }
 
 export default DropdownOption

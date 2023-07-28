@@ -3,8 +3,8 @@ import { createSelector } from "reselect"
 import Color from "color"
 import {
   getMachineState,
-  getState,
   getPreviewState,
+  getState,
 } from "@/features/store/selectors"
 import { createCachedSelector } from "re-reselect"
 import {
@@ -138,7 +138,11 @@ export const getPreviewVertices = createCachedSelector(
 )((state, id) => id)
 
 // returns a flattened array of all visible computed vertices and connectors (across layers)
-export const getAllComputedVertices = createSelector([getState], (state) => {
+export const getAllComputedVertices = createSelector(getState, (state) => {
+  if (!state.fonts.loaded) {
+    return []
+  } // wait for fonts
+
   log("getAllComputedVertices")
   const visibleLayerIds = getVisibleNonEffectIds(state)
 
@@ -173,7 +177,7 @@ export const getConnectingVertices = createCachedSelector(
     const end = endVertices[0]
 
     if (startLayer.connectionMethod === "along perimeter") {
-      const machineInstance = getMachineInstance([], state.machine)
+      const machineInstance = getMachineInstance([], state.main.machine)
       const startPerimeter = machineInstance.nearestPerimeterVertex(start)
       const endPerimeter = machineInstance.nearestPerimeterVertex(end)
       const perimeterConnection = machineInstance.tracePerimeter(

@@ -1,138 +1,105 @@
-import React, { Component } from "react"
-import { connect } from "react-redux"
+import React, { useEffect, useRef } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import Downloader from "@/features/exporter/Downloader"
 import { getFontsState } from "@/features/store/selectors"
 import { getCurrentLayer } from "@/features/layers/selectors"
-import { getLayersState, getPreviewState } from "@/features/store/selectors"
+import { getPreviewState } from "@/features/store/selectors"
 import { updateLayer } from "@/features/layers/layersSlice"
 import { getVerticesStats } from "@/features/machine/selectors"
+import { getModelFromType } from "@/config/models"
 import "./Preview.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
 
-const mapStateToProps = (state, ownProps) => {
-  const fonts = getFontsState(state)
-  if (!fonts.loaded) {
-    return {}
+const Preview = () => {
+  const dispatch = useDispatch()
+  const fonts = useSelector(getFontsState)
+  const currentLayer = useSelector(getCurrentLayer)
+  const sliderValue = useSelector(getPreviewState).sliderValue
+  const verticesStats = useSelector(getVerticesStats)
+  const previewElement = useRef(null)
+  const model = getModelFromType(currentLayer.type)
+
+  useEffect(() => {
+    if (fonts.loaded) {
+      previewElement.current.focus()
+    }
+  }, [fonts.loaded])
+
+  const handleSliderChange = (value) => {
+    dispatch(updatePreview({ sliderValue: value }))
   }
 
-  const preview = getPreviewState(state)
-  const current = getCurrentLayer(state)
-  const layers = getLayersState(state)
-
-  return {
-    currentLayer: current,
-    currentLayerSelected: layers.selected === current.id,
-    sliderValue: preview.sliderValue,
-    verticesStats: getVerticesStats(state),
-  }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onSlider: (value) => {
-      dispatch(updatePreview({ sliderValue: value }))
-    },
-    onLayerChange: (attrs) => {
-      dispatch(updateLayer(attrs))
-    },
-    onKeyDown: (event, currentLayer) => {
+  const handleKeyDown = (event) => {
+    if (model.canMove) {
       let attrs = { id: currentLayer.id }
+      const delta = event.shiftKey ? 1 : 5
 
-      if (currentLayer.canMove) {
-        if (
-          ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(
-            event.key,
-          )
-        ) {
-          const delta = event.shiftKey ? 1 : 5
-
-          if (event.key === "ArrowDown") {
-            attrs.y = currentLayer.y - delta
-          } else if (event.key === "ArrowUp") {
-            attrs.y = currentLayer.y + delta
-          } else if (event.key === "ArrowLeft") {
-            attrs.x = currentLayer.x - delta
-          } else if (event.key === "ArrowRight") {
-            attrs.x = currentLayer.x + delta
-          }
-
-          dispatch(updateLayer(attrs))
-        }
+      switch (event.key) {
+        case "ArrowDown":
+          attrs.y = currentLayer.y - delta
+          break
+        case "ArrowUp":
+          attrs.y = currentLayer.y + delta
+          break
+        case "ArrowLeft":
+          attrs.x = currentLayer.x - delta
+          break
+        case "ArrowRight":
+          attrs.x = currentLayer.x + delta
+          break
+        default:
+          return
       }
-    },
-  }
-}
 
-class Preview extends Component {
-  componentDidMount() {
-    if (this.props.currentLayer) {
-      // ensures that arrow keys always work
-      this.el.focus()
+      dispatch(updateLayer(attrs))
     }
   }
 
-  render() {
-    const {
-      currentLayer,
-      currentLayerSelected,
-      sliderValue,
-      verticesStats,
-      onSlider,
-      onKeyDown,
-    } = this.props
+  if (!fonts.loaded) {
+    return <div></div>
+  }
 
-    if (currentLayer) {
-      return (
+  return (
+    <div
+      className="machine-preview d-flex flex-grow-1 flex-column"
+      id="machine-preview"
+    >
+      <div className="flex-grow-1 d-flex flex-column">
         <div
-          className="machine-preview d-flex flex-grow-1 flex-column"
-          id="machine-preview"
+          id="preview-wrapper"
+          className="preview-wrapper d-flex flex-column align-items-center"
+          ref={previewElement}
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
         >
-          <div className="flex-grow-1 d-flex flex-column">
-            <div
-              id="preview-wrapper"
-              className="preview-wrapper d-flex flex-column align-items-center"
-              ref={(el) => {
-                this.el = el
-              }}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (currentLayerSelected) {
-                  onKeyDown(e, currentLayer)
-                }
-              }}
-            >
-              <PreviewWindow />
+          <PreviewWindow />
+        </div>
+
+        <div className="mt-auto pt-2 bg-white d-flex align-items-center">
+          <div className="flex-grow-1">
+            <div className="mx-2">
+              Points: {verticesStats.numPoints}, Distance:{" "}
+              {verticesStats.distance}
             </div>
 
-            <div className="mt-auto pt-2 bg-white d-flex align-items-center">
-              <div className="flex-grow-1">
-                <div className="mx-2">
-                  Points: {verticesStats.numPoints}, Distance:{" "}
-                  {verticesStats.distance}
-                </div>
-
-                <div className="p-3">
-                  <Slider
-                    value={sliderValue}
-                    step={1}
-                    min={0.0}
-                    max={100.0}
-                    onChange={onSlider}
-                  />
-                </div>
-              </div>
-              <Downloader />
+            <div className="p-3">
+              <Slider
+                value={sliderValue}
+                step={1}
+                min={0.0}
+                max={100.0}
+                onChange={handleSliderChange}
+              />
             </div>
           </div>
+          <Downloader />
         </div>
-      )
-    } else {
-      return <div></div>
-    }
-  }
+      </div>
+    </div>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Preview)
+export default Preview

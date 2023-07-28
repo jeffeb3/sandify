@@ -25,13 +25,14 @@ class ToggleButtonOption extends Component {
         <Col sm={7}>
           <ToggleButtonGroup
             type="radio"
+            className="border"
             name={this.props.optionKey}
             value={currentChoice}
             key={this.props.optionKey}
             onChange={(choice) => {
               let attrs = {}
               attrs[this.props.optionKey] = choice
-              this.props.onChange(attrs)
+              this.props.handleChange(attrs)
             }}
           >
             {option.choices.map((choice) => {

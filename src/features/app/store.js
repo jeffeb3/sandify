@@ -34,8 +34,11 @@ const persistedState =
   typeof jest === "undefined" && usePersistedState
     ? loadState(persistInitKey) || undefined
     : undefined
+
 // reset some values
-persistedState.fonts.loaded = false
+if (persistedState) {
+  persistedState.fonts.loaded = false
+}
 
 const store = configureStore({
   reducer: combineReducers({

@@ -89,7 +89,6 @@ const layersSlice = createSlice({
     newEffectType,
     newEffectName,
     newEffectNameOverride: false,
-    copyLayerName: null,
     byId: {
       [defaultLayerId]: layerState,
     },
@@ -116,10 +115,11 @@ const layersSlice = createSlice({
       state.allIds = arrayMove(state.allIds, oldIndex, newIndex)
     },
     copyLayer(state, action) {
-      const source = state.byId[action.payload]
+      const { id, name } = action.payload
+      const source = state.byId[id]
       const layer = createLayer(state, {
         ...source,
-        name: state.copyLayerName,
+        name,
       })
       delete layer.effectIds
 
