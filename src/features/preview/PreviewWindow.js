@@ -4,13 +4,14 @@ import { Provider } from "react-redux"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { updateLayer } from "@/features/layers/layersSlice"
-import { getMachineState, getPreviewState } from "@/features/store/selectors"
+import { getPreviewState } from "@/features/preview/previewSelectors"
+import { getMachineState } from "@/features/machine/machineSelectors"
 import {
   getCurrentLayer,
   getKonvaLayerIds,
   getVisibleNonEffectIds,
   isDragging,
-} from "@/features/layers/selectors"
+} from "@/features/layers/layerSelectors"
 import { roundP } from "@/common/util"
 import PreviewLayer from "./PreviewLayer"
 import PreviewConnector from "./PreviewConnector"

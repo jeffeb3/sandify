@@ -12,7 +12,7 @@ import ToggleButtonOption from "@/components/ToggleButtonOption"
 import { getModelSelectOptions } from "@/config/models"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
-import { getCurrentLayer } from "./selectors"
+import { getCurrentLayer } from "./layerSelectors"
 import "./LayerEditor.scss"
 
 const LayerEditor = ({ id }) => {

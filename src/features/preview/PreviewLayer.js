@@ -6,16 +6,17 @@ import {
   getSliderColors,
   getVertexOffsets,
   getSliderBounds,
-} from "../machine/selectors"
+} from "@/features/machine/machineSelectors"
 import { updateLayer } from "@/features/layers/layersSlice"
-import { getLayersState, getPreviewState } from "@/features/store/selectors"
+import { getPreviewState } from "@/features/preview/previewSelectors"
+import { getLayersState } from "@/features/layers/layerSelectors"
 import { getModelFromType } from "@/config/models"
 import {
   getCurrentLayer,
   getLayerIndex,
   getLayer,
   getNumVisibleLayers,
-} from "@/features/layers/selectors"
+} from "@/features/layers/layerSelectors"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 

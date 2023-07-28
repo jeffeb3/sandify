@@ -3,7 +3,7 @@ import { connect } from "react-redux"
 import { Accordion } from "react-bootstrap"
 import RectSettings from "./RectSettings"
 import PolarSettings from "./PolarSettings"
-import { getMachineState } from "@/features/store/selectors"
+import { getMachineState } from "@/features/machine/machineSelectors"
 
 const mapStateToProps = (state, ownProps) => {
   const machine = getMachineState(state)

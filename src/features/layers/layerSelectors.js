@@ -1,12 +1,16 @@
-import {
-  getLayersState,
-  createDeepEqualSelector,
-} from "@/features/store/selectors"
+import { getMainState } from "@/features/app/appSelectors"
 import { createSelector } from "reselect"
 import { createCachedSelector } from "re-reselect"
-import { memoizeArrayProducingFn } from "@/common/selectors"
+import {
+  memoizeArrayProducingFn,
+  createDeepEqualSelector,
+} from "@/common/selectors"
 import { log } from "@/common/debugging"
 
+export const getLayersState = createSelector(
+  getMainState,
+  (main) => main.layers,
+)
 const getCurrentLayerId = createSelector(
   getLayersState,
   (layers) => layers.current,

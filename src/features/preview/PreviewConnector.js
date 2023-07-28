@@ -6,9 +6,9 @@ import {
   getSliderColors,
   getVertexOffsets,
   getConnectingVertices,
-} from "@/features/machine/selectors"
-import { getPreviewState } from "@/features/store/selectors"
-import { getCurrentLayer, getLayer } from "@/features/layers/selectors"
+} from "@/features/machine/machineSelectors"
+import { getPreviewState } from "@/features/preview/previewSelectors"
+import { getCurrentLayer, getLayer } from "@/features/layers/layerSelectors"
 import PreviewHelper from "./PreviewHelper"
 
 // Renders a connector between two layers.

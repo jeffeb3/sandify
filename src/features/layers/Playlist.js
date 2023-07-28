@@ -8,7 +8,7 @@ import {
   getCurrentLayer,
   getNumLayers,
   getAllLayers,
-} from "@/features/layers/selectors"
+} from "@/features/layers/layerSelectors"
 import {
   setCurrentLayer,
   addLayer,

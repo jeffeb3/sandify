@@ -1,11 +1,8 @@
 import LRUCache from "lru-cache"
 import { createSelector } from "reselect"
 import Color from "color"
-import {
-  getMachineState,
-  getPreviewState,
-  getState,
-} from "@/features/store/selectors"
+import { getState, getMainState } from "@/features/app/appSelectors"
+import { getPreviewState } from "@/features/preview/previewSelectors"
 import { createCachedSelector } from "re-reselect"
 import {
   getLayer,
@@ -13,7 +10,7 @@ import {
   getVisibleNonEffectIds,
   getLayerEffects,
   getNonEffectLayerIndex,
-} from "@/features/layers/selectors"
+} from "@/features/layers/layerSelectors"
 import Layer from "@/features/layers/Layer"
 import { getModelFromType } from "@/config/models"
 import { rotate, offset } from "@/common/geometry"
@@ -31,9 +28,13 @@ const getCacheKey = (state) => {
   return JSON.stringify(state)
 }
 
+export const getMachineState = createSelector(
+  getMainState,
+  (main) => main.machine,
+)
+
 // by returning null for shapes which don't use machine settings, this selector will ensure
 // transformed vertices are not redrawn when machine settings change
-
 export const getLayerMachine = createCachedSelector(
   getLayer,
   getMachineState,

@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
 import { copyLayer } from "./layersSlice"
-import { getCurrentLayer } from "./selectors"
+import { getCurrentLayer } from "./layerSelectors"
 
 const CopyLayer = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()

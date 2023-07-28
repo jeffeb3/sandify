@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { getMachineState } from "@/features/store/selectors"
+import { getMachineState } from "@/features/machine/machineSelectors"
 import { machineOptions } from "./options"
 import {
   toggleMachinePolarExpanded,
