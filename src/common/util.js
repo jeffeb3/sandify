@@ -28,3 +28,32 @@ export const arrayRotate = (arr, count) => {
   arr.push.apply(arr, arr.splice(0, count))
   return arr
 }
+
+// Helper function to take a string and make the user download a text file with that text as the
+// content. I don't really understand this, but I took it from here, and it seems to work:
+// https://stackoverflow.com/a/18197511
+export const downloadFile = (
+  fileName,
+  text,
+  fileType = "text/plain;charset=utf-8",
+) => {
+  let link = document.createElement("a")
+  link.download = fileName
+
+  let blob = new Blob([text], { type: fileType })
+
+  // Windows Edge fix
+  if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+    window.navigator.msSaveOrOpenBlob(blob, fileName)
+  } else {
+    link.href = URL.createObjectURL(blob)
+    if (document.createEvent) {
+      var event = document.createEvent("MouseEvents")
+      event.initEvent("click", true, true)
+      link.dispatchEvent(event)
+    } else {
+      link.click()
+    }
+    URL.revokeObjectURL(link.href)
+  }
+}

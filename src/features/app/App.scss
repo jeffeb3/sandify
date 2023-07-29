@@ -5,6 +5,12 @@
   background-color: white;
 }
 
+.inputs {
+  .row:not(:first-child) {
+    margin-top: 0.5rem;
+  }
+}
+
 .App {
   background-color: #eee;
 }

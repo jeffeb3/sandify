@@ -116,7 +116,7 @@ class RectSettings extends Component {
                   id="origin-bar"
                   type="checkbox"
                   name="origin"
-                  className="flex-wrap"
+                  className="flex-wrap border"
                   value={this.props.origin}
                   onChange={this.props.onOriginChange}
                 >

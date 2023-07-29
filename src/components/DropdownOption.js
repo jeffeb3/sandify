@@ -43,7 +43,7 @@ const DropdownOption = ({
 
   return (
     <Row
-      className="align-items-center pb-2"
+      className="align-items-center"
       key={index}
     >
       <Col sm={5}>

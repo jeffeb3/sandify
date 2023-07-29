@@ -1,3 +1,54 @@
+export const [GCODE, THETARHO, SVG, SCARA] = [
+  "gcode",
+  "thetarho",
+  "svg",
+  "scara",
+]
+export const exportTypes = {
+  gcode: "GCode",
+  thetarho: "Theta Rho",
+  svg: "SVG",
+  scara: "SCARA GCode (experimental)",
+}
+
+export const exporterOptions = {
+  fileName: {
+    title: "File name",
+    type: "string",
+  },
+  fileType: {
+    title: "Export as",
+    type: "dropdown",
+    choices: exportTypes,
+  },
+  polarRhoMax: {
+    title: "Maximum rho value (0-1)",
+    min: 0,
+    max: 1,
+  },
+  unitsPerCircle: {
+    title: "Units per circle",
+    type: "number",
+  },
+  post: {
+    title: "Program end code",
+    type: "textarea",
+    isVisible: (exporter, state) => {
+      return state.fileType !== SVG
+    },
+  },
+  pre: {
+    title: "Program start code",
+    type: "textarea",
+    isVisible: (exporter, state) => {
+      return state.fileType !== SVG
+    },
+  },
+  reverse: {
+    title: "Reverse path in the code",
+  },
+}
+
 export default class Exporter {
   constructor(props) {
     this.props = props

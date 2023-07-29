@@ -1,50 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit"
 
-// accommodate old and new local storage keys
-const localMinX = parseFloat(localStorage.getItem('minX') || localStorage.getItem('machine_min_x'))
-const localMaxX = parseFloat(localStorage.getItem('maxX') || localStorage.getItem('machine_max_x'))
-const localMinY = parseFloat(localStorage.getItem('minY') || localStorage.getItem('machine_min_y'))
-const localMaxY = parseFloat(localStorage.getItem('maxY') || localStorage.getItem('machine_max_y'))
-const localMaxRadius = parseFloat(localStorage.getItem('maxRadius') || localStorage.getItem('machine_radius'))
-
-let rectOrigin = localStorage.getItem('rectOrigin')
-if (rectOrigin) { rectOrigin = JSON.parse(rectOrigin) }
-if (!Array.isArray(rectOrigin)) { rectOrigin = [] }
-
 const machineSlice = createSlice({
   name: 'machine',
   initialState: {
-    rectangular: undefined !== localStorage.getItem('machine_rect_active') ? localStorage.getItem('machine_rect_active') < 2 : true,
+    rectangular: true,
     rectExpanded: false,
     polarExpanded: false,
-    minX: localMinX || 0,
-    maxX: localMaxX || 500,
-    minY: localMinY || 0,
-    maxY: localMaxY || 500,
-    maxRadius: localMaxRadius || 250,
-    minimizeMoves: JSON.parse(localStorage.getItem('minimizeMoves')) || false,
-    rectOrigin: rectOrigin,
-    polarStartPoint: localStorage.getItem('polarStartPoint') || 'none',
-    polarEndPoint: localStorage.getItem('polarEndPoint') || 'none'
+    minX: 0,
+    maxX: 500,
+    minY: 0,
+    maxY: 500,
+    maxRadius: 250,
+    minimizeMoves: false,
+    rectOrigin: [],
+    polarStartPoint: 'none',
+    polarEndPoint: 'none'
   },
   reducers: {
     updateMachine(state, action) {
       Object.assign(state, action.payload)
-      Object.keys(action.payload).forEach(key => {
-        localStorage.setItem(key, action.payload[key])
-      })
     },
     toggleMachineRectExpanded(state, action) {
       state.rectangular = true
       state.rectExpanded = !state.rectExpanded
       state.polarExpanded = false
-      localStorage.setItem('machine_rect_active', 1)
     },
     toggleMachinePolarExpanded(state, action) {
       state.rectangular = false
       state.rectExpanded = false
       state.polarExpanded = !state.polarExpanded
-      localStorage.setItem('machine_rect_active', 2)
     },
     setMachineRectOrigin(state, action) {
       let newValue = []
@@ -57,11 +41,9 @@ const machineSlice = createSlice({
         }
       }
       state.rectOrigin = newValue
-      localStorage.setItem('rectOrigin', JSON.stringify(newValue))
     },
     toggleMinimizeMoves(state, action) {
       state.minimizeMoves = !state.minimizeMoves
-      localStorage.setItem('minimizeMoves', state.minimizeMoves)
     },
   }
 })

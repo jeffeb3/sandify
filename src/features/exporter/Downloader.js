@@ -1,20 +1,20 @@
-import React, { Component } from "react"
-import ReactGA from "react-ga"
-import { connect } from "react-redux"
+import React, { useState } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { Button, Modal, Col, Row } from "react-bootstrap"
+import { downloadFile } from "@/common/util"
 import DropdownOption from "@/components/DropdownOption"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import { updateExporter } from "./exporterSlice"
 import { getAllComputedVertices } from "@/features/machine/machineSelectors"
-import { getMainState } from "@/features/app/appSelectors"
-import { getLayersState } from "@/features/layers/layerSelectors"
+import { getExporterState } from "@/features/exporter/exporterSelectors"
+import { getMachineState } from "@/features/machine/machineSelectors"
 import { getComments } from "./exporterSelectors"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"
 import SvgExporter from "./SvgExporter"
 import ThetaRhoExporter from "./ThetaRhoExporter"
-import { Exporter, GCODE, THETARHO, SVG, SCARA } from "./options"
+import { exporterOptions, GCODE, THETARHO, SVG, SCARA } from "./Exporter"
 
 const exporters = {
   [GCODE]: GCodeExporter,
@@ -23,272 +23,200 @@ const exporters = {
   [SCARA]: ScaraGCodeExporter,
 }
 
-const mapStateToProps = (state, ownProps) => {
-  const main = getMainState(state)
-  const layers = getLayersState(state)
-
-  return {
-    reverse: main.exporter.reverse,
-    show: main.exporter.show,
-    vertices: getAllComputedVertices(state),
-    comments: getComments(state),
-    input: main.app.input,
-    layer: layers.current,
-    offsetX: main.machine.rectangular
-      ? (main.machine.minX + main.machine.maxX) / 2.0
-      : main.machine.maxRadius,
-    offsetY: main.machine.rectangular
-      ? (main.machine.minY + main.machine.maxY) / 2.0
-      : main.machine.maxRadius,
-    width: main.machine.rectangular
-      ? main.machine.maxX - main.machine.minX
-      : 2.0 * main.machine.maxRadius,
-    height: main.machine.rectangular
-      ? main.machine.maxY - main.machine.minY
-      : 2.0 * main.machine.maxRadius,
-    maxRadius: main.machine.rectangular
+const Downloader = () => {
+  const dispatch = useDispatch()
+  const machine = useSelector(getMachineState)
+  const exporterState = useSelector(getExporterState)
+  const [showModal, setShowModal] = useState(false)
+  const toggleModal = () => setShowModal(!showModal)
+  const { fileType, fileName } = exporterState
+  const props = {
+    ...exporterState,
+    offsetX: machine.rectangular
+      ? (machine.minX + machine.maxX) / 2.0
+      : machine.maxRadius,
+    offsetY: machine.rectangular
+      ? (machine.minY + machine.maxY) / 2.0
+      : machine.maxRadius,
+    width: machine.rectangular
+      ? machine.maxX - machine.minX
+      : 2.0 * machine.maxRadius,
+    height: machine.rectangular
+      ? machine.maxY - machine.minY
+      : 2.0 * machine.maxRadius,
+    maxRadius: machine.rectangular
       ? Math.sqrt(
-          Math.pow(main.machine.maxX - main.machine.minX, 2.0) +
-            Math.pow(main.machine.maxY - main.machine.minY, 2.0),
+          Math.pow(machine.maxX - machine.minX, 2.0) +
+            Math.pow(machine.maxY - machine.minY, 2.0),
         )
-      : main.machine.maxRadius,
-    fileName: main.exporter.fileName,
-    fileType: main.exporter.fileType,
-    isGCode:
-      main.exporter.fileType === GCODE || main.exporter.fileType === SCARA,
-    polarRhoMax: main.exporter.polarRhoMax,
-    unitsPerCircle: main.exporter.unitsPerCircle,
-    pre: main.exporter.fileType !== SVG ? main.exporter.pre : "",
-    post: main.exporter.fileType !== SVG ? main.exporter.post : "",
-    options: new Exporter().getOptions(),
+      : machine.maxRadius,
+    vertices: useSelector(getAllComputedVertices),
+    comments: useSelector(getComments),
   }
-}
+  const exporter = new exporters[fileType](props)
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    open: () => {
-      dispatch(updateExporter({ show: true }))
-    },
-    close: () => {
-      dispatch(updateExporter({ show: false }))
-    },
-    onChange: (attrs) => {
-      dispatch(updateExporter(attrs))
-    },
+  const handleChange = (attrs) => {
+    dispatch(updateExporter(attrs))
   }
-}
 
-class Downloader extends Component {
-  // Record this event to google analytics.
-  gaRecord(fileType) {
-    let savedCode = "Saved: " + this.props.input
-    if (this.props.input === "shape" || this.props.input === "Shape") {
-      savedCode = savedCode + ": " + this.props.layer
+  const handleDownload = () => {
+    let name = fileName
+    if (!fileName.includes(".")) {
+      name += exporter.fileExtension
     }
-    ReactGA.event({
-      category: fileType,
-      action: savedCode,
-    })
-  }
-
-  download() {
-    let exporter = new exporters[this.props.fileType](this.props)
-    let startTime = performance.now()
-    let fileName = this.props.fileName
+    const type =
+      fileType === SVG
+        ? "image/svg+xml;charset=utf-8"
+        : "text/plain;charset=utf-8"
 
     exporter.export()
-
-    if (!fileName.includes(".")) {
-      fileName += exporter.fileExtension
-    }
-
-    this.gaRecord(exporter.label)
-    this.downloadFile(fileName, exporter.lines.join("\n"))
-    this.props.close()
-
-    let endTime = performance.now()
-    ReactGA.timing({
-      category: exporter.label,
-      variable: "Save Code",
-      value: endTime - startTime, // in milliseconds
-    })
+    downloadFile(name, exporter.lines.join("\n"), type)
+    toggleModal()
   }
 
-  // Helper function to take a string and make the user download a text file with that text as the
-  // content. I don't really understand this, but I took it from here, and it seems to work:
-  // https://stackoverflow.com/a/18197511
-  downloadFile(fileName, text) {
-    let link = document.createElement("a")
-    link.download = fileName
+  return (
+    <div>
+      <Button
+        className="ml-2 mr-3"
+        variant="primary"
+        onClick={toggleModal}
+      >
+        Export
+      </Button>
+      <Modal
+        size="lg"
+        show={showModal}
+        onHide={toggleModal}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Export to a file</Modal.Title>
+        </Modal.Header>
 
-    let fileType = "text/plain;charset=utf-8"
-    if (this.props.fileType === SVG) {
-      fileType = "image/svg+xml;charset=utf-8"
-    }
-    let blob = new Blob([text], { type: fileType })
+        <Modal.Body className="inputs">
+          <DropdownOption
+            onChange={handleChange}
+            options={exporterOptions}
+            optionKey="fileType"
+            key="fileType"
+            index={0}
+            data={props}
+          />
 
-    // Windows Edge fix
-    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveOrOpenBlob(blob, fileName)
-    } else {
-      link.href = URL.createObjectURL(blob)
-      if (document.createEvent) {
-        var event = document.createEvent("MouseEvents")
-        event.initEvent("click", true, true)
-        link.dispatchEvent(event)
-      } else {
-        link.click()
-      }
-      URL.revokeObjectURL(link.href)
-    }
-  }
-
-  render() {
-    return (
-      <div>
-        <Button
-          className="ml-2 mr-3"
-          variant="primary"
-          onClick={this.props.open}
-        >
-          Export
-        </Button>
-        <Modal
-          size="lg"
-          show={this.props.show}
-          onHide={this.props.close}
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Export to a file</Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body>
-            <DropdownOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="fileType"
-              key="fileType"
-              index={0}
-              data={this.props}
-            />
-
-            {this.props.fileType === SCARA && (
-              <Row>
-                <Col sm={5}></Col>
-                <Col
-                  sm={7}
-                  className="mb-2"
-                >
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
-                  >
-                    Read more
-                  </a>{" "}
-                  about SCARA GCode.
-                </Col>
-              </Row>
-            )}
-
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="fileName"
-              optionKey="fileName"
-              index={1}
-              data={this.props}
-            />
-
-            {(this.props.fileType === THETARHO ||
-              this.props.fileType === SCARA) && (
-              <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                key="polarRhoMax"
-                optionKey="polarRhoMax"
-                index={2}
-                data={this.props}
-              />
-            )}
-
-            {this.props.fileType === SCARA && (
-              <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                key="unitsPerCircle"
-                optionKey="unitsPerCircle"
-                index={2}
-                data={this.props}
-              />
-            )}
-
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="pre"
-              optionKey="pre"
-              index={3}
-              data={this.props}
-            />
-
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="post"
-              optionKey="post"
-              index={4}
-              data={this.props}
-            />
-
+          {fileType === SCARA && (
             <Row>
               <Col sm={5}></Col>
-              <Col sm={7}>
-                See{" "}
+              <Col
+                sm={7}
+                className="mb-2"
+              >
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href="https://github.com/jeffeb3/sandify/wiki#export-variables"
+                  href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
                 >
-                  {" "}
-                  the wiki{" "}
+                  Read more
                 </a>{" "}
-                for details on available program export variables.
+                about SCARA GCode.
               </Col>
             </Row>
+          )}
 
-            <div className="mt-2">
-              <CheckboxOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey="reverse"
-                key="reverse"
-                index={5}
-                data={this.props}
-              />
-            </div>
-          </Modal.Body>
+          <InputOption
+            onChange={handleChange}
+            options={exporterOptions}
+            key="fileName"
+            optionKey="fileName"
+            index={1}
+            data={props}
+          />
 
-          <Modal.Footer>
-            <Button
-              id="code-close"
-              variant="light"
-              onClick={this.props.close}
-            >
-              Close
-            </Button>
-            <Button
-              id="code-download"
-              variant="primary"
-              onClick={this.download.bind(this)}
-            >
-              Download
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    )
-  }
+          {(fileType === THETARHO || fileType === SCARA) && (
+            <InputOption
+              onChange={handleChange}
+              options={exporterOptions}
+              key="polarRhoMax"
+              optionKey="polarRhoMax"
+              index={2}
+              data={props}
+            />
+          )}
+
+          {fileType === SCARA && (
+            <InputOption
+              onChange={handleChange}
+              options={exporterOptions}
+              key="unitsPerCircle"
+              optionKey="unitsPerCircle"
+              index={2}
+              data={props}
+            />
+          )}
+
+          <InputOption
+            onChange={handleChange}
+            options={exporterOptions}
+            key="pre"
+            optionKey="pre"
+            index={3}
+            data={props}
+          />
+
+          <InputOption
+            onChange={handleChange}
+            options={exporterOptions}
+            key="post"
+            optionKey="post"
+            index={4}
+            data={props}
+          />
+
+          <Row>
+            <Col sm={5}></Col>
+            <Col sm={7}>
+              See{" "}
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/jeffeb3/sandify/wiki#export-variables"
+              >
+                {" "}
+                the wiki{" "}
+              </a>{" "}
+              for details on available program export variables.
+            </Col>
+          </Row>
+
+          <div className="mt-2">
+            <CheckboxOption
+              onChange={handleChange}
+              options={exporterOptions}
+              optionKey="reverse"
+              key="reverse"
+              index={5}
+              data={props}
+            />
+          </div>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            id="code-close"
+            variant="light"
+            onClick={toggleModal}
+          >
+            Close
+          </Button>
+          <Button
+            id="code-download"
+            variant="primary"
+            onClick={handleDownload}
+          >
+            Download
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Downloader)
+export default Downloader
