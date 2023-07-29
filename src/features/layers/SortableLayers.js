@@ -1,65 +1,63 @@
-import React from 'react'
-import { SortableContainer, SortableElement } from 'react-sortable-hoc'
-import { Button, ListGroup } from 'react-bootstrap'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import React from "react"
+import { SortableContainer, SortableElement } from "react-sortable-hoc"
+import { Button, ListGroup } from "react-bootstrap"
+import { FaEye, FaEyeSlash } from "react-icons/fa"
 
-const SortableLayer = SortableElement((
-  {
+const SortableLayer = SortableElement(
+  ({
     active,
     numLayers,
     currentLayer,
     layer,
-    onLayerSelected,
-    onEffectMoved,
     onSortStarted,
-    onToggleLayerOpen,
-    onToggleLayerVisible
+    handleLayerSelected,
+    handleToggleLayerVisible,
   }) => {
     const { name, id, visible } = layer
-    const activeClass = active ? 'active' : ''
-    const dragClass = numLayers > 1 ? 'cursor-move' : ''
-    const visibleClass = visible ? '' : 'layer-hidden'
+    const activeClass = active ? "active" : ""
+    const dragClass = numLayers > 1 ? "cursor-move" : ""
+    const visibleClass = visible ? "" : "layer-hidden"
 
-    return <ListGroup.Item
-      className={[activeClass, dragClass,  visibleClass, 'layer p-0'].join(' ')}
-      key={id}
-      id={id}
-    >
-      <div
-        className={[`layer-${activeClass}`, 'd-flex align-items-center'].join(' ')}
-        onClick={onLayerSelected}
+    return (
+      <ListGroup.Item
+        className={[activeClass, dragClass, visibleClass, "layer p-0"].join(
+          " ",
+        )}
+        key={id}
+        id={id}
       >
-        <div className="layer-left">
-          <Button
-            className="layer-button"
-            variant="light"
-            data-id={id}
-            onClick={onToggleLayerVisible.bind(this, id)}
-          >
-            {visible && <FaEye size="0.8em" />}
-            {!visible && <FaEyeSlash size="0.8em" />}
-          </Button>
-        </div>
+        <div
+          className={[`layer-${activeClass}`, "d-flex align-items-center"].join(
+            " ",
+          )}
+          onClick={handleLayerSelected}
+        >
+          <div className="layer-left">
+            <Button
+              className="layer-button"
+              variant="light"
+              data-id={id}
+              onClick={handleToggleLayerVisible.bind(this, id)}
+            >
+              {visible && <FaEye size="0.8em" />}
+              {!visible && <FaEyeSlash size="0.8em" />}
+            </Button>
+          </div>
 
-        <div className="no-select">
-           {name}
+          <div className="no-select">{name}</div>
         </div>
-      </div>
-    </ListGroup.Item>
-  }
+      </ListGroup.Item>
+    )
+  },
 )
 
 const SortableLayers = SortableContainer((props) => {
-  const {
-    layers,
-    currentLayer,
-    ...other
-  } = props
+  const { layers, currentLayer, ...other } = props
 
   return (
     <ListGroup
       variant="flush"
-      style={{maxHeight: "240px"}}
+      style={{ maxHeight: "240px" }}
       className="border overflow-auto"
       id="playlist-group"
     >

@@ -1,6 +1,6 @@
-import React, { Component } from "react"
-import { connect } from "react-redux"
+import React, { useState, useEffect } from "react"
 import { Button } from "react-bootstrap"
+import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
 
@@ -11,175 +11,119 @@ import {
 } from "@/features/layers/layerSelectors"
 import {
   setCurrentLayer,
-  addLayer,
   removeLayer,
   moveLayer,
   toggleVisible,
   toggleOpen,
 } from "@/features/layers/layersSlice"
-import { registeredModels, getModelFromType } from "@/config/models"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import ImportLayer from "./ImportLayer"
 import SortableLayers from "./SortableLayers"
 import "./Playlist.scss"
 
-const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const shape = getModelFromType(layer.type)
-  const numLayers = getNumLayers(state)
+function Playlist() {
+  const dispatch = useDispatch()
+  const layers = useSelector(getAllLayers)
+  const currentLayer = useSelector(getCurrentLayer)
+  const numLayers = useSelector(getNumLayers)
+  const canRemove = numLayers > 1
 
-  return {
-    layers: getAllLayers(state),
-    numLayers,
-    currentLayer: layer,
-    shape,
+  const [showNewLayer, setShowNewLayer] = useState(false)
+  const [showImportLayer, setShowImportLayer] = useState(false)
+  const [showCopyLayer, setShowCopyLayer] = useState(false)
+
+  const toggleNewLayerModal = () => setShowNewLayer(!showNewLayer)
+  const toggleImportModal = () => setShowImportLayer(!showImportLayer)
+  const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
+
+  const handleLayerRemoved = (id) => dispatch(removeLayer(id))
+  const handleLayerMoved = ({ oldIndex, newIndex }) =>
+    dispatch(moveLayer({ oldIndex, newIndex }))
+  const handleToggleLayerOpen = (id) => dispatch(toggleOpen({ id }))
+  const handleToggleLayerVisible = (id) => dispatch(toggleVisible({ id }))
+  const handleLayerSelected = (event) => {
+    const id = event.target.closest(".list-group-item").id
+    dispatch(setCurrentLayer(id))
   }
-}
+  const handleUpdateBeforeSortStart = ({ node }) =>
+    dispatch(setCurrentLayer(node.id))
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onLayerSelected: (event) => {
-      const id = event.target.closest(".list-group-item").id
-      dispatch(setCurrentLayer(id))
-    },
-    onLayerAdded: (type) => {
-      const attrs = registeredModels[type].getInitialState()
-      dispatch(addLayer(attrs))
-    },
-    onLayerRemoved: (id) => {
-      dispatch(removeLayer(id))
-    },
-    onLayerMoved: ({ oldIndex, newIndex }) => {
-      dispatch(moveLayer({ oldIndex, newIndex }))
-    },
-    onSortStarted: ({ node }) => {
-      dispatch(setCurrentLayer(node.id))
-    },
-    onToggleLayerOpen: (id) => {
-      dispatch(toggleOpen({ id }))
-    },
-    onToggleLayerVisible: (id) => {
-      dispatch(toggleVisible({ id }))
-    },
-  }
-}
-
-class Playlist extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      showNewLayer: false,
-      showImportLayer: false,
-      showCopyLayer: false,
-    }
-  }
-
-  scrollToBottom() {
-    // we're not supposed to directly access DOM with React, with instead use a ref. That said, I can't figure
-    // out how to get the nested ref in an elegant way.
+  useEffect(() => {
     const el = document.getElementById("playlist-group")
     el.scrollTop = el.scrollHeight
-  }
+  }, [numLayers])
 
-  toggleNewLayerModal() {
-    this.setState({ showNewLayer: !this.state.showNewLayer })
-  }
+  return (
+    <div>
+      <NewLayer
+        showModal={showNewLayer}
+        toggleModal={toggleNewLayerModal}
+      />
+      <ImportLayer
+        showModal={showImportLayer}
+        toggleModal={toggleImportModal}
+      />
+      <CopyLayer
+        showModal={showCopyLayer}
+        toggleModal={toggleCopyModal}
+      />
 
-  toggleImportModal() {
-    this.setState({ showImportLayer: !this.state.showImportLayer })
-  }
-
-  toggleCopyModal() {
-    this.setState({ showCopyLayer: !this.state.showCopyLayer })
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.numLayers > prevProps.numLayers) {
-      // new layer added; make sure we scroll down to it
-      this.scrollToBottom()
-    }
-  }
-
-  render() {
-    const {
-      currentLayer,
-      numLayers,
-      onLayerMoved,
-      onLayerRemoved,
-      onSortStarted,
-    } = this.props
-    const canRemove = numLayers > 1
-
-    return (
-      <div>
-        <NewLayer
-          showModal={this.state.showNewLayer}
-          toggleModal={this.toggleNewLayerModal.bind(this)}
+      <div className="p-3">
+        <SortableLayers
+          pressDelay={150}
+          onSortEnd={handleLayerMoved}
+          updateBeforeSortStart={handleUpdateBeforeSortStart}
+          lockAxis="y"
+          layers={layers}
+          currentLayer={currentLayer}
+          numLayers={numLayers}
+          handleLayerSelected={handleLayerSelected}
+          handleToggleLayerOpen={handleToggleLayerOpen}
+          handleToggleLayerVisible={handleToggleLayerVisible}
         />
-
-        <ImportLayer
-          showModal={this.state.showImportLayer}
-          toggleModal={this.toggleImportModal.bind(this)}
-        />
-
-        <CopyLayer
-          showModal={this.state.showCopyLayer}
-          toggleModal={this.toggleCopyModal.bind(this)}
-        />
-
-        <div className="p-3">
-          <SortableLayers
-            pressDelay={150}
-            onSortEnd={onLayerMoved}
-            updateBeforeSortStart={onSortStarted}
-            lockAxis="y"
-            {...this.props}
-          />
-          <div className="d-flex align-items-center border-left border-right border-bottom">
-            <Button
-              className="ml-2 layer-button"
-              variant="light"
-              size="sm"
-              data-tip="Create new layer"
-              onClick={this.toggleNewLayerModal.bind(this)}
-            >
-              <FaPlusSquare />
-            </Button>
-            <Button
-              className="layer-button"
-              variant="light"
-              data-tip="Import new layer"
-              onClick={this.toggleImportModal.bind(this)}
-            >
-              <MdOutlineFileUpload />
-            </Button>
-            <div className="ml-auto">
-              {canRemove && (
-                <Button
-                  className="layer-button"
-                  variant="light"
-                  data-tip="Delete layer"
-                  onClick={onLayerRemoved.bind(this, currentLayer.id)}
-                >
-                  <FaTrash />
-                </Button>
-              )}
+        <div className="d-flex align-items-center border-left border-right border-bottom">
+          <Button
+            className="ml-2 layer-button"
+            variant="light"
+            size="sm"
+            data-tip="Create new layer"
+            onClick={toggleNewLayerModal}
+          >
+            <FaPlusSquare />
+          </Button>
+          <Button
+            className="layer-button"
+            variant="light"
+            data-tip="Import new layer"
+            onClick={toggleImportModal}
+          >
+            <MdOutlineFileUpload />
+          </Button>
+          <div className="ml-auto">
+            {canRemove && (
               <Button
                 className="layer-button"
                 variant="light"
-                data-tip="Copy layer"
-                onClick={this.toggleCopyModal.bind(this)}
+                data-tip="Delete layer"
+                onClick={() => handleLayerRemoved(currentLayer.id)}
               >
-                <FaCopy />
+                <FaTrash />
               </Button>
-            </div>
+            )}
+            <Button
+              className="layer-button"
+              variant="light"
+              data-tip="Copy layer"
+              onClick={toggleCopyModal}
+            >
+              <FaCopy />
+            </Button>
           </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Playlist)
+export default Playlist
