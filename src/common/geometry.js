@@ -332,3 +332,7 @@ export const toScaraGcode = (vertices, unitsPerCircle) => {
     return new Victor(x, y)
   })
 }
+
+export const pointsToVertices = (points) => {
+  return points.map((point) => new Victor(point.x, point.y))
+}

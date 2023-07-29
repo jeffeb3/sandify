@@ -21,12 +21,9 @@ const PreviewWindow = () => {
   const dispatch = useDispatch()
   const store = useStore()
   const previewElement = useRef(null)
-  const { use_rect, minX, minY, maxX, maxY, maxRadius } = useSelector((state) =>
-    getMachineState(state),
-  )
-  const { canvasWidth, canvasHeight } = useSelector((state) =>
-    getPreviewState(state),
-  )
+  const { rectangular, minX, minY, maxX, maxY, maxRadius } =
+    useSelector(getMachineState)
+  const { canvasWidth, canvasHeight } = useSelector(getPreviewState)
   const currentLayer = useSelector(getCurrentLayer)
   const konvaIds = useSelector(getKonvaLayerIds)
   const layerIds = useSelector(getVisibleNonEffectIds)
@@ -60,7 +57,7 @@ const PreviewWindow = () => {
   const relativeScale = () => {
     let width, height
 
-    if (use_rect) {
+    if (rectangular) {
       width = maxX - minX
       height = maxY - minY
     } else {
@@ -105,9 +102,9 @@ const PreviewWindow = () => {
     }
   }
 
-  const clipFunc = dragging ? (use_rect ? clipRect : clipCircle) : null
-  const width = use_rect ? maxX - minX : maxRadius * 2
-  const height = use_rect ? maxY - minY : maxRadius * 2
+  const clipFunc = dragging ? (rectangular ? clipRect : clipCircle) : null
+  const width = rectangular ? maxX - minX : maxRadius * 2
+  const height = rectangular ? maxY - minY : maxRadius * 2
   const scale = relativeScale()
 
   return (
@@ -125,7 +122,7 @@ const PreviewWindow = () => {
     >
       <Provider store={store}>
         <Layer clipFunc={clipFunc}>
-          {!use_rect && (
+          {!rectangular && (
             <Circle
               x={0}
               y={0}
@@ -134,7 +131,7 @@ const PreviewWindow = () => {
               stroke="gray"
             />
           )}
-          {use_rect && (
+          {rectangular && (
             <Rect
               x={0}
               y={0}

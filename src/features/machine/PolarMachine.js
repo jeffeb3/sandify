@@ -9,6 +9,8 @@ export default class PolarMachine extends Machine {
     this.settings = Object.assign({}, settings)
     this.settings.perimeterConstant = 50
     this.sizeX = this.settings.maxRadius * 2
+    this.height = this.sizeX
+    this.width = this.sizeX
     this.layerInfo = layerInfo
   }
 

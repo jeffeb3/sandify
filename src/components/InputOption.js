@@ -6,7 +6,7 @@ const InputOption = ({
   data,
   options,
   optionKey,
-  handleChange,
+  onChange,
   delayKey,
   object,
   label = true,
@@ -26,11 +26,33 @@ const InputOption = ({
   const visible =
     option.isVisible === undefined ? true : option.isVisible(object, data)
 
-  const delayedSet = debounce((value, key, handleChange) => {
+  const delayedSet = debounce((value, key, onChange) => {
     let attrs = {}
     attrs[key] = value
-    handleChange(attrs)
+    onChange(attrs)
   }, 1500)
+
+  const handleChange = (event) => {
+    let newValue = event.target.value
+
+    if (optionType === "number") {
+      newValue = newValue === "" ? "" : parseFloat(newValue)
+    }
+
+    setValue(newValue)
+
+    let attrs = {}
+    attrs[optionKey] = newValue
+
+    if (option.onChange !== undefined) {
+      attrs = option.onChange(object, attrs, data)
+    }
+    onChange(attrs)
+
+    if (delayKey !== undefined) {
+      delayedSet(newValue, delayKey, onChange)
+    }
+  }
 
   const renderedInput = (
     <Form.Control
@@ -43,33 +65,13 @@ const InputOption = ({
       value={value}
       autoComplete="off"
       plaintext={option.plainText}
-      onChange={(event) => {
-        let newValue = event.target.value
-
-        if (optionType === "number") {
-          newValue = newValue === "" ? "" : parseFloat(newValue)
-        }
-
-        setValue(newValue)
-
-        let attrs = {}
-        attrs[optionKey] = newValue
-
-        if (option.handleChange !== undefined) {
-          attrs = option.handleChange(object, attrs, data)
-        }
-        handleChange(attrs)
-
-        if (delayKey !== undefined) {
-          delayedSet(newValue, delayKey, handleChange)
-        }
-      }}
+      onChange={handleChange}
     />
   )
 
   if (!option.inline) {
     return (
-      <Row className={"align-items-center pb-1" + (visible ? "" : " d-none")}>
+      <Row className={"align-items-center" + (visible ? "" : " d-none")}>
         <Col sm={5}>
           {label && (
             <Form.Label htmlFor={`option-${optionKey}`}>

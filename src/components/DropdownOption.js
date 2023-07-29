@@ -7,7 +7,7 @@ const DropdownOption = ({
   optionKey,
   data,
   object,
-  handleChange,
+  onChange,
   index,
 }) => {
   const option = options[optionKey]
@@ -25,10 +25,21 @@ const DropdownOption = ({
     : Object.keys(choices).map((key) => {
         return { value: key, label: option.choices[key] }
       })
-
   const currentLabel = Array.isArray(choices)
     ? currentChoice
     : choices[currentChoice]
+
+  const handleChange = (choice) => {
+    const value = choice.value
+    let attrs = {}
+    attrs[optionKey] = value
+
+    if (option.handleChange !== undefined) {
+      attrs = option.handleChange(object, attrs, data)
+    }
+
+    onChange(attrs)
+  }
 
   return (
     <Row
@@ -42,17 +53,7 @@ const DropdownOption = ({
       <Col sm={7}>
         <Select
           value={{ value: currentChoice, label: currentLabel }}
-          onChange={(choice) => {
-            const value = choice.value
-            let attrs = {}
-            attrs[optionKey] = value
-
-            if (option.handleChange !== undefined) {
-              attrs = option.handleChange(object, attrs, data)
-            }
-
-            handleChange(attrs)
-          }}
+          onChange={handleChange}
           options={choices}
         />
       </Col>

@@ -11,6 +11,8 @@ export default class RectMachine extends Machine {
     this.layerInfo = layerInfo
     this.sizeX = Math.abs((settings.maxX - settings.minX) / 2.0)
     this.sizeY = Math.abs((settings.maxY - settings.minY) / 2.0)
+    this.height = this.sizeY * 2
+    this.width = this.sizeX * 2
     this.corners = [
       new Victor(-this.sizeX, -this.sizeY),
       new Victor(-this.sizeX, this.sizeY),

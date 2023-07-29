@@ -12,11 +12,9 @@ const CommentsBox = ({ options, optionKey, data, comments }) => {
   })
 
   return (
-    <div
-      id="comments"
-      className="mt-4 p-3"
-    >
-      {option.title}:<div className="ml-3">{renderedComments}</div>
+    <div>
+      <div>{option.title}</div>
+      <div className="mt-2 p-3 border">{renderedComments}</div>
     </div>
   )
 }

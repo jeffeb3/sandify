@@ -13,7 +13,6 @@ import { getModelSelectOptions } from "@/config/models"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
 import { getCurrentLayer } from "./layerSelectors"
-import "./LayerEditor.scss"
 
 const LayerEditor = ({ id }) => {
   const dispatch = useDispatch()
@@ -77,7 +76,7 @@ const LayerEditor = ({ id }) => {
     const props = {
       options,
       key,
-      handleChange,
+      onChange: handleChange,
       optionKey: key,
       data: state,
       object: model,
@@ -130,7 +129,7 @@ const LayerEditor = ({ id }) => {
             <Card.Body>
               {getOptionComponent(model, layerOptions, "name")}
               {model.canTransform(state) && (
-                <Row className="align-items-center mb-2">
+                <Row className="align-items-center mt-1 mb-2">
                   <Col sm={5}>Transform</Col>
                   <Col sm={7}>
                     {model.canMove && (
