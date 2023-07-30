@@ -1,29 +1,22 @@
-import React, { Component } from "react"
-import { connect } from "react-redux"
+import React from "react"
+import { useSelector } from "react-redux"
 import { Accordion } from "react-bootstrap"
 import RectSettings from "./RectSettings"
 import PolarSettings from "./PolarSettings"
 import { getMachineState } from "@/features/machine/machineSelectors"
 
-const mapStateToProps = (state, ownProps) => {
-  const machine = getMachineState(state)
+const MachineSettings = () => {
+  const machine = useSelector(getMachineState)
+  const rectangular = machine.rectangular
 
-  return {
-    rectangular: machine.rectangular,
-  }
+  return (
+    <div className="p-3">
+      <Accordion defaultActiveKey={rectangular ? 2 : 1}>
+        <RectSettings />
+        <PolarSettings />
+      </Accordion>
+    </div>
+  )
 }
 
-class MachineSettings extends Component {
-  render() {
-    return (
-      <div className="p-3">
-        <Accordion defaultActiveKey={this.props.rectangular ? 2 : 1}>
-          <RectSettings />
-          <PolarSettings />
-        </Accordion>
-      </div>
-    )
-  }
-}
-
-export default connect(mapStateToProps, null)(MachineSettings)
+export default MachineSettings

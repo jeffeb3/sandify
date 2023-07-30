@@ -1,5 +1,5 @@
-import React, { Component } from "react"
-import { connect } from "react-redux"
+import React from "react"
+import { useDispatch, useSelector } from "react-redux"
 import {
   Accordion,
   Col,
@@ -13,155 +13,137 @@ import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import { getMachineState } from "@/features/machine/machineSelectors"
 import { machineOptions } from "./options"
-import {
-  toggleMachinePolarExpanded,
-  updateMachine,
-  toggleMinimizeMoves,
-} from "./machineSlice"
+import { toggleMachinePolarExpanded, updateMachine } from "./machineSlice"
 
-const mapStateToProps = (state, ownProps) => {
-  const machine = getMachineState(state)
+const PolarSettings = () => {
+  const dispatch = useDispatch()
+  const { rectangular, maxRadius, startPoint, endPoint, minimizeMoves } =
+    useSelector(getMachineState)
 
-  return {
-    expanded: machine.polarExpanded,
-    active: !machine.rectangular,
-    maxRadius: machine.maxRadius,
-    startPoint: machine.polarStartPoint,
-    endPoint: machine.polarEndPoint,
-    minimizeMoves: machine.minimizeMoves,
-    options: machineOptions,
+  const handleAccordionToggle = () => {
+    dispatch(toggleMachinePolarExpanded())
   }
-}
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    activeCallback: (event) => {
-      dispatch(toggleMachinePolarExpanded())
-    },
-    onChange: (attrs) => {
-      dispatch(updateMachine(attrs))
-    },
-    onStartPointChange: (value) => {
-      dispatch(updateMachine({ polarStartPoint: value }))
-    },
-    onEndPointChange: (value) => {
-      dispatch(updateMachine({ polarEndPoint: value }))
-    },
-    toggleMinimizeMoves: () => {
-      dispatch(toggleMinimizeMoves())
-    },
+  const handleChange = (attrs) => {
+    dispatch(updateMachine(attrs))
   }
-}
 
-class PolarSettings extends Component {
-  render() {
-    var activeClassName = this.props.active ? "active" : ""
+  const handleStartPointChange = (value) => {
+    dispatch(updateMachine({ polarStartPoint: value }))
+  }
 
-    return (
-      <Card className={`${activeClassName} overflow-auto`}>
-        <Accordion.Toggle
-          as={Card.Header}
-          eventKey={1}
-          onClick={this.props.activeCallback}
-        >
-          <h3>Polar machine</h3>
-          Polar machines like Sisyphus
-        </Accordion.Toggle>
+  const handleEndPointChange = (value) => {
+    dispatch(updateMachine({ polarEndPoint: value }))
+  }
 
-        <Accordion.Collapse eventKey={1}>
-          <Card.Body>
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="maxRadius"
-              optionKey="maxRadius"
-              index={0}
-              data={this.props}
-            />
+  // ClassName logic
+  const activeClassName = rectangular ? "" : "active"
 
-            <Row className="align-items-center pb-2">
-              <Col sm={5}>
-                <Form.Label htmlFor="forceStart">Start point</Form.Label>
-              </Col>
+  // Render method
+  return (
+    <Card className={`${activeClassName} overflow-auto`}>
+      <Accordion.Toggle
+        as={Card.Header}
+        eventKey={1}
+        onClick={handleAccordionToggle}
+      >
+        <h3>Polar machine</h3>
+        Polar machines like Sisyphus
+      </Accordion.Toggle>
 
-              <Col sm={7}>
-                <ToggleButtonGroup
-                  id="startPoint"
-                  type="radio"
-                  name="startPoint"
-                  value={this.props.startPoint}
-                  onChange={this.props.onStartPointChange}
+      <Accordion.Collapse eventKey={1}>
+        <Card.Body>
+          <InputOption
+            onChange={handleChange}
+            options={machineOptions}
+            key="maxRadius"
+            optionKey="maxRadius"
+            index={0}
+            data={{ maxRadius }}
+          />
+
+          <Row className="align-items-center pb-2">
+            <Col sm={5}>
+              <Form.Label htmlFor="forceStart">Start point</Form.Label>
+            </Col>
+
+            <Col sm={7}>
+              <ToggleButtonGroup
+                id="startPoint"
+                type="radio"
+                name="startPoint"
+                value={startPoint}
+                onChange={handleStartPointChange}
+              >
+                <ToggleButton
+                  variant="light"
+                  value="none"
                 >
-                  <ToggleButton
-                    variant="light"
-                    value="none"
-                  >
-                    none
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value="center"
-                  >
-                    center
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value="perimeter"
-                  >
-                    perimeter
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Col>
-            </Row>
-
-            <Row className="align-items-center pb-2">
-              <Col sm={5}>
-                <Form.Label htmlFor="endPoint">End point</Form.Label>
-              </Col>
-
-              <Col sm={7}>
-                <ToggleButtonGroup
-                  id="endPoint"
-                  type="radio"
-                  name="endPoint"
-                  value={this.props.endPoint}
-                  onChange={this.props.onEndPointChange}
+                  none
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value="center"
                 >
-                  <ToggleButton
-                    variant="light"
-                    value="none"
-                  >
-                    none
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value="center"
-                  >
-                    center
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value="perimeter"
-                  >
-                    perimeter
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Col>
-            </Row>
+                  center
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value="perimeter"
+                >
+                  perimeter
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Col>
+          </Row>
 
-            <CheckboxOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="minimizeMoves"
-              key="minimizeMoves"
-              index={0}
-              data={this.props}
-            />
-          </Card.Body>
-        </Accordion.Collapse>
-      </Card>
-    )
-  }
+          <Row className="align-items-center pb-2">
+            <Col sm={5}>
+              <Form.Label htmlFor="endPoint">End point</Form.Label>
+            </Col>
+
+            <Col sm={7}>
+              <ToggleButtonGroup
+                id="endPoint"
+                type="radio"
+                name="endPoint"
+                value={endPoint}
+                onChange={handleEndPointChange}
+              >
+                <ToggleButton
+                  variant="light"
+                  value="none"
+                >
+                  none
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value="center"
+                >
+                  center
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value="perimeter"
+                >
+                  perimeter
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Col>
+          </Row>
+
+          <CheckboxOption
+            onChange={handleChange}
+            options={machineOptions}
+            optionKey="minimizeMoves"
+            key="minimizeMoves"
+            index={0}
+            data={{ minimizeMoves }}
+          />
+        </Card.Body>
+      </Accordion.Collapse>
+    </Card>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PolarSettings)
+export default PolarSettings

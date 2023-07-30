@@ -1,5 +1,5 @@
-import React, { Component } from "react"
-import { connect } from "react-redux"
+import React from "react"
+import { useSelector, useDispatch } from "react-redux"
 import {
   Accordion,
   Card,
@@ -14,153 +14,132 @@ import CheckboxOption from "@/components/CheckboxOption"
 import { getMachineState } from "@/features/machine/machineSelectors"
 import {
   updateMachine,
-  toggleMinimizeMoves,
   toggleMachineRectExpanded,
   setMachineRectOrigin,
 } from "./machineSlice"
 import { machineOptions } from "./options"
 
-const mapStateToProps = (state, ownProps) => {
-  const machine = getMachineState(state)
+const RectSettings = () => {
+  const dispatch = useDispatch()
+  const { rectangular, minX, maxX, minY, maxY, origin, minimizeMoves } =
+    useSelector(getMachineState)
+  const activeClassName = rectangular ? "active" : ""
 
-  return {
-    expanded: machine.rectExpanded,
-    active: machine.rectangular,
-    minX: machine.minX,
-    maxX: machine.maxX,
-    minY: machine.minY,
-    maxY: machine.maxY,
-    origin: machine.rectOrigin,
-    minimizeMoves: machine.minimizeMoves,
-    options: machineOptions,
+  const handleAccordionToggle = () => {
+    dispatch(toggleMachineRectExpanded())
   }
-}
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    activeCallback: (event) => {
-      dispatch(toggleMachineRectExpanded())
-    },
-    onChange: (attrs) => {
-      dispatch(updateMachine(attrs))
-    },
-    onOriginChange: (value) => {
-      dispatch(setMachineRectOrigin(value))
-    },
-    toggleMinimizeMoves: () => {
-      dispatch(toggleMinimizeMoves())
-    },
+  const handleChange = (attrs) => {
+    dispatch(updateMachine(attrs))
   }
-}
 
-class RectSettings extends Component {
-  render() {
-    var activeClassName = this.props.active ? "active" : ""
+  const handleOriginChange = (value) => {
+    dispatch(setMachineRectOrigin(value))
+  }
 
-    return (
-      <Card className={`${activeClassName} overflow-auto`}>
-        <Accordion.Toggle
-          as={Card.Header}
-          eventKey={2}
-          onClick={this.props.activeCallback}
-        >
-          <h3>Rectangular machine</h3>
-          Rectangular machines like Zen XY
-        </Accordion.Toggle>
+  return (
+    <Card className={`${activeClassName} overflow-auto`}>
+      <Accordion.Toggle
+        as={Card.Header}
+        eventKey={2}
+        onClick={handleAccordionToggle}
+      >
+        <h3>Rectangular machine</h3>
+        Rectangular machines like Zen XY
+      </Accordion.Toggle>
 
-        <Accordion.Collapse eventKey={2}>
-          <Card.Body>
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="minX"
-              optionKey="minX"
-              index={0}
-              data={this.props}
-            />
+      <Accordion.Collapse eventKey={2}>
+        <Card.Body>
+          <InputOption
+            onChange={handleChange}
+            options={machineOptions}
+            key="minX"
+            optionKey="minX"
+            index={0}
+            data={{ minX }}
+          />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="maxX"
-              optionKey="maxX"
-              index={0}
-              data={this.props}
-            />
+          <InputOption
+            onChange={handleChange}
+            options={machineOptions}
+            key="maxX"
+            optionKey="maxX"
+            index={0}
+            data={{ maxX }}
+          />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="minY"
-              optionKey="minY"
-              index={0}
-              data={this.props}
-            />
+          <InputOption
+            onChange={handleChange}
+            options={machineOptions}
+            key="minY"
+            optionKey="minY"
+            index={0}
+            data={{ minY }}
+          />
 
-            <InputOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              key="maxY"
-              optionKey="maxY"
-              index={0}
-              data={this.props}
-            />
+          <InputOption
+            onChange={handleChange}
+            options={machineOptions}
+            key="maxY"
+            optionKey="maxY"
+            index={0}
+            data={{ maxY }}
+          />
 
-            <Row className="align-items-center pb-2">
-              <Col sm={5}>
-                <Form.Label htmlFor="origin">Force origin</Form.Label>
-              </Col>
+          <Row className="align-items-center pb-2">
+            <Col sm={5}>
+              <Form.Label htmlFor="origin">Force origin</Form.Label>
+            </Col>
 
-              <Col sm={7}>
-                <ToggleButtonGroup
-                  id="origin-bar"
-                  type="checkbox"
-                  name="origin"
-                  className="flex-wrap border"
-                  value={this.props.origin}
-                  onChange={this.props.onOriginChange}
+            <Col sm={7}>
+              <ToggleButtonGroup
+                id="origin-bar"
+                type="checkbox"
+                name="origin"
+                className="flex-wrap border"
+                value={origin}
+                onChange={handleOriginChange}
+              >
+                <ToggleButton
+                  variant="light"
+                  value={1}
                 >
-                  <ToggleButton
-                    variant="light"
-                    value={1}
-                  >
-                    upper left
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value={2}
-                  >
-                    upper right
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value={0}
-                  >
-                    lower left
-                  </ToggleButton>
-                  <ToggleButton
-                    variant="light"
-                    value={3}
-                  >
-                    lower right
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Col>
-            </Row>
+                  upper left
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value={2}
+                >
+                  upper right
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value={0}
+                >
+                  lower left
+                </ToggleButton>
+                <ToggleButton
+                  variant="light"
+                  value={3}
+                >
+                  lower right
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Col>
+          </Row>
 
-            <CheckboxOption
-              onChange={this.props.onChange}
-              options={this.props.options}
-              optionKey="minimizeMoves"
-              key="minimizeMoves"
-              index={0}
-              data={this.props}
-            />
-          </Card.Body>
-        </Accordion.Collapse>
-      </Card>
-    )
-  }
+          <CheckboxOption
+            onChange={handleChange}
+            options={machineOptions}
+            optionKey="minimizeMoves"
+            key="minimizeMoves"
+            index={0}
+            data={{ minimizeMoves }}
+          />
+        </Card.Body>
+      </Accordion.Collapse>
+    </Card>
+  )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(RectSettings)
+export default RectSettings

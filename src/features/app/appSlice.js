@@ -1,20 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit"
 
 const appSlice = createSlice({
-  name: 'app',
+  name: "app",
   initialState: {
-    sandifyVersion: '0.2.8', // Also change the version in package.json.
-    input: 'shape',
+    sandifyVersion: "0.2.8", // Also change the version in package.json.
   },
-  reducers: {
-    chooseInput(state, action) {
-      state.input = action.payload
-    },
-  }
+  reducers: {},
 })
-
-export const {
-  chooseInput
-} = appSlice.actions
 
 export default appSlice.reducer
