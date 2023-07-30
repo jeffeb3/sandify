@@ -6,7 +6,7 @@ import { getMachineState } from "@/features/machine/machineSelectors"
 import ThetaRhoImporter from "@/features/importer/ThetaRhoImporter"
 import GCodeImporter from "@/features/importer/GCodeImporter"
 import { addLayer } from "./layersSlice"
-import Layer from "./layer"
+import Layer from "./Layer"
 
 const ImportLayer = ({ toggleModal, showModal }) => {
   const machineState = useSelector(getMachineState)
