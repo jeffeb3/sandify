@@ -1,19 +1,12 @@
-// mock implementation of lodash uniqueId, so that we can reset during tests
-const idCounter = {}
+let counter = 0
 
-export default function uniqueId(prefix='$lodash$') {
-  if (!idCounter[prefix]) {
-    idCounter[prefix] = 0
-  }
-
-  const id =++idCounter[prefix]
-  if (prefix === '$lodash$') {
-    return `${id}`
-  }
-
-  return `${prefix}${id}`
+const uniqueId = () => {
+  counter++
+  return counter.toString()
 }
 
-export const resetUniqueIds = () => {
-  Object.keys(idCounter).forEach(key => delete idCounter[key])
+export const resetUniqueId = () => {
+  counter = 0
 }
+
+jest.mock("uuid", () => ({ v4: () => uniqueId() }))

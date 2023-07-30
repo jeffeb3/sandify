@@ -121,6 +121,7 @@ const layersSlice = createSlice({
         ...source,
         name,
       })
+
       delete layer.effectIds
 
       if (source.effectIds) {

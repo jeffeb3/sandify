@@ -51,7 +51,9 @@ function Playlist() {
 
   useEffect(() => {
     const el = document.getElementById("playlist-group")
-    el.scrollTop = el.scrollHeight
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
   }, [numLayers])
 
   return (

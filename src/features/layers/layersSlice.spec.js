@@ -1,6 +1,4 @@
-jest.mock("lodash/uniqueId")
-const uniqueId = require("lodash/uniqueId") // eslint-disable-line @typescript-eslint/no-var-requires
-import mockUniqueId, { resetUniqueIds } from "@/common/mocks"
+import { resetUniqueId } from "@/common/mocks"
 import layers, {
   addLayer,
   removeLayer,
@@ -12,48 +10,33 @@ import layers, {
   moveEffect,
   setCurrentLayer,
   setSelectedLayer,
-  setNewLayerType,
-  setNewEffectType,
   changeModelType,
   updateLayer,
   toggleOpen,
   toggleVisible,
 } from "./layersSlice"
+import Layer from "./Layer"
 
 beforeEach(() => {
-  resetUniqueIds()
-  uniqueId.mockImplementation((prefix) => mockUniqueId(prefix))
+  resetUniqueId()
 })
 
 describe("layers reducer", () => {
-  const initialState = {
-    circleLobes: 1,
-    circleDirection: "clockwise",
-    type: "circle",
-    width: 10,
-    height: 10,
-    x: 0.0,
-    y: 0.0,
-    open: true,
-    rotation: 0,
-    reverse: false,
-    connectionMethod: "line",
-    dragging: false,
-    visible: true,
-  }
+  const circleState = new Layer("circle").getInitialState()
+  const polygonState = new Layer("polygon").getInitialState()
+  polygonState.id = "1"
 
   it("should handle initial state", () => {
     expect(layers(undefined, {})).toEqual({
-      current: null,
-      selected: null,
-      newLayerType: "polygon",
-      newLayerName: "polygon",
-      newLayerNameOverride: false,
+      current: "1",
+      selected: "1",
       newEffectNameOverride: false,
       newEffectName: "mask",
       newEffectType: "mask",
-      byId: {},
-      allIds: [],
+      byId: {
+        ["1"]: polygonState,
+      },
+      allIds: ["1"],
     })
   })
 
@@ -70,16 +53,15 @@ describe("layers reducer", () => {
       ),
     ).toEqual({
       byId: {
-        "layer-1": {
-          id: "layer-1",
+        1: {
+          id: "1",
           name: "foo",
         },
       },
-      allIds: ["layer-1"],
-      current: "layer-1",
-      selected: "layer-1",
+      allIds: ["1"],
+      current: "1",
+      selected: "1",
       newLayerName: "foo",
-      newLayerNameOverride: false,
     })
   })
 
@@ -89,15 +71,15 @@ describe("layers reducer", () => {
         layers(
           {
             byId: {
-              "layer-1": {
-                id: "layer-1",
+              1: {
+                id: "1",
                 name: "foo",
               },
             },
-            allIds: ["layer-1"],
-            current: "layer-1",
+            allIds: ["1"],
+            current: "1",
           },
-          removeLayer("layer-1"),
+          removeLayer("1"),
         ),
       ).toEqual({
         byId: {},
@@ -145,30 +127,33 @@ describe("layers reducer", () => {
         layers(
           {
             byId: {
-              "layer-0": {
-                id: "layer-0",
+              0: {
+                id: "0",
                 name: "foo",
               },
             },
-            allIds: ["layer-0"],
-            current: "layer-0",
+            allIds: ["0"],
+            current: "0",
           },
-          copyLayer("layer-0"),
+          copyLayer({
+            id: "0",
+            name: "bar",
+          }),
         ),
       ).toEqual({
         byId: {
-          "layer-0": {
-            id: "layer-0",
+          0: {
+            id: "0",
             name: "foo",
           },
-          "layer-1": {
-            id: "layer-1",
-            name: "foo",
+          1: {
+            id: "1",
+            name: "bar",
           },
         },
-        allIds: ["layer-0", "layer-1"],
-        current: "layer-1",
-        selected: "layer-1",
+        allIds: ["0", "1"],
+        current: "1",
+        selected: "1",
       })
     })
 
@@ -177,48 +162,51 @@ describe("layers reducer", () => {
         layers(
           {
             byId: {
-              layer: {
-                id: "layer",
+              0: {
+                id: "0",
                 name: "foo",
                 effectIds: ["effect"],
               },
               effect: {
                 id: "effect",
                 name: "bar",
-                parentId: "layer",
+                parentId: "0",
               },
             },
-            allIds: ["layer"],
-            current: "layer",
+            allIds: ["0"],
+            current: "0",
           },
-          copyLayer("layer"),
+          copyLayer({
+            id: "0",
+            name: "foo copy",
+          }),
         ),
       ).toEqual({
         byId: {
-          layer: {
-            id: "layer",
+          0: {
+            id: "0",
             name: "foo",
             effectIds: ["effect"],
           },
           effect: {
             id: "effect",
             name: "bar",
-            parentId: "layer",
+            parentId: "0",
           },
-          "layer-1": {
-            id: "layer-1",
-            name: "foo",
-            effectIds: ["layer-2"],
+          1: {
+            id: "1",
+            name: "foo copy",
+            effectIds: ["2"],
           },
-          "layer-2": {
-            id: "layer-2",
+          2: {
+            id: "2",
             name: "bar",
-            parentId: "layer-1",
+            parentId: "1",
           },
         },
-        allIds: ["layer", "layer-1"],
-        current: "layer-1",
-        selected: "layer-1",
+        allIds: ["0", "1"],
+        current: "1",
+        selected: "1",
       })
     })
   })
@@ -241,8 +229,8 @@ describe("layers reducer", () => {
       layers(
         {
           byId: {
-            "layer-1": {
-              id: "layer-1",
+            0: {
+              id: "0",
               name: "foo",
               type: "circle",
               circleLobes: "2",
@@ -250,14 +238,14 @@ describe("layers reducer", () => {
             },
           },
         },
-        restoreDefaults("layer-1"),
+        restoreDefaults("0"),
       ),
     ).toEqual({
       byId: {
-        "layer-1": {
-          id: "layer-1",
+        0: {
+          id: "0",
           name: "foo",
-          ...initialState,
+          ...circleState,
         },
       },
     })
@@ -288,36 +276,36 @@ describe("layers reducer", () => {
         layers(
           {
             byId: {
-              layer: {
-                id: "layer",
+              0: {
+                id: "0",
                 name: "foo",
               },
             },
-            allIds: ["layer"],
-            current: "layer",
+            allIds: ["0"],
+            current: "0",
           },
           addEffect({
             name: "bar",
-            parentId: "layer",
+            parentId: "0",
           }),
         ),
       ).toEqual({
         byId: {
-          layer: {
-            id: "layer",
+          0: {
+            id: "0",
             name: "foo",
             open: true,
-            effectIds: ["layer-1"],
+            effectIds: ["1"],
           },
-          "layer-1": {
-            id: "layer-1",
+          1: {
+            id: "1",
             name: "bar",
-            parentId: "layer",
+            parentId: "0",
           },
         },
-        allIds: ["layer"],
-        current: "layer-1",
-        selected: "layer-1",
+        allIds: ["0"],
+        current: "1",
+        selected: "1",
       })
     })
   })
@@ -470,7 +458,7 @@ describe("layers reducer", () => {
         byId: {
           "layer-1": {
             id: "layer-1",
-            ...initialState,
+            ...circleState,
           },
         },
       })
@@ -493,7 +481,7 @@ describe("layers reducer", () => {
         byId: {
           "layer-1": {
             id: "layer-1",
-            ...initialState,
+            ...circleState,
             circleLobes: 2,
           },
         },
@@ -563,34 +551,6 @@ describe("layers reducer", () => {
           open: false,
         },
       },
-    })
-  })
-
-  it("should handle setNewLayerType", () => {
-    expect(
-      layers(
-        {
-          newLayerType: "circle",
-        },
-        setNewLayerType("polygon"),
-      ),
-    ).toEqual({
-      newLayerType: "polygon",
-      newLayerName: "polygon",
-    })
-  })
-
-  it("should handle setNewEffectType", () => {
-    expect(
-      layers(
-        {
-          newEffectType: "mask",
-        },
-        setNewEffectType("noise"),
-      ),
-    ).toEqual({
-      newEffectType: "noise",
-      newEffectName: "noise",
     })
   })
 })
