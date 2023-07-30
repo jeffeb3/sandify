@@ -1,9 +1,9 @@
-import PolarMachine from './PolarMachine'
-import Victor from 'victor'
+import PolarMachine from "./PolarMachine"
+import Victor from "victor"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class PolarInvertedMachine extends PolarMachine {
-  constructor(vertices, settings, layerInfo={}) {
+  constructor(vertices, settings, layerInfo = {}) {
     super(vertices, settings, layerInfo)
   }
 
@@ -17,7 +17,7 @@ export default class PolarInvertedMachine extends PolarMachine {
   nearestVertex(vertex) {
     const size = this.settings.maxRadius
 
-    if ( vertex.length() < size) {
+    if (vertex.length() < size) {
       const scale = size / vertex.length()
       return vertex.multiply(new Victor(scale, scale))
     } else {
@@ -27,19 +27,23 @@ export default class PolarInvertedMachine extends PolarMachine {
 
   // Take a given line, and if the line goes out of bounds, returns the vertices
   // around the outside edge to follow around without messing up the shape of the vertices.
-  clipSegment(start, end, log=false) {
+  clipSegment(start, end, log = false) {
     const size = this.settings.maxRadius
     const radStart = start.magnitude()
     const radEnd = end.magnitude()
 
     if (radStart < size && radEnd < size) {
-      if (log) { console.log('line is inside limits') }
+      if (log) {
+        console.log("line is inside limits")
+      }
       return []
     }
 
     const intersections = this.getIntersections(start, end)
     if (!intersections.intersection) {
-      if (log) { console.log('line is outside limits') }
+      if (log) {
+        console.log("line is outside limits")
+      }
       return [end]
     }
 
@@ -47,22 +51,30 @@ export default class PolarInvertedMachine extends PolarMachine {
       let point = intersections.points[0].point
       let otherPoint = intersections.points[1].point
 
-      if (log) { console.log('line is outside limits, but intersects within limits') }
-      return [
-        ...this.tracePerimeter(point, otherPoint),
-        otherPoint,
-        end
-      ]
+      if (log) {
+        console.log("line is outside limits, but intersects within limits")
+      }
+      return [...this.tracePerimeter(point, otherPoint), otherPoint, end]
     }
 
     if (radStart <= size) {
-      const point1 = (intersections.points[0].on && Math.abs(intersections.points[0].point - start) > 0.0001) ? intersections.points[0].point : intersections.points[1].point
-      if (log) { console.log('start is inside limits') }
-      return [ point1, end ]
+      const point1 =
+        intersections.points[0].on &&
+        Math.abs(intersections.points[0].point - start) > 0.0001
+          ? intersections.points[0].point
+          : intersections.points[1].point
+      if (log) {
+        console.log("start is inside limits")
+      }
+      return [point1, end]
     } else {
-      const point1 = intersections.points[0].on ? intersections.points[0].point : intersections.points[1].point
-      if (log) { console.log('end is inside limits') }
-      return [ start, point1 ]
+      const point1 = intersections.points[0].on
+        ? intersections.points[0].point
+        : intersections.points[1].point
+      if (log) {
+        console.log("end is inside limits")
+      }
+      return [start, point1]
     }
   }
 

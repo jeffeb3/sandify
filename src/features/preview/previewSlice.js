@@ -1,11 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const previewSlice = createSlice({
-  name: 'preview',
+  name: "preview",
   initialState: {
     canvasWidth: 600,
     canvasHeight: 600,
-    sliderValue: 0.0
+    sliderValue: 0.0,
   },
   reducers: {
     updatePreview(state, action) {
@@ -15,12 +15,9 @@ const previewSlice = createSlice({
       state.canvasHeight = action.payload.height
       state.canvasWidth = action.payload.width
     },
-  }
+  },
 })
 
-export const {
-  updatePreview,
-  setPreviewSize,
-} = previewSlice.actions
+export const { updatePreview, setPreviewSize } = previewSlice.actions
 
 export default previewSlice.reducer

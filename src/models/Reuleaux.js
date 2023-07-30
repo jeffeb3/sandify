@@ -11,7 +11,7 @@ const options = {
 
 export default class Reuleaux extends Model {
   constructor() {
-    super('reuleaux')
+    super("reuleaux")
     this.label = "Reuleaux"
   }
 

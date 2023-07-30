@@ -1,7 +1,7 @@
-import Layer, { layerOptions } from './Layer'
+import Layer, { layerOptions } from "./Layer"
 
 export const shapeOptions = {
-  ...layerOptions
+  ...layerOptions,
 }
 
 export default class Shape extends Layer {

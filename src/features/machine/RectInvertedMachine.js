@@ -1,10 +1,10 @@
-import RectMachine from './RectMachine'
-import Victor from 'victor'
-import clip from 'liang-barsky'
+import RectMachine from "./RectMachine"
+import Victor from "victor"
+import clip from "liang-barsky"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class RectInvertedMachine extends RectMachine {
-  constructor(vertices, settings, layerInfo={}) {
+  constructor(vertices, settings, layerInfo = {}) {
     super(vertices, settings, layerInfo)
   }
 
@@ -12,12 +12,14 @@ export default class RectInvertedMachine extends RectMachine {
     return this.enforceInvertedLimits()
   }
 
-  clipSegment(start, end, log=false) {
+  clipSegment(start, end, log = false) {
     const quadrantStart = this.pointLocation(start)
     const quadrantEnd = this.pointLocation(end)
 
     if (quadrantStart === 0b0000 && quadrantEnd === 0b0000) {
-      if (log) { console.log('line is inside limits') }
+      if (log) {
+        console.log("line is inside limits")
+      }
       return []
     }
 
@@ -27,24 +29,36 @@ export default class RectInvertedMachine extends RectMachine {
     const clipped = clip(a, b, bounds)
 
     if (quadrantStart === 0b000) {
-      if (log) { console.log('start is inside limits') }
+      if (log) {
+        console.log("start is inside limits")
+      }
       return [new Victor(b[0], b[1]), end]
     }
 
     if (quadrantEnd === 0b000) {
-      if (log) { console.log('end is inside limits') }
+      if (log) {
+        console.log("end is inside limits")
+      }
       return [start, new Victor(a[0], a[1])]
     }
 
     if (clipped) {
-      if (log) { console.log('line is outside limits, but intersects within limits') }
+      if (log) {
+        console.log("line is outside limits, but intersects within limits")
+      }
       return [
         start,
-        ...this.tracePerimeter(new Victor(a[0], a[1]), new Victor(b[0], b[1]), true),
-        end
+        ...this.tracePerimeter(
+          new Victor(a[0], a[1]),
+          new Victor(b[0], b[1]),
+          true,
+        ),
+        end,
       ]
     } else {
-      if (log) { console.log('line is outside limits') }
+      if (log) {
+        console.log("line is outside limits")
+      }
       return [start, end]
     }
   }

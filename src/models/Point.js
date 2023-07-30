@@ -3,7 +3,7 @@ import Model from "./Model"
 
 export default class Point extends Model {
   constructor() {
-    super('point')
+    super("point")
     this.label = "Point"
     this.startingWidth = 1
     this.startingHeight = 1

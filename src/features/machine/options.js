@@ -1,30 +1,30 @@
 export const machineOptions = {
   minX: {
-    title: 'Min X (mm)',
+    title: "Min X (mm)",
   },
   maxX: {
-    title: 'Max X (mm)',
+    title: "Max X (mm)",
   },
   minY: {
-    title: 'Min Y (mm)',
+    title: "Min Y (mm)",
   },
   maxY: {
-    title: 'Max Y (mm)',
+    title: "Max Y (mm)",
   },
   origin: {
-    title: 'Force origin'
+    title: "Force origin",
   },
   maxRadius: {
-    title: 'Max radius (mm)'
+    title: "Max radius (mm)",
   },
   minimizeMoves: {
-    title: 'Try to minimize perimeter moves',
-    type: 'checkbox'
+    title: "Try to minimize perimeter moves",
+    type: "checkbox",
   },
   polarEndPoint: {
-    title: 'End point'
+    title: "End point",
   },
   polarStartPoint: {
-    title: 'Start point'
+    title: "Start point",
   },
 }

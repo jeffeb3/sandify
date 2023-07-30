@@ -23,7 +23,7 @@ const options = {
 
 export default class Polygon extends Model {
   constructor() {
-    super('polygon')
+    super("polygon")
     this.label = "Polygon"
   }
 

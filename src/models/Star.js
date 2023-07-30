@@ -15,7 +15,7 @@ const options = {
 
 export default class Star extends Model {
   constructor() {
-    super('star')
+    super("star")
     this.label = "Star"
   }
 

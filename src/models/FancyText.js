@@ -50,7 +50,7 @@ const options = {
 
 export default class FancyText extends Model {
   constructor() {
-    super('fancyText')
+    super("fancyText")
     this.label = "Fancy Text"
     this.usesMachine = true
     this.usesFonts = true
@@ -86,9 +86,9 @@ export default class FancyText extends Model {
       horizontalAlign(vertices, state.shape.fancyAlignment)
       this.centerOnOrigin(vertices)
 
-      return state.creating ?
-        vertices.flat() :  // machine isn't available here
-        this.connectWords(vertices, offsets, state).flat()
+      return state.creating
+        ? vertices.flat() // machine isn't available here
+        : this.connectWords(vertices, offsets, state).flat()
     } else {
       return [new Victor(0, 0)]
     }

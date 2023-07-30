@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit"
 
 const machineSlice = createSlice({
-  name: 'machine',
+  name: "machine",
   initialState: {
     rectangular: true,
     rectExpanded: false,
@@ -13,8 +13,8 @@ const machineSlice = createSlice({
     maxRadius: 250,
     minimizeMoves: false,
     rectOrigin: [],
-    polarStartPoint: 'none',
-    polarEndPoint: 'none'
+    polarStartPoint: "none",
+    polarEndPoint: "none",
   },
   reducers: {
     updateMachine(state, action) {
@@ -34,7 +34,7 @@ const machineSlice = createSlice({
       let newValue = []
       let value = action.payload
 
-      for (let i = 0; i < value.length ; i++) {
+      for (let i = 0; i < value.length; i++) {
         if (!state.rectOrigin.includes(value[i])) {
           newValue.push(value[i])
           break
@@ -45,7 +45,7 @@ const machineSlice = createSlice({
     toggleMinimizeMoves(state, action) {
       state.minimizeMoves = !state.minimizeMoves
     },
-  }
+  },
 })
 
 export const {

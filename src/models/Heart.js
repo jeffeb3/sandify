@@ -3,7 +3,7 @@ import Model from "./Model"
 
 export default class Heart extends Model {
   constructor() {
-    super('heart')
+    super("heart")
     this.label = "Heart"
   }
 

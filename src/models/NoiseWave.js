@@ -30,7 +30,7 @@ const options = {
 
 export default class NoiseWave extends Model {
   constructor() {
-    super('noise_wave')
+    super("noise_wave")
     this.label = "Noise Waves"
     this.selectGroup = "Erasers"
     this.usesMachine = true

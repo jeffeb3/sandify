@@ -2,12 +2,9 @@ import Victor from "victor"
 import Model from "./Model"
 
 const options = {
-  ...shapeOptions,
-  ...{
-    freeformPoints: {
-      title: "Points",
-      type: "input",
-    },
+  freeformPoints: {
+    title: "Points",
+    type: "input",
   },
 }
 

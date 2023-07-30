@@ -271,7 +271,7 @@ function linearVertices(state) {
 
 export default class Wiper extends Model {
   constructor() {
-    super('wiper')
+    super("wiper")
     this.label = "Wiper"
     this.selectGroup = "Erasers"
     this.usesMachine = true

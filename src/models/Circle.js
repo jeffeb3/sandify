@@ -15,7 +15,7 @@ const options = {
 
 export default class Circle extends Model {
   constructor() {
-    super('circle')
+    super("circle")
     this.label = "Circle"
   }
 

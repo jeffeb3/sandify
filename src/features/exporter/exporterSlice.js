@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { GCODE, THETARHO, SVG } from "./Exporter"
+import { GCODE } from "./Exporter"
 
 const exporterSlice = createSlice({
   name: "exporter",

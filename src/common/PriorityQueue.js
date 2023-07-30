@@ -9,8 +9,8 @@ export class PriorityQueue {
     } else {
       let added = false
       for (let i = 1; i <= this.collection.length; i++) {
-        if (element[1] < this.collection[i-1][1]){
-          this.collection.splice(i-1, 0, element)
+        if (element[1] < this.collection[i - 1][1]) {
+          this.collection.splice(i - 1, 0, element)
           added = true
           break
         }
@@ -28,6 +28,6 @@ export class PriorityQueue {
   }
 
   isEmpty() {
-    return (this.collection.length === 0)
+    return this.collection.length === 0
   }
 }
