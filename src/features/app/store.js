@@ -42,13 +42,11 @@ if (persistedState) {
 
 const store = configureStore({
   reducer: combineReducers({
-    main: combineReducers({
-      app: appReducer,
-      layers: layersReducer,
-      exporter: exporterReducer,
-      machine: machineReducer,
-      preview: previewReducer,
-    }),
+    app: appReducer,
+    layers: layersReducer,
+    exporter: exporterReducer,
+    machine: machineReducer,
+    preview: previewReducer,
     fonts: fontsReducer,
   }),
   preloadedState: persistedState,

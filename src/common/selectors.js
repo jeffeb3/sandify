@@ -9,7 +9,7 @@ export const memoizeArrayProducingFn = (fn) => {
 
 // does a deep equality check instead of checking immutability; used in cases
 // where a selector depends on another selector that returns a new object each time,
-// e.g., getLayerIndex
+// e.g., selectLayerIndexById
 export const createDeepEqualSelector = createSelectorCreator(
   defaultMemoize,
   isEqual,

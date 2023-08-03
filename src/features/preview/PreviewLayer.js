@@ -2,39 +2,39 @@ import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import {
-  getPreviewVertices,
-  getSliderColors,
-  getVertexOffsets,
-  getSliderBounds,
-} from "@/features/machine/machineSelectors"
+  selectPreviewVerticesById,
+  selectSliderColors,
+  selectVertexOffsets,
+  selectSliderBounds,
+} from "@/features/machine/machineSlice"
 import { updateLayer } from "@/features/layers/layersSlice"
-import { getPreviewState } from "@/features/preview/previewSelectors"
-import { getLayersState } from "@/features/layers/layerSelectors"
+import { selectPreviewState } from "@/features/preview/previewSlice"
+import { selectLayers } from "@/features/layers/layersSlice"
 import { getModelFromType } from "@/config/models"
 import {
-  getCurrentLayer,
-  getLayerIndex,
-  getLayer,
-  getNumVisibleLayers,
-} from "@/features/layers/layerSelectors"
+  selectCurrentLayer,
+  selectLayerIndexById,
+  selectLayerById,
+  selectNumVisibleLayers,
+} from "@/features/layers/layersSlice"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 
 const PreviewLayer = (ownProps) => {
   const dispatch = useDispatch()
-  const layers = useSelector(getLayersState)
-  const currentLayer = useSelector(getCurrentLayer)
+  const layers = useSelector(selectLayers)
+  const currentLayer = useSelector(selectCurrentLayer)
   const layer =
-    useSelector((state) => getLayer(state, ownProps.id)) || currentLayer
-  const index = useSelector((state) => getLayerIndex(state, layer.id))
-  const numLayers = useSelector(getNumVisibleLayers)
-  const preview = useSelector(getPreviewState)
+    useSelector((state) => selectLayerById(state, ownProps.id)) || currentLayer
+  const index = useSelector((state) => selectLayerIndexById(state, layer.id))
+  const numLayers = useSelector(selectNumVisibleLayers)
+  const preview = useSelector(selectPreviewState)
   const vertices = useSelector((state) =>
-    getPreviewVertices(state, layer.id, "1"),
+    selectPreviewVerticesById(state, layer.id, "1"),
   )
-  const colors = useSelector(getSliderColors)
-  const offsets = useSelector(getVertexOffsets)
-  const bounds = useSelector(getSliderBounds)
+  const colors = useSelector(selectSliderColors)
+  const offsets = useSelector(selectVertexOffsets)
+  const bounds = useSelector(selectSliderBounds)
 
   const selected = layers.selected
   const sliderValue = preview.sliderValue

@@ -2,13 +2,16 @@ import React from "react"
 import { useSelector } from "react-redux"
 import { Shape } from "react-konva"
 import {
-  getSliderBounds,
-  getSliderColors,
-  getVertexOffsets,
-  getConnectingVertices,
-} from "@/features/machine/machineSelectors"
-import { getPreviewState } from "@/features/preview/previewSelectors"
-import { getCurrentLayer, getLayer } from "@/features/layers/layerSelectors"
+  selectSliderBounds,
+  selectSliderColors,
+  selectVertexOffsets,
+  selectConnectingVerticesById,
+} from "@/features/machine/machineSlice"
+import { selectPreviewState } from "@/features/preview/previewSlice"
+import {
+  selectCurrentLayer,
+  selectLayerById,
+} from "@/features/layers/layersSlice"
 import PreviewHelper from "./PreviewHelper"
 
 // Renders a connector between two layers.
@@ -22,11 +25,12 @@ const PreviewConnector = (ownProps) => {
     // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
     // It's quite likely there is a more elegant/proper way around this.
     const { startId, endId } = ownProps
-    const currentLayer = getCurrentLayer(state)
-    const startLayer = getLayer(state, startId) || getCurrentLayer(state)
-    const endLayer = getLayer(state, endId)
-    const vertices = getConnectingVertices(state, startId)
-    const preview = getPreviewState(state)
+    const currentLayer = selectCurrentLayer(state)
+    const startLayer =
+      selectLayerById(state, startId) || selectCurrentLayer(state)
+    const endLayer = selectLayerById(state, endId)
+    const vertices = selectConnectingVerticesById(state, startId)
+    const preview = selectPreviewState(state)
 
     return {
       currentLayer,
@@ -35,10 +39,10 @@ const PreviewConnector = (ownProps) => {
       vertices,
       layer: startLayer, // renamed for preview helper
       sliderValue: preview.sliderValue,
-      colors: getSliderColors(state),
+      colors: selectSliderColors(state),
       offsetId: startId + "-connector",
-      offsets: getVertexOffsets(state),
-      bounds: getSliderBounds(state),
+      offsets: selectVertexOffsets(state),
+      bounds: selectSliderBounds(state),
     }
   }
 

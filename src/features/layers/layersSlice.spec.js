@@ -1,21 +1,24 @@
+import configureMockStore from "redux-mock-store"
+import thunk from "redux-thunk"
 import { resetUniqueId } from "@/common/mocks"
 import layers, {
+  layersActions,
   addLayer,
-  removeLayer,
+  addEffect,
+  changeModelType,
+  deleteLayer,
+  removeEffect,
+  deleteEffect,
   copyLayer,
+  moveEffect,
   moveLayer,
   restoreDefaults,
-  addEffect,
-  removeEffect,
-  moveEffect,
   setCurrentLayer,
-  setSelectedLayer,
-  changeModelType,
   updateLayer,
-  toggleOpen,
-  toggleVisible,
 } from "./layersSlice"
 import Layer from "./Layer"
+
+const mockStore = configureMockStore([thunk])
 
 beforeEach(() => {
   resetUniqueId()
@@ -23,534 +26,381 @@ beforeEach(() => {
 
 describe("layers reducer", () => {
   const circleState = new Layer("circle").getInitialState()
-  const polygonState = new Layer("polygon").getInitialState()
-  polygonState.id = "1"
 
   it("should handle initial state", () => {
+    const polygonState = new Layer("polygon").getInitialState()
+    polygonState.id = "1"
+
     expect(layers(undefined, {})).toEqual({
+      ids: ["1"],
+      entities: {
+        1: polygonState,
+      },
       current: "1",
       selected: "1",
-      newEffectNameOverride: false,
-      newEffectName: "mask",
-      newEffectType: "mask",
-      byId: {
-        ["1"]: polygonState,
-      },
-      allIds: ["1"],
     })
   })
 
-  it("should handle addLayer", () => {
-    expect(
-      layers(
-        {
-          byId: {},
-          allIds: [],
-        },
-        addLayer({
-          name: "foo",
-        }),
-      ),
-    ).toEqual({
-      byId: {
-        1: {
-          id: "1",
-          name: "foo",
-        },
-      },
-      allIds: ["1"],
-      current: "1",
-      selected: "1",
-      newLayerName: "foo",
-    })
-  })
-
-  describe("removeLayer", () => {
-    it("should remove layer", () => {
+  describe("atomic actions", () => {
+    it("should handle addLayer", () => {
       expect(
         layers(
           {
-            byId: {
+            ids: [],
+            entities: {},
+          },
+          addLayer({
+            name: "foo",
+          }),
+        ),
+      ).toEqual({
+        ids: ["1"],
+        entities: {
+          1: {
+            id: "1",
+            name: "foo",
+            effectIds: [],
+          },
+        },
+        current: "1",
+        selected: "1",
+      })
+    })
+
+    describe("should handle deleteLayer", () => {
+      expect(
+        layers(
+          {
+            entities: {
               1: {
                 id: "1",
                 name: "foo",
               },
             },
-            allIds: ["1"],
+            ids: ["1"],
             current: "1",
           },
-          removeLayer("1"),
+          layersActions.deleteLayer("1"),
         ),
       ).toEqual({
-        byId: {},
-        allIds: [],
+        entities: {},
+        ids: [],
         current: undefined,
-        selected: undefined,
       })
     })
 
-    it("should remove effects associated with layer", () => {
+    it("should handle addEffect", () => {
       expect(
         layers(
           {
-            byId: {
-              layer: {
-                id: "layer",
-                name: "foo",
-                effectIds: ["effect"],
-              },
-              effect: {
-                id: "effect",
-                name: "bar",
-                parentId: "layer",
-              },
-            },
-            allIds: ["layer"],
-            current: "layer",
-            copyLayerName: "foo",
-          },
-          removeLayer("layer"),
-        ),
-      ).toEqual({
-        byId: {},
-        allIds: [],
-        current: undefined,
-        selected: undefined,
-        copyLayerName: "foo",
-      })
-    })
-  })
-
-  describe("copyLayer", () => {
-    it("should copy layer", () => {
-      expect(
-        layers(
-          {
-            byId: {
+            entities: {
               0: {
                 id: "0",
                 name: "foo",
+                effectIds: [],
               },
             },
-            allIds: ["0"],
-            current: "0",
+            ids: ["0"],
           },
-          copyLayer({
+          layersActions.addEffect({
             id: "0",
-            name: "bar",
+            effectId: "1",
           }),
         ),
       ).toEqual({
-        byId: {
+        entities: {
           0: {
             id: "0",
             name: "foo",
-          },
-          1: {
-            id: "1",
-            name: "bar",
-          },
-        },
-        allIds: ["0", "1"],
-        current: "1",
-        selected: "1",
-      })
-    })
-
-    it("should copy effects", () => {
-      expect(
-        layers(
-          {
-            byId: {
-              0: {
-                id: "0",
-                name: "foo",
-                effectIds: ["effect"],
-              },
-              effect: {
-                id: "effect",
-                name: "bar",
-                parentId: "0",
-              },
-            },
-            allIds: ["0"],
-            current: "0",
-          },
-          copyLayer({
-            id: "0",
-            name: "foo copy",
-          }),
-        ),
-      ).toEqual({
-        byId: {
-          0: {
-            id: "0",
-            name: "foo",
-            effectIds: ["effect"],
-          },
-          effect: {
-            id: "effect",
-            name: "bar",
-            parentId: "0",
-          },
-          1: {
-            id: "1",
-            name: "foo copy",
-            effectIds: ["2"],
-          },
-          2: {
-            id: "2",
-            name: "bar",
-            parentId: "1",
-          },
-        },
-        allIds: ["0", "1"],
-        current: "1",
-        selected: "1",
-      })
-    })
-  })
-
-  it("should handle moveLayer", () => {
-    expect(
-      layers(
-        {
-          allIds: ["a", "b", "c", "d", "e"],
-        },
-        moveLayer({ oldIndex: 0, newIndex: 2 }),
-      ),
-    ).toEqual({
-      allIds: ["b", "c", "a", "d", "e"],
-    })
-  })
-
-  it("should handle restoreDefaults", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            0: {
-              id: "0",
-              name: "foo",
-              type: "circle",
-              circleLobes: "2",
-              polygonSides: "5",
-            },
-          },
-        },
-        restoreDefaults("0"),
-      ),
-    ).toEqual({
-      byId: {
-        0: {
-          id: "0",
-          name: "foo",
-          ...circleState,
-        },
-      },
-    })
-  })
-
-  describe("addEffect", () => {
-    it("when no parent layer, does nothing", () => {
-      const state = {
-        byId: {
-          "layer-1": {
-            id: "layer-1",
-            name: "foo",
-          },
-        },
-      }
-      expect(
-        layers(
-          state,
-          addEffect({
-            name: "bar",
-          }),
-        ),
-      ).toEqual(state)
-    })
-
-    it("adds effect", () => {
-      expect(
-        layers(
-          {
-            byId: {
-              0: {
-                id: "0",
-                name: "foo",
-              },
-            },
-            allIds: ["0"],
-            current: "0",
-          },
-          addEffect({
-            name: "bar",
-            parentId: "0",
-          }),
-        ),
-      ).toEqual({
-        byId: {
-          0: {
-            id: "0",
-            name: "foo",
-            open: true,
             effectIds: ["1"],
           },
-          1: {
-            id: "1",
-            name: "bar",
-            parentId: "0",
+        },
+        ids: ["0"],
+      })
+    })
+
+    it("should handle moveEffect", () => {
+      expect(
+        layers(
+          {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                effectIds: ["1", "2", "3"],
+              },
+            },
+          },
+          moveEffect({ id: "0", oldIndex: 0, newIndex: 1 }),
+        ),
+      ).toEqual({
+        entities: {
+          0: {
+            id: "0",
+            name: "foo",
+            effectIds: ["2", "1", "3"],
           },
         },
-        allIds: ["0"],
+      })
+    })
+
+    it("should handle removeEffect", () => {
+      expect(
+        layers(
+          {
+            entities: {
+              0: {
+                id: "0",
+                effectIds: ["1"],
+              },
+            },
+            ids: ["0"],
+          },
+          removeEffect({
+            id: "0",
+            effectId: "1",
+          }),
+        ),
+      ).toEqual({
+        entities: {
+          0: {
+            id: "0",
+            effectIds: [],
+          },
+        },
+        ids: ["0"],
+      })
+    })
+
+    describe("changeModelType", () => {
+      it("should add default values", () => {
+        expect(
+          layers(
+            {
+              entities: {
+                0: {
+                  id: "0",
+                },
+              },
+            },
+            changeModelType({ id: "0", type: "circle" }),
+          ),
+        ).toEqual({
+          entities: {
+            0: {
+              id: "0",
+              ...circleState,
+            },
+          },
+        })
+      })
+
+      it("should not override values if provided", () => {
+        expect(
+          layers(
+            {
+              entities: {
+                0: {
+                  id: "0",
+                  circleLobes: 2,
+                },
+              },
+            },
+            changeModelType({ id: "0", type: "circle" }),
+          ),
+        ).toEqual({
+          entities: {
+            0: {
+              id: "0",
+              ...circleState,
+              circleLobes: 2,
+            },
+          },
+        })
+      })
+    })
+
+    it("should handle moveLayer", () => {
+      expect(
+        layers(
+          {
+            ids: ["a", "b", "c", "d", "e"],
+          },
+          moveLayer({ oldIndex: 0, newIndex: 2 }),
+        ),
+      ).toEqual({
+        ids: ["b", "c", "a", "d", "e"],
+      })
+    })
+
+    it("should handle restoreDefaults", () => {
+      expect(
+        layers(
+          {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                type: "circle",
+                circleLobes: "2",
+                polygonSides: "5",
+              },
+            },
+          },
+          restoreDefaults("0"),
+        ),
+      ).toEqual({
+        entities: {
+          0: {
+            id: "0",
+            name: "foo",
+            ...circleState,
+          },
+        },
+      })
+    })
+
+    it("should handle setCurrentLayer", () => {
+      expect(
+        layers(
+          {
+            entities: {
+              0: {},
+              1: {},
+            },
+            current: "0",
+          },
+          setCurrentLayer("1"),
+        ),
+      ).toEqual({
+        entities: {
+          0: {},
+          1: {},
+        },
         current: "1",
         selected: "1",
       })
     })
-  })
 
-  it("should handle removeEffect", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            "layer-1": {
-              id: "layer-1",
-              name: "foo",
-              effectIds: ["layer-2"],
-            },
-            "layer-2": {
-              id: "layer-2",
-              name: "bar",
-              parentId: "layer-1",
-            },
-          },
-          allIds: ["layer-1"],
-          current: "layer-2",
-        },
-        removeEffect("layer-2"),
-      ),
-    ).toEqual({
-      byId: {
-        "layer-1": {
-          id: "layer-1",
-          name: "foo",
-          effectIds: [],
-        },
-      },
-      allIds: ["layer-1"],
-      current: "layer-1",
-      selected: "layer-1",
-    })
-  })
-
-  it("should handle moveEffect", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            "layer-1": {
-              id: "layer-1",
-              name: "foo",
-              effectIds: ["layer-2", "layer-3"],
-            },
-            "layer-2": {
-              id: "layer-2",
-              name: "bar",
-              parentId: "layer-1",
-            },
-            "layer-3": {
-              id: "layer-3",
-              name: "moo",
-              parentId: "layer-1",
-            },
-          },
-          allIds: ["layer-1"],
-        },
-        moveEffect({ parentId: "layer-1", oldIndex: 0, newIndex: 1 }),
-      ),
-    ).toEqual({
-      byId: {
-        "layer-1": {
-          id: "layer-1",
-          name: "foo",
-          effectIds: ["layer-3", "layer-2"],
-        },
-        "layer-2": {
-          id: "layer-2",
-          name: "bar",
-          parentId: "layer-1",
-        },
-        "layer-3": {
-          id: "layer-3",
-          name: "moo",
-          parentId: "layer-1",
-        },
-      },
-      allIds: ["layer-1"],
-    })
-  })
-
-  it("should handle setCurrentLayer", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            "layer-2": {
-              id: "layer-2",
-            },
-          },
-          allIds: ["layer-1", "layer-2"],
-        },
-        setCurrentLayer("layer-2"),
-      ),
-    ).toEqual({
-      byId: {
-        "layer-2": {
-          id: "layer-2",
-        },
-      },
-      allIds: ["layer-1", "layer-2"],
-      current: "layer-2",
-      selected: "layer-2",
-    })
-  })
-
-  it("should handle setSelectedLayer", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            "layer-2": {
-              id: "layer-2",
-            },
-          },
-          allIds: ["layer-1", "layer-2"],
-        },
-        setSelectedLayer("layer-2"),
-      ),
-    ).toEqual({
-      byId: {
-        "layer-2": {
-          id: "layer-2",
-        },
-      },
-      allIds: ["layer-1", "layer-2"],
-      selected: "layer-2",
-    })
-  })
-
-  describe("changeModelType", () => {
-    it("should add default values", () => {
+    it("should handle updateLayer", () => {
       expect(
         layers(
           {
-            byId: {
-              "layer-1": {
-                id: "layer-1",
+            entities: {
+              1: {
+                id: "1",
+                name: "foo",
               },
             },
           },
-          changeModelType({ id: "layer-1", type: "circle" }),
+          updateLayer({ id: "1", name: "bar" }),
         ),
       ).toEqual({
-        byId: {
-          "layer-1": {
-            id: "layer-1",
-            ...circleState,
-          },
-        },
-      })
-    })
-
-    it("should not override values if provided", () => {
-      expect(
-        layers(
-          {
-            byId: {
-              "layer-1": {
-                id: "layer-1",
-                circleLobes: 2,
-              },
-            },
-          },
-          changeModelType({ id: "layer-1", type: "circle" }),
-        ),
-      ).toEqual({
-        byId: {
-          "layer-1": {
-            id: "layer-1",
-            ...circleState,
-            circleLobes: 2,
+        entities: {
+          1: {
+            id: "1",
+            name: "bar",
           },
         },
       })
     })
   })
 
-  it("should handle updateLayer", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            1: {
-              id: "1",
-              name: "foo",
+  describe("compound actions", () => {
+    describe("addEffect", () => {
+      it("should dispatch actions to create an effect and then add it to the layer", async () => {
+        const store = mockStore()
+        const effect = {
+          name: "foo",
+        }
+
+        store.dispatch(addEffect({ id: "0", effect }))
+        const actions = store.getActions()
+        expect(actions[0].type).toEqual("effects/addEffect")
+        expect(actions[0].meta.id).toEqual("1")
+        expect(actions[1].type).toEqual("layers/addEffect")
+        expect(actions[1].payload).toEqual({ id: "0", effectId: "1" })
+      })
+    })
+
+    describe("deleteEffect", () => {
+      it("should dispatch actions to remove the effect from the layer and then delete it", async () => {
+        const store = mockStore()
+
+        store.dispatch(deleteEffect({ id: "0", effectId: "1" }))
+        const actions = store.getActions()
+        expect(actions[0].type).toEqual("layers/removeEffect")
+        expect(actions[0].payload).toEqual({ id: "0", effectId: "1" })
+        expect(actions[1].type).toEqual("effects/deleteEffect")
+        expect(actions[1].payload).toEqual("1")
+      })
+    })
+
+    describe("deleteLayer", () => {
+      it("should dispatch actions to delete the layer and then delete its effects", async () => {
+        const store = mockStore({
+          layers: {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                effectIds: ["1", "2"],
+              },
             },
+            ids: ["0"],
           },
-        },
-        updateLayer({ id: "1", name: "bar" }),
-      ),
-    ).toEqual({
-      byId: {
-        1: {
-          id: "1",
+        })
+
+        store.dispatch(deleteLayer("0"))
+        const actions = store.getActions()
+        expect(actions[0].type).toEqual("effects/deleteEffect")
+        expect(actions[1].type).toEqual("effects/deleteEffect")
+        expect(actions[2].type).toEqual("layers/deleteLayer")
+      })
+    })
+
+    describe("copyLayer", () => {
+      it("should dispatch actions copy the layer and its effects", async () => {
+        const store = mockStore({
+          layers: {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                effectIds: ["a", "b"],
+              },
+            },
+            ids: ["0"],
+          },
+          effects: {
+            entities: {
+              a: {
+                id: "a",
+              },
+              b: {
+                id: "b",
+              },
+            },
+            ids: ["a", "b"],
+          },
+        })
+
+        store.dispatch(
+          copyLayer({
+            id: "0",
+            name: "bar",
+          }),
+        )
+        const actions = store.getActions()
+        expect(actions[0].type).toEqual("effects/addEffect")
+        expect(actions[1].type).toEqual("effects/addEffect")
+        expect(actions[2].type).toEqual("layers/addLayer")
+        expect(actions[2].payload).toEqual({
+          id: "3",
           name: "bar",
-        },
-      },
-    })
-  })
-
-  it("should handle toggleVisible", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            1: {
-              visible: true,
-            },
-          },
-        },
-        toggleVisible({ id: "1" }),
-      ),
-    ).toEqual({
-      byId: {
-        1: {
-          visible: false,
-        },
-      },
-    })
-  })
-
-  it("should handle toggleOpen", () => {
-    expect(
-      layers(
-        {
-          byId: {
-            1: {
-              open: true,
-            },
-          },
-        },
-        toggleOpen({ id: "1" }),
-      ),
-    ).toEqual({
-      byId: {
-        1: {
-          open: false,
-        },
-      },
+          effectIds: ["1", "2"],
+        })
+      })
     })
   })
 })

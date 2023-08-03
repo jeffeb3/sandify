@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux"
 import MachineSettings from "@/features/machine/MachineSettings"
 import LayerEditor from "@/features/layers/LayerEditor"
 import Playlist from "@/features/layers/Playlist"
-import { getCurrentLayer } from "@/features/layers/layerSelectors"
+import { selectCurrentLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 import Footer from "./Footer"
 
 const InputTabs = () => {
   const dispatch = useDispatch()
-  const layer = useSelector(getCurrentLayer)
+  const layer = useSelector(selectCurrentLayer)
 
   useEffect(() => {
     Object.keys(supportedFonts).forEach((url) => dispatch(loadFont(url)))

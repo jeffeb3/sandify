@@ -5,16 +5,15 @@ import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
 
 import {
-  getCurrentLayer,
-  getNumLayers,
-  getAllLayers,
-} from "@/features/layers/layerSelectors"
+  selectCurrentLayer,
+  selectNumLayers,
+} from "@/features/layers/layersSlice"
 import {
   setCurrentLayer,
-  removeLayer,
+  deleteLayer,
   moveLayer,
-  toggleVisible,
-  toggleOpen,
+  updateLayer,
+  selectAllLayers,
 } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
@@ -24,9 +23,9 @@ import "./Playlist.scss"
 
 function Playlist() {
   const dispatch = useDispatch()
-  const layers = useSelector(getAllLayers)
-  const currentLayer = useSelector(getCurrentLayer)
-  const numLayers = useSelector(getNumLayers)
+  const layers = useSelector(selectAllLayers)
+  const currentLayer = useSelector(selectCurrentLayer)
+  const numLayers = useSelector(selectNumLayers)
   const canRemove = numLayers > 1
 
   const [showNewLayer, setShowNewLayer] = useState(false)
@@ -37,11 +36,11 @@ function Playlist() {
   const toggleImportModal = () => setShowImportLayer(!showImportLayer)
   const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
 
-  const handleLayerRemoved = (id) => dispatch(removeLayer(id))
+  const handleLayerRemoved = (id) => dispatch(deleteLayer(id))
   const handleLayerMoved = ({ oldIndex, newIndex }) =>
     dispatch(moveLayer({ oldIndex, newIndex }))
-  const handleToggleLayerOpen = (id) => dispatch(toggleOpen({ id }))
-  const handleToggleLayerVisible = (id) => dispatch(toggleVisible({ id }))
+  const handleToggleLayerVisible = (id) =>
+    dispatch(updateLayer({ id, changes: { visible: !currentLayer.visible } }))
   const handleLayerSelected = (event) => {
     const id = event.target.closest(".list-group-item").id
     dispatch(setCurrentLayer(id))
@@ -81,7 +80,6 @@ function Playlist() {
           currentLayer={currentLayer}
           numLayers={numLayers}
           handleLayerSelected={handleLayerSelected}
-          handleToggleLayerOpen={handleToggleLayerOpen}
           handleToggleLayerVisible={handleToggleLayerVisible}
         />
         <div className="d-flex align-items-center border-left border-right border-bottom">

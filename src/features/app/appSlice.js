@@ -8,4 +8,7 @@ const appSlice = createSlice({
   reducers: {},
 })
 
+export const selectState = (state) => state
+export const selectAppState = (state) => state.app
+
 export default appSlice.reducer

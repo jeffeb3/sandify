@@ -2,14 +2,14 @@ import React from "react"
 import { Button, Modal, Form, Accordion, Card } from "react-bootstrap"
 import { useSelector, useDispatch } from "react-redux"
 import ReactGA from "react-ga"
-import { getMachineState } from "@/features/machine/machineSelectors"
+import { selectMachine } from "@/features/machine/machineSlice"
 import ThetaRhoImporter from "@/features/importer/ThetaRhoImporter"
 import GCodeImporter from "@/features/importer/GCodeImporter"
 import { addLayer } from "./layersSlice"
 import Layer from "./Layer"
 
 const ImportLayer = ({ toggleModal, showModal }) => {
-  const machineState = useSelector(getMachineState)
+  const machineState = useSelector(selectMachine)
   const dispatch = useDispatch()
   let startTime
 

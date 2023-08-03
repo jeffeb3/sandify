@@ -2,7 +2,6 @@ import ReactGA from "react-ga"
 import throttle from "lodash/throttle"
 import PolarMachine from "./PolarMachine"
 import RectMachine from "./RectMachine"
-import { getModelFromType } from "@/config/models"
 import Victor from "victor"
 
 //function track(vertex, data, loopIndex) {
@@ -111,19 +110,16 @@ export const transformShapes = (vertices, layer, effects) => {
   //    }
   //  }
 
-  if (layer.reverse) {
-    outputVertices = outputVertices.reverse()
-  }
-
-  if (effects && effects.length > 0) {
-    effects.forEach((effect) => {
-      outputVertices = getModelFromType(effect.type).applyEffect(
-        effect,
-        layer,
-        outputVertices,
-      )
-    })
-  }
+  // todo: reimplement
+  //if (effects && effects.length > 0) {
+  //  effects.forEach((effect) => {
+  //    outputVertices = getModelFromType(effect.type).applyEffect(
+  //      effect,
+  //      layer,
+  //      outputVertices,
+  //    )
+  //  })
+  //}
 
   const endTime = performance.now()
   throttledReportTiming(endTime - startTime)

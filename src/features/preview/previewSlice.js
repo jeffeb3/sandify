@@ -1,4 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit"
+import { createSelector } from "reselect"
+import { selectState } from "@/features/app/appSlice"
+
+// ------------------------------
+// Slice, reducers and atomic actions
+// ------------------------------
 
 const previewSlice = createSlice({
   name: "preview",
@@ -19,5 +25,13 @@ const previewSlice = createSlice({
 })
 
 export const { updatePreview, setPreviewSize } = previewSlice.actions
-
 export default previewSlice.reducer
+
+// ------------------------------
+// Selectors
+// ------------------------------
+
+export const selectPreviewState = createSelector(
+  selectState,
+  (state) => state.preview,
+)

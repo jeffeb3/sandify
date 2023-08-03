@@ -1,6 +1,14 @@
 import { resizeVertices, dimensions } from "@/common/geometry"
+import { pick } from "lodash"
+import LRUCache from "lru-cache"
 
 const options = []
+const cache = new LRUCache({
+  length: (n, key) => {
+    return n.length
+  },
+  max: 500000,
+})
 
 export default class Model {
   constructor(type) {
@@ -79,7 +87,38 @@ export default class Model {
     return options
   }
 
+  getCacheKey(state) {
+    // include only model values in key
+    const cacheState = { ...state }
+    cacheState.shape = pick(cacheState.shape, Object.keys(this.getOptions()))
+
+    return JSON.stringify(cacheState)
+  }
+
+  // override as needed; returns an array of Victor vertices
   getVertices(state) {
     return []
+  }
+
+  draw(state) {
+    if (this.shouldCache) {
+      const key = this.getCacheKey(state)
+      let vertices = cache.get(key)
+
+      if (!vertices) {
+        vertices = this.getVertices(state)
+
+        if (vertices.length > 1) {
+          cache.set(key, vertices)
+        }
+      }
+
+      // return a copy of these vertices even though it's coming from the cache, because
+      // downstream logic is modifying them directly; it's the computation of the vertices
+      // that can be expensive, not the copying.
+      return vertices.map((vertex) => vertex.clone())
+    } else {
+      return this.getVertices(state)
+    }
   }
 }

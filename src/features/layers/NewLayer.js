@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import Select from "react-select"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import {
@@ -21,7 +21,7 @@ const customStyles = {
 
 const NewLayer = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
-  const selectOptions = useSelector(getModelSelectOptions)
+  const selectOptions = getModelSelectOptions()
   const [type, setType] = useState(defaultModel.type)
   const [name, setName] = useState(defaultModel.label)
   const selectedShape = getModelFromType(type)

@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { getMachineState } from "@/features/machine/machineSelectors"
+import { selectMachine } from "@/features/machine/machineSlice"
 import {
   updateMachine,
   toggleMachineRectExpanded,
@@ -22,7 +22,7 @@ import { machineOptions } from "./options"
 const RectSettings = () => {
   const dispatch = useDispatch()
   const { rectangular, minX, maxX, minY, maxY, origin, minimizeMoves } =
-    useSelector(getMachineState)
+    useSelector(selectMachine)
   const activeClassName = rectangular ? "active" : ""
 
   const handleAccordionToggle = () => {

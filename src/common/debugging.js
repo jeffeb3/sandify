@@ -3,7 +3,7 @@ import { compact } from "lodash"
 // set to true to enable console logging
 const debug = false
 
-// limit which keys are shown, e.g., const keys = ['getLayer']
+// limit which keys are shown, e.g., const keys = ['selectLayerById']
 const keys = null
 
 // keep count of log occurrences by key

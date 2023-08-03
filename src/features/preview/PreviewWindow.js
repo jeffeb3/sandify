@@ -4,14 +4,14 @@ import { Provider } from "react-redux"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { updateLayer } from "@/features/layers/layersSlice"
-import { getPreviewState } from "@/features/preview/previewSelectors"
-import { getMachineState } from "@/features/machine/machineSelectors"
+import { selectPreviewState } from "@/features/preview/previewSlice"
+import { selectMachine } from "@/features/machine/machineSlice"
 import {
-  getCurrentLayer,
-  getKonvaLayerIds,
-  getVisibleNonEffectIds,
-  isDragging,
-} from "@/features/layers/layerSelectors"
+  selectCurrentLayer,
+  selectKonvaLayerIds,
+  selectVisibleLayerIds,
+  selectIsDragging,
+} from "@/features/layers/layersSlice"
 import { roundP } from "@/common/util"
 import PreviewLayer from "./PreviewLayer"
 import PreviewConnector from "./PreviewConnector"
@@ -22,12 +22,12 @@ const PreviewWindow = () => {
   const store = useStore()
   const previewElement = useRef(null)
   const { rectangular, minX, minY, maxX, maxY, maxRadius } =
-    useSelector(getMachineState)
-  const { canvasWidth, canvasHeight } = useSelector(getPreviewState)
-  const currentLayer = useSelector(getCurrentLayer)
-  const konvaIds = useSelector(getKonvaLayerIds)
-  const layerIds = useSelector(getVisibleNonEffectIds)
-  const dragging = useSelector(isDragging)
+    useSelector(selectMachine)
+  const { canvasWidth, canvasHeight } = useSelector(selectPreviewState)
+  const currentLayer = useSelector(selectCurrentLayer)
+  const konvaIds = useSelector(selectKonvaLayerIds)
+  const layerIds = useSelector(selectVisibleLayerIds)
+  const dragging = useSelector(selectIsDragging)
 
   useEffect(() => {
     const wrapper = document.getElementById("preview-wrapper")

@@ -1,193 +1,112 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
+import { createSelector } from "reselect"
+import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import arrayMove from "array-move"
-import { getModelFromType, getDefaultModelType } from "@/config/models"
+import {
+  memoizeArrayProducingFn,
+  createDeepEqualSelector,
+} from "@/common/selectors"
+import { getDefaultModelType } from "@/config/models"
 import Layer from "./Layer"
+import { selectState } from "@/features/app/appSlice"
+import { effectsSlice, selectEffectById } from "@/features/effects/effectsSlice"
+import { log } from "@/common/debugging"
 
-const notCopiedWhenTypeChanges = ["type", "height", "width"]
-const newEffectType = localStorage.getItem("currentEffect") || "mask"
-const newEffectName = getModelFromType(newEffectType).label.toLowerCase()
+// ------------------------------
+// Slice, reducers and atomic actions
+// ------------------------------
 
-function createLayer(state, attrs) {
-  const restore = attrs.restore
-  delete attrs.restore
-  const layer = {
-    ...attrs,
-    id: (restore && attrs.id) || uuidv4(),
-    name: attrs.name,
-  }
-
-  state.byId[layer.id] = layer
-  return layer
-}
-
-function deleteLayer(state, deleteId) {
-  const idx = state.allIds.findIndex((id) => id === deleteId)
-  state.allIds.splice(idx, 1)
-  delete state.byId[deleteId]
-  return idx
-}
-
-function deleteEffect(state, deleteId) {
-  const layer = state.byId[deleteId]
-  const parent = state.byId[layer.parentId]
-
-  const idx = parent.effectIds.findIndex((id) => id === deleteId)
-  parent.effectIds.splice(idx, 1)
-
-  delete state.byId[deleteId]
-  handleAfterDelete(state, deleteId, idx)
-}
-
-function createEffect(state, parent, attrs) {
-  const effect = createLayer(state, {
-    ...attrs,
-    name: attrs.name || state.newEffectName,
-  })
-
-  effect.parentId = parent.id
-  parent.effectIds ||= []
-  parent.effectIds.push(effect.id)
-  parent.effectIds = [...new Set(parent.effectIds)]
-
-  return effect
-}
-
-function handleAfterDelete(state, deletedId, deletedIdx) {
-  if (deletedId === state.current) {
-    if (deletedIdx === state.allIds.length) {
-      setCurrentId(state, state.allIds[deletedIdx - 1])
-    } else {
-      setCurrentId(state, state.allIds[deletedIdx])
-    }
-  }
-}
-
-function currLayerIndex(state) {
-  const currentLayer = state.byId[state.current]
-  return state.allIds.findIndex((id) => id === currentLayer.id)
-}
-
-// TODO: remove this function when you refactor to remove 'selected' feature; currently disabled
-function setCurrentId(state, id) {
-  state.selected = id
-  state.current = id
-}
-
+const layersAdapter = createEntityAdapter()
 const defaultLayer = new Layer(getDefaultModelType())
 const defaultLayerId = uuidv4()
 const layerState = {
   id: defaultLayerId,
   ...defaultLayer.getInitialState(),
 }
+const notCopiedWhenTypeChanges = ["type", "height", "width"]
+
+function currLayerIndex(state) {
+  const currentLayer = state.entities[state.current]
+  return state.ids.findIndex((id) => id === currentLayer.id)
+}
 
 const layersSlice = createSlice({
   name: "layers",
-  initialState: {
+  initialState: layersAdapter.getInitialState({
     current: defaultLayerId,
     selected: defaultLayerId,
-    newEffectType,
-    newEffectName,
-    newEffectNameOverride: false,
-    byId: {
+    entities: {
       [defaultLayerId]: layerState,
     },
-    allIds: [defaultLayerId],
-  },
+    ids: [defaultLayerId],
+  }),
   reducers: {
-    addLayer(state, action) {
-      const index = state.current ? currLayerIndex(state) + 1 : 0
-      const layer = createLayer(state, action.payload)
+    addLayer: {
+      reducer(state, action) {
+        // we need to insert at a specific index, which is not supported by addOne
+        const index = state.current ? currLayerIndex(state) + 1 : 0
+        const layer = {
+          ...action.payload,
+          effectIds: [],
+        }
+        state.ids.splice(index, 0, layer.id)
+        state.entities[layer.id] = layer
+        state.current = layer.id
+        state.selected = layer.id
 
-      state.allIds.splice(index, 0, layer.id)
-      setCurrentId(state, layer.id)
-      state.newLayerName = layer.name
+        if (layer.type !== "fileImport") {
+          localStorage.setItem(
+            layer.effect ? "defaultEffect" : "defaultModel",
+            layer.type,
+          )
+        }
+      },
+      prepare(layer) {
+        const id = uuidv4()
+        // return newly generated id so downstream actions can use it
+        return { payload: { ...layer, id }, meta: { id } }
+      },
+    },
+    deleteLayer: (state, action) => {
+      const deleteId = action.payload
+      const deleteIdx = state.ids.findIndex((id) => id === deleteId)
+      layersAdapter.removeOne(state, deleteId)
 
-      if (layer.type !== "fileImport") {
-        localStorage.setItem(
-          layer.effect ? "defaultEffect" : "defaultModel",
-          layer.type,
-        )
+      if (deleteId === state.current) {
+        const idx = deleteIdx === state.ids.length ? deleteIdx - 1 : deleteIdx
+        state.current = state.ids[idx]
       }
     },
-    moveLayer(state, action) {
+    moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
-      state.allIds = arrayMove(state.allIds, oldIndex, newIndex)
+      state.ids = arrayMove(state.ids, oldIndex, newIndex)
     },
-    copyLayer(state, action) {
-      const { id, name } = action.payload
-      const source = state.byId[id]
-      const layer = createLayer(state, {
-        ...source,
-        name,
-      })
+    updateLayer: (state, action) => {
+      const layer = action.payload
+      layersAdapter.updateOne(state, { id: layer.id, changes: layer })
+    },
+    addEffect: (state, action) => {
+      const { id, effectId } = action.payload
+      state.entities[id].effectIds.push(effectId)
+    },
+    moveEffect: (state, action) => {
+      const { id, oldIndex, newIndex } = action.payload
+      const layer = state.entities[id]
 
-      delete layer.effectIds
+      layer.effectIds = arrayMove(layer.effectIds, oldIndex, newIndex)
+    },
+    removeEffect: (state, action) => {
+      const { id, effectId } = action.payload
+      const layer = state.entities[id]
+      const idx = layer.effectIds.findIndex((id) => id === effectId)
 
-      if (source.effectIds) {
-        layer.effectIds = source.effectIds.map((effectId) => {
-          return createEffect(state, layer, state.byId[effectId]).id
-        })
-      }
-
-      const index = state.allIds.findIndex((id) => id === state.current) + 1
-      state.allIds.splice(index, 0, layer.id)
-      setCurrentId(state, layer.id)
+      layer.effectIds.splice(idx, 1)
     },
-    removeLayer(state, action) {
-      const id = action.payload
-      const layer = state.byId[id]
-
-      if (layer.effectIds) {
-        layer.effectIds.forEach((effectId) => {
-          deleteEffect(state, effectId)
-        })
-      }
-
-      const idx = deleteLayer(state, id)
-      handleAfterDelete(state, id, idx)
-    },
-    addEffect(state, action) {
-      const parent = state.byId[action.payload.parentId]
-      if (parent === undefined) return
-
-      const effect = createEffect(state, parent, action.payload)
-      parent.open = true
-      setCurrentId(state, effect.id)
-    },
-    removeEffect(state, action) {
-      deleteEffect(state, action.payload)
-    },
-    moveEffect(state, action) {
-      const { parentId, oldIndex, newIndex } = action.payload
-      const parent = state.byId[parentId]
-      parent.effectIds = arrayMove(parent.effectIds, oldIndex, newIndex)
-    },
-    restoreDefaults(state, action) {
-      const id = action.payload
-      const currentLayer = state.byId[id]
-      const layer = new Layer(currentLayer.type)
-
-      state.byId[id] = {
-        id,
-        name: currentLayer.name,
-        ...layer.getInitialState(),
-      }
-    },
-    setCurrentLayer(state, action) {
-      const current = state.byId[action.payload]
-
-      if (current) {
-        setCurrentId(state, current.id)
-      }
-    },
-    setSelectedLayer(state, action) {
-      state.selected = action.payload
-    },
-    changeModelType(state, action) {
+    changeModelType: (state, action) => {
       const { type, id } = action.payload
+      const layer = state.entities[id]
       const newLayer = new Layer(type).getInitialState()
-      const layer = state.byId[id]
 
       Object.keys(newLayer).forEach((attr) => {
         if (
@@ -204,52 +123,212 @@ const layersSlice = createSlice({
         newLayer.y = 0
       }
 
-      state.byId[id] = newLayer
+      layersAdapter.setOne(state, newLayer)
     },
-    setNewEffectType(state, action) {
-      let attrs = { newEffectType: action.payload }
-      if (!state.newEffectNameOverride) {
-        const shape = getModelFromType(action.payload)
-        attrs.newEffectName = shape.name.toLowerCase()
+    restoreDefaults: (state, action) => {
+      const id = action.payload
+      const { type, name } = state.entities[id]
+      const layer = new Layer(type)
+
+      layer.getInitialState()
+      layersAdapter.setOne(state, {
+        id,
+        name,
+        ...layer.getInitialState(),
+      })
+    },
+    setCurrentLayer: (state, action) => {
+      const id = action.payload
+
+      if (state.entities[id]) {
+        state.current = id
+        state.selected = id
       }
-      Object.assign(state, attrs)
-    },
-    updateLayer(state, action) {
-      const layer = action.payload
-      const currLayer = state.byId[layer.id]
-      state.byId[layer.id] = { ...currLayer, ...layer }
-    },
-    updateLayers(state, action) {
-      Object.assign(state, action.payload)
-    },
-    toggleOpen(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].open = !state.byId[layer.id].open
-    },
-    toggleVisible(state, action) {
-      const layer = action.payload
-      state.byId[layer.id].visible = !state.byId[layer.id].visible
     },
   },
 })
 
-export const {
-  addLayer,
-  copyLayer,
-  moveLayer,
-  removeLayer,
-  addEffect,
-  removeEffect,
-  moveEffect,
-  restoreDefaults,
-  setCurrentLayer,
-  setSelectedLayer,
-  changeModelType,
-  setNewEffectType,
-  updateLayer,
-  updateLayers,
-  toggleVisible,
-  toggleOpen,
-} = layersSlice.actions
+// ------------------------------
+// Compound actions (thunks) that make multiple changes to the store across reducers,
+// but only render once.
+// ------------------------------
+
+export const deleteLayer = (id) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const layer = selectById(state, id)
+
+    // delete the effects, and then delete the layer
+    layer.effectIds.forEach((effectId) => {
+      dispatch(effectsSlice.actions.deleteEffect(effectId))
+    })
+    dispatch(layersSlice.actions.deleteLayer(id))
+  }
+}
+
+export const copyLayer = ({ id, name }) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const layer = selectById(state, id)
+    const newLayer = {
+      ...layer,
+      name,
+    }
+
+    // copy effects
+    newLayer.effectIds = layer.effectIds.map((effectId) => {
+      const effect = selectEffectById(state, effectId)
+      return dispatch(effectsSlice.actions.addEffect(effect)).meta.id
+    })
+
+    // create new layer
+    dispatch(layersSlice.actions.addLayer(newLayer))
+  }
+}
+
+export const addEffect = ({ id, effect }) => {
+  return (dispatch) => {
+    // create the effect first, and then add it to the layer
+    const action = dispatch(effectsSlice.actions.addEffect(effect))
+    dispatch(layersSlice.actions.addEffect({ id, effectId: action.meta.id }))
+  }
+}
+
+export const deleteEffect = ({ id, effectId }) => {
+  return (dispatch) => {
+    dispatch(layersSlice.actions.removeEffect({ id, effectId }))
+    dispatch(effectsSlice.actions.deleteEffect(effectId))
+  }
+}
 
 export default layersSlice.reducer
+export const { actions: layersActions } = layersSlice
+export const {
+  addLayer,
+  changeModelType,
+  moveEffect,
+  moveLayer,
+  removeEffect,
+  restoreDefaults,
+  setCurrentLayer,
+  updateLayer,
+} = layersSlice.actions
+
+// ------------------------------
+// Selectors
+// ------------------------------
+
+// used in slice
+const { selectById } = layersAdapter.getSelectors((state) => state.layers)
+
+export const {
+  selectAll: selectAllLayers,
+  selectIds: selectLayerIds,
+  selectEntities: selectLayerEntities,
+} = layersAdapter.getSelectors((state) => state.layers)
+
+export const selectLayers = createSelector(selectState, (state) => state.layers)
+
+// the default selectLayerById selector created by the layer entity adapter only caches
+// the latest invocation. The cached selector caches all invocations.
+export const selectLayerById = createCachedSelector(
+  selectLayers,
+  (state, id) => id,
+  (layers, id) => layers.entities[id],
+)((state, id) => id)
+
+const selectCurrentLayerId = createSelector(
+  selectLayers,
+  (layers) => layers.current,
+)
+
+export const selectCurrentLayer = createSelector(
+  [selectLayerEntities, selectCurrentLayerId],
+  (layers, current) => {
+    return layers[current]
+  },
+)
+
+export const selectVisibleLayerIds = createSelector(
+  [selectLayerIds, selectLayerEntities],
+  (layerIds, layers) => {
+    return layerIds.filter((id) => layers[id].visible)
+  },
+)
+
+export const selectNumLayers = createSelector(selectLayerIds, (layerIds) => {
+  log("getNumLayer")
+  return layerIds.length
+})
+
+// puts the current layer last in the list to ensure it can be rotated; else
+// the handle will not rotate
+export const selectKonvaLayerIds = createSelector(
+  [selectCurrentLayer, selectVisibleLayerIds],
+  (currentLayer, visibleLayerIds) => {
+    const kIds = visibleLayerIds.filter((id) => id !== currentLayer.id)
+    if (currentLayer.visible) {
+      kIds.push(currentLayer.id)
+    }
+    return kIds
+  },
+)
+
+export const selectIsDragging = createSelector(
+  [selectLayerIds, selectLayerEntities],
+  (ids, layers) => {
+    log("selectIsDragging")
+    return (
+      ids.filter((id) => layers[id].visible && layers[id].dragging).length > 0
+    )
+  },
+)
+
+export const selectNumVisibleLayers = createSelector(
+  selectVisibleLayerIds,
+  (layers) => {
+    return layers.length
+  },
+)
+
+// deep equal selector is needed here because selectVisibleLayerIds will return a different
+// array reference as input every time its inputs change
+export const selectLayerIndexById = createCachedSelector(
+  (state, id) => id,
+  selectVisibleLayerIds,
+  (layerId, visibleLayerIds) => {
+    return visibleLayerIds.findIndex((id) => id === layerId)
+  },
+)({
+  selectorCreator: createDeepEqualSelector,
+  keySelector: (state, id) => id,
+})
+
+// TODO: replace this
+// returns any effects tied to a given layer; memoizeArrayProducingFn will ensure we
+// only recompute transformed vertices when an effect changes.
+export const selectLayerEffectsById = createCachedSelector(
+  (state, id) => id,
+  selectLayerEntities,
+  selectVisibleLayerIds,
+  memoizeArrayProducingFn((layerId, layers, visibleLayerIds) => {
+    let index = visibleLayerIds.findIndex((id) => id === layerId)
+    const layer = layers[layerId]
+
+    if (layer.effect || index === visibleLayerIds.length - 1) {
+      return []
+    } else {
+      index = index + 1
+      const effects = []
+      let id = visibleLayerIds[index]
+
+      while (id && layers[id].effect) {
+        effects.push(layers[id])
+        index = index + 1
+        id = visibleLayerIds[index]
+      }
+
+      return effects
+    }
+  }),
+)((state, id) => id)

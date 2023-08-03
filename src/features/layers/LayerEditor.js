@@ -12,11 +12,11 @@ import ToggleButtonOption from "@/components/ToggleButtonOption"
 import { getModelSelectOptions } from "@/config/models"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
-import { getCurrentLayer } from "./layerSelectors"
+import { selectCurrentLayer } from "./layersSlice"
 
 const LayerEditor = ({ id }) => {
   const dispatch = useDispatch()
-  const state = useSelector(getCurrentLayer)
+  const state = useSelector(selectCurrentLayer)
   const layer = new Layer(state.type)
   const model = layer.model
   const layerOptions = layer.getOptions()
@@ -191,7 +191,7 @@ const LayerEditor = ({ id }) => {
             <Accordion.Toggle
               as={Button}
               variant="link"
-              eventKey={1}
+              eventKey={2}
             >
               Shape
             </Accordion.Toggle>

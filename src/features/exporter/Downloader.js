@@ -6,10 +6,12 @@ import DropdownOption from "@/components/DropdownOption"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import { updateExporter } from "./exporterSlice"
-import { getAllComputedVertices } from "@/features/machine/machineSelectors"
-import { getExporterState } from "@/features/exporter/exporterSelectors"
-import { getMachineState } from "@/features/machine/machineSelectors"
-import { getComments } from "./exporterSelectors"
+import { selectComputedVertices } from "@/features/machine/machineSlice"
+import {
+  selectExporterState,
+  selectComments,
+} from "@/features/exporter/exporterSlice"
+import { selectMachine } from "@/features/machine/machineSlice"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"
 import SvgExporter from "./SvgExporter"
@@ -25,8 +27,8 @@ const exporters = {
 
 const Downloader = () => {
   const dispatch = useDispatch()
-  const machine = useSelector(getMachineState)
-  const exporterState = useSelector(getExporterState)
+  const machine = useSelector(selectMachine)
+  const exporterState = useSelector(selectExporterState)
   const [showModal, setShowModal] = useState(false)
   const toggleModal = () => setShowModal(!showModal)
   const { fileType, fileName } = exporterState
@@ -50,8 +52,8 @@ const Downloader = () => {
             Math.pow(machine.maxY - machine.minY, 2.0),
         )
       : machine.maxRadius,
-    vertices: useSelector(getAllComputedVertices),
-    comments: useSelector(getComments),
+    vertices: useSelector(selectComputedVertices),
+    comments: useSelector(selectComments),
   }
   const exporter = new exporters[fileType](props)
 

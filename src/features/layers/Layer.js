@@ -84,6 +84,7 @@ export default class Layer {
         reverse: false,
         visible: true,
         name: this.model.label,
+        effects: [],
       },
     }
   }
@@ -92,9 +93,10 @@ export default class Layer {
     return layerOptions
   }
 
-  getVertices(state) {
+  // returns an array of Victor vertices
+  draw(state) {
     const { width, height, x, y, rotation } = state.shape
-    let vertices = this.model.getVertices(state)
+    let vertices = this.model.draw(state)
 
     if (this.model.autosize) {
       vertices = resizeVertices(vertices, width, height, false)
@@ -105,6 +107,10 @@ export default class Layer {
       vertex.rotateDeg(-rotation)
       vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })
+
+    if (state.shape.reverse) {
+      vertices = vertices.reverse()
+    }
 
     return vertices
   }

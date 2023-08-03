@@ -11,14 +11,14 @@ import {
 } from "react-bootstrap"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { getMachineState } from "@/features/machine/machineSelectors"
+import { selectMachine } from "@/features/machine/machineSlice"
 import { machineOptions } from "./options"
 import { toggleMachinePolarExpanded, updateMachine } from "./machineSlice"
 
 const PolarSettings = () => {
   const dispatch = useDispatch()
   const { rectangular, maxRadius, startPoint, endPoint, minimizeMoves } =
-    useSelector(getMachineState)
+    useSelector(selectMachine)
 
   const handleAccordionToggle = () => {
     dispatch(toggleMachinePolarExpanded())

@@ -3,10 +3,10 @@ import { useSelector } from "react-redux"
 import { Accordion } from "react-bootstrap"
 import RectSettings from "./RectSettings"
 import PolarSettings from "./PolarSettings"
-import { getMachineState } from "@/features/machine/machineSelectors"
+import { selectMachine } from "@/features/machine/machineSlice"
 
 const MachineSettings = () => {
-  const machine = useSelector(getMachineState)
+  const machine = useSelector(selectMachine)
   const rectangular = machine.rectangular
 
   return (

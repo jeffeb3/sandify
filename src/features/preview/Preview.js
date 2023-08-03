@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from "react-redux"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import Downloader from "@/features/exporter/Downloader"
-import { getFontsState } from "@/features/app/appSelectors"
-import { getCurrentLayer } from "@/features/layers/layerSelectors"
-import { getPreviewState } from "@/features/preview/previewSelectors"
+import { selectFontsState } from "@/features/fonts/fontsSlice"
+import { selectCurrentLayer } from "@/features/layers/layersSlice"
+import { selectPreviewState } from "@/features/preview/previewSlice"
 import { updateLayer } from "@/features/layers/layersSlice"
-import { getVerticesStats } from "@/features/machine/machineSelectors"
+import { selectVerticesStats } from "@/features/machine/machineSlice"
 import { getModelFromType } from "@/config/models"
 import "./Preview.scss"
 import { updatePreview } from "./previewSlice"
@@ -15,10 +15,10 @@ import PreviewWindow from "./PreviewWindow"
 
 const Preview = () => {
   const dispatch = useDispatch()
-  const fonts = useSelector(getFontsState)
-  const currentLayer = useSelector(getCurrentLayer)
-  const sliderValue = useSelector(getPreviewState).sliderValue
-  const verticesStats = useSelector(getVerticesStats)
+  const fonts = useSelector(selectFontsState)
+  const currentLayer = useSelector(selectCurrentLayer)
+  const sliderValue = useSelector(selectPreviewState).sliderValue
+  const verticesStats = useSelector(selectVerticesStats)
   const previewElement = useRef(null)
   const model = getModelFromType(currentLayer.type)
 
