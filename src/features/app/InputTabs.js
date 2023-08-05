@@ -2,8 +2,7 @@ import React, { useEffect } from "react"
 import { Tab, Tabs } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
 import MachineSettings from "@/features/machine/MachineSettings"
-import LayerEditor from "@/features/layers/LayerEditor"
-import Playlist from "@/features/layers/Playlist"
+import LayerManager from "@/features/layers/LayerManager"
 import { selectCurrentLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 import Footer from "./Footer"
@@ -24,16 +23,10 @@ const InputTabs = () => {
       >
         <Tab
           eventKey="draw"
-          title="Draw"
+          title="Layers"
           className="full-page-tab"
         >
-          <div className="d-flex flex-column h-100">
-            <Playlist />
-            <LayerEditor
-              key={layer.id}
-              id={layer.id}
-            />
-          </div>
+          <LayerManager />
         </Tab>
 
         <Tab

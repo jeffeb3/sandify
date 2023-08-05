@@ -1,10 +1,10 @@
-import Model from "./Model"
-import { getMachineInstance } from "@/features/machine/computer"
 import Victor from "victor"
 import noise from "@/common/noise"
 import seedrandom from "seedrandom"
 import { shapeSimilarity } from "curve-matcher"
 import { offset } from "@/common/geometry"
+import { getMachineInstance } from "@/features/machine/machineSlice"
+import Model from "./Model"
 
 const options = {
   numParticles: {

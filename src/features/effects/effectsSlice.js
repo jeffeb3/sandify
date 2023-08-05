@@ -1,9 +1,14 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
+import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
+
+// ------------------------------
+// Slice, reducers and atomic actions
+// ------------------------------
 
 const effectsAdapter = createEntityAdapter()
 
-function currEffectIndex(state) {
+const currEffectIndex = (state) => {
   const currentEffect = state.entities[state.current]
   return state.ids.findIndex((id) => id === currentEffect.id)
 }
@@ -40,15 +45,32 @@ export const effectsSlice = createSlice({
         state.current = state.ids[idx]
       }
     },
+    updateEffect: (state, action) => {
+      const effect = action.payload
+      effectsAdapter.updateOne(state, { id: effect.id, changes: effect })
+    },
   },
 })
 
 export default effectsSlice.reducer
+export const { addEffect, deleteEffect, updateEffect } = effectsSlice.actions
 
-export const { addEffect, deleteEffect } = effectsSlice.actions
+// ------------------------------
+// Selectors
+// ------------------------------
 
 export const {
   selectAll: selectAllEffects,
   selectById: selectEffectById,
   selectIds: selectEffectIds,
 } = effectsAdapter.getSelectors((state) => state.effects)
+
+export const selectEffectsByLayerId = createCachedSelector(
+  selectAllEffects,
+  (state, layerId) => layerId,
+  (effects, layerId) => {
+    return effects.filter((effect) => effect.layerId === layerId)
+  },
+)({
+  keySelector: (state, layerId) => layerId,
+})

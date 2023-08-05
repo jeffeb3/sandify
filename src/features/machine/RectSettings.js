@@ -17,7 +17,7 @@ import {
   toggleMachineRectExpanded,
   setMachineRectOrigin,
 } from "./machineSlice"
-import { machineOptions } from "./options"
+import { machineOptions } from "./Machine"
 
 const RectSettings = () => {
   const dispatch = useDispatch()

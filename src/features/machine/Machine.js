@@ -1,5 +1,36 @@
 import { vertexRoundP } from "@/common/geometry"
 
+export const machineOptions = {
+  minX: {
+    title: "Min X (mm)",
+  },
+  maxX: {
+    title: "Max X (mm)",
+  },
+  minY: {
+    title: "Min Y (mm)",
+  },
+  maxY: {
+    title: "Max Y (mm)",
+  },
+  origin: {
+    title: "Force origin",
+  },
+  maxRadius: {
+    title: "Max radius (mm)",
+  },
+  minimizeMoves: {
+    title: "Try to minimize perimeter moves",
+    type: "checkbox",
+  },
+  polarEndPoint: {
+    title: "End point",
+  },
+  polarStartPoint: {
+    title: "Start point",
+  },
+}
+
 // inherit all machine classes from this base class
 export default class Machine {
   // given a set of vertices, ensure they adhere to the limits defined by the machine

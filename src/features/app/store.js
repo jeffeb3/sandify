@@ -5,6 +5,7 @@ import exporterReducer from "@/features/exporter/exporterSlice"
 import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
+import effectsReducer from "@/features/effects/effectsSlice"
 import { loadState, saveState } from "@/common/localStorage"
 import appReducer from "./appSlice"
 
@@ -44,6 +45,7 @@ const store = configureStore({
   reducer: combineReducers({
     app: appReducer,
     layers: layersReducer,
+    effects: effectsReducer,
     exporter: exporterReducer,
     machine: machineReducer,
     preview: previewReducer,

@@ -2,21 +2,19 @@ import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import {
-  selectPreviewVerticesById,
+  updateLayer,
+  selectCurrentLayer,
+  selectLayerIndex,
+  selectLayerById,
+  selectNumVisibleLayers,
+  selectPreviewVertices,
   selectSliderColors,
   selectVertexOffsets,
   selectSliderBounds,
-} from "@/features/machine/machineSlice"
-import { updateLayer } from "@/features/layers/layersSlice"
+} from "@/features/layers/layersSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { selectLayers } from "@/features/layers/layersSlice"
 import { getModelFromType } from "@/config/models"
-import {
-  selectCurrentLayer,
-  selectLayerIndexById,
-  selectLayerById,
-  selectNumVisibleLayers,
-} from "@/features/layers/layersSlice"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 
@@ -24,13 +22,12 @@ const PreviewLayer = (ownProps) => {
   const dispatch = useDispatch()
   const layers = useSelector(selectLayers)
   const currentLayer = useSelector(selectCurrentLayer)
-  const layer =
-    useSelector((state) => selectLayerById(state, ownProps.id)) || currentLayer
-  const index = useSelector((state) => selectLayerIndexById(state, layer.id))
+  const layer = useSelector((state) => selectLayerById(state, ownProps.id))
+  const index = useSelector((state) => selectLayerIndex(state, layer.id))
   const numLayers = useSelector(selectNumVisibleLayers)
   const preview = useSelector(selectPreviewState)
   const vertices = useSelector((state) =>
-    selectPreviewVerticesById(state, layer.id, "1"),
+    selectPreviewVertices(state, layer.id),
   )
   const colors = useSelector(selectSliderColors)
   const offsets = useSelector(selectVertexOffsets)

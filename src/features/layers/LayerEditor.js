@@ -12,6 +12,7 @@ import ToggleButtonOption from "@/components/ToggleButtonOption"
 import { getModelSelectOptions } from "@/config/models"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
+import EffectManager from "@/features/effects/EffectManager"
 import { selectCurrentLayer } from "./layersSlice"
 
 const LayerEditor = ({ id }) => {
@@ -107,10 +108,7 @@ const LayerEditor = ({ id }) => {
   ))
 
   return (
-    <Card
-      className="p-3 overflow-auto flex-grow-1"
-      style={{ borderTop: "1px solid #aaa", borderBottom: "none" }}
-    >
+    <div className="px-3 overflow-auto flex-grow-1">
       <Accordion
         key={1}
         defaultActiveKey={1}
@@ -209,11 +207,33 @@ const LayerEditor = ({ id }) => {
               {renderedModelSelection}
               {renderedModelOptions}
               {renderedLink}
+              <Accordion
+                key={3}
+                defaultActiveKey={3}
+                className="mt-3"
+              >
+                <Card>
+                  <Card.Header className="d-flex">
+                    <Accordion.Toggle
+                      as={Button}
+                      variant="link"
+                      eventKey={3}
+                    >
+                      Effects
+                    </Accordion.Toggle>
+                  </Card.Header>
+                  <Accordion.Collapse eventKey={3}>
+                    <Card.Body>
+                      <EffectManager />
+                    </Card.Body>
+                  </Accordion.Collapse>
+                </Card>
+              </Accordion>
             </Card.Body>
           </Accordion.Collapse>
         </Card>
       </Accordion>
-    </Card>
+    </div>
   )
 }
 

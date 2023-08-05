@@ -1,6 +1,7 @@
 import configureMockStore from "redux-mock-store"
 import thunk from "redux-thunk"
 import { resetUniqueId } from "@/common/mocks"
+import { configureStore } from "@reduxjs/toolkit"
 import layers, {
   layersActions,
   addLayer,
@@ -15,7 +16,10 @@ import layers, {
   restoreDefaults,
   setCurrentLayer,
   updateLayer,
+  selectLayerVertices,
 } from "./layersSlice"
+import effects, { updateEffect } from "@/features/effects/effectsSlice"
+import machine from "@/features/machine/machineSlice"
 import Layer from "./Layer"
 
 const mockStore = configureMockStore([thunk])
@@ -24,11 +28,16 @@ beforeEach(() => {
   resetUniqueId()
 })
 
+// ------------------------------
+// Slice, reducers and atomic actions
+// ------------------------------
+
+const polygonState = new Layer("polygon").getInitialState()
+
 describe("layers reducer", () => {
   const circleState = new Layer("circle").getInitialState()
 
   it("should handle initial state", () => {
-    const polygonState = new Layer("polygon").getInitialState()
     polygonState.id = "1"
 
     expect(layers(undefined, {})).toEqual({
@@ -317,6 +326,11 @@ describe("layers reducer", () => {
         store.dispatch(addEffect({ id: "0", effect }))
         const actions = store.getActions()
         expect(actions[0].type).toEqual("effects/addEffect")
+        expect(actions[0].payload).toEqual({
+          id: "1",
+          layerId: "0",
+          name: "foo",
+        })
         expect(actions[0].meta.id).toEqual("1")
         expect(actions[1].type).toEqual("layers/addEffect")
         expect(actions[1].payload).toEqual({ id: "0", effectId: "1" })
@@ -401,6 +415,71 @@ describe("layers reducer", () => {
           effectIds: ["1", "2"],
         })
       })
+    })
+  })
+})
+
+// ------------------------------
+// Selectors
+// ------------------------------
+describe("layers selectors", () => {
+  const initialState = {
+    layers: {
+      ids: ["A", "B"],
+      entities: {
+        A: { ...polygonState, id: "A", name: "A", effectIds: ["1", "3"] },
+        B: { ...polygonState, id: "B", name: "B", effectIds: ["2"] },
+      },
+    },
+    effects: {
+      ids: ["1", "2", "3"],
+      entities: {
+        1: { id: "1", layerId: "A" },
+        2: { id: "2", layerId: "B" },
+        3: { id: "3", layerId: "A" },
+      },
+    },
+    machine: {},
+  }
+
+  describe("selectLayerVertices", () => {
+    let store
+    beforeEach(() => {
+      store = configureStore({
+        reducer: {
+          effects,
+          layers,
+          machine,
+        },
+        preloadedState: initialState,
+      })
+      resetUniqueId(3)
+      selectLayerVertices.resetRecomputations()
+    })
+
+    it("should recompute when layer changes", () => {
+      selectLayerVertices(store.getState(), "A")
+      store.dispatch(updateLayer({ id: "A", foo: "bar" }))
+      selectLayerVertices(store.getState(), "A")
+
+      expect(selectLayerVertices.recomputations()).toBe(2)
+    })
+
+    it("should recompute when adding new effect", () => {
+      selectLayerVertices(store.getState(), "A")
+      store.dispatch(addEffect({ id: "A", effect: { name: "bar" } }))
+      selectLayerVertices(store.getState(), "A")
+
+      expect(selectLayerVertices.recomputations()).toBe(2)
+    })
+
+    it("should recompute when layer effect changes", () => {
+      selectLayerVertices(store.getState(), "A")
+      store.dispatch(updateEffect({ id: "1", foo: "bar" }))
+      store.dispatch(updateEffect({ id: "1", foo: "bar" })) // equivalent
+      selectLayerVertices(store.getState(), "A")
+
+      expect(selectLayerVertices.recomputations()).toBe(2)
     })
   })
 })

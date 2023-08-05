@@ -3,7 +3,7 @@ import { SortableContainer, SortableElement } from "react-sortable-hoc"
 import { Button, ListGroup } from "react-bootstrap"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 
-const SortableLayer = SortableElement(
+const LayerRow = SortableElement(
   ({
     active,
     numLayers,
@@ -51,7 +51,7 @@ const SortableLayer = SortableElement(
   },
 )
 
-const SortableLayers = SortableContainer((props) => {
+const LayerList = SortableContainer((props) => {
   const { layers, currentLayer, ...other } = props
 
   return (
@@ -59,11 +59,11 @@ const SortableLayers = SortableContainer((props) => {
       variant="flush"
       style={{ maxHeight: "240px" }}
       className="border overflow-auto"
-      id="playlist-group"
+      id="layers"
     >
       {layers.map((layer, index) => {
         return (
-          <SortableLayer
+          <LayerRow
             key={layer.id}
             id={layer.id}
             index={index}
@@ -78,4 +78,4 @@ const SortableLayers = SortableContainer((props) => {
   )
 })
 
-export default SortableLayers
+export default LayerList

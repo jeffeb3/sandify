@@ -1,16 +1,24 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector } from "reselect"
+import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
+import Color from "color"
+import { rotate, offset } from "@/common/geometry"
 import arrayMove from "array-move"
-import {
-  memoizeArrayProducingFn,
-  createDeepEqualSelector,
-} from "@/common/selectors"
-import { getDefaultModelType } from "@/config/models"
+import { isEqual } from "lodash"
+import { getDefaultModelType, getModelFromType } from "@/config/models"
 import Layer from "./Layer"
 import { selectState } from "@/features/app/appSlice"
-import { effectsSlice, selectEffectById } from "@/features/effects/effectsSlice"
+import {
+  effectsSlice,
+  selectEffectById,
+  selectEffectsByLayerId,
+} from "@/features/effects/effectsSlice"
+import {
+  selectMachine,
+  getMachineInstance,
+} from "@/features/machine/machineSlice"
+import { selectPreviewState } from "@/features/preview/previewSlice"
 import { log } from "@/common/debugging"
 
 // ------------------------------
@@ -106,7 +114,8 @@ const layersSlice = createSlice({
     changeModelType: (state, action) => {
       const { type, id } = action.payload
       const layer = state.entities[id]
-      const newLayer = new Layer(type).getInitialState()
+      const instance = new Layer(type)
+      const newLayer = instance.getInitialState()
 
       Object.keys(newLayer).forEach((attr) => {
         if (
@@ -118,7 +127,7 @@ const layersSlice = createSlice({
       })
 
       newLayer.id = id
-      if (!newLayer.canMove) {
+      if (!instance.model.canMove) {
         newLayer.x = 0
         newLayer.y = 0
       }
@@ -189,7 +198,12 @@ export const copyLayer = ({ id, name }) => {
 export const addEffect = ({ id, effect }) => {
   return (dispatch) => {
     // create the effect first, and then add it to the layer
-    const action = dispatch(effectsSlice.actions.addEffect(effect))
+    const action = dispatch(
+      effectsSlice.actions.addEffect({
+        ...effect,
+        layerId: id,
+      }),
+    )
     dispatch(layersSlice.actions.addEffect({ id, effectId: action.meta.id }))
   }
 }
@@ -235,6 +249,17 @@ export const selectLayerById = createCachedSelector(
   selectLayers,
   (state, id) => id,
   (layers, id) => layers.entities[id],
+)((state, id) => id)
+
+// by returning null for shapes which don't use machine settings, this selector will ensure
+// transformed vertices are not redrawn when machine settings change
+export const selectLayerMachine = createCachedSelector(
+  selectLayerById,
+  selectMachine,
+  (layer, machine) => {
+    const model = getModelFromType(layer.type)
+    return model.usesMachine ? machine : null
+  },
 )((state, id) => id)
 
 const selectCurrentLayerId = createSelector(
@@ -291,44 +316,260 @@ export const selectNumVisibleLayers = createSelector(
   },
 )
 
-// deep equal selector is needed here because selectVisibleLayerIds will return a different
-// array reference as input every time its inputs change
-export const selectLayerIndexById = createCachedSelector(
+export const selectLayerIndex = createCachedSelector(
   (state, id) => id,
   selectVisibleLayerIds,
   (layerId, visibleLayerIds) => {
     return visibleLayerIds.findIndex((id) => id === layerId)
   },
+)((state, id) => id)
+
+// returns vertices for a given layer
+export const selectLayerVertices = createCachedSelector(
+  selectLayerById,
+  selectEffectsByLayerId,
+  selectLayerMachine,
+  (layer, effects, machine) => {
+    const instance = new Layer(layer.type)
+    return instance.draw({
+      shape: layer,
+      machine,
+    })
+  },
 )({
-  selectorCreator: createDeepEqualSelector,
   keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
 })
 
-// TODO: replace this
-// returns any effects tied to a given layer; memoizeArrayProducingFn will ensure we
-// only recompute transformed vertices when an effect changes.
-export const selectLayerEffectsById = createCachedSelector(
+// returns computed (machine-bound) vertices for a given layer
+const selectMachineVertices = createCachedSelector(
   (state, id) => id,
-  selectLayerEntities,
-  selectVisibleLayerIds,
-  memoizeArrayProducingFn((layerId, layers, visibleLayerIds) => {
-    let index = visibleLayerIds.findIndex((id) => id === layerId)
-    const layer = layers[layerId]
-
-    if (layer.effect || index === visibleLayerIds.length - 1) {
-      return []
-    } else {
-      index = index + 1
-      const effects = []
-      let id = visibleLayerIds[index]
-
-      while (id && layers[id].effect) {
-        effects.push(layers[id])
-        index = index + 1
-        id = visibleLayerIds[index]
+  selectLayerVertices,
+  selectLayerIndex,
+  selectNumVisibleLayers,
+  selectMachine,
+  (id, vertices, layerIndex, numLayers, machine) => {
+    log("selectMachineVertices", id)
+    if (vertices.length > 0) {
+      const layerInfo = {
+        start: layerIndex === 0,
+        end: layerIndex === numLayers - 1,
       }
-
-      return effects
+      const machineInstance = getMachineInstance(vertices, machine, layerInfo)
+      return machineInstance.polish().vertices
     }
-  }),
+  },
 )((state, id) => id)
+
+// creates a selector that returns previewable vertices for a given layer
+export const selectPreviewVertices = createCachedSelector(
+  selectLayerVertices,
+  selectMachineVertices,
+  selectLayerById,
+  (originalVertices, computedVertices, layer, foo, bar) => {
+    log("selectPreviewVertices", layer.id)
+    const vertices = layer.dragging ? originalVertices : computedVertices
+
+    return vertices.map((vertex) => {
+      let previewVertex = rotate(
+        offset(vertex, -layer.x, -layer.y),
+        layer.rotation,
+      )
+
+      // store original coordinates
+      previewVertex.origX = vertex.x
+      previewVertex.origY = vertex.y
+
+      return previewVertex
+    })
+  },
+)((state, id) => id)
+
+// returns a array of all visible machine-bound vertices and the connections between them
+export const selectConnectedVertices = createSelector(selectState, (state) => {
+  if (!state.fonts.loaded) {
+    return []
+  } // wait for fonts
+
+  log("selectConnectedVertices")
+  const visibleLayerIds = selectVisibleLayerIds(state)
+
+  return visibleLayerIds
+    .map((id, idx) => {
+      const vertices = selectMachineVertices(state, id)
+      const connector = selectConnectingVertices(state, id)
+      return [...vertices, ...connector]
+    })
+    .flat()
+})
+
+// returns an array of vertices connecting a given layer to the next (if it exists)
+export const selectConnectingVertices = createCachedSelector(
+  (state, id) => id,
+  selectState,
+  (layerId, state) => {
+    log("selectConnectingVertices")
+
+    const visibleLayerIds = selectVisibleLayerIds(state)
+    const idx = selectLayerIndex(state, layerId)
+
+    if (idx == visibleLayerIds.length - 1) {
+      // last vertex
+      return []
+    }
+
+    const endId = visibleLayerIds[idx + 1]
+    const startLayer = selectLayerById(state, layerId)
+    const endLayer = selectLayerById(state, endId)
+    const startVertices = selectMachineVertices(state, startLayer.id)
+    const endVertices = selectMachineVertices(state, endLayer.id)
+    const start = startVertices[startVertices.length - 1]
+    const end = endVertices[0]
+
+    if (startLayer.connectionMethod === "along perimeter") {
+      const machineInstance = getMachineInstance([], state.machine)
+      const startPerimeter = machineInstance.nearestPerimeterVertex(start)
+      const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+      const perimeterConnection = machineInstance.tracePerimeter(
+        startPerimeter,
+        endPerimeter,
+      )
+
+      return [
+        start,
+        startPerimeter,
+        perimeterConnection,
+        endPerimeter,
+        end,
+      ].flat()
+    } else {
+      return [start, end]
+    }
+  },
+)((state, id) => id)
+
+// returns the starting offset for each layer, given previous layers
+export const selectVertexOffsets = createSelector(selectState, (state) => {
+  log("selectVertexOffsets")
+  const visibleLayerIds = selectVisibleLayerIds(state)
+  let offsets = {}
+  let offset = 0
+
+  visibleLayerIds.forEach((id) => {
+    const vertices = selectMachineVertices(state, id)
+    const connector = selectConnectingVertices(state, id)
+    offsets[id] = { start: offset, end: offset + vertices.length - 1 }
+
+    if (connector.length > 0) {
+      offsets[id + "-connector"] = {
+        start: offset + vertices.length,
+        end: offset + vertices.length + connector.length - 1,
+      }
+      offset += vertices.length + connector.length
+    }
+  })
+
+  return offsets
+})
+
+// returns statistics across all layers
+export const selectVerticesStats = createSelector(
+  selectConnectedVertices,
+  (vertices) => {
+    let distance = 0.0
+    let previous = null
+
+    vertices.forEach((vertex) => {
+      if (previous && vertex) {
+        distance += Math.sqrt(
+          Math.pow(vertex.x - previous.x, 2.0) +
+            Math.pow(vertex.y - previous.y, 2.0),
+        )
+      }
+      previous = vertex
+    })
+
+    log("getVerticeStats")
+    return {
+      numPoints: vertices.length,
+      distance: Math.floor(distance),
+    }
+  },
+)
+
+// given a set of vertices and a slider value, returns the indices of the
+// start and end vertices representing a preview slider moving through them.
+export const selectSliderBounds = createSelector(
+  [selectConnectedVertices, selectPreviewState],
+  (vertices, preview) => {
+    const slideSize = 2.0
+    const beginFraction = preview.sliderValue / 100.0
+    const endFraction = (slideSize + preview.sliderValue) / 100.0
+    let start = Math.round(vertices.length * beginFraction)
+    let end = Math.round(vertices.length * endFraction)
+
+    if (end >= vertices.length) {
+      end = vertices.length - 1
+    }
+
+    if (start > 0 && end - start <= 1) {
+      if (start < 1) {
+        end = Math.min(vertices.length, 1)
+      } else {
+        start = end - 1
+      }
+    }
+
+    return { start, end }
+  },
+)
+
+// returns a hash of { index => color } that specifies the gradient color of the
+// line drawn at each index.
+export const selectSliderColors = createSelector(
+  [selectSliderBounds, selectVertexOffsets],
+  (bounds, offsets) => {
+    log("selectSliderColors")
+    const colors = {}
+    const { start, end } = bounds
+
+    if (end !== start) {
+      let startColor = Color("yellow")
+      const colorStep = 3.0 / 8 / (end - start)
+
+      for (let i = end; i >= start; i--) {
+        colors[i] = startColor.darken(colorStep * (end - i)).hex()
+      }
+    }
+
+    return colors
+  },
+)
+
+// TODO: fix or remove
+// used by the preview window; reverses rotation and offsets because they are
+// re-added by Konva transformer.
+/*
+export const makeGetPreviewTrackVertices = (layerId) => {
+  return createSelector(
+    getCachedSelector(makeGetLayer, layerId),
+    (layer) => {
+      log("makeGetPreviewTrackVertices", layerId)
+      let trackVertices = []
+
+      const numLoops = layer.numLoops
+      for (var i=0; i<numLoops; i++) {
+      if (layer.trackEnabled) {
+      trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
+      }
+    }
+
+      return trackVertices.map((vertex) => {
+        return rotate(offset(vertex, -layer.x, -layer.y), layer.rotation)
+      })
+    },
+  )
+}
+*/

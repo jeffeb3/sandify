@@ -1,5 +1,5 @@
 import { resizeVertices, dimensions, pointsToVertices } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machine/computer"
+import { getMachineInstance } from "@/features/machine/machineSlice"
 import Model from "./Model"
 
 const options = {

@@ -2,62 +2,43 @@ import React from "react"
 import { useSelector } from "react-redux"
 import { Shape } from "react-konva"
 import {
+  selectCurrentLayer,
+  selectLayerById,
   selectSliderBounds,
   selectSliderColors,
   selectVertexOffsets,
-  selectConnectingVerticesById,
-} from "@/features/machine/machineSlice"
-import { selectPreviewState } from "@/features/preview/previewSlice"
-import {
-  selectCurrentLayer,
-  selectLayerById,
+  selectConnectingVertices,
 } from "@/features/layers/layersSlice"
+import { selectPreviewState } from "@/features/preview/previewSlice"
 import PreviewHelper from "./PreviewHelper"
 
-// Renders a connector between two layers.
 const PreviewConnector = (ownProps) => {
-  const mapStateToProps = (state) => {
-    // if a layer matching this shape's id does not exist, we have a zombie
-    // child. It has to do with a child (preview shape) subscribing to the store
-    // before its parent (preview window), and trying to render first after a
-    // layer is removed. This is a tangled, but well-known problem with React-Redux
-    // hooks, and the solution for now is to render the current layer instead.
-    // https://react-redux.js.org/api/hooks#stale-props-and-zombie-children
-    // It's quite likely there is a more elegant/proper way around this.
-    const { startId, endId } = ownProps
-    const currentLayer = selectCurrentLayer(state)
-    const startLayer =
-      selectLayerById(state, startId) || selectCurrentLayer(state)
-    const endLayer = selectLayerById(state, endId)
-    const vertices = selectConnectingVerticesById(state, startId)
-    const preview = selectPreviewState(state)
+  const { startId, endId } = ownProps
+  const currentLayer = useSelector(selectCurrentLayer)
+  const startLayer = useSelector((state) => selectLayerById(state, startId))
+  const endLayer = useSelector((state) => selectLayerById(state, endId))
+  const vertices = useSelector((state) =>
+    selectConnectingVertices(state, startId),
+  )
+  const sliderValue = useSelector(selectPreviewState).sliderValue
+  const colors = useSelector(selectSliderColors)
+  const offsets = useSelector(selectVertexOffsets)
+  const bounds = useSelector(selectSliderBounds)
+  console.log(startLayer.id + ": " + endLayer.id)
 
-    return {
-      currentLayer,
-      startLayer,
-      endLayer,
-      vertices,
-      layer: startLayer, // renamed for preview helper
-      sliderValue: preview.sliderValue,
-      colors: selectSliderColors(state),
-      offsetId: startId + "-connector",
-      offsets: selectVertexOffsets(state),
-      bounds: selectSliderBounds(state),
-    }
-  }
-
-  const props = useSelector(mapStateToProps)
-  const {
+  const helper = new PreviewHelper({
     currentLayer,
     startLayer,
     endLayer,
     vertices,
-    offsets,
-    colors,
-    bounds,
+    layer: startLayer,
     sliderValue,
-  } = props
-  const helper = new PreviewHelper(props)
+    colors,
+    offsetId: startId + "-connector",
+    offsets,
+    bounds,
+  })
+
   const selectedColor = "yellow"
   const unselectedColor = "rgba(195, 214, 230, 0.65)"
   const backgroundSelectedColor = "#6E6E00"
@@ -65,14 +46,12 @@ const PreviewConnector = (ownProps) => {
   const isSliding = sliderValue !== 0
   const isSelected = currentLayer.id === endLayer.id
 
-  // used by Konva to draw shape
   function sceneFunc(context, shape) {
     drawConnector(context)
     helper.drawSliderEndPoint(context)
     context.fillStrokeShape(shape)
   }
 
-  // used by Konva to mark boundaries of shape
   function hitFunc(context) {
     context.fillStrokeShape(this)
   }

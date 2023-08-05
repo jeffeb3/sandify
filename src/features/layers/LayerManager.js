@@ -3,6 +3,7 @@ import { Button } from "react-bootstrap"
 import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
+import LayerEditor from "@/features/layers/LayerEditor"
 
 import {
   selectCurrentLayer,
@@ -18,10 +19,10 @@ import {
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import ImportLayer from "./ImportLayer"
-import SortableLayers from "./SortableLayers"
-import "./Playlist.scss"
+import LayerList from "./LayerList"
+import "./LayerManager.scss"
 
-function Playlist() {
+function LayerManager() {
   const dispatch = useDispatch()
   const layers = useSelector(selectAllLayers)
   const currentLayer = useSelector(selectCurrentLayer)
@@ -40,7 +41,7 @@ function Playlist() {
   const handleLayerMoved = ({ oldIndex, newIndex }) =>
     dispatch(moveLayer({ oldIndex, newIndex }))
   const handleToggleLayerVisible = (id) =>
-    dispatch(updateLayer({ id, changes: { visible: !currentLayer.visible } }))
+    dispatch(updateLayer({ id, visible: !currentLayer.visible }))
   const handleLayerSelected = (event) => {
     const id = event.target.closest(".list-group-item").id
     dispatch(setCurrentLayer(id))
@@ -49,14 +50,14 @@ function Playlist() {
     dispatch(setCurrentLayer(node.id))
 
   useEffect(() => {
-    const el = document.getElementById("playlist-group")
+    const el = document.getElementById("layers")
     if (el) {
       el.scrollTop = el.scrollHeight
     }
   }, [numLayers])
 
   return (
-    <div>
+    <div className="d-flex flex-column h-100">
       <NewLayer
         showModal={showNewLayer}
         toggleModal={toggleNewLayerModal}
@@ -69,9 +70,8 @@ function Playlist() {
         showModal={showCopyLayer}
         toggleModal={toggleCopyModal}
       />
-
       <div className="p-3">
-        <SortableLayers
+        <LayerList
           pressDelay={150}
           onSortEnd={handleLayerMoved}
           updateBeforeSortStart={handleUpdateBeforeSortStart}
@@ -122,8 +122,12 @@ function Playlist() {
           </div>
         </div>
       </div>
+      <LayerEditor
+        key={currentLayer.id}
+        id={currentLayer.id}
+      />
     </div>
   )
 }
 
-export default Playlist
+export default LayerManager

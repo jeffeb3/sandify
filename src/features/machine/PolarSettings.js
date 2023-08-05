@@ -12,7 +12,7 @@ import {
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import { selectMachine } from "@/features/machine/machineSlice"
-import { machineOptions } from "./options"
+import { machineOptions } from "@/features/machine/Machine"
 import { toggleMachinePolarExpanded, updateMachine } from "./machineSlice"
 
 const PolarSettings = () => {

@@ -13,7 +13,7 @@ import {
 import { arrayRotate } from "@/common/util"
 import { pointsOnPath } from "points-on-path"
 import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
-import { getMachineInstance } from "@/features/machine/computer"
+import { getMachineInstance } from "@/features/machine/machineSlice"
 import pointInPolygon from "point-in-polygon"
 
 const MIN_SPACING_MULTIPLIER = 1.2

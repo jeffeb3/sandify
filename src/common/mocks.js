@@ -5,8 +5,8 @@ const uniqueId = () => {
   return counter.toString()
 }
 
-export const resetUniqueId = () => {
-  counter = 0
+export const resetUniqueId = (start = 0) => {
+  counter = start
 }
 
 jest.mock("uuid", () => ({ v4: () => uniqueId() }))
