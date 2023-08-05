@@ -26,7 +26,7 @@ export const effectsSlice = createSlice({
         state.ids.splice(index, 0, effect.id)
         state.entities[effect.id] = effect
         state.current = effect.id
-        localStorage.setItem("defaultModel", effect.type)
+        localStorage.setItem("defaultShape", effect.type)
       },
       prepare(effect) {
         const id = uuidv4()

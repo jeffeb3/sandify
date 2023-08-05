@@ -6,7 +6,10 @@ import Color from "color"
 import { rotate, offset } from "@/common/geometry"
 import arrayMove from "array-move"
 import { isEqual } from "lodash"
-import { getDefaultModelType, getModelFromType } from "@/models/factory"
+import {
+  getDefaultShapeType,
+  getShapeFromType,
+} from "@/features/shapes/factory"
 import Layer from "./Layer"
 import { selectState } from "@/features/app/appSlice"
 import {
@@ -26,7 +29,7 @@ import { log } from "@/common/debugging"
 // ------------------------------
 
 const layersAdapter = createEntityAdapter()
-const defaultLayer = new Layer(getDefaultModelType())
+const defaultLayer = new Layer(getDefaultShapeType())
 const defaultLayerId = uuidv4()
 const layerState = {
   id: defaultLayerId,
@@ -65,7 +68,7 @@ const layersSlice = createSlice({
 
         if (layer.type !== "fileImport") {
           localStorage.setItem(
-            layer.effect ? "defaultEffect" : "defaultModel",
+            layer.effect ? "defaultEffect" : "defaultShape",
             layer.type,
           )
         }
@@ -257,8 +260,8 @@ export const selectLayerMachine = createCachedSelector(
   selectLayerById,
   selectMachine,
   (layer, machine) => {
-    const model = getModelFromType(layer.type)
-    return model.usesMachine ? machine : null
+    const shape = getShapeFromType(layer.type)
+    return shape.usesMachine ? machine : null
   },
 )((state, id) => id)
 

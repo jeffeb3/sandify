@@ -7,7 +7,7 @@ import { selectFontsState } from "@/features/fonts/fontsSlice"
 import { selectCurrentLayer } from "@/features/layers/layersSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { updateLayer, selectVerticesStats } from "@/features/layers/layersSlice"
-import { getModelFromType } from "@/models/factory"
+import { getShapeFromType } from "@/features/shapes/factory"
 import "./Preview.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
@@ -19,7 +19,7 @@ const Preview = () => {
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const verticesStats = useSelector(selectVerticesStats)
   const previewElement = useRef(null)
-  const model = getModelFromType(currentLayer.type)
+  const model = getShapeFromType(currentLayer.type)
 
   useEffect(() => {
     if (fonts.loaded) {

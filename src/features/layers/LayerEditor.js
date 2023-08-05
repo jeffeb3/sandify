@@ -9,7 +9,7 @@ import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
-import { getModelSelectOptions } from "@/models/factory"
+import { getShapeSelectOptions } from "@/features/shapes/factory"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
@@ -22,8 +22,8 @@ const LayerEditor = ({ id }) => {
   const model = layer.model
   const layerOptions = layer.getOptions()
   const modelOptions = model.getOptions()
-  const selectOptions = getModelSelectOptions()
-  const allowModelSelection = model.selectGroup !== "import" && !model.effect
+  const selectOptions = getShapeSelectOptions()
+  const allowModelSelection = model.selectGroup !== "import"
   const selectedOption = {
     value: model.type,
     label: model.label,

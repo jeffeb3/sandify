@@ -89,7 +89,7 @@ export const transformShapes = (vertices, layer, effects) => {
 
   if (effects && effects.length > 0) {
     effects.forEach((effect) => {
-      outputVertices = getModelFromType(effect.type).applyEffect(
+      outputVertices = getShapeFromType(effect.type).applyEffect(
         effect,
         layer,
         outputVertices,

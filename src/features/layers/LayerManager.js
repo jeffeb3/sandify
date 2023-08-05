@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
-
 import {
   selectCurrentLayer,
   selectNumLayers,
@@ -22,7 +21,7 @@ import ImportLayer from "./ImportLayer"
 import LayerList from "./LayerList"
 import "./LayerManager.scss"
 
-function LayerManager() {
+const LayerManager = () => {
   const dispatch = useDispatch()
   const layers = useSelector(selectAllLayers)
   const currentLayer = useSelector(selectCurrentLayer)

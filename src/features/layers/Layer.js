@@ -1,4 +1,4 @@
-import { getModelFromType } from "@/models/factory"
+import { getShapeFromType } from "@/features/shapes/factory"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 
 export const layerOptions = {
@@ -65,7 +65,7 @@ export const layerOptions = {
 
 export default class Layer {
   constructor(type) {
-    this.model = getModelFromType(type)
+    this.model = getShapeFromType(type)
   }
 
   getInitialState(props) {

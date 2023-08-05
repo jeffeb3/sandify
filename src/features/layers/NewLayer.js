@@ -3,14 +3,14 @@ import { useDispatch } from "react-redux"
 import Select from "react-select"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import {
-  getModelSelectOptions,
-  getDefaultModel,
-  getModelFromType,
-} from "@/models/factory"
+  getShapeSelectOptions,
+  getDefaultShape,
+  getShapeFromType,
+} from "@/features/shapes/factory"
 import Layer from "./Layer"
 import { addLayer } from "./layersSlice"
 
-const defaultModel = getDefaultModel()
+const defaultShape = getDefaultShape()
 const customStyles = {
   control: (base) => ({
     ...base,
@@ -21,10 +21,10 @@ const customStyles = {
 
 const NewLayer = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
-  const selectOptions = getModelSelectOptions()
-  const [type, setType] = useState(defaultModel.type)
-  const [name, setName] = useState(defaultModel.label)
-  const selectedShape = getModelFromType(type)
+  const selectOptions = getShapeSelectOptions()
+  const [type, setType] = useState(defaultShape.type)
+  const [name, setName] = useState(defaultShape.label)
+  const selectedShape = getShapeFromType(type)
   const selectedOption = {
     value: selectedShape.id,
     label: selectedShape.label,
@@ -35,10 +35,10 @@ const NewLayer = ({ toggleModal, showModal }) => {
   }
 
   const handleChangeNewType = (selected) => {
-    const model = getModelFromType(selected.value)
+    const shape = getShapeFromType(selected.value)
 
     setType(selected.value)
-    setName(model.label.toLowerCase())
+    setName(shape.label.toLowerCase())
   }
 
   const handleChangeNewName = (event) => {

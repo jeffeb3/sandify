@@ -14,7 +14,7 @@ import {
 } from "@/features/layers/layersSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { selectLayers } from "@/features/layers/layersSlice"
-import { getModelFromType } from "@/models/factory"
+import { getShapeFromType } from "@/features/shapes/factory"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 
@@ -35,7 +35,7 @@ const PreviewLayer = (ownProps) => {
 
   const selected = layers.selected
   const sliderValue = preview.sliderValue
-  const model = getModelFromType(layer.type)
+  const model = getShapeFromType(layer.type)
   const start = index === 0
   const end = index === numLayers - 1
   const width = layer.width
