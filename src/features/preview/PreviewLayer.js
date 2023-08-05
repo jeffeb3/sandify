@@ -14,7 +14,7 @@ import {
 } from "@/features/layers/layersSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { selectLayers } from "@/features/layers/layersSlice"
-import { getModelFromType } from "@/config/models"
+import { getModelFromType } from "@/models/factory"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 

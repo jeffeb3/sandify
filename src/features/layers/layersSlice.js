@@ -6,7 +6,7 @@ import Color from "color"
 import { rotate, offset } from "@/common/geometry"
 import arrayMove from "array-move"
 import { isEqual } from "lodash"
-import { getDefaultModelType, getModelFromType } from "@/config/models"
+import { getDefaultModelType, getModelFromType } from "@/models/factory"
 import Layer from "./Layer"
 import { selectState } from "@/features/app/appSlice"
 import {

@@ -1,4 +1,4 @@
-import { getModelFromType } from "@/config/models"
+import { getModelFromType } from "@/models/factory"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 
 export const layerOptions = {

@@ -1,4 +1,4 @@
-import { getModelFromType } from "@/config/models"
+import { getModelFromType } from "@/models/factory"
 // import Machine from '@/models/Machine'
 import Exporter from "./Exporter"
 
