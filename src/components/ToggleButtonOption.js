@@ -23,11 +23,11 @@ const ToggleButtonOption = (props) => {
 
   return (
     <Row className={"align-items-center py-1" + (visible ? "" : " d-none")}>
-      <Col sm={5}>
+      <Col sm={5} className="mb-1">
         <Form.Label>{option.title}</Form.Label>
       </Col>
 
-      <Col sm={7}>
+      <Col sm={7} className="mb-1">
         <ToggleButtonGroup
           type="radio"
           className="border"

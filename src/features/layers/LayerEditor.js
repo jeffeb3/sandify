@@ -15,12 +15,12 @@ import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
 import { selectCurrentLayer } from "./layersSlice"
 
-const LayerEditor = ({ id }) => {
+const LayerEditor = () => {
   const dispatch = useDispatch()
-  const state = useSelector(selectCurrentLayer)
-  const layer = new Layer(state.type)
-  const model = layer.model
-  const layerOptions = layer.getOptions()
+  const layer = useSelector(selectCurrentLayer)
+  const instance = new Layer(layer.type)
+  const model = instance.model
+  const layerOptions = instance.getOptions()
   const modelOptions = model.getOptions()
   const selectOptions = getShapeSelectOptions()
   const allowModelSelection = model.selectGroup !== "import"
@@ -45,23 +45,23 @@ const LayerEditor = ({ id }) => {
   ) : undefined
 
   const handleChangeType = (selected) => {
-    dispatch(changeModelType({ id, type: selected.value }))
+    dispatch(changeModelType({ id: layer.id, type: selected.value }))
   }
 
   const handleChange = (attrs) => {
-    attrs.id = id
+    attrs.id = layer.id
     dispatch(updateLayer(attrs))
   }
 
   const handleRestoreDefaults = () => {
-    dispatch(restoreDefaults(id))
+    dispatch(restoreDefaults(layer.id))
   }
 
   const renderedModelSelection = allowModelSelection && (
     <Row className="align-items-center">
-      <Col sm={5}>Type</Col>
+      <Col sm={5} className="mb-1">Type</Col>
 
-      <Col sm={7}>
+      <Col sm={7} className="mb-1">
         <Select
           value={selectedOption}
           onChange={handleChangeType}
@@ -79,7 +79,7 @@ const LayerEditor = ({ id }) => {
       key,
       onChange: handleChange,
       optionKey: key,
-      data: state,
+      data: layer,
       object: model,
       label,
     }
@@ -100,7 +100,6 @@ const LayerEditor = ({ id }) => {
 
   const renderedModelOptions = Object.keys(modelOptions).map((key) => (
     <div
-      className="mt-1"
       key={key}
     >
       {getOptionComponent(model, modelOptions, key)}
@@ -108,7 +107,7 @@ const LayerEditor = ({ id }) => {
   ))
 
   return (
-    <div className="px-3 overflow-auto flex-grow-1">
+    <div className="px-3 overflow-auto flex-grow-1 border pt-3">
       <Accordion
         key={1}
         defaultActiveKey={1}
@@ -126,7 +125,7 @@ const LayerEditor = ({ id }) => {
           <Accordion.Collapse eventKey={1}>
             <Card.Body>
               {getOptionComponent(model, layerOptions, "name")}
-              {model.canTransform(state) && (
+              {model.canTransform(layer) && (
                 <Row className="align-items-center mt-1 mb-2">
                   <Col sm={5}>Transform</Col>
                   <Col sm={7}>
@@ -140,7 +139,7 @@ const LayerEditor = ({ id }) => {
                         </Col>
                       </Row>
                     )}
-                    {model.canChangeSize(state) && model.autosize && (
+                    {model.canChangeSize(layer) && model.autosize && (
                       <Row className="mt-1">
                         <Col xs={6}>
                           {getOptionComponent(model, layerOptions, "width")}
@@ -150,7 +149,7 @@ const LayerEditor = ({ id }) => {
                         </Col>
                       </Row>
                     )}
-                    {model.canRotate(state) && (
+                    {model.canRotate(layer) && (
                       <Row className="mt-1">
                         <Col xs={6}>
                           <div className="d-flex align-items-center">

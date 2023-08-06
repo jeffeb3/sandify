@@ -46,11 +46,11 @@ const DropdownOption = ({
       className="align-items-center"
       key={index}
     >
-      <Col sm={5}>
+      <Col sm={5} className="mb-1">
         <Form.Label htmlFor="options-dropdown">{option.title}</Form.Label>
       </Col>
 
-      <Col sm={7}>
+      <Col sm={7} className="mb-1">
         <Select
           value={{ value: currentChoice, label: currentLabel }}
           onChange={handleChange}
