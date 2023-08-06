@@ -7,32 +7,31 @@ import Track from "./Track"
 import Warp from "./Warp"
 
 export const effectFactory = {
-  fisheye: new Fisheye(),
-  fineTuning: new FineTuning(),
-  loop: new Loop(),
-  mask: new Mask(),
-  noise: new Noise(),
-  track: new Track(),
-  warp: new Warp(),
+  fisheye: Fisheye,
+  fineTuning: FineTuning,
+  loop: Loop,
+  mask: Mask,
+  noise: Noise,
+  track: Track,
+  warp: Warp,
 }
 
-export const getEffectFromType = (type) => {
-  return effectFactory[type]
+export const getEffectFromType = (type, ...args) => {
+  return new effectFactory[type](args)
 }
 
 export const getDefaultEffectType = () => {
-  const defaultType = localStorage.getItem("defaultEffect")
-  return getEffectFromType(defaultType) ? defaultType : "mask"
+  return localStorage.getItem("defaultEffect") || "mask"
 }
 
 export const getDefaultEffect = () => {
-  return effectFactory[getDefaultEffectType()]
+  return getEffectFromType(getDefaultEffectType())
 }
 
 export const getEffectSelectOptions = () => {
   const types = Object.keys(effectFactory)
 
   return types.map((type) => {
-    return { value: type, label: effectFactory[type].label }
+    return { value: type, label: getEffectFromType(type).label }
   })
 }

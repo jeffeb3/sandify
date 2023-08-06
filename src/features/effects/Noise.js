@@ -63,7 +63,7 @@ export default class Noise extends Effect {
     }
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     if (effect.noiseAmplitude > 0) {
       noise.seed(effect.seed)
       vertices = subsample(vertices, 2.0)

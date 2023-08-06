@@ -116,7 +116,7 @@ export default class Loop extends Effect {
     return circle(25)
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     const outputVertices = []
     const { x, y, rotation } = layer
 

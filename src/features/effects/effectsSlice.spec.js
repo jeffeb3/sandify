@@ -1,7 +1,8 @@
 import { resetUniqueId } from "@/common/mocks"
-import effects, {
+import effectsReducer, {
   addEffect,
   deleteEffect,
+  setCurrentEffect,
   selectEffectsByLayerId,
   updateEffect,
 } from "./effectsSlice"
@@ -16,7 +17,7 @@ beforeEach(() => {
 
 describe("effects reducer", () => {
   it("should handle initial state", () => {
-    expect(effects(undefined, {})).toEqual({
+    expect(effectsReducer(undefined, {})).toEqual({
       ids: [],
       entities: {},
     })
@@ -24,7 +25,7 @@ describe("effects reducer", () => {
 
   it("should handle addEffect", () => {
     expect(
-      effects(
+      effectsReducer(
         {
           ids: [],
           entities: {},
@@ -47,7 +48,7 @@ describe("effects reducer", () => {
 
   it("should handle deleteEffect", () => {
     expect(
-      effects(
+      effectsReducer(
         {
           ids: ["1"],
           entities: {
@@ -69,7 +70,7 @@ describe("effects reducer", () => {
 
   it("should handle updateEffect", () => {
     expect(
-      effects(
+      effectsReducer(
         {
           ids: ["1"],
           entities: {
@@ -89,6 +90,28 @@ describe("effects reducer", () => {
           name: "bar",
         },
       },
+    })
+  })
+
+  it("should handle setCurrentEffect", () => {
+    expect(
+      effectsReducer(
+        {
+          entities: {
+            0: {},
+            1: {},
+          },
+          current: "0",
+        },
+        setCurrentEffect("1"),
+      ),
+    ).toEqual({
+      entities: {
+        0: {},
+        1: {},
+      },
+      current: "1",
+      selected: "1",
     })
   })
 })

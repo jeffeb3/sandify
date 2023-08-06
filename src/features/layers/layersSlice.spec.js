@@ -2,7 +2,7 @@ import configureMockStore from "redux-mock-store"
 import thunk from "redux-thunk"
 import { resetUniqueId } from "@/common/mocks"
 import { configureStore } from "@reduxjs/toolkit"
-import layers, {
+import layersReducer, {
   layersActions,
   addLayer,
   addEffect,
@@ -18,8 +18,9 @@ import layers, {
   updateLayer,
   selectLayerVertices,
 } from "./layersSlice"
-import effects, { updateEffect } from "@/features/effects/effectsSlice"
-import machine from "@/features/machine/machineSlice"
+import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
+import machineReducer from "@/features/machine/machineSlice"
+import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"
 
 const mockStore = configureMockStore([thunk])
@@ -33,6 +34,7 @@ beforeEach(() => {
 // ------------------------------
 
 const polygonState = new Layer("polygon").getInitialState()
+const loopEffectState = new EffectLayer("loop").getInitialState()
 
 describe("layers reducer", () => {
   const circleState = new Layer("circle").getInitialState()
@@ -40,7 +42,7 @@ describe("layers reducer", () => {
   it("should handle initial state", () => {
     polygonState.id = "1"
 
-    expect(layers(undefined, {})).toEqual({
+    expect(layersReducer(undefined, {})).toEqual({
       ids: ["1"],
       entities: {
         1: polygonState,
@@ -53,7 +55,7 @@ describe("layers reducer", () => {
   describe("atomic actions", () => {
     it("should handle addLayer", () => {
       expect(
-        layers(
+        layersReducer(
           {
             ids: [],
             entities: {},
@@ -78,7 +80,7 @@ describe("layers reducer", () => {
 
     describe("should handle deleteLayer", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               1: {
@@ -100,7 +102,7 @@ describe("layers reducer", () => {
 
     it("should handle addEffect", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               0: {
@@ -130,7 +132,7 @@ describe("layers reducer", () => {
 
     it("should handle moveEffect", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               0: {
@@ -155,7 +157,7 @@ describe("layers reducer", () => {
 
     it("should handle removeEffect", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               0: {
@@ -184,7 +186,7 @@ describe("layers reducer", () => {
     describe("changeModelType", () => {
       it("should add default values", () => {
         expect(
-          layers(
+          layersReducer(
             {
               entities: {
                 0: {
@@ -206,7 +208,7 @@ describe("layers reducer", () => {
 
       it("should not override values if provided", () => {
         expect(
-          layers(
+          layersReducer(
             {
               entities: {
                 0: {
@@ -231,7 +233,7 @@ describe("layers reducer", () => {
 
     it("should handle moveLayer", () => {
       expect(
-        layers(
+        layersReducer(
           {
             ids: ["a", "b", "c", "d", "e"],
           },
@@ -244,7 +246,7 @@ describe("layers reducer", () => {
 
     it("should handle restoreDefaults", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               0: {
@@ -271,7 +273,7 @@ describe("layers reducer", () => {
 
     it("should handle setCurrentLayer", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               0: {},
@@ -293,7 +295,7 @@ describe("layers reducer", () => {
 
     it("should handle updateLayer", () => {
       expect(
-        layers(
+        layersReducer(
           {
             entities: {
               1: {
@@ -339,7 +341,19 @@ describe("layers reducer", () => {
 
     describe("deleteEffect", () => {
       it("should dispatch actions to remove the effect from the layer and then delete it", async () => {
-        const store = mockStore()
+        const store = mockStore({
+          layers: {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                effectIds: ["1", "2"],
+              },
+            },
+            ids: ["0"],
+            current: "0"
+          },
+        })
 
         store.dispatch(deleteEffect({ id: "0", effectId: "1" }))
         const actions = store.getActions()
@@ -434,9 +448,9 @@ describe("layers selectors", () => {
     effects: {
       ids: ["1", "2", "3"],
       entities: {
-        1: { id: "1", layerId: "A" },
-        2: { id: "2", layerId: "B" },
-        3: { id: "3", layerId: "A" },
+        1: { id: "1", layerId: "A", ...loopEffectState },
+        2: { id: "2", layerId: "B", ...loopEffectState },
+        3: { id: "3", layerId: "A", ...loopEffectState },
       },
     },
     machine: {},
@@ -447,9 +461,9 @@ describe("layers selectors", () => {
     beforeEach(() => {
       store = configureStore({
         reducer: {
-          effects,
-          layers,
-          machine,
+          effects: effectsReducer,
+          layers: layersReducer,
+          machine: machineReducer,
         },
         preloadedState: initialState,
       })
@@ -475,6 +489,7 @@ describe("layers selectors", () => {
 
     it("should recompute when layer effect changes", () => {
       selectLayerVertices(store.getState(), "A")
+      expect(selectLayerVertices.recomputations()).toBe(1)
       store.dispatch(updateEffect({ id: "1", foo: "bar" }))
       store.dispatch(updateEffect({ id: "1", foo: "bar" })) // equivalent
       selectLayerVertices(store.getState(), "A")

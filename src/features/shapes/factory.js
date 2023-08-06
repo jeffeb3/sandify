@@ -20,39 +20,38 @@ import SpaceFiller from "./space_filler/SpaceFiller"
 import Wiper from "./Wiper"
 
 export const shapeFactory = {
-  polygon: new Polygon(),
-  star: new Star(),
-  circle: new Circle(),
-  heart: new Heart(),
-  reuleaux: new Reuleaux(),
-  epicycloid: new Epicycloid(),
-  hypocycloid: new Hypocycloid(),
-  rose: new Rose(),
-  inputText: new InputText(),
-  fancyText: new FancyText(),
-  v1Engineering: new V1Engineering(),
-  lsystem: new LSystem(),
-  fractalSpirograph: new FractalSpirograph(),
-  tessellationTwist: new TessellationTwist(),
-  point: new Point(),
-  circlePacker: new CirclePacker(),
-  wiper: new Wiper(),
-  spaceFiller: new SpaceFiller(),
-  noise_wave: new NoiseWave(),
-  fileImport: new FileImport(),
+  polygon: Polygon,
+  star: Star,
+  circle: Circle,
+  heart: Heart,
+  reuleaux: Reuleaux,
+  epicycloid: Epicycloid,
+  hypocycloid: Hypocycloid,
+  rose: Rose,
+  inputText: InputText,
+  fancyText: FancyText,
+  v1Engineering: V1Engineering,
+  lsystem: LSystem,
+  fractalSpirograph: FractalSpirograph,
+  tessellationTwist: TessellationTwist,
+  point: Point,
+  circlePacker: CirclePacker,
+  wiper: Wiper,
+  spaceFiller: SpaceFiller,
+  noise_wave: NoiseWave,
+  fileImport: FileImport,
 }
 
-export const getShapeFromType = (type) => {
-  return shapeFactory[type]
+export const getShapeFromType = (type, ...args) => {
+  return new shapeFactory[type](args)
 }
 
 export const getDefaultShapeType = () => {
-  const defaultType = localStorage.getItem("defaultShape")
-  return getShapeFromType(defaultType) ? defaultType : "polygon"
+  return localStorage.getItem("defaultShape") || "polygon"
 }
 
 export const getDefaultShape = () => {
-  return shapeFactory[getDefaultShapeType()]
+  return getShapeFromType(getDefaultShapeType())
 }
 
 export const getShapeSelectOptions = () => {
@@ -60,7 +59,7 @@ export const getShapeSelectOptions = () => {
   const types = Object.keys(shapeFactory)
 
   for (const type of types) {
-    const shape = shapeFactory[type]
+    const shape = getShapeFromType(type)
     const optionLabel = { value: type, label: shape.label }
 
     let found = false

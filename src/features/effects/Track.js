@@ -51,7 +51,7 @@ export default class Track extends Effect {
     return circle(25)
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     let outputVertices = []
 
     for (var j = 0; j < vertices.length; j++) {

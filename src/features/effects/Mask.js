@@ -86,7 +86,7 @@ export default class Mask extends Effect {
     }
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     vertices = vertices.map((vertex) => {
       return rotate(offset(vertex, -effect.x, -effect.y), effect.rotation)
     })

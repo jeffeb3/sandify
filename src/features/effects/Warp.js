@@ -88,7 +88,7 @@ export default class Warp extends Effect {
     return circle(width / 2)
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     if (effect.subsample) {
       vertices = subsample(vertices, 2.0)
     }

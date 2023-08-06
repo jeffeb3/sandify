@@ -56,7 +56,7 @@ export default class FineTuning extends Effect {
     return circle(25)
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     // Remove one point if we are smearing
     if (effect.transformMethod === "smear") {
       vertices.pop()

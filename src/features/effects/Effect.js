@@ -1,10 +1,7 @@
-export default class Effect {
-  constructor(type) {
-    this.type = type
-  }
+import Model from "@/common/Model"
 
-  // redux state of a newly created instance
-  getInitialState() {
-    return {}
+export default class Effect extends Model {
+  constructor(type) {
+    super(type)
   }
 }

@@ -41,7 +41,7 @@ export default class Fisheye extends Effect {
     return circle(this.startingWidth / 2)
   }
 
-  applyEffect(effect, layer, vertices) {
+  getVertices(effect, layer, vertices) {
     const fisheye = d3Fisheye
       .radial()
       .radius(effect.width / 2)
