@@ -70,6 +70,25 @@ h2 {
   }
 }
 
+.btn-secondary {
+  background-color: #e9ecef;
+  color: #495057 !important;
+  border: none;
+
+  &:hover {
+    background-color: darken(#e9ecef, 5%);
+  }
+
+  &.focus, &:focus {
+    background-color: darken(#e9ecef, 5%);
+  }
+
+  &:not(:disabled):not(.disabled).active,
+  &:not(:disabled):not(.disabled):active {
+    background-color: darken(#e9ecef, 5%);
+  }
+}
+
 .btn-group>.btn.active, .btn-group>.btn:active, .btn-group>.btn:focus {
   z-index: inherit;
 }

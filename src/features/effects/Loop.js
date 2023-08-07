@@ -1,5 +1,5 @@
 import Effect from "./Effect"
-import { scale, rotate, circle } from "@/common/geometry"
+import { scale, rotate } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -91,11 +91,11 @@ export default class Loop extends Effect {
       ...{
         // loop Options
         transformMethod: "smear",
-        numLoops: 10,
+        numLoops: 5,
 
         // grow options
         growEnabled: true,
-        growValue: 100,
+        growValue: 25,
         growMethod: "constant",
         growMathInput: "i+cos(i/2)",
         growMath: "i+cos(i/2)",
@@ -111,25 +111,18 @@ export default class Loop extends Effect {
     }
   }
 
-  getVertices(state) {
-    // TODO Make this more reasonable
-    return circle(25)
-  }
+  // TODO: replace with bounds for transformer
+  // getVertices(state) {
+  //  return circle(25)
+  //}
 
   getVertices(effect, layer, vertices) {
     const outputVertices = []
-    const { x, y, rotation } = layer
 
     // remove first point if we are smearing
     if (effect.transformMethod === "smear") {
       vertices.pop()
     }
-
-    // remove rotation and offsets; will add back at end
-    vertices.forEach((vertex) => {
-      vertex.addX({ x: -x || 0 }).addY({ y: -y || 0 })
-      vertex.rotateDeg(rotation)
-    })
 
     for (var i = 0; i < effect.numLoops; i++) {
       for (let j = 0; j < vertices.length; j++) {
@@ -185,12 +178,6 @@ export default class Loop extends Effect {
         outputVertices.push(vertex)
       }
     }
-
-    // add rotation and offsets
-    outputVertices.forEach((vertex) => {
-      vertex.rotateDeg(-rotation)
-      vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
-    })
 
     return outputVertices
   }

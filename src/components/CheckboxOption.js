@@ -21,11 +21,17 @@ const CheckboxOption = ({ options, optionKey, data, object, onChange }) => {
 
   return (
     <Row className={"align-items-center" + (visible ? "" : " d-none")}>
-      <Col sm={5} className="mb-1">
+      <Col
+        sm={5}
+        className="mb-1"
+      >
         <Form.Label htmlFor="options-step">{option.title}</Form.Label>
       </Col>
 
-      <Col sm={7} className="mb-1">
+      <Col
+        sm={7}
+        className="mb-1"
+      >
         <Switch
           checked={data[optionKey]}
           onChange={handleChange}

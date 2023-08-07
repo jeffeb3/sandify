@@ -1,5 +1,4 @@
 import { arrayRotate } from "@/common/util"
-import { circle } from "@/common/geometry"
 import Effect from "./Effect"
 
 const options = {
@@ -51,10 +50,10 @@ export default class FineTuning extends Effect {
     }
   }
 
-  getVertices(state) {
-    // TODO Make this more reasonable
-    return circle(25)
-  }
+  // TODO: Replace with selecting bounding
+  //  getVertices(state) {
+  //    return circle(25)
+  //  }
 
   getVertices(effect, layer, vertices) {
     // Remove one point if we are smearing

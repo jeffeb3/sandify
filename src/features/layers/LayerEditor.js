@@ -59,9 +59,17 @@ const LayerEditor = () => {
 
   const renderedModelSelection = allowModelSelection && (
     <Row className="align-items-center">
-      <Col sm={5} className="mb-1">Type</Col>
+      <Col
+        sm={5}
+        className="mb-1"
+      >
+        Type
+      </Col>
 
-      <Col sm={7} className="mb-1">
+      <Col
+        sm={7}
+        className="mb-1"
+      >
         <Select
           value={selectedOption}
           onChange={handleChangeType}
@@ -99,11 +107,7 @@ const LayerEditor = () => {
   }
 
   const renderedModelOptions = Object.keys(modelOptions).map((key) => (
-    <div
-      key={key}
-    >
-      {getOptionComponent(model, modelOptions, key)}
-    </div>
+    <div key={key}>{getOptionComponent(model, modelOptions, key)}</div>
   ))
 
   return (
@@ -206,28 +210,7 @@ const LayerEditor = () => {
               {renderedModelSelection}
               {renderedModelOptions}
               {renderedLink}
-              <Accordion
-                key={3}
-                defaultActiveKey={3}
-                className="mt-3"
-              >
-                <Card>
-                  <Card.Header className="d-flex">
-                    <Accordion.Toggle
-                      as={Button}
-                      variant="link"
-                      eventKey={3}
-                    >
-                      Effects
-                    </Accordion.Toggle>
-                  </Card.Header>
-                  <Accordion.Collapse eventKey={3}>
-                    <Card.Body>
-                      <EffectManager />
-                    </Card.Body>
-                  </Accordion.Collapse>
-                </Card>
-              </Accordion>
+              <EffectManager />
             </Card.Body>
           </Accordion.Collapse>
         </Card>

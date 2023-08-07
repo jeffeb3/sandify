@@ -1,5 +1,6 @@
 import { getShapeFromType } from "@/features/shapes/factory"
-import { resizeVertices, centerOnOrigin } from "@/common/geometry"
+import EffectLayer from "@/features/effects/EffectLayer"
+import { resizeVertices, centerOnOrigin, findBounds } from "@/common/geometry"
 
 export const layerOptions = {
   name: {
@@ -84,7 +85,7 @@ export default class Layer {
         reverse: false,
         visible: true,
         name: this.model.label,
-        effects: [],
+        effectIds: [],
       },
     }
   }
@@ -94,24 +95,47 @@ export default class Layer {
   }
 
   // returns an array of Victor vertices
-  draw(state) {
-    const { width, height, x, y, rotation } = state.shape
-    let vertices = this.model.draw(state)
+  getVertices({ layer, effects, machine }) {
+    this.state = layer
+    this.vertices = this.model.getCachedVertices({ shape: layer, machine })
+    this.resize()
+
+    const bounds = findBounds(this.vertices)
+
+    this.applyEffects(effects)
+
+    // center relative to our original shape prior to effects
+    centerOnOrigin(this.vertices, bounds)
+    this.transform()
+
+    return this.vertices
+  }
+
+  resize() {
+    const { width, height } = this.state
 
     if (this.model.autosize) {
-      vertices = resizeVertices(vertices, width, height, false)
-      centerOnOrigin(vertices)
+      this.vertices = resizeVertices(this.vertices, width, height, false)
     }
+  }
 
-    vertices.forEach((vertex) => {
+  transform() {
+    const { x, y, rotation } = this.state
+
+    this.vertices.forEach((vertex) => {
       vertex.rotateDeg(-rotation)
       vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })
 
-    if (state.shape.reverse) {
-      vertices = vertices.reverse()
+    if (this.state.reverse) {
+      this.vertices = this.vertices.reverse()
     }
+  }
 
-    return vertices
+  applyEffects(effects) {
+    effects.forEach((effect) => {
+      const effectLayer = new EffectLayer(effect.type)
+      this.vertices = effectLayer.getVertices(effect, this.state, this.vertices)
+    })
   }
 }

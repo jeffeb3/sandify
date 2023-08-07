@@ -351,7 +351,7 @@ describe("layers reducer", () => {
               },
             },
             ids: ["0"],
-            current: "0"
+            current: "0",
           },
         })
 

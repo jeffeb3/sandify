@@ -3,9 +3,10 @@ import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import Color from "color"
-import { rotate, offset } from "@/common/geometry"
 import arrayMove from "array-move"
 import { isEqual } from "lodash"
+import { rotate, offset } from "@/common/geometry"
+import { orderByKey } from "@/common/util"
 import {
   getDefaultShapeType,
   getShapeFromType,
@@ -212,9 +213,17 @@ export const addEffect = ({ id, effect }) => {
 }
 
 export const deleteEffect = ({ id, effectId }) => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const effectIds = selectCurrentLayer(state).effectIds
+    const deleteIdx = effectIds.findIndex((id) => id === effectId)
+
     dispatch(layersSlice.actions.removeEffect({ id, effectId }))
     dispatch(effectsSlice.actions.deleteEffect(effectId))
+
+    if (effectIds.length > 1) {
+      dispatch(effectsSlice.actions.setCurrentEffect(effectIds[deleteIdx - 1]))
+    }
   }
 }
 
@@ -242,6 +251,7 @@ export const {
   selectAll: selectAllLayers,
   selectIds: selectLayerIds,
   selectEntities: selectLayerEntities,
+  selectTotal: selectNumLayers,
 } = layersAdapter.getSelectors((state) => state.layers)
 
 export const selectLayers = createSelector(selectState, (state) => state.layers)
@@ -284,11 +294,6 @@ export const selectVisibleLayerIds = createSelector(
   },
 )
 
-export const selectNumLayers = createSelector(selectLayerIds, (layerIds) => {
-  log("getNumLayer")
-  return layerIds.length
-})
-
 // puts the current layer last in the list to ensure it can be rotated; else
 // the handle will not rotate
 export const selectKonvaLayerIds = createSelector(
@@ -327,17 +332,31 @@ export const selectLayerIndex = createCachedSelector(
   },
 )((state, id) => id)
 
-// returns vertices for a given layer
-export const selectLayerVertices = createCachedSelector(
+// returns a list of ordered effects for a given layer
+export const selectLayerEffects = createCachedSelector(
   selectLayerById,
   selectEffectsByLayerId,
+  (layer, effects) => {
+    return orderByKey(layer.effectIds, effects)
+  },
+)((state, id) => id)
+
+// returns a list of visible ordered effects for a given layer
+export const selectVisibleLayerEffects = createCachedSelector(
+  selectLayerEffects,
+  (effects) => {
+    return effects.filter((effect) => effect.visible)
+  },
+)((state, id) => id)
+
+// returns the vertices for a given layer
+export const selectLayerVertices = createCachedSelector(
+  selectLayerById,
+  selectVisibleLayerEffects,
   selectLayerMachine,
   (layer, effects, machine) => {
     const instance = new Layer(layer.type)
-    return instance.draw({
-      shape: layer,
-      machine,
-    })
+    return instance.getVertices({ layer, effects, machine })
   },
 )({
   keySelector: (state, id) => id,
@@ -346,7 +365,7 @@ export const selectLayerVertices = createCachedSelector(
   }),
 })
 
-// returns computed (machine-bound) vertices for a given layer
+// returns the machine-bound vertices for a given layer
 const selectMachineVertices = createCachedSelector(
   (state, id) => id,
   selectLayerVertices,

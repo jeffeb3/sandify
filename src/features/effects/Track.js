@@ -1,5 +1,5 @@
 import Effect from "./Effect"
-import { offset, rotate, circle } from "@/common/geometry"
+import { offset, rotate } from "@/common/geometry"
 
 const options = {
   trackRadius: {
@@ -46,10 +46,10 @@ export default class Track extends Effect {
     }
   }
 
-  getVertices(state) {
-    // TODO Make this more reasonable
+  // TODO: replace with bounds for transformer
+  /*getVertices(state) {
     return circle(25)
-  }
+  }*/
 
   getVertices(effect, layer, vertices) {
     let outputVertices = []

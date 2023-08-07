@@ -2,22 +2,20 @@ import React from "react"
 import { SortableContainer, SortableElement } from "react-sortable-hoc"
 import { Button, ListGroup } from "react-bootstrap"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
-import Layer from "./Layer"
 
-const LayerRow = SortableElement(
+const EffectRow = SortableElement(
   ({
     active,
-    numLayers,
-    layer,
+    numEffects,
+    effect,
     onSortStarted,
-    handleLayerSelected,
-    handleToggleLayerVisible,
+    handleEffectSelected,
+    handleToggleEffectVisible,
   }) => {
-    const { name, id, visible } = layer
+    const { name, id, visible } = effect
     const activeClass = active ? "active" : ""
-    const dragClass = numLayers > 1 ? "cursor-move" : ""
+    const dragClass = numEffects > 1 ? "cursor-move" : ""
     const visibleClass = visible ? "" : "layer-hidden"
-    const instance = new Layer(layer.type)
 
     return (
       <ListGroup.Item
@@ -31,51 +29,44 @@ const LayerRow = SortableElement(
           className={[`layer-${activeClass}`, "d-flex align-items-center"].join(
             " ",
           )}
-          onClick={handleLayerSelected}
+          onClick={handleEffectSelected}
         >
           <div className="layer-left">
             <Button
               className="layer-button"
               variant="light"
               data-id={id}
-              onClick={handleToggleLayerVisible.bind(this, id)}
+              onClick={handleToggleEffectVisible.bind(this, id)}
             >
               {visible && <FaEye size="0.8em" />}
               {!visible && <FaEyeSlash size="0.8em" />}
             </Button>
           </div>
 
-          <div className="d-flex no-select flex-grow-1 align-items-center">
-            <div className="flex-grow-1">{name}</div>
-            <span
-              className="mr-3"
-              style={{ fontSize: "80%" }}
-            >
-              {instance.model.label}
-            </span>
-          </div>
+          <div className="no-select">{name}</div>
         </div>
       </ListGroup.Item>
     )
   },
 )
 
-const LayerList = SortableContainer(({ layers, currentLayer, ...other }) => {
+const EffectList = SortableContainer(({ effects, currentEffect, ...other }) => {
   return (
     <ListGroup
       variant="flush"
       style={{ maxHeight: "240px" }}
       className="border overflow-auto"
-      id="layers"
+      id="effects"
     >
-      {layers.map((layer, index) => {
+      {effects.map((effect, index) => {
         return (
-          <LayerRow
-            key={layer.id}
-            id={layer.id}
+          <EffectRow
+            key={effect.id}
+            id={effect.id}
             index={index}
-            active={currentLayer.id === layer.id}
-            layer={layer}
+            active={currentEffect?.id === effect.id}
+            effect={effect}
+            currentEffect={currentEffect}
             {...other}
           />
         )
@@ -84,4 +75,4 @@ const LayerList = SortableContainer(({ layers, currentLayer, ...other }) => {
   )
 })
 
-export default LayerList
+export default EffectList

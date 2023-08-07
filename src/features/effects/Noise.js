@@ -132,11 +132,6 @@ export default class Noise extends Effect {
     return new Victor(vertex.x + Math.cos(a) * 5, vertex.y + Math.sin(a) * 5)
   }
 
-  getVertices(state) {
-    // not needed
-    return []
-  }
-
   getOptions() {
     return options
   }

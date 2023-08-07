@@ -1,6 +1,5 @@
-import Victor from "victor"
 import Effect from "./Effect"
-import { rotate, offset, circle } from "@/common/geometry"
+import { rotate, offset } from "@/common/geometry"
 import PolarMachine from "@/features/machine/PolarMachine"
 import RectMachine from "@/features/machine/RectMachine"
 import PolarInvertedMachine from "@/features/machine/PolarInvertedMachine"
@@ -69,7 +68,8 @@ export default class Mask extends Effect {
     return options
   }
 
-  getVertices(state) {
+  // TODO: replace with bounds for transformer
+  /*getVertices(state) {
     const width = state.shape.width
     const height = state.shape.height
 
@@ -84,7 +84,7 @@ export default class Mask extends Effect {
         new Victor(-width / 2, height / 2),
       ]
     }
-  }
+  }*/
 
   getVertices(effect, layer, vertices) {
     vertices = vertices.map((vertex) => {

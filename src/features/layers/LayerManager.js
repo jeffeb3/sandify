@@ -35,16 +35,19 @@ const LayerManager = () => {
   const toggleNewLayerModal = () => setShowNewLayer(!showNewLayer)
   const toggleImportModal = () => setShowImportLayer(!showImportLayer)
   const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
+  const handleLayerRemoved = (id) => dispatch(deleteLayer(currentLayer.id))
 
-  const handleLayerRemoved = (id) => dispatch(deleteLayer(id))
   const handleLayerMoved = ({ oldIndex, newIndex }) =>
     dispatch(moveLayer({ oldIndex, newIndex }))
+
   const handleToggleLayerVisible = (id) =>
     dispatch(updateLayer({ id, visible: !currentLayer.visible }))
+
   const handleLayerSelected = (event) => {
     const id = event.target.closest(".list-group-item").id
     dispatch(setCurrentLayer(id))
   }
+
   const handleUpdateBeforeSortStart = ({ node }) =>
     dispatch(setCurrentLayer(node.id))
 
@@ -105,7 +108,7 @@ const LayerManager = () => {
                 className="layer-button"
                 variant="light"
                 data-tip="Delete layer"
-                onClick={() => handleLayerRemoved(currentLayer.id)}
+                onClick={handleLayerRemoved}
               >
                 <FaTrash />
               </Button>
@@ -121,10 +124,7 @@ const LayerManager = () => {
           </div>
         </div>
       </div>
-      <LayerEditor
-        key={currentLayer.id}
-        id={currentLayer.id}
-      />
+      <LayerEditor />
     </div>
   )
 }

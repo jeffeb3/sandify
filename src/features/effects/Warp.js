@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Effect from "./Effect"
-import { circle, subsample } from "@/common/geometry"
+import { subsample } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -83,10 +83,11 @@ export default class Warp extends Effect {
     }
   }
 
-  getVertices(state) {
+  // TODO: replace with bounds for transformer
+  /*getVertices(state) {
     const width = state.shape.width
     return circle(width / 2)
-  }
+  }*/
 
   getVertices(effect, layer, vertices) {
     if (effect.subsample) {

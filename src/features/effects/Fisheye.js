@@ -1,6 +1,5 @@
 import Victor from "victor"
 import Effect from "./Effect"
-import { circle } from "@/common/geometry"
 import * as d3Fisheye from "d3-fisheye"
 
 const options = {
@@ -37,9 +36,10 @@ export default class Fisheye extends Effect {
     }
   }
 
-  getVertices(state) {
-    return circle(this.startingWidth / 2)
-  }
+  // TODO: Replace with selecting bounding
+  // getVertices(state) {
+  //   return circle(this.startingWidth / 2)
+  // }
 
   getVertices(effect, layer, vertices) {
     const fisheye = d3Fisheye

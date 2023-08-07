@@ -1,5 +1,3 @@
-export default class Group extends Model {
-  constructor(type) {
-    super(type)
-  }
-}
+import Model from "@/common/Model"
+
+export default class Group extends Model {}

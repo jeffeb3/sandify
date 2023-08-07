@@ -72,14 +72,22 @@ const InputOption = ({
   if (!option.inline) {
     return (
       <Row className={"align-items-center" + (visible ? "" : " d-none")}>
-        <Col sm={5} className="mb-1">
+        <Col
+          sm={5}
+          className="mb-1"
+        >
           {label && (
             <Form.Label htmlFor={`option-${optionKey}`}>
               {option.title}
             </Form.Label>
           )}
         </Col>
-        <Col sm={7} className="mb-1">{renderedInput}</Col>
+        <Col
+          sm={7}
+          className="mb-1"
+        >
+          {renderedInput}
+        </Col>
       </Row>
     )
   } else {
