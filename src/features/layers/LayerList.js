@@ -1,87 +1,155 @@
 import React from "react"
-import { SortableContainer, SortableElement } from "react-sortable-hoc"
 import { Button, ListGroup } from "react-bootstrap"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { useSelector, useDispatch } from "react-redux"
+import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
 import Layer from "./Layer"
+import {
+  moveLayer,
+  setCurrentLayer,
+  selectCurrentLayer,
+  selectNumLayers,
+  selectAllLayers,
+  updateLayer,
+} from "@/features/layers/layersSlice"
 
-const LayerRow = SortableElement(
-  ({
-    active,
-    numLayers,
-    layer,
-    onSortStarted,
-    handleLayerSelected,
-    handleToggleLayerVisible,
-  }) => {
-    const { name, id, visible } = layer
-    const activeClass = active ? "active" : ""
-    const dragClass = numLayers > 1 ? "cursor-move" : ""
-    const visibleClass = visible ? "" : "layer-hidden"
-    const instance = new Layer(layer.type)
+const LayerRow = ({
+  active,
+  numLayers,
+  layer,
+  handleLayerSelected,
+  handleToggleLayerVisible,
+}) => {
+  const { name, id, visible } = layer
+  const activeClass = active ? "active" : ""
+  const dragClass = numLayers > 1 ? "cursor-move" : ""
+  const visibleClass = visible ? "" : "layer-hidden"
+  const instance = new Layer(layer.type)
 
-    return (
-      <ListGroup.Item
-        className={[activeClass, dragClass, visibleClass, "layer p-0"].join(
-          " ",
-        )}
-        key={id}
-        id={id}
-      >
-        <div
-          className={[`layer-${activeClass}`, "d-flex align-items-center"].join(
-            " ",
-          )}
-          onClick={handleLayerSelected}
-        >
-          <div className="layer-left">
-            <Button
-              className="layer-button"
-              variant="light"
-              data-id={id}
-              onClick={handleToggleLayerVisible.bind(this, id)}
-            >
-              {visible && <FaEye size="0.8em" />}
-              {!visible && <FaEyeSlash size="0.8em" />}
-            </Button>
-          </div>
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useSortable({
+      id,
+    })
 
-          <div className="d-flex no-select flex-grow-1 align-items-center">
-            <div className="flex-grow-1">{name}</div>
-            <span
-              className="mr-3"
-              style={{ fontSize: "80%" }}
-            >
-              {instance.model.label}
-            </span>
-          </div>
-        </div>
-      </ListGroup.Item>
-    )
-  },
-)
+  const style = {
+    transform: `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`,
+    cursor: isDragging ? "grabbing" : "grab",
+  }
 
-const LayerList = SortableContainer(({ layers, currentLayer, ...other }) => {
   return (
-    <ListGroup
-      variant="flush"
-      style={{ maxHeight: "240px" }}
-      className="border overflow-auto"
-      id="layers"
+    <ListGroup.Item
+      className={`layer p-0 ${activeClass} ${dragClass} ${visibleClass}`}
+      key={id}
+      id={id}
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
     >
-      {layers.map((layer, index) => {
-        return (
-          <LayerRow
-            key={layer.id}
-            id={layer.id}
-            index={index}
-            active={currentLayer.id === layer.id}
-            layer={layer}
-            {...other}
-          />
-        )
-      })}
-    </ListGroup>
+      <div
+        className={`layer-${activeClass} d-flex align-items-center`}
+        onClick={handleLayerSelected}
+      >
+        <div className="layer-left">
+          <Button
+            className="layer-button"
+            variant="light"
+            data-id={id}
+            onClick={() => {
+              handleToggleLayerVisible(id)
+            }}
+          >
+            {visible ? <FaEye size="0.8em" /> : <FaEyeSlash size="0.8em" />}
+          </Button>
+        </div>
+
+        <div className="d-flex no-select flex-grow-1 align-items-center">
+          <div className="flex-grow-1">{name}</div>
+          <span
+            className="mr-3"
+            style={{ fontSize: "80%" }}
+          >
+            {instance.model.label}
+          </span>
+        </div>
+      </div>
+    </ListGroup.Item>
   )
-})
+}
+
+const LayerList = () => {
+  // row has to be dragged 3 pixels before dragging starts; this allows the buttons
+  // on the row to work properly.
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    }),
+  )
+  const dispatch = useDispatch()
+  const currentLayer = useSelector(selectCurrentLayer)
+  const numLayers = useSelector(selectNumLayers)
+  const layers = useSelector(selectAllLayers)
+
+  const handleLayerSelected = (event) => {
+    const id = event.target.closest(".list-group-item").id
+    dispatch(setCurrentLayer(id))
+  }
+
+  const handleDragStart = ({ active }) => dispatch(setCurrentLayer(active.id))
+
+  const handleToggleLayerVisible = (id) => {
+    dispatch(updateLayer({ id, visible: !currentLayer.visible }))
+  }
+
+  const handleDragEnd = ({ active, over }) => {
+    if (active.id !== over.id) {
+      const oldIndex = layers.findIndex((layer) => layer.id === active.id)
+      const newIndex = layers.findIndex((layer) => layer.id === over.id)
+      dispatch(moveLayer({ oldIndex, newIndex }))
+    }
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      modifiers={[restrictToVerticalAxis]}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={layers.map((layer) => layer.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <ListGroup
+          variant="flush"
+          style={{ maxHeight: "240px" }}
+          className="border overflow-auto"
+          id="layers"
+        >
+          {layers.map((layer, index) => (
+            <LayerRow
+              id={layer.id}
+              key={layer.id}
+              active={currentLayer.id === layer.id}
+              numLayers={numLayers}
+              layer={layer}
+              handleLayerSelected={handleLayerSelected}
+              handleToggleLayerVisible={handleToggleLayerVisible}
+              index={index}
+            />
+          ))}
+        </ListGroup>
+      </SortableContext>
+    </DndContext>
+  )
+}
 
 export default LayerList

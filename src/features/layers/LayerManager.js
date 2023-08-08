@@ -8,13 +8,7 @@ import {
   selectCurrentLayer,
   selectNumLayers,
 } from "@/features/layers/layersSlice"
-import {
-  setCurrentLayer,
-  deleteLayer,
-  moveLayer,
-  updateLayer,
-  selectAllLayers,
-} from "@/features/layers/layersSlice"
+import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import ImportLayer from "./ImportLayer"
@@ -23,7 +17,6 @@ import "./LayerManager.scss"
 
 const LayerManager = () => {
   const dispatch = useDispatch()
-  const layers = useSelector(selectAllLayers)
   const currentLayer = useSelector(selectCurrentLayer)
   const numLayers = useSelector(selectNumLayers)
   const canRemove = numLayers > 1
@@ -36,20 +29,6 @@ const LayerManager = () => {
   const toggleImportModal = () => setShowImportLayer(!showImportLayer)
   const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
   const handleLayerRemoved = (id) => dispatch(deleteLayer(currentLayer.id))
-
-  const handleLayerMoved = ({ oldIndex, newIndex }) =>
-    dispatch(moveLayer({ oldIndex, newIndex }))
-
-  const handleToggleLayerVisible = (id) =>
-    dispatch(updateLayer({ id, visible: !currentLayer.visible }))
-
-  const handleLayerSelected = (event) => {
-    const id = event.target.closest(".list-group-item").id
-    dispatch(setCurrentLayer(id))
-  }
-
-  const handleUpdateBeforeSortStart = ({ node }) =>
-    dispatch(setCurrentLayer(node.id))
 
   useEffect(() => {
     const el = document.getElementById("layers")
@@ -73,17 +52,7 @@ const LayerManager = () => {
         toggleModal={toggleCopyModal}
       />
       <div className="p-3">
-        <LayerList
-          pressDelay={150}
-          onSortEnd={handleLayerMoved}
-          updateBeforeSortStart={handleUpdateBeforeSortStart}
-          lockAxis="y"
-          layers={layers}
-          currentLayer={currentLayer}
-          numLayers={numLayers}
-          handleLayerSelected={handleLayerSelected}
-          handleToggleLayerVisible={handleToggleLayerVisible}
-        />
+        <LayerList />
         <div className="d-flex align-items-center border-left border-right border-bottom">
           <Button
             className="ml-2 layer-button"

@@ -24,7 +24,6 @@ const PreviewConnector = (ownProps) => {
   const colors = useSelector(selectSliderColors)
   const offsets = useSelector(selectVertexOffsets)
   const bounds = useSelector(selectSliderBounds)
-  console.log(startLayer.id + ": " + endLayer.id)
 
   const helper = new PreviewHelper({
     currentLayer,

@@ -5,15 +5,10 @@ import { Card, Accordion } from "react-bootstrap"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import {
   selectCurrentLayer,
-  selectLayerEffects,
   deleteEffect,
-  moveEffect,
+  selectLayerEffects,
 } from "@/features/layers/layersSlice"
-import {
-  selectCurrentEffect,
-  setCurrentEffect,
-  updateEffect,
-} from "./effectsSlice"
+import { selectCurrentEffect } from "./effectsSlice"
 import EffectEditor from "./EffectEditor"
 import EffectList from "./EffectList"
 import NewEffect from "./NewEffect"
@@ -27,16 +22,7 @@ const EffectManager = () => {
   )
   const numEffects = effects.length
   const [showNewEffect, setShowNewEffect] = useState(false)
-
   const toggleNewEffectModal = () => setShowNewEffect(!showNewEffect)
-
-  const handleToggleEffectVisible = (id) =>
-    dispatch(updateEffect({ id, visible: !currentEffect.visible }))
-
-  const handleEffectSelected = (event) => {
-    const id = event.target.closest(".list-group-item").id
-    dispatch(setCurrentEffect(id))
-  }
 
   const handleEffectDeleted = (id) => {
     dispatch(
@@ -46,12 +32,6 @@ const EffectManager = () => {
       }),
     )
   }
-
-  const handleEffectMoved = ({ oldIndex, newIndex }) =>
-    dispatch(moveEffect({ id: currentLayer.id, oldIndex, newIndex }))
-
-  const handleUpdateBeforeSortStart = ({ node }) =>
-    dispatch(setCurrentEffect(node.id))
 
   return (
     <div>
@@ -88,14 +68,9 @@ const EffectManager = () => {
             <Accordion.Collapse eventKey={3}>
               <Card.Body>
                 <EffectList
-                  pressDelay={150}
-                  onSortEnd={handleEffectMoved}
-                  updateBeforeSortStart={handleUpdateBeforeSortStart}
-                  lockAxis="y"
                   effects={effects}
                   currentEffect={currentEffect}
-                  handleEffectSelected={handleEffectSelected}
-                  handleToggleEffectVisible={handleToggleEffectVisible}
+                  currentLayer={currentLayer}
                 />
                 <div className="d-flex align-items-center border-left border-right border-bottom">
                   <Button
