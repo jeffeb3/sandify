@@ -1,5 +1,6 @@
 import React from "react"
 import { useSelector } from "react-redux"
+import { isEqual } from "lodash"
 import { Shape } from "react-konva"
 import {
   selectCurrentLayer,
@@ -23,7 +24,11 @@ const PreviewConnector = (ownProps) => {
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const colors = useSelector(selectSliderColors)
   const offsets = useSelector(selectVertexOffsets)
-  const bounds = useSelector(selectSliderBounds)
+  const bounds = useSelector(selectSliderBounds, isEqual)
+
+  if (!(startLayer && endLayer)) {
+    return null
+  } // no longer valid
 
   const helper = new PreviewHelper({
     currentLayer,
@@ -102,4 +107,4 @@ const PreviewConnector = (ownProps) => {
   )
 }
 
-export default PreviewConnector
+export default React.memo(PreviewConnector)

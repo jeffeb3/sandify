@@ -7,6 +7,7 @@ import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
 import effectsReducer from "@/features/effects/effectsSlice"
 import { loadState, saveState } from "@/common/localStorage"
+import { resetLogCounts } from "@/common/debugging"
 import appReducer from "./appSlice"
 
 /*
@@ -39,6 +40,7 @@ const persistedState =
 // reset some values
 if (persistedState) {
   persistedState.fonts.loaded = false
+  // persistedState.effects.current = null
 }
 
 const store = configureStore({
@@ -57,6 +59,7 @@ const store = configureStore({
 if (persistState) {
   store.subscribe(() => {
     saveState(store.getState(), persistSaveKey)
+    resetLogCounts()
   })
 }
 

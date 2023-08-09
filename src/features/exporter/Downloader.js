@@ -221,4 +221,4 @@ const Downloader = () => {
   )
 }
 
-export default Downloader
+export default React.memo(Downloader)

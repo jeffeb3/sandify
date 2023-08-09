@@ -1,9 +1,10 @@
 import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
+import { isEqual } from "lodash"
 import {
   updateLayer,
-  selectCurrentLayer,
+  selectCurrentLayerId,
   selectLayerIndex,
   selectLayerById,
   selectNumVisibleLayers,
@@ -12,30 +13,58 @@ import {
   selectVertexOffsets,
   selectSliderBounds,
 } from "@/features/layers/layersSlice"
-import { selectPreviewState } from "@/features/preview/previewSlice"
-import { selectLayers } from "@/features/layers/layersSlice"
+import { selectPreviewSliderValue } from "@/features/preview/previewSlice"
 import { getShapeFromType } from "@/features/shapes/factory"
 import { roundP } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
+import { log } from "@/common/debugging"
+
+const scaleByWheel = (size, deltaY) => {
+  const sign = Math.sign(deltaY)
+  const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * sign
+  let newSize = Math.max(roundP(size * scale, 0), 1)
+
+  if (newSize === size) {
+    // if the log scaled value isn't big enough to move the scale
+    newSize = Math.max(sign + size, 1)
+  }
+
+  return newSize
+}
 
 const PreviewLayer = (ownProps) => {
+  log(`PreviewLayer render ${ownProps.id}`)
   const dispatch = useDispatch()
-  const layers = useSelector(selectLayers)
-  const currentLayer = useSelector(selectCurrentLayer)
+  const currentLayerId = useSelector(selectCurrentLayerId)
   const layer = useSelector((state) => selectLayerById(state, ownProps.id))
-  const index = useSelector((state) => selectLayerIndex(state, layer.id))
+  const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
-  const preview = useSelector(selectPreviewState)
+  const sliderValue = useSelector(selectPreviewSliderValue)
   const vertices = useSelector((state) =>
-    selectPreviewVertices(state, layer.id),
+    selectPreviewVertices(state, ownProps.id),
   )
-  const colors = useSelector(selectSliderColors)
-  const offsets = useSelector(selectVertexOffsets)
-  const bounds = useSelector(selectSliderBounds)
+  const colors = useSelector(selectSliderColors, isEqual)
+  const offsets = useSelector(selectVertexOffsets, isEqual)
+  const bounds = useSelector(selectSliderBounds, isEqual)
 
-  const selected = layers.selected
-  const sliderValue = preview.sliderValue
-  const model = getShapeFromType(layer.type)
+  const shapeRef = React.useRef()
+  const trRef = React.useRef()
+  const isCurrent = layer?.id === currentLayerId
+  const model = getShapeFromType(layer?.type || "polygon")
+
+  useEffect(() => {
+    if (layer?.visible && isCurrent && model.canChangeSize(layer)) {
+      trRef.current.nodes([shapeRef.current])
+      trRef.current.getLayer().batchDraw()
+    }
+  }, [isCurrent, layer, model.canMove, shapeRef, trRef])
+
+  if (!layer) {
+    // "zombie child" situation; the hooks (above) are able to deal with a
+    // null layer. If we're a zombie, we do not need to render.
+    return null
+  }
+
   const start = index === 0
   const end = index === numLayers - 1
   const width = layer.width
@@ -44,15 +73,13 @@ const PreviewLayer = (ownProps) => {
   const unselectedColor = "rgba(195, 214, 230, 0.65)"
   const backgroundSelectedColor = "#6E6E00"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
-  const isSelected = selected === ownProps.id
   const isSliding = sliderValue !== 0
-  const isCurrent = layer.id === currentLayer.id
   const helper = new PreviewHelper({ layer, vertices, offsets, bounds, colors })
 
   const drawLayerVertices = (context, bounds) => {
     const { end } = bounds
     let oldColor = null
-    let currentColor = isSelected ? selectedColor : unselectedColor
+    let currentColor = isCurrent ? selectedColor : unselectedColor
 
     context.beginPath()
     context.lineWidth = 1
@@ -120,7 +147,7 @@ const PreviewLayer = (ownProps) => {
       //      }
       drawLayerVertices(context, bounds)
 
-      if (start || end || isSelected) {
+      if (start || end || isCurrent) {
         drawStartAndEndPoints(context)
       }
       helper.drawSliderEndPoint(context)
@@ -140,7 +167,7 @@ const PreviewLayer = (ownProps) => {
 
   const handleSelect = () => {
     // deselection is currently disabled
-    // dispatch(setSelectedLayer(selected == null ? currentLayer.id : null))
+    // dispatch(setSelectedLayer(selected == null ? currentLayerId : null))
   }
 
   const handleDragStart = () => {
@@ -177,15 +204,21 @@ const PreviewLayer = (ownProps) => {
     })
   }
 
-  const shapeRef = React.useRef()
-  const trRef = React.useRef()
+  const handleWheel = (e) => {
+    if (isCurrent) {
+      e.evt.preventDefault()
 
-  useEffect(() => {
-    if (layer.visible && isSelected && model.canChangeSize(layer)) {
-      trRef.current.nodes([shapeRef.current])
-      trRef.current.getLayer().batchDraw()
+      if (Math.abs(e.evt.deltaY) > 0) {
+        dispatch(
+          updateLayer({
+            width: scaleByWheel(layer.width, e.evt.deltaY),
+            height: scaleByWheel(layer.height, e.evt.deltaY),
+            id: layer.id,
+          }),
+        )
+      }
     }
-  }, [isSelected, layer, model.canMove, shapeRef, trRef])
+  }
 
   return (
     <>
@@ -210,9 +243,10 @@ const PreviewLayer = (ownProps) => {
           onDragEnd={handleDragEnd}
           onTransformStart={handleTransformStart}
           onTransformEnd={handleTransformEnd}
+          onWheel={handleWheel}
         />
       )}
-      {layer.visible && isSelected && model.canChangeSize(layer) && (
+      {layer.visible && isCurrent && model.canChangeSize(layer) && (
         <Transformer
           ref={trRef}
           centeredScaling={true}
@@ -230,4 +264,4 @@ const PreviewLayer = (ownProps) => {
   )
 }
 
-export default PreviewLayer
+export default React.memo(PreviewLayer)

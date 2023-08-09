@@ -35,3 +35,8 @@ export const selectPreviewState = createSelector(
   selectState,
   (state) => state.preview,
 )
+
+export const selectPreviewSliderValue = createSelector(
+  selectPreviewState,
+  (state) => state.sliderValue,
+)

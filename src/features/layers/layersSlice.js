@@ -270,12 +270,16 @@ export const selectLayerMachine = createCachedSelector(
   selectLayerById,
   selectMachine,
   (layer, machine) => {
+    if (!layer) {
+      return null
+    } // zombie child
+
     const shape = getShapeFromType(layer.type)
     return shape.usesMachine ? machine : null
   },
 )((state, id) => id)
 
-const selectCurrentLayerId = createSelector(
+export const selectCurrentLayerId = createSelector(
   selectLayers,
   (layers) => layers.current,
 )
@@ -337,7 +341,8 @@ export const selectLayerEffects = createCachedSelector(
   selectLayerById,
   selectEffectsByLayerId,
   (layer, effects) => {
-    return orderByKey(layer.effectIds, effects)
+    // guard vs zombie child
+    return (layer && orderByKey(layer.effectIds, effects)) || []
   },
 )((state, id) => id)
 
@@ -355,6 +360,10 @@ export const selectLayerVertices = createCachedSelector(
   selectVisibleLayerEffects,
   selectLayerMachine,
   (layer, effects, machine) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
     const instance = new Layer(layer.type)
     return instance.getVertices({ layer, effects, machine })
   },
@@ -390,7 +399,11 @@ export const selectPreviewVertices = createCachedSelector(
   selectLayerVertices,
   selectMachineVertices,
   selectLayerById,
-  (originalVertices, computedVertices, layer, foo, bar) => {
+  (originalVertices, computedVertices, layer) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
     log("selectPreviewVertices", layer.id)
     const vertices = layer.dragging ? originalVertices : computedVertices
 
@@ -432,7 +445,7 @@ export const selectConnectingVertices = createCachedSelector(
   (state, id) => id,
   selectState,
   (layerId, state) => {
-    log("selectConnectingVertices")
+    log("selectConnectingVertices", layerId)
 
     const visibleLayerIds = selectVisibleLayerIds(state)
     const idx = selectLayerIndex(state, layerId)

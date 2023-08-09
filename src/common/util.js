@@ -1,4 +1,4 @@
-import { keyBy } from "lodash"
+import { keyBy, compact } from "lodash"
 
 export const difference = (a, b) => {
   // eslint-disable-next-line no-undef
@@ -63,5 +63,5 @@ export const downloadFile = (
 // returns an ordered list of objects based on a given key
 export const orderByKey = (keys, objects, keyName = "id") => {
   const objectMap = keyBy(objects, keyName)
-  return keys.map((key) => objectMap[key])
+  return compact(keys.map((key) => objectMap[key]))
 }

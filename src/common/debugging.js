@@ -1,7 +1,10 @@
 import { compact } from "lodash"
 
 // set to true to enable console logging
-const debug = false
+const debug = true
+
+// set to true to clear console before logging each state change
+const debugConsoleClear = true
 
 // limit which keys are shown, e.g., const keys = ['selectLayerById']
 const keys = null
@@ -18,6 +21,18 @@ export const log = (key, id) => {
 
       const message = [logCounts[keyId], keyId].join(" - ")
       console.log(message)
+    }
+  }
+}
+
+export const resetLogCounts = () => {
+  if (debug) {
+    for (const key of Object.getOwnPropertyNames(logCounts)) {
+      delete logCounts[key]
+    }
+
+    if (debugConsoleClear) {
+      console.clear()
     }
   }
 }

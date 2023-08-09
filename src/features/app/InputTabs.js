@@ -51,4 +51,4 @@ const InputTabs = () => {
   }
 }
 
-export default InputTabs
+export default React.memo(InputTabs)
