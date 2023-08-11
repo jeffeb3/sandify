@@ -7,7 +7,6 @@ const InputOption = ({
   options,
   optionKey,
   onChange,
-  delayKey,
   object,
   label = true,
 }) => {
@@ -18,6 +17,7 @@ const InputOption = ({
   }, [data, optionKey])
 
   const option = options[optionKey]
+  const { delayKey } = option
   const optionType = option.type || "number"
   const minimum =
     typeof option.min === "function" ? option.min(data) : parseFloat(option.min)
@@ -49,7 +49,7 @@ const InputOption = ({
     }
     onChange(attrs)
 
-    if (delayKey !== undefined) {
+    if (delayKey) {
       delayedSet(newValue, delayKey, onChange)
     }
   }

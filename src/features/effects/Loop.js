@@ -27,6 +27,7 @@ const options = {
   growMathInput: {
     title: "Scale function (i)",
     type: "text",
+    delayKey: "growMath",
     isVisible: (layer, state) => {
       return state.growMethod === "function"
     },
@@ -52,6 +53,7 @@ const options = {
   spinMathInput: {
     title: "Spin function (i)",
     type: "text",
+    delayKey: "spinMath",
     isVisible: (layer, state) => {
       return state.spinMethod === "function"
     },
@@ -111,13 +113,13 @@ export default class Loop extends Effect {
     }
   }
 
-  // TODO: replace with bounds for transformer
-  // getVertices(state) {
-  //  return circle(25)
-  //}
-
   getVertices(effect, layer, vertices) {
     const outputVertices = []
+
+    // weird case where user has turned off both grow and spin
+    if (!effect.growEnabled && !effect.spinEnabled) {
+      return vertices
+    }
 
     // remove first point if we are smearing
     if (effect.transformMethod === "smear") {
