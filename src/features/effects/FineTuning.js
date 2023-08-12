@@ -1,4 +1,12 @@
+import Victor from "victor"
 import { arrayRotate } from "@/common/util"
+import {
+  cloneVertices,
+  isLoop,
+  totalDistance,
+  distance,
+  boundingVerticesAtLength,
+} from "@/common/geometry"
 import Effect from "./Effect"
 
 const options = {
@@ -50,45 +58,92 @@ export default class FineTuning extends Effect {
     }
   }
 
-  // TODO: Replace with selecting bounding
-  //  getVertices(state) {
-  //    return circle(25)
-  //  }
-
   getVertices(effect, layer, vertices) {
-    // Remove one point if we are smearing
-    if (effect.transformMethod === "smear") {
-      vertices.pop()
-    }
-
-    let outputVertices = vertices
-
     if (
       effect.rotateStartingPct === undefined ||
       effect.rotateStartingPct !== 0
     ) {
-      const start = Math.round(
-        (outputVertices.length * effect.rotateStartingPct) / 100.0,
-      )
-      outputVertices = arrayRotate(outputVertices, start)
+      vertices = this.rotateStartingPoint(vertices, effect)
     }
 
     if (effect.drawPortionPct !== undefined) {
-      const drawPortionPct = Math.round(
-        ((parseInt(effect.drawPortionPct) || 100) / 100.0) *
-          outputVertices.length,
-      )
-      outputVertices = outputVertices.slice(0, drawPortionPct)
+      vertices = this.drawPortion(vertices, effect)
     }
 
-    const backtrack = Math.round(
-      (vertices.length * effect.backtrackPct) / 100.0,
-    )
-    outputVertices = outputVertices.concat(
-      outputVertices.slice(outputVertices.length - backtrack).reverse(),
+    if (effect.backtrackPct !== 0) {
+      vertices = this.backtrack(vertices, effect)
+    }
+
+    return vertices
+  }
+
+  // rotates the starting point of the shape based on a percentage of the overall length;
+  // adds a new vertex along the path to match the given percentage.
+  rotateStartingPoint(vertices, effect) {
+    let rotation = effect.rotateStartingPct
+    if (rotation < 0) {
+      rotation = 100 + rotation
+    }
+
+    const loop = isLoop(vertices)
+    const { vNew, index2 } = this.getBoundingSegment(vertices, rotation)
+
+    vertices.splice(index2, 0, vNew)
+    vertices = arrayRotate(vertices, index2)
+
+    if (loop) {
+      // close the loop
+      vertices.push(Victor.fromObject(vertices[0]))
+    }
+
+    return vertices
+  }
+
+  // draws a percentage-based portion of the shape; adds a new vertex along the path
+  // to match the given percentage.
+  drawPortion(vertices, effect) {
+    const { vNew, index2 } = this.getBoundingSegment(
+      vertices,
+      effect.drawPortionPct,
     )
 
-    return outputVertices
+    vertices.splice(index2)
+    vertices.push(vNew)
+
+    return vertices
+  }
+
+  // backtracks a percentage-based distance along the the shape's path; adds a new vertex
+  // along the path to match the given percentage.
+  backtrack(vertices, effect) {
+    const reversedVertices = [...vertices].reverse()
+    const { vNew, index2 } = this.getBoundingSegment(
+      reversedVertices,
+      effect.backtrackPct,
+    )
+    const backtrackVertices = cloneVertices(reversedVertices.slice(0, index2))
+    backtrackVertices.push(vNew)
+
+    return vertices.concat(backtrackVertices)
+  }
+
+  getBoundingSegment(vertices, pct) {
+    const d = Math.round((totalDistance(vertices) * pct) / 100.0)
+    const [v1, v2] = boundingVerticesAtLength(vertices, d)
+    const segmentLength = distance(v1, v2)
+    const d2 = d - totalDistance(vertices.slice(0, vertices.indexOf(v1) + 1))
+    const vNew = new Victor(
+      v1.x + (d2 * (v2.x - v1.x)) / segmentLength,
+      v1.y + (d2 * (v2.y - v1.y)) / segmentLength,
+    )
+    const index2 = vertices.indexOf(v2)
+
+    return {
+      v1,
+      v2,
+      vNew,
+      index2,
+    }
   }
 
   getOptions() {

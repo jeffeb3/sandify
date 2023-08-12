@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid"
 import Color from "color"
 import arrayMove from "array-move"
 import { isEqual } from "lodash"
-import { rotate, offset } from "@/common/geometry"
+import { rotate, offset, totalDistance } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
 import {
   getDefaultShapeType,
@@ -390,6 +390,8 @@ const selectMachineVertices = createCachedSelector(
       }
       const machineInstance = getMachineInstance(vertices, machine, layerInfo)
       return machineInstance.polish().vertices
+    } else {
+      return []
     }
   },
 )((state, id) => id)
@@ -513,23 +515,10 @@ export const selectVertexOffsets = createSelector(selectState, (state) => {
 export const selectVerticesStats = createSelector(
   selectConnectedVertices,
   (vertices) => {
-    let distance = 0.0
-    let previous = null
-
-    vertices.forEach((vertex) => {
-      if (previous && vertex) {
-        distance += Math.sqrt(
-          Math.pow(vertex.x - previous.x, 2.0) +
-            Math.pow(vertex.y - previous.y, 2.0),
-        )
-      }
-      previous = vertex
-    })
-
     log("getVerticeStats")
     return {
       numPoints: vertices.length,
-      distance: Math.floor(distance),
+      distance: Math.floor(totalDistance(vertices)),
     }
   },
 )

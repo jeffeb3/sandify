@@ -15,6 +15,39 @@ export const distance = (v1, v2) => {
   return Math.sqrt(Math.pow(v1.x - v2.x, 2.0) + Math.pow(v1.y - v2.y, 2.0))
 }
 
+export const totalDistance = (vertices) => {
+  let d = 0.0
+  let previous = null
+
+  vertices.forEach((vertex) => {
+    if (previous && vertex) {
+      d += distance(previous, vertex)
+    }
+    previous = vertex
+  })
+
+  return d
+}
+
+// returns the points whose cumulative length most closely match the target length
+export const boundingVerticesAtLength = (vertices, targetLength) => {
+  let cumulativeLength = 0
+
+  for (let i = 0; i < vertices.length - 1; i++) {
+    let dx = vertices[i + 1].x - vertices[i].x
+    let dy = vertices[i + 1].y - vertices[i].y
+    let segmentLength = Math.sqrt(dx * dx + dy * dy)
+
+    if (cumulativeLength + segmentLength >= targetLength) {
+      return [vertices[i], vertices[i + 1]]
+    }
+    cumulativeLength += segmentLength
+  }
+
+  // If target length is beyond the vertices, return the last two vertices
+  return [vertices[vertices.length - 2], vertices[vertices.length - 1]]
+}
+
 // calculate the coterminal angle (0..2*PI) of a given angle
 export const coterminal = (angle) => {
   return angle - Math.floor(angle / (Math.PI * 2)) * Math.PI * 2
@@ -319,6 +352,15 @@ export const findMinimumVertex = (value, arr, fn) => {
   return found
 }
 
+export const isLoop = (vertices, precision = 3) => {
+  return (
+    vertices.length > 1 &&
+    vertexRoundP(vertices[0], precision).isEqualTo(
+      vertexRoundP(vertices[vertices.length - 1], precision),
+    )
+  )
+}
+
 // Convert theta, rho vertices to goofy x, y, which really represent scara angles.
 export const toScaraGcode = (vertices, unitsPerCircle) => {
   return vertices.map((thetaRho) => {
@@ -333,6 +375,6 @@ export const toScaraGcode = (vertices, unitsPerCircle) => {
   })
 }
 
-export const pointsToVertices = (points) => {
+export const cloneVertices = (points) => {
   return points.map((point) => new Victor(point.x, point.y))
 }

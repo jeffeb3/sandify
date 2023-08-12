@@ -1,4 +1,4 @@
-import { resizeVertices, dimensions, pointsToVertices } from "@/common/geometry"
+import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
 import { getMachineInstance } from "@/features/machine/machineSlice"
 import Shape from "./Shape"
 
@@ -41,7 +41,7 @@ export default class FileImport extends Shape {
 
   initialDimensions(props) {
     const { machine } = props
-    const vertices = pointsToVertices(props.vertices)
+    const vertices = cloneVertices(props.vertices)
     const machineInstance = getMachineInstance(vertices, machine)
 
     // default to 80% of machine size
@@ -55,7 +55,7 @@ export default class FileImport extends Shape {
   }
 
   getVertices(state) {
-    return pointsToVertices(state.shape.vertices)
+    return cloneVertices(state.shape.vertices)
   }
 
   getOptions() {

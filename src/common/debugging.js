@@ -4,7 +4,7 @@ import { compact } from "lodash"
 const debug = true
 
 // set to true to clear console before logging each state change
-const debugConsoleClear = true
+const debugConsoleClear = false
 
 // limit which keys are shown, e.g., const keys = ['selectLayerById']
 const keys = null
