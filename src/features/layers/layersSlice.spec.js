@@ -271,28 +271,6 @@ describe("layers reducer", () => {
       })
     })
 
-    it("should handle setCurrentLayer", () => {
-      expect(
-        layersReducer(
-          {
-            entities: {
-              0: {},
-              1: {},
-            },
-            current: "0",
-          },
-          setCurrentLayer("1"),
-        ),
-      ).toEqual({
-        entities: {
-          0: {},
-          1: {},
-        },
-        current: "1",
-        selected: "1",
-      })
-    })
-
     it("should handle updateLayer", () => {
       expect(
         layersReducer(
@@ -344,7 +322,7 @@ describe("layers reducer", () => {
         const store = mockStore({
           layers: {
             entities: {
-              0: {
+              "0": {
                 id: "0",
                 name: "foo",
                 effectIds: ["1", "2"],
@@ -429,6 +407,44 @@ describe("layers reducer", () => {
           effectIds: ["1", "2"],
         })
       })
+    })
+
+    it("should handle setCurrentLayer", () => {
+      const store = mockStore({
+        layers: {
+          entities: {
+            0: {
+              id: "0",
+              name: "foo",
+              effectIds: ["a", "b"],
+            },
+          },
+          ids: ["0"],
+          selected: "0",
+          current: null,
+        },
+        effects: {
+          entities: {
+            a: {
+              id: "a",
+            },
+            b: {
+              id: "b",
+            },
+          },
+          ids: ["a", "b"],
+          selected: "a",
+          current: "a"
+        },
+      })
+
+      store.dispatch(
+        setCurrentLayer("0"),
+      )
+
+      const actions = store.getActions()
+      expect(actions[0].type).toEqual("layers/setCurrentLayer")
+      expect(actions[1].type).toEqual("effects/setCurrentEffect")
     })
   })
 })

@@ -2,8 +2,8 @@ import React from "react"
 import { Col, Row } from "react-bootstrap"
 import { Provider } from "react-redux"
 import Header from "./Header"
-import InputTabs from "./InputTabs"
-import Preview from "@/features/preview/Preview"
+import Tabs from "./Tabs"
+import PreviewManager from "@/features/preview/PreviewManager"
 import store from "./store"
 import "./App.scss"
 
@@ -16,11 +16,11 @@ const App = () => {
         <main>
           <Row className="no-gutters">
             <Col className="full-page d-flex flex-column">
-              <Preview />
+              <PreviewManager />
             </Col>
 
             <div id="sidebar">
-              <InputTabs />
+              <Tabs />
             </div>
           </Row>
         </main>

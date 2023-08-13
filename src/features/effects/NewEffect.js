@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import Select from "react-select"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
-import { selectCurrentLayer, addEffect } from "@/features/layers/layersSlice"
+import { selectSelectedLayer, addEffect } from "@/features/layers/layersSlice"
 import {
   getEffectSelectOptions,
   getDefaultEffect,
@@ -21,7 +21,7 @@ const customStyles = {
 
 const NewEffect = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const selectOptions = getEffectSelectOptions()
   const [type, setType] = useState(defaultEffect.type)
   const [name, setName] = useState(defaultEffect.label)
@@ -51,7 +51,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
 
     dispatch(
       addEffect({
-        id: currentLayer.id,
+        id: selectedLayer.id,
         effect: layer.getInitialState(),
       }),
     )

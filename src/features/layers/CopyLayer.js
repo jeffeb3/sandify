@@ -2,13 +2,13 @@ import React, { useRef, useState } from "react"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
 import { copyLayer } from "./layersSlice"
-import { selectCurrentLayer } from "./layersSlice"
+import { selectSelectedLayer } from "./layersSlice"
 
 const CopyLayer = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const namedInputRef = useRef(null)
-  const [copyLayerName, setCopyLayerName] = useState(currentLayer.name)
+  const [copyLayerName, setCopyLayerName] = useState(selectedLayer.name)
 
   const handleChangeCopyLayerName = (event) => {
     setCopyLayerName(event.target.value)
@@ -21,7 +21,7 @@ const CopyLayer = ({ toggleModal, showModal }) => {
   const handleCopyLayer = () => {
     dispatch(
       copyLayer({
-        id: currentLayer.id,
+        id: selectedLayer.id,
         name: copyLayerName,
       }),
     )
@@ -39,7 +39,7 @@ const CopyLayer = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {currentLayer.name}</Modal.Title>
+        <Modal.Title>Copy {selectedLayer.name}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>

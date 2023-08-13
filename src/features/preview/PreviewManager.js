@@ -4,22 +4,22 @@ import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import Downloader from "@/features/exporter/Downloader"
 import { selectFontsState } from "@/features/fonts/fontsSlice"
-import { selectCurrentLayer } from "@/features/layers/layersSlice"
+import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { updateLayer, selectVerticesStats } from "@/features/layers/layersSlice"
 import { getShapeFromType } from "@/features/shapes/factory"
-import "./Preview.scss"
+import "./PreviewManager.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
 
-const Preview = () => {
+const PreviewManager = () => {
   const dispatch = useDispatch()
   const fonts = useSelector(selectFontsState)
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const verticesStats = useSelector(selectVerticesStats)
   const previewElement = useRef(null)
-  const model = getShapeFromType(currentLayer.type)
+  const model = getShapeFromType(selectedLayer.type)
 
   useEffect(() => {
     if (fonts.loaded) {
@@ -33,21 +33,21 @@ const Preview = () => {
 
   const handleKeyDown = (event) => {
     if (model.canMove) {
-      let attrs = { id: currentLayer.id }
+      let attrs = { id: selectedLayer.id }
       const delta = event.shiftKey ? 1 : 5
 
       switch (event.key) {
         case "ArrowDown":
-          attrs.y = currentLayer.y - delta
+          attrs.y = selectedLayer.y - delta
           break
         case "ArrowUp":
-          attrs.y = currentLayer.y + delta
+          attrs.y = selectedLayer.y + delta
           break
         case "ArrowLeft":
-          attrs.x = currentLayer.x - delta
+          attrs.x = selectedLayer.x - delta
           break
         case "ArrowRight":
-          attrs.x = currentLayer.x + delta
+          attrs.x = selectedLayer.x + delta
           break
         default:
           return
@@ -101,4 +101,4 @@ const Preview = () => {
   )
 }
 
-export default React.memo(Preview)
+export default React.memo(PreviewManager)

@@ -1,30 +1,20 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Row, Col } from "react-bootstrap"
-import Select from "react-select"
 import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
-import { getEffectSelectOptions } from "@/features/effects/factory"
 import { updateEffect } from "./effectsSlice"
 import EffectLayer from "./EffectLayer"
-import { selectCurrentEffect } from "./effectsSlice"
+import { selectSelectedEffect } from "./effectsSlice"
 
 const EffectEditor = ({ id }) => {
   const dispatch = useDispatch()
-  const effect = useSelector(selectCurrentEffect)
+  const effect = useSelector(selectSelectedEffect)
+  const instance = new EffectLayer(effect.type)
   const model = new EffectLayer(effect.type).model
+  const effectOptions = instance.getOptions()
   const modelOptions = model.getOptions()
-  const selectOptions = getEffectSelectOptions()
-  const selectedOption = {
-    value: model.type,
-    label: model.label,
-  }
-
-  //  const handleChangeType = (selected) => {
-  //    dispatch(changeModelType({ id, type: selected.value }))
-  //  }
 
   const handleChange = (attrs) => {
     attrs.id = effect.id
@@ -34,29 +24,6 @@ const EffectEditor = ({ id }) => {
   //  const handleRestoreDefaults = () => {
   //    dispatch(restoreDefaults(id))
   //  }
-
-  const renderedModelSelection = (
-    <Row className="align-items-center">
-      <Col
-        sm={5}
-        className="mb-1"
-      >
-        Type
-      </Col>
-
-      <Col
-        sm={7}
-        className="mb-1"
-      >
-        <Select
-          value={selectedOption}
-          //          onChange={handleChangeType}
-          maxMenuHeight={305}
-          options={selectOptions}
-        />
-      </Col>
-    </Row>
-  )
 
   const getOptionComponent = (model, options, key, label = true) => {
     const option = options[key]
@@ -88,7 +55,8 @@ const EffectEditor = ({ id }) => {
 
   return (
     <div className="pl-1 overflow-hidden flex-grow-1 mt-3 container-fluid pr-0">
-      {renderedModelSelection}
+      {getOptionComponent(model, effectOptions, "width")}
+      {getOptionComponent(model, effectOptions, "height")}
       {renderedModelOptions}
     </div>
   )

@@ -1,13 +1,20 @@
 import Victor from "victor"
-import Effect from "./Effect"
 import * as d3Fisheye from "d3-fisheye"
+import { circle } from "@/common/geometry"
+import Effect from "./Effect"
 
 const options = {
   fisheyeDistortion: {
     title: "Distortion",
     min: -2,
     max: 40,
-    step: 0.1,
+    step: 1,
+  },
+  x: {
+    title: "X",
+  },
+  y: {
+    title: "Y",
   },
 }
 
@@ -15,12 +22,11 @@ export default class Fisheye extends Effect {
   constructor() {
     super("fisheye")
     this.label = "Fisheye"
-    this.startingWidth = 100
-    this.startingHeight = 100
+    this.canMove = true
   }
 
-  canRotate(state) {
-    return false
+  canChangeSize(state) {
+    return true
   }
 
   canChangeHeight(state) {
@@ -32,19 +38,24 @@ export default class Fisheye extends Effect {
       ...super.getInitialState(),
       ...{
         fisheyeDistortion: 3,
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
       },
     }
   }
 
-  // TODO: Replace with selecting bounding
-  // getVertices(state) {
-  //   return circle(this.startingWidth / 2)
-  // }
+  getSelectionVertices(effect) {
+    console.log("here")
+    return circle(effect.width / 2)
+  }
 
   getVertices(effect, layer, vertices) {
+    const radius = effect.width / 2
     const fisheye = d3Fisheye
       .radial()
-      .radius(effect.width / 2)
+      .radius(radius)
       .distortion(effect.fisheyeDistortion / 2)
     fisheye.focus([effect.x, effect.y])
 

@@ -26,6 +26,10 @@ const InputOption = ({
   const visible =
     option.isVisible === undefined ? true : option.isVisible(object, data)
 
+  if (!visible) {
+    return null
+  }
+
   const delayedSet = debounce((value, key, onChange) => {
     let attrs = {}
     attrs[key] = value

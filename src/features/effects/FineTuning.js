@@ -127,6 +127,9 @@ export default class FineTuning extends Effect {
     return vertices.concat(backtrackVertices)
   }
 
+  // given an array of vertices and a percentage, returns a new vertex (vNew) positioned at
+  // the percentage-based distance along the path, along with the two vertices (v1, v2) that bound
+  // it on either side.
   getBoundingSegment(vertices, pct) {
     const d = Math.round((totalDistance(vertices) * pct) / 100.0)
     const [v1, v2] = boundingVerticesAtLength(vertices, d)

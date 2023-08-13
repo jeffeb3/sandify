@@ -5,7 +5,7 @@ import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
 import {
-  selectCurrentLayer,
+  selectSelectedLayerId,
   selectNumLayers,
 } from "@/features/layers/layersSlice"
 import { deleteLayer } from "@/features/layers/layersSlice"
@@ -17,7 +17,7 @@ import "./LayerManager.scss"
 
 const LayerManager = () => {
   const dispatch = useDispatch()
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayerId = useSelector(selectSelectedLayerId)
   const numLayers = useSelector(selectNumLayers)
   const canRemove = numLayers > 1
 
@@ -28,7 +28,7 @@ const LayerManager = () => {
   const toggleNewLayerModal = () => setShowNewLayer(!showNewLayer)
   const toggleImportModal = () => setShowImportLayer(!showImportLayer)
   const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
-  const handleLayerRemoved = (id) => dispatch(deleteLayer(currentLayer.id))
+  const handleLayerRemoved = (id) => dispatch(deleteLayer(selectedLayerId))
 
   useEffect(() => {
     const el = document.getElementById("layers")

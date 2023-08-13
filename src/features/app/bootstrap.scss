@@ -45,8 +45,12 @@ h2 {
   background-color: #A0D4EB;
 }
 
-.list-group-item .active {
-  background-color: #2d6da4;
+.list-group-item.active {
+  background-color: lighten(#2d6da4, 5%);
+}
+
+.list-group-item.selected {
+  background-color: #d2d2d2;
 }
 
 .btn-group {

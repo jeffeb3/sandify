@@ -1,5 +1,5 @@
 import React from "react"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { Button, ListGroup } from "react-bootstrap"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core"
@@ -9,30 +9,34 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { moveEffect } from "@/features/layers/layersSlice"
-import { setCurrentEffect, updateEffect } from "./effectsSlice"
+import { moveEffect, setCurrentEffect } from "@/features/layers/layersSlice"
+import {
+  updateEffect,
+  selectCurrentEffectId,
+  selectSelectedEffectId,
+} from "./effectsSlice"
 
 const EffectRow = ({
-  active,
+  current,
+  selected,
   effect,
   handleEffectSelected,
   handleToggleEffectVisible,
 }) => {
   const { name, id, visible } = effect
-
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({
       id,
     })
-
   const style = {
     transform: `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`,
     cursor: isDragging ? "grabbing" : "grab",
   }
+  const itemClass = current ? "active" : selected ? "selected" : ""
 
   return (
     <ListGroup.Item
-      className={`layer p-0 ${active ? "active" : ""}`}
+      className={`layer p-0 ${itemClass}`}
       key={id}
       id={id}
       ref={setNodeRef}
@@ -41,7 +45,7 @@ const EffectRow = ({
       {...attributes}
     >
       <div
-        className={`layer-${active ? "active" : ""} d-flex align-items-center`}
+        className="d-flex align-items-center"
         onClick={handleEffectSelected}
       >
         <div className="layer-left">
@@ -61,8 +65,10 @@ const EffectRow = ({
   )
 }
 
-const EffectList = ({ effects, currentEffect, currentLayer }) => {
+const EffectList = ({ effects, currentEffect, selectedLayer }) => {
   const dispatch = useDispatch()
+  const currentEffectId = useSelector(selectCurrentEffectId)
+  const selectedEffectId = useSelector(selectSelectedEffectId)
 
   // row has to be dragged 3 pixels before dragging starts; this allows the buttons
   // on the row to work properly.
@@ -80,7 +86,7 @@ const EffectList = ({ effects, currentEffect, currentLayer }) => {
     if (active.id !== over.id) {
       const oldIndex = effects.findIndex((effect) => effect.id === active.id)
       const newIndex = effects.findIndex((effect) => effect.id === over.id)
-      dispatch(moveEffect({ id: currentLayer.id, oldIndex, newIndex }))
+      dispatch(moveEffect({ id: selectedLayer.id, oldIndex, newIndex }))
     }
   }
 
@@ -113,7 +119,8 @@ const EffectList = ({ effects, currentEffect, currentLayer }) => {
             <EffectRow
               id={effect.id}
               key={effect.id}
-              active={currentEffect?.id === effect.id}
+              current={currentEffectId === effect.id}
+              selected={selectedEffectId === effect.id}
               effect={effect}
               handleEffectSelected={handleEffectSelected}
               handleToggleEffectVisible={handleToggleEffectVisible}

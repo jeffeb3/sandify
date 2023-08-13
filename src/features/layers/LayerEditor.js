@@ -13,11 +13,11 @@ import { getShapeSelectOptions } from "@/features/shapes/factory"
 import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
 import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
-import { selectCurrentLayer } from "./layersSlice"
+import { selectSelectedLayer } from "./layersSlice"
 
 const LayerEditor = () => {
   const dispatch = useDispatch()
-  const layer = useSelector(selectCurrentLayer)
+  const layer = useSelector(selectSelectedLayer)
   const instance = new Layer(layer.type)
   const model = instance.model
   const layerOptions = instance.getOptions()
@@ -75,6 +75,8 @@ const LayerEditor = () => {
           onChange={handleChangeType}
           maxMenuHeight={305}
           options={selectOptions}
+          menuPortalTarget={document.body}
+          styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         />
       </Col>
     </Row>

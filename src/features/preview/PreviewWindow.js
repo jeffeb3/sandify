@@ -6,12 +6,12 @@ import throttle from "lodash/throttle"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { selectMachine } from "@/features/machine/machineSlice"
 import {
-  selectKonvaLayerIds,
+  selectSelectedLayer,
   selectVisibleLayerIds,
   selectIsDragging,
 } from "@/features/layers/layersSlice"
-import PreviewLayer from "./PreviewLayer"
-import PreviewConnector from "./PreviewConnector"
+import ShapePreview from "./ShapePreview"
+import ConnectorPreview from "./ConnectorPreview"
 import { setPreviewSize } from "./previewSlice"
 
 const PreviewWindow = () => {
@@ -20,8 +20,9 @@ const PreviewWindow = () => {
   const { rectangular, minX, minY, maxX, maxY, maxRadius } =
     useSelector(selectMachine)
   const { canvasWidth, canvasHeight } = useSelector(selectPreviewState)
-  const konvaIds = useSelector(selectKonvaLayerIds, isEqual)
+  const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
+  const remainingLayerIds = layerIds.filter((id) => id !== selectedLayer?.id)
   const dragging = useSelector(selectIsDragging)
 
   useEffect(() => {
@@ -75,6 +76,8 @@ const PreviewWindow = () => {
   const height = rectangular ? maxY - minY : maxRadius * 2
   const scale = relativeScale()
 
+  // some awkward rendering to put the current layer as the last child in the layer to ensure
+  // transformer rotation works; this is a Konva restriction.
   return (
     <Stage
       id="preview-wrapper"
@@ -109,25 +112,35 @@ const PreviewWindow = () => {
             offsetY={height / 2}
           />
         )}
-        {konvaIds.map((id, i) => {
-          const idx = layerIds.findIndex((layerId) => layerId === id)
-          const nextId =
-            idx !== -1 && idx < layerIds.length - 1 ? layerIds[idx + 1] : null
-          return [
-            nextId && (
-              <PreviewConnector
-                startId={id}
-                endId={nextId}
-                key={"c-" + i}
-              />
-            ),
-            <PreviewLayer
-              id={id}
-              key={i}
-              index={i}
-            />,
-          ].filter((e) => e !== null)
-        })}
+        {[
+          remainingLayerIds.map((id, i) => {
+            const idx = layerIds.findIndex((layerId) => layerId === id)
+            const nextId =
+              idx !== -1 && idx < layerIds.length - 1 ? layerIds[idx + 1] : null
+            return [
+              nextId && (
+                <ConnectorPreview
+                  startId={id}
+                  endId={nextId}
+                  key={"c-" + i}
+                />
+              ),
+              <ShapePreview
+                id={id}
+                key={id}
+                index={i}
+              />,
+            ]
+          }),
+          selectedLayer && (
+            <ShapePreview
+              id={selectedLayer.id}
+              key={selectedLayer.id}
+            />
+          ),
+        ]
+          .flat()
+          .filter((e) => e !== null)}
       </Layer>
     </Stage>
   )

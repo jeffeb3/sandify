@@ -65,3 +65,17 @@ export const orderByKey = (keys, objects, keyName = "id") => {
   const objectMap = keyBy(objects, keyName)
   return compact(keys.map((key) => objectMap[key]))
 }
+
+// given a delta value from a mouse wheel, returns the equivalent layer delta; used for resizing.
+export const scaleByWheel = (size, deltaY) => {
+  const sign = Math.sign(deltaY)
+  const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * sign
+  let newSize = Math.max(roundP(size * scale, 0), 1)
+
+  if (newSize === size) {
+    // if the log scaled value isn't big enough to move the scale
+    newSize = Math.max(sign + size, 1)
+  }
+
+  return newSize
+}

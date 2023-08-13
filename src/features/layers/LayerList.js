@@ -13,30 +13,30 @@ import Layer from "./Layer"
 import {
   moveLayer,
   setCurrentLayer,
-  selectCurrentLayer,
+  selectCurrentLayerId,
+  selectSelectedLayer,
   selectNumLayers,
   selectAllLayers,
   updateLayer,
 } from "@/features/layers/layersSlice"
 
 const LayerRow = ({
-  active,
+  current,
+  selected,
   numLayers,
   layer,
   handleLayerSelected,
   handleToggleLayerVisible,
 }) => {
   const { name, id, visible } = layer
-  const activeClass = active ? "active" : ""
+  const activeClass = current ? "active" : selected ? "selected" : ""
   const dragClass = numLayers > 1 ? "cursor-move" : ""
   const visibleClass = visible ? "" : "layer-hidden"
   const instance = new Layer(layer.type)
-
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({
       id,
     })
-
   const style = {
     transform: `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`,
     cursor: isDragging ? "grabbing" : "grab",
@@ -94,7 +94,8 @@ const LayerList = () => {
     }),
   )
   const dispatch = useDispatch()
-  const currentLayer = useSelector(selectCurrentLayer)
+  const currentLayerId = useSelector(selectCurrentLayerId)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const numLayers = useSelector(selectNumLayers)
   const layers = useSelector(selectAllLayers)
 
@@ -106,7 +107,7 @@ const LayerList = () => {
   const handleDragStart = ({ active }) => dispatch(setCurrentLayer(active.id))
 
   const handleToggleLayerVisible = (id) => {
-    dispatch(updateLayer({ id, visible: !currentLayer.visible }))
+    dispatch(updateLayer({ id, visible: !selectedLayer.visible }))
   }
 
   const handleDragEnd = ({ active, over }) => {
@@ -138,7 +139,8 @@ const LayerList = () => {
             <LayerRow
               id={layer.id}
               key={layer.id}
-              active={currentLayer.id === layer.id}
+              current={currentLayerId === layer.id}
+              selected={selectedLayer.id === layer.id}
               numLayers={numLayers}
               layer={layer}
               handleLayerSelected={handleLayerSelected}

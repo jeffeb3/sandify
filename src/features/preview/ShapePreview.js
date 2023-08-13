@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Shape, Transformer } from "react-konva"
+import { Shape, Transformer, Group } from "react-konva"
 import { isEqual } from "lodash"
 import {
   updateLayer,
@@ -8,34 +8,27 @@ import {
   selectLayerIndex,
   selectLayerById,
   selectNumVisibleLayers,
+  selectActiveEffect,
   selectPreviewVertices,
   selectSliderColors,
   selectVertexOffsets,
   selectSliderBounds,
 } from "@/features/layers/layersSlice"
 import { selectPreviewSliderValue } from "@/features/preview/previewSlice"
+import EffectPreview from "@/features/preview/EffectPreview"
 import { getShapeFromType } from "@/features/shapes/factory"
-import { roundP } from "@/common/util"
+import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
 
-const scaleByWheel = (size, deltaY) => {
-  const sign = Math.sign(deltaY)
-  const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * sign
-  let newSize = Math.max(roundP(size * scale, 0), 1)
-
-  if (newSize === size) {
-    // if the log scaled value isn't big enough to move the scale
-    newSize = Math.max(sign + size, 1)
-  }
-
-  return newSize
-}
-
-const PreviewLayer = (ownProps) => {
-  log(`PreviewLayer render ${ownProps.id}`)
+const ShapePreview = (ownProps) => {
+  log(`ShapePreview render ${ownProps.id}`)
   const dispatch = useDispatch()
   const currentLayerId = useSelector(selectCurrentLayerId)
+  const activeEffect = useSelector(
+    (state) => selectActiveEffect(state, ownProps.id),
+    isEqual,
+  )
   const layer = useSelector((state) => selectLayerById(state, ownProps.id))
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
@@ -48,16 +41,17 @@ const PreviewLayer = (ownProps) => {
   const bounds = useSelector(selectSliderBounds, isEqual)
 
   const shapeRef = React.useRef()
+  const groupRef = React.useRef()
   const trRef = React.useRef()
   const isCurrent = layer?.id === currentLayerId
   const model = getShapeFromType(layer?.type || "polygon")
 
   useEffect(() => {
     if (layer?.visible && isCurrent && model.canChangeSize(layer)) {
-      trRef.current.nodes([shapeRef.current])
+      trRef.current.nodes([groupRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isCurrent, layer, model.canMove, shapeRef, trRef])
+  }, [isCurrent, activeEffect, layer, model.canMove, groupRef, trRef])
 
   if (!layer) {
     // "zombie child" situation; the hooks (above) are able to deal with a
@@ -67,8 +61,7 @@ const PreviewLayer = (ownProps) => {
 
   const start = index === 0
   const end = index === numLayers - 1
-  const width = layer.width
-  const height = layer.height
+  const { width, height } = layer
   const selectedColor = "yellow"
   const unselectedColor = "rgba(195, 214, 230, 0.65)"
   const backgroundSelectedColor = "#6E6E00"
@@ -165,43 +158,46 @@ const PreviewLayer = (ownProps) => {
     dispatch(updateLayer(attrs))
   }
 
-  const handleSelect = () => {
-    // deselection is currently disabled
-    // dispatch(setSelectedLayer(selected == null ? currentLayerId : null))
-  }
-
-  const handleDragStart = () => {
-    if (isCurrent) {
-      handleChange({ dragging: true })
+  const handleDragStart = (e) => {
+    if (e.currentTarget === e.target) {
+      if (isCurrent) {
+        handleChange({ dragging: true })
+      }
     }
   }
 
   const handleDragEnd = (e) => {
-    handleChange({
-      dragging: false,
-      x: roundP(e.target.x(), 0),
-      y: roundP(-e.target.y(), 0),
-    })
+    if (e.currentTarget === e.target) {
+      handleChange({
+        dragging: false,
+        x: roundP(e.target.x(), 0),
+        y: roundP(-e.target.y(), 0),
+      })
+    }
   }
 
   const handleTransformStart = (e) => {
-    handleChange({ dragging: true })
+    if (e.currentTarget === e.target) {
+      handleChange({ dragging: true })
+    }
   }
 
   const handleTransformEnd = (e) => {
-    const node = shapeRef.current
-    const scaleX = node.scaleX()
-    const scaleY = node.scaleY()
+    if (e.currentTarget === e.target) {
+      const node = groupRef.current
+      const scaleX = node.scaleX()
+      const scaleY = node.scaleY()
 
-    node.scaleX(1)
-    node.scaleY(1)
+      node.scaleX(1)
+      node.scaleY(1)
 
-    handleChange({
-      dragging: false,
-      width: roundP(Math.max(5, layer.width * scaleX), 0),
-      height: roundP(Math.max(5, layer.height * scaleY), 0),
-      rotation: roundP(node.rotation(), 0),
-    })
+      handleChange({
+        dragging: false,
+        width: roundP(Math.max(5, layer.width * scaleX), 0),
+        height: roundP(Math.max(5, layer.height * scaleY), 0),
+        rotation: roundP(node.rotation(), 0),
+      })
+    }
   }
 
   const handleWheel = (e) => {
@@ -221,31 +217,39 @@ const PreviewLayer = (ownProps) => {
   }
 
   return (
-    <>
-      {layer.visible && (
-        <Shape
-          {...ownProps}
-          draggable={model.canMove && isCurrent}
-          width={width}
-          height={height}
-          offsetY={height / 2}
-          offsetX={width / 2}
-          x={layer.x || 0}
-          y={-layer.y || 0}
-          onClick={handleSelect}
-          onTap={handleSelect}
-          ref={shapeRef}
-          strokeWidth={1}
-          rotation={layer.rotation || 0}
-          sceneFunc={sceneFunc}
-          hitFunc={hitFunc}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onTransformStart={handleTransformStart}
-          onTransformEnd={handleTransformEnd}
-          onWheel={handleWheel}
-        />
-      )}
+    <Group>
+      <Group
+        ref={groupRef}
+        x={layer.x || 0}
+        y={-layer.y || 0}
+        rotation={layer.rotation || 0}
+        onTransformStart={handleTransformStart}
+        onTransformEnd={handleTransformEnd}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        draggable={model.canMove && isCurrent}
+      >
+        {layer.visible && (
+          <Shape
+            {...ownProps}
+            width={width}
+            height={height}
+            offsetY={height / 2}
+            offsetX={width / 2}
+            ref={shapeRef}
+            strokeWidth={1}
+            sceneFunc={sceneFunc}
+            hitFunc={hitFunc}
+            onWheel={handleWheel}
+          />
+        )}
+        {activeEffect && (
+          <EffectPreview
+            id={activeEffect.id}
+            key={activeEffect.id}
+          />
+        )}
+      </Group>
       {layer.visible && isCurrent && model.canChangeSize(layer) && (
         <Transformer
           ref={trRef}
@@ -260,8 +264,8 @@ const PreviewLayer = (ownProps) => {
           }
         />
       )}
-    </>
+    </Group>
   )
 }
 
-export default React.memo(PreviewLayer)
+export default React.memo(ShapePreview)

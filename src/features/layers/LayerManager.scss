@@ -5,6 +5,10 @@
     color: white;
     background-color: inherit;
   }
+
+  .selected.list-group-item & {
+    background-color: #d2d2d2;
+  }
 }
 
 .cursor-move {

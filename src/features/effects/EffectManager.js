@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { Card, Accordion } from "react-bootstrap"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import {
-  selectCurrentLayer,
+  selectSelectedLayer,
   deleteEffect,
   selectLayerEffects,
 } from "@/features/layers/layersSlice"
@@ -15,10 +15,10 @@ import NewEffect from "./NewEffect"
 
 const EffectManager = () => {
   const dispatch = useDispatch()
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const currentEffect = useSelector(selectCurrentEffect)
   const effects = useSelector((state) =>
-    selectLayerEffects(state, currentLayer.id),
+    selectLayerEffects(state, selectedLayer.id),
   )
   const numEffects = effects.length
   const [showNewEffect, setShowNewEffect] = useState(false)
@@ -27,7 +27,7 @@ const EffectManager = () => {
   const handleEffectDeleted = (id) => {
     dispatch(
       deleteEffect({
-        id: currentLayer.id,
+        id: selectedLayer.id,
         effectId: currentEffect.id,
       }),
     )
@@ -66,11 +66,11 @@ const EffectManager = () => {
               </Accordion.Toggle>
             </Card.Header>
             <Accordion.Collapse eventKey={3}>
-              <Card.Body>
+              <Card.Body className="p-0">
                 <EffectList
                   effects={effects}
                   currentEffect={currentEffect}
-                  currentLayer={currentLayer}
+                  selectedLayer={selectedLayer}
                 />
                 <div className="d-flex align-items-center border-left border-right border-bottom">
                   <Button
@@ -101,7 +101,9 @@ const EffectManager = () => {
                     </Button>
                   </div>
                 </div>
-                <EffectEditor />
+                <div className="px-3 pb-3 pt-2">
+                  <EffectEditor />
+                </div>
               </Card.Body>
             </Accordion.Collapse>
           </Card>

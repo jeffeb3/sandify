@@ -3,13 +3,13 @@ import { Tab, Tabs } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
 import MachineSettings from "@/features/machine/MachineSettings"
 import LayerManager from "@/features/layers/LayerManager"
-import { selectCurrentLayer } from "@/features/layers/layersSlice"
+import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 import Footer from "./Footer"
 
-const InputTabs = () => {
+const AppTabs = () => {
   const dispatch = useDispatch()
-  const layer = useSelector(selectCurrentLayer)
+  const layer = useSelector(selectSelectedLayer)
 
   useEffect(() => {
     Object.keys(supportedFonts).forEach((url) => dispatch(loadFont(url)))
@@ -51,4 +51,4 @@ const InputTabs = () => {
   }
 }
 
-export default React.memo(InputTabs)
+export default React.memo(AppTabs)

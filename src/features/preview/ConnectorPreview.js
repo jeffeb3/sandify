@@ -3,7 +3,7 @@ import { useSelector } from "react-redux"
 import { isEqual } from "lodash"
 import { Shape } from "react-konva"
 import {
-  selectCurrentLayer,
+  selectSelectedLayer,
   selectLayerById,
   selectSliderBounds,
   selectSliderColors,
@@ -13,9 +13,9 @@ import {
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import PreviewHelper from "./PreviewHelper"
 
-const PreviewConnector = (ownProps) => {
+const ConnectorPreview = (ownProps) => {
   const { startId, endId } = ownProps
-  const currentLayer = useSelector(selectCurrentLayer)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const startLayer = useSelector((state) => selectLayerById(state, startId))
   const endLayer = useSelector((state) => selectLayerById(state, endId))
   const vertices = useSelector((state) =>
@@ -31,7 +31,7 @@ const PreviewConnector = (ownProps) => {
   } // no longer valid
 
   const helper = new PreviewHelper({
-    currentLayer,
+    selectedLayer,
     startLayer,
     endLayer,
     vertices,
@@ -48,7 +48,7 @@ const PreviewConnector = (ownProps) => {
   const backgroundSelectedColor = "#6E6E00"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = sliderValue !== 0
-  const isSelected = currentLayer.id === endLayer.id
+  const isSelected = selectedLayer.id === endLayer.id
 
   function sceneFunc(context, shape) {
     drawConnector(context)
@@ -107,4 +107,4 @@ const PreviewConnector = (ownProps) => {
   )
 }
 
-export default React.memo(PreviewConnector)
+export default React.memo(ConnectorPreview)

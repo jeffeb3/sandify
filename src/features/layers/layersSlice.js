@@ -17,6 +17,7 @@ import {
   effectsSlice,
   selectEffectById,
   selectEffectsByLayerId,
+  selectCurrentEffect,
 } from "@/features/effects/effectsSlice"
 import {
   selectMachine,
@@ -38,9 +39,9 @@ const layerState = {
 }
 const notCopiedWhenTypeChanges = ["type", "height", "width"]
 
-function currLayerIndex(state) {
-  const currentLayer = state.entities[state.current]
-  return state.ids.findIndex((id) => id === currentLayer.id)
+const currSelectedIndex = (state) => {
+  const selectedLayer = state.entities[state.selected]
+  return state.ids.findIndex((id) => id === selectedLayer.id)
 }
 
 const layersSlice = createSlice({
@@ -57,7 +58,7 @@ const layersSlice = createSlice({
     addLayer: {
       reducer(state, action) {
         // we need to insert at a specific index, which is not supported by addOne
-        const index = state.current ? currLayerIndex(state) + 1 : 0
+        const index = state.selected ? currSelectedIndex(state) + 1 : 0
         const layer = {
           ...action.payload,
           effectIds: [],
@@ -152,8 +153,10 @@ const layersSlice = createSlice({
     },
     setCurrentLayer: (state, action) => {
       const id = action.payload
-
-      if (state.entities[id]) {
+      console.log(id)
+      if (!id) {
+        state.current = null
+      } else if (state.entities[id]) {
         state.current = id
         state.selected = id
       }
@@ -215,7 +218,7 @@ export const addEffect = ({ id, effect }) => {
 export const deleteEffect = ({ id, effectId }) => {
   return (dispatch, getState) => {
     const state = getState()
-    const effectIds = selectCurrentLayer(state).effectIds
+    const effectIds = selectLayerById(state, id).effectIds
     const deleteIdx = effectIds.findIndex((id) => id === effectId)
 
     dispatch(layersSlice.actions.removeEffect({ id, effectId }))
@@ -224,6 +227,20 @@ export const deleteEffect = ({ id, effectId }) => {
     if (effectIds.length > 1) {
       dispatch(effectsSlice.actions.setCurrentEffect(effectIds[deleteIdx - 1]))
     }
+  }
+}
+
+export const setCurrentLayer = (id) => {
+  return (dispatch, getState) => {
+    dispatch(layersSlice.actions.setCurrentLayer(id))
+    dispatch(effectsSlice.actions.setCurrentEffect(null))
+  }
+}
+
+export const setCurrentEffect = (id) => {
+  return (dispatch, getState) => {
+    dispatch(effectsSlice.actions.setCurrentEffect(id))
+    dispatch(layersSlice.actions.setCurrentLayer(null))
   }
 }
 
@@ -236,7 +253,6 @@ export const {
   moveLayer,
   removeEffect,
   restoreDefaults,
-  setCurrentLayer,
   updateLayer,
 } = layersSlice.actions
 
@@ -284,10 +300,22 @@ export const selectCurrentLayerId = createSelector(
   (layers) => layers.current,
 )
 
+export const selectSelectedLayerId = createSelector(
+  selectLayers,
+  (layers) => layers.selected,
+)
+
 export const selectCurrentLayer = createSelector(
   [selectLayerEntities, selectCurrentLayerId],
-  (layers, current) => {
-    return layers[current]
+  (layers, currentId) => {
+    return layers[currentId]
+  },
+)
+
+export const selectSelectedLayer = createSelector(
+  [selectLayerEntities, selectSelectedLayerId],
+  (layers, selectedId) => {
+    return layers[selectedId]
   },
 )
 
@@ -295,19 +323,6 @@ export const selectVisibleLayerIds = createSelector(
   [selectLayerIds, selectLayerEntities],
   (layerIds, layers) => {
     return layerIds.filter((id) => layers[id].visible)
-  },
-)
-
-// puts the current layer last in the list to ensure it can be rotated; else
-// the handle will not rotate
-export const selectKonvaLayerIds = createSelector(
-  [selectCurrentLayer, selectVisibleLayerIds],
-  (currentLayer, visibleLayerIds) => {
-    const kIds = visibleLayerIds.filter((id) => id !== currentLayer.id)
-    if (currentLayer.visible) {
-      kIds.push(currentLayer.id)
-    }
-    return kIds
   },
 )
 
@@ -351,6 +366,16 @@ export const selectVisibleLayerEffects = createCachedSelector(
   selectLayerEffects,
   (effects) => {
     return effects.filter((effect) => effect.visible)
+  },
+)((state, id) => id)
+
+export const selectActiveEffect = createCachedSelector(
+  selectLayerById,
+  selectCurrentEffect,
+  (layer, currentEffect) => {
+    if (layer.effectIds.includes(currentEffect?.id)) {
+      return currentEffect
+    }
   },
 )((state, id) => id)
 

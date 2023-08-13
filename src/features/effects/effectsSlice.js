@@ -1,8 +1,10 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector } from "reselect"
+import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
+import { isEqual } from "lodash"
 import { v4 as uuidv4 } from "uuid"
 import { selectState } from "@/features/app/appSlice"
+import EffectLayer from "./EffectLayer"
 
 // ------------------------------
 // Slice, reducers and atomic actions
@@ -28,6 +30,7 @@ export const effectsSlice = createSlice({
         state.ids.splice(index, 0, effect.id)
         state.entities[effect.id] = effect
         state.current = effect.id
+        state.selected = effect.id
         localStorage.setItem("defaultEffect", effect.type)
       },
       prepare(effect) {
@@ -54,7 +57,9 @@ export const effectsSlice = createSlice({
     setCurrentEffect: (state, action) => {
       const id = action.payload
 
-      if (state.entities[id]) {
+      if (!id) {
+        state.current = null // preserve selection
+      } else if (state.entities[id]) {
         state.current = id
         state.selected = id
       }
@@ -63,8 +68,7 @@ export const effectsSlice = createSlice({
 })
 
 export default effectsSlice.reducer
-export const { addEffect, deleteEffect, updateEffect, setCurrentEffect } =
-  effectsSlice.actions
+export const { addEffect, deleteEffect, updateEffect, setCurrentEffect } = effectsSlice.actions
 
 // ------------------------------
 // Selectors
@@ -93,14 +97,44 @@ export const selectEffectsByLayerId = createCachedSelector(
   keySelector: (state, layerId) => layerId,
 })
 
-const selectCurrentEffectId = createSelector(
+export const selectCurrentEffectId = createSelector(
   selectEffects,
   (effects) => effects.current,
 )
 
+export const selectSelectedEffectId = createSelector(
+  selectEffects,
+  (effects) => effects.selected,
+)
+
 export const selectCurrentEffect = createSelector(
   [selectEffectEntities, selectCurrentEffectId],
-  (effects, current) => {
-    return effects[current]
+  (effects, currentId) => {
+    return effects[currentId]
   },
 )
+
+export const selectSelectedEffect = createSelector(
+  [selectEffectEntities, selectSelectedEffectId],
+  (effects, selectedId) => {
+    return effects[selectedId]
+  },
+)
+
+// returns the selection vertices for a given effect
+export const selectEffectSelectionVertices = createCachedSelector(
+  selectEffectById,
+  (effect) => {
+    if (!effect) {
+      return []
+    } // zombie child
+
+    const instance = new EffectLayer(effect.type)
+    return instance.getSelectionVertices(effect)
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
