@@ -1,6 +1,7 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Button, ListGroup } from "react-bootstrap"
+import { Tooltip } from "react-tooltip"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
@@ -44,6 +45,7 @@ const EffectRow = ({
       {...listeners}
       {...attributes}
     >
+      <Tooltip id="tooltip-toggle-visible" />
       <div
         className="d-flex align-items-center"
         onClick={handleEffectSelected}
@@ -53,6 +55,8 @@ const EffectRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
+            data-tooltip-content={visible ? "Hide effect" : "Show effect" }
+            data-tooltip-id="tooltip-toggle-visible"
             onClick={() => handleToggleEffectVisible(id)}
           >
             {visible ? <FaEye size="0.8em" /> : <FaEyeSlash size="0.8em" />}
@@ -112,7 +116,7 @@ const EffectList = ({ effects, currentEffect, selectedLayer }) => {
         <ListGroup
           variant="flush"
           style={{ maxHeight: "240px" }}
-          className="border overflow-auto"
+          className="border overflow-visible"
           id="effects"
         >
           {effects.map((effect, index) => (

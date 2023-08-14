@@ -1,5 +1,6 @@
 import React from "react"
 import { Button, ListGroup } from "react-bootstrap"
+import { Tooltip } from "react-tooltip"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { useSelector, useDispatch } from "react-redux"
 import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core"
@@ -52,6 +53,7 @@ const LayerRow = ({
       {...listeners}
       {...attributes}
     >
+      <Tooltip id="tooltip-toggle-visible" />
       <div
         className={`layer-${activeClass} d-flex align-items-center`}
         onClick={handleLayerSelected}
@@ -61,6 +63,8 @@ const LayerRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
+            data-tooltip-content={visible ? "Hide layer" : "Show layer" }
+            data-tooltip-id="tooltip-toggle-visible"
             onClick={() => {
               handleToggleLayerVisible(id)
             }}

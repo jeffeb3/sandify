@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { Button } from "react-bootstrap"
+import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
 import { Card, Accordion } from "react-bootstrap"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
@@ -73,28 +74,35 @@ const EffectManager = () => {
                   selectedLayer={selectedLayer}
                 />
                 <div className="d-flex align-items-center border-left border-right border-bottom">
+                  <Tooltip id="tooltip-new-effect" />
                   <Button
                     className="ml-2 layer-button"
                     variant="light"
                     size="sm"
-                    data-tip="Create new effect"
+                    data-tooltip-content="Create new effect"
+                    data-tooltip-id="tooltip-new-layer"
                     onClick={toggleNewEffectModal}
                   >
                     <FaPlusSquare />
                   </Button>
                   <div className="ml-auto">
+                    <Tooltip id="tooltip-delete-effect" />
                     <Button
                       className="layer-button"
                       variant="light"
-                      data-tip="Delete effect"
+                      data-tooltip-content="Delete effect"
+                      data-tooltip-id="tooltip-delete-layer"
                       onClick={handleEffectDeleted}
                     >
                       <FaTrash />
                     </Button>
+                    <Tooltip id="tooltip-copy-effect" />
                     <Button
                       className="layer-button"
                       variant="light"
                       data-tip="Copy effect"
+                      data-tooltip-content="Copy effect"
+                      data-tooltip-id="tooltip-copy-layer"
                       // onClick={toggleCopyEffect}
                     >
                       <FaCopy />

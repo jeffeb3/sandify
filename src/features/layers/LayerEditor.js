@@ -113,7 +113,7 @@ const LayerEditor = () => {
   ))
 
   return (
-    <div className="px-3 overflow-auto flex-grow-1 border pt-3">
+    <div className="px-3 overflow-visible flex-grow-1 border pt-3">
       <Accordion
         key={1}
         defaultActiveKey={1}

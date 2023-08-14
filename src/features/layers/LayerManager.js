@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { Button } from "react-bootstrap"
+import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
@@ -54,38 +55,46 @@ const LayerManager = () => {
       <div className="p-3">
         <LayerList />
         <div className="d-flex align-items-center border-left border-right border-bottom">
+          <Tooltip id="tooltip-new-layer" />
           <Button
             className="ml-2 layer-button"
             variant="light"
             size="sm"
-            data-tip="Create new layer"
+            data-tooltip-content="Create new layer"
+            data-tooltip-id="tooltip-new-layer"
             onClick={toggleNewLayerModal}
           >
             <FaPlusSquare />
           </Button>
+          <Tooltip id="tooltip-import-layer" />
           <Button
             className="layer-button"
             variant="light"
-            data-tip="Import new layer"
+            data-tooltip-content="Import new layer"
+            data-tooltip-id="tooltip-import-layer"
             onClick={toggleImportModal}
           >
             <MdOutlineFileUpload />
           </Button>
           <div className="ml-auto">
+            {canRemove && <Tooltip id="tooltip-delete-layer" />}
             {canRemove && (
               <Button
                 className="layer-button"
                 variant="light"
-                data-tip="Delete layer"
+                data-tooltip-content="Delete layer"
+                data-tooltip-id="tooltip-delete-layer"
                 onClick={handleLayerRemoved}
               >
                 <FaTrash />
               </Button>
             )}
+            <Tooltip id="tooltip-copy-layer" />
             <Button
               className="layer-button"
               variant="light"
-              data-tip="Copy layer"
+              data-tooltip-content="Copy layer"
+              data-tooltip-id="tooltip-copy-layer"
               onClick={toggleCopyModal}
             >
               <FaCopy />

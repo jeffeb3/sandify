@@ -43,6 +43,7 @@ describe("effects reducer", () => {
         },
       },
       current: "1",
+      selected: "1",
     })
   })
 
