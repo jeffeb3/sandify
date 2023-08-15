@@ -58,14 +58,12 @@ describe("effects reducer", () => {
               name: "foo",
             },
           },
-          current: "1",
         },
         deleteEffect("1"),
       ),
     ).toEqual({
       entities: {},
       ids: [],
-      current: undefined,
     })
   })
 

@@ -1,5 +1,8 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { IconContext } from "react-icons"
+import { AiOutlineRotateRight } from "react-icons/ai"
+import { Row, Col } from "react-bootstrap"
 import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
@@ -13,17 +16,13 @@ const EffectEditor = ({ id }) => {
   const effect = useSelector(selectSelectedEffect)
   const instance = new EffectLayer(effect.type)
   const model = new EffectLayer(effect.type).model
-  const effectOptions = instance.getOptions()
+  const layerOptions = instance.getOptions()
   const modelOptions = model.getOptions()
 
   const handleChange = (attrs) => {
     attrs.id = effect.id
     dispatch(updateEffect(attrs))
   }
-
-  //  const handleRestoreDefaults = () => {
-  //    dispatch(restoreDefaults(id))
-  //  }
 
   const getOptionComponent = (model, options, key, label = true) => {
     const option = options[key]
@@ -55,8 +54,43 @@ const EffectEditor = ({ id }) => {
 
   return (
     <div className="pl-1 overflow-hidden flex-grow-1 mt-3 container-fluid pr-0">
-      {getOptionComponent(model, effectOptions, "width")}
-      {getOptionComponent(model, effectOptions, "height")}
+      {model.canTransform(effect) && (
+        <Row className="align-items-center mt-1 mb-2">
+          <Col sm={5}>Transform</Col>
+          <Col sm={7}>
+            {model.canMove && (
+              <Row>
+                <Col xs={6}>{getOptionComponent(model, layerOptions, "x")}</Col>
+                <Col xs={6}>{getOptionComponent(model, layerOptions, "y")}</Col>
+              </Row>
+            )}
+            {model.canChangeSize(effect) && (
+              <Row className="mt-1">
+                <Col xs={6}>
+                  {getOptionComponent(model, layerOptions, "width")}
+                </Col>
+                <Col xs={6}>
+                  {getOptionComponent(model, layerOptions, "height")}
+                </Col>
+              </Row>
+            )}
+            {model.canRotate(effect) && (
+              <Row className="mt-1">
+                <Col xs={6}>
+                  <div className="d-flex align-items-center">
+                    <div className="mr-1">
+                      <IconContext.Provider value={{ size: "1.3rem" }}>
+                        <AiOutlineRotateRight />
+                      </IconContext.Provider>
+                    </div>
+                    {getOptionComponent(model, layerOptions, "rotation", false)}
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </Col>
+        </Row>
+      )}
       {renderedModelOptions}
     </div>
   )

@@ -18,6 +18,7 @@ import {
   selectEffectById,
   selectEffectsByLayerId,
   selectCurrentEffect,
+  selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
 import {
   selectMachine,
@@ -83,13 +84,7 @@ const layersSlice = createSlice({
     },
     deleteLayer: (state, action) => {
       const deleteId = action.payload
-      const deleteIdx = state.ids.findIndex((id) => id === deleteId)
       layersAdapter.removeOne(state, deleteId)
-
-      if (deleteId === state.current) {
-        const idx = deleteIdx === state.ids.length ? deleteIdx - 1 : deleteIdx
-        state.current = state.ids[idx]
-      }
     },
     moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
@@ -153,7 +148,7 @@ const layersSlice = createSlice({
     },
     setCurrentLayer: (state, action) => {
       const id = action.payload
-      console.log(id)
+
       if (!id) {
         state.current = null
       } else if (state.entities[id]) {
@@ -163,98 +158,6 @@ const layersSlice = createSlice({
     },
   },
 })
-
-// ------------------------------
-// Compound actions (thunks) that make multiple changes to the store across reducers,
-// but only render once.
-// ------------------------------
-
-export const deleteLayer = (id) => {
-  return (dispatch, getState) => {
-    const state = getState()
-    const layer = selectById(state, id)
-
-    // delete the effects, and then delete the layer
-    layer.effectIds.forEach((effectId) => {
-      dispatch(effectsSlice.actions.deleteEffect(effectId))
-    })
-    dispatch(layersSlice.actions.deleteLayer(id))
-  }
-}
-
-export const copyLayer = ({ id, name }) => {
-  return (dispatch, getState) => {
-    const state = getState()
-    const layer = selectById(state, id)
-    const newLayer = {
-      ...layer,
-      name,
-    }
-
-    // copy effects
-    newLayer.effectIds = layer.effectIds.map((effectId) => {
-      const effect = selectEffectById(state, effectId)
-      return dispatch(effectsSlice.actions.addEffect(effect)).meta.id
-    })
-
-    // create new layer
-    dispatch(layersSlice.actions.addLayer(newLayer))
-  }
-}
-
-export const addEffect = ({ id, effect }) => {
-  return (dispatch) => {
-    // create the effect first, and then add it to the layer
-    const action = dispatch(
-      effectsSlice.actions.addEffect({
-        ...effect,
-        layerId: id,
-      }),
-    )
-    dispatch(layersSlice.actions.addEffect({ id, effectId: action.meta.id }))
-  }
-}
-
-export const deleteEffect = ({ id, effectId }) => {
-  return (dispatch, getState) => {
-    const state = getState()
-    const effectIds = selectLayerById(state, id).effectIds
-    const deleteIdx = effectIds.findIndex((id) => id === effectId)
-
-    dispatch(layersSlice.actions.removeEffect({ id, effectId }))
-    dispatch(effectsSlice.actions.deleteEffect(effectId))
-
-    if (effectIds.length > 1) {
-      dispatch(effectsSlice.actions.setCurrentEffect(effectIds[deleteIdx - 1]))
-    }
-  }
-}
-
-export const setCurrentLayer = (id) => {
-  return (dispatch, getState) => {
-    dispatch(layersSlice.actions.setCurrentLayer(id))
-    dispatch(effectsSlice.actions.setCurrentEffect(null))
-  }
-}
-
-export const setCurrentEffect = (id) => {
-  return (dispatch, getState) => {
-    dispatch(effectsSlice.actions.setCurrentEffect(id))
-    dispatch(layersSlice.actions.setCurrentLayer(null))
-  }
-}
-
-export default layersSlice.reducer
-export const { actions: layersActions } = layersSlice
-export const {
-  addLayer,
-  changeModelType,
-  moveEffect,
-  moveLayer,
-  removeEffect,
-  restoreDefaults,
-  updateLayer,
-} = layersSlice.actions
 
 // ------------------------------
 // Selectors
@@ -373,6 +276,9 @@ export const selectActiveEffect = createCachedSelector(
   selectLayerById,
   selectCurrentEffect,
   (layer, currentEffect) => {
+    if (!layer) {
+      return null
+    }
     if (layer.effectIds.includes(currentEffect?.id)) {
       return currentEffect
     }
@@ -597,28 +503,119 @@ export const selectSliderColors = createSelector(
   },
 )
 
-// TODO: fix or remove
-// used by the preview window; reverses rotation and offsets because they are
-// re-added by Konva transformer.
-/*
-export const makeGetPreviewTrackVertices = (layerId) => {
-  return createSelector(
-    getCachedSelector(makeGetLayer, layerId),
-    (layer) => {
-      log("makeGetPreviewTrackVertices", layerId)
-      let trackVertices = []
+// ------------------------------
+// Compound actions (thunks) that make multiple changes to the store across reducers,
+// but only render once.
+// ------------------------------
 
-      const numLoops = layer.numLoops
-      for (var i=0; i<numLoops; i++) {
-      if (layer.trackEnabled) {
-      trackVertices.push(transformShape(layer, new Victor(0.0, 0.0), i, i))
-      }
+export const deleteLayer = (id) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const ids = selectLayerIds(state)
+    const deleteIdx = ids.findIndex((_id) => _id === id)
+    const layer = selectById(state, id)
+    const selectedLayerId = selectSelectedLayerId(state)
+
+    // delete the effects, and then delete the layer
+    layer.effectIds.forEach((effectId) => {
+      dispatch(effectsSlice.actions.deleteEffect(effectId))
+    })
+    dispatch(layersSlice.actions.deleteLayer(id))
+
+    if (id === selectedLayerId) {
+      const idx =
+        deleteIdx === 0
+          ? 1
+          : deleteIdx == ids.length - 1
+          ? deleteIdx - 1
+          : deleteIdx
+      dispatch(setCurrentLayer(ids[idx]))
+    }
+  }
+}
+
+export const copyLayer = ({ id, name }) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const layer = selectById(state, id)
+    const newLayer = {
+      ...layer,
+      name,
     }
 
-      return trackVertices.map((vertex) => {
-        return rotate(offset(vertex, -layer.x, -layer.y), layer.rotation)
-      })
-    },
-  )
+    // copy effects
+    newLayer.effectIds = layer.effectIds.map((effectId) => {
+      const effect = selectEffectById(state, effectId)
+      return dispatch(effectsSlice.actions.addEffect(effect)).meta.id
+    })
+
+    // create new layer
+    dispatch(layersSlice.actions.addLayer(newLayer))
+  }
 }
-*/
+
+export const addEffect = ({ id, effect }) => {
+  return (dispatch) => {
+    // create the effect first, and then add it to the layer
+    const action = dispatch(
+      effectsSlice.actions.addEffect({
+        ...effect,
+        layerId: id,
+      }),
+    )
+    dispatch(layersSlice.actions.addEffect({ id, effectId: action.meta.id }))
+    dispatch(setCurrentEffect(id))
+  }
+}
+
+export const deleteEffect = ({ id, effectId }) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const effectIds = selectLayerById(state, id).effectIds
+    const deleteIdx = effectIds.findIndex((id) => id === effectId)
+    const selectedEffectId = selectSelectedEffectId(state)
+
+    dispatch(layersSlice.actions.removeEffect({ id, effectId }))
+    dispatch(effectsSlice.actions.deleteEffect(effectId))
+
+    if (effectIds.length > 1) {
+      if (effectId === selectedEffectId) {
+        const idx =
+          deleteIdx === 0
+            ? 1
+            : deleteIdx == effectIds.length - 1
+            ? deleteIdx - 1
+            : deleteIdx
+        dispatch(setCurrentEffect(effectIds[idx]))
+      }
+    } else {
+      dispatch(setCurrentLayer(id))
+    }
+  }
+}
+
+export const setCurrentLayer = (id) => {
+  return (dispatch, getState) => {
+    dispatch(layersSlice.actions.setCurrentLayer(id))
+    dispatch(effectsSlice.actions.setCurrentEffect(null))
+  }
+}
+
+export const setCurrentEffect = (id) => {
+  return (dispatch, getState) => {
+    dispatch(effectsSlice.actions.setCurrentEffect(id))
+    dispatch(layersSlice.actions.setCurrentLayer(null))
+  }
+}
+
+export default layersSlice.reducer
+export const { actions: layersActions } = layersSlice
+export const {
+  addLayer,
+  changeModelType,
+  moveEffect,
+  moveLayer,
+  removeEffect,
+  restoreDefaults,
+  updateLayer,
+} = layersSlice.actions

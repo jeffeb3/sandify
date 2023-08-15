@@ -119,25 +119,8 @@ const ShapePreview = (ownProps) => {
     }
   }
 
-  // TODO: fix or remove
-  // draws the line representing the track the path follows
-  //  const drawTrackVertices = (context) => {
-  //    context.beginPath()
-  //    context.lineWidth = 4.0
-  //    context.strokeStyle = "green"
-  //    helper.moveTo(context, props.trackVertices[0])
-  //    for (let i = 0; i < props.trackVertices.length; i++) {
-  //      helper.lineTo(context, props.trackVertices[i])
-  //    }
-  //    context.stroke()
-  //  }
-
   const sceneFunc = (context, shape) => {
     if (vertices && vertices.length > 0) {
-      // TODO: fix or remove
-      //      if (props.trackVertices && props.trackVertices.length > 0) {
-      //        drawTrackVertices(context)
-      //      }
       drawLayerVertices(context, bounds)
 
       if (start || end || isCurrent) {

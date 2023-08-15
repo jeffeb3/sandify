@@ -42,13 +42,7 @@ export const effectsSlice = createSlice({
     },
     deleteEffect: (state, action) => {
       const deleteId = action.payload
-      const deleteIdx = state.ids.findIndex((id) => id === deleteId)
       effectsAdapter.removeOne(state, deleteId)
-
-      if (deleteId === state.current) {
-        const idx = deleteIdx === state.ids.length ? deleteIdx - 1 : deleteIdx
-        state.current = state.ids[idx]
-      }
     },
     updateEffect: (state, action) => {
       const effect = action.payload
@@ -68,7 +62,8 @@ export const effectsSlice = createSlice({
 })
 
 export default effectsSlice.reducer
-export const { addEffect, deleteEffect, updateEffect, setCurrentEffect } = effectsSlice.actions
+export const { addEffect, deleteEffect, updateEffect, setCurrentEffect } =
+  effectsSlice.actions
 
 // ------------------------------
 // Selectors

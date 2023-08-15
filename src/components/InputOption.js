@@ -25,6 +25,10 @@ const InputOption = ({
     typeof option.max === "function" ? option.max(data) : parseFloat(option.max)
   const visible =
     option.isVisible === undefined ? true : option.isVisible(object, data)
+  const title =
+    typeof option.title === "function"
+      ? option.title(object, data)
+      : option.title
 
   if (!visible) {
     return null
@@ -72,7 +76,6 @@ const InputOption = ({
       onChange={handleChange}
     />
   )
-
   if (!option.inline) {
     return (
       <Row className={"align-items-center" + (visible ? "" : " d-none")}>
@@ -81,9 +84,7 @@ const InputOption = ({
           className="mb-1"
         >
           {label && (
-            <Form.Label htmlFor={`option-${optionKey}`}>
-              {option.title}
-            </Form.Label>
+            <Form.Label htmlFor={`option-${optionKey}`}>{title}</Form.Label>
           )}
         </Col>
         <Col
@@ -103,7 +104,7 @@ const InputOption = ({
             className="mr-2"
             style={{ width: "22px" }}
           >
-            {option.title}
+            {title}
           </Form.Label>
         )}
         {renderedInput}

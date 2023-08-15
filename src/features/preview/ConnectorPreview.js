@@ -26,7 +26,7 @@ const ConnectorPreview = (ownProps) => {
   const offsets = useSelector(selectVertexOffsets)
   const bounds = useSelector(selectSliderBounds, isEqual)
 
-  if (!(startLayer && endLayer)) {
+  if (!(startLayer && endLayer && selectedLayer)) {
     return null
   } // no longer valid
 

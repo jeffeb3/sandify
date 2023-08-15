@@ -19,7 +19,7 @@ const PreviewManager = () => {
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const verticesStats = useSelector(selectVerticesStats)
   const previewElement = useRef(null)
-  const model = getShapeFromType(selectedLayer.type)
+  const model = getShapeFromType(selectedLayer?.type || "polygon")
 
   useEffect(() => {
     if (fonts.loaded) {

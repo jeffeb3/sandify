@@ -55,7 +55,7 @@ const EffectRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
-            data-tooltip-content={visible ? "Hide effect" : "Show effect" }
+            data-tooltip-content={visible ? "Hide effect" : "Show effect"}
             data-tooltip-id="tooltip-toggle-visible"
             onClick={() => handleToggleEffectVisible(id)}
           >

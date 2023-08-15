@@ -89,14 +89,12 @@ describe("layers reducer", () => {
               },
             },
             ids: ["1"],
-            current: "1",
           },
           layersActions.deleteLayer("1"),
         ),
       ).toEqual({
         entities: {},
         ids: [],
-        current: undefined,
       })
     })
 
@@ -322,14 +320,25 @@ describe("layers reducer", () => {
         const store = mockStore({
           layers: {
             entities: {
-              "0": {
+              0: {
                 id: "0",
                 name: "foo",
-                effectIds: ["1", "2"],
+                effectIds: ["1"],
               },
             },
             ids: ["0"],
             current: "0",
+            selected: "0",
+          },
+          effects: {
+            entities: {
+              1: {
+                id: "1",
+              },
+            },
+            ids: ["1"],
+            current: undefined,
+            selected: "1",
           },
         })
 
@@ -434,13 +443,11 @@ describe("layers reducer", () => {
           },
           ids: ["a", "b"],
           selected: "a",
-          current: "a"
+          current: "a",
         },
       })
 
-      store.dispatch(
-        setCurrentLayer("0"),
-      )
+      store.dispatch(setCurrentLayer("0"))
 
       const actions = store.getActions()
       expect(actions[0].type).toEqual("layers/setCurrentLayer")

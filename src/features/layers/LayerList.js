@@ -63,7 +63,7 @@ const LayerRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
-            data-tooltip-content={visible ? "Hide layer" : "Show layer" }
+            data-tooltip-content={visible ? "Hide layer" : "Show layer"}
             data-tooltip-id="tooltip-toggle-visible"
             onClick={() => {
               handleToggleLayerVisible(id)
