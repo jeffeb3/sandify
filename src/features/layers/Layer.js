@@ -1,6 +1,6 @@
 import { getShapeFromType } from "@/features/shapes/factory"
 import EffectLayer from "@/features/effects/EffectLayer"
-import { resizeVertices, centerOnOrigin, findBounds } from "@/common/geometry"
+import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 
 export const layerOptions = {
   name: {
@@ -100,14 +100,10 @@ export default class Layer {
   getVertices({ layer, effects, machine }) {
     this.state = layer
     this.vertices = this.model.getCachedVertices({ shape: layer, machine })
+
     this.resize()
-
-    const bounds = findBounds(this.vertices)
-
+    centerOnOrigin(this.vertices)
     this.applyEffects(effects)
-
-    // center relative to our original shape prior to effects
-    centerOnOrigin(this.vertices, bounds)
     this.transform()
 
     return this.vertices

@@ -332,13 +332,13 @@ export const selectPreviewVertices = createCachedSelector(
   selectLayerVertices,
   selectMachineVertices,
   selectLayerById,
-  (originalVertices, computedVertices, layer) => {
+  (originalVertices, machineVertices, layer) => {
     if (!layer) {
       return []
     } // zombie child
 
     log("selectPreviewVertices", layer.id)
-    const vertices = layer.dragging ? originalVertices : computedVertices
+    const vertices = layer.dragging ? originalVertices : machineVertices
 
     return vertices.map((vertex) => {
       let previewVertex = rotate(

@@ -99,7 +99,7 @@ export default class Mask extends Effect {
       return rotate(offset(vertex, -effect.x, -effect.y), effect.rotation)
     })
 
-    if (!layer.dragging && !effect.dragging) {
+    if (!effect.dragging) {
       const machineClass =
         effect.maskMachine === "circle"
           ? effect.maskInvert

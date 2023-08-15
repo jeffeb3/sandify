@@ -1,5 +1,6 @@
 import Effect from "./Effect"
-import { scale, rotate } from "@/common/geometry"
+import Victor from "victor"
+import { scale, rotate, centerOnOrigin } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -114,7 +115,7 @@ export default class Loop extends Effect {
   }
 
   getVertices(effect, layer, vertices) {
-    const outputVertices = []
+    centerOnOrigin(vertices, [new Victor(0, 0), new Victor(0, 0)])
 
     // weird case where user has turned off both grow and spin
     if (!effect.growEnabled && !effect.spinEnabled) {
@@ -125,6 +126,8 @@ export default class Loop extends Effect {
     if (effect.transformMethod === "smear") {
       vertices.pop()
     }
+
+    const outputVertices = []
 
     for (var i = 0; i < effect.numLoops; i++) {
       for (let j = 0; j < vertices.length; j++) {

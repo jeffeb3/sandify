@@ -46,7 +46,7 @@ const EffectPreview = (ownProps) => {
   const helper = new PreviewHelper({ layer: effect })
 
   const drawLayerVertices = (context) => {
-    let currentColor = "yellow"
+    let currentColor = "rgba(195, 214, 230, 0.65)"
 
     context.beginPath()
     context.lineWidth = 1
