@@ -39,6 +39,7 @@ const options = {
 export default class Mask extends Effect {
   constructor() {
     super("mask")
+    this.canMove = true
     this.label = "Mask"
   }
 
@@ -50,12 +51,19 @@ export default class Mask extends Effect {
     return state.maskMachine != "circle"
   }
 
+  canChangeSize(state) {
+    return true
+  }
+
   getInitialState() {
     return {
       ...super.getInitialState(),
       ...{
         width: 100,
         height: 100,
+        x: 0,
+        y: 0,
+        rotation: 0,
         maskMinimizeMoves: false,
         maskMachine: "rectangle",
         maskBorder: false,

@@ -1,9 +1,26 @@
 import { getEffectFromType } from "@/features/effects/factory"
 
 export const effectOptions = {
+  x: {
+    title: "X",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canMove
+    },
+  },
+  y: {
+    title: "Y",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canMove
+    },
+  },
   width: {
-    title: "W",
+    title: (model, state) => {
+      return model.canChangeHeight(state) ? "W" : "S"
+    },
     min: 1,
+    inline: true,
     isVisible: (model, state) => {
       return model.canChangeSize(state)
     },
@@ -17,8 +34,16 @@ export const effectOptions = {
   height: {
     title: "H",
     min: 1,
+    inline: true,
     isVisible: (model, state) => {
       return model.canChangeSize(state) && model.canChangeHeight(state)
+    },
+  },
+  rotation: {
+    title: "Rotate (degrees)",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canRotate(state)
     },
   },
 }

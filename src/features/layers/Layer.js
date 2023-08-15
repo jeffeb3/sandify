@@ -22,7 +22,9 @@ export const layerOptions = {
     },
   },
   width: {
-    title: "W",
+    title: (model, state) => {
+      return model.canChangeHeight(state) ? "W" : "S"
+    },
     min: 1,
     inline: true,
     isVisible: (model, state) => {

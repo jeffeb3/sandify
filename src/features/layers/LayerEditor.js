@@ -145,7 +145,7 @@ const LayerEditor = () => {
                         </Col>
                       </Row>
                     )}
-                    {model.canChangeSize(layer) && model.autosize && (
+                    {model.canChangeSize(layer) && (
                       <Row className="mt-1">
                         <Col xs={6}>
                           {getOptionComponent(model, layerOptions, "width")}
