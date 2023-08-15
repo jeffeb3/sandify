@@ -1,20 +1,18 @@
 import Victor from "victor"
 import * as d3Fisheye from "d3-fisheye"
-import { circle } from "@/common/geometry"
+import { circle, subsample } from "@/common/geometry"
 import Effect from "./Effect"
 
 const options = {
+  fisheyeSubsample: {
+    title: "Subsample points",
+    type: "checkbox",
+  },
   fisheyeDistortion: {
     title: "Distortion",
     min: -2,
     max: 40,
     step: 1,
-  },
-  x: {
-    title: "X",
-  },
-  y: {
-    title: "Y",
   },
 }
 
@@ -38,6 +36,7 @@ export default class Fisheye extends Effect {
       ...super.getInitialState(),
       ...{
         fisheyeDistortion: 3,
+        fisheyeSubsample: true,
         x: 0,
         y: 0,
         width: 100,
@@ -47,11 +46,14 @@ export default class Fisheye extends Effect {
   }
 
   getSelectionVertices(effect) {
-    console.log("here")
     return circle(effect.width / 2)
   }
 
   getVertices(effect, layer, vertices) {
+    if (effect.fisheyeSubsample) {
+      vertices = subsample(vertices, 2.0)
+    }
+
     const radius = effect.width / 2
     const fisheye = d3Fisheye
       .radial()
