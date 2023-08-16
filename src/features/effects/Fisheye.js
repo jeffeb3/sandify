@@ -20,7 +20,10 @@ export default class Fisheye extends Effect {
   constructor() {
     super("fisheye")
     this.label = "Fisheye"
-    this.canMove = true
+  }
+
+  canMove(state) {
+    return true
   }
 
   canChangeSize(state) {

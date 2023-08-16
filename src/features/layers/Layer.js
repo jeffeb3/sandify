@@ -11,14 +11,14 @@ export const layerOptions = {
     title: "X",
     inline: true,
     isVisible: (model, state) => {
-      return model.canMove
+      return model.canMove(state)
     },
   },
   y: {
     title: "Y",
     inline: true,
     isVisible: (model, state) => {
-      return model.canMove
+      return model.canMove(state)
     },
   },
   width: {

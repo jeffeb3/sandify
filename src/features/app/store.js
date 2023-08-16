@@ -40,7 +40,6 @@ const persistedState =
 // reset some values
 if (persistedState) {
   persistedState.fonts.loaded = false
-  // persistedState.effects.current = null
 }
 
 const store = configureStore({

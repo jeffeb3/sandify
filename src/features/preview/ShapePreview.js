@@ -51,7 +51,14 @@ const ShapePreview = (ownProps) => {
       trRef.current.nodes([groupRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isCurrent, activeEffect, layer, model.canMove, groupRef, trRef])
+  }, [
+    isCurrent,
+    activeEffect,
+    layer,
+    layer && model.canMove(layer),
+    groupRef,
+    trRef,
+  ])
 
   if (!layer) {
     // "zombie child" situation; the hooks (above) are able to deal with a
@@ -237,7 +244,7 @@ const ShapePreview = (ownProps) => {
         <Transformer
           ref={trRef}
           centeredScaling={true}
-          resizeEnabled={model.canResize}
+          resizeEnabled={model.canChangeSize(layer)}
           rotateEnabled={model.canRotate(layer)}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={

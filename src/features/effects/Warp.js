@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Effect from "./Effect"
-import { subsample } from "@/common/geometry"
+import { subsample, circle } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -9,10 +9,15 @@ const options = {
     type: "dropdown",
     choices: ["angle", "quad", "circle", "grid", "shear", "custom"],
     onChange: (model, changes, state) => {
-      if (["angle", "quad", "shear"].includes(changes.warpType)) {
-        changes.rotation = changes.warpType === "shear" ? 0 : 45
-      } else {
+      if (["angle", "quad"].includes(changes.warpType)) {
+        changes.rotation = 45
+      } else if (changes.warpType == "shear") {
         changes.rotation = 0
+        changes.x = 0
+        changes.y = 0
+      } else if (changes.warpType == "custom") {
+        changes.height = 40
+        changes.width = 40
       }
 
       return changes
@@ -51,8 +56,10 @@ export default class Warp extends Effect {
   constructor() {
     super("warp")
     this.label = "Warp"
-    this.startingWidth = 40
-    this.startingHeight = 40
+  }
+
+  canMove(state) {
+    return state.warpType !== "shear"
   }
 
   canRotate(state) {
@@ -79,15 +86,18 @@ export default class Warp extends Effect {
         yMathInput: "y + 4*sin((x-y)/20)",
         yMath: "y + 4*sin((x-y)/20)",
         rotation: 45,
+        width: 40,
+        height: 40,
+        x: 0,
+        y: 0,
       },
     }
   }
 
-  // TODO: replace with bounds for transformer
-  /*getVertices(state) {
-    const width = state.shape.width
+  getSelectionVertices(effect) {
+    const { width } = effect
     return circle(width / 2)
-  }*/
+  }
 
   getVertices(effect, layer, vertices) {
     if (effect.subsample) {

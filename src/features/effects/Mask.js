@@ -1,5 +1,6 @@
 import Effect from "./Effect"
-import { rotate, offset } from "@/common/geometry"
+import Victor from "Victor"
+import { rotate, offset, circle } from "@/common/geometry"
 import PolarMachine from "@/features/machine/PolarMachine"
 import RectMachine from "@/features/machine/RectMachine"
 import PolarInvertedMachine from "@/features/machine/PolarInvertedMachine"
@@ -39,8 +40,11 @@ const options = {
 export default class Mask extends Effect {
   constructor() {
     super("mask")
-    this.canMove = true
     this.label = "Mask"
+  }
+
+  canMove(state) {
+    return true
   }
 
   canRotate(state) {
@@ -76,12 +80,10 @@ export default class Mask extends Effect {
     return options
   }
 
-  // TODO: replace with bounds for transformer
-  /*getVertices(state) {
-    const width = state.shape.width
-    const height = state.shape.height
+  getSelectionVertices(effect) {
+    const { width, height } = effect
 
-    if (state.shape.dragging && state.shape.maskMachine === "circle") {
+    if (effect.maskMachine === "circle") {
       return circle(width / 2)
     } else {
       return [
@@ -92,7 +94,7 @@ export default class Mask extends Effect {
         new Victor(-width / 2, height / 2),
       ]
     }
-  }*/
+  }
 
   getVertices(effect, layer, vertices) {
     vertices = vertices.map((vertex) => {

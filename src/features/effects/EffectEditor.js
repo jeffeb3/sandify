@@ -58,7 +58,7 @@ const EffectEditor = ({ id }) => {
         <Row className="align-items-center mt-1 mb-2">
           <Col sm={5}>Transform</Col>
           <Col sm={7}>
-            {model.canMove && (
+            {model.canMove(effect) && (
               <Row>
                 <Col xs={6}>{getOptionComponent(model, layerOptions, "x")}</Col>
                 <Col xs={6}>{getOptionComponent(model, layerOptions, "y")}</Col>

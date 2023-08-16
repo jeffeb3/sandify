@@ -32,7 +32,7 @@ const PreviewManager = () => {
   }
 
   const handleKeyDown = (event) => {
-    if (model.canMove) {
+    if (model.canMove(selectedLayer)) {
       let attrs = { id: selectedLayer.id }
       const delta = event.shiftKey ? 1 : 5
 

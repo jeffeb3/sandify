@@ -76,8 +76,6 @@ export default class Loop extends Effect {
   constructor() {
     super("loop")
     this.label = "Loop"
-    this.canMove = false
-    this.effect = true
   }
 
   canRotate(state) {

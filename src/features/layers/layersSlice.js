@@ -127,7 +127,7 @@ const layersSlice = createSlice({
       })
 
       newLayer.id = id
-      if (!instance.model.canMove) {
+      if (!instance.model.canMove(state)) {
         newLayer.x = 0
         newLayer.y = 0
       }

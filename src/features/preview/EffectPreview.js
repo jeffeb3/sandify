@@ -34,7 +34,7 @@ const EffectPreview = (ownProps) => {
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isCurrent, effect, model.canMove, shapeRef, trRef])
+  }, [isCurrent, effect, model.canMove(effect), shapeRef, trRef])
 
   if (!effect) {
     // "zombie child" situation; the hooks (above) are able to deal with a
@@ -46,7 +46,7 @@ const EffectPreview = (ownProps) => {
   const helper = new PreviewHelper({ layer: effect })
 
   const drawLayerVertices = (context) => {
-    let currentColor = "rgba(195, 214, 230, 0.65)"
+    let currentColor = "yellow"
 
     context.beginPath()
     context.lineWidth = 1
@@ -142,7 +142,7 @@ const EffectPreview = (ownProps) => {
       {effect.visible && (
         <Shape
           {...ownProps}
-          draggable={model.canMove && isCurrent}
+          draggable={model.canMove(effect) && isCurrent}
           width={width}
           height={height}
           offsetY={height / 2}
@@ -165,7 +165,7 @@ const EffectPreview = (ownProps) => {
         <Transformer
           ref={trRef}
           centeredScaling={true}
-          resizeEnabled={model.canResize}
+          resizeEnabled={model.canChangeSize(effect)}
           rotateEnabled={model.canRotate(effect)}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={

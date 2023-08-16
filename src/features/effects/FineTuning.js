@@ -35,8 +35,6 @@ export default class FineTuning extends Effect {
     super("fineTuning")
     this.label = "Fine Tuning"
     this.selectGroup = "effects"
-    this.canMove = false
-    this.effect = true
   }
 
   canChangeSize(state) {
@@ -44,6 +42,10 @@ export default class FineTuning extends Effect {
   }
 
   canRotate(state) {
+    return false
+  }
+
+  canMove(state) {
     return false
   }
 

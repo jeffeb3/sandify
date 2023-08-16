@@ -6,7 +6,6 @@ export default class Model {
     this.state = state
 
     Object.assign(this, {
-      canMove: true,
       usesMachine: false,
       usesFonts: false,
       dragging: false,
@@ -28,8 +27,15 @@ export default class Model {
     return true
   }
 
+  // override as needed
+  canMove(state) {
+    return true
+  }
+
   canTransform(state) {
-    return this.canMove || this.canRotate(state) || this.canChangeSize(state)
+    return (
+      this.canMove(state) || this.canRotate(state) || this.canChangeSize(state)
+    )
   }
 
   // redux state of a newly created instance

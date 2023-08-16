@@ -35,10 +35,13 @@ export default class SpaceFiller extends Shape {
     this.label = "Space Filler"
     this.usesMachine = true
     this.autosize = false
-    this.canMove = false
     this.selectGroup = "Erasers"
     this.linkText = "Fractal charm: space filling curves"
     this.link = "https://www.youtube.com/watch?v=RU0wScIj36o"
+  }
+
+  canMove(state) {
+    return false
   }
 
   canChangeSize(state) {

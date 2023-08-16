@@ -34,8 +34,8 @@ const DropdownOption = ({
     let attrs = {}
     attrs[optionKey] = value
 
-    if (option.handleChange !== undefined) {
-      attrs = option.handleChange(object, attrs, data)
+    if (option.onChange !== undefined) {
+      attrs = option.onChange(object, attrs, data)
     }
 
     onChange(attrs)
@@ -61,6 +61,8 @@ const DropdownOption = ({
           value={{ value: currentChoice, label: currentLabel }}
           onChange={handleChange}
           options={choices}
+          menuPortalTarget={document.body}
+          styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         />
       </Col>
     </Row>

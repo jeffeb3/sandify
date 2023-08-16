@@ -38,9 +38,12 @@ export default class CirclePacker extends Shape {
     super("circlePacker")
     this.label = "Circle Packer"
     this.usesMachine = true
-    this.canMove = false
     this.autosize = false
     this.selectGroup = "Erasers"
+  }
+
+  canMove(state) {
+    return false
   }
 
   canChangeSize(state) {

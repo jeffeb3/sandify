@@ -3,11 +3,6 @@ import Model from "@/common/Model"
 const effectOptions = []
 
 export default class Effect extends Model {
-  constructor(type) {
-    super(type)
-    this.canMove = false
-  }
-
   // override as needed
   canChangeSize(state) {
     return false
@@ -15,6 +10,11 @@ export default class Effect extends Model {
 
   // override as needed
   canRotate(state) {
+    return false
+  }
+
+  // override as needed
+  canMove(state) {
     return false
   }
 

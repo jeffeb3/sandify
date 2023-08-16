@@ -35,7 +35,10 @@ export default class NoiseWave extends Shape {
     this.selectGroup = "Erasers"
     this.usesMachine = true
     this.autosize = false
-    this.canMove = false
+  }
+
+  canMove(state) {
+    return false
   }
 
   canChangeSize(state) {

@@ -277,7 +277,10 @@ export default class Wiper extends Shape {
     this.usesMachine = true
     this.shouldCache = false
     this.autosize = false
-    this.canMove = false
+  }
+
+  canMove(state) {
+    return false
   }
 
   canChangeSize(state) {
