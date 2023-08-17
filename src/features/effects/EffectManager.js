@@ -67,7 +67,7 @@ const EffectManager = () => {
               </Accordion.Toggle>
             </Card.Header>
             <Accordion.Collapse eventKey={3}>
-              <Card.Body className="p-0">
+              <Card.Body>
                 <EffectList
                   effects={effects}
                   currentEffect={currentEffect}
@@ -109,7 +109,7 @@ const EffectManager = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="px-3 pb-3 pt-2">
+                <div className="pb-3 pt-2">
                   <EffectEditor />
                 </div>
               </Card.Body>

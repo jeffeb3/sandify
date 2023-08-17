@@ -25,7 +25,12 @@ const CheckboxOption = ({ options, optionKey, data, object, onChange }) => {
         sm={5}
         className="mb-1"
       >
-        <Form.Label htmlFor="options-step">{option.title}</Form.Label>
+        <Form.Label
+          htmlFor="options-step"
+          className="mb-0"
+        >
+          {option.title}
+        </Form.Label>
       </Col>
 
       <Col

@@ -1,6 +1,6 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Button, Card, Row, Col, Accordion } from "react-bootstrap"
+import { Button, Row, Col } from "react-bootstrap"
 import Select from "react-select"
 import { IconContext } from "react-icons"
 import { AiOutlineRotateRight } from "react-icons/ai"
@@ -113,110 +113,73 @@ const LayerEditor = () => {
   ))
 
   return (
-    <div className="px-3 overflow-visible flex-grow-1 border pt-3">
-      <Accordion
-        key={1}
-        defaultActiveKey={1}
-      >
-        <Card>
-          <Card.Header>
-            <Accordion.Toggle
-              as={Button}
-              variant="link"
-              eventKey={1}
-            >
-              Layer
-            </Accordion.Toggle>
-          </Card.Header>
-          <Accordion.Collapse eventKey={1}>
-            <Card.Body>
-              {getOptionComponent(model, layerOptions, "name")}
-              {model.canTransform(layer) && (
-                <Row className="align-items-center mt-1 mb-2">
-                  <Col sm={5}>Transform</Col>
-                  <Col sm={7}>
-                    {model.canMove(layer) && (
-                      <Row>
-                        <Col xs={6}>
-                          {getOptionComponent(model, layerOptions, "x")}
-                        </Col>
-                        <Col xs={6}>
-                          {getOptionComponent(model, layerOptions, "y")}
-                        </Col>
-                      </Row>
-                    )}
-                    {model.canChangeSize(layer) && (
-                      <Row className="mt-1">
-                        <Col xs={6}>
-                          {getOptionComponent(model, layerOptions, "width")}
-                        </Col>
-                        <Col xs={6}>
-                          {getOptionComponent(model, layerOptions, "height")}
-                        </Col>
-                      </Row>
-                    )}
-                    {model.canRotate(layer) && (
-                      <Row className="mt-1">
-                        <Col xs={6}>
-                          <div className="d-flex align-items-center">
-                            <div className="mr-1">
-                              <IconContext.Provider value={{ size: "1.3rem" }}>
-                                <AiOutlineRotateRight />
-                              </IconContext.Provider>
-                            </div>
-                            {getOptionComponent(
-                              model,
-                              layerOptions,
-                              "rotation",
-                              false,
-                            )}
-                          </div>
-                        </Col>
-                      </Row>
-                    )}
+    <div className="overflow-visible flex-grow-1">
+      <div className="px-3 pt-3 border-top border-secondary">
+        {getOptionComponent(model, layerOptions, "name")}
+
+        {renderedModelSelection}
+        {renderedModelOptions}
+        {renderedLink}
+        <EffectManager />
+      </div>
+      <div className="border-top border-secondary px-3 py-3 mt-3">
+        {model.canTransform(layer) && (
+          <Row className="align-items-center mt-1 mb-2">
+            <Col sm={5}>Transform</Col>
+            <Col sm={7}>
+              {model.canMove(layer) && (
+                <Row>
+                  <Col xs={6}>
+                    {getOptionComponent(model, layerOptions, "x")}
+                  </Col>
+                  <Col xs={6}>
+                    {getOptionComponent(model, layerOptions, "y")}
                   </Col>
                 </Row>
               )}
-              {getOptionComponent(model, layerOptions, "reverse")}
-              {getOptionComponent(model, layerOptions, "connectionMethod")}
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-      </Accordion>
+              {model.canChangeSize(layer) && (
+                <Row className="mt-1">
+                  <Col xs={6}>
+                    {getOptionComponent(model, layerOptions, "width")}
+                  </Col>
+                  <Col xs={6}>
+                    {getOptionComponent(model, layerOptions, "height")}
+                  </Col>
+                </Row>
+              )}
+              {model.canRotate(layer) && (
+                <Row className="mt-1">
+                  <Col xs={6}>
+                    <div className="d-flex align-items-center">
+                      <div className="mr-1">
+                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                          <AiOutlineRotateRight />
+                        </IconContext.Provider>
+                      </div>
+                      {getOptionComponent(
+                        model,
+                        layerOptions,
+                        "rotation",
+                        false,
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+              )}
+            </Col>
+          </Row>
+        )}
+        {getOptionComponent(model, layerOptions, "reverse")}
+        {getOptionComponent(model, layerOptions, "connectionMethod")}
 
-      <Accordion
-        key={2}
-        defaultActiveKey={2}
-        className="mt-3"
-      >
-        <Card>
-          <Card.Header className="d-flex">
-            <Accordion.Toggle
-              as={Button}
-              variant="link"
-              eventKey={2}
-            >
-              Shape
-            </Accordion.Toggle>
-            <Button
-              className="ml-auto"
-              variant="outline-primary"
-              size="sm"
-              onClick={handleRestoreDefaults}
-            >
-              Restore defaults
-            </Button>
-          </Card.Header>
-          <Accordion.Collapse eventKey={2}>
-            <Card.Body>
-              {renderedModelSelection}
-              {renderedModelOptions}
-              {renderedLink}
-              <EffectManager />
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-      </Accordion>
+        <Button
+          className="mt-3"
+          variant="secondary"
+          onClick={handleRestoreDefaults}
+        >
+          Restore defaults
+        </Button>
+      </div>
     </div>
   )
 }

@@ -84,7 +84,12 @@ const InputOption = ({
           className="mb-1"
         >
           {label && (
-            <Form.Label htmlFor={`option-${optionKey}`}>{title}</Form.Label>
+            <Form.Label
+              htmlFor={`option-${optionKey}`}
+              className="mb-0"
+            >
+              {title}
+            </Form.Label>
           )}
         </Col>
         <Col
