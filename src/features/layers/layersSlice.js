@@ -526,9 +526,7 @@ export const deleteLayer = (id) => {
       const idx =
         deleteIdx === 0
           ? 1
-          : deleteIdx == ids.length - 1
-          ? deleteIdx - 1
-          : deleteIdx
+          : deleteIdx - 1
       dispatch(setCurrentLayer(ids[idx]))
     }
   }
@@ -583,9 +581,7 @@ export const deleteEffect = ({ id, effectId }) => {
         const idx =
           deleteIdx === 0
             ? 1
-            : deleteIdx == effectIds.length - 1
-            ? deleteIdx - 1
-            : deleteIdx
+            : deleteIdx - 1
         dispatch(setCurrentEffect(effectIds[idx]))
       }
     } else {
