@@ -18,7 +18,8 @@ const CopyLayer = ({ toggleModal, showModal }) => {
     event.target.select()
   }
 
-  const handleCopyLayer = () => {
+  const handleCopyLayer = (event) => {
+    event.preventDefault()
     dispatch(
       copyLayer({
         id: selectedLayer.id,
@@ -42,36 +43,38 @@ const CopyLayer = ({ toggleModal, showModal }) => {
         <Modal.Title>Copy {selectedLayer.name}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
-        <Row className="align-items-center">
-          <Col sm={5}>Name</Col>
-          <Col sm={7}>
-            <Form.Control
-              ref={namedInputRef}
-              value={copyLayerName}
-              onFocus={handleNameFocus}
-              onChange={handleChangeCopyLayerName}
-            />
-          </Col>
-        </Row>
-      </Modal.Body>
+      <Form onSubmit={handleCopyLayer}>
+        <Modal.Body>
+          <Row className="align-items-center">
+            <Col sm={5}>Name</Col>
+            <Col sm={7}>
+              <Form.Control
+                ref={namedInputRef}
+                value={copyLayerName}
+                onFocus={handleNameFocus}
+                onChange={handleChangeCopyLayerName}
+              />
+            </Col>
+          </Row>
+        </Modal.Body>
 
-      <Modal.Footer>
-        <Button
-          id="copy-layer-close"
-          variant="light"
-          onClick={toggleModal}
-        >
-          Cancel
-        </Button>
-        <Button
-          id="copy-layer-copy"
-          variant="primary"
-          onClick={handleCopyLayer}
-        >
-          Copy
-        </Button>
-      </Modal.Footer>
+        <Modal.Footer>
+          <Button
+            id="copy-layer-close"
+            variant="light"
+            onClick={toggleModal}
+          >
+            Cancel
+          </Button>
+          <Button
+            id="copy-layer-copy"
+            variant="primary"
+            type="submit"
+          >
+            Copy
+          </Button>
+        </Modal.Footer>
+      </Form>
     </Modal>
   )
 }

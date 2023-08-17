@@ -523,10 +523,7 @@ export const deleteLayer = (id) => {
     dispatch(layersSlice.actions.deleteLayer(id))
 
     if (id === selectedLayerId) {
-      const idx =
-        deleteIdx === 0
-          ? 1
-          : deleteIdx - 1
+      const idx = deleteIdx === 0 ? 1 : deleteIdx - 1
       dispatch(setCurrentLayer(ids[idx]))
     }
   }
@@ -578,10 +575,7 @@ export const deleteEffect = ({ id, effectId }) => {
 
     if (effectIds.length > 1) {
       if (effectId === selectedEffectId) {
-        const idx =
-          deleteIdx === 0
-            ? 1
-            : deleteIdx - 1
+        const idx = deleteIdx === 0 ? 1 : deleteIdx - 1
         dispatch(setCurrentEffect(effectIds[idx]))
       }
     } else {

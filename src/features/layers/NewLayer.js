@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
 import Select from "react-select"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
@@ -21,6 +21,7 @@ const customStyles = {
 
 const NewLayer = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
+  const selectRef = useRef()
   const selectOptions = getShapeSelectOptions()
   const [type, setType] = useState(defaultShape.type)
   const [name, setName] = useState(defaultShape.label)
@@ -45,7 +46,13 @@ const NewLayer = ({ toggleModal, showModal }) => {
     setName(event.target.value)
   }
 
-  const onLayerAdded = () => {
+  const handleInitialFocus = () => {
+    selectRef.current.focus()
+  }
+
+  const onLayerAdded = (event) => {
+    event.preventDefault()
+
     const layer = new Layer(type)
     const attrs = layer.getInitialState()
 
@@ -58,52 +65,56 @@ const NewLayer = ({ toggleModal, showModal }) => {
     <Modal
       show={showModal}
       onHide={toggleModal}
+      onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
         <Modal.Title>Create new layer</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
-        <Row className="align-items-center">
-          <Col sm={5}>Type</Col>
-          <Col sm={7}>
-            <Select
-              value={selectedOption}
-              onChange={handleChangeNewType}
-              styles={customStyles}
-              maxMenuHeight={305}
-              options={selectOptions}
-            />
-          </Col>
-        </Row>
-        <Row className="align-items-center mt-2">
-          <Col sm={5}>Name</Col>
-          <Col sm={7}>
-            <Form.Control
-              value={name}
-              onFocus={handleNameFocus}
-              onChange={handleChangeNewName}
-            />
-          </Col>
-        </Row>
-      </Modal.Body>
+      <Form onSubmit={onLayerAdded}>
+        <Modal.Body>
+          <Row className="align-items-center">
+            <Col sm={5}>Type</Col>
+            <Col sm={7}>
+              <Select
+                ref={selectRef}
+                value={selectedOption}
+                onChange={handleChangeNewType}
+                styles={customStyles}
+                maxMenuHeight={305}
+                options={selectOptions}
+              />
+            </Col>
+          </Row>
+          <Row className="align-items-center mt-2">
+            <Col sm={5}>Name</Col>
+            <Col sm={7}>
+              <Form.Control
+                value={name}
+                onFocus={handleNameFocus}
+                onChange={handleChangeNewName}
+              />
+            </Col>
+          </Row>
+        </Modal.Body>
 
-      <Modal.Footer>
-        <Button
-          id="new-layer-close"
-          variant="light"
-          onClick={toggleModal}
-        >
-          Cancel
-        </Button>
-        <Button
-          id="new-layer-add"
-          variant="primary"
-          onClick={onLayerAdded}
-        >
-          Create
-        </Button>
-      </Modal.Footer>
+        <Modal.Footer>
+          <Button
+            id="new-layer-close"
+            variant="light"
+            onClick={toggleModal}
+          >
+            Cancel
+          </Button>
+          <Button
+            id="new-layer-add"
+            variant="primary"
+            type="submit"
+          >
+            Create
+          </Button>
+        </Modal.Footer>
+      </Form>
     </Modal>
   )
 }
