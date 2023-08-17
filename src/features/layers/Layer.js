@@ -101,8 +101,11 @@ export default class Layer {
     this.state = layer
     this.vertices = this.model.getCachedVertices({ shape: layer, machine })
 
-    this.resize()
-    centerOnOrigin(this.vertices)
+    if (this.model.autosize) {
+      this.resize()
+      centerOnOrigin(this.vertices)
+    }
+
     this.applyEffects(effects)
     this.transform()
 
@@ -111,10 +114,7 @@ export default class Layer {
 
   resize() {
     const { width, height } = this.state
-
-    if (this.model.autosize) {
-      this.vertices = resizeVertices(this.vertices, width, height, false)
-    }
+    this.vertices = resizeVertices(this.vertices, width, height, false)
   }
 
   transform() {

@@ -217,7 +217,7 @@ const ShapePreview = (ownProps) => {
         onTransformEnd={handleTransformEnd}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        draggable={model.canMove && isCurrent}
+        draggable={model.canMove(layer) && isCurrent}
       >
         {layer.visible && (
           <Shape

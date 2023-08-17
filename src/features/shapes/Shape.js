@@ -58,6 +58,7 @@ export default class Shape extends Model {
     // include only model values in key
     const cacheState = { ...state }
     cacheState.shape = pick(cacheState.shape, Object.keys(this.getOptions()))
+    cacheState.type = state.shape.type
 
     return JSON.stringify(cacheState)
   }

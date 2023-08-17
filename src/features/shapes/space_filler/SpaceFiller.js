@@ -6,7 +6,7 @@ import {
   onMinIterations,
   onMaxIterations,
 } from "@/common/lindenmayer"
-import { resizeVertices } from "@/common/geometry"
+import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { subtypes } from "./subtypes"
 
 const options = {
@@ -95,7 +95,7 @@ export default class SpaceFiller extends Shape {
           : config.iterationsGrow
     }
 
-    return resizeVertices(curve, sizeX * scale, sizeY * scale)
+    return centerOnOrigin(resizeVertices(curve, sizeX * scale, sizeY * scale))
   }
 
   getOptions() {
