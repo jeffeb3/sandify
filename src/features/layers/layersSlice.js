@@ -15,6 +15,7 @@ import Layer from "./Layer"
 import { selectState } from "@/features/app/appSlice"
 import {
   effectsSlice,
+  setSelectedEffect,
   selectEffectById,
   selectEffectsByLayerId,
   selectCurrentEffect,
@@ -62,18 +63,15 @@ const layersSlice = createSlice({
         const index = state.selected ? currSelectedIndex(state) + 1 : 0
         const layer = {
           ...action.payload,
-          effectIds: [],
         }
+        layer.effectIds = []
         state.ids.splice(index, 0, layer.id)
         state.entities[layer.id] = layer
         state.current = layer.id
         state.selected = layer.id
 
         if (layer.type !== "fileImport") {
-          localStorage.setItem(
-            layer.effect ? "defaultEffect" : "defaultShape",
-            layer.type,
-          )
+          localStorage.setItem("defaultShape", layer.type)
         }
       },
       prepare(layer) {
@@ -538,14 +536,17 @@ export const copyLayer = ({ id, name }) => {
       name,
     }
 
+    // create new layer
+    const action = dispatch(layersSlice.actions.addLayer(newLayer))
+    const newId = action.meta.id
+
     // copy effects
-    newLayer.effectIds = layer.effectIds.map((effectId) => {
+    layer.effectIds.map((effectId) => {
       const effect = selectEffectById(state, effectId)
-      return dispatch(effectsSlice.actions.addEffect(effect)).meta.id
+      return dispatch(addEffect({ id: newId, effect }))
     })
 
-    // create new layer
-    dispatch(layersSlice.actions.addLayer(newLayer))
+    dispatch(setCurrentLayer(newId))
   }
 }
 
@@ -586,8 +587,12 @@ export const deleteEffect = ({ id, effectId }) => {
 
 export const setCurrentLayer = (id) => {
   return (dispatch, getState) => {
+    const state = getState()
+    const layer = selectLayerById(state, id)
+
     dispatch(layersSlice.actions.setCurrentLayer(id))
     dispatch(effectsSlice.actions.setCurrentEffect(null))
+    dispatch(setSelectedEffect(layer?.effectIds[0])) // this guard is a hack to get a test to run
   }
 }
 

@@ -63,7 +63,8 @@ export default class Shape extends Model {
     return JSON.stringify(cacheState)
   }
 
-  // override as needed; returns an array of Victor vertices
+  // override as needed; returns an array of Victor vertices that render
+  // the shape with the specific options
   getVertices(state) {
     return []
   }

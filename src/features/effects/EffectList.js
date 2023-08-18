@@ -57,7 +57,7 @@ const EffectRow = ({
             data-id={id}
             data-tooltip-content={visible ? "Hide effect" : "Show effect"}
             data-tooltip-id="tooltip-toggle-visible"
-            onClick={() => handleToggleEffectVisible(id)}
+            onClick={() => handleToggleEffectVisible(id, effect.visible)}
           >
             {visible ? <FaEye size="0.8em" /> : <FaEyeSlash size="0.8em" />}
           </Button>
@@ -69,7 +69,7 @@ const EffectRow = ({
   )
 }
 
-const EffectList = ({ effects, currentEffect, selectedLayer }) => {
+const EffectList = ({ effects, selectedLayer }) => {
   const dispatch = useDispatch()
   const currentEffectId = useSelector(selectCurrentEffectId)
   const selectedEffectId = useSelector(selectSelectedEffectId)
@@ -87,6 +87,9 @@ const EffectList = ({ effects, currentEffect, selectedLayer }) => {
   const handleDragStart = ({ active }) => dispatch(setCurrentEffect(active.id))
 
   const handleDragEnd = ({ active, over }) => {
+    if (!over) {
+      return
+    }
     if (active.id !== over.id) {
       const oldIndex = effects.findIndex((effect) => effect.id === active.id)
       const newIndex = effects.findIndex((effect) => effect.id === over.id)
@@ -94,8 +97,10 @@ const EffectList = ({ effects, currentEffect, selectedLayer }) => {
     }
   }
 
-  const handleToggleEffectVisible = (id) =>
-    dispatch(updateEffect({ id, visible: !currentEffect.visible }))
+  const handleToggleEffectVisible = (id, visible) => {
+    dispatch(setCurrentEffect(id))
+    dispatch(updateEffect({ id, visible: !visible }))
+  }
 
   const handleEffectSelected = (event) => {
     const id = event.target.closest(".list-group-item").id

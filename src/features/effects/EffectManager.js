@@ -9,7 +9,7 @@ import {
   deleteEffect,
   selectLayerEffects,
 } from "@/features/layers/layersSlice"
-import { selectCurrentEffect } from "./effectsSlice"
+import { selectSelectedEffect } from "./effectsSlice"
 import EffectEditor from "./EffectEditor"
 import EffectList from "./EffectList"
 import NewEffect from "./NewEffect"
@@ -17,7 +17,7 @@ import NewEffect from "./NewEffect"
 const EffectManager = () => {
   const dispatch = useDispatch()
   const selectedLayer = useSelector(selectSelectedLayer)
-  const currentEffect = useSelector(selectCurrentEffect)
+  const selectedEffect = useSelector(selectSelectedEffect)
   const effects = useSelector((state) =>
     selectLayerEffects(state, selectedLayer.id),
   )
@@ -29,7 +29,7 @@ const EffectManager = () => {
     dispatch(
       deleteEffect({
         id: selectedLayer.id,
-        effectId: currentEffect.id,
+        effectId: selectedEffect.id,
       }),
     )
   }
@@ -70,7 +70,6 @@ const EffectManager = () => {
               <Card.Body>
                 <EffectList
                   effects={effects}
-                  currentEffect={currentEffect}
                   selectedLayer={selectedLayer}
                 />
                 <div className="d-flex align-items-center border-left border-right border-bottom">

@@ -407,14 +407,12 @@ describe("layers reducer", () => {
           }),
         )
         const actions = store.getActions()
-        expect(actions[0].type).toEqual("effects/addEffect")
+        expect(actions[0].type).toEqual("layers/addLayer")
         expect(actions[1].type).toEqual("effects/addEffect")
-        expect(actions[2].type).toEqual("layers/addLayer")
-        expect(actions[2].payload).toEqual({
-          id: "3",
-          name: "bar",
-          effectIds: ["1", "2"],
-        })
+        expect(actions[2].type).toEqual("layers/addEffect")
+        expect(actions[3].type).toEqual("effects/setCurrentEffect")
+        expect(actions[4].type).toEqual("layers/setCurrentLayer")
+        expect(actions[5].type).toEqual("effects/addEffect")
       })
     })
 

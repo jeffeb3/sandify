@@ -38,7 +38,7 @@ export default class Model {
     )
   }
 
-  // redux state of a newly created instance
+  // override as needed; redux state of a newly created instance
   getInitialState() {
     return {}
   }

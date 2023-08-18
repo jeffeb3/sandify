@@ -58,12 +58,24 @@ export const effectsSlice = createSlice({
         state.selected = id
       }
     },
+    setSelectedEffect: (state, action) => {
+      const id = action.payload
+
+      if (state.entities[id]) {
+        state.selected = id
+      }
+    },
   },
 })
 
 export default effectsSlice.reducer
-export const { addEffect, deleteEffect, updateEffect, setCurrentEffect } =
-  effectsSlice.actions
+export const {
+  addEffect,
+  deleteEffect,
+  updateEffect,
+  setCurrentEffect,
+  setSelectedEffect,
+} = effectsSlice.actions
 
 // ------------------------------
 // Selectors

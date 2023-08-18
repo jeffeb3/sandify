@@ -65,8 +65,8 @@ const LayerRow = ({
             data-id={id}
             data-tooltip-content={visible ? "Hide layer" : "Show layer"}
             data-tooltip-id="tooltip-toggle-visible"
-            onClick={() => {
-              handleToggleLayerVisible(id)
+            onClick={(e) => {
+              handleToggleLayerVisible(id, layer.visible)
             }}
           >
             {visible ? <FaEye size="0.8em" /> : <FaEyeSlash size="0.8em" />}
@@ -110,11 +110,15 @@ const LayerList = () => {
 
   const handleDragStart = ({ active }) => dispatch(setCurrentLayer(active.id))
 
-  const handleToggleLayerVisible = (id) => {
-    dispatch(updateLayer({ id, visible: !selectedLayer.visible }))
+  const handleToggleLayerVisible = (id, visible) => {
+    dispatch(setCurrentLayer(id))
+    dispatch(updateLayer({ id, visible: !visible }))
   }
 
   const handleDragEnd = ({ active, over }) => {
+    if (!over) {
+      return
+    }
     if (active.id !== over.id) {
       const oldIndex = layers.findIndex((layer) => layer.id === active.id)
       const newIndex = layers.findIndex((layer) => layer.id === over.id)

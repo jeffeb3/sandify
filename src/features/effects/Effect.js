@@ -18,12 +18,14 @@ export default class Effect extends Model {
     return false
   }
 
-  // override as needed; returns an array of Victor vertices
+  // override as needed; returns an array of Victor vertices that are used to
+  // render a Konva transformer when the effect is selected
   getSelectionVertices(effect) {
     return []
   }
 
-  // override as needed
+  // override as needed; returns an array of Victor vertices that are the result
+  // of applying the effect to the layer
   getVertices(effect, layer, vertices) {
     return []
   }

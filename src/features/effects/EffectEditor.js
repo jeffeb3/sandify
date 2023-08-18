@@ -14,8 +14,9 @@ import { selectSelectedEffect } from "./effectsSlice"
 const EffectEditor = ({ id }) => {
   const dispatch = useDispatch()
   const effect = useSelector(selectSelectedEffect)
-  const instance = new EffectLayer(effect.type)
-  const model = new EffectLayer(effect.type).model
+  const type = effect?.type || "mask" // guard zombie child
+  const instance = new EffectLayer(type)
+  const model = new EffectLayer(type).model
   const layerOptions = instance.getOptions()
   const modelOptions = model.getOptions()
 
