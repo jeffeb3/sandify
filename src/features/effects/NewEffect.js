@@ -2,7 +2,11 @@ import React, { useState, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import Select from "react-select"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
-import { selectSelectedLayer, addEffect } from "@/features/layers/layersSlice"
+import {
+  selectSelectedLayer,
+  addEffect,
+  selectLayerVertices,
+} from "@/features/layers/layersSlice"
 import {
   getEffectSelectOptions,
   getDefaultEffect,
@@ -23,6 +27,9 @@ const NewEffect = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectedLayer = useSelector(selectSelectedLayer)
+  const selectedLayerVertices = useSelector((state) =>
+    selectLayerVertices(state, selectedLayer.id),
+  )
   const selectOptions = getEffectSelectOptions()
   const [type, setType] = useState(defaultEffect.type)
   const [name, setName] = useState(defaultEffect.label)
@@ -58,7 +65,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
     dispatch(
       addEffect({
         id: selectedLayer.id,
-        effect: layer.getInitialState(),
+        effect: layer.getInitialState(selectedLayer, selectedLayerVertices),
       }),
     )
     toggleModal()

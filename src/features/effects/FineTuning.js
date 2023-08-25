@@ -28,6 +28,13 @@ const options = {
     max: 100,
     step: 2,
   },
+  reverse: {
+    title: "Reverse path",
+    type: "checkbox",
+    isVisible: (model, state) => {
+      return !model.effect
+    },
+  },
 }
 
 export default class FineTuning extends Effect {
@@ -56,11 +63,16 @@ export default class FineTuning extends Effect {
         drawPortionPct: 100,
         backtrackPct: 0,
         rotateStartingPct: 0,
+        reverse: false,
       },
     }
   }
 
   getVertices(effect, layer, vertices) {
+    if (effect.reverse) {
+      vertices = vertices.reverse()
+    }
+
     if (
       effect.rotateStartingPct === undefined ||
       effect.rotateStartingPct !== 0

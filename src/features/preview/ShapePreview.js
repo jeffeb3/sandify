@@ -9,11 +9,18 @@ import {
   selectLayerById,
   selectNumVisibleLayers,
   selectActiveEffect,
+  selectVisibleLayerEffects,
+  selectShapePreviewVertices,
+  selectShapeWhileEffectDraggingVertices,
   selectPreviewVertices,
   selectSliderColors,
   selectVertexOffsets,
   selectSliderBounds,
+  selectLayerPreviewBounds,
+  setCurrentLayer,
 } from "@/features/layers/layersSlice"
+import { selectCurrentEffectId } from "@/features/effects/effectsSlice"
+import EffectLayer from "@/features/effects/EffectLayer"
 import { selectPreviewSliderValue } from "@/features/preview/previewSlice"
 import EffectPreview from "@/features/preview/EffectPreview"
 import { getShapeFromType } from "@/features/shapes/factory"
@@ -25,25 +32,48 @@ const ShapePreview = (ownProps) => {
   log(`ShapePreview render ${ownProps.id}`)
   const dispatch = useDispatch()
   const currentLayerId = useSelector(selectCurrentLayerId)
+  const currentEffectId = useSelector(selectCurrentEffectId)
   const activeEffect = useSelector(
     (state) => selectActiveEffect(state, ownProps.id),
+    isEqual,
+  )
+  const activeEffectInstance = activeEffect
+    ? new EffectLayer(activeEffect.type)
+    : null
+  const visibleEffects = useSelector(
+    (state) => selectVisibleLayerEffects(state, ownProps.id),
     isEqual,
   )
   const layer = useSelector((state) => selectLayerById(state, ownProps.id))
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
   const sliderValue = useSelector(selectPreviewSliderValue)
-  const vertices = useSelector((state) =>
+  const layerVertices = useSelector((state) =>
     selectPreviewVertices(state, ownProps.id),
+  )
+  const effectDraggingVertices = useSelector((state) =>
+    selectShapeWhileEffectDraggingVertices(
+      state,
+      ownProps.id,
+      activeEffect?.id,
+    ),
+  )
+  const shapePreviewVertices = useSelector((state) =>
+    selectShapePreviewVertices(state, ownProps.id),
   )
   const colors = useSelector(selectSliderColors, isEqual)
   const offsets = useSelector(selectVertexOffsets, isEqual)
-  const bounds = useSelector(selectSliderBounds, isEqual)
+  const sliderBounds = useSelector(selectSliderBounds, isEqual)
+  const layerBounds = useSelector(
+    (state) => selectLayerPreviewBounds(state, ownProps.id),
+    isEqual,
+  )
 
   const shapeRef = React.useRef()
   const groupRef = React.useRef()
   const trRef = React.useRef()
   const isCurrent = layer?.id === currentLayerId
+  console.log(isCurrent)
   const model = getShapeFromType(layer?.type || "polygon")
 
   useEffect(() => {
@@ -66,29 +96,45 @@ const ShapePreview = (ownProps) => {
     return null
   }
 
-  const start = index === 0
-  const end = index === numLayers - 1
+  const isFirstLayer = index === 0
+  const isLastLayer = index === numLayers - 1
   const { width, height } = layer
-  const selectedColor = "yellow"
-  const unselectedColor = "rgba(195, 214, 230, 0.65)"
-  const backgroundSelectedColor = "#6E6E00"
+  const selectedColor = "rgba(255, 255, 0, 0.8)"
+  const unselectedColor = "rgba(255, 255, 0, 0.7)"
+  const backgroundSelectedColor = "#2983BA"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = sliderValue !== 0
-  const helper = new PreviewHelper({ layer, vertices, offsets, bounds, colors })
+  const helper = new PreviewHelper({
+    layer,
+    layerVertices,
+    offsets,
+    bounds: sliderBounds,
+    colors,
+  })
 
   const drawLayerVertices = (context, bounds) => {
     const { end } = bounds
     let oldColor = null
-    let currentColor = isCurrent ? selectedColor : unselectedColor
+    let currentColor
+
+    if (isCurrent) {
+      currentColor = selectedColor
+    } else if (activeEffect) {
+      currentColor = "rgba(15, 128, 0, 0.8)"
+    } else if (layer.dragging || currentLayerId || currentEffectId) {
+      currentColor = backgroundUnselectedColor
+    } else {
+      currentColor = unselectedColor
+    }
 
     context.beginPath()
     context.lineWidth = 1
     context.strokeStyle = currentColor
-    helper.moveTo(context, vertices[0])
+    helper.moveTo(context, layerVertices[0])
     context.stroke()
 
     context.beginPath()
-    for (let i = 1; i < vertices.length; i++) {
+    for (let i = 1; i < layerVertices.length; i++) {
       if (isSliding) {
         let absoluteI = i + offsets[layer.id].start
         let pathColor =
@@ -103,22 +149,54 @@ const ShapePreview = (ownProps) => {
         }
       }
 
+      helper.moveTo(context, layerVertices[i - 1])
+      helper.lineTo(context, layerVertices[i])
+    }
+    context.stroke()
+  }
+
+  const drawVertices = (context, vertices, color, lineWidth = 1) => {
+    context.beginPath()
+    context.lineWidth = lineWidth
+    context.strokeStyle = color
+    helper.moveTo(context, vertices[0])
+    context.stroke()
+
+    context.beginPath()
+    for (let i = 1; i < vertices.length; i++) {
       helper.moveTo(context, vertices[i - 1])
       helper.lineTo(context, vertices[i])
     }
     context.stroke()
   }
 
-  const drawStartAndEndPoints = (context) => {
-    const start = vertices[0]
-    const end = vertices[vertices.length - 1]
+  const drawLayerStartAndEndPoints = (context) => {
+    const start = layerVertices[0]
+    const end = layerVertices[layerVertices.length - 1]
 
     context.beginPath()
-    context.strokeStyle = "green"
+    context.strokeStyle = "#2983BA"
     helper.dot(context, start, start ? 5 : 3)
     helper.markOriginalCoordinates(context, start)
 
-    if (end) {
+    context.beginPath()
+    context.strokeStyle = "red"
+    helper.dot(context, end, end ? 5 : 3)
+    helper.markOriginalCoordinates(context, end)
+  }
+
+  const drawStartAndEndPoints = (context) => {
+    const start = layerVertices[0]
+    const end = layerVertices[layerVertices.length - 1]
+
+    if (isFirstLayer) {
+      context.beginPath()
+      context.strokeStyle = "green"
+      helper.dot(context, start, start ? 5 : 3)
+      helper.markOriginalCoordinates(context, start)
+    }
+
+    if (isLastLayer) {
       context.beginPath()
       context.strokeStyle = "red"
       helper.dot(context, end, end ? 5 : 3)
@@ -127,20 +205,46 @@ const ShapePreview = (ownProps) => {
   }
 
   const sceneFunc = (context, shape) => {
-    if (vertices && vertices.length > 0) {
-      drawLayerVertices(context, bounds)
+    if (layerVertices && layerVertices.length > 0) {
+      if (!isSliding && isCurrent && visibleEffects.length > 0) {
+        drawVertices(context, shapePreviewVertices, "rgba(15, 128, 0, 0.8)")
+      }
 
-      if (start || end || isCurrent) {
+      if (activeEffect && activeEffect.dragging) {
+        if (!activeEffectInstance.model.dragPreview) {
+          drawVertices(context, effectDraggingVertices, "green")
+        }
+      } else {
+        drawLayerVertices(context, sliderBounds)
+      }
+
+      if (isCurrent) {
+        drawLayerStartAndEndPoints(context)
+      } else if (!currentLayerId && !currentEffectId) {
         drawStartAndEndPoints(context)
       }
+
       helper.drawSliderEndPoint(context)
     }
 
     context.fillStrokeShape(shape)
   }
 
-  function hitFunc(context) {
-    context.fillStrokeShape(this)
+  // determines whether a layer is selected when it is clicked; based on the outer bounds of
+  // the layer, including all of its effects
+  // TODO: this is a bit off with irregular shapes; something related to off-center origin
+  function hitFunc(context, shape) {
+    const offsetX = (layerBounds[1].x + layerBounds[0].x) / 2
+    const offsetY = (layerBounds[1].y + layerBounds[0].y) / 2
+    const width = layerBounds[1].x - layerBounds[0].x
+    const height = layerBounds[1].y - layerBounds[0].y
+    const offsetWidth = (width - shape.getAttr("width")) / 2
+    const offsetHeight = (height - shape.getAttr("height")) / 2
+
+    context.beginPath()
+    context.rect(offsetX - offsetWidth, -offsetY - offsetHeight, width, height)
+    context.closePath()
+    context.fillStrokeShape(shape)
   }
 
   const handleChange = (attrs) => {
@@ -206,6 +310,11 @@ const ShapePreview = (ownProps) => {
     }
   }
 
+  const handleClick = (e) => {
+    dispatch(setCurrentLayer(ownProps.id))
+    e.cancelBubble = true // don't bubble this up to the preview window
+  }
+
   return (
     <Group>
       <Group
@@ -231,11 +340,13 @@ const ShapePreview = (ownProps) => {
             sceneFunc={sceneFunc}
             hitFunc={hitFunc}
             onWheel={handleWheel}
+            onClick={handleClick}
           />
         )}
         {activeEffect && (
           <EffectPreview
             id={activeEffect.id}
+            layerId={layer.id}
             key={activeEffect.id}
           />
         )}
@@ -243,6 +354,7 @@ const ShapePreview = (ownProps) => {
       {layer.visible && isCurrent && model.canChangeSize(layer) && (
         <Transformer
           ref={trRef}
+          borderStroke="#fefefe"
           centeredScaling={true}
           resizeEnabled={model.canChangeSize(layer)}
           rotateEnabled={model.canRotate(layer)}

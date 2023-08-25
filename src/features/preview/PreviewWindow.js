@@ -8,7 +8,7 @@ import { selectMachine } from "@/features/machine/machineSlice"
 import {
   selectSelectedLayer,
   selectVisibleLayerIds,
-  selectIsDragging,
+  setCurrentLayer,
 } from "@/features/layers/layersSlice"
 import ShapePreview from "./ShapePreview"
 import ConnectorPreview from "./ConnectorPreview"
@@ -16,14 +16,13 @@ import { setPreviewSize } from "./previewSlice"
 
 const PreviewWindow = () => {
   const dispatch = useDispatch()
-  const previewElement = useRef(null)
   const { rectangular, minX, minY, maxX, maxY, maxRadius } =
     useSelector(selectMachine)
   const { canvasWidth, canvasHeight } = useSelector(selectPreviewState)
   const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
   const remainingLayerIds = layerIds.filter((id) => id !== selectedLayer?.id)
-  const dragging = useSelector(selectIsDragging)
+  const layerRef = useRef()
 
   useEffect(() => {
     const wrapper = document.getElementById("preview-wrapper")
@@ -60,44 +59,62 @@ const PreviewWindow = () => {
       width = height = maxRadius * 2.0
     }
 
-    return Math.min(canvasWidth / width, canvasHeight / height)
+    return {
+      scaleWidth: canvasWidth / width,
+      scaleHeight: canvasHeight / height,
+    }
   }
 
-  const clipCircle = (ctx) => {
-    ctx.arc(0, 0, maxRadius, 0, Math.PI * 2, false)
-  }
-
-  const clipRect = (ctx) => {
-    ctx.rect(-width / 2, -height / 2, width, height)
-  }
-
-  const clipFunc = dragging ? (rectangular ? clipRect : clipCircle) : null
   const width = rectangular ? maxX - minX : maxRadius * 2
   const height = rectangular ? maxY - minY : maxRadius * 2
-  const scale = relativeScale()
+  const { scaleWidth, scaleHeight } = relativeScale()
+  const scale = Math.min(scaleWidth, scaleHeight)
+
+  const selectedIdx = layerIds.findIndex(
+    (layerId) => layerId === selectedLayer?.id,
+  )
+  const selectedNextId =
+    selectedIdx !== -1 && selectedIdx < layerIds.length - 1
+      ? layerIds[selectedIdx + 1]
+      : null
+
+  // add hidden debugging option to toggle the hit canvas on the layer when the user
+  // clicks on the layer while pressing the Alt key
+  const handleLayerClick = (e) => {
+    if (e.evt.altKey && layerRef.current) {
+      layerRef.current.toggleHitCanvas()
+      e.cancelBubble = true
+    }
+  }
+
+  const handleStageClick = (e) => {
+    dispatch(setCurrentLayer(null))
+  }
 
   // some awkward rendering to put the current layer as the last child in the layer to ensure
   // transformer rotation works; this is a Konva restriction.
   return (
     <Stage
-      id="preview-wrapper"
-      ref={previewElement}
-      className="preview-wrapper d-flex align-items-center"
+      className="d-flex align-items-center"
       scaleX={scale}
       scaleY={scale}
       height={height * scale}
-      width={width * scale}
-      offsetX={-width / 2}
+      width={width * scaleWidth}
+      offsetX={(-width * (scaleWidth / scale)) / 2}
       offsetY={-height / 2}
+      onClick={handleStageClick}
     >
-      <Layer clipFunc={clipFunc}>
+      <Layer
+        ref={layerRef}
+        onClick={handleLayerClick}
+      >
         {!rectangular && (
           <Circle
             x={0}
             y={0}
             radius={maxRadius}
-            fill="transparent"
-            stroke="gray"
+            fill="black"
+            stroke="transparent"
           />
         )}
         {rectangular && (
@@ -106,8 +123,8 @@ const PreviewWindow = () => {
             y={0}
             width={width}
             height={height}
-            fill="transparent"
-            stroke="gray"
+            fill="black"
+            stroke="transparent"
             offsetX={width / 2}
             offsetY={height / 2}
           />
@@ -132,6 +149,13 @@ const PreviewWindow = () => {
               />,
             ]
           }),
+          selectedNextId && (
+            <ConnectorPreview
+              startId={selectedLayer.id}
+              endId={selectedNextId}
+              key="c-first"
+            />
+          ),
           selectedLayer && (
             <ShapePreview
               id={selectedLayer.id}

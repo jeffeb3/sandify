@@ -45,13 +45,6 @@ export const layerOptions = {
       return model.canChangeSize(state) && model.canChangeHeight(state)
     },
   },
-  reverse: {
-    title: "Reverse path",
-    type: "checkbox",
-    isVisible: (model, state) => {
-      return !model.effect
-    },
-  },
   rotation: {
     title: "Rotate (degrees)",
     inline: true,
@@ -84,7 +77,6 @@ export default class Layer {
         width: dimensions.width,
         height: dimensions.height,
         rotation: 0,
-        reverse: false,
         visible: true,
         name: this.model.label,
         effectIds: [],
@@ -124,10 +116,6 @@ export default class Layer {
       vertex.rotateDeg(-rotation)
       vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
     })
-
-    if (this.state.reverse) {
-      this.vertices = this.vertices.reverse()
-    }
   }
 
   applyEffects(effects) {

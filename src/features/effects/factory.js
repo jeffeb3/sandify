@@ -4,6 +4,7 @@ import Loop from "./Loop"
 import Mask from "./Mask"
 import Noise from "./Noise"
 import Track from "./Track"
+import Transformer from "./Transformer"
 import Warp from "./Warp"
 
 export const effectFactory = {
@@ -13,6 +14,7 @@ export const effectFactory = {
   mask: Mask,
   noise: Noise,
   track: Track,
+  transformer: Transformer,
   warp: Warp,
 }
 

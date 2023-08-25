@@ -5,19 +5,30 @@ import { Shape } from "react-konva"
 import {
   selectSelectedLayer,
   selectLayerById,
+  selectCurrentLayerId,
   selectSliderBounds,
   selectSliderColors,
   selectVertexOffsets,
   selectConnectingVertices,
+  selectActiveEffect,
 } from "@/features/layers/layersSlice"
+import { selectCurrentEffectId } from "@/features/effects/effectsSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import PreviewHelper from "./PreviewHelper"
 
 const ConnectorPreview = (ownProps) => {
   const { startId, endId } = ownProps
   const selectedLayer = useSelector(selectSelectedLayer)
+  const currentLayerId = useSelector(selectCurrentLayerId)
+  const currentEffectId = useSelector(selectCurrentEffectId)
   const startLayer = useSelector((state) => selectLayerById(state, startId))
   const endLayer = useSelector((state) => selectLayerById(state, endId))
+  const startActiveEffect = useSelector((state) =>
+    selectActiveEffect(state, startId),
+  )
+  const endActiveEffect = useSelector((state) =>
+    selectActiveEffect(state, endId),
+  )
   const vertices = useSelector((state) =>
     selectConnectingVertices(state, startId),
   )
@@ -30,6 +41,11 @@ const ConnectorPreview = (ownProps) => {
     return null
   } // no longer valid
 
+  const isDragging =
+    startLayer.dragging ||
+    endLayer.dragging ||
+    startActiveEffect?.dragging ||
+    endActiveEffect?.dragging
   const helper = new PreviewHelper({
     selectedLayer,
     startLayer,
@@ -43,31 +59,43 @@ const ConnectorPreview = (ownProps) => {
     bounds,
   })
 
-  const selectedColor = "yellow"
-  const unselectedColor = "rgba(195, 214, 230, 0.65)"
-  const backgroundSelectedColor = "#6E6E00"
+  const currentColor = "rgba(41, 131, 186, 0.7)"
+  const unselectedColor = "rgba(255, 255, 0, 0.7)"
+  const backgroundSelectedColor = "#2983BA"
   const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = sliderValue !== 0
-  const isSelected = selectedLayer.id === endLayer.id
+  const isCurrent =
+    currentLayerId === startLayer.id || currentLayerId == endLayer.id
 
   function sceneFunc(context, shape) {
-    drawConnector(context)
+    if (!isDragging) {
+      drawConnector(context)
+    }
+
+    if (currentLayerId == startLayer.id) {
+      drawPoint(vertices[vertices.length - 1], context)
+    }
+
+    if (currentLayerId == endLayer.id) {
+      drawPoint(vertices[0], context)
+    }
+
     helper.drawSliderEndPoint(context)
     context.fillStrokeShape(shape)
-  }
-
-  function hitFunc(context) {
-    context.fillStrokeShape(this)
   }
 
   function drawConnector(context) {
     const { end } = bounds
     let oldColor = null
-    let currentColor = isSelected ? selectedColor : unselectedColor
+    let color = isCurrent
+      ? currentColor
+      : currentLayerId || currentEffectId
+      ? backgroundUnselectedColor
+      : unselectedColor
 
     context.beginPath()
     context.lineWidth = 1
-    context.strokeStyle = unselectedColor
+    context.strokeStyle = color
     helper.moveTo(context, vertices[0])
     context.stroke()
 
@@ -78,11 +106,11 @@ const ConnectorPreview = (ownProps) => {
         let pathColor =
           absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
 
-        currentColor = colors[absoluteI] || pathColor
-        if (currentColor !== oldColor) {
+        color = colors[absoluteI] || pathColor
+        if (color !== oldColor) {
           context.stroke()
-          context.strokeStyle = currentColor
-          oldColor = currentColor
+          context.strokeStyle = color
+          oldColor = color
           context.beginPath()
         }
       }
@@ -93,14 +121,20 @@ const ConnectorPreview = (ownProps) => {
     context.stroke()
   }
 
+  const drawPoint = (point, context) => {
+    context.beginPath()
+    context.strokeStyle = "transparent"
+    helper.dot(context, point, point ? 5 : 3, backgroundSelectedColor)
+    helper.markOriginalCoordinates(context, point)
+  }
+
   return (
     <React.Fragment>
-      {endLayer && !startLayer.dragging && !endLayer.dragging && (
+      {endLayer && (
         <Shape
           offsetX={startLayer.width / 2}
           offsetY={startLayer.height / 2}
           sceneFunc={sceneFunc}
-          hitFunc={hitFunc}
         ></Shape>
       )}
     </React.Fragment>

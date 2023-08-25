@@ -169,7 +169,6 @@ const LayerEditor = () => {
             </Col>
           </Row>
         )}
-        {getOptionComponent(model, layerOptions, "reverse")}
         {getOptionComponent(model, layerOptions, "connectionMethod")}
 
         <Button

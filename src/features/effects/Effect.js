@@ -3,6 +3,11 @@ import Model from "@/common/Model"
 const effectOptions = []
 
 export default class Effect extends Model {
+  constructor(type, state) {
+    super(type, state)
+    this.dragPreview = false
+  }
+
   // override as needed
   canChangeSize(state) {
     return false

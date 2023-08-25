@@ -7,6 +7,7 @@ import {
   selectEffectSelectionVertices,
   updateEffect,
 } from "@/features/effects/effectsSlice"
+import { selectDraggingEffectVertices } from "@/features/layers/layersSlice"
 import { getEffectFromType } from "@/features/effects/factory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
@@ -20,9 +21,9 @@ const EffectPreview = (ownProps) => {
   const vertices = useSelector((state) =>
     selectEffectSelectionVertices(state, ownProps.id),
   )
-  //  const colors = useSelector(selectSliderColors, isEqual)
-  //  const offsets = useSelector(selectVertexOffsets, isEqual)
-  //  const bounds = useSelector(selectSliderBounds, isEqual)
+  const draggingVertices = useSelector((state) =>
+    selectDraggingEffectVertices(state, ownProps.layerId, ownProps.id),
+  )
 
   const shapeRef = React.useRef()
   const trRef = React.useRef()
@@ -46,7 +47,7 @@ const EffectPreview = (ownProps) => {
   const helper = new PreviewHelper({ layer: effect })
 
   const drawLayerVertices = (context) => {
-    let currentColor = "yellow"
+    let currentColor = "rgba(255, 255, 0, 0.8)"
 
     context.beginPath()
     context.lineWidth = 1
@@ -62,15 +63,47 @@ const EffectPreview = (ownProps) => {
     context.stroke()
   }
 
+  const drawDraggingVertices = (context) => {
+    let currentColor = "rgba(15, 128, 0, 0.8)"
+
+    context.beginPath()
+    context.lineWidth = 1
+    context.strokeStyle = currentColor
+    helper.moveTo(context, draggingVertices[0])
+    context.stroke()
+
+    context.beginPath()
+    for (let i = 1; i < draggingVertices.length; i++) {
+      helper.moveTo(context, draggingVertices[i - 1])
+      helper.lineTo(context, draggingVertices[i])
+    }
+    context.stroke()
+  }
+
   const sceneFunc = (context, shape) => {
     if (isCurrent && vertices && vertices.length > 0) {
       drawLayerVertices(context)
     }
 
+    if (
+      isCurrent &&
+      effect.dragging &&
+      draggingVertices &&
+      draggingVertices.length > 0
+    ) {
+      drawDraggingVertices(context)
+    }
+
     context.fillStrokeShape(shape)
   }
 
-  function hitFunc(context) {
+  function hitFunc(context, shape) {
+    const width = shape.getAttr("width")
+    const height = shape.getAttr("height")
+    const x = shape.getAttr("x")
+    const y = shape.getAttr("y")
+
+    context.rect(x - effect.x, y + effect.y, width, height)
     context.fillStrokeShape(this)
   }
 
@@ -165,6 +198,7 @@ const EffectPreview = (ownProps) => {
         <Transformer
           ref={trRef}
           centeredScaling={true}
+          borderStroke="white"
           resizeEnabled={model.canChangeSize(effect)}
           rotateEnabled={model.canRotate(effect)}
           rotationSnaps={[0, 90, 180, 270]}

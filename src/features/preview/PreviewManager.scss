@@ -1,8 +1,9 @@
-.preview-wrapper {
+#preview-main {
   background-color: #333;
+}
 
+.preview-wrapper {
   .konvajs-content {
-    background-color: black;
     margin: 0 auto;
   }
 
@@ -12,7 +13,7 @@
 
   @media (min-width: 992px) {
     width: 100%;
-    height: calc(100vh - 169px);
+    height: calc(100vh - 216px);
   }
 }
 

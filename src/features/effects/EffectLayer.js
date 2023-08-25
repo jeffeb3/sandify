@@ -53,9 +53,9 @@ export default class EffectLayer {
     this.model = getEffectFromType(type)
   }
 
-  getInitialState(props) {
+  getInitialState(layer, layerVertices) {
     return {
-      ...this.model.getInitialState(props),
+      ...this.model.getInitialState(layer, layerVertices),
       ...{
         type: this.model.type,
         visible: true,

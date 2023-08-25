@@ -5,13 +5,14 @@ import { v4 as uuidv4 } from "uuid"
 import Color from "color"
 import arrayMove from "array-move"
 import { isEqual } from "lodash"
-import { rotate, offset, totalDistance } from "@/common/geometry"
+import { rotate, offset, totalDistance, findBounds } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
 import {
   getDefaultShapeType,
   getShapeFromType,
 } from "@/features/shapes/factory"
 import Layer from "./Layer"
+import EffectLayer from "@/features/effects/EffectLayer"
 import { selectState } from "@/features/app/appSlice"
 import {
   effectsSlice,
@@ -163,6 +164,22 @@ const layersSlice = createSlice({
 
 // used in slice
 const { selectById } = layersAdapter.getSelectors((state) => state.layers)
+
+// returns vertices suitable for display in the preview window
+const previewVertices = (vertices, layer) => {
+  return vertices.map((vertex) => {
+    let previewVertex = rotate(
+      offset(vertex, -layer.x, -layer.y),
+      layer.rotation,
+    )
+
+    // store original coordinates
+    previewVertex.origX = vertex.x
+    previewVertex.origY = vertex.y
+
+    return previewVertex
+  })
+}
 
 export const {
   selectAll: selectAllLayers,
@@ -325,6 +342,32 @@ const selectMachineVertices = createCachedSelector(
   },
 )((state, id) => id)
 
+// returns preview vertices for a given layer, without effects
+export const selectShapePreviewVertices = createCachedSelector(
+  selectLayerById,
+  selectVisibleLayerEffects,
+  selectLayerMachine,
+  (layer, effects, machine) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    const instance = new Layer(layer.type)
+    const vertices = instance.getVertices({
+      layer,
+      effects: [],
+      machine,
+    })
+
+    return previewVertices(vertices, layer)
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
 // creates a selector that returns previewable vertices for a given layer
 export const selectPreviewVertices = createCachedSelector(
   selectLayerVertices,
@@ -337,21 +380,84 @@ export const selectPreviewVertices = createCachedSelector(
 
     log("selectPreviewVertices", layer.id)
     const vertices = layer.dragging ? originalVertices : machineVertices
-
-    return vertices.map((vertex) => {
-      let previewVertex = rotate(
-        offset(vertex, -layer.x, -layer.y),
-        layer.rotation,
-      )
-
-      // store original coordinates
-      previewVertex.origX = vertex.x
-      previewVertex.origY = vertex.y
-
-      return previewVertex
-    })
+    return previewVertices(vertices, layer)
   },
 )((state, id) => id)
+
+// returns the preview vertices for a dragging effect; this includes all effects up to
+// the given effect
+export const selectDraggingEffectVertices = createCachedSelector(
+  (state, id, effectId) => effectId,
+  selectVisibleLayerEffects,
+  selectLayerById,
+  selectLayerMachine,
+  (effectId, effects, layer, machine) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    const instance = new Layer(layer.type)
+    const effect = effects.find((effect) => effect.id == effectId)
+
+    if (!effect) {
+      // no longer visible
+      return []
+    }
+
+    const effectInstance = new EffectLayer(effect.type)
+    const idx = effects.findIndex((effect) => effect.id == effectId)
+    const vertices = effectInstance.model.dragPreview
+      ? instance.getVertices({
+          layer,
+          effects: effects.slice(0, idx + 1),
+          machine,
+        })
+      : []
+
+    return previewVertices(previewVertices(vertices, layer), effect)
+  },
+)({
+  keySelector: (state, id, effectId) => id + effectId,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns the preview vertices for a layer when an effect is being dragged; this includes all
+// effects up prior to the dragged effect
+export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
+  (state, id, effectId) => effectId,
+  selectVisibleLayerEffects,
+  selectLayerById,
+  selectLayerMachine,
+  (effectId, effects, layer, machine) => {
+    if (!layer || !effectId) {
+      return []
+    } // zombie child or inactive effect
+
+    const instance = new Layer(layer.type)
+    const effect = effects.find((effect) => effect.id == effectId)
+
+    if (!effect) {
+      // no longer visible
+      return []
+    }
+
+    const idx = effects.findIndex((effect) => effect.id == effectId)
+    const vertices = instance.getVertices({
+      layer,
+      effects: effects.slice(0, idx),
+      machine,
+    })
+
+    return previewVertices(vertices, layer)
+  },
+)({
+  keySelector: (state, id, effectId) => id + effectId,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
 
 // returns a array of all visible machine-bound vertices and the connections between them
 export const selectConnectedVertices = createSelector(selectState, (state) => {
@@ -389,6 +495,11 @@ export const selectConnectingVertices = createCachedSelector(
     const endId = visibleLayerIds[idx + 1]
     const startLayer = selectLayerById(state, layerId)
     const endLayer = selectLayerById(state, endId)
+
+    if (!startLayer || !endLayer) {
+      return [] // zombie child
+    }
+
     const startVertices = selectMachineVertices(state, startLayer.id)
     const endVertices = selectMachineVertices(state, endLayer.id)
     const start = startVertices[startVertices.length - 1]
@@ -451,6 +562,32 @@ export const selectVerticesStats = createSelector(
     }
   },
 )
+
+// returns the bounds for a given preview layer; include the original shape
+// in the bounds to compensate for potential masking
+export const selectLayerPreviewBounds = createCachedSelector(
+  selectLayerById,
+  selectMachineVertices,
+  selectMachine,
+  (layer, machineVertices, machine) => {
+    if (!layer) {
+      // zombie child
+      return []
+    }
+
+    const instance = new Layer(layer.type)
+    const vertices = instance.getVertices({ layer, effects: [], machine })
+
+    const combinedVertices = [...vertices, ...machineVertices].flat()
+
+    return findBounds(previewVertices(combinedVertices, layer))
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
 
 // given a set of vertices and a slider value, returns the indices of the
 // start and end vertices representing a preview slider moving through them.

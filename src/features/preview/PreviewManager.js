@@ -4,10 +4,18 @@ import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import Downloader from "@/features/exporter/Downloader"
 import { selectFontsState } from "@/features/fonts/fontsSlice"
-import { selectSelectedLayer } from "@/features/layers/layersSlice"
+import {
+  updateEffect,
+  selectCurrentEffect,
+} from "@/features/effects/effectsSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
-import { updateLayer, selectVerticesStats } from "@/features/layers/layersSlice"
+import {
+  updateLayer,
+  selectCurrentLayer,
+  selectVerticesStats,
+} from "@/features/layers/layersSlice"
 import { getShapeFromType } from "@/features/shapes/factory"
+import { getEffectFromType } from "@/features/effects/factory"
 import "./PreviewManager.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
@@ -15,11 +23,13 @@ import PreviewWindow from "./PreviewWindow"
 const PreviewManager = () => {
   const dispatch = useDispatch()
   const fonts = useSelector(selectFontsState)
-  const selectedLayer = useSelector(selectSelectedLayer)
+  const currentLayer = useSelector(selectCurrentLayer)
+  const currentEffectLayer = useSelector(selectCurrentEffect)
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const verticesStats = useSelector(selectVerticesStats)
   const previewElement = useRef(null)
-  const model = getShapeFromType(selectedLayer?.type || "polygon")
+  const currentShape = getShapeFromType(currentLayer?.type || "polygon")
+  const currentEffect = getEffectFromType(currentEffectLayer?.type || "mask")
 
   useEffect(() => {
     if (fonts.loaded) {
@@ -31,29 +41,41 @@ const PreviewManager = () => {
     dispatch(updatePreview({ sliderValue: value }))
   }
 
+  const arrowKeyChange = (layer, event) => {
+    const attrs = { id: layer.id }
+    const delta = event.shiftKey ? 1 : 5
+
+    switch (event.key) {
+      case "ArrowDown":
+        attrs.y = layer.y - delta
+        break
+      case "ArrowUp":
+        attrs.y = layer.y + delta
+        break
+      case "ArrowLeft":
+        attrs.x = layer.x - delta
+        break
+      case "ArrowRight":
+        attrs.x = layer.x + delta
+        break
+      default:
+        break
+    }
+
+    return attrs
+  }
+
   const handleKeyDown = (event) => {
-    if (model.canMove(selectedLayer)) {
-      let attrs = { id: selectedLayer.id }
-      const delta = event.shiftKey ? 1 : 5
-
-      switch (event.key) {
-        case "ArrowDown":
-          attrs.y = selectedLayer.y - delta
-          break
-        case "ArrowUp":
-          attrs.y = selectedLayer.y + delta
-          break
-        case "ArrowLeft":
-          attrs.x = selectedLayer.x - delta
-          break
-        case "ArrowRight":
-          attrs.x = selectedLayer.x + delta
-          break
-        default:
-          return
+    if (currentLayer) {
+      if (currentShape.canMove(currentLayer)) {
+        const attrs = arrowKeyChange(currentLayer, event)
+        dispatch(updateLayer(attrs))
       }
-
-      dispatch(updateLayer(attrs))
+    } else if (currentEffect) {
+      if (currentEffect.canMove(currentEffectLayer)) {
+        const attrs = arrowKeyChange(currentEffectLayer, event)
+        dispatch(updateEffect(attrs))
+      }
     }
   }
 
@@ -66,15 +88,22 @@ const PreviewManager = () => {
       className="machine-preview d-flex flex-grow-1 flex-column"
       id="machine-preview"
     >
-      <div className="flex-grow-1 d-flex flex-column">
+      <div
+        id="preview-main"
+        className="flex-grow-1 d-flex flex-column"
+      >
         <div
-          id="preview-wrapper"
-          className="preview-wrapper d-flex flex-column align-items-center"
+          className="d-flex flex-column align-items-center py-4"
           ref={previewElement}
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
-          <PreviewWindow />
+          <div
+            id="preview-wrapper"
+            className="preview-wrapper"
+          >
+            <PreviewWindow />
+          </div>
         </div>
 
         <div className="mt-auto pt-2 bg-white d-flex align-items-center">

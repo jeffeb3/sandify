@@ -140,7 +140,7 @@ const LayerList = () => {
         <ListGroup
           variant="flush"
           style={{ maxHeight: "240px" }}
-          className="border overflow-auto"
+          className="border overflow-hidden"
           id="layers"
         >
           {layers.map((layer, index) => (
