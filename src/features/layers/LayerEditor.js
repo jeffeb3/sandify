@@ -1,6 +1,6 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Button, Row, Col } from "react-bootstrap"
+import { Row, Col } from "react-bootstrap"
 import Select from "react-select"
 import { IconContext } from "react-icons"
 import { AiOutlineRotateRight } from "react-icons/ai"
@@ -10,7 +10,7 @@ import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
 import { getShapeSelectOptions } from "@/features/shapes/factory"
-import { updateLayer, changeModelType, restoreDefaults } from "./layersSlice"
+import { updateLayer, changeModelType } from "./layersSlice"
 import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
 import { selectSelectedLayer } from "./layersSlice"
@@ -51,10 +51,6 @@ const LayerEditor = () => {
   const handleChange = (attrs) => {
     attrs.id = layer.id
     dispatch(updateLayer(attrs))
-  }
-
-  const handleRestoreDefaults = () => {
-    dispatch(restoreDefaults(layer.id))
   }
 
   const renderedModelSelection = allowModelSelection && (
@@ -170,14 +166,6 @@ const LayerEditor = () => {
           </Row>
         )}
         {getOptionComponent(model, layerOptions, "connectionMethod")}
-
-        <Button
-          className="mt-3"
-          variant="secondary"
-          onClick={handleRestoreDefaults}
-        >
-          Restore defaults
-        </Button>
       </div>
     </div>
   )

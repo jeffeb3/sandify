@@ -4,12 +4,13 @@ import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
 import { Card, Accordion } from "react-bootstrap"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
+import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import {
   selectSelectedLayer,
   deleteEffect,
   selectLayerEffects,
 } from "@/features/layers/layersSlice"
-import { selectSelectedEffect } from "./effectsSlice"
+import { selectSelectedEffect, restoreDefaults } from "./effectsSlice"
 import EffectEditor from "./EffectEditor"
 import EffectList from "./EffectList"
 import NewEffect from "./NewEffect"
@@ -36,6 +37,10 @@ const EffectManager = () => {
         effectId: selectedEffect.id,
       }),
     )
+  }
+
+  const handleRestoreDefaults = () => {
+    dispatch(restoreDefaults(selectedEffect.id))
   }
 
   return (
@@ -112,6 +117,16 @@ const EffectManager = () => {
                       onClick={toggleCopyModal}
                     >
                       <FaCopy />
+                    </Button>
+                    <Tooltip id="tooltip-restore-effect" />
+                    <Button
+                      className="layer-button"
+                      variant="light"
+                      data-tooltip-content="Restore effect defaulta"
+                      data-tooltip-id="tooltip-restore-effect"
+                      onClick={handleRestoreDefaults}
+                    >
+                      <MdOutlineSettingsBackupRestore />
                     </Button>
                   </div>
                 </div>

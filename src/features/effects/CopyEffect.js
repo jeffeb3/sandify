@@ -8,10 +8,12 @@ const CopyEffect = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
   const selectedEffect = useSelector(selectSelectedEffect)
   const namedInputRef = useRef(null)
-  const [copyEffectName, setCopyEffectName] = useState(selectedEffect?.name || '')
+  const [copyEffectName, setCopyEffectName] = useState(
+    selectedEffect?.name || "",
+  )
 
   useEffect(() => {
-    setCopyEffectName(selectedEffect?.name || '')
+    setCopyEffectName(selectedEffect?.name || "")
   }, [selectedEffect])
 
   const handleChangeCopyEffectName = (event) => {
@@ -30,7 +32,7 @@ const CopyEffect = ({ toggleModal, showModal }) => {
         effect: {
           ...selectedEffect,
           name: copyEffectName,
-        }
+        },
       }),
     )
     toggleModal()
@@ -47,7 +49,7 @@ const CopyEffect = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {selectedEffect?.name || ''}</Modal.Title>
+        <Modal.Title>Copy {selectedEffect?.name || ""}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleCopyEffect}>

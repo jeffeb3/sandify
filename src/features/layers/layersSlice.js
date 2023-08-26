@@ -135,13 +135,13 @@ const layersSlice = createSlice({
     },
     restoreDefaults: (state, action) => {
       const id = action.payload
-      const { type, name } = state.entities[id]
+      const { type, name, effectIds } = state.entities[id]
       const layer = new Layer(type)
 
-      layer.getInitialState()
       layersAdapter.setOne(state, {
         id,
         name,
+        effectIds,
         ...layer.getInitialState(),
       })
     },

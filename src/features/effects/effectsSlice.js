@@ -65,6 +65,18 @@ export const effectsSlice = createSlice({
         state.selected = id
       }
     },
+    restoreDefaults: (state, action) => {
+      const id = action.payload
+      const { type, name, layerId } = state.entities[id]
+      const layer = new EffectLayer(type)
+
+      effectsAdapter.setOne(state, {
+        id,
+        name,
+        layerId,
+        ...layer.getInitialState(),
+      })
+    },
   },
 })
 
@@ -75,6 +87,7 @@ export const {
   updateEffect,
   setCurrentEffect,
   setSelectedEffect,
+  restoreDefaults,
 } = effectsSlice.actions
 
 // ------------------------------

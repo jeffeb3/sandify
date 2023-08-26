@@ -1,5 +1,6 @@
 .layer-button {
-  color: #aaa;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
 
   .active.list-group-item & {
     color: white;

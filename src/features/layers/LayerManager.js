@@ -3,11 +3,15 @@ import { Button } from "react-bootstrap"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
-import { MdOutlineFileUpload } from "react-icons/md"
+import {
+  MdOutlineFileUpload,
+  MdOutlineSettingsBackupRestore,
+} from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
 import {
   selectSelectedLayerId,
   selectNumLayers,
+  restoreDefaults,
 } from "@/features/layers/layersSlice"
 import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
@@ -37,6 +41,10 @@ const LayerManager = () => {
       el.scrollTop = el.scrollHeight
     }
   }, [numLayers])
+
+  const handleRestoreDefaults = () => {
+    dispatch(restoreDefaults(selectedLayerId))
+  }
 
   return (
     <div className="d-flex flex-column h-100">
@@ -98,6 +106,16 @@ const LayerManager = () => {
               onClick={toggleCopyModal}
             >
               <FaCopy />
+            </Button>
+            <Tooltip id="tooltip-restore-layer" />
+            <Button
+              className="layer-button"
+              variant="light"
+              data-tooltip-content="Restore layer defaulta"
+              data-tooltip-id="tooltip-restore-layer"
+              onClick={handleRestoreDefaults}
+            >
+              <MdOutlineSettingsBackupRestore />
             </Button>
           </div>
         </div>

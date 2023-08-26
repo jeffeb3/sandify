@@ -5,7 +5,9 @@ import effectsReducer, {
   setCurrentEffect,
   selectEffectsByLayerId,
   updateEffect,
+  restoreDefaults,
 } from "./effectsSlice"
+import EffectLayer from "./EffectLayer"
 
 beforeEach(() => {
   resetUniqueId()
@@ -16,6 +18,8 @@ beforeEach(() => {
 // ------------------------------
 
 describe("effects reducer", () => {
+  const maskState = new EffectLayer("mask").getInitialState()
+
   it("should handle initial state", () => {
     expect(effectsReducer(undefined, {})).toEqual({
       ids: [],
@@ -111,6 +115,33 @@ describe("effects reducer", () => {
       },
       current: "1",
       selected: "1",
+    })
+  })
+
+  it("should handle restoreDefaults", () => {
+    expect(
+      effectsReducer(
+        {
+          entities: {
+            0: {
+              id: "0",
+              name: "foo",
+              type: "mask",
+              height: "26",
+              width: "26",
+            },
+          },
+        },
+        restoreDefaults("0"),
+      ),
+    ).toEqual({
+      entities: {
+        0: {
+          id: "0",
+          name: "foo",
+          ...maskState,
+        },
+      },
     })
   })
 })
