@@ -42,6 +42,7 @@ const LayerRow = ({
     transform: `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`,
     cursor: isDragging ? "grabbing" : "grab",
   }
+  const tooltipId = `tooltip-toggle-visible-${layer.id}`
 
   return (
     <ListGroup.Item
@@ -53,7 +54,7 @@ const LayerRow = ({
       {...listeners}
       {...attributes}
     >
-      <Tooltip id="tooltip-toggle-visible" />
+      <Tooltip id={tooltipId} />
       <div
         className={`layer-${activeClass} d-flex align-items-center`}
         onClick={handleLayerSelected}
@@ -64,7 +65,8 @@ const LayerRow = ({
             variant="light"
             data-id={id}
             data-tooltip-content={visible ? "Hide layer" : "Show layer"}
-            data-tooltip-id="tooltip-toggle-visible"
+            data-tooltip-id={tooltipId}
+            data-tooltip-place="top-end"
             onClick={(e) => {
               handleToggleLayerVisible(id, layer.visible)
             }}
@@ -140,7 +142,7 @@ const LayerList = () => {
         <ListGroup
           variant="flush"
           style={{ maxHeight: "240px" }}
-          className="border overflow-hidden"
+          className="border"
           id="layers"
         >
           {layers.map((layer, index) => (

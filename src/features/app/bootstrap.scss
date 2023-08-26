@@ -46,6 +46,7 @@ h2 {
 }
 
 .list-group-item.active {
+  z-index: auto;
   background-color: lighten(#2983BA, 5%);
 }
 

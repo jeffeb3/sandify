@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
@@ -27,15 +27,8 @@ const PreviewManager = () => {
   const currentEffectLayer = useSelector(selectCurrentEffect)
   const sliderValue = useSelector(selectPreviewState).sliderValue
   const verticesStats = useSelector(selectVerticesStats)
-  const previewElement = useRef(null)
   const currentShape = getShapeFromType(currentLayer?.type || "polygon")
   const currentEffect = getEffectFromType(currentEffectLayer?.type || "mask")
-
-  useEffect(() => {
-    if (fonts.loaded) {
-      previewElement.current.focus()
-    }
-  }, [fonts.loaded])
 
   const handleSliderChange = (value) => {
     dispatch(updatePreview({ sliderValue: value }))
@@ -93,8 +86,7 @@ const PreviewManager = () => {
         className="flex-grow-1 d-flex flex-column"
       >
         <div
-          className="d-flex flex-column align-items-center py-4"
-          ref={previewElement}
+          className="d-flex flex-column align-items-center"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
