@@ -8,7 +8,11 @@ import {
   selectEffectSelectionVertices,
   updateEffect,
 } from "@/features/effects/effectsSlice"
-import { selectDraggingEffectVertices } from "@/features/layers/layersSlice"
+import {
+  selectLayerById,
+  selectDraggingEffectVertices,
+  selectIsUpstreamEffectDragging,
+} from "@/features/layers/layersSlice"
 import { getEffectFromType } from "@/features/effects/factory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
@@ -23,11 +27,15 @@ const EffectPreview = (ownProps) => {
     (state) => selectEffectById(state, ownProps.id),
     isEqual,
   )
+  const layer = useSelector((state) => selectLayerById(state, effect.layerId))
   const vertices = useSelector((state) =>
     selectEffectSelectionVertices(state, ownProps.id),
   )
   const draggingVertices = useSelector((state) =>
-    selectDraggingEffectVertices(state, ownProps.layerId, ownProps.id),
+    selectDraggingEffectVertices(state, effect.layerId, ownProps.id),
+  )
+  const upstreamIsDragging = useSelector((state) =>
+    selectIsUpstreamEffectDragging(state, ownProps.id),
   )
 
   const shapeRef = React.useRef()
@@ -36,11 +44,16 @@ const EffectPreview = (ownProps) => {
   const model = getEffectFromType(effect?.type || "mask")
 
   useEffect(() => {
-    if (effect?.visible && isCurrent && model.canChangeSize(effect)) {
+    if (
+      effect?.visible &&
+      layer?.visible &&
+      isCurrent &&
+      model.canChangeSize(effect)
+    ) {
       trRef.current.nodes([shapeRef.current])
       trRef.current.getLayer().batchDraw()
     }
-  }, [isCurrent, effect, model.canMove(effect), shapeRef, trRef])
+  }, [isCurrent, effect, layer, model.canMove(effect), shapeRef, trRef])
 
   if (!effect) {
     // "zombie child" situation; the hooks (above) are able to deal with a
@@ -52,12 +65,10 @@ const EffectPreview = (ownProps) => {
   const helper = new PreviewHelper({ layer: effect })
   const { selectedShapeColor, activeEffectColor } = colors
 
-  const drawLayerVertices = (context) => {
-    let currentColor = selectedShapeColor
-
+  const drawLayerVertices = (context, color) => {
     context.beginPath()
     context.lineWidth = 1
-    context.strokeStyle = currentColor
+    context.strokeStyle = color
     helper.moveTo(context, vertices[0])
     context.stroke()
 
@@ -87,8 +98,12 @@ const EffectPreview = (ownProps) => {
   }
 
   const sceneFunc = (context, shape) => {
-    if (isCurrent && vertices && vertices.length > 0) {
-      drawLayerVertices(context)
+    if (vertices && vertices.length > 0) {
+      if (isCurrent) {
+        drawLayerVertices(context, selectedShapeColor)
+      } else if (upstreamIsDragging) {
+        drawLayerVertices(context, activeEffectColor)
+      }
     }
 
     if (
@@ -176,6 +191,11 @@ const EffectPreview = (ownProps) => {
     }
   }
 
+  // some effects never render anything
+  if (!(height === 0 || height) && !(width === 0 || width)) {
+    return null
+  }
+
   return (
     <>
       {effect.visible && (
@@ -200,21 +220,24 @@ const EffectPreview = (ownProps) => {
           onWheel={handleWheel}
         />
       )}
-      {effect.visible && isCurrent && model.canChangeSize(effect) && (
-        <Transformer
-          ref={trRef}
-          centeredScaling={true}
-          borderStroke="white"
-          resizeEnabled={model.canChangeSize(effect)}
-          rotateEnabled={model.canRotate(effect)}
-          rotationSnaps={[0, 90, 180, 270]}
-          enabledAnchors={
-            !model.canChangeHeight(effect)
-              ? ["top-left", "top-right", "bottom-left", "bottom-right"]
-              : null
-          }
-        />
-      )}
+      {effect.visible &&
+        layer?.visible &&
+        isCurrent &&
+        model.canChangeSize(effect) && (
+          <Transformer
+            ref={trRef}
+            centeredScaling={true}
+            borderStroke="white"
+            resizeEnabled={model.canChangeSize(effect)}
+            rotateEnabled={model.canRotate(effect)}
+            rotationSnaps={[0, 90, 180, 270]}
+            enabledAnchors={
+              !model.canChangeHeight(effect)
+                ? ["top-left", "top-right", "bottom-left", "bottom-right"]
+                : null
+            }
+          />
+        )}
     </>
   )
 }

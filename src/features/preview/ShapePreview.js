@@ -34,13 +34,6 @@ const ShapePreview = (ownProps) => {
   const dispatch = useDispatch()
   const currentLayerId = useSelector(selectCurrentLayerId)
   const currentEffectId = useSelector(selectCurrentEffectId)
-  const activeEffect = useSelector(
-    (state) => selectActiveEffect(state, ownProps.id),
-    isEqual,
-  )
-  const activeEffectInstance = activeEffect
-    ? new EffectLayer(activeEffect.type)
-    : null
   const visibleEffects = useSelector(
     (state) => selectVisibleLayerEffects(state, ownProps.id),
     isEqual,
@@ -49,6 +42,17 @@ const ShapePreview = (ownProps) => {
     (state) => selectLayerById(state, ownProps.id),
     isEqual,
   )
+  const activeEffect = useSelector(
+    (state) => selectActiveEffect(state, ownProps.id),
+    isEqual,
+  )
+  const remainingEffectIds = layer.effectIds.filter(
+    (id) => id !== activeEffect?.id,
+  )
+  const activeEffectInstance = activeEffect
+    ? new EffectLayer(activeEffect.type)
+    : null
+
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
   const sliderValue = useSelector(selectPreviewSliderValue)
@@ -328,8 +332,27 @@ const ShapePreview = (ownProps) => {
     e.cancelBubble = true // don't bubble this up to the preview window
   }
 
+  // Order of these layers is very important. The current layer or effect must always
+  // be the last one in order for Konva to allow dragging and transformer manipulation.
+  // That's why this looks a little weird.
   return (
     <Group>
+      {remainingEffectIds.map((id, i) => {
+        return (
+          <Group
+            x={layer.x || 0}
+            y={-layer.y || 0}
+            rotation={layer.rotation || 0}
+            key={`group-id`}
+          >
+            <EffectPreview
+              id={id}
+              key={id}
+              index={i}
+            />
+          </Group>
+        )
+      })}
       <Group
         ref={groupRef}
         x={layer.x || 0}
@@ -359,7 +382,6 @@ const ShapePreview = (ownProps) => {
         {activeEffect && (
           <EffectPreview
             id={activeEffect.id}
-            layerId={layer.id}
             key={activeEffect.id}
           />
         )}

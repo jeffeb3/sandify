@@ -459,6 +459,34 @@ export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
   }),
 })
 
+// returns whether an upstream effect from the given effect is being dragged
+export const selectIsUpstreamEffectDragging = createCachedSelector(
+  selectEffectById,
+  selectSelectedLayer,
+  selectCurrentEffect,
+  (effect, selectedLayer, currentEffect) => {
+    if (
+      !(effect && selectedLayer && currentEffect?.dragging) ||
+      effect.id === currentEffect.id ||
+      effect.layerId != currentEffect.layerId
+    ) {
+      return false
+    }
+
+    const idx = selectedLayer.effectIds.findIndex((id) => id === effect.id)
+    const draggingIdx = selectedLayer.effectIds.findIndex(
+      (id) => id === currentEffect.id,
+    )
+
+    return idx > draggingIdx
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
 // returns a array of all visible machine-bound vertices and the connections between them
 export const selectConnectedVertices = createSelector(selectState, (state) => {
   if (!state.fonts.loaded) {

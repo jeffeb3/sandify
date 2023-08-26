@@ -10,17 +10,6 @@ import { loadState, saveState } from "@/common/localStorage"
 import { resetLogCounts } from "@/common/debugging"
 import appReducer from "./appSlice"
 
-/*
-const customizedMiddleware = getDefaultMiddleware({
-  immutableCheck: {
-    ignoredPaths: ['importer.vertices']
-  },
-  serializableCheck: {
-    ignoredPaths: ['importer.vertices']
-  }
-})
-*/
-
 // set both to true when running locally if you want to preserve your shape
 // settings across page loads; don't forget to toggle false when done testing!
 const usePersistedState = true
