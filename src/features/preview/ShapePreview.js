@@ -27,6 +27,7 @@ import { getShapeFromType } from "@/features/shapes/factory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
+import colors from "@/common/colors"
 
 const ShapePreview = (ownProps) => {
   log(`ShapePreview render ${ownProps.id}`)
@@ -44,7 +45,10 @@ const ShapePreview = (ownProps) => {
     (state) => selectVisibleLayerEffects(state, ownProps.id),
     isEqual,
   )
-  const layer = useSelector((state) => selectLayerById(state, ownProps.id))
+  const layer = useSelector(
+    (state) => selectLayerById(state, ownProps.id),
+    isEqual,
+  )
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
   const sliderValue = useSelector(selectPreviewSliderValue)
@@ -61,7 +65,7 @@ const ShapePreview = (ownProps) => {
   const shapePreviewVertices = useSelector((state) =>
     selectShapePreviewVertices(state, ownProps.id),
   )
-  const colors = useSelector(selectSliderColors, isEqual)
+  const sliderColors = useSelector(selectSliderColors, isEqual)
   const offsets = useSelector(selectVertexOffsets, isEqual)
   const sliderBounds = useSelector(selectSliderBounds, isEqual)
   const layerBounds = useSelector(
@@ -73,7 +77,6 @@ const ShapePreview = (ownProps) => {
   const groupRef = React.useRef()
   const trRef = React.useRef()
   const isCurrent = layer?.id === currentLayerId
-  console.log(isCurrent)
   const model = getShapeFromType(layer?.type || "polygon")
 
   useEffect(() => {
@@ -96,20 +99,30 @@ const ShapePreview = (ownProps) => {
     return null
   }
 
+  const {
+    selectedShapeColor,
+    activeEffectColor,
+    endPointColor,
+    startPointColor,
+    unselectedShapeColor,
+    noSelectionColor,
+    slidingColor,
+    transformerBorderColor,
+  } = colors
   const isFirstLayer = index === 0
   const isLastLayer = index === numLayers - 1
   const { width, height } = layer
-  const selectedColor = "rgba(255, 255, 0, 0.8)"
-  const unselectedColor = "rgba(255, 255, 0, 0.7)"
-  const backgroundSelectedColor = "#2983BA"
-  const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
   const isSliding = sliderValue !== 0
   const helper = new PreviewHelper({
     layer,
     layerVertices,
     offsets,
+    offsetId: layer.id,
+    start: index === 0,
+    end: index === numLayers - 1,
     bounds: sliderBounds,
-    colors,
+    colors: sliderColors,
+    vertices: layerVertices,
   })
 
   const drawLayerVertices = (context, bounds) => {
@@ -118,13 +131,13 @@ const ShapePreview = (ownProps) => {
     let currentColor
 
     if (isCurrent) {
-      currentColor = selectedColor
+      currentColor = selectedShapeColor
     } else if (activeEffect) {
-      currentColor = "rgba(15, 128, 0, 0.8)"
+      currentColor = activeEffectColor
     } else if (layer.dragging || currentLayerId || currentEffectId) {
-      currentColor = backgroundUnselectedColor
+      currentColor = unselectedShapeColor
     } else {
-      currentColor = unselectedColor
+      currentColor = noSelectionColor
     }
 
     context.beginPath()
@@ -137,10 +150,9 @@ const ShapePreview = (ownProps) => {
     for (let i = 1; i < layerVertices.length; i++) {
       if (isSliding) {
         let absoluteI = i + offsets[layer.id].start
-        let pathColor =
-          absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
+        let pathColor = absoluteI <= end ? slidingColor : unselectedShapeColor
 
-        currentColor = colors[absoluteI] || pathColor
+        currentColor = sliderColors[absoluteI] || pathColor
         if (currentColor !== oldColor) {
           context.stroke()
           context.strokeStyle = currentColor
@@ -175,12 +187,12 @@ const ShapePreview = (ownProps) => {
     const end = layerVertices[layerVertices.length - 1]
 
     context.beginPath()
-    context.strokeStyle = "#2983BA"
+    context.strokeStyle = startPointColor
     helper.dot(context, start, start ? 5 : 3)
     helper.markOriginalCoordinates(context, start)
 
     context.beginPath()
-    context.strokeStyle = "red"
+    context.strokeStyle = endPointColor
     helper.dot(context, end, end ? 5 : 3)
     helper.markOriginalCoordinates(context, end)
   }
@@ -191,14 +203,14 @@ const ShapePreview = (ownProps) => {
 
     if (isFirstLayer) {
       context.beginPath()
-      context.strokeStyle = "green"
+      context.strokeStyle = startPointColor
       helper.dot(context, start, start ? 5 : 3)
       helper.markOriginalCoordinates(context, start)
     }
 
     if (isLastLayer) {
       context.beginPath()
-      context.strokeStyle = "red"
+      context.strokeStyle = endPointColor
       helper.dot(context, end, end ? 5 : 3)
       helper.markOriginalCoordinates(context, end)
     }
@@ -207,12 +219,12 @@ const ShapePreview = (ownProps) => {
   const sceneFunc = (context, shape) => {
     if (layerVertices && layerVertices.length > 0) {
       if (!isSliding && isCurrent && visibleEffects.length > 0) {
-        drawVertices(context, shapePreviewVertices, "rgba(15, 128, 0, 0.8)")
+        drawVertices(context, shapePreviewVertices, activeEffectColor)
       }
 
       if (activeEffect && activeEffect.dragging) {
         if (!activeEffectInstance.model.dragPreview) {
-          drawVertices(context, effectDraggingVertices, "green")
+          drawVertices(context, effectDraggingVertices, activeEffectColor)
         }
       } else {
         drawLayerVertices(context, sliderBounds)
@@ -224,7 +236,9 @@ const ShapePreview = (ownProps) => {
         drawStartAndEndPoints(context)
       }
 
-      helper.drawSliderEndPoint(context)
+      if (isSliding) {
+        helper.drawSliderEndPoint(context)
+      }
     }
 
     context.fillStrokeShape(shape)
@@ -232,7 +246,6 @@ const ShapePreview = (ownProps) => {
 
   // determines whether a layer is selected when it is clicked; based on the outer bounds of
   // the layer, including all of its effects
-  // TODO: this is a bit off with irregular shapes; something related to off-center origin
   function hitFunc(context, shape) {
     const offsetX = (layerBounds[1].x + layerBounds[0].x) / 2
     const offsetY = (layerBounds[1].y + layerBounds[0].y) / 2
@@ -354,7 +367,7 @@ const ShapePreview = (ownProps) => {
       {layer.visible && isCurrent && model.canChangeSize(layer) && (
         <Transformer
           ref={trRef}
-          borderStroke="#fefefe"
+          borderStroke={transformerBorderColor}
           centeredScaling={true}
           resizeEnabled={model.canChangeSize(layer)}
           rotateEnabled={model.canRotate(layer)}

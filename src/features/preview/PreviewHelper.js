@@ -1,4 +1,5 @@
 import Victor from "victor"
+import colors from "@/common/colors"
 
 // translates shape coordinates into pixel coordinates with a centered origin
 export default class PreviewHelper {
@@ -27,7 +28,7 @@ export default class PreviewHelper {
     context.lineTo(px.x, px.y)
   }
 
-  dot(context, vertex, radius = 4, color = "yellow") {
+  dot(context, vertex, radius = 4, color = colors.selectedShapeColor) {
     const px = this.toPixels(vertex)
     context.arc(px.x, px.y, radius, 0, 2 * Math.PI, true)
     context.fillStyle = context.strokeStyle
@@ -51,8 +52,7 @@ export default class PreviewHelper {
         if (sliderEnd) {
           context.beginPath()
 
-          this.moveTo(context, sliderEnd)
-          context.strokeStyle = "yellow"
+          context.strokeStyle = "transparent"
           this.dot(context, sliderEnd)
           context.stroke()
 

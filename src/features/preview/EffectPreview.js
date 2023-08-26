@@ -1,6 +1,7 @@
 import React, { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
+import { isEqual } from "lodash"
 import {
   selectCurrentEffectId,
   selectEffectById,
@@ -12,12 +13,16 @@ import { getEffectFromType } from "@/features/effects/factory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
+import colors from "@/common/colors"
 
 const EffectPreview = (ownProps) => {
   log(`EffectPreview render ${ownProps.id}`)
   const dispatch = useDispatch()
   const currentEffectId = useSelector(selectCurrentEffectId)
-  const effect = useSelector((state) => selectEffectById(state, ownProps.id))
+  const effect = useSelector(
+    (state) => selectEffectById(state, ownProps.id),
+    isEqual,
+  )
   const vertices = useSelector((state) =>
     selectEffectSelectionVertices(state, ownProps.id),
   )
@@ -45,9 +50,10 @@ const EffectPreview = (ownProps) => {
 
   const { width, height } = effect
   const helper = new PreviewHelper({ layer: effect })
+  const { selectedShapeColor, activeEffectColor } = colors
 
   const drawLayerVertices = (context) => {
-    let currentColor = "rgba(255, 255, 0, 0.8)"
+    let currentColor = selectedShapeColor
 
     context.beginPath()
     context.lineWidth = 1
@@ -64,7 +70,7 @@ const EffectPreview = (ownProps) => {
   }
 
   const drawDraggingVertices = (context) => {
-    let currentColor = "rgba(15, 128, 0, 0.8)"
+    let currentColor = activeEffectColor
 
     context.beginPath()
     context.lineWidth = 1

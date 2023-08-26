@@ -15,26 +15,35 @@ import {
 import { selectCurrentEffectId } from "@/features/effects/effectsSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import PreviewHelper from "./PreviewHelper"
+import colors from "@/common/colors"
 
 const ConnectorPreview = (ownProps) => {
   const { startId, endId } = ownProps
-  const selectedLayer = useSelector(selectSelectedLayer)
+  const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const currentLayerId = useSelector(selectCurrentLayerId)
   const currentEffectId = useSelector(selectCurrentEffectId)
-  const startLayer = useSelector((state) => selectLayerById(state, startId))
-  const endLayer = useSelector((state) => selectLayerById(state, endId))
-  const startActiveEffect = useSelector((state) =>
-    selectActiveEffect(state, startId),
+  const startLayer = useSelector(
+    (state) => selectLayerById(state, startId),
+    isEqual,
   )
-  const endActiveEffect = useSelector((state) =>
-    selectActiveEffect(state, endId),
+  const endLayer = useSelector(
+    (state) => selectLayerById(state, endId),
+    isEqual,
+  )
+  const startActiveEffect = useSelector(
+    (state) => selectActiveEffect(state, startId),
+    isEqual,
+  )
+  const endActiveEffect = useSelector(
+    (state) => selectActiveEffect(state, endId),
+    isEqual,
   )
   const vertices = useSelector((state) =>
     selectConnectingVertices(state, startId),
   )
   const sliderValue = useSelector(selectPreviewState).sliderValue
-  const colors = useSelector(selectSliderColors)
-  const offsets = useSelector(selectVertexOffsets)
+  const sliderColors = useSelector(selectSliderColors, isEqual)
+  const offsets = useSelector(selectVertexOffsets, isEqual)
   const bounds = useSelector(selectSliderBounds, isEqual)
 
   if (!(startLayer && endLayer && selectedLayer)) {
@@ -53,16 +62,19 @@ const ConnectorPreview = (ownProps) => {
     vertices,
     layer: startLayer,
     sliderValue,
-    colors,
+    colors: sliderColors,
     offsetId: startId + "-connector",
     offsets,
     bounds,
   })
 
-  const currentColor = "rgba(41, 131, 186, 0.7)"
-  const unselectedColor = "rgba(255, 255, 0, 0.7)"
-  const backgroundSelectedColor = "#2983BA"
-  const backgroundUnselectedColor = "rgba(195, 214, 230, 0.4)"
+  const {
+    activeConnectorColor,
+    unselectedShapeColor,
+    slidingColor,
+    noSelectionColor,
+  } = colors
+  const currentColor = activeConnectorColor
   const isSliding = sliderValue !== 0
   const isCurrent =
     currentLayerId === startLayer.id || currentLayerId == endLayer.id
@@ -72,12 +84,14 @@ const ConnectorPreview = (ownProps) => {
       drawConnector(context)
     }
 
-    if (currentLayerId == startLayer.id) {
-      drawPoint(vertices[vertices.length - 1], context)
-    }
+    if (!isSliding) {
+      if (currentLayerId == startLayer.id) {
+        drawPoint(vertices[vertices.length - 1], context)
+      }
 
-    if (currentLayerId == endLayer.id) {
-      drawPoint(vertices[0], context)
+      if (currentLayerId == endLayer.id) {
+        drawPoint(vertices[0], context)
+      }
     }
 
     helper.drawSliderEndPoint(context)
@@ -90,8 +104,8 @@ const ConnectorPreview = (ownProps) => {
     let color = isCurrent
       ? currentColor
       : currentLayerId || currentEffectId
-      ? backgroundUnselectedColor
-      : unselectedColor
+      ? unselectedShapeColor
+      : noSelectionColor
 
     context.beginPath()
     context.lineWidth = 1
@@ -103,10 +117,9 @@ const ConnectorPreview = (ownProps) => {
     for (let i = 1; i < vertices.length; i++) {
       if (isSliding) {
         let absoluteI = offsets[endLayer.id].start - vertices.length + i
-        let pathColor =
-          absoluteI <= end ? backgroundSelectedColor : backgroundUnselectedColor
+        let pathColor = absoluteI <= end ? slidingColor : unselectedShapeColor
 
-        color = colors[absoluteI] || pathColor
+        color = sliderColors[absoluteI] || pathColor
         if (color !== oldColor) {
           context.stroke()
           context.strokeStyle = color
@@ -124,7 +137,7 @@ const ConnectorPreview = (ownProps) => {
   const drawPoint = (point, context) => {
     context.beginPath()
     context.strokeStyle = "transparent"
-    helper.dot(context, point, point ? 5 : 3, backgroundSelectedColor)
+    helper.dot(context, point, point ? 5 : 3, activeConnectorColor)
     helper.markOriginalCoordinates(context, point)
   }
 
