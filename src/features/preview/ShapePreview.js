@@ -343,7 +343,7 @@ const ShapePreview = (ownProps) => {
             x={layer.x || 0}
             y={-layer.y || 0}
             rotation={layer.rotation || 0}
-            key={`group-id`}
+            key={`group-${id}`}
           >
             <EffectPreview
               id={id}

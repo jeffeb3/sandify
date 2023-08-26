@@ -1,33 +1,36 @@
 import React, { useRef, useState, useEffect } from "react"
 import { Button, Modal, Row, Col, Form } from "react-bootstrap"
 import { useDispatch, useSelector } from "react-redux"
-import { copyLayer } from "./layersSlice"
-import { selectSelectedLayer } from "./layersSlice"
+import { selectSelectedEffect } from "./effectsSlice"
+import { addEffect } from "@/features/layers/layersSlice"
 
-const CopyLayer = ({ toggleModal, showModal }) => {
+const CopyEffect = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
-  const selectedLayer = useSelector(selectSelectedLayer)
+  const selectedEffect = useSelector(selectSelectedEffect)
   const namedInputRef = useRef(null)
-  const [copyLayerName, setCopyLayerName] = useState(selectedLayer.name)
+  const [copyEffectName, setCopyEffectName] = useState(selectedEffect?.name || '')
 
   useEffect(() => {
-    setCopyLayerName(selectedLayer.name)
-  }, [selectedLayer])
+    setCopyEffectName(selectedEffect?.name || '')
+  }, [selectedEffect])
 
-  const handleChangeCopyLayerName = (event) => {
-    setCopyLayerName(event.target.value)
+  const handleChangeCopyEffectName = (event) => {
+    setCopyEffectName(event.target.value)
   }
 
   const handleNameFocus = (event) => {
     event.target.select()
   }
 
-  const handleCopyLayer = (event) => {
+  const handleCopyEffect = (event) => {
     event.preventDefault()
     dispatch(
-      copyLayer({
-        id: selectedLayer.id,
-        name: copyLayerName,
+      addEffect({
+        id: selectedEffect.layerId,
+        effect: {
+          ...selectedEffect,
+          name: copyEffectName,
+        }
       }),
     )
     toggleModal()
@@ -44,19 +47,19 @@ const CopyLayer = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {selectedLayer.name}</Modal.Title>
+        <Modal.Title>Copy {selectedEffect?.name || ''}</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleCopyLayer}>
+      <Form onSubmit={handleCopyEffect}>
         <Modal.Body>
           <Row className="align-items-center">
             <Col sm={5}>Name</Col>
             <Col sm={7}>
               <Form.Control
                 ref={namedInputRef}
-                value={copyLayerName}
+                value={copyEffectName}
                 onFocus={handleNameFocus}
-                onChange={handleChangeCopyLayerName}
+                onChange={handleChangeCopyEffectName}
               />
             </Col>
           </Row>
@@ -83,4 +86,4 @@ const CopyLayer = ({ toggleModal, showModal }) => {
   )
 }
 
-export default CopyLayer
+export default CopyEffect

@@ -13,6 +13,7 @@ import { selectSelectedEffect } from "./effectsSlice"
 import EffectEditor from "./EffectEditor"
 import EffectList from "./EffectList"
 import NewEffect from "./NewEffect"
+import CopyEffect from "./CopyEffect"
 
 const EffectManager = () => {
   const dispatch = useDispatch()
@@ -23,7 +24,10 @@ const EffectManager = () => {
   )
   const numEffects = effects.length
   const [showNewEffect, setShowNewEffect] = useState(false)
+  const [showCopyEffect, setShowCopyEffect] = useState(false)
+
   const toggleNewEffectModal = () => setShowNewEffect(!showNewEffect)
+  const toggleCopyModal = () => setShowCopyEffect(!showCopyEffect)
 
   const handleEffectDeleted = (id) => {
     dispatch(
@@ -40,7 +44,10 @@ const EffectManager = () => {
         showModal={showNewEffect}
         toggleModal={toggleNewEffectModal}
       />
-
+      <CopyEffect
+        showModal={showCopyEffect}
+        toggleModal={toggleCopyModal}
+      />
       {numEffects == 0 && (
         <Button
           className="mt-3"
@@ -102,7 +109,7 @@ const EffectManager = () => {
                       data-tip="Copy effect"
                       data-tooltip-content="Copy effect"
                       data-tooltip-id="tooltip-copy-layer"
-                      // onClick={toggleCopyEffect}
+                      onClick={toggleCopyModal}
                     >
                       <FaCopy />
                     </Button>
