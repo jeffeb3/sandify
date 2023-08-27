@@ -46,12 +46,6 @@ const ShapePreview = (ownProps) => {
     (state) => selectActiveEffect(state, ownProps.id),
     isEqual,
   )
-  const remainingEffectIds = layer.effectIds.filter(
-    (id) => id !== activeEffect?.id,
-  )
-  const activeEffectInstance = activeEffect
-    ? new EffectLayer(activeEffect.type)
-    : null
 
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
@@ -77,6 +71,12 @@ const ShapePreview = (ownProps) => {
     isEqual,
   )
 
+  const remainingEffectIds = layer
+    ? layer.effectIds.filter((id) => id !== activeEffect?.id)
+    : []
+  const activeEffectInstance = activeEffect
+    ? new EffectLayer(activeEffect.type)
+    : null
   const shapeRef = React.useRef()
   const groupRef = React.useRef()
   const trRef = React.useRef()
@@ -234,7 +234,7 @@ const ShapePreview = (ownProps) => {
         drawLayerVertices(context, sliderBounds)
       }
 
-      if (isCurrent) {
+      if (isCurrent || activeEffect) {
         drawLayerStartAndEndPoints(context)
       } else if (!currentLayerId && !currentEffectId) {
         drawStartAndEndPoints(context)

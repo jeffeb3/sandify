@@ -27,12 +27,12 @@ const EffectPreview = (ownProps) => {
     (state) => selectEffectById(state, ownProps.id),
     isEqual,
   )
-  const layer = useSelector((state) => selectLayerById(state, effect.layerId))
+  const layer = useSelector((state) => selectLayerById(state, effect?.layerId))
   const vertices = useSelector((state) =>
     selectEffectSelectionVertices(state, ownProps.id),
   )
   const draggingVertices = useSelector((state) =>
-    selectDraggingEffectVertices(state, effect.layerId, ownProps.id),
+    selectDraggingEffectVertices(state, effect?.layerId, ownProps.id),
   )
   const upstreamIsDragging = useSelector((state) =>
     selectIsUpstreamEffectDragging(state, ownProps.id),

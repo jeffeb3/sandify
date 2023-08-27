@@ -31,7 +31,7 @@ const LayerEditor = () => {
   const link = model.link
   const linkText = model.linkText || "here"
   const renderedLink = link ? (
-    <div className="mt-4">
+    <div className="mt-3">
       See{" "}
       <a
         target="_blank"

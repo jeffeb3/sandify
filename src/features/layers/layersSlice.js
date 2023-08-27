@@ -141,8 +141,8 @@ const layersSlice = createSlice({
       layersAdapter.setOne(state, {
         id,
         name,
-        effectIds,
         ...layer.getInitialState(),
+        effectIds,
       })
     },
     setCurrentLayer: (state, action) => {
