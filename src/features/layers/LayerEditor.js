@@ -1,6 +1,7 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Row, Col } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
 import Select from "react-select"
 import { IconContext } from "react-icons"
 import { AiOutlineRotateRight } from "react-icons/ai"
@@ -147,7 +148,7 @@ const LayerEditor = () => {
                 <Row className="mt-1">
                   <Col xs={6}>
                     <div className="d-flex align-items-center">
-                      <div className="mr-1">
+                      <div className="me-1">
                         <IconContext.Provider value={{ size: "1.3rem" }}>
                           <AiOutlineRotateRight />
                         </IconContext.Provider>

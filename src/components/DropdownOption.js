@@ -1,5 +1,7 @@
 import React from "react"
-import { Col, Form, Row } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
 import Select from "react-select"
 
 const DropdownOption = ({

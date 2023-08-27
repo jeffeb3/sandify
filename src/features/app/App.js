@@ -1,5 +1,5 @@
 import React from "react"
-import { Col, Row } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
 import { Provider } from "react-redux"
 import Header from "./Header"
 import Tabs from "./Tabs"
@@ -14,7 +14,7 @@ const App = () => {
         <Header />
 
         <main>
-          <Row className="no-gutters">
+          <div className="d-flex flex-column flex-lg-row">
             <Col className="full-page d-flex flex-column">
               <PreviewManager />
             </Col>
@@ -22,7 +22,7 @@ const App = () => {
             <div id="sidebar">
               <Tabs />
             </div>
-          </Row>
+          </div>
         </main>
       </div>
     </Provider>

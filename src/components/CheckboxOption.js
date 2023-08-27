@@ -1,5 +1,7 @@
 import React from "react"
-import { Col, Row, Form } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
 import S from "react-switch"
 const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 

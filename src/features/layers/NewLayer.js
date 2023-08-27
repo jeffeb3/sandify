@@ -1,7 +1,11 @@
 import React, { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
 import Select from "react-select"
-import { Button, Modal, Row, Col, Form } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
+import Button from "react-bootstrap/Button"
+import Modal from "react-bootstrap/Modal"
 import {
   getShapeSelectOptions,
   getDefaultShape,

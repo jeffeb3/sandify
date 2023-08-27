@@ -1,5 +1,6 @@
 import React, { useEffect } from "react"
-import { Tab, Tabs } from "react-bootstrap"
+import Tab from "react-bootstrap/Tab"
+import Tabs from "react-bootstrap/Tabs"
 import { useDispatch, useSelector } from "react-redux"
 import MachineSettings from "@/features/machine/MachineSettings"
 import LayerManager from "@/features/layers/LayerManager"

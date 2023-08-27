@@ -1,5 +1,6 @@
 import React from "react"
-import { Button, ListGroup } from "react-bootstrap"
+import Button from "react-bootstrap/Button"
+import ListGroup from "react-bootstrap/ListGroup"
 import { Tooltip } from "react-tooltip"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { useSelector, useDispatch } from "react-redux"
@@ -56,7 +57,7 @@ const LayerRow = ({
     >
       <Tooltip id={tooltipId} />
       <div
-        className={`layer-${activeClass} d-flex align-items-center`}
+        className={`d-flex align-items-center me-2`}
         onClick={handleLayerSelected}
       >
         <div className="layer-left">
@@ -78,7 +79,7 @@ const LayerRow = ({
         <div className="d-flex no-select flex-grow-1 align-items-center">
           <div className="flex-grow-1">{name}</div>
           <span
-            className="mr-3"
+            className="me-2"
             style={{ fontSize: "80%" }}
           >
             {instance.model.label}

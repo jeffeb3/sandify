@@ -2,7 +2,8 @@ import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { IconContext } from "react-icons"
 import { AiOutlineRotateRight } from "react-icons/ai"
-import { Row, Col } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
 import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
@@ -54,7 +55,7 @@ const EffectEditor = ({ id }) => {
   ))
 
   return (
-    <div className="pl-1 overflow-hidden flex-grow-1 mt-3 container-fluid pr-0">
+    <div className="ps-1 overflow-hidden flex-grow-1 mt-3 container-fluid pe-0">
       {model.canTransform(effect) && (
         <Row className="align-items-center mt-1 mb-2">
           <Col sm={5}>Transform</Col>
@@ -79,7 +80,7 @@ const EffectEditor = ({ id }) => {
               <Row className="mt-1">
                 <Col xs={6}>
                   <div className="d-flex align-items-center">
-                    <div className="mr-1">
+                    <div className="me-1">
                       <IconContext.Provider value={{ size: "1.3rem" }}>
                         <AiOutlineRotateRight />
                       </IconContext.Provider>

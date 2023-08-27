@@ -8,11 +8,11 @@ const Header = () => {
       <div className="d-flex align-items-center justify-content-center">
         <img
           src={logo}
-          className="app-logo mr-2"
+          className="app-logo me-2"
           alt="logo"
         />
         <h1 className="d-inline m-0">sandify</h1>
-        <p className="ml-4 d-none d-lg-block">
+        <p className="ms-4 d-none d-lg-block">
           create patterns for robots that draw in sand with ball bearings
         </p>
       </div>

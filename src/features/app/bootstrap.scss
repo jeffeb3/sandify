@@ -1,48 +1,19 @@
 /**
- Bootstrap 4 overrides
+ Bootstrap 5 overrides
  **/
-.card-header {
-  background-color: rgba(0,0,0,.05);
-  padding: 0.5rem;
+h2 {
+  font-size: 1.6rem;
 }
 
-.card-body {
-  padding: 1rem;
-}
-
-.card {
+.accordion-header {
   h3 {
     margin: 0;
     font-size: 1.25rem;
   }
 }
 
-.accordion > .card {
-  overflow: visible;
-}
-
-.accordion > .card > .card-header {
-  margin-bottom: 0;
-}
-
-.card-body .form-label {
-  margin-bottom: 0;
-}
-
-h2 {
-  font-size: 1.6rem;
-}
-
-.card h3 {
-  margin-top: 0.5rem;
-}
-
 .tab-content {
   background-color: white;
-}
-
-.card.active > .card-header {
-  background-color: #A0D4EB;
 }
 
 .list-group-item.active {

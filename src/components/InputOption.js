@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react"
-import { Col, Form, Row } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
 import debounce from "lodash/debounce"
 
 const InputOption = ({
@@ -106,7 +108,7 @@ const InputOption = ({
         {label && (
           <Form.Label
             htmlFor={`option-${optionKey}`}
-            className="mr-2"
+            className="me-2"
             style={{ width: "22px" }}
           >
             {title}

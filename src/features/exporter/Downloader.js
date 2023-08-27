@@ -1,6 +1,9 @@
 import React, { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { Button, Modal, Col, Row } from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Button from "react-bootstrap/Button"
+import Modal from "react-bootstrap/Modal"
 import { downloadFile } from "@/common/util"
 import DropdownOption from "@/components/DropdownOption"
 import InputOption from "@/components/InputOption"
@@ -79,7 +82,7 @@ const Downloader = () => {
   return (
     <div>
       <Button
-        className="ml-2 mr-3"
+        className="ms-2 me-3"
         variant="primary"
         onClick={toggleModal}
       >

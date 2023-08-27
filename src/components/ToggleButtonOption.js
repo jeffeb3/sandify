@@ -1,11 +1,9 @@
 import React from "react"
-import {
-  Col,
-  Form,
-  Row,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-bootstrap"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
+import ToggleButton from "react-bootstrap/ToggleButton"
+import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 
 const ToggleButtonOption = (props) => {
   const option = props.options[props.optionKey]
@@ -46,6 +44,7 @@ const ToggleButtonOption = (props) => {
             return (
               <ToggleButton
                 key={choice}
+                id={`${props.optionKey}-${choice}`}
                 variant="light"
                 value={choice}
               >

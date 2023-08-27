@@ -1,6 +1,7 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { Button, ListGroup } from "react-bootstrap"
+import Button from "react-bootstrap/Button"
+import ListGroup from "react-bootstrap/ListGroup"
 import { Tooltip } from "react-tooltip"
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { DndContext, useSensor, useSensors, PointerSensor } from "@dnd-kit/core"
