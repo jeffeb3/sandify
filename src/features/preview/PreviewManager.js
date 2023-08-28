@@ -86,13 +86,13 @@ const PreviewManager = () => {
         className="flex-grow-1 d-flex flex-column"
       >
         <div
-          className="d-flex flex-column align-items-center"
+          className="d-flex flex-column"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
           <div
             id="preview-wrapper"
-            className="preview-wrapper"
+            className="preview-wrapper d-flex flex-column justify-content-center"
           >
             <PreviewWindow />
           </div>
@@ -115,7 +115,6 @@ const PreviewManager = () => {
               />
             </div>
           </div>
-          <Downloader />
         </div>
       </div>
     </div>

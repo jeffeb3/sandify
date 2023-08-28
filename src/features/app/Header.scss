@@ -1,20 +1,22 @@
-header {
-  background-color: #2983BA;
-  padding: 1rem;
+.header {
+  background-color: #2983BA !important;
   color: white;
-  text-align: center;
 
-  h2 {
-    font-size: 3rem;
+  .navbar-nav > a {
+    color: white;
   }
 
-  p {
-    font-size: 1.4rem;
-    margin: 0.4rem 0 0 0;
+  .nav-item.dropdown > a {
+    color: white;
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: white;
   }
 }
 
 .app-logo {
   animation: App-logo-spin infinite 20s linear;
-  height: 3.6rem;
+  height: 2.2rem;
 }

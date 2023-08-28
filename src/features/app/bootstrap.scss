@@ -69,22 +69,9 @@ h2 {
   border-color: #adb5bd !important;
 }
 
-.btn-group>.btn.active, .btn-group>.btn:active, .btn-group>.btn:focus {
-  z-index: inherit;
-}
-
 .no-select {
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+/Edge */
   user-select: none; /* Standard */
-}
-
-.accordion-arrow {
-  transition: transform 0.3s ease;
-  transform: rotate(0deg);
-}
-
-.accordion .show .accordion-arrow {
-  transform: rotate(90deg);
 }

@@ -8,7 +8,7 @@ import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 import Footer from "./Footer"
 
-const AppTabs = () => {
+const Sidebar = () => {
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
 
@@ -20,7 +20,6 @@ const AppTabs = () => {
     return (
       <Tabs
         defaultActiveKey="draw"
-        id="input-tabs"
       >
         <Tab
           eventKey="draw"
@@ -52,4 +51,4 @@ const AppTabs = () => {
   }
 }
 
-export default React.memo(AppTabs)
+export default React.memo(Sidebar)

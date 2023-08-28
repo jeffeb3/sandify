@@ -29,10 +29,10 @@ const PreviewWindow = () => {
     const resize = () => {
       const width = parseInt(
         getComputedStyle(wrapper).getPropertyValue("width"),
-      )
+      ) - 22
       const height = parseInt(
         getComputedStyle(wrapper).getPropertyValue("height"),
-      )
+      ) - 22
 
       if (canvasWidth !== width || canvasHeight !== height) {
         dispatch(setPreviewSize({ width, height }))

@@ -17,13 +17,20 @@
 
 @media (min-width: 992px) {
   .full-page {
-    height: calc(100vh - 90px);
+    height: calc(100vh - 64px);
     overflow: auto;
-    border-right: 1px solid #aaa;
+
+    .tab-content {
+      height: 100%;
+    }
+
+    .tab-pane {
+      height: 100%;
+    }
   }
 
   .full-page-tab {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 114px);
     overflow: auto;
   }
 }

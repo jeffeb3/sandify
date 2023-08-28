@@ -28,12 +28,10 @@ const exporters = {
   [SCARA]: ScaraGCodeExporter,
 }
 
-const Downloader = () => {
+const Downloader = ({ showModal, toggleModal }) => {
   const dispatch = useDispatch()
   const machine = useSelector(selectMachine)
   const exporterState = useSelector(selectExporterState)
-  const [showModal, setShowModal] = useState(false)
-  const toggleModal = () => setShowModal(!showModal)
   const { fileType, fileName } = exporterState
   const props = {
     ...exporterState,
@@ -80,147 +78,138 @@ const Downloader = () => {
   }
 
   return (
-    <div>
-      <Button
-        className="ms-2 me-3"
-        variant="primary"
-        onClick={toggleModal}
-      >
-        Export
-      </Button>
-      <Modal
-        size="lg"
-        show={showModal}
-        onHide={toggleModal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Export to a file</Modal.Title>
-        </Modal.Header>
+    <Modal
+      size="lg"
+      show={showModal}
+      onHide={toggleModal}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Export to a file</Modal.Title>
+      </Modal.Header>
 
-        <Modal.Body className="inputs">
-          <DropdownOption
-            onChange={handleChange}
-            options={exporterOptions}
-            optionKey="fileType"
-            key="fileType"
-            index={0}
-            data={props}
-          />
+      <Modal.Body className="inputs">
+        <DropdownOption
+          onChange={handleChange}
+          options={exporterOptions}
+          optionKey="fileType"
+          key="fileType"
+          index={0}
+          data={props}
+        />
 
-          {fileType === SCARA && (
-            <Row>
-              <Col sm={5}></Col>
-              <Col
-                sm={7}
-                className="mb-2"
-              >
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
-                >
-                  Read more
-                </a>{" "}
-                about SCARA GCode.
-              </Col>
-            </Row>
-          )}
-
-          <InputOption
-            onChange={handleChange}
-            options={exporterOptions}
-            key="fileName"
-            optionKey="fileName"
-            index={1}
-            data={props}
-          />
-
-          {(fileType === THETARHO || fileType === SCARA) && (
-            <InputOption
-              onChange={handleChange}
-              options={exporterOptions}
-              key="polarRhoMax"
-              optionKey="polarRhoMax"
-              index={2}
-              data={props}
-            />
-          )}
-
-          {fileType === SCARA && (
-            <InputOption
-              onChange={handleChange}
-              options={exporterOptions}
-              key="unitsPerCircle"
-              optionKey="unitsPerCircle"
-              index={2}
-              data={props}
-            />
-          )}
-
-          <InputOption
-            onChange={handleChange}
-            options={exporterOptions}
-            key="pre"
-            optionKey="pre"
-            index={3}
-            data={props}
-          />
-
-          <InputOption
-            onChange={handleChange}
-            options={exporterOptions}
-            key="post"
-            optionKey="post"
-            index={4}
-            data={props}
-          />
-
+        {fileType === SCARA && (
           <Row>
             <Col sm={5}></Col>
-            <Col sm={7}>
-              See{" "}
+            <Col
+              sm={7}
+              className="mb-2"
+            >
               <a
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://github.com/jeffeb3/sandify/wiki#export-variables"
+                href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
               >
-                {" "}
-                the wiki{" "}
+                Read more
               </a>{" "}
-              for details on available program export variables.
+              about SCARA GCode.
             </Col>
           </Row>
+        )}
 
-          <div className="mt-2">
-            <CheckboxOption
-              onChange={handleChange}
-              options={exporterOptions}
-              optionKey="reverse"
-              key="reverse"
-              index={5}
-              data={props}
-            />
-          </div>
-        </Modal.Body>
+        <InputOption
+          onChange={handleChange}
+          options={exporterOptions}
+          key="fileName"
+          optionKey="fileName"
+          index={1}
+          data={props}
+        />
 
-        <Modal.Footer>
-          <Button
-            id="code-close"
-            variant="light"
-            onClick={toggleModal}
-          >
-            Close
-          </Button>
-          <Button
-            id="code-download"
-            variant="primary"
-            onClick={handleDownload}
-          >
-            Download
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+        {(fileType === THETARHO || fileType === SCARA) && (
+          <InputOption
+            onChange={handleChange}
+            options={exporterOptions}
+            key="polarRhoMax"
+            optionKey="polarRhoMax"
+            index={2}
+            data={props}
+          />
+        )}
+
+        {fileType === SCARA && (
+          <InputOption
+            onChange={handleChange}
+            options={exporterOptions}
+            key="unitsPerCircle"
+            optionKey="unitsPerCircle"
+            index={2}
+            data={props}
+          />
+        )}
+
+        <InputOption
+          onChange={handleChange}
+          options={exporterOptions}
+          key="pre"
+          optionKey="pre"
+          index={3}
+          data={props}
+        />
+
+        <InputOption
+          onChange={handleChange}
+          options={exporterOptions}
+          key="post"
+          optionKey="post"
+          index={4}
+          data={props}
+        />
+
+        <Row>
+          <Col sm={5}></Col>
+          <Col sm={7}>
+            See{" "}
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://github.com/jeffeb3/sandify/wiki#export-variables"
+            >
+              {" "}
+              the wiki{" "}
+            </a>{" "}
+            for details on available program export variables.
+          </Col>
+        </Row>
+
+        <div className="mt-2">
+          <CheckboxOption
+            onChange={handleChange}
+            options={exporterOptions}
+            optionKey="reverse"
+            key="reverse"
+            index={5}
+            data={props}
+          />
+        </div>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button
+          id="code-close"
+          variant="light"
+          onClick={toggleModal}
+        >
+          Close
+        </Button>
+        <Button
+          id="code-download"
+          variant="primary"
+          onClick={handleDownload}
+        >
+          Download
+        </Button>
+      </Modal.Footer>
+    </Modal>
   )
 }
 
