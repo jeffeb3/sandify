@@ -23,16 +23,17 @@ const PreviewWindow = () => {
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
   const remainingLayerIds = layerIds.filter((id) => id !== selectedLayer?.id)
   const layerRef = useRef()
+  const stagePadding = 22
 
   useEffect(() => {
     const wrapper = document.getElementById("preview-wrapper")
     const resize = () => {
       const width = parseInt(
         getComputedStyle(wrapper).getPropertyValue("width"),
-      ) - 22
+      ) - stagePadding
       const height = parseInt(
         getComputedStyle(wrapper).getPropertyValue("height"),
-      ) - 22
+      ) - stagePadding
 
       if (canvasWidth !== width || canvasHeight !== height) {
         dispatch(setPreviewSize({ width, height }))
@@ -42,12 +43,9 @@ const PreviewWindow = () => {
       trailing: true,
     })
 
+    resize()
     window.addEventListener("resize", throttledResize, false)
-
-    return () => {
-      window.removeEventListener("resize", throttledResize, false)
-    }
-  }, [dispatch, canvasWidth, canvasHeight])
+  }, [])
 
   const relativeScale = () => {
     let width, height

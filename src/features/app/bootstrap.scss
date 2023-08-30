@@ -5,6 +5,14 @@ h2 {
   font-size: 1.6rem;
 }
 
+.navbar {
+  --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='lightgray' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>") !important;
+}
+
+.navbar-toggler {
+  border-color: lightgray;
+}
+
 .accordion-header {
   h3 {
     margin: 0;

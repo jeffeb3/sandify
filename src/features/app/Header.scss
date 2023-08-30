@@ -3,11 +3,16 @@
   color: white;
 
   .navbar-nav > a {
-    color: white;
+    color: #e1e1e1;
   }
 
   .nav-item.dropdown > a {
     color: white;
+  }
+
+  .navbar-nav .nav-link.active, .navbar-nav .nav-link.show {
+    color: white;
+    font-weight: bold;
   }
 
   h1 {

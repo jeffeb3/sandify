@@ -1,17 +1,20 @@
 import React, { useState } from "react"
-import Nav from 'react-bootstrap/Nav'
-import Navbar from 'react-bootstrap/Navbar'
-import NavDropdown from 'react-bootstrap/NavDropdown'
+import Nav from "react-bootstrap/Nav"
+import Navbar from "react-bootstrap/Navbar"
+import NavDropdown from "react-bootstrap/NavDropdown"
 import Downloader from "@/features/exporter/Downloader"
 import logo from "./logo.svg"
 import "./Header.scss"
 
-const Header = () => {
+const Header = ({ eventKey, setEventKey }) => {
   const [showExport, setShowExport] = useState(false)
   const toggleShowExport = () => setShowExport(!showExport)
 
   return (
-    <Navbar expand="lg" className="header px-3">
+    <Navbar
+      expand="lg"
+      className="header px-3"
+    >
       <Navbar.Brand href="/">
         <div className="d-flex align-items-center">
           <img
@@ -25,12 +28,26 @@ const Header = () => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
-          <NavDropdown title="File" id="basic-nav-dropdown">
+          <NavDropdown
+            title="File"
+            id="basic-nav-dropdown"
+          >
             <NavDropdown.Item onClick={toggleShowExport}>
               Export
             </NavDropdown.Item>
           </NavDropdown>
-          <Nav.Link>About</Nav.Link>
+          <Nav.Link
+            active={eventKey === "patterns"}
+            onClick={() => setEventKey("patterns")}
+          >
+            Patterns
+          </Nav.Link>
+          <Nav.Link
+            active={eventKey === "about"}
+            onClick={() => setEventKey("about")}
+          >
+            About
+          </Nav.Link>
         </Nav>
       </Navbar.Collapse>
       <Downloader

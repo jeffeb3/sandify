@@ -1,29 +1,55 @@
-import React from "react"
-import Col from "react-bootstrap/Col"
-import Container from 'react-bootstrap/Container'
+import React, { useState } from "react"
+import Tab from "react-bootstrap/Tab"
 import { Provider } from "react-redux"
 import Header from "./Header"
+import About from "./About"
+import PreviewManager from "@/features/preview/PreviewManager"
 import Sidebar from "./Sidebar"
-import Main from "./Main"
 import store from "./store"
-import logo from "./logo.svg"
 import "./App.scss"
 
 const App = () => {
+  const [eventKey, setEventKey] = useState("patterns")
+
   return (
     <Provider store={store}>
       <div className="App">
-        <Header />
+        <Header
+          eventKey={eventKey}
+          setEventKey={setEventKey}
+        />
         <main>
-          <div className="d-flex flex-column flex-lg-row">
-            <div className="full-page d-flex flex-column flex-grow-1">
-              <Main />
-            </div>
+          <Tab.Container
+            activeKey={eventKey}
+            defaultActiveKey="about"
+          >
+            <Tab.Content>
+              <Tab.Pane
+                eventKey="patterns"
+                title="Patterns"
+              >
+                <div className="d-flex flex-column flex-lg-row">
+                  <div className="full-page d-flex flex-column flex-grow-1">
+                    <PreviewManager />
+                  </div>
+                  <div
+                    id="sidebar"
+                    className="flex-shrink-0"
+                  >
+                    <Sidebar />
+                  </div>
+                </div>
+              </Tab.Pane>
 
-            <div id="sidebar" className="flex-shrink-0">
-              <Sidebar />
-            </div>
-          </div>
+              <Tab.Pane
+                eventKey="about"
+                title="About"
+                className="full-page-tab"
+              >
+                <About />
+              </Tab.Pane>
+            </Tab.Content>
+          </Tab.Container>
         </main>
       </div>
     </Provider>

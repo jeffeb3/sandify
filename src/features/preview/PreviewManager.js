@@ -2,7 +2,6 @@ import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
-import Downloader from "@/features/exporter/Downloader"
 import { selectFontsState } from "@/features/fonts/fontsSlice"
 import {
   updateEffect,

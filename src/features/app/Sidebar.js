@@ -6,7 +6,6 @@ import MachineSettings from "@/features/machine/MachineSettings"
 import LayerManager from "@/features/layers/LayerManager"
 import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
-import Footer from "./Footer"
 
 const Sidebar = () => {
   const dispatch = useDispatch()
@@ -18,9 +17,7 @@ const Sidebar = () => {
 
   if (layer) {
     return (
-      <Tabs
-        defaultActiveKey="draw"
-      >
+      <Tabs defaultActiveKey="draw">
         <Tab
           eventKey="draw"
           title="Layers"
@@ -35,14 +32,6 @@ const Sidebar = () => {
           className="full-page-tab"
         >
           <MachineSettings />
-        </Tab>
-
-        <Tab
-          eventKey="about"
-          title="About"
-          className="full-page-tab"
-        >
-          <Footer />
         </Tab>
       </Tabs>
     )
