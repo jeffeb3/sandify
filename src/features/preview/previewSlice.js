@@ -12,6 +12,7 @@ const previewSlice = createSlice({
     canvasWidth: 600,
     canvasHeight: 600,
     sliderValue: 0.0,
+    zoom: 1.0,
   },
   reducers: {
     updatePreview(state, action) {
@@ -39,4 +40,9 @@ export const selectPreviewState = createSelector(
 export const selectPreviewSliderValue = createSelector(
   selectPreviewState,
   (state) => state.sliderValue,
+)
+
+export const selectPreviewZoom = createSelector(
+  selectPreviewState,
+  (state) => state.zoom,
 )

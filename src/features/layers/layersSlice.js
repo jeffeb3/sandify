@@ -753,11 +753,15 @@ export const deleteEffect = ({ id, effectId }) => {
 export const setCurrentLayer = (id) => {
   return (dispatch, getState) => {
     const state = getState()
-    const layer = selectLayerById(state, id)
 
-    dispatch(layersSlice.actions.setCurrentLayer(id))
-    dispatch(effectsSlice.actions.setCurrentEffect(null))
-    dispatch(setSelectedEffect(layer?.effectIds[0])) // this guard is a hack to get a test to run
+    if (id) {
+      const layer = selectLayerById(state, id)
+      dispatch(layersSlice.actions.setCurrentLayer(id))
+      dispatch(effectsSlice.actions.setCurrentEffect(null))
+      dispatch(setSelectedEffect(layer?.effectIds[0])) // this guard is a hack to get a test to run
+    } else {
+      dispatch(layersSlice.actions.setCurrentLayer(null))
+    }
   }
 }
 

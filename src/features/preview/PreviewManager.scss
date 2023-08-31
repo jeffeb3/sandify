@@ -3,6 +3,8 @@
 }
 
 .preview-wrapper {
+  overflow: auto;
+
   .konvajs-content {
     margin: 0 auto;
   }
@@ -14,6 +16,6 @@
   @media (min-width: 992px) {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    height: calc(100vh - 142px);
+    height: calc(100vh - 118px);
   }
 }

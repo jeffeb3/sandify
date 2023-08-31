@@ -1,5 +1,6 @@
-import React from "react"
+import React, { useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import Select from "react-select"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
 import { selectFontsState } from "@/features/fonts/fontsSlice"
@@ -7,12 +8,11 @@ import {
   updateEffect,
   selectCurrentEffect,
 } from "@/features/effects/effectsSlice"
-import { selectPreviewState } from "@/features/preview/previewSlice"
 import {
-  updateLayer,
-  selectCurrentLayer,
-  selectVerticesStats,
-} from "@/features/layers/layersSlice"
+  selectPreviewSliderValue,
+  selectPreviewZoom,
+} from "@/features/preview/previewSlice"
+import { updateLayer, selectCurrentLayer } from "@/features/layers/layersSlice"
 import { getShapeFromType } from "@/features/shapes/factory"
 import { getEffectFromType } from "@/features/effects/factory"
 import "./PreviewManager.scss"
@@ -24,16 +24,35 @@ const PreviewManager = () => {
   const fonts = useSelector(selectFontsState)
   const currentLayer = useSelector(selectCurrentLayer)
   const currentEffectLayer = useSelector(selectCurrentEffect)
-  const sliderValue = useSelector(selectPreviewState).sliderValue
-  const verticesStats = useSelector(selectVerticesStats)
+  const sliderValue = useSelector(selectPreviewSliderValue)
+  const zoom = useSelector(selectPreviewZoom)
+  const wrapperRef = useRef()
+
   const currentShape = getShapeFromType(currentLayer?.type || "polygon")
   const currentEffect = getEffectFromType(currentEffectLayer?.type || "mask")
+  const zoomChoices = [
+    { value: 0.25, label: "25%" },
+    { value: 0.5, label: "50%" },
+    { value: 1.0, label: "100%" },
+    { value: 2.0, label: "200%" },
+    { value: 4.0, label: "400%" },
+  ]
+  const selectedZoomOption = zoomChoices.find((choice) => choice.value == zoom)
+  const previewAlignClass = zoom < 1 ? " justify-content-center" : ""
 
   const handleSliderChange = (value) => {
     dispatch(updatePreview({ sliderValue: value }))
   }
 
+  const handleZoomChange = (option) => {
+    dispatch(updatePreview({ zoom: option.value }))
+  }
+
   const arrowKeyChange = (layer, event) => {
+    if (!layer) {
+      return
+    }
+
     const attrs = { id: layer.id }
     const delta = event.shiftKey ? 1 : 5
 
@@ -63,7 +82,7 @@ const PreviewManager = () => {
         const attrs = arrowKeyChange(currentLayer, event)
         dispatch(updateLayer(attrs))
       }
-    } else if (currentEffect) {
+    } else if (currentEffectLayer) {
       if (currentEffect.canMove(currentEffectLayer)) {
         const attrs = arrowKeyChange(currentEffectLayer, event)
         dispatch(updateEffect(attrs))
@@ -91,28 +110,33 @@ const PreviewManager = () => {
         >
           <div
             id="preview-wrapper"
-            className="preview-wrapper d-flex flex-column justify-content-center"
+            className={`preview-wrapper d-flex flex-column${previewAlignClass}`}
+            ref={wrapperRef}
           >
             <PreviewWindow />
           </div>
         </div>
 
-        <div className="mt-auto pt-2 bg-white d-flex align-items-center">
-          <div className="flex-grow-1">
-            <div className="mx-2">
-              Points: {verticesStats.numPoints}, Distance:{" "}
-              {verticesStats.distance}
-            </div>
-
-            <div className="p-3">
-              <Slider
-                value={sliderValue}
-                step={1}
-                min={0.0}
-                max={100.0}
-                onChange={handleSliderChange}
-              />
-            </div>
+        <div className="mt-auto py-2 bg-white d-flex align-items-center">
+          <div className="mx-2">
+            <Select
+              id="zoom-select"
+              options={zoomChoices}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              value={selectedZoomOption}
+              onChange={handleZoomChange}
+            ></Select>
+          </div>
+          <div className="flex-grow-1 ms-3">
+            <Slider
+              value={sliderValue}
+              step={1}
+              min={0.0}
+              max={100.0}
+              onChange={handleSliderChange}
+            />
           </div>
         </div>
       </div>

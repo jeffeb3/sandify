@@ -6,6 +6,7 @@ describe("preview reducer", () => {
       canvasWidth: 600,
       canvasHeight: 600,
       sliderValue: 0,
+      zoom: 1,
     })
   })
 

@@ -4,6 +4,7 @@ import Tabs from "react-bootstrap/Tabs"
 import { useDispatch, useSelector } from "react-redux"
 import MachineSettings from "@/features/machine/MachineSettings"
 import LayerManager from "@/features/layers/LayerManager"
+import PreviewStats from "@/features/preview/PreviewStats"
 import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 
@@ -32,6 +33,14 @@ const Sidebar = () => {
           className="full-page-tab"
         >
           <MachineSettings />
+        </Tab>
+
+        <Tab
+          eventKey="stats"
+          title="Stats"
+          className="full-page-tab"
+        >
+          <PreviewStats />
         </Tab>
       </Tabs>
     )

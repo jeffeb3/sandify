@@ -253,6 +253,7 @@ describe("layers reducer", () => {
                 type: "circle",
                 circleLobes: "2",
                 polygonSides: "5",
+                effectIds: [],
               },
             },
           },

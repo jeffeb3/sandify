@@ -12,7 +12,7 @@ import {
 } from "@/features/layers/layersSlice"
 import ShapePreview from "./ShapePreview"
 import ConnectorPreview from "./ConnectorPreview"
-import { setPreviewSize } from "./previewSlice"
+import { setPreviewSize, selectPreviewZoom } from "./previewSlice"
 
 const PreviewWindow = () => {
   const dispatch = useDispatch()
@@ -21,6 +21,7 @@ const PreviewWindow = () => {
   const { canvasWidth, canvasHeight } = useSelector(selectPreviewState)
   const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
+  const zoom = useSelector(selectPreviewZoom)
   const remainingLayerIds = layerIds.filter((id) => id !== selectedLayer?.id)
   const layerRef = useRef()
   const stagePadding = 22
@@ -28,12 +29,12 @@ const PreviewWindow = () => {
   useEffect(() => {
     const wrapper = document.getElementById("preview-wrapper")
     const resize = () => {
-      const width = parseInt(
-        getComputedStyle(wrapper).getPropertyValue("width"),
-      ) - stagePadding
-      const height = parseInt(
-        getComputedStyle(wrapper).getPropertyValue("height"),
-      ) - stagePadding
+      const width =
+        parseInt(getComputedStyle(wrapper).getPropertyValue("width")) -
+        stagePadding
+      const height =
+        parseInt(getComputedStyle(wrapper).getPropertyValue("height")) -
+        stagePadding
 
       if (canvasWidth !== width || canvasHeight !== height) {
         dispatch(setPreviewSize({ width, height }))
@@ -45,6 +46,10 @@ const PreviewWindow = () => {
 
     resize()
     window.addEventListener("resize", throttledResize, false)
+
+    return () => {
+      window.removeEventListener("resize", throttledResize, false)
+    }
   }, [])
 
   const relativeScale = () => {
@@ -94,12 +99,12 @@ const PreviewWindow = () => {
   return (
     <Stage
       className="d-flex align-items-center"
-      scaleX={scale}
-      scaleY={scale}
-      height={height * scale}
-      width={width * scaleWidth}
+      scaleX={scale * zoom}
+      scaleY={scale * zoom}
+      height={height * scaleHeight * zoom}
+      width={width * scaleWidth * zoom}
       offsetX={(-width * (scaleWidth / scale)) / 2}
-      offsetY={-height / 2}
+      offsetY={(-height * (scaleHeight / scale)) / 2}
       onClick={handleStageClick}
     >
       <Layer
