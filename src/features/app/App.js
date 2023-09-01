@@ -24,10 +24,7 @@ const App = () => {
             defaultActiveKey="about"
           >
             <Tab.Content>
-              <Tab.Pane
-                eventKey="patterns"
-                title="Patterns"
-              >
+              <Tab.Pane eventKey="patterns">
                 <div className="d-flex flex-column flex-lg-row">
                   <div className="full-page d-flex flex-column flex-grow-1">
                     <PreviewManager />
@@ -43,7 +40,6 @@ const App = () => {
 
               <Tab.Pane
                 eventKey="about"
-                title="About"
                 className="full-page-tab"
               >
                 <About />

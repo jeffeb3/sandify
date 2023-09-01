@@ -30,7 +30,7 @@ const Header = ({ eventKey, setEventKey }) => {
         <Nav className="me-auto">
           <NavDropdown
             title="File"
-            id="basic-nav-dropdown"
+            id="file-dropdown"
           >
             <NavDropdown.Item onClick={toggleShowExport}>
               Export

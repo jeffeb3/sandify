@@ -38,7 +38,7 @@ const PreviewManager = () => {
     { value: 4.0, label: "400%" },
   ]
   const selectedZoomOption = zoomChoices.find((choice) => choice.value == zoom)
-  const previewAlignClass = zoom < 1 ? " justify-content-center" : ""
+  const previewAlignClass = zoom <= 1 ? " justify-content-center" : ""
 
   const handleSliderChange = (value) => {
     dispatch(updatePreview({ sliderValue: value }))

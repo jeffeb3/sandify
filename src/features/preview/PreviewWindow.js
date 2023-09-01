@@ -31,10 +31,10 @@ const PreviewWindow = () => {
     const resize = () => {
       const width =
         parseInt(getComputedStyle(wrapper).getPropertyValue("width")) -
-        stagePadding
+        2 * stagePadding
       const height =
         parseInt(getComputedStyle(wrapper).getPropertyValue("height")) -
-        stagePadding
+        2 * stagePadding
 
       if (canvasWidth !== width || canvasHeight !== height) {
         dispatch(setPreviewSize({ width, height }))
@@ -98,13 +98,12 @@ const PreviewWindow = () => {
   // transformer rotation works; this is a Konva restriction.
   return (
     <Stage
-      className="d-flex align-items-center"
       scaleX={scale * zoom}
       scaleY={scale * zoom}
-      height={height * scaleHeight * zoom}
-      width={width * scaleWidth * zoom}
-      offsetX={(-width * (scaleWidth / scale)) / 2}
-      offsetY={(-height * (scaleHeight / scale)) / 2}
+      height={height * scaleHeight * zoom + stagePadding}
+      width={width * scaleWidth * zoom + stagePadding}
+      offsetX={(-width * (scaleWidth / scale) - stagePadding * 0.75) / 2}
+      offsetY={(-height * (scaleHeight / scale) - stagePadding * 0.75) / 2}
       onClick={handleStageClick}
     >
       <Layer
