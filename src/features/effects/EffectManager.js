@@ -74,7 +74,7 @@ const EffectManager = () => {
                 effects={effects}
                 selectedLayer={selectedLayer}
               />
-              <div className="d-flex align-items-center border-left border-right border-bottom">
+              <div className="d-flex align-items-center border-start border-end border-bottom">
                 <Tooltip id="tooltip-new-effect" />
                 <Button
                   className="ms-2 layer-button"
@@ -120,7 +120,7 @@ const EffectManager = () => {
                   </Button>
                 </div>
               </div>
-              <div className="pb-3 pt-2">
+              <div className="pt-2">
                 <EffectEditor />
               </div>
             </Accordion.Body>

@@ -102,8 +102,8 @@ const PreviewWindow = () => {
       scaleY={scale * zoom}
       height={height * scaleHeight * zoom + stagePadding}
       width={width * scaleWidth * zoom + stagePadding}
-      offsetX={(-width * (scaleWidth / scale) - stagePadding * 0.75) / 2}
-      offsetY={(-height * (scaleHeight / scale) - stagePadding * 0.75) / 2}
+      offsetX={(-width * (scaleWidth / scale) - stagePadding * 0.5) / 2}
+      offsetY={(-height * (scaleHeight / scale) - stagePadding * 0.5) / 2}
       onClick={handleStageClick}
     >
       <Layer

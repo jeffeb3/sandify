@@ -121,7 +121,7 @@ const LayerEditor = () => {
       </div>
       <div className="border-top border-secondary px-3 py-3 mt-3">
         {model.canTransform(layer) && (
-          <Row className="align-items-center mt-1 mb-2">
+          <Row className="align-items-center mt-1 mb-1">
             <Col sm={5}>Transform</Col>
             <Col sm={7}>
               {model.canMove(layer) && (

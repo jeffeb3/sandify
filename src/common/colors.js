@@ -1,5 +1,5 @@
 const colors = {
-  selectedShapeColor: "rgba(255, 255, 0, 0.9)", // yellow
+  selectedShapeColor: "rgba(255, 255, 0, 0.7)", // yellow
   slidingColor: "#2983BA", // blue
   activeEffectColor: "rgba(15, 128, 0, 0.8)", // green
   unselectedShapeColor: "rgba(195, 214, 230, 0.4)", // gray

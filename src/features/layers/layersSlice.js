@@ -761,6 +761,7 @@ export const setCurrentLayer = (id) => {
       dispatch(setSelectedEffect(layer?.effectIds[0])) // this guard is a hack to get a test to run
     } else {
       dispatch(layersSlice.actions.setCurrentLayer(null))
+      dispatch(effectsSlice.actions.setCurrentEffect(null))
     }
   }
 }

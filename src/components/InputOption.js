@@ -108,7 +108,7 @@ const InputOption = ({
         {label && (
           <Form.Label
             htmlFor={`option-${optionKey}`}
-            className="me-2"
+            className="me-2 mb-0"
             style={{ width: "22px" }}
           >
             {title}

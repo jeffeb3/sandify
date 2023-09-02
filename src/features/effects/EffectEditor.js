@@ -56,8 +56,9 @@ const EffectEditor = ({ id }) => {
 
   return (
     <div className="ps-1 overflow-hidden flex-grow-1 mt-3 container-fluid pe-0">
+      {renderedModelOptions}
       {model.canTransform(effect) && (
-        <Row className="align-items-center mt-1 mb-2">
+        <Row className="align-items-center mt-1 mb-1">
           <Col sm={5}>Transform</Col>
           <Col sm={7}>
             {model.canMove(effect) && (
@@ -93,7 +94,6 @@ const EffectEditor = ({ id }) => {
           </Col>
         </Row>
       )}
-      {renderedModelOptions}
     </div>
   )
 }

@@ -62,7 +62,7 @@ const LayerManager = () => {
       />
       <div className="p-3">
         <LayerList />
-        <div className="d-flex align-items-center border-left border-right border-bottom">
+        <div className="d-flex align-items-center border-start border-end border-bottom">
           <Tooltip id="tooltip-new-layer" />
           <Button
             className="ms-2 layer-button"
