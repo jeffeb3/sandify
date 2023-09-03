@@ -41,7 +41,6 @@ const About = () => {
               </a>{" "}
               forum.
             </p>
-
             <h2 className="mt-4">Getting started</h2>
             <p>
               Part of the fun of Sandify is playing it like you would a
@@ -51,8 +50,8 @@ const About = () => {
               <a href="https://github.com/jeffeb3/sandify/wiki">the wiki</a> for
               some features that you might miss the first time through.
             </p>
-
-            <h2 className="mt-4">What sand machines are supported?</h2>
+            <h2>Exporting patterns</h2>
+            <h3 className="mt-4">What sand machines are supported?</h3>
             <p>
               Sandify supports gcode and theta-rho formats. Sandify was
               originally designed for{" "}
@@ -63,7 +62,69 @@ const About = () => {
               <a href="https://sisyphus-industries.com/">Sisyphus Industries</a>
               .
             </p>
-
+            <h2>Importing layers</h2>
+            Sandify supports import of pattern files as new layers. Supported
+            formats are .thr, .gcode, and .nc files.
+            <h3 className="mt-4">Where can I find theta rho files?</h3>
+            Sisyphus machines use theta rho (.thr) files. There is a large
+            community sharing patterns.
+            <div className="row mt-2">
+              <div className="col-6">
+                <ul className="list-unstyled">
+                  <li>
+                    <a href="https://reddit.com/u/markyland">
+                      Markyland on Reddit
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/Dithermaster/sisyphus/">
+                      Dithermaster&apos;s github
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/SlightlyLoony/JSisyphus">
+                      JSisyphus by Slightly Loony
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div className="col-6">
+                <ul className="list-unstyled">
+                  <li>
+                    <a href="https://reddit.com/r/SisyphusIndustries">
+                      Sisyphus on Reddit
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://sisyphus-industries.com/community/community-tracks">
+                      Sisyphus Community
+                    </a>
+                  </li>
+                  <li>
+                    <a href="http://thejuggler.net/sisyphus/">The Juggler</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <h3 className="mt-2">About copyrights</h3>
+            <p>
+              Be careful and respectful regarding pattern copyrights. Understand
+              that the original author put their labor, intensity, and ideas
+              into this art. The creators have a right to own it (and they have
+              a copyright, even if it doesn&apos;t say so). If you don&apos;t
+              have permission (a license) to use their art, then you
+              shouldn&apos;t be. If you do have permission to use their art,
+              then you should be thankful, and I&apos;m sure they would
+              appreciate you sending them a note of thanks. A picture of your
+              table creating their shared art would probably make them smile.
+            </p>
+            <p>
+              Someone posting the .thr file to a forum or subreddit probably
+              wants it to be shared, and drawing it on your home table is
+              probably OK. Just be careful if you want to use them for something
+              significant without explicit permission.
+            </p>
+            <p>P.S. I am not a lawyer.</p>
             <h2 className="mt-4">Github</h2>
             <p>
               Sandify is hosted on{" "}
@@ -77,7 +138,6 @@ const About = () => {
                 we&apos;d love your help.
               </a>
             </p>
-
             <h2 className="mt-4">License</h2>
             <p>
               Sandify is licensed under the{" "}

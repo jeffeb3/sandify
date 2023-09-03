@@ -2,13 +2,16 @@ import React, { useState } from "react"
 import Nav from "react-bootstrap/Nav"
 import Navbar from "react-bootstrap/Navbar"
 import NavDropdown from "react-bootstrap/NavDropdown"
-import Downloader from "@/features/exporter/Downloader"
+import ExportDownloader from "@/features/export/ExportDownloader"
+import LayerImporter from "@/features/import/LayerImporter"
 import logo from "./logo.svg"
 import "./Header.scss"
 
 const Header = ({ eventKey, setEventKey }) => {
   const [showExport, setShowExport] = useState(false)
-  const toggleShowExport = () => setShowExport(!showExport)
+  const [showImport, setShowImport] = useState(0)
+  const toggleExport = () => setShowExport(!showExport)
+  const toggleImport = () => setShowImport(showImport + 1) // force file dialog to open again
 
   return (
     <Navbar
@@ -32,8 +35,16 @@ const Header = ({ eventKey, setEventKey }) => {
             title="File"
             id="file-dropdown"
           >
-            <NavDropdown.Item onClick={toggleShowExport}>
-              Export
+            <NavDropdown.Item>Open...</NavDropdown.Item>
+            <NavDropdown.Item onClick={toggleImport}>
+              Import layer...
+            </NavDropdown.Item>
+            <NavDropdown.Divider />
+            <NavDropdown.Item>Save</NavDropdown.Item>
+            <NavDropdown.Item>Save as...</NavDropdown.Item>
+            <NavDropdown.Divider />
+            <NavDropdown.Item onClick={toggleExport}>
+              Export pattern as...
             </NavDropdown.Item>
           </NavDropdown>
           <Nav.Link
@@ -50,9 +61,13 @@ const Header = ({ eventKey, setEventKey }) => {
           </Nav.Link>
         </Nav>
       </Navbar.Collapse>
-      <Downloader
+      <ExportDownloader
         showModal={showExport}
-        toggleModal={toggleShowExport}
+        toggleModal={toggleExport}
+      />
+      <LayerImporter
+        showModal={showImport}
+        toggleModal={toggleImport}
       />
     </Navbar>
   )

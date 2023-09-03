@@ -16,7 +16,7 @@ const options = {
   trackShape: {
     title: "Track type",
     type: "togglebutton",
-    choices: ["circle", "spiral"],
+    choices: ["circular", "spiral"],
   },
   trackSpiralRadiusPct: {
     title: "Spiral tightness",
@@ -238,7 +238,9 @@ export default class Track extends Effect {
       trackShape,
     } = effect
     const numShapes =
-      trackShape == "circle" ? trackNumShapes : trackNumShapes - 1
+      trackShape == "circle" && trackRotation === 360
+        ? trackNumShapes
+        : trackNumShapes - 1
     const spiralRadius = width * trackSpiralRadiusPct
     const shapeCompleteFraction = index / (numShapes || 1)
     const endAngle = (trackRotation * Math.PI) / 180

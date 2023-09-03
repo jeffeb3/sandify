@@ -3,10 +3,7 @@ import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
-import {
-  MdOutlineFileUpload,
-  MdOutlineSettingsBackupRestore,
-} from "react-icons/md"
+import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
 import {
   selectSelectedLayerId,
@@ -16,7 +13,6 @@ import {
 import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
-import ImportLayer from "./ImportLayer"
 import LayerList from "./LayerList"
 import "./LayerManager.scss"
 
@@ -27,11 +23,9 @@ const LayerManager = () => {
   const canRemove = numLayers > 1
 
   const [showNewLayer, setShowNewLayer] = useState(false)
-  const [showImportLayer, setShowImportLayer] = useState(false)
   const [showCopyLayer, setShowCopyLayer] = useState(false)
 
   const toggleNewLayerModal = () => setShowNewLayer(!showNewLayer)
-  const toggleImportModal = () => setShowImportLayer(!showImportLayer)
   const toggleCopyModal = () => setShowCopyLayer(!showCopyLayer)
   const handleLayerRemoved = (id) => dispatch(deleteLayer(selectedLayerId))
 
@@ -52,10 +46,6 @@ const LayerManager = () => {
         showModal={showNewLayer}
         toggleModal={toggleNewLayerModal}
       />
-      <ImportLayer
-        showModal={showImportLayer}
-        toggleModal={toggleImportModal}
-      />
       <CopyLayer
         showModal={showCopyLayer}
         toggleModal={toggleCopyModal}
@@ -73,16 +63,6 @@ const LayerManager = () => {
             onClick={toggleNewLayerModal}
           >
             <FaPlusSquare />
-          </Button>
-          <Tooltip id="tooltip-import-layer" />
-          <Button
-            className="layer-button"
-            variant="light"
-            data-tooltip-content="Import new layer"
-            data-tooltip-id="tooltip-import-layer"
-            onClick={toggleImportModal}
-          >
-            <MdOutlineFileUpload />
           </Button>
           <div className="ml-auto">
             {canRemove && <Tooltip id="tooltip-delete-layer" />}

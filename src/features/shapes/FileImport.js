@@ -17,7 +17,7 @@ const options = {
 export default class FileImport extends Shape {
   constructor() {
     super("fileImport")
-    this.label = "FileImport"
+    this.label = "import"
     this.usesMachine = true
     this.selectGroup = "import"
   }

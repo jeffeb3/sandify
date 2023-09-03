@@ -13,7 +13,7 @@ import { selectConnectedVertices } from "@/features/layers/layersSlice"
 import {
   selectExporterState,
   selectComments,
-} from "@/features/exporter/exporterSlice"
+} from "@/features/export/exporterSlice"
 import { selectMachine } from "@/features/machine/machineSlice"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"

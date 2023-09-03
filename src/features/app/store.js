@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { combineReducers } from "redux"
 import machineReducer from "@/features/machine/machineSlice"
-import exporterReducer from "@/features/exporter/exporterSlice"
+import exporterReducer from "@/features/export/exporterSlice"
 import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
