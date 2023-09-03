@@ -29,6 +29,24 @@ export const totalDistance = (vertices) => {
   return d
 }
 
+// returns the total distance calculated for every vertex by index; also returns
+// total distance
+export const totalDistances = (vertices) => {
+  let total = 0.0
+  let previous = null
+  const distances = { 0: 0.0 }
+
+  vertices.forEach((vertex, index) => {
+    if (previous && vertex) {
+      total += distance(previous, vertex)
+      distances[index] = total
+    }
+    previous = vertex
+  })
+
+  return { total, distances }
+}
+
 // returns the points whose cumulative length most closely match the target length
 export const boundingVerticesAtLength = (vertices, targetLength) => {
   let cumulativeLength = 0
@@ -210,16 +228,25 @@ export const circle = (radius, start = 0, x = 0, y = 0) => {
   return points
 }
 
-export const arc = (radius, startAngle, endAngle, x = 0, y = 0) => {
+export const arc = (
+  radius,
+  startAngle,
+  endAngle,
+  x = 0,
+  y = 0,
+  shortestDistance = true,
+) => {
   let resolution = (Math.PI * 2.0) / 128.0 // 128 segments per circle. Enough?
   let deltaAngle = (endAngle - startAngle + 2.0 * Math.PI) % (2.0 * Math.PI)
 
-  if (deltaAngle > Math.PI) {
-    deltaAngle -= 2.0 * Math.PI
-  }
+  if (shortestDistance) {
+    if (deltaAngle > Math.PI) {
+      deltaAngle -= 2.0 * Math.PI
+    }
 
-  if (deltaAngle < 0.0) {
-    resolution *= -1.0
+    if (deltaAngle < 0.0) {
+      resolution *= -1.0
+    }
   }
 
   let tracePoints = []
@@ -377,4 +404,44 @@ export const toScaraGcode = (vertices, unitsPerCircle) => {
 
 export const cloneVertices = (points) => {
   return points.map((point) => new Victor(point.x, point.y))
+}
+
+// returns the point in arr that is farthest to a given point
+export const farthest = (arr, point) => {
+  return arr.reduce(
+    (max, x, i, arr) => (x.distance(point) > max.distance(point) ? x : max),
+    arr[0],
+  )
+}
+
+// returns the point in arr that is closest to a given point
+export const closest = (arr, point) => {
+  return arr.reduce(
+    (max, x, i, arr) => (x.distance(point) < max.distance(point) ? x : max),
+    arr[0],
+  )
+}
+
+// returns the intersection point of two line segments
+export const calculateIntersection = (p1, p2, p3, p4) => {
+  var denominator =
+    (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x)
+  if (denominator === 0) {
+    return null // lines are parallel
+  }
+  var a = p1.y - p3.y
+  var b = p1.x - p3.x
+  var numerator1 = (p4.x - p3.x) * a - (p4.y - p3.y) * b
+  var numerator2 = (p2.x - p1.x) * a - (p2.y - p1.y) * b
+  a = numerator1 / denominator
+  b = numerator2 / denominator
+
+  // return the intersection point if it's within the bounds of both line segments
+  if (a > 0 && a < 1 && b > 0 && b < 1) {
+    return {
+      x: p1.x + a * (p2.x - p1.x),
+      y: p1.y + a * (p2.y - p1.y),
+    }
+  }
+  return null // intersection point is out of bounds
 }

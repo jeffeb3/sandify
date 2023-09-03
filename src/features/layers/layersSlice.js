@@ -40,7 +40,7 @@ const layerState = {
   id: defaultLayerId,
   ...defaultLayer.getInitialState(),
 }
-const notCopiedWhenTypeChanges = ["type", "height", "width"]
+const notCopiedWhenTypeChanges = ["type"]
 
 const currSelectedIndex = (state) => {
   const selectedLayer = state.entities[state.selected]

@@ -2,7 +2,7 @@ import seedrandom from "seedrandom"
 import Shape from "../Shape"
 import { Circle } from "./Circle"
 import Graph from "@/common/Graph"
-import { circle, arc } from "@/common/geometry"
+import { circle, arc, closest, farthest } from "@/common/geometry"
 import { getMachineInstance } from "@/features/machine/machineSlice"
 import Victor from "victor"
 
@@ -153,10 +153,10 @@ export default class CirclePacker extends Shape {
 
     while (orphans.length > 0) {
       // find orphan furthest from center (closest to perimeter)
-      const orphan = this.farthest(orphans, center)
+      const orphan = farthest(orphans, center)
 
       // find connected circle closest to that orphan
-      const connector = this.closest(connected, orphan)
+      const connector = closest(connected, orphan)
 
       // connect them
       this.graph.addEdge(orphan, connector)
@@ -269,8 +269,8 @@ export default class CirclePacker extends Shape {
   }
 
   drawConnectingArc(from, to, startingAngle) {
-    const li1 = this.closest(from.lineIntersection(from, to), to)
-    const li2 = this.closest(to.lineIntersection(from, to), from)
+    const li1 = closest(from.lineIntersection(from, to), to)
+    const li2 = closest(to.lineIntersection(from, to), from)
     const a2 = Math.atan2(li1.y - from.y, li1.x - from.x)
     const a3 = Math.atan2(li2.y - to.y, li2.x - to.x)
 
@@ -302,12 +302,12 @@ export default class CirclePacker extends Shape {
 
     if (stack.length > 0) {
       const p1 = stack[0]
-      const li1 = this.closest(c.lineIntersection(c, p1), c)
+      const li1 = closest(c.lineIntersection(c, p1), c)
       a1 = Math.atan2(li1.y - p1.y, li1.x - p1.x)
 
       if (stack.length > 1) {
         const p2 = stack[1]
-        const li2 = this.closest(p1.lineIntersection(p1, p2), p2)
+        const li2 = closest(p1.lineIntersection(p1, p2), p2)
 
         a2 = Math.atan2(li2.y - p1.y, li2.x - p1.x)
         this.points.push(...arc(p1.r, a1, a2, p1.x, p1.y))
@@ -347,22 +347,6 @@ export default class CirclePacker extends Shape {
   addCircle(c) {
     this.circles.push(c)
     this.graph.addNode(c)
-  }
-
-  // returns the point in arr that is farthest to a given point
-  farthest(arr, point) {
-    return arr.reduce(
-      (max, x, i, arr) => (x.distance(point) > max.distance(point) ? x : max),
-      arr[0],
-    )
-  }
-
-  // returns the point in arr that is closest to a given point
-  closest(arr, point) {
-    return arr.reduce(
-      (max, x, i, arr) => (x.distance(point) < max.distance(point) ? x : max),
-      arr[0],
-    )
   }
 
   getOptions() {
