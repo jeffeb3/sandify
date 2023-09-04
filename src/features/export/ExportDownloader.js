@@ -8,11 +8,11 @@ import { downloadFile } from "@/common/util"
 import DropdownOption from "@/components/DropdownOption"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { updateExporter } from "./exporterSlice"
 import { selectConnectedVertices } from "@/features/layers/layersSlice"
 import {
   selectExporterState,
   selectComments,
+  updateExporter,
 } from "@/features/export/exporterSlice"
 import { selectMachine } from "@/features/machine/machineSlice"
 import GCodeExporter from "./GCodeExporter"
@@ -28,7 +28,7 @@ const exporters = {
   [SCARA]: ScaraGCodeExporter,
 }
 
-const Downloader = ({ showModal, toggleModal }) => {
+const ExportDownloader = ({ showModal, toggleModal }) => {
   const dispatch = useDispatch()
   const machine = useSelector(selectMachine)
   const exporterState = useSelector(selectExporterState)
@@ -87,7 +87,7 @@ const Downloader = ({ showModal, toggleModal }) => {
         <Modal.Title>Export to a file</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="inputs">
+      <Modal.Body>
         <DropdownOption
           onChange={handleChange}
           options={exporterOptions}
@@ -213,4 +213,4 @@ const Downloader = ({ showModal, toggleModal }) => {
   )
 }
 
-export default React.memo(Downloader)
+export default React.memo(ExportDownloader)

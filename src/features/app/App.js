@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import Tab from "react-bootstrap/Tab"
 import { Provider } from "react-redux"
+import { ToastContainer } from "react-toastify"
 import Header from "./Header"
 import About from "./About"
 import PreviewManager from "@/features/preview/PreviewManager"
@@ -14,6 +15,12 @@ const App = () => {
   return (
     <Provider store={store}>
       <div className="App">
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={true}
+          theme="colored"
+        />
         <Header
           eventKey={eventKey}
           setEventKey={setEventKey}

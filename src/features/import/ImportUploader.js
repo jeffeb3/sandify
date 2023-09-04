@@ -7,13 +7,12 @@ import GCodeImporter from "@/features/import/GCodeImporter"
 import { addLayer } from "@/features/layers/layersSlice"
 import Layer from "@/features/layers/Layer"
 
-const LayerImporter = ({ toggleModal, showModal }) => {
+const ImportUploader = ({ toggleModal, showModal }) => {
   const machineState = useSelector(selectMachine)
   const dispatch = useDispatch()
   const inputRef = useRef()
 
   useEffect(() => {
-    console.log(showModal)
     if (showModal && inputRef.current) {
       inputRef.current.click()
     }
@@ -34,13 +33,13 @@ const LayerImporter = ({ toggleModal, showModal }) => {
   }
 
   const handleFileSelected = (event) => {
-    let file = event.target.files[0]
+    const file = event.target.files[0]
 
     if (file) {
-      let reader = new FileReader()
+      const reader = new FileReader()
 
       reader.onload = (event) => {
-        var text = reader.result
+        const text = reader.result
 
         let importer
         if (file.name.toLowerCase().endsWith(".thr")) {
@@ -61,7 +60,7 @@ const LayerImporter = ({ toggleModal, showModal }) => {
 
   return (
     <Form.Control
-      id="fileUpload"
+      id="importUpload"
       ref={inputRef}
       type="file"
       accept=".thr,.gcode,.nc"
@@ -71,4 +70,4 @@ const LayerImporter = ({ toggleModal, showModal }) => {
   )
 }
 
-export default React.memo(LayerImporter)
+export default React.memo(ImportUploader)

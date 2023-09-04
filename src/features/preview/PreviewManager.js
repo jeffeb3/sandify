@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux"
 import Select from "react-select"
 import Slider from "rc-slider"
 import "rc-slider/assets/index.css"
-import { selectFontsState } from "@/features/fonts/fontsSlice"
 import {
   updateEffect,
   selectCurrentEffect,
@@ -21,7 +20,6 @@ import PreviewWindow from "./PreviewWindow"
 
 const PreviewManager = () => {
   const dispatch = useDispatch()
-  const fonts = useSelector(selectFontsState)
   const currentLayer = useSelector(selectCurrentLayer)
   const currentEffectLayer = useSelector(selectCurrentEffect)
   const sliderValue = useSelector(selectPreviewSliderValue)
@@ -88,10 +86,6 @@ const PreviewManager = () => {
         dispatch(updateEffect(attrs))
       }
     }
-  }
-
-  if (!fonts.loaded) {
-    return <div></div>
   }
 
   return (

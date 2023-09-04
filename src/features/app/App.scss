@@ -1,11 +1,6 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'react-toastify/dist/ReactToastify.css';
 @import './bootstrap.scss';
-
-.inputs {
-  .row:not(:first-child) {
-    margin-top: 0.5rem;
-  }
-}
 
 .react-tooltip {
   z-index: 9999;

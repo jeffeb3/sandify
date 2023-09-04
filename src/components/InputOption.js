@@ -10,6 +10,8 @@ const InputOption = ({
   optionKey,
   onChange,
   object,
+  inputRef,
+  focusOnSelect = false,
   label = true,
 }) => {
   const [value, setValue] = useState(data[optionKey])
@@ -64,6 +66,12 @@ const InputOption = ({
     }
   }
 
+  const handleFocus = (event) => {
+    if (focusOnSelect) {
+      event.target.select()
+    }
+  }
+
   const renderedInput = (
     <Form.Control
       as={optionType === "textarea" ? "textarea" : "input"}
@@ -74,8 +82,10 @@ const InputOption = ({
       max={!isNaN(maximum) ? maximum : ""}
       value={value}
       autoComplete="off"
+      ref={inputRef}
       plaintext={option.plainText}
       onChange={handleChange}
+      onFocus={handleFocus}
     />
   )
   if (!option.inline) {

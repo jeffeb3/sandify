@@ -6,6 +6,7 @@ import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
 import effectsReducer from "@/features/effects/effectsSlice"
+import fileReducer from "@/features/file/fileSlice"
 import { loadState, saveState } from "@/common/localStorage"
 import { resetLogCounts } from "@/common/debugging"
 import appReducer from "./appSlice"
@@ -31,16 +32,40 @@ if (persistedState) {
   persistedState.fonts.loaded = false
 }
 
+const combinedReducer = combineReducers({
+  app: appReducer,
+  effects: effectsReducer,
+  exporter: exporterReducer,
+  file: fileReducer,
+  fonts: fontsReducer,
+  layers: layersReducer,
+  machine: machineReducer,
+  preview: previewReducer,
+})
+
+const rootReducer = (state, action) => {
+  if (action.type === "NEW_PATTERN") {
+    const newState = {
+      ...state,
+      layers: undefined,
+      effects: undefined,
+    }
+    return combinedReducer(newState, action)
+  } else if (action.type === "LOAD_PATTERN") {
+    const { effects, layers } = action.payload
+    const newState = {
+      ...state,
+      layers,
+      effects,
+    }
+    return combinedReducer(newState, action)
+  }
+
+  return combinedReducer(state, action)
+}
+
 const store = configureStore({
-  reducer: combineReducers({
-    app: appReducer,
-    layers: layersReducer,
-    effects: effectsReducer,
-    exporter: exporterReducer,
-    machine: machineReducer,
-    preview: previewReducer,
-    fonts: fontsReducer,
-  }),
+  reducer: rootReducer,
   preloadedState: persistedState,
 })
 
