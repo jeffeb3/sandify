@@ -44,7 +44,7 @@ const combinedReducer = combineReducers({
 })
 
 const rootReducer = (state, action) => {
-  if (action.type === "NEW_PATTERN") {
+  if (action.type === "RESET_PATTERN") {
     const newState = {
       ...state,
       layers: undefined,

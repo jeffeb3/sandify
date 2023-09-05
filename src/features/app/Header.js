@@ -22,7 +22,7 @@ const Header = ({ eventKey, setEventKey }) => {
   const dispatch = useDispatch()
 
   const handleNew = () => {
-    dispatch({ type: "NEW_PATTERN" })
+    dispatch({ type: "RESET_PATTERN" })
   }
 
   return (
