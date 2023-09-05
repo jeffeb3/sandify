@@ -58,6 +58,10 @@ const rootReducer = (state, action) => {
       layers,
       effects,
     }
+
+    const id = newState.layers.ids[0]
+    newState.layers.current = id
+    newState.layers.selected = id
     return combinedReducer(newState, action)
   }
 

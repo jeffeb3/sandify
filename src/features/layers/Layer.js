@@ -124,4 +124,9 @@ export default class Layer {
       this.vertices = effectLayer.getVertices(effect, this.state, this.vertices)
     })
   }
+
+  // used to preserve hidden attributes when loading from a file
+  getHiddenAttrs() {
+    return []
+  }
 }

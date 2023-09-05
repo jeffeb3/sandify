@@ -75,4 +75,9 @@ export default class EffectLayer {
   getSelectionVertices(effect) {
     return this.model.getSelectionVertices(effect)
   }
+
+  // used to preserve hidden attributes when loading from a file
+  getHiddenAttrs() {
+    return ["layerId"]
+  }
 }
