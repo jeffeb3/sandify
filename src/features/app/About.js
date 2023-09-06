@@ -46,8 +46,8 @@ const About = () => {
               Part of the fun of Sandify is playing it like you would a
               xylophone. Try it out first. The goal is to make it easy to make
               your first pattern by just clicking and scrolling, finding
-              something you like. Check out{" "}
-              <a href="https://github.com/jeffeb3/sandify/wiki">the wiki</a> for
+              something you like. Check out the{" "}
+              <a href="https://github.com/jeffeb3/sandify/wiki">wiki</a> for
               some features that you might miss the first time through.
             </p>
             <h2>Exporting patterns</h2>

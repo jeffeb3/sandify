@@ -116,6 +116,7 @@ const LayerEditor = () => {
 
         {renderedModelSelection}
         {renderedModelOptions}
+        {getOptionComponent(model, layerOptions, "connectionMethod")}
         {renderedLink}
         <EffectManager />
       </div>
@@ -166,7 +167,6 @@ const LayerEditor = () => {
             </Col>
           </Row>
         )}
-        {getOptionComponent(model, layerOptions, "connectionMethod")}
       </div>
     </div>
   )

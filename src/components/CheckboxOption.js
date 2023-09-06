@@ -37,7 +37,7 @@ const CheckboxOption = ({ options, optionKey, data, object, onChange }) => {
 
       <Col
         sm={7}
-        className="mb-1"
+        className="mb-1 d-flex align-items-center"
       >
         <Switch
           checked={data[optionKey]}

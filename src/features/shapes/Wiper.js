@@ -4,7 +4,7 @@ import Shape from "./Shape"
 
 const options = {
   wiperType: {
-    title: "Type",
+    title: "Wiper type",
     type: "togglebutton",
     choices: ["Lines", "Spiral"],
   },

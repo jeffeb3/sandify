@@ -20,12 +20,12 @@ const ToggleButtonOption = (props) => {
   }
 
   return (
-    <Row className={"align-items-center py-1" + (visible ? "" : " d-none")}>
+    <Row className={"align-items-center" + (visible ? "" : " d-none")}>
       <Col
         sm={5}
         className="mb-1"
       >
-        <Form.Label>{option.title}</Form.Label>
+        <Form.Label className="m-0">{option.title}</Form.Label>
       </Col>
 
       <Col

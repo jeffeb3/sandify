@@ -25,12 +25,11 @@ const DropdownOption = ({
         return { value: choice, label: choice }
       })
     : Object.keys(choices).map((key) => {
-        return { value: key, label: option.choices[key] }
+        return { value: key, label: choices[key] }
       })
-  const currentLabel = Array.isArray(choices)
-    ? currentChoice
-    : choices[currentChoice]
-
+  const currentLabel = choices.find(
+    (choice) => choice.value == currentChoice,
+  ).label
   const handleChange = (choice) => {
     const value = choice.value
     let attrs = {}

@@ -131,6 +131,10 @@ const layersSlice = createSlice({
         newLayer.y = 0
       }
 
+      if (!instance.model.canRotate(state)) {
+        newLayer.rotation = 0
+      }
+
       layersAdapter.setOne(state, newLayer)
     },
     restoreDefaults: (state, action) => {
