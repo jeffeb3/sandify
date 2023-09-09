@@ -3,7 +3,7 @@ import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import Color from "color"
-import arrayMove from "array-move"
+import { arrayMoveImmutable } from "array-move"
 import { isEqual } from "lodash"
 import { rotate, offset, totalDistance, findBounds } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
@@ -88,7 +88,7 @@ const layersSlice = createSlice({
     },
     moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
-      state.ids = arrayMove(state.ids, oldIndex, newIndex)
+      state.ids = arrayMoveImmutable(state.ids, oldIndex, newIndex)
     },
     updateLayer: (state, action) => {
       const layer = action.payload
@@ -102,7 +102,7 @@ const layersSlice = createSlice({
       const { id, oldIndex, newIndex } = action.payload
       const layer = state.entities[id]
 
-      layer.effectIds = arrayMove(layer.effectIds, oldIndex, newIndex)
+      layer.effectIds = arrayMoveImmutable(layer.effectIds, oldIndex, newIndex)
     },
     removeEffect: (state, action) => {
       const { id, effectId } = action.payload

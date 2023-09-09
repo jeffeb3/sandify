@@ -2,7 +2,7 @@ import React from "react"
 import { createRoot } from "react-dom/client"
 import App from "./App"
 import "core-js"
-import Konva from "konva-node"
+import Konva from "konva"
 
 Konva.isBrowser = false
 

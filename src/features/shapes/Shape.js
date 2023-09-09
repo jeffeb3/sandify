@@ -1,6 +1,6 @@
 import { resizeVertices, dimensions } from "@/common/geometry"
 import { pick } from "lodash"
-import LRUCache from "lru-cache"
+import { LRUCache } from "lru-cache"
 import Model from "@/common/Model"
 
 const cache = new LRUCache({

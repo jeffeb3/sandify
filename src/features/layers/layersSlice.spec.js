@@ -20,6 +20,7 @@ import layersReducer, {
 } from "./layersSlice"
 import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
 import machineReducer from "@/features/machine/machineSlice"
+import fontsReducer from "@/features/fonts/fontsSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"
 
@@ -486,6 +487,7 @@ describe("layers selectors", () => {
           effects: effectsReducer,
           layers: layersReducer,
           machine: machineReducer,
+          fonts: fontsReducer,
         },
         preloadedState: initialState,
       })
