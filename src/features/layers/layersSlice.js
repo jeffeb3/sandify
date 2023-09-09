@@ -22,6 +22,7 @@ import {
   selectCurrentEffect,
   selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
+import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
 import {
   selectMachine,
   getMachineInstance,
@@ -217,6 +218,19 @@ export const selectLayerMachine = createCachedSelector(
   },
 )((state, id) => id)
 
+const selectLayerFontsLoaded = createCachedSelector(
+  selectLayerById,
+  selectFontsLoaded,
+  (layer, fontsLoaded) => {
+    if (!layer) {
+      return false
+    }
+
+    const shape = getShapeFromType(layer.type)
+    return shape.usesFonts ? fontsLoaded : false
+  },
+)((state, id) => id)
+
 export const selectCurrentLayerId = createSelector(
   selectLayers,
   (layers) => layers.current,
@@ -309,6 +323,7 @@ export const selectLayerVertices = createCachedSelector(
   selectLayerById,
   selectVisibleLayerEffects,
   selectLayerMachine,
+  selectLayerFontsLoaded,
   (layer, effects, machine) => {
     if (!layer) {
       return []

@@ -45,6 +45,6 @@ export const fontsSlice = createSlice({
   },
 })
 
-export const selectFontsState = (state) => state.fonts
+export const selectFontsLoaded = (state) => state.fonts.loaded
 
 export default fontsSlice.reducer
