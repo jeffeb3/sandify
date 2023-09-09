@@ -98,4 +98,9 @@ export default class Shape extends Model {
       return this.getVertices(state)
     }
   }
+
+  // override as needed; hook to modify updates to a layer
+  handleUpdate(changes) {
+    // default is to do nothing
+  }
 }

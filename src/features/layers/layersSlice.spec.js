@@ -279,6 +279,7 @@ describe("layers reducer", () => {
               1: {
                 id: "1",
                 name: "foo",
+                type: "circle"
               },
             },
           },
@@ -289,6 +290,7 @@ describe("layers reducer", () => {
           1: {
             id: "1",
             name: "bar",
+            type: "circle"
           },
         },
       })

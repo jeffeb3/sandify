@@ -91,8 +91,12 @@ const layersSlice = createSlice({
       state.ids = arrayMoveImmutable(state.ids, oldIndex, newIndex)
     },
     updateLayer: (state, action) => {
-      const layer = action.payload
-      layersAdapter.updateOne(state, { id: layer.id, changes: layer })
+      const changes = action.payload
+      const layer = state.entities[changes.id]
+      const shape = getShapeFromType(layer.type)
+
+      shape.handleUpdate(layer, changes)
+      layersAdapter.updateOne(state, { id: changes.id, changes })
     },
     addEffect: (state, action) => {
       const { id, effectId } = action.payload

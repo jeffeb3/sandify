@@ -9,6 +9,7 @@ import {
   findBounds,
   nearestVertex,
   findMinimumVertex,
+  dimensions,
 } from "@/common/geometry"
 import { arrayRotate } from "@/common/util"
 import { pointsOnPath } from "points-on-path"
@@ -34,7 +35,7 @@ const options = {
   fancyLineSpacing: {
     title: "Line spacing",
     type: "number",
-    step: 0.1,
+    step: 0.5,
   },
   fancyConnectLines: {
     title: "Connect rows",
@@ -93,6 +94,38 @@ export default class FancyText extends Shape {
         : this.connectWords(vertices, offsets, state).flat()
     } else {
       return [new Victor(0, 0)]
+    }
+  }
+
+  // hook to modify updates to a layer
+  handleUpdate(layer, changes) {
+    if (changes.fancyText || changes.fancyFont) {
+      // change width as the user types
+      const props = {
+        ...layer,
+        fancyText: changes.fancyText || layer.fancyText,
+        fancyFont: changes.fancyFont || layer.fancyFont,
+      }
+      const oldVertices = this.getVertices({ shape: layer, creating: true })
+      const vertices = this.getVertices({ shape: props, creating: true })
+      const { width: oldWidth } = dimensions(oldVertices)
+      const { width } = dimensions(vertices)
+
+      changes.width = (layer.width * width) / oldWidth
+      changes.aspectRatio = changes.width / layer.height
+    } else if (changes.fancyLineSpacing) {
+      // change height as spacing changes
+      const props = {
+        ...layer,
+        fancyLineSpacing: changes.fancyLineSpacing,
+      }
+      const oldVertices = this.getVertices({ shape: layer, creating: true })
+      const vertices = this.getVertices({ shape: props, creating: true })
+      const { height: oldHeight } = dimensions(oldVertices)
+      const { height } = dimensions(vertices)
+
+      changes.height = (layer.height * height) / oldHeight
+      changes.aspectRatio = layer.width / changes.height
     }
   }
 

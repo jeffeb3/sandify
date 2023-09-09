@@ -1,7 +1,7 @@
 import { CursiveFont, SansSerifFont, MonospaceFont } from "./Fonts"
 import Victor from "victor"
 import Shape from "@/features/shapes/Shape"
-import { arc } from "@/common/geometry"
+import { arc, dimensions } from "@/common/geometry"
 
 const options = {
   inputText: {
@@ -221,6 +221,25 @@ export default class InputText extends Shape {
     const scale = 2.5 // to normalize starting size
     textPoints.forEach((point) => point.multiply({ x: scale, y: scale }))
     return textPoints
+  }
+
+  // hook to modify updates to a layer
+  handleUpdate(layer, changes) {
+    if (changes.inputText || changes.inputFont) {
+      // change width as the user types
+      const props = {
+        ...layer,
+        inputText: changes.inputText || layer.inputText,
+        inputFont: changes.inputFont || layer.inputFont,
+      }
+      const oldVertices = this.getVertices({ shape: layer, creating: true })
+      const vertices = this.getVertices({ shape: props, creating: true })
+      const { width: oldWidth } = dimensions(oldVertices)
+      const { width } = dimensions(vertices)
+
+      changes.width = (layer.width * width) / oldWidth
+      changes.aspectRatio = changes.width / layer.height
+    }
   }
 
   getOptions() {
