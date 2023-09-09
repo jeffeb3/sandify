@@ -5,7 +5,14 @@ import Form from "react-bootstrap/Form"
 import S from "react-switch"
 const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 
-const CheckboxOption = ({ options, optionKey, data, object, onChange }) => {
+const CheckboxOption = ({
+  options,
+  optionKey,
+  data,
+  object,
+  onChange,
+  label = true,
+}) => {
   const option = options[optionKey]
   const visible =
     option.isVisible === undefined ? true : option.isVisible(object, data)
@@ -27,12 +34,14 @@ const CheckboxOption = ({ options, optionKey, data, object, onChange }) => {
         sm={5}
         className="mb-1"
       >
-        <Form.Label
-          htmlFor="options-step"
-          className="mb-0"
-        >
-          {option.title}
-        </Form.Label>
+        {label && (
+          <Form.Label
+            htmlFor="options-step"
+            className="mb-0"
+          >
+            {option.title}
+          </Form.Label>
+        )}
       </Col>
 
       <Col

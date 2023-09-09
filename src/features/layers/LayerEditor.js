@@ -2,9 +2,15 @@ import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
+import Button from "react-bootstrap/Button"
 import Select from "react-select"
+import { Tooltip } from "react-tooltip"
 import { IconContext } from "react-icons"
-import { AiOutlineRotateRight } from "react-icons/ai"
+import {
+  AiOutlineRotateRight,
+  AiTwotoneLock,
+  AiTwotoneUnlock,
+} from "react-icons/ai"
 import CommentsBox from "@/components/CommentsBox"
 import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
@@ -52,6 +58,15 @@ const LayerEditor = () => {
   const handleChange = (attrs) => {
     attrs.id = layer.id
     dispatch(updateLayer(attrs))
+  }
+
+  const handleChangeMaintainAspectRatio = (value) => {
+    dispatch(
+      updateLayer({
+        id: layer.id,
+        maintainAspectRatio: !layer.maintainAspectRatio,
+      }),
+    )
   }
 
   const renderedModelSelection = allowModelSelection && (
@@ -118,55 +133,103 @@ const LayerEditor = () => {
         {renderedModelOptions}
         {getOptionComponent(model, layerOptions, "connectionMethod")}
         {renderedLink}
-        <EffectManager />
       </div>
-      <div className="border-top border-secondary px-3 py-3 mt-3">
+      <div className="border-top px-3 py-3 mt-2">
         {model.canTransform(layer) && (
           <Row className="align-items-center mt-1 mb-1">
-            <Col sm={5}>Transform</Col>
-            <Col sm={7}>
-              {model.canMove(layer) && (
-                <Row>
-                  <Col xs={6}>
-                    {getOptionComponent(model, layerOptions, "x")}
-                  </Col>
-                  <Col xs={6}>
-                    {getOptionComponent(model, layerOptions, "y")}
-                  </Col>
-                </Row>
-              )}
-              {model.canChangeSize(layer) && (
-                <Row className="mt-1">
-                  <Col xs={6}>
-                    {getOptionComponent(model, layerOptions, "width")}
-                  </Col>
-                  <Col xs={6}>
-                    {getOptionComponent(model, layerOptions, "height")}
-                  </Col>
-                </Row>
-              )}
-              {model.canRotate(layer) && (
-                <Row className="mt-1">
-                  <Col xs={6}>
-                    <div className="d-flex align-items-center">
-                      <div className="me-1">
+            <Col sm={3}>Transform</Col>
+            <Col sm={9}>
+              <div className="d-flex">
+                <div className="d-flex flex-column">
+                  <Row>
+                    {model.canMove(layer) && (
+                      <Col xs={6}>
+                        {getOptionComponent(model, layerOptions, "x")}
+                      </Col>
+                    )}
+                    {model.canChangeSize(layer) && (
+                      <Col xs={6}>
+                        {getOptionComponent(model, layerOptions, "width")}
+                      </Col>
+                    )}
+                  </Row>
+                  <Row className="mt-1">
+                    {model.canMove(layer) && (
+                      <Col xs={6}>
+                        {getOptionComponent(model, layerOptions, "y")}
+                      </Col>
+                    )}
+                    {model.canChangeSize(layer) && (
+                      <Col xs={6}>
+                        {getOptionComponent(model, layerOptions, "height")}
+                      </Col>
+                    )}
+                  </Row>
+                </div>
+                {model.canChangeAspectRatio(layer) && (
+                  <div className="ms-1 align-self-center">
+                    <Tooltip id="tooltip-maintain-aspect-ratio" />
+                    <Button
+                      className="layer-button"
+                      variant="light"
+                      data-tooltip-content="Maintain aspect ratio"
+                      data-tooltip-id="tooltip-maintain-aspect-ratio"
+                      onClick={handleChangeMaintainAspectRatio}
+                    >
+                      {layer.maintainAspectRatio && (
                         <IconContext.Provider value={{ size: "1.3rem" }}>
-                          <AiOutlineRotateRight />
+                          <AiTwotoneLock />
                         </IconContext.Provider>
-                      </div>
-                      {getOptionComponent(
-                        model,
-                        layerOptions,
-                        "rotation",
-                        false,
                       )}
+                      {!layer.maintainAspectRatio && (
+                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                          <AiTwotoneUnlock />
+                        </IconContext.Provider>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              {model.canRotate(layer) && (
+                <div className="d-flex">
+                  <Row className="flex-grow-1">
+                    <Col xs={6}>
+                      <div className="d-flex align-items-center mt-1">
+                        <div className="me-1">
+                          <IconContext.Provider value={{ size: "1.3rem" }}>
+                            <AiOutlineRotateRight />
+                          </IconContext.Provider>
+                        </div>
+                        {getOptionComponent(
+                          model,
+                          layerOptions,
+                          "rotation",
+                          false,
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
+                  {/* hack to get spacing to work */}
+                  {model.canChangeAspectRatio(layer) && (
+                    <div className="ms-1 align-self-center">
+                      <Button
+                        className="layer-button invisible"
+                        variant="light"
+                      >
+                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                          <AiTwotoneLock />
+                        </IconContext.Provider>
+                      </Button>
                     </div>
-                  </Col>
-                </Row>
+                  )}
+                </div>
               )}
             </Col>
           </Row>
         )}
+      </div>
+      <div className="border-top border-secondary px-3 pt-1">
+        <EffectManager />
       </div>
     </div>
   )

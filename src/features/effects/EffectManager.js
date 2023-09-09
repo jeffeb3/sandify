@@ -120,9 +120,7 @@ const EffectManager = () => {
                   </Button>
                 </div>
               </div>
-              <div className="pt-2">
-                <EffectEditor />
-              </div>
+              <EffectEditor />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>

@@ -48,7 +48,7 @@ export default class Track extends Effect {
     return true
   }
 
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return false
   }
 
@@ -60,8 +60,6 @@ export default class Track extends Effect {
     return {
       ...super.getInitialState(),
       ...{
-        x: 0,
-        y: 0,
         width: 50,
         height: 50,
         trackShape: "circle",

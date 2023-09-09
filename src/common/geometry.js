@@ -121,29 +121,40 @@ export const dimensions = (vertices) => {
   }
 }
 
-// resizes each vertex in a list to the specified dimensions.
-// If lock = true, will not stretch the shape.
-// resizes each vertex in a list to the specified dimensions. Will not stretch the shape.
-export const resizeVertices = (vertices, sizeX, sizeY, lock = true) => {
+// resizes each vertex in a list to the specified dimensions; the stretch parameter determines
+// whether to stretch the shape to fit the dimensions.
+export const resizeVertices = (
+  vertices,
+  sizeX,
+  sizeY,
+  stretch = false,
+  aspectRatio = 1.0,
+) => {
   let scaleX, scaleY, deltaX, deltaY
   const bounds = findBounds(vertices)
   const oldSizeX = bounds[1].x - bounds[0].x
   const oldSizeY = bounds[1].y - bounds[0].y
 
-  if (lock) {
-    const size = Math.max(sizeX, sizeY)
-    const oldSize = Math.max(oldSizeX, oldSizeY)
-    scaleX = size / oldSize
-    scaleY = size / oldSize
-    bounds[0].multiply({ x: scaleX, y: scaleY })
-    bounds[1].multiply({ x: scaleX, y: scaleY })
-    deltaX = bounds[0].x / 2
-    deltaY = bounds[0].y / 2
-  } else {
+  if (stretch) {
     scaleX = sizeX / oldSizeX
     scaleY = sizeY / oldSizeY
     deltaX = 0
     deltaY = 0
+  } else {
+    const size = Math.max(sizeX, sizeY)
+    const oldSize = Math.max(oldSizeX, oldSizeY)
+
+    if (aspectRatio > 1) {
+      scaleX = size / oldSize
+      scaleY = size / aspectRatio / oldSize
+    } else {
+      scaleX = (size * aspectRatio) / oldSize
+      scaleY = size / oldSize
+    }
+    bounds[0].multiply({ x: scaleX, y: scaleY })
+    bounds[1].multiply({ x: scaleX, y: scaleY })
+    deltaX = bounds[0].x / 2
+    deltaY = bounds[0].y / 2
   }
 
   vertices.forEach((vertex) => {

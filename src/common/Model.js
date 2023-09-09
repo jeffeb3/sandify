@@ -9,6 +9,7 @@ export default class Model {
       usesMachine: false,
       usesFonts: false,
       dragging: false,
+      stretch: false,
     })
   }
 
@@ -18,7 +19,7 @@ export default class Model {
   }
 
   // override as needed
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return this.canChangeSize(state)
   }
 

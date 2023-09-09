@@ -21,27 +21,35 @@ export default class Shape extends Model {
       autosize: true,
       startingWidth: 100,
       startingHeight: 100,
-      startingAspectRatioLocked: true,
+      aspectRatioLocked: true,
     })
   }
 
   // calculates the initial dimensions of the model
   initialDimensions(props) {
+    const { width, height } = this.recalculateDimensions(
+      props,
+      this.startingWidth,
+      this.startingHeight,
+    )
+    return {
+      width,
+      height,
+      aspectRatio: width / height,
+    }
+  }
+
+  recalculateDimensions(props, width, height) {
     if (this.autosize) {
       const vertices = this.initialVertices(props)
 
-      resizeVertices(
-        vertices,
-        this.startingWidth,
-        this.startingHeight,
-        this.startingAspectRatioLocked,
-      )
+      resizeVertices(vertices, width, height, false)
 
       return dimensions(vertices)
     } else {
       return {
-        width: this.startingWidth,
-        height: this.startingHeight,
+        width,
+        height,
       }
     }
   }

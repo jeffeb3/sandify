@@ -34,6 +34,7 @@ function getMaxX(points) {
 export default class InputText extends Shape {
   constructor() {
     super("inputText")
+    this.stretch = true
     this.label = "Text"
   }
 
@@ -44,6 +45,7 @@ export default class InputText extends Shape {
         inputText: "Sandify",
         inputFont: "Cursive",
         rotateDir: "Center",
+        maintainAspectRatio: true,
       },
     }
   }

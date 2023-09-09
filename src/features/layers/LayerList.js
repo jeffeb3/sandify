@@ -140,26 +140,27 @@ const LayerList = () => {
         items={layers.map((layer) => layer.id)}
         strategy={verticalListSortingStrategy}
       >
-        <ListGroup
-          variant="flush"
-          style={{ maxHeight: "240px" }}
-          className="border"
-          id="layers"
-        >
-          {layers.map((layer, index) => (
-            <LayerRow
-              id={layer.id}
-              key={layer.id}
-              current={currentLayerId === layer.id}
-              selected={selectedLayer.id === layer.id}
-              numLayers={numLayers}
-              layer={layer}
-              handleLayerSelected={handleLayerSelected}
-              handleToggleLayerVisible={handleToggleLayerVisible}
-              index={index}
-            />
-          ))}
-        </ListGroup>
+        <div className="overflow-auto border">
+          <ListGroup
+            variant="flush"
+            id="layers"
+            style={{ maxHeight: "200px" }}
+          >
+            {layers.map((layer, index) => (
+              <LayerRow
+                id={layer.id}
+                key={layer.id}
+                current={currentLayerId === layer.id}
+                selected={selectedLayer.id === layer.id}
+                numLayers={numLayers}
+                layer={layer}
+                handleLayerSelected={handleLayerSelected}
+                handleToggleLayerVisible={handleToggleLayerVisible}
+                index={index}
+              />
+            ))}
+          </ListGroup>
+        </div>
       </SortableContext>
     </DndContext>
   )

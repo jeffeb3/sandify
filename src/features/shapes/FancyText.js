@@ -54,6 +54,7 @@ export default class FancyText extends Shape {
     this.label = "Fancy Text"
     this.usesMachine = true
     this.usesFonts = true
+    this.stretch = true
   }
 
   getInitialState() {
@@ -65,6 +66,7 @@ export default class FancyText extends Shape {
         fancyAlignment: "left",
         fancyConnectLines: "inside",
         fancyLineSpacing: 1.0,
+        maintainAspectRatio: true,
       },
     }
   }

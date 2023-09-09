@@ -302,12 +302,19 @@ const ShapePreview = (ownProps) => {
       node.scaleX(1)
       node.scaleY(1)
 
-      handleChange({
+      const width = roundP(Math.max(5, layer.width * scaleX), 0)
+      const height = roundP(Math.max(5, layer.height * scaleY), 0)
+      const changes = {
         dragging: false,
-        width: roundP(Math.max(5, layer.width * scaleX), 0),
-        height: roundP(Math.max(5, layer.height * scaleY), 0),
+        width,
+        height,
         rotation: roundP(node.rotation(), 0),
-      })
+      }
+
+      if (!layer.maintainAspectRatio) {
+        changes.aspectRatio = width / height
+      }
+      handleChange(changes)
     }
   }
 
@@ -395,7 +402,7 @@ const ShapePreview = (ownProps) => {
           rotateEnabled={model.canRotate(layer)}
           rotationSnaps={[0, 90, 180, 270]}
           enabledAnchors={
-            !model.canChangeHeight(layer)
+            layer.maintainAspectRatio
               ? ["top-left", "top-right", "bottom-left", "bottom-right"]
               : null
           }

@@ -16,17 +16,17 @@ export const effectOptions = {
     },
   },
   width: {
-    title: (model, state) => {
-      return model.canChangeHeight(state) ? "W" : "S"
-    },
+    title: "W",
     min: 1,
     inline: true,
     isVisible: (model, state) => {
       return model.canChangeSize(state)
     },
     onChange: (model, changes, state) => {
-      if (!model.canChangeHeight(state)) {
+      if (state.maintainAspectRatio) {
         changes.height = changes.width
+      } else {
+        changes.aspectRatio = changes.width / state.height
       }
       return changes
     },
@@ -35,9 +35,18 @@ export const effectOptions = {
     title: "H",
     min: 1,
     inline: true,
-    isVisible: (model, state) => {
-      return model.canChangeSize(state) && model.canChangeHeight(state)
+    onChange: (model, changes, state) => {
+      if (state.maintainAspectRatio) {
+        changes.width = changes.height
+      } else {
+        changes.aspectRatio = state.width / changes.height
+      }
+      return changes
     },
+  },
+  maintainAspectRatio: {
+    title: "Lock aspect ratio",
+    type: "checkbox",
   },
   rotation: {
     title: "Rotate (degrees)",
@@ -54,7 +63,7 @@ export default class EffectLayer {
   }
 
   getInitialState(layer, layerVertices) {
-    return {
+    const state = {
       ...this.model.getInitialState(layer, layerVertices),
       ...{
         type: this.model.type,
@@ -62,6 +71,22 @@ export default class EffectLayer {
         name: this.model.label,
       },
     }
+
+    if (this.model.canChangeSize(state)) {
+      state.maintainAspectRatio = false
+      state.aspectRatio = 1.0
+    }
+
+    if (this.model.canMove(state) && state.x === undefined) {
+      state.x = 0
+      state.y = 0
+    }
+
+    if (this.model.canRotate(state) && state.rotation === undefined) {
+      state.rotation = 0
+    }
+
+    return state
   }
 
   getOptions() {

@@ -15,6 +15,10 @@ export default class Point extends Shape {
     return false
   }
 
+  canRotate(state) {
+    return false
+  }
+
   getInitialState() {
     return {
       ...super.getInitialState(),

@@ -91,7 +91,7 @@ const LayerManager = () => {
             <Button
               className="layer-button"
               variant="light"
-              data-tooltip-content="Restore layer defaulta"
+              data-tooltip-content="Restore layer defaults"
               data-tooltip-id="tooltip-restore-layer"
               onClick={handleRestoreDefaults}
             >

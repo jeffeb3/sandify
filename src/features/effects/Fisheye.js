@@ -30,7 +30,7 @@ export default class Fisheye extends Effect {
     return true
   }
 
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return false
   }
 
@@ -40,8 +40,6 @@ export default class Fisheye extends Effect {
       ...{
         fisheyeDistortion: 3,
         fisheyeSubsample: true,
-        x: 0,
-        y: 0,
         width: 100,
         height: 100,
       },

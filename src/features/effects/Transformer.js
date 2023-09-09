@@ -47,7 +47,6 @@ export default class Transformer extends Effect {
         height,
         x: offsetX - layer.x,
         y: offsetY - layer.y,
-        rotation: 0,
       },
     }
   }
@@ -57,7 +56,7 @@ export default class Transformer extends Effect {
     this.effect = effect
     this.vertices = [...vertices]
 
-    resizeVertices(this.vertices, effect.width, effect.height, false)
+    resizeVertices(this.vertices, effect.width, effect.height, true)
     centerOnOrigin(this.vertices)
     this.transform()
 

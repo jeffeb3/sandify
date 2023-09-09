@@ -119,25 +119,26 @@ const EffectList = ({ effects, selectedLayer }) => {
         items={effects.map((effect) => effect.id)}
         strategy={verticalListSortingStrategy}
       >
-        <ListGroup
-          variant="flush"
-          style={{ maxHeight: "240px" }}
-          className="border overflow-visible"
-          id="effects"
-        >
-          {effects.map((effect, index) => (
-            <EffectRow
-              id={effect.id}
-              key={effect.id}
-              current={currentEffectId === effect.id}
-              selected={selectedEffectId === effect.id}
-              effect={effect}
-              handleEffectSelected={handleEffectSelected}
-              handleToggleEffectVisible={handleToggleEffectVisible}
-              index={index}
-            />
-          ))}
-        </ListGroup>
+        <div className="overflow-auto border">
+          <ListGroup
+            variant="flush"
+            id="effects"
+            style={{ maxHeight: "200px" }}
+          >
+            {effects.map((effect, index) => (
+              <EffectRow
+                id={effect.id}
+                key={effect.id}
+                current={currentEffectId === effect.id}
+                selected={selectedEffectId === effect.id}
+                effect={effect}
+                handleEffectSelected={handleEffectSelected}
+                handleToggleEffectVisible={handleToggleEffectVisible}
+                index={index}
+              />
+            ))}
+          </ListGroup>
+        </div>
       </SortableContext>
     </DndContext>
   )

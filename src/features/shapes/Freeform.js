@@ -15,7 +15,7 @@ export default class Freeform extends Shape {
     this.startingHeight = 50
   }
 
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return false
   }
 

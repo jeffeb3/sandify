@@ -232,7 +232,7 @@ const EffectPreview = (ownProps) => {
             rotateEnabled={model.canRotate(effect)}
             rotationSnaps={[0, 90, 180, 270]}
             enabledAnchors={
-              !model.canChangeHeight(effect)
+              effect.maintainAspectRatio
                 ? ["top-left", "top-right", "bottom-left", "bottom-right"]
                 : null
             }

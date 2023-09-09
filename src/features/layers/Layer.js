@@ -1,6 +1,7 @@
 import { getShapeFromType } from "@/features/shapes/factory"
 import EffectLayer from "@/features/effects/EffectLayer"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
+import { roundP } from "@/common/util"
 
 export const layerOptions = {
   name: {
@@ -22,17 +23,17 @@ export const layerOptions = {
     },
   },
   width: {
-    title: (model, state) => {
-      return model.canChangeHeight(state) ? "W" : "S"
-    },
+    title: "W",
     min: 1,
     inline: true,
     isVisible: (model, state) => {
       return model.canChangeSize(state)
     },
     onChange: (model, changes, state) => {
-      if (!model.canChangeHeight(state)) {
-        changes.height = changes.width
+      if (state.maintainAspectRatio) {
+        changes.height = roundP(changes.width / state.aspectRatio, 2)
+      } else {
+        changes.aspectRatio = changes.width / state.height
       }
       return changes
     },
@@ -41,9 +42,18 @@ export const layerOptions = {
     title: "H",
     min: 1,
     inline: true,
-    isVisible: (model, state) => {
-      return model.canChangeSize(state) && model.canChangeHeight(state)
+    onChange: (model, changes, state) => {
+      if (state.maintainAspectRatio) {
+        changes.width = roundP(changes.height * state.aspectRatio, 2)
+      } else {
+        changes.aspectRatio = state.width / changes.height
+      }
+      return changes
     },
+  },
+  maintainAspectRatio: {
+    title: "Lock aspect ratio",
+    type: "checkbox",
   },
   rotation: {
     title: "Rotate (degrees)",
@@ -66,6 +76,7 @@ export default class Layer {
 
   getInitialState(props) {
     const dimensions = this.model.initialDimensions(props)
+    const { width, height, aspectRatio } = dimensions
 
     return {
       ...this.model.getInitialState(props),
@@ -74,8 +85,9 @@ export default class Layer {
         connectionMethod: "line",
         x: 0.0,
         y: 0.0,
-        width: dimensions.width,
-        height: dimensions.height,
+        width,
+        height,
+        aspectRatio,
         rotation: 0,
         visible: true,
         name: this.model.label,
@@ -105,8 +117,20 @@ export default class Layer {
   }
 
   resize() {
-    const { width, height } = this.state
-    this.vertices = resizeVertices(this.vertices, width, height, false)
+    const { width, height, aspectRatio } = this.state
+
+    if (this.model.stretch) {
+      // special case for shapes that always stretch to fit their dimensions (e.g., font shapes)
+      this.vertices = resizeVertices(this.vertices, width, height, true, 1)
+    } else {
+      this.vertices = resizeVertices(
+        this.vertices,
+        width,
+        height,
+        false,
+        aspectRatio,
+      )
+    }
   }
 
   transform() {

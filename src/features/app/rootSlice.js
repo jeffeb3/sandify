@@ -40,6 +40,7 @@ const loadPattern = (state, action) => {
   const id = newState.layers.ids[0]
   newState.layers.current = id
   newState.layers.selected = id
+  newState.effects.selected = newState.layers.entities[id].effectIds[0]
   newState.preview.sliderValue = 1.0
   newState.preview.zoom = 1.0
 

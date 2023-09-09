@@ -51,7 +51,7 @@ export default class Mask extends Effect {
     return state.maskMachine != "circle"
   }
 
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return state.maskMachine != "circle"
   }
 
@@ -65,9 +65,6 @@ export default class Mask extends Effect {
       ...{
         width: 100,
         height: 100,
-        x: 0,
-        y: 0,
-        rotation: 0,
         maskMinimizeMoves: false,
         maskMachine: "rectangle",
         maskBorder: false,

@@ -70,7 +70,7 @@ export default class Warp extends Effect {
     return state.warpType !== "custom"
   }
 
-  canChangeHeight(state) {
+  canChangeAspectRatio(state) {
     return false
   }
 
