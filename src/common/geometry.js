@@ -112,12 +112,24 @@ export const findBounds = (vertices) => {
   return [new Victor(loX, loY), new Victor(hiX, hiY)]
 }
 
-export const dimensions = (vertices) => {
+export const dimensions = (vertices, precision = 0) => {
   const bounds = findBounds(vertices)
 
-  return {
-    width: Math.round(bounds[1].x - bounds[0].x, 0),
-    height: Math.round(bounds[1].y - bounds[0].y, 0),
+  if (bounds.length === 0) {
+    return {
+      width: 0,
+      height: 0,
+    }
+  } else if (precision !== false) {
+    return {
+      width: Math.round(bounds[1].x - bounds[0].x, precision),
+      height: Math.round(bounds[1].y - bounds[0].y, precision),
+    }
+  } else {
+    return {
+      width: bounds[1].x - bounds[0].x,
+      height: bounds[1].y - bounds[0].y,
+    }
   }
 }
 
@@ -130,6 +142,8 @@ export const resizeVertices = (
   stretch = false,
   aspectRatio = 1.0,
 ) => {
+  if (vertices.length === 0) return vertices
+
   let scaleX, scaleY, deltaX, deltaY
   const bounds = findBounds(vertices)
   const oldSizeX = bounds[1].x - bounds[0].x
@@ -164,33 +178,37 @@ export const resizeVertices = (
   return vertices
 }
 
-// returns a vertex with x and y rounded to p number of digits
-export const vertexRoundP = (v, p) => {
-  return new Victor(roundP(v.x, p), roundP(v.y, p))
+// modifies a vertex's x and y rounded to p number of digits
+export const vertexRoundP = (vertex, p) => {
+  vertex.x = roundP(vertex.x, p)
+  vertex.y = roundP(vertex.y, p)
+
+  return vertex
 }
 
 // Transform functions
 export const rotate = (vertex, angleDeg) => {
-  const angle = (Math.PI / 180.0) * angleDeg
-  return new Victor(
-    vertex.x * Math.cos(angle) - vertex.y * Math.sin(angle),
-    vertex.x * Math.sin(angle) + vertex.y * Math.cos(angle),
-  )
+  vertex.rotateDeg(angleDeg)
+
+  return vertex
 }
 
 export const scale = (vertex, scaleX, scaleY) => {
-  return new Victor(
-    vertex.x * scaleX,
-    vertex.y * (scaleY === undefined ? scaleX : scaleY),
-  )
+  vertex.multiply({ x: scaleX, y: scaleY === undefined ? scaleX : scaleY })
+
+  return vertex
 }
 
 export const offset = (vertex, x, y) => {
-  return new Victor(vertex.x + x, vertex.y + y)
+  vertex.add({ x, y })
+
+  return vertex
 }
 
 // modifies the given array in place, centering the points on (0, 0)
 export const centerOnOrigin = (vertices, bounds) => {
+  if (vertices.length === 0) return vertices
+
   bounds ||= findBounds(vertices)
   const offsetX = (bounds[1].x + bounds[0].x) / 2
   const offsetY = (bounds[1].y + bounds[0].y) / 2
@@ -413,8 +431,37 @@ export const toScaraGcode = (vertices, unitsPerCircle) => {
   })
 }
 
-export const cloneVertices = (points) => {
-  return points.map((point) => new Victor(point.x, point.y))
+export const cloneVertex = (vertex) => {
+  const newVertex = new Victor(vertex.x, vertex.y)
+  const attrs = ["origX", "origY", "connect", "connector", "hidden"]
+
+  attrs.forEach((attr) => {
+    if (vertex[attr] !== undefined) {
+      newVertex[attr] = vertex[attr]
+    }
+  })
+
+  return newVertex
+}
+
+export const cloneVertices = (vertices) => {
+  return vertices.map((vertex) => cloneVertex(vertex))
+}
+
+// add attributes to a given vertex
+export const annotateVertex = (vertex, attrs) => {
+  Object.assign(vertex, attrs)
+
+  return vertex
+}
+
+// add attributes to a given array of vertices
+export const annotateVertices = (vertices, attrs) => {
+  vertices.forEach((vertex) => {
+    annotateVertex(vertex, attrs)
+  })
+
+  return vertices
 }
 
 // returns the point in arr that is farthest to a given point

@@ -55,27 +55,8 @@ export default class PreviewHelper {
           context.strokeStyle = "transparent"
           this.dot(context, sliderEnd)
           context.stroke()
-
-          this.markOriginalCoordinates(context, sliderEnd)
         }
       }
-    }
-  }
-
-  markOriginalCoordinates(context, vertex) {
-    if (this.props.markCoordinates && !this.props.currentLayer.dragging) {
-      const signX = vertex.x < 0 ? 1 : -1
-      const signY = vertex.y < 0 ? -1 : 1
-      const x = (vertex.origX || vertex.x).toFixed(2)
-      const y = (vertex.origY || vertex.y).toFixed(2)
-
-      context.fillStyle = "white"
-      context.font = "10px Arial"
-      context.fillText(
-        "" + x + ", " + y,
-        vertex.x + 15 * signX,
-        -vertex.y + 5 * signY,
-      )
     }
   }
 }

@@ -137,8 +137,7 @@ const ConnectorPreview = (ownProps) => {
   const drawPoint = (point, context) => {
     context.beginPath()
     context.strokeStyle = "transparent"
-    helper.dot(context, point, point ? 5 : 3, activeConnectorColor)
-    helper.markOriginalCoordinates(context, point)
+    helper.dot(context, point, 5, activeConnectorColor)
   }
 
   return (

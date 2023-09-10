@@ -2,6 +2,7 @@ import { CursiveFont, SansSerifFont, MonospaceFont } from "./Fonts"
 import Victor from "victor"
 import Shape from "@/features/shapes/Shape"
 import { arc, dimensions } from "@/common/geometry"
+import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machine/machineSlice"
 
 const options = {
   inputText: {
@@ -36,6 +37,7 @@ export default class InputText extends Shape {
     super("inputText")
     this.stretch = true
     this.label = "Text"
+    this.usesMachine = true
   }
 
   getInitialState() {
@@ -110,33 +112,33 @@ export default class InputText extends Shape {
     const maxY = 2.4
 
     if (state.shape.rotateDir === "Center") {
-      // Starting Y offset
       let y = ((lines.length - 1) * maxY) / 2.0
 
       // Capture some wrap around points, to connect the lines.
-      let connectorPoints = []
-      lines.forEach((points) => {
+      lines.forEach((points, i) => {
         let maxX = getMaxX(points)
         let widthOffset = maxX / 2.0
 
-        // Add in the connector points (if we have any)
-        textPoints = [...textPoints, ...connectorPoints]
-        connectorPoints = []
-
         // offset the line's vertices
-        textPoints = [
-          ...textPoints,
-          ...points.map((point) => {
-            return new Victor(point.x - widthOffset, point.y + y)
-          }),
-        ]
+        points.forEach((point) => {
+          point.x = point.x - widthOffset
+          point.y = point.y + y
+        })
 
-        // Add in some points way off, so to wrap around for this line.
-        connectorPoints.push(new Victor(1e9, y))
-        connectorPoints.push(new Victor(1e9, -1e9))
-        connectorPoints.push(new Victor(-1e9, -1e9))
-        y -= maxY
-        connectorPoints.push(new Victor(-1e9, y))
+        textPoints = [...textPoints, ...points]
+
+        if (i > 0) {
+          // mark this vertex; we will connect to the next vertice along the machine perimeter
+          // once all other transformations have happened
+          const prevPoints = lines[i - 1]
+          const prev = prevPoints[prevPoints.length - 1]
+
+          if (prev) {
+            prev.connector = true
+            prev.hidden = true // don't render this line in the preview
+          }
+        }
+        y -= maxY * 0.9
       })
     } else {
       // This variable controls "Top" vs. "Bottom"
@@ -223,10 +225,18 @@ export default class InputText extends Shape {
     return textPoints
   }
 
+  // After transformations are complete, connect words along perimeter.
+  finalizeVertices(vertices, state) {
+    if (!state.shape.dragging) {
+      return connectMarkedVerticesAlongMachinePerimeter(vertices, state.machine)
+    } else {
+      return vertices
+    }
+  }
+
   // hook to modify updates to a layer
   handleUpdate(layer, changes) {
-    if (changes.inputText || changes.inputFont) {
-      // change width as the user types
+    if (changes.inputText || changes.inputFont || changes.rotateDir) {
       const props = {
         ...layer,
         inputText: changes.inputText || layer.inputText,
@@ -234,10 +244,15 @@ export default class InputText extends Shape {
       }
       const oldVertices = this.getVertices({ shape: layer, creating: true })
       const vertices = this.getVertices({ shape: props, creating: true })
-      const { width: oldWidth } = dimensions(oldVertices)
-      const { width } = dimensions(vertices)
+      const { width: oldWidth, height: oldHeight } = dimensions(oldVertices)
+      const { width, height } = dimensions(vertices)
 
-      changes.width = (layer.width * width) / oldWidth
+      changes.width =
+        oldWidth === 0 ? this.startingWidth : (layer.width * width) / oldWidth
+      changes.height =
+        oldHeight == 0
+          ? this.startingHeight
+          : (layer.height * height) / oldHeight
       changes.aspectRatio = changes.width / layer.height
     }
   }

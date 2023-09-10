@@ -102,8 +102,10 @@ export default class Layer {
 
   // returns an array of Victor vertices
   getVertices({ layer, effects, machine }) {
+    const layerState = { shape: layer, machine }
+
     this.state = layer
-    this.vertices = this.model.getCachedVertices({ shape: layer, machine })
+    this.vertices = this.model.getCachedVertices(layerState)
 
     if (this.model.autosize) {
       this.resize()
@@ -112,6 +114,7 @@ export default class Layer {
 
     this.applyEffects(effects)
     this.transform()
+    this.vertices = this.model.finalizeVertices(this.vertices, layerState)
 
     return this.vertices
   }

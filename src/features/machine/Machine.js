@@ -1,4 +1,4 @@
-import { vertexRoundP } from "@/common/geometry"
+import { vertexRoundP, annotateVertices } from "@/common/geometry"
 
 export const machineOptions = {
   minX: {
@@ -77,7 +77,9 @@ export default class Machine {
       const vertex = this.vertices[next]
 
       if (previous) {
-        const line = this.clipSegment(previous, vertex)
+        const line = annotateVertices(this.clipSegment(previous, vertex), {
+          connect: vertex.connect,
+        })
 
         for (let pt = 0; pt < line.length; pt++) {
           if (line[pt] !== previous) {
@@ -166,7 +168,10 @@ export default class Machine {
         // connect the two segments along the perimeter
         const prev = segments[j - 1]
         connectedVertices.push(
-          this.tracePerimeter(prev[prev.length - 1], current[0]),
+          annotateVertices(
+            this.tracePerimeter(prev[prev.length - 1], current[0]),
+            { connect: prev[prev.length - 1].connect },
+          ),
         )
       }
       connectedVertices.push(current)
@@ -269,7 +274,7 @@ export default class Machine {
   // round each vertex to the nearest .001. This eliminates floating point
   // math errors and allows us to do accurate equality comparisons.
   limitPrecision() {
-    this.vertices = this.vertices.map((vertex) => vertexRoundP(vertex, 3))
+    this.vertices.forEach((vertex) => vertexRoundP(vertex, 3))
     return this
   }
 }

@@ -1,4 +1,10 @@
-import { angle, onSegment, circle, arc } from "@/common/geometry"
+import {
+  angle,
+  onSegment,
+  circle,
+  arc,
+  annotateVertex,
+} from "@/common/geometry"
 import Machine from "./Machine"
 import Victor from "victor"
 
@@ -19,14 +25,20 @@ export default class PolarMachine extends Machine {
 
     if (this.settings.polarStartPoint !== "none") {
       if (this.settings.polarStartPoint === "center") {
-        this.vertices.unshift(new Victor(0.0, 0.0))
+        this.vertices.unshift(
+          annotateVertex(new Victor(0.0, 0.0), { connect: true }),
+        )
       } else {
         const first = this.vertices[0]
         const scale = maxRadius / first.magnitude()
         const startPoint = Victor.fromObject(first).multiply(
           new Victor(scale, scale),
         )
-        this.vertices.unshift(new Victor(startPoint.x, startPoint.y))
+        this.vertices.unshift(
+          annotateVertex(new Victor(startPoint.x, startPoint.y), {
+            connect: true,
+          }),
+        )
       }
     }
   }
@@ -36,14 +48,20 @@ export default class PolarMachine extends Machine {
 
     if (this.settings.polarEndPoint !== "none") {
       if (this.settings.polarEndPoint === "center") {
-        this.vertices.push(new Victor(0.0, 0.0))
+        this.vertices[this.vertices.length - 1].connect = true
+        this.vertices.push(
+          annotateVertex(new Victor(0.0, 0.0), { connect: true }),
+        )
       } else {
         const last = this.vertices[this.vertices.length - 1]
         const scale = maxRadius / last.magnitude()
         const endPoint = Victor.fromObject(last).multiply(
           new Victor(scale, scale),
         )
-        this.vertices.push(new Victor(endPoint.x, endPoint.y))
+        this.vertices[this.vertices.length - 1].connect = true
+        this.vertices.push(
+          annotateVertex(new Victor(endPoint.x, endPoint.y), { connect: true }),
+        )
       }
     }
   }
@@ -58,10 +76,10 @@ export default class PolarMachine extends Machine {
       const precisionModifier = 0.0001
       const scale = (size - precisionModifier) / vertex.length()
 
-      return vertex.multiply(new Victor(scale, scale))
-    } else {
-      return vertex
+      vertex.multiply(new Victor(scale, scale))
     }
+
+    return vertex
   }
 
   inBounds(vertex) {

@@ -5,7 +5,13 @@ import { v4 as uuidv4 } from "uuid"
 import Color from "color"
 import { arrayMoveImmutable } from "array-move"
 import { isEqual } from "lodash"
-import { rotate, offset, totalDistance, findBounds } from "@/common/geometry"
+import {
+  rotate,
+  offset,
+  totalDistance,
+  findBounds,
+  cloneVertex,
+} from "@/common/geometry"
 import { orderByKey } from "@/common/util"
 import {
   getDefaultShapeType,
@@ -177,6 +183,8 @@ const { selectById } = layersAdapter.getSelectors((state) => state.layers)
 // returns vertices suitable for display in the preview window
 const previewVertices = (vertices, layer) => {
   return vertices.map((vertex) => {
+    vertex = cloneVertex(vertex)
+
     let previewVertex = rotate(
       offset(vertex, -layer.x, -layer.y),
       layer.rotation,
@@ -630,8 +638,10 @@ export const selectLayerPreviewBounds = createCachedSelector(
     const vertices = instance.getVertices({ layer, effects: [], machine })
 
     const combinedVertices = [...vertices, ...machineVertices].flat()
+    const previewedVertices = previewVertices(combinedVertices, layer)
 
-    return findBounds(previewVertices(combinedVertices, layer))
+    // don't include connector vertices
+    return findBounds(previewedVertices.filter((vertex) => !vertex.connect))
   },
 )({
   keySelector: (state, id) => id,

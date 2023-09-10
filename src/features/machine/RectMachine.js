@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Machine from "./Machine"
-import { distance, vertexRoundP } from "@/common/geometry"
+import { distance, vertexRoundP, cloneVertex } from "@/common/geometry"
 import clip from "liang-barsky"
 
 export default class RectMachine extends Machine {
@@ -178,10 +178,11 @@ export default class RectMachine extends Machine {
   // Finds the nearest vertex that is in the bounds. This will change the shape. i.e. this
   // doesn't care about the line segment, only about the point.
   nearestVertex(vertex) {
-    return new Victor(
-      Math.min(this.sizeX, Math.max(-this.sizeX, vertex.x)),
-      Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y)),
-    )
+    vertex = cloneVertex(vertex) // preserve attributes
+    vertex.x = Math.min(this.sizeX, Math.max(-this.sizeX, vertex.x))
+    vertex.y = Math.min(this.sizeY, Math.max(-this.sizeY, vertex.y))
+
+    return vertex
   }
 
   // Returns the nearest perimeter vertex to the given vertex.
@@ -425,11 +426,11 @@ export default class RectMachine extends Machine {
 
   // returns the points if any that intersect with the line represented by start and end
   clipLine(start, end) {
-    const s = Victor.fromObject(start)
-    const e = Victor.fromObject(end)
+    const s = [start.x, start.y]
+    const e = [end.x, end.y]
     const bounds = [-this.sizeX, -this.sizeY, this.sizeX, this.sizeY]
 
     clip(s, e, bounds)
-    return [s, e]
+    return [new Victor(s[0], s[1]), new Victor(e[0], e[1])]
   }
 }

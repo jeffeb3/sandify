@@ -1,6 +1,6 @@
 import Effect from "./Effect"
 import Victor from "victor"
-import { scale, rotate, centerOnOrigin } from "@/common/geometry"
+import { scale, rotate, centerOnOrigin, cloneVertex } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -129,7 +129,7 @@ export default class Loop extends Effect {
 
     for (var i = 0; i < effect.numLoops; i++) {
       for (let j = 0; j < vertices.length; j++) {
-        let vertex = vertices[j]
+        let vertex = cloneVertex(vertices[j])
         let amount =
           effect.transformMethod === "smear" ? i + j / vertices.length : i
 

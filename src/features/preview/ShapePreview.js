@@ -112,6 +112,7 @@ const ShapePreview = (ownProps) => {
     noSelectionColor,
     slidingColor,
     transformerBorderColor,
+    activeConnectorColor,
   } = colors
   const isFirstLayer = index === 0
   const isLastLayer = index === numLayers - 1
@@ -149,9 +150,12 @@ const ShapePreview = (ownProps) => {
     context.strokeStyle = currentColor
     helper.moveTo(context, layerVertices[0])
     context.stroke()
-
     context.beginPath()
+
     for (let i = 1; i < layerVertices.length; i++) {
+      const curr = layerVertices[i]
+      const prev = layerVertices[i - 1]
+
       if (isSliding) {
         let absoluteI = i + offsets[layer.id].start
         let pathColor = absoluteI <= end ? slidingColor : unselectedShapeColor
@@ -163,10 +167,21 @@ const ShapePreview = (ownProps) => {
           oldColor = currentColor
           context.beginPath()
         }
+      } else {
+        const vertexColor =
+          isCurrent && prev.connect ? activeConnectorColor : currentColor
+        if (vertexColor !== oldColor) {
+          context.stroke()
+          context.strokeStyle = vertexColor
+          oldColor = vertexColor
+          context.beginPath()
+        }
       }
 
-      helper.moveTo(context, layerVertices[i - 1])
-      helper.lineTo(context, layerVertices[i])
+      helper.moveTo(context, prev)
+      if (!prev.hidden) {
+        helper.lineTo(context, curr)
+      }
     }
     context.stroke()
   }
@@ -187,18 +202,35 @@ const ShapePreview = (ownProps) => {
   }
 
   const drawLayerStartAndEndPoints = (context) => {
-    const start = layerVertices[0]
-    const end = layerVertices[layerVertices.length - 1]
+    const startIdx = layerVertices.findIndex((vertex) => !vertex.connect)
+    const start = layerVertices[startIdx]
+    const endIdx = layerVertices.findLastIndex((vertex) => !vertex.connect)
+    const end = layerVertices[endIdx]
+
+    if (startIdx > 0) {
+      context.beginPath()
+      context.strokeStyle = "transparent"
+      helper.dot(context, layerVertices[0], 5, activeConnectorColor)
+    }
+
+    if (endIdx < layerVertices.length - 1) {
+      context.beginPath()
+      context.strokeStyle = "transparent"
+      helper.dot(
+        context,
+        layerVertices[layerVertices.length - 1],
+        5,
+        activeConnectorColor,
+      )
+    }
 
     context.beginPath()
     context.strokeStyle = startPointColor
     helper.dot(context, start, start ? 5 : 3)
-    helper.markOriginalCoordinates(context, start)
 
     context.beginPath()
     context.strokeStyle = endPointColor
     helper.dot(context, end, end ? 5 : 3)
-    helper.markOriginalCoordinates(context, end)
   }
 
   const drawStartAndEndPoints = (context) => {
@@ -209,14 +241,12 @@ const ShapePreview = (ownProps) => {
       context.beginPath()
       context.strokeStyle = startPointColor
       helper.dot(context, start, start ? 5 : 3)
-      helper.markOriginalCoordinates(context, start)
     }
 
     if (isLastLayer) {
       context.beginPath()
       context.strokeStyle = endPointColor
       helper.dot(context, end, end ? 5 : 3)
-      helper.markOriginalCoordinates(context, end)
     }
   }
 
@@ -251,6 +281,8 @@ const ShapePreview = (ownProps) => {
   // determines whether a layer is selected when it is clicked; based on the outer bounds of
   // the layer, including all of its effects
   function hitFunc(context, shape) {
+    if (layerBounds.length === 0) return // no visible layers
+
     const offsetX = (layerBounds[1].x + layerBounds[0].x) / 2
     const offsetY = (layerBounds[1].y + layerBounds[0].y) / 2
     const width = layerBounds[1].x - layerBounds[0].x

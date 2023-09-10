@@ -1,4 +1,4 @@
-import { resizeVertices, dimensions } from "@/common/geometry"
+import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
 import { pick } from "lodash"
 import { LRUCache } from "lru-cache"
 import Model from "@/common/Model"
@@ -67,6 +67,7 @@ export default class Shape extends Model {
     const cacheState = { ...state }
     cacheState.shape = pick(cacheState.shape, Object.keys(this.getOptions()))
     cacheState.type = state.shape.type
+    cacheState.dragging = state.shape.dragging
 
     return JSON.stringify(cacheState)
   }
@@ -93,13 +94,19 @@ export default class Shape extends Model {
       // return a copy of these vertices even though it's coming from the cache, because
       // downstream logic is modifying them directly; it's the computation of the vertices
       // that can be expensive, not the copying.
-      return vertices.map((vertex) => vertex.clone())
+      return cloneVertices(vertices)
     } else {
       return this.getVertices(state)
     }
   }
 
-  // override as needed; hook to modify updates to a layer
+  // override as needed to do final vertex modifications after all layer transformations are
+  // complete. Returns an array of vertices.
+  finalizeVertices(vertices, state) {
+    return vertices
+  }
+
+  // override as needed; hook to modify updates to a layer before they affect the state
   handleUpdate(changes) {
     // default is to do nothing
   }

@@ -1,4 +1,7 @@
 import Victor from "victor"
+import { arrayRotate } from "@/common/util"
+import { pointsOnPath } from "points-on-path"
+import pointInPolygon from "point-in-polygon"
 import Shape from "./Shape"
 import {
   subsample,
@@ -11,11 +14,8 @@ import {
   findMinimumVertex,
   dimensions,
 } from "@/common/geometry"
-import { arrayRotate } from "@/common/util"
-import { pointsOnPath } from "points-on-path"
+import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machine/machineSlice"
 import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
-import { getMachineInstance } from "@/features/machine/machineSlice"
-import pointInPolygon from "point-in-polygon"
 
 const MIN_SPACING_MULTIPLIER = 1.2
 const SPECIAL_CHILDREN = ["i", "j", "?"]
@@ -97,10 +97,18 @@ export default class FancyText extends Shape {
     }
   }
 
-  // hook to modify updates to a layer
+  // After transformations are complete, connect words along perimeter.
+  finalizeVertices(vertices, state) {
+    if (!state.shape.dragging) {
+      return connectMarkedVerticesAlongMachinePerimeter(vertices, state.machine)
+    } else {
+      return vertices
+    }
+  }
+
+  // hook to modify updates to a layer before they affect the state
   handleUpdate(layer, changes) {
-    if (changes.fancyText || changes.fancyFont) {
-      // change width as the user types
+    if (changes.fancyText || changes.fancyFont || changes.fancyLineSpacing) {
       const props = {
         ...layer,
         fancyText: changes.fancyText || layer.fancyText,
@@ -108,24 +116,16 @@ export default class FancyText extends Shape {
       }
       const oldVertices = this.getVertices({ shape: layer, creating: true })
       const vertices = this.getVertices({ shape: props, creating: true })
-      const { width: oldWidth } = dimensions(oldVertices)
-      const { width } = dimensions(vertices)
+      const { width: oldWidth, height: oldHeight } = dimensions(oldVertices)
+      const { width, height } = dimensions(vertices)
 
-      changes.width = (layer.width * width) / oldWidth
+      changes.width =
+        oldWidth === 0 ? this.startingWidth : (layer.width * width) / oldWidth
+      changes.height =
+        oldHeight == 0
+          ? this.startingHeight
+          : (layer.height * height) / oldHeight
       changes.aspectRatio = changes.width / layer.height
-    } else if (changes.fancyLineSpacing) {
-      // change height as spacing changes
-      const props = {
-        ...layer,
-        fancyLineSpacing: changes.fancyLineSpacing,
-      }
-      const oldVertices = this.getVertices({ shape: layer, creating: true })
-      const vertices = this.getVertices({ shape: props, creating: true })
-      const { height: oldHeight } = dimensions(oldVertices)
-      const { height } = dimensions(vertices)
-
-      changes.height = (layer.height * height) / oldHeight
-      changes.aspectRatio = layer.width / changes.height
     }
   }
 
@@ -136,7 +136,6 @@ export default class FancyText extends Shape {
 
   // use the specified connection method to draw lines to connect each row in a multi-row phrase
   connectWords(vertices, offsets, state) {
-    const machine = getMachineInstance([], state.machine)
     let newVertices = []
 
     for (let i = 0; i < vertices.length; i++) {
@@ -148,19 +147,10 @@ export default class FancyText extends Shape {
         const prev = prevVertices[prevVertices.length - 1]
 
         if (state.shape.fancyConnectLines === "outside") {
-          // connect the two rows along the perimeter
-          const clipped = machine.clipLine(
-            new Victor(prev.x - machine.sizeX * 2, prev.y),
-            new Victor(prev.x + machine.sizeX * 2, prev.y),
-          )
-          const clipped2 = machine.clipLine(
-            new Victor(next.x - machine.sizeX * 2, next.y),
-            new Victor(next.x + machine.sizeX * 2, next.y),
-          )
-
-          newVertices.push(clipped[1])
-          newVertices.push(machine.tracePerimeter(clipped[1], clipped2[0]))
-          newVertices.push(clipped2[0])
+          // mark this vertex; we will connect to the next vertice along the machine perimeter
+          // once all other transformations have happened
+          prev.connector = true
+          prev.hidden = true // don't render this line in the preview
         } else {
           // connect the two rows by drawing a horizontal line in the middle of the two rows
           const lowest =
