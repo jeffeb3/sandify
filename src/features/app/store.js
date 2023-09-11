@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit"
 import { loadState, saveState } from "@/common/localStorage"
 import { resetLogCounts } from "@/common/debugging"
+import SandifyImporter from "@/features/file/SandifyImporter"
 import rootReducer from "./rootSlice"
 
 // by default, state is always persisted in local storage
@@ -14,14 +15,21 @@ const persistState = true
 const persistInitKey = "state"
 const persistSaveKey = "state"
 
-const persistedState =
+let persistedState =
   typeof jest === "undefined" && usePersistedState
     ? loadState(persistInitKey) || undefined
     : undefined
 
 // reset some values
 if (persistedState) {
-  persistedState.fonts.loaded = false
+  const importer = new SandifyImporter()
+  try {
+    // double JSON parsing ensures it's valid JSON before we try to import it
+    importer.import(JSON.stringify(persistedState))
+    persistedState.fonts.loaded = false
+  } catch (err) {
+    persistedState = undefined
+  }
 }
 
 const store = configureStore({

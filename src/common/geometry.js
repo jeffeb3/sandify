@@ -142,7 +142,7 @@ export const resizeVertices = (
   stretch = false,
   aspectRatio = 1.0,
 ) => {
-  if (vertices.length === 0) return vertices
+  if (vertices.length < 2) return vertices
 
   let scaleX, scaleY, deltaX, deltaY
   const bounds = findBounds(vertices)

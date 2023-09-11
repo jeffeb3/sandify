@@ -1,6 +1,11 @@
 import Victor from "victor"
 import Machine from "./Machine"
-import { distance, vertexRoundP, cloneVertex } from "@/common/geometry"
+import {
+  distance,
+  vertexRoundP,
+  cloneVertex,
+  annotateVertices,
+} from "@/common/geometry"
 import clip from "liang-barsky"
 
 export default class RectMachine extends Machine {
@@ -58,11 +63,17 @@ export default class RectMachine extends Machine {
       if (outPoint === last) {
         this.vertices = [
           this.vertices,
-          this.tracePerimeter(newPoint, this.corners[corner], true),
+          annotateVertices(
+            this.tracePerimeter(newPoint, this.corners[corner], true),
+            { connect: true },
+          ),
         ].flat()
       } else {
         this.vertices = [
-          this.tracePerimeter(this.corners[corner], newPoint, true),
+          annotateVertices(
+            this.tracePerimeter(this.corners[corner], newPoint, true),
+            { connect: true },
+          ),
           this.vertices,
         ].flat()
       }

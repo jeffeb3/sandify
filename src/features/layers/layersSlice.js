@@ -378,7 +378,8 @@ export const selectShapePreviewVertices = createCachedSelector(
   selectLayerById,
   selectVisibleLayerEffects,
   selectLayerMachine,
-  (layer, effects, machine) => {
+  selectLayerFontsLoaded,
+  (layer, effects, machine, fontsLoaded) => {
     if (!layer) {
       return []
     } // zombie child
@@ -719,8 +720,9 @@ export const deleteLayer = (id) => {
     dispatch(layersSlice.actions.deleteLayer(id))
 
     if (id === selectedLayerId) {
-      const idx = deleteIdx === 0 ? 1 : deleteIdx - 1
-      dispatch(setCurrentLayer(ids[idx]))
+      const newIds = ids.filter((i) => i != id)
+      const idx = deleteIdx === ids.length - 1 ? deleteIdx - 1 : deleteIdx
+      dispatch(setCurrentLayer(newIds[idx]))
     }
   }
 }
@@ -774,8 +776,11 @@ export const deleteEffect = ({ id, effectId }) => {
 
     if (effectIds.length > 1) {
       if (effectId === selectedEffectId) {
-        const idx = deleteIdx === 0 ? 1 : deleteIdx - 1
-        dispatch(setCurrentEffect(effectIds[idx]))
+        const newIds = effectIds.filter((i) => i != effectId)
+        const idx =
+          deleteIdx === effectIds.length - 1 ? deleteIdx - 1 : deleteIdx
+
+        dispatch(setCurrentEffect(newIds[idx]))
       }
     } else {
       dispatch(setCurrentLayer(id))
