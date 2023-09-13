@@ -3,7 +3,7 @@ import noise from "@/common/noise"
 import seedrandom from "seedrandom"
 import { shapeSimilarity } from "curve-matcher"
 import { offset } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machine/machineSlice"
+import { getMachineInstance } from "@/features/machines/machineSlice"
 import Shape from "./Shape"
 
 const options = {

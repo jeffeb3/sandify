@@ -4,7 +4,7 @@ import { isEqual } from "lodash"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { selectPreviewState } from "@/features/preview/previewSlice"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectMachine } from "@/features/machines/machineSlice"
 import {
   selectSelectedLayer,
   selectVisibleLayerIds,

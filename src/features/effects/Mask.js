@@ -1,10 +1,10 @@
 import Effect from "./Effect"
 import Victor from "victor"
 import { rotate, offset, circle } from "@/common/geometry"
-import PolarMachine from "@/features/machine/PolarMachine"
-import RectMachine from "@/features/machine/RectMachine"
-import PolarInvertedMachine from "@/features/machine/PolarInvertedMachine"
-import RectInvertedMachine from "@/features/machine/RectInvertedMachine"
+import PolarMachine from "@/features/machines/PolarMachine"
+import RectMachine from "@/features/machines/RectMachine"
+import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
+import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
 
 const options = {
   maskMachine: {

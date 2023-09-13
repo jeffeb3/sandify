@@ -14,7 +14,7 @@ import {
   selectComments,
   updateExporter,
 } from "@/features/export/exporterSlice"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectMachine } from "@/features/machines/machineSlice"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"
 import SvgExporter from "./SvgExporter"

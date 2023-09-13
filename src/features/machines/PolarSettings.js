@@ -7,8 +7,8 @@ import ToggleButton from "react-bootstrap/ToggleButton"
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { selectMachine } from "@/features/machine/machineSlice"
-import { machineOptions } from "@/features/machine/Machine"
+import { selectMachine } from "@/features/machines/machineSlice"
+import { machineOptions } from "@/features/machines/Machine"
 import { updateMachine } from "./machineSlice"
 
 const PolarSettings = () => {

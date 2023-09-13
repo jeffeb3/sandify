@@ -3,7 +3,7 @@ import Shape from "../Shape"
 import { Circle } from "./Circle"
 import Graph from "@/common/Graph"
 import { circle, arc, closest, farthest } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machine/machineSlice"
+import { getMachineInstance } from "@/features/machines/machineSlice"
 import Victor from "victor"
 
 const ROUNDS = 100 // default number of rounds to attempt to create and grow circles

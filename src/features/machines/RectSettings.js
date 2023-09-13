@@ -7,7 +7,7 @@ import ToggleButton from "react-bootstrap/ToggleButton"
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectMachine } from "@/features/machines/machineSlice"
 import { updateMachine, setMachineRectOrigin } from "./machineSlice"
 import { machineOptions } from "./Machine"
 

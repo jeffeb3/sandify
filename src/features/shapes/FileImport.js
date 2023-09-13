@@ -1,5 +1,5 @@
 import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machine/machineSlice"
+import { getMachineInstance } from "@/features/machines/machineSlice"
 import Shape from "./Shape"
 
 const options = {

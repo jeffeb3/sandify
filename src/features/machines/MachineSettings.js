@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Accordion from "react-bootstrap/Accordion"
 import RectSettings from "./RectSettings"
 import PolarSettings from "./PolarSettings"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectMachine } from "@/features/machines/machineSlice"
 import {
   toggleMachinePolarExpanded,
   toggleMachineRectExpanded,

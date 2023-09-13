@@ -19,7 +19,7 @@ import layersReducer, {
   selectLayerVertices,
 } from "./layersSlice"
 import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
-import machineReducer from "@/features/machine/machineSlice"
+import machineReducer from "@/features/machines/machineSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"

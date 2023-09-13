@@ -32,7 +32,7 @@ import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
 import {
   selectMachine,
   getMachineInstance,
-} from "@/features/machine/machineSlice"
+} from "@/features/machines/machineSlice"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { log } from "@/common/debugging"
 

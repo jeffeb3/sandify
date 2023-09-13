@@ -1,5 +1,6 @@
 import { combineReducers } from "redux"
-import machineReducer from "@/features/machine/machineSlice"
+import machineReducer from "@/features/machines/machineSlice"
+import machinesReducer from "@/features/machines/machinesSlice"
 import exporterReducer from "@/features/export/exporterSlice"
 import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"

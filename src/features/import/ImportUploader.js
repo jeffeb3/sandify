@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectMachine } from "@/features/machines/machineSlice"
 import ThetaRhoImporter from "@/features/import/ThetaRhoImporter"
 import GCodeImporter from "@/features/import/GCodeImporter"
 import { addLayer } from "@/features/layers/layersSlice"
