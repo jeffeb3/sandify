@@ -2,7 +2,12 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
 import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { isEqual } from "lodash"
-import { v4 as uuidv4 } from "uuid"
+import {
+  insertOne,
+  prepareAfterAdd,
+  deleteOne,
+  updateOne,
+} from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import EffectLayer from "./EffectLayer"
 
@@ -10,43 +15,28 @@ import EffectLayer from "./EffectLayer"
 // Slice, reducers and atomic actions
 // ------------------------------
 
-const effectsAdapter = createEntityAdapter()
-
-const currEffectIndex = (state) => {
-  const currentEffect = state.entities[state.current]
-  return state.ids.findIndex((id) => id === currentEffect.id)
-}
+const adapter = createEntityAdapter()
 
 export const effectsSlice = createSlice({
   name: "effects",
-  initialState: effectsAdapter.getInitialState(),
+  initialState: adapter.getInitialState(),
   reducers: {
     addEffect: {
       reducer(state, action) {
-        // we need to insert at a specific index, which is not supported by addOne
-        const index = state.current ? currEffectIndex(state) + 1 : 0
-        const effect = action.payload
+        const effect = insertOne(state, action)
 
-        state.ids.splice(index, 0, effect.id)
-        state.entities[effect.id] = effect
-        state.current = effect.id
         state.selected = effect.id
         localStorage.setItem("defaultEffect", effect.type)
       },
       prepare(effect) {
-        const id = uuidv4()
-
-        // return newly generated id so downstream actions can use it
-        return { payload: { ...effect, id }, meta: { id } }
+        return prepareAfterAdd(effect)
       },
     },
     deleteEffect: (state, action) => {
-      const deleteId = action.payload
-      effectsAdapter.removeOne(state, deleteId)
+      deleteOne(adapter, state, action)
     },
     updateEffect: (state, action) => {
-      const effect = action.payload
-      effectsAdapter.updateOne(state, { id: effect.id, changes: effect })
+      updateOne(adapter, state, action)
     },
     setCurrentEffect: (state, action) => {
       const id = action.payload
@@ -70,7 +60,7 @@ export const effectsSlice = createSlice({
       const { type, name, layerId } = state.entities[id]
       const layer = new EffectLayer(type)
 
-      effectsAdapter.setOne(state, {
+      adapter.setOne(state, {
         id,
         name,
         layerId,
@@ -100,7 +90,7 @@ export const {
   selectIds: selectEffectIds,
   selectEntities: selectEffectEntities,
   selectNumEffects: selectTotal,
-} = effectsAdapter.getSelectors((state) => state.effects)
+} = adapter.getSelectors((state) => state.effects)
 
 export const selectEffects = createSelector(
   selectState,

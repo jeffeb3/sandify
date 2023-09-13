@@ -17,6 +17,7 @@ const combinedReducer = combineReducers({
   fonts: fontsReducer,
   layers: layersReducer,
   machine: machineReducer,
+  machines: machinesReducer,
   preview: previewReducer,
 })
 

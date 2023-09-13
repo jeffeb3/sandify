@@ -13,6 +13,7 @@ import {
   cloneVertex,
 } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
+import { insertOne, prepareAfterAdd, deleteOne } from "@/common/slice"
 import {
   getDefaultShapeType,
   getShapeFromType,
@@ -40,7 +41,7 @@ import { log } from "@/common/debugging"
 // Slice, reducers and atomic actions
 // ------------------------------
 
-const layersAdapter = createEntityAdapter()
+const adapter = createEntityAdapter()
 const defaultLayer = new Layer(getDefaultShapeType())
 const defaultLayerId = uuidv4()
 const layerState = {
@@ -49,14 +50,9 @@ const layerState = {
 }
 const notCopiedWhenTypeChanges = ["type"]
 
-const currSelectedIndex = (state) => {
-  const selectedLayer = state.entities[state.selected]
-  return state.ids.findIndex((id) => id === selectedLayer.id)
-}
-
 const layersSlice = createSlice({
   name: "layers",
-  initialState: layersAdapter.getInitialState({
+  initialState: adapter.getInitialState({
     current: defaultLayerId,
     selected: defaultLayerId,
     entities: {
@@ -67,30 +63,20 @@ const layersSlice = createSlice({
   reducers: {
     addLayer: {
       reducer(state, action) {
-        // we need to insert at a specific index, which is not supported by addOne
-        const index = state.selected ? currSelectedIndex(state) + 1 : 0
-        const layer = {
-          ...action.payload,
-        }
-        layer.effectIds = []
-        state.ids.splice(index, 0, layer.id)
-        state.entities[layer.id] = layer
-        state.current = layer.id
-        state.selected = layer.id
+        const layer = insertOne(state, action)
 
+        state.selected = layer.id
+        layer.effectIds = []
         if (layer.type !== "fileImport") {
           localStorage.setItem("defaultShape", layer.type)
         }
       },
       prepare(layer) {
-        const id = uuidv4()
-        // return newly generated id so downstream actions can use it
-        return { payload: { ...layer, id }, meta: { id } }
+        return prepareAfterAdd(layer)
       },
     },
     deleteLayer: (state, action) => {
-      const deleteId = action.payload
-      layersAdapter.removeOne(state, deleteId)
+      deleteOne(adapter, state, action)
     },
     moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
@@ -102,7 +88,7 @@ const layersSlice = createSlice({
       const shape = getShapeFromType(layer.type)
 
       shape.handleUpdate(layer, changes)
-      layersAdapter.updateOne(state, { id: changes.id, changes })
+      adapter.updateOne(state, { id: changes.id, changes })
     },
     addEffect: (state, action) => {
       const { id, effectId } = action.payload
@@ -146,14 +132,14 @@ const layersSlice = createSlice({
         newLayer.rotation = 0
       }
 
-      layersAdapter.setOne(state, newLayer)
+      adapter.setOne(state, newLayer)
     },
     restoreDefaults: (state, action) => {
       const id = action.payload
       const { type, name, effectIds } = state.entities[id]
       const layer = new Layer(type)
 
-      layersAdapter.setOne(state, {
+      adapter.setOne(state, {
         id,
         name,
         ...layer.getInitialState(),
@@ -178,7 +164,7 @@ const layersSlice = createSlice({
 // ------------------------------
 
 // used in slice
-const { selectById } = layersAdapter.getSelectors((state) => state.layers)
+const { selectById } = adapter.getSelectors((state) => state.layers)
 
 // returns vertices suitable for display in the preview window
 const previewVertices = (vertices, layer) => {
@@ -203,7 +189,7 @@ export const {
   selectIds: selectLayerIds,
   selectEntities: selectLayerEntities,
   selectTotal: selectNumLayers,
-} = layersAdapter.getSelectors((state) => state.layers)
+} = adapter.getSelectors((state) => state.layers)
 
 export const selectLayers = createSelector(selectState, (state) => state.layers)
 
