@@ -9,20 +9,20 @@ const CheckboxOption = ({
   options,
   optionKey,
   data,
-  object,
+  model,
   onChange,
   label = true,
 }) => {
   const option = options[optionKey]
   const visible =
-    option.isVisible === undefined ? true : option.isVisible(object, data)
+    option.isVisible === undefined ? true : option.isVisible(model, data)
 
   const handleChange = (checked) => {
     let attrs = {}
     attrs[optionKey] = checked
 
     if (option.onChange !== undefined) {
-      attrs = option.onChange(object, attrs, data)
+      attrs = option.onChange(model, attrs, data)
     }
 
     onChange(attrs)

@@ -8,10 +8,10 @@ import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 const ToggleButtonOption = (props) => {
   const option = props.options[props.optionKey]
   const { data } = props
-  const object = props.object || data
+  const model = props.model || data
   const currentChoice = data[props.optionKey]
   const visible =
-    option.isVisible === undefined ? true : option.isVisible(object, data)
+    option.isVisible === undefined ? true : option.isVisible(model, data)
 
   const handleChange = (choice) => {
     let attrs = {}

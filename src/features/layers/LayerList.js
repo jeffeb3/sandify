@@ -166,4 +166,4 @@ const LayerList = () => {
   )
 }
 
-export default LayerList
+export default React.memo(LayerList)

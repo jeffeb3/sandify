@@ -9,7 +9,7 @@ const InputOption = ({
   options,
   optionKey,
   onChange,
-  object,
+  model,
   inputRef,
   focusOnSelect = false,
   label = true,
@@ -28,10 +28,10 @@ const InputOption = ({
   const maximum =
     typeof option.max === "function" ? option.max(data) : parseFloat(option.max)
   const visible =
-    option.isVisible === undefined ? true : option.isVisible(object, data)
+    option.isVisible === undefined ? true : option.isVisible(model, data)
   const title =
     typeof option.title === "function"
-      ? option.title(object, data)
+      ? option.title(model, data)
       : option.title
 
   if (!visible) {
@@ -57,7 +57,7 @@ const InputOption = ({
     attrs[optionKey] = newValue
 
     if (option.onChange !== undefined) {
-      attrs = option.onChange(object, attrs, data)
+      attrs = option.onChange(model, attrs, data)
     }
     onChange(attrs)
 

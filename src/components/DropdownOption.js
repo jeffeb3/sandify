@@ -8,7 +8,7 @@ const DropdownOption = ({
   options,
   optionKey,
   data,
-  object,
+  model,
   onChange,
   index,
 }) => {
@@ -36,7 +36,7 @@ const DropdownOption = ({
     attrs[optionKey] = value
 
     if (option.onChange !== undefined) {
-      attrs = option.onChange(object, attrs, data)
+      attrs = option.onChange(model, attrs, data)
     }
 
     onChange(attrs)

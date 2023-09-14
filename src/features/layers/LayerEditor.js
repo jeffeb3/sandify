@@ -12,10 +12,7 @@ import {
   AiTwotoneUnlock,
 } from "react-icons/ai"
 import CommentsBox from "@/components/CommentsBox"
-import InputOption from "@/components/InputOption"
-import DropdownOption from "@/components/DropdownOption"
-import CheckboxOption from "@/components/CheckboxOption"
-import ToggleButtonOption from "@/components/ToggleButtonOption"
+import ModelOption from "@/components/ModelOption"
 import { getShapeSelectOptions } from "@/features/shapes/factory"
 import { updateLayer, changeModelType } from "./layersSlice"
 import Layer from "./Layer"
@@ -94,44 +91,38 @@ const LayerEditor = () => {
     </Row>
   )
 
-  const getOptionComponent = (model, options, key, label = true) => {
-    const option = options[key]
-    const props = {
-      options,
-      key,
-      onChange: handleChange,
-      optionKey: key,
-      data: layer,
-      object: model,
-      label,
-    }
-
-    switch (option.type) {
-      case "dropdown":
-        return <DropdownOption {...props} />
-      case "checkbox":
-        return <CheckboxOption {...props} />
-      case "comments":
-        return <CommentsBox {...props} />
-      case "togglebutton":
-        return <ToggleButtonOption {...props} />
-      default:
-        return <InputOption {...props} />
-    }
+  // this should really be a component, but I could not figure out how to get it
+  // to not re-render as the value changed; the fallout is that the editor re-renders
+  // more than it should, but it's not noticeable
+  const renderOption = ({
+    optionKey,
+    options = layerOptions,
+    label = true,
+  }) => {
+    return (
+      <ModelOption
+        model={model}
+        key={optionKey}
+        data={layer}
+        options={options}
+        optionKey={optionKey}
+        onChange={handleChange}
+        label={label}
+      />
+    )
   }
 
-  const renderedModelOptions = Object.keys(modelOptions).map((key) => (
-    <div key={key}>{getOptionComponent(model, modelOptions, key)}</div>
-  ))
+  const renderedModelOptions = Object.keys(modelOptions).map((optionKey) =>
+    renderOption({ options: modelOptions, optionKey }),
+  )
 
   return (
     <div className="overflow-visible flex-grow-1">
       <div className="px-3 pt-3 border-top border-secondary">
-        {getOptionComponent(model, layerOptions, "name")}
-
+        {renderOption({ optionKey: "name" })}
         {renderedModelSelection}
         {renderedModelOptions}
-        {getOptionComponent(model, layerOptions, "connectionMethod")}
+        {renderOption({ optionKey: "connectionMethod" })}
         {renderedLink}
       </div>
       <div className="border-top px-3 py-3 mt-2">
@@ -143,26 +134,18 @@ const LayerEditor = () => {
                 <div className="d-flex flex-column">
                   <Row>
                     {model.canMove(layer) && (
-                      <Col xs={6}>
-                        {getOptionComponent(model, layerOptions, "x")}
-                      </Col>
+                      <Col xs={6}>{renderOption({ optionKey: "x" })}</Col>
                     )}
                     {model.canChangeSize(layer) && (
-                      <Col xs={6}>
-                        {getOptionComponent(model, layerOptions, "width")}
-                      </Col>
+                      <Col xs={6}>{renderOption({ optionKey: "width" })}</Col>
                     )}
                   </Row>
                   <Row className="mt-1">
                     {model.canMove(layer) && (
-                      <Col xs={6}>
-                        {getOptionComponent(model, layerOptions, "y")}
-                      </Col>
+                      <Col xs={6}>{renderOption({ optionKey: "y" })}</Col>
                     )}
                     {model.canChangeSize(layer) && (
-                      <Col xs={6}>
-                        {getOptionComponent(model, layerOptions, "height")}
-                      </Col>
+                      <Col xs={6}>{renderOption({ optionKey: "height" })}</Col>
                     )}
                   </Row>
                 </div>
@@ -200,12 +183,10 @@ const LayerEditor = () => {
                             <AiOutlineRotateRight />
                           </IconContext.Provider>
                         </div>
-                        {getOptionComponent(
-                          model,
-                          layerOptions,
-                          "rotation",
-                          false,
-                        )}
+                        {renderOption({
+                          optionKey: "rotation",
+                          label: false,
+                        })}
                       </div>
                     </Col>
                   </Row>
@@ -235,4 +216,4 @@ const LayerEditor = () => {
   )
 }
 
-export default LayerEditor
+export default React.memo(LayerEditor)

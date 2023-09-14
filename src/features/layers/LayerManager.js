@@ -64,40 +64,38 @@ const LayerManager = () => {
           >
             <FaPlusSquare />
           </Button>
-          <div className="ml-auto">
-            {canRemove && <Tooltip id="tooltip-delete-layer" />}
-            {canRemove && (
-              <Button
-                className="layer-button"
-                variant="light"
-                data-tooltip-content="Delete layer"
-                data-tooltip-id="tooltip-delete-layer"
-                onClick={handleLayerRemoved}
-              >
-                <FaTrash />
-              </Button>
-            )}
-            <Tooltip id="tooltip-copy-layer" />
+          {canRemove && <Tooltip id="tooltip-delete-layer" />}
+          {canRemove && (
             <Button
               className="layer-button"
               variant="light"
-              data-tooltip-content="Copy layer"
-              data-tooltip-id="tooltip-copy-layer"
-              onClick={toggleCopyModal}
+              data-tooltip-content="Delete layer"
+              data-tooltip-id="tooltip-delete-layer"
+              onClick={handleLayerRemoved}
             >
-              <FaCopy />
+              <FaTrash />
             </Button>
-            <Tooltip id="tooltip-restore-layer" />
-            <Button
-              className="layer-button"
-              variant="light"
-              data-tooltip-content="Restore layer defaults"
-              data-tooltip-id="tooltip-restore-layer"
-              onClick={handleRestoreDefaults}
-            >
-              <MdOutlineSettingsBackupRestore />
-            </Button>
-          </div>
+          )}
+          <Tooltip id="tooltip-copy-layer" />
+          <Button
+            className="layer-button"
+            variant="light"
+            data-tooltip-content="Copy layer"
+            data-tooltip-id="tooltip-copy-layer"
+            onClick={toggleCopyModal}
+          >
+            <FaCopy />
+          </Button>
+          <Tooltip id="tooltip-restore-layer" />
+          <Button
+            className="layer-button"
+            variant="light"
+            data-tooltip-content="Restore layer defaults"
+            data-tooltip-id="tooltip-restore-layer"
+            onClick={handleRestoreDefaults}
+          >
+            <MdOutlineSettingsBackupRestore />
+          </Button>
         </div>
       </div>
       <LayerEditor />
@@ -105,4 +103,4 @@ const LayerManager = () => {
   )
 }
 
-export default LayerManager
+export default React.memo(LayerManager)

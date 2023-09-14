@@ -129,4 +129,4 @@ const EffectManager = () => {
   )
 }
 
-export default EffectManager
+export default React.memo(EffectManager)
