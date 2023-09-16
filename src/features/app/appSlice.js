@@ -10,5 +10,6 @@ const appSlice = createSlice({
 
 export const selectState = (state) => state
 export const selectAppState = (state) => state.app
+export const selectAppVersion = (state) => state.app.sandifyVersion
 
 export default appSlice.reducer

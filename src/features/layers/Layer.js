@@ -30,6 +30,9 @@ export const layerOptions = {
       return model.canChangeSize(state)
     },
     onChange: (model, changes, state) => {
+      if (changes.width === "" || changes.width <= 0) {
+        changes.width = 1
+      }
       if (state.maintainAspectRatio) {
         changes.height = roundP(changes.width / state.aspectRatio, 2)
       } else {
@@ -43,6 +46,9 @@ export const layerOptions = {
     min: 1,
     inline: true,
     onChange: (model, changes, state) => {
+      if (changes.height === "" || changes.height <= 0) {
+        changes.height = 1
+      }
       if (state.maintainAspectRatio) {
         changes.width = roundP(changes.height * state.aspectRatio, 2)
       } else {

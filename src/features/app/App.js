@@ -31,7 +31,7 @@ const App = () => {
           <main>
             <Tab.Container
               activeKey={eventKey}
-              defaultActiveKey="about"
+              defaultActiveKey="patterns"
             >
               <Tab.Content>
                 <Tab.Pane eventKey="patterns">

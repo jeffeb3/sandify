@@ -1,13 +1,17 @@
 import React from "react"
+import { useSelector } from "react-redux"
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import HappyHolidays from "./happy-holidays.svg"
 import PerlinRings from "./perlin-rings.svg"
 import KochCubeFlowers from "./koch-cube-flowers.svg"
+import { selectAppVersion } from "@/features/app/appSlice"
 import "./About.scss"
 
 const About = () => {
+  const version = useSelector(selectAppVersion)
+
   return (
     <footer className="p-4">
       <Container
@@ -20,6 +24,12 @@ const About = () => {
             sm={6}
           >
             <h1 className="mb-0">sandify</h1>
+            <div
+              style={{ fontSize: "1.4rem" }}
+              className="mb-2"
+            >
+              v{version}
+            </div>
             <div className="tagline mb-2">
               create patterns for robots that draw in sand with ball bearings
             </div>
@@ -51,7 +61,7 @@ const About = () => {
               some features that you might miss the first time through.
             </p>
             <h2>Exporting patterns</h2>
-            <h3 className="mt-4">What sand machines are supported?</h3>
+            <h3 className="mt-3">What sand machines are supported?</h3>
             <p>
               Sandify supports gcode and theta-rho formats. Sandify was
               originally designed for{" "}
@@ -65,7 +75,7 @@ const About = () => {
             <h2>Importing layers</h2>
             Sandify supports import of pattern files as new layers. Supported
             formats are .thr, .gcode, and .nc files.
-            <h3 className="mt-4">Where can I find theta rho files?</h3>
+            <h3 className="mt-3">Where can I find theta rho files?</h3>
             Sisyphus machines use theta rho (.thr) files. There is a large
             community sharing patterns.
             <div className="row mt-2">

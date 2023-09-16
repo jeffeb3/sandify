@@ -113,7 +113,7 @@ describe("machines reducer", () => {
             entities: {},
           },
           upsertImportedMachine({
-            name: "foo",
+            minX: 500,
           }),
         ),
       ).toEqual({
@@ -121,7 +121,8 @@ describe("machines reducer", () => {
         entities: {
           1: {
             id: "1",
-            name: "foo",
+            minX: 500,
+            name: "[imported]",
             imported: true,
           },
         },
