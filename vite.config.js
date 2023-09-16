@@ -11,7 +11,7 @@ export default defineConfig(() => ({
   },
   plugins: [
     react(),
-    nodePolyfills()
+    nodePolyfills(),
   ],
   resolve: {
     alias: {
@@ -35,7 +35,7 @@ export default defineConfig(() => ({
   optimizeDeps: {
     esbuildOptions: {
       plugins: [
-        NodeGlobalsPolyfillPlugin({ buffer: false, process: false }),
+        NodeGlobalsPolyfillPlugin({ buffer: false, process: true }),
         {
           name: "load-js-files-as-jsx",
           setup(build) {

@@ -54,6 +54,34 @@ export const machinesSlice = createSlice({
     updateMachine: (state, action) => {
       updateOne(adapter, state, action)
     },
+    upsertImportedMachine: {
+      reducer(state, action) {
+        const machines = Object.values(state.entities)
+        const importedIdx = machines.findIndex(
+          (machine) => machine.name == "[imported]",
+        )
+
+        if (importedIdx !== -1) {
+          const existingId = machines[importedIdx].id
+
+          action.payload.id = existingId
+          action.payload.name = "[imported]"
+          updateOne(adapter, state, action)
+          state.current = existingId
+        } else {
+          action.payload = {
+            ...action.payload,
+            name: "[imported]",
+            imported: true,
+          }
+          adapter.addOne(state, action)
+          state.current = state.ids[state.ids.length - 1]
+        }
+      },
+      prepare(machine) {
+        return prepareAfterAdd(machine)
+      },
+    },
     setCurrentMachine: (state, action) => {
       state.current = action.payload
     },
@@ -83,6 +111,7 @@ export const { actions: machinesActions } = machinesSlice
 export const {
   addMachine,
   updateMachine,
+  upsertImportedMachine,
   setCurrentMachine,
   deleteMachine,
   changeMachineType,

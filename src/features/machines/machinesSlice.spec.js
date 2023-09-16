@@ -3,6 +3,7 @@ import machinesReducer, {
   addMachine,
   deleteMachine,
   updateMachine,
+  upsertImportedMachine,
   setCurrentMachine,
   changeMachineType,
 } from "./machinesSlice"
@@ -100,6 +101,65 @@ describe("machines reducer", () => {
           name: "bar",
         },
       },
+    })
+  })
+
+  describe("upsertImportedMachine", () => {
+    it("should create a machine if one doesn't already exist", () => {
+      expect(
+        machinesReducer(
+          {
+            ids: [],
+            entities: {},
+          },
+          upsertImportedMachine({
+            name: "foo",
+          }),
+        ),
+      ).toEqual({
+        ids: ["1"],
+        entities: {
+          1: {
+            id: "1",
+            name: "foo",
+            imported: true,
+          },
+        },
+        current: "1",
+      })
+    })
+
+    it("should update the existing machine if it exists", () => {
+      expect(
+        machinesReducer(
+          {
+            ids: ["1"],
+            entities: {
+              1: {
+                id: "1",
+                name: "[imported]",
+                imported: true,
+                minX: 500,
+              },
+            },
+            current: "1",
+          },
+          upsertImportedMachine({
+            minX: 100,
+          }),
+        ),
+      ).toEqual({
+        ids: ["1"],
+        entities: {
+          1: {
+            id: "1",
+            name: "[imported]",
+            imported: true,
+            minX: 100,
+          },
+        },
+        current: "1",
+      })
     })
   })
 

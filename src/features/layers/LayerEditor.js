@@ -11,7 +11,6 @@ import {
   AiTwotoneLock,
   AiTwotoneUnlock,
 } from "react-icons/ai"
-import CommentsBox from "@/components/CommentsBox"
 import ModelOption from "@/components/ModelOption"
 import { getShapeSelectOptions } from "@/features/shapes/shapeFactory"
 import { updateLayer, changeModelType } from "./layersSlice"

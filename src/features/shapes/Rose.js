@@ -20,7 +20,6 @@ export default class Rose extends Shape {
     this.label = "Rose"
     this.link = "http://mathworld.wolfram.com/Rose.html"
     this.linkText = "Rose at Wolfram Mathworld"
-    this.startingAspectRatioLocked = false // force a square shape
   }
 
   getInitialState() {

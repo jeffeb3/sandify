@@ -21,7 +21,7 @@ export default class Shape extends Model {
       autosize: true,
       startingWidth: 100,
       startingHeight: 100,
-      aspectRatioLocked: true,
+      maintainAspectRatio: false,
     })
   }
 

@@ -11,10 +11,9 @@ import CheckboxOption from "@/components/CheckboxOption"
 import { selectConnectedVertices } from "@/features/layers/layersSlice"
 import {
   selectExporterState,
-  selectComments,
   updateExporter,
 } from "@/features/export/exporterSlice"
-import { selectMachine } from "@/features/machines/machineSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import GCodeExporter from "./GCodeExporter"
 import ScaraGCodeExporter from "./ScaraGCodeExporter"
 import SvgExporter from "./SvgExporter"
@@ -30,31 +29,35 @@ const exporters = {
 
 const ExportDownloader = ({ showModal, toggleModal }) => {
   const dispatch = useDispatch()
-  const machine = useSelector(selectMachine)
+  const machine = useSelector(selectCurrentMachine)
   const exporterState = useSelector(selectExporterState)
   const { fileType, fileName } = exporterState
   const props = {
     ...exporterState,
-    offsetX: machine.rectangular
-      ? (machine.minX + machine.maxX) / 2.0
-      : machine.maxRadius,
-    offsetY: machine.rectangular
-      ? (machine.minY + machine.maxY) / 2.0
-      : machine.maxRadius,
-    width: machine.rectangular
-      ? machine.maxX - machine.minX
-      : 2.0 * machine.maxRadius,
-    height: machine.rectangular
-      ? machine.maxY - machine.minY
-      : 2.0 * machine.maxRadius,
-    maxRadius: machine.rectangular
-      ? Math.sqrt(
-          Math.pow(machine.maxX - machine.minX, 2.0) +
-            Math.pow(machine.maxY - machine.minY, 2.0),
-        )
-      : machine.maxRadius,
+    offsetX:
+      machine.type === "rectangular"
+        ? (machine.minX + machine.maxX) / 2.0
+        : machine.maxRadius,
+    offsetY:
+      machine.type === "rectangular"
+        ? (machine.minY + machine.maxY) / 2.0
+        : machine.maxRadius,
+    width:
+      machine.type === "rectangular"
+        ? machine.maxX - machine.minX
+        : 2.0 * machine.maxRadius,
+    height:
+      machine.type === "rectangular"
+        ? machine.maxY - machine.minY
+        : 2.0 * machine.maxRadius,
+    maxRadius:
+      machine.type === "rectangular"
+        ? Math.sqrt(
+            Math.pow(machine.maxX - machine.minX, 2.0) +
+              Math.pow(machine.maxY - machine.minY, 2.0),
+          )
+        : machine.maxRadius,
     vertices: useSelector(selectConnectedVertices),
-    comments: useSelector(selectComments),
   }
   const exporter = new exporters[fileType](props)
 
@@ -168,16 +171,15 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         <Row>
           <Col sm={5}></Col>
           <Col sm={7}>
-            See{" "}
+            See the{" "}
             <a
               target="_blank"
               rel="noopener noreferrer"
               href="https://github.com/jeffeb3/sandify/wiki#export-variables"
             >
-              {" "}
-              the wiki{" "}
+              wiki{" "}
             </a>{" "}
-            for details on available program export variables.
+            for details on program export variables.
           </Col>
         </Row>
 

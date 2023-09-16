@@ -1,5 +1,5 @@
 import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machines/machineSlice"
+import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
 
 const options = {
@@ -7,10 +7,6 @@ const options = {
     title: "Source file",
     type: "inputText",
     plainText: "true",
-  },
-  comments: {
-    title: "Comments",
-    type: "comments",
   },
 }
 
@@ -27,29 +23,23 @@ export default class FileImport extends Shape {
       ...super.getInitialState(),
       ...{
         vertices: [],
-        comments: [],
+        maintainAspectRatio: true,
       },
       ...(props === undefined
         ? {}
         : {
             fileName: props.fileName,
             vertices: props.vertices,
-            comments: props.comments,
           }),
     }
   }
 
   initialDimensions(props) {
-    const { machine } = props
     const vertices = cloneVertices(props.vertices)
-    const machineInstance = getMachineInstance(vertices, machine)
+    const machine = getMachine(props.machine)
 
     // default to 80% of machine size
-    resizeVertices(
-      vertices,
-      machineInstance.width * 0.8,
-      machineInstance.height * 0.8,
-    )
+    resizeVertices(vertices, machine.width * 0.8, machine.height * 0.8)
 
     return dimensions(vertices)
   }

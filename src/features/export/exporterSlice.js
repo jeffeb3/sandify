@@ -1,10 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
 import { createSelector } from "reselect"
-import { selectAllLayers } from "@/features/layers/layersSlice"
-import CommentExporter from "./CommentExporter"
-import { log } from "@/common/debugging"
-import { selectState, selectAppState } from "@/features/app/appSlice"
-import { selectMachine } from "@/features/machine/machineSlice"
+import { selectState } from "@/features/app/appSlice"
 import { GCODE } from "./Exporter"
 
 // ------------------------------
@@ -39,19 +35,4 @@ export default exporterSlice.reducer
 export const selectExporterState = createSelector(
   selectState,
   (state) => state.exporter,
-)
-
-export const selectComments = createSelector(
-  [selectAppState, selectAllLayers, selectExporterState, selectMachine],
-  (app, layers, exporter, machine) => {
-    log("selectComments")
-    const state = {
-      app,
-      layers,
-      exporter,
-      machine,
-    }
-
-    return new CommentExporter(state).export()
-  },
 )

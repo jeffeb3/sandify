@@ -49,12 +49,11 @@ const Header = ({ eventKey, setEventKey }) => {
           >
             <NavDropdown.Item onClick={handleNew}>New</NavDropdown.Item>
             <NavDropdown.Item onClick={toggleOpen}>Open...</NavDropdown.Item>
-            <NavDropdown.Item onClick={toggleImport}>
-              Import layer...
-            </NavDropdown.Item>
-            <NavDropdown.Divider />
             <NavDropdown.Item onClick={toggleSave}>Save as...</NavDropdown.Item>
             <NavDropdown.Divider />
+            <NavDropdown.Item onClick={toggleImport}>
+              Import...
+            </NavDropdown.Item>
             <NavDropdown.Item onClick={toggleExport}>
               Export as...
             </NavDropdown.Item>

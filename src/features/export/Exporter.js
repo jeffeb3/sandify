@@ -67,7 +67,6 @@ export default class Exporter {
     this.computeOutputVertices(vertices)
     this.header()
     this.startComments()
-    this.props.comments.forEach((comment) => this.line(comment))
     this.line()
     this.keyValueLine("File name", "'" + this.props.fileName + "'")
     this.keyValueLine("File type", this.props.fileType)

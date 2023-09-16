@@ -29,6 +29,8 @@ const InputOption = ({
     typeof option.max === "function" ? option.max(data) : parseFloat(option.max)
   const visible =
     option.isVisible === undefined ? true : option.isVisible(model, data)
+  const enabled =
+    option.isEnabled === undefined ? true : option.isEnabled(model, data)
   const title =
     typeof option.title === "function"
       ? option.title(model, data)
@@ -75,6 +77,7 @@ const InputOption = ({
 
   const renderedInput = (
     <Form.Control
+      disabled={!enabled}
       as={optionType === "textarea" ? "textarea" : "input"}
       name={`option-${optionKey}`}
       type={optionType}

@@ -4,6 +4,7 @@ export const machineOptions = {
   name: {
     title: "Name",
     type: "text",
+    isEnabled: (model, state) => !state.imported,
   },
   minimizeMoves: {
     title: "Minimize perimeter moves",
@@ -24,6 +25,7 @@ export default class Machine {
     return {
       name: "default machine",
       minimizeMoves: false,
+      imported: false,
     }
   }
 

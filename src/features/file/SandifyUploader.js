@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useDispatch } from "react-redux"
 import { toast } from "react-toastify"
+import { upsertImportedMachine } from "@/features/machines/machinesSlice"
 import SandifyImporter from "./SandifyImporter"
 
 const SandifyUploader = ({ toggleModal, showModal }) => {
@@ -27,6 +28,7 @@ const SandifyUploader = ({ toggleModal, showModal }) => {
           const importer = new SandifyImporter()
           const newState = importer.import(text)
 
+          dispatch(upsertImportedMachine(newState.machine))
           dispatch({ type: "LOAD_PATTERN", payload: newState })
         } catch (e) {
           toast.error(e.message)
