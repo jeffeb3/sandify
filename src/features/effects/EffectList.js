@@ -38,7 +38,7 @@ const EffectRow = ({
 
   return (
     <ListGroup.Item
-      className={`layer p-0 ${itemClass}`}
+      className={`layer p-0 ps-1 ${itemClass}`}
       key={id}
       id={id}
       ref={setNodeRef}

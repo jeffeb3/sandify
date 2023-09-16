@@ -18,7 +18,7 @@ export const effectFactory = {
   warp: Warp,
 }
 
-export const getEffectFromType = (type, ...args) => {
+export const getEffect = (type, ...args) => {
   return new effectFactory[type](args)
 }
 
@@ -27,13 +27,13 @@ export const getDefaultEffectType = () => {
 }
 
 export const getDefaultEffect = () => {
-  return getEffectFromType(getDefaultEffectType())
+  return getEffect(getDefaultEffectType())
 }
 
 export const getEffectSelectOptions = () => {
   const types = Object.keys(effectFactory)
 
   return types.map((type) => {
-    return { value: type, label: getEffectFromType(type).label }
+    return { value: type, label: getEffect(type).label }
   })
 }

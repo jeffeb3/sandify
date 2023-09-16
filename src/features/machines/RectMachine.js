@@ -1,5 +1,5 @@
 import Victor from "victor"
-import Machine from "./Machine"
+import Machine, { machineOptions } from "./Machine"
 import {
   distance,
   vertexRoundP,
@@ -8,14 +8,36 @@ import {
 } from "@/common/geometry"
 import clip from "liang-barsky"
 
+const rectMachineOptions = {
+  minX: {
+    title: "Min x (mm)",
+    min: 0,
+  },
+  maxX: {
+    title: "Max x (mm)",
+    min: 0,
+  },
+  minY: {
+    title: "Min y (mm)",
+    min: 0,
+  },
+  maxY: {
+    title: "Max y (mm)",
+    min: 0,
+  },
+  rectOrigin: {
+    title: "Force origin",
+    type: "quadrantbuttons",
+  },
+  ...machineOptions,
+}
+
 export default class RectMachine extends Machine {
-  constructor(vertices, settings, layerInfo = {}) {
-    super()
-    this.vertices = vertices
-    this.settings = settings
-    this.layerInfo = layerInfo
-    this.sizeX = Math.abs((settings.maxX - settings.minX) / 2.0)
-    this.sizeY = Math.abs((settings.maxY - settings.minY) / 2.0)
+  constructor(state) {
+    super(state)
+    this.label = "Rectangular"
+    this.sizeX = Math.abs((this.state.maxX - this.state.minX) / 2.0)
+    this.sizeY = Math.abs((this.state.maxY - this.state.minY) / 2.0)
     this.height = this.sizeY * 2
     this.width = this.sizeX * 2
     this.corners = [
@@ -26,18 +48,36 @@ export default class RectMachine extends Machine {
     ]
   }
 
+  getInitialState() {
+    return {
+      ...super.getInitialState(),
+      ...{
+        type: "rectangular",
+        minX: 0,
+        maxX: 500,
+        minY: 0,
+        maxY: 500,
+        rectOrigin: undefined,
+      },
+    }
+  }
+
+  getOptions() {
+    return rectMachineOptions
+  }
+
   addStartPoint() {
     return this
   }
 
   addEndPoint() {
-    if (this.settings.rectOrigin.length === 1) {
+    if (this.state.rectOrigin !== undefined) {
       // OK, let's assign corners indices:
       // [1]   [2]
       //
       //
       // [0]   [3]
-      const corner = this.settings.rectOrigin[0]
+      const corner = this.state.rectOrigin
       const first = this.vertices[0]
       const last = this.vertices[this.vertices.length - 1]
       const maxRadius =

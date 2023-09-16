@@ -1,4 +1,4 @@
-import { getShapeFromType } from "@/features/shapes/factory"
+import { getShape } from "@/features/shapes/shapeFactory"
 import EffectLayer from "@/features/effects/EffectLayer"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { roundP } from "@/common/util"
@@ -71,7 +71,7 @@ export const layerOptions = {
 
 export default class Layer {
   constructor(type) {
-    this.model = getShapeFromType(type)
+    this.model = getShape(type)
   }
 
   getInitialState(props) {

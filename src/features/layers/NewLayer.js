@@ -9,8 +9,8 @@ import Modal from "react-bootstrap/Modal"
 import {
   getShapeSelectOptions,
   getDefaultShape,
-  getShapeFromType,
-} from "@/features/shapes/factory"
+  getShape,
+} from "@/features/shapes/shapeFactory"
 import Layer from "./Layer"
 import { addLayer } from "./layersSlice"
 
@@ -29,7 +29,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
   const selectOptions = getShapeSelectOptions()
   const [type, setType] = useState(defaultShape.type)
   const [name, setName] = useState(defaultShape.label)
-  const selectedShape = getShapeFromType(type)
+  const selectedShape = getShape(type)
   const selectedOption = {
     value: selectedShape.id,
     label: selectedShape.label,
@@ -40,7 +40,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
   }
 
   const handleChangeNewType = (selected) => {
-    const shape = getShapeFromType(selected.value)
+    const shape = getShape(selected.value)
 
     setType(selected.value)
     setName(shape.label.toLowerCase())

@@ -57,7 +57,7 @@ const LayerRow = ({
     >
       <Tooltip id={tooltipId} />
       <div
-        className={`d-flex align-items-center me-2`}
+        className={`d-flex align-items-center ms-1 me-2`}
         onClick={handleLayerSelected}
       >
         <div className="layer-left">

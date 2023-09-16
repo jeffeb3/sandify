@@ -3,7 +3,7 @@ import EffectLayer from "@/features/effects/EffectLayer"
 
 export default class SandifyImporter {
   import(stateString) {
-    let state = JSON.parse(stateString)
+    const state = JSON.parse(stateString)
 
     this.checkStructure(state)
     this.ensureIntegrity(state, "layers", Layer)

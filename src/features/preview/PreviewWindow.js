@@ -4,7 +4,8 @@ import { isEqual } from "lodash"
 import { Stage, Layer, Circle, Rect } from "react-konva"
 import throttle from "lodash/throttle"
 import { selectPreviewState } from "@/features/preview/previewSlice"
-import { selectMachine } from "@/features/machines/machineSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
+import { getMachine } from "@/features/machines/machineFactory"
 import {
   selectSelectedLayer,
   selectVisibleLayerIds,
@@ -16,8 +17,8 @@ import { setPreviewSize, selectPreviewZoom } from "./previewSlice"
 
 const PreviewWindow = () => {
   const dispatch = useDispatch()
-  const { rectangular, minX, minY, maxX, maxY, maxRadius } =
-    useSelector(selectMachine)
+  const machine = useSelector(selectCurrentMachine)
+  const machineInstance = getMachine(machine)
   const { canvasWidth, canvasHeight } = useSelector(selectPreviewState)
   const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
@@ -52,25 +53,9 @@ const PreviewWindow = () => {
     }
   }, [])
 
-  const relativeScale = () => {
-    let width, height
-
-    if (rectangular) {
-      width = maxX - minX
-      height = maxY - minY
-    } else {
-      width = height = maxRadius * 2.0
-    }
-
-    return {
-      scaleWidth: canvasWidth / width,
-      scaleHeight: canvasHeight / height,
-    }
-  }
-
-  const width = rectangular ? maxX - minX : maxRadius * 2
-  const height = rectangular ? maxY - minY : maxRadius * 2
-  const { scaleWidth, scaleHeight } = relativeScale()
+  const { width, height } = machineInstance
+  const scaleWidth = canvasWidth / width
+  const scaleHeight = canvasHeight / height
   const scale = Math.min(scaleWidth, scaleHeight)
 
   const selectedIdx = layerIds.findIndex(
@@ -110,16 +95,16 @@ const PreviewWindow = () => {
         ref={layerRef}
         onClick={handleLayerClick}
       >
-        {!rectangular && (
+        {machine.type === "polar" && (
           <Circle
             x={0}
             y={0}
-            radius={maxRadius}
+            radius={width / 2}
             fill="black"
             stroke="transparent"
           />
         )}
-        {rectangular && (
+        {machine.type === "rectangular" && (
           <Rect
             x={0}
             y={0}

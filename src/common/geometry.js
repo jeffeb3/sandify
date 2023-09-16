@@ -450,7 +450,14 @@ export const cloneVertices = (vertices) => {
 
 // add attributes to a given vertex
 export const annotateVertex = (vertex, attrs) => {
-  Object.assign(vertex, attrs)
+  const filteredAttrs = Object.keys(attrs).reduce((memo, key) => {
+    if (attrs[key] !== undefined) {
+      memo[key] = attrs[key]
+    }
+    return memo
+  }, {})
+
+  Object.assign(vertex, filteredAttrs)
 
   return vertex
 }

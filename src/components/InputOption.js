@@ -33,6 +33,7 @@ const InputOption = ({
     typeof option.title === "function"
       ? option.title(model, data)
       : option.title
+  const inputWidth = optionType === "text" ? "auto" : "132px"
 
   if (!visible) {
     return null
@@ -108,7 +109,7 @@ const InputOption = ({
           sm={7}
           className="mb-1"
         >
-          {renderedInput}
+          <div style={{ width: inputWidth }}>{renderedInput}</div>
         </Col>
       </Row>
     )

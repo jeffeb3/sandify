@@ -3,6 +3,7 @@ import InputOption from "@/components/InputOption"
 import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
+import QuadrantButtonsOption from "@/components/QuadrantButtonsOption"
 
 const ModelOption = ({
   model,
@@ -39,6 +40,13 @@ const ModelOption = ({
     case "togglebutton":
       return (
         <ToggleButtonOption
+          key={optionKey}
+          {...props}
+        />
+      )
+    case "quadrantbuttons":
+      return (
+        <QuadrantButtonsOption
           key={optionKey}
           {...props}
         />

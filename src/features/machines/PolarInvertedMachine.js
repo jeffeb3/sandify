@@ -3,10 +3,6 @@ import Victor from "victor"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class PolarInvertedMachine extends PolarMachine {
-  constructor(vertices, settings, layerInfo = {}) {
-    super(vertices, settings, layerInfo)
-  }
-
   // Walk the given vertices, clipping as needed along the perimeter
   enforceLimits() {
     return this.enforceInvertedLimits()
@@ -15,7 +11,7 @@ export default class PolarInvertedMachine extends PolarMachine {
   // Finds the nearest vertex that is in the bounds of the circle. This will change the
   // shape. i.e. this doesn't care about the line segment, only about the point.
   nearestVertex(vertex) {
-    const size = this.settings.maxRadius
+    const size = this.state.maxRadius
 
     if (vertex.length() < size) {
       const scale = size / vertex.length()
@@ -28,7 +24,7 @@ export default class PolarInvertedMachine extends PolarMachine {
   // Take a given line, and if the line goes out of bounds, returns the vertices
   // around the outside edge to follow around without messing up the shape of the vertices.
   clipSegment(start, end, log = false) {
-    const size = this.settings.maxRadius
+    const size = this.state.maxRadius
     const radStart = start.magnitude()
     const radEnd = end.magnitude()
 
@@ -80,6 +76,6 @@ export default class PolarInvertedMachine extends PolarMachine {
 
   // Returns the vertex if it's outside the bounds of the circle.
   inBounds(vertex) {
-    return vertex.length() < this.settings.maxRadius
+    return vertex.length() < this.state.maxRadius
   }
 }

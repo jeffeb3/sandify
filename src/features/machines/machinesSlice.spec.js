@@ -1,11 +1,19 @@
 import { resetUniqueId } from "@/common/mocks"
 import machinesReducer, {
-  defaultMachineState,
   addMachine,
   deleteMachine,
   updateMachine,
   setCurrentMachine,
+  changeMachineType,
 } from "./machinesSlice"
+import {
+  getMachine,
+  getDefaultMachineType,
+} from "@/features/machines/machineFactory"
+
+const defaultMachineState = getMachine(
+  getDefaultMachineType(),
+).getInitialState()
 
 beforeEach(() => {
   resetUniqueId()
@@ -92,6 +100,54 @@ describe("machines reducer", () => {
           name: "bar",
         },
       },
+    })
+  })
+
+  describe("changeMachineType", () => {
+    it("should add default values", () => {
+      expect(
+        machinesReducer(
+          {
+            entities: {
+              0: {
+                id: "0",
+              },
+            },
+          },
+          changeMachineType({ id: "0", type: "rectangular" }),
+        ),
+      ).toEqual({
+        entities: {
+          0: {
+            id: "0",
+            ...defaultMachineState,
+          },
+        },
+      })
+    })
+
+    it("should not override values if provided", () => {
+      expect(
+        machinesReducer(
+          {
+            entities: {
+              0: {
+                id: "0",
+                minX: 100,
+              },
+            },
+          },
+          changeMachineType({ id: "0", type: "rectangular" }),
+        ),
+      ).toEqual({
+        entities: {
+          0: {
+            id: "0",
+            ...defaultMachineState,
+            minX: 100,
+          },
+        },
+      })
     })
   })
 

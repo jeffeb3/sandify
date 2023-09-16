@@ -2,7 +2,7 @@ import { CursiveFont, SansSerifFont, MonospaceFont } from "./Fonts"
 import Victor from "victor"
 import Shape from "@/features/shapes/Shape"
 import { arc, dimensions } from "@/common/geometry"
-import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/machineSlice"
+import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
 
 const options = {
   inputText: {

@@ -13,7 +13,7 @@ import {
   selectDraggingEffectVertices,
   selectIsUpstreamEffectDragging,
 } from "@/features/layers/layersSlice"
-import { getEffectFromType } from "@/features/effects/factory"
+import { getEffect } from "@/features/effects/effectFactory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
@@ -41,7 +41,7 @@ const EffectPreview = (ownProps) => {
   const shapeRef = React.useRef()
   const trRef = React.useRef()
   const isCurrent = effect?.id === currentEffectId
-  const model = getEffectFromType(effect?.type || "mask")
+  const model = getEffect(effect?.type || "mask")
 
   useEffect(() => {
     if (

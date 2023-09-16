@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"
-import { selectMachine } from "@/features/machines/machineSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import ThetaRhoImporter from "@/features/import/ThetaRhoImporter"
 import GCodeImporter from "@/features/import/GCodeImporter"
 import { addLayer } from "@/features/layers/layersSlice"
 import Layer from "@/features/layers/Layer"
 
 const ImportUploader = ({ toggleModal, showModal }) => {
-  const machineState = useSelector(selectMachine)
+  const machineState = useSelector(selectCurrentMachine)
   const dispatch = useDispatch()
   const inputRef = useRef()
 

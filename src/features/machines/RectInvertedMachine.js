@@ -4,10 +4,6 @@ import clip from "liang-barsky"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class RectInvertedMachine extends RectMachine {
-  constructor(vertices, settings, layerInfo = {}) {
-    super(vertices, settings, layerInfo)
-  }
-
   enforceLimits() {
     return this.enforceInvertedLimits()
   }

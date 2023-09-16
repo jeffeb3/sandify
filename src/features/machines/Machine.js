@@ -1,48 +1,49 @@
 import { vertexRoundP, annotateVertices } from "@/common/geometry"
 
 export const machineOptions = {
-  minX: {
-    title: "Min X (mm)",
-  },
-  maxX: {
-    title: "Max X (mm)",
-  },
-  minY: {
-    title: "Min Y (mm)",
-  },
-  maxY: {
-    title: "Max Y (mm)",
-  },
-  origin: {
-    title: "Force origin",
-  },
-  maxRadius: {
-    title: "Max radius (mm)",
+  name: {
+    title: "Name",
+    type: "text",
   },
   minimizeMoves: {
-    title: "Try to minimize perimeter moves",
+    title: "Minimize perimeter moves",
     type: "checkbox",
-  },
-  polarEndPoint: {
-    title: "End point",
-  },
-  polarStartPoint: {
-    title: "Start point",
   },
 }
 
 // inherit all machine classes from this base class
 export default class Machine {
-  // given a set of vertices, ensure they adhere to the limits defined by the machine
-  polish() {
-    this.enforceLimits().cleanVertices().limitPrecision().optimizePerimeter()
+  constructor(state) {
+    this.state = Object.keys(state).length < 2 ? this.getInitialState() : state
+    this.label = "Machine"
+  }
 
+  // override as needed; redux state of a newly created instance
+  getInitialState() {
+    return {
+      name: "default machine",
+      minimizeMoves: false,
+    }
+  }
+
+  // override as needed
+  getOptions() {
+    return machineOptions
+  }
+
+  // given a set of vertices, ensure they adhere to the limits defined by the machine
+  polish(vertices, layerInfo) {
+    this.vertices = vertices
+    this.layerInfo = layerInfo
+
+    this.enforceLimits().cleanVertices().limitPrecision().optimizePerimeter()
     if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 
     // second call to limit precision for final cleanup
-    return this.limitPrecision()
+    this.limitPrecision()
+    return this.vertices
   }
 
   // clean the list of vertices and remove (nearly) duplicate points
@@ -155,7 +156,7 @@ export default class Machine {
   optimizePerimeter() {
     let segments = this.stripExtraPerimeterVertices()
 
-    if (this.settings.minimizeMoves) {
+    if (this.state.minimizeMoves) {
       segments = this.minimizePerimeterMoves(segments)
     }
 

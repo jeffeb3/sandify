@@ -3,7 +3,7 @@ import noise from "@/common/noise"
 import seedrandom from "seedrandom"
 import { shapeSimilarity } from "curve-matcher"
 import { offset } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machines/machineSlice"
+import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
 
 const options = {
@@ -65,29 +65,15 @@ export default class NoiseWave extends Shape {
   getVertices(state) {
     // without this adjustment, using an inverted circular mask causes clipping issues
     const adjustment = 0.001
-
-    const machine = {
+    const machineState = {
+      ...state.machine,
       maxRadius: state.machine.maxRadius - adjustment,
-      rectangular: state.machine.rectangular,
-      minX: state.machine.minX,
-      maxX: state.machine.maxX,
-      minY: state.machine.minY,
-      maxY: state.machine.maxY,
     }
-
     const shape = state.shape
     const rng = seedrandom(shape.seed)
+    const machine = getMachine(machineState)
+    const { sizeX, sizeY } = machine
     let vertices = []
-    let sizeX, sizeY
-
-    if (machine.rectangular) {
-      sizeX = machine.maxX - machine.minX
-      sizeY = machine.maxY - machine.minY
-    } else {
-      sizeX = sizeY = machine.maxRadius * 2.0
-    }
-
-    const machineInstance = getMachineInstance([], machine)
 
     noise.seed(shape.seed)
 
@@ -120,7 +106,7 @@ export default class NoiseWave extends Shape {
         group.push(newVertex)
 
         // Stop if we entered and then exited the machine coordinates.
-        const inside = machineInstance.inBounds(newVertex)
+        const inside = machine.inBounds(newVertex)
         if (wasInside && !inside) {
           break
         }
@@ -137,12 +123,12 @@ export default class NoiseWave extends Shape {
       if (vertices.length > 0) {
         const start = vertices[vertices.length - 1]
         const end = curve[0]
-        const startPerimeter = machineInstance.nearestPerimeterVertex(start)
-        const endPerimeter = machineInstance.nearestPerimeterVertex(end)
+        const startPerimeter = machine.nearestPerimeterVertex(start)
+        const endPerimeter = machine.nearestPerimeterVertex(end)
         vertices = vertices.concat(
           [
             startPerimeter,
-            machineInstance.tracePerimeter(startPerimeter, endPerimeter),
+            machine.tracePerimeter(startPerimeter, endPerimeter),
             endPerimeter,
             end,
           ].flat(),

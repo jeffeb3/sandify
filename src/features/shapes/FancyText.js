@@ -14,7 +14,7 @@ import {
   findMinimumVertex,
   dimensions,
 } from "@/common/geometry"
-import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/machineSlice"
+import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
 import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
 
 const MIN_SPACING_MULTIPLIER = 1.2

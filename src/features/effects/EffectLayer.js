@@ -1,4 +1,4 @@
-import { getEffectFromType } from "@/features/effects/factory"
+import { getEffect } from "@/features/effects/effectFactory"
 
 export const effectOptions = {
   x: {
@@ -59,7 +59,7 @@ export const effectOptions = {
 
 export default class EffectLayer {
   constructor(type) {
-    this.model = getEffectFromType(type)
+    this.model = getEffect(type)
   }
 
   getInitialState(layer, layerVertices) {

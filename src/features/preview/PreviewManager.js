@@ -12,8 +12,8 @@ import {
   selectPreviewZoom,
 } from "@/features/preview/previewSlice"
 import { updateLayer, selectCurrentLayer } from "@/features/layers/layersSlice"
-import { getShapeFromType } from "@/features/shapes/factory"
-import { getEffectFromType } from "@/features/effects/factory"
+import { getShape } from "@/features/shapes/shapeFactory"
+import { getEffect } from "@/features/effects/effectFactory"
 import "./PreviewManager.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
@@ -26,8 +26,8 @@ const PreviewManager = () => {
   const zoom = useSelector(selectPreviewZoom)
   const wrapperRef = useRef()
 
-  const currentShape = getShapeFromType(currentLayer?.type || "polygon")
-  const currentEffect = getEffectFromType(currentEffectLayer?.type || "mask")
+  const currentShape = getShape(currentLayer?.type || "polygon")
+  const currentEffect = getEffect(currentEffectLayer?.type || "mask")
   const zoomChoices = [
     { value: 0.25, label: "25%" },
     { value: 0.5, label: "50%" },

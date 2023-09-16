@@ -14,8 +14,8 @@ import {
 import {
   getEffectSelectOptions,
   getDefaultEffect,
-  getEffectFromType,
-} from "./factory"
+  getEffect,
+} from "./effectFactory"
 import EffectLayer from "./EffectLayer"
 
 const defaultEffect = getDefaultEffect()
@@ -37,7 +37,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
   const selectOptions = getEffectSelectOptions()
   const [type, setType] = useState(defaultEffect.type)
   const [name, setName] = useState(defaultEffect.label)
-  const selectedEffect = getEffectFromType(type)
+  const selectedEffect = getEffect(type)
   const selectedOption = {
     value: selectedEffect.id,
     label: selectedEffect.label,
@@ -52,7 +52,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
   }
 
   const handleChangeNewType = (selected) => {
-    const effect = getEffectFromType(selected.value)
+    const effect = getEffect(selected.value)
 
     setType(selected.value)
     setName(effect.label.toLowerCase())

@@ -3,7 +3,7 @@ import Shape from "../Shape"
 import { Circle } from "./Circle"
 import Graph from "@/common/Graph"
 import { circle, arc, closest, farthest } from "@/common/geometry"
-import { getMachineInstance } from "@/features/machines/machineSlice"
+import { getMachine } from "@/features/machines/machineFactory"
 import Victor from "victor"
 
 const ROUNDS = 100 // default number of rounds to attempt to create and grow circles
@@ -81,7 +81,7 @@ export default class CirclePacker extends Shape {
       minX: machine.minX,
       minY: machine.minY,
       maxRadius: machine.maxRadius,
-      rectangular: machine.rectangular,
+      rectangular: machine.type === "rectangular",
       attempts: state.shape.attempts,
       r: state.shape.startingRadius,
       inBounds: state.shape.inBounds,
@@ -328,7 +328,7 @@ export default class CirclePacker extends Shape {
     this.points.push(...arc(c.r, angle, a2, c.x, c.y))
 
     // connect along perimeter
-    const machine = getMachineInstance([], this.settings)
+    const machine = getMachine(this.settings)
     this.points.push(...machine.tracePerimeter(intersection, intersection2))
     this.points.push(intersection2)
 

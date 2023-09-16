@@ -5,26 +5,59 @@ import {
   arc,
   annotateVertex,
 } from "@/common/geometry"
-import Machine from "./Machine"
 import Victor from "victor"
+import Machine, { machineOptions } from "./Machine"
+
+const polarMachineOptions = {
+  maxRadius: {
+    title: "Max radius (mm)",
+    min: 0,
+  },
+  polarEndPoint: {
+    title: "End point",
+    type: "togglebutton",
+    choices: ["none", "center", "perimeter"],
+  },
+  polarStartPoint: {
+    title: "Start point",
+    type: "togglebutton",
+    choices: ["none", "center", "perimeter"],
+  },
+  ...machineOptions,
+}
 
 export default class PolarMachine extends Machine {
-  constructor(vertices, settings, layerInfo = {}) {
-    super()
-    this.vertices = vertices
-    this.settings = Object.assign({}, settings)
-    this.settings.perimeterConstant = 50
-    this.sizeX = this.settings.maxRadius * 2
+  constructor(state) {
+    super(state)
+    this.label = "Polar"
+    this.perimeterConstant = 50
+    this.sizeX = this.state.maxRadius * 2
+    this.sizeY = this.sizeX
     this.height = this.sizeX
     this.width = this.sizeX
-    this.layerInfo = layerInfo
+  }
+
+  getInitialState() {
+    return {
+      ...super.getInitialState(),
+      ...{
+        type: "polar",
+        maxRadius: 250,
+        polarStartPoint: "none",
+        polarEndPoint: "none",
+      },
+    }
+  }
+
+  getOptions() {
+    return polarMachineOptions
   }
 
   addStartPoint() {
-    const maxRadius = this.settings.maxRadius
+    const maxRadius = this.state.maxRadius
 
-    if (this.settings.polarStartPoint !== "none") {
-      if (this.settings.polarStartPoint === "center") {
+    if (this.state.polarStartPoint !== "none") {
+      if (this.state.polarStartPoint === "center") {
         this.vertices.unshift(
           annotateVertex(new Victor(0.0, 0.0), { connect: true }),
         )
@@ -44,10 +77,10 @@ export default class PolarMachine extends Machine {
   }
 
   addEndPoint() {
-    const maxRadius = this.settings.maxRadius
+    const maxRadius = this.state.maxRadius
 
-    if (this.settings.polarEndPoint !== "none") {
-      if (this.settings.polarEndPoint === "center") {
+    if (this.state.polarEndPoint !== "none") {
+      if (this.state.polarEndPoint === "center") {
         this.vertices[this.vertices.length - 1].connect = true
         this.vertices.push(
           annotateVertex(new Victor(0.0, 0.0), { connect: true }),
@@ -69,29 +102,29 @@ export default class PolarMachine extends Machine {
   // Finds the nearest vertex that is in the bounds of the circle. This will change the
   // shape. i.e. this doesn't care about the line segment, only about the point.
   nearestVertex(vertex) {
-    const size = this.settings.maxRadius
+    const size = this.state.maxRadius
 
     if (vertex.length() > size) {
       // try to prevent floating point math from pushing us out of bounds
       const precisionModifier = 0.0001
       const scale = (size - precisionModifier) / vertex.length()
 
-      vertex.multiply(new Victor(scale, scale))
+      return vertex.clone().multiply(new Victor(scale, scale))
+    } else {
+      return vertex
     }
-
-    return vertex
   }
 
   inBounds(vertex) {
-    return vertex.length() < this.settings.maxRadius
+    return vertex.length() < this.state.maxRadius
   }
 
   // Returns the nearest perimeter vertex to the given vertex.
   nearestPerimeterVertex(vertex) {
     if (vertex) {
       return new Victor(
-        Math.cos(vertex.angle()) * this.settings.maxRadius,
-        Math.sin(vertex.angle()) * this.settings.maxRadius,
+        Math.cos(vertex.angle()) * this.state.maxRadius,
+        Math.sin(vertex.angle()) * this.state.maxRadius,
       )
     } else {
       return new Victor(0, 0)
@@ -108,12 +141,12 @@ export default class PolarMachine extends Machine {
       deltaAngle -= 2.0 * Math.PI
     }
 
-    return Math.abs(deltaAngle) * this.settings.maxRadius
+    return Math.abs(deltaAngle) * this.state.maxRadius
   }
 
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
-    return arc(this.settings.maxRadius, start.angle(), end.angle())
+    return arc(this.state.maxRadius, start.angle(), end.angle())
   }
 
   outlinePerimeter() {
@@ -121,10 +154,7 @@ export default class PolarMachine extends Machine {
 
     if (last) {
       this.vertices = this.vertices.concat(
-        circle(
-          this.settings.maxRadius,
-          parseInt((last.angle() * 64) / Math.PI),
-        ),
+        circle(this.state.maxRadius, parseInt((last.angle() * 64) / Math.PI)),
       )
     }
     return this
@@ -132,7 +162,7 @@ export default class PolarMachine extends Machine {
 
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta = 1) {
-    let rm = Math.pow(this.settings.maxRadius, 2)
+    let rm = Math.pow(this.state.maxRadius, 2)
     let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
     let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
     let d = this.perimeterDistance(v1, v2)
@@ -147,7 +177,7 @@ export default class PolarMachine extends Machine {
     return (
       Math.abs(r1 - rm) < delta &&
       Math.abs(r2 - rm) < delta &&
-      d < (3 * this.settings.maxRadius) / this.settings.perimeterConstant
+      d < (3 * this.state.maxRadius) / this.perimeterConstant
     )
   }
 
@@ -171,7 +201,7 @@ export default class PolarMachine extends Machine {
     //     find both intersections
     //     trace from start to first intersction
     //     trace from second intersection to end
-    const size = this.settings.maxRadius
+    const size = this.state.maxRadius
     const radStart = start.magnitude()
     const radEnd = end.magnitude()
 
@@ -232,7 +262,7 @@ export default class PolarMachine extends Machine {
   }
 
   getIntersections(start, end) {
-    const size = this.settings.maxRadius
+    const size = this.state.maxRadius
     let direction = end.clone().subtract(start).clone().normalize()
     let t = direction.x * -1.0 * start.x + direction.y * -1.0 * start.y
     let e = direction.clone().multiply(Victor(t, t)).add(start)

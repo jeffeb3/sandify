@@ -42,7 +42,7 @@ export const shapeFactory = {
   fileImport: FileImport,
 }
 
-export const getShapeFromType = (type, ...args) => {
+export const getShape = (type, ...args) => {
   return new shapeFactory[type](args)
 }
 
@@ -51,7 +51,7 @@ export const getDefaultShapeType = () => {
 }
 
 export const getDefaultShape = () => {
-  return getShapeFromType(getDefaultShapeType())
+  return getShape(getDefaultShapeType())
 }
 
 export const getShapeSelectOptions = () => {
@@ -59,7 +59,7 @@ export const getShapeSelectOptions = () => {
   const types = Object.keys(shapeFactory)
 
   for (const type of types) {
-    const shape = getShapeFromType(type)
+    const shape = getShape(type)
     const optionLabel = { value: type, label: shape.label }
 
     let found = false

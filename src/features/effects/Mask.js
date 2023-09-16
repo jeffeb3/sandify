@@ -24,7 +24,7 @@ const options = {
     },
   },
   maskMinimizeMoves: {
-    title: "Try to minimize perimeter moves",
+    title: "Minimize perimeter moves",
     type: "checkbox",
   },
   maskInvert: {
@@ -108,21 +108,17 @@ export default class Mask extends Effect {
           ? RectInvertedMachine
           : RectMachine
 
-      const machine = new machineClass(
-        vertices,
-        {
-          minX: 0,
-          maxX: effect.width,
-          minY: 0,
-          maxY: effect.height,
-          minimizeMoves: effect.maskMinimizeMoves,
-          maxRadius: effect.width / 2,
-          perimeterConstant: effect.maskPerimeterConstant,
-          mask: true,
-        },
-        { border: effect.maskBorder },
-      )
-      vertices = machine.polish().vertices
+      const machine = new machineClass({
+        minX: 0,
+        maxX: effect.width,
+        minY: 0,
+        maxY: effect.height,
+        minimizeMoves: effect.maskMinimizeMoves,
+        maxRadius: effect.width / 2,
+        perimeterConstant: effect.maskPerimeterConstant,
+        mask: true,
+      })
+      vertices = machine.polish(vertices, { border: effect.maskBorder })
     }
 
     return vertices.map((vertex) => {

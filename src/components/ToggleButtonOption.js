@@ -35,6 +35,7 @@ const ToggleButtonOption = (props) => {
         <ToggleButtonGroup
           type="radio"
           className="border"
+          size="sm"
           name={props.optionKey}
           value={currentChoice}
           key={props.optionKey}

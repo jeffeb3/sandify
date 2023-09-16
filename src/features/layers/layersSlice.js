@@ -14,10 +14,7 @@ import {
 } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
 import { insertOne, prepareAfterAdd, deleteOne } from "@/common/slice"
-import {
-  getDefaultShapeType,
-  getShapeFromType,
-} from "@/features/shapes/factory"
+import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
 import Layer from "./Layer"
 import EffectLayer from "@/features/effects/EffectLayer"
 import { selectState } from "@/features/app/appSlice"
@@ -30,10 +27,8 @@ import {
   selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
 import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
-import {
-  selectMachine,
-  getMachineInstance,
-} from "@/features/machines/machineSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
+import { getMachine } from "@/features/machines/machineFactory"
 import { selectPreviewState } from "@/features/preview/previewSlice"
 import { log } from "@/common/debugging"
 
@@ -85,7 +80,7 @@ const layersSlice = createSlice({
     updateLayer: (state, action) => {
       const changes = action.payload
       const layer = state.entities[changes.id]
-      const shape = getShapeFromType(layer.type)
+      const shape = getShape(layer.type)
 
       shape.handleUpdate(layer, changes)
       adapter.updateOne(state, { id: changes.id, changes })
@@ -205,13 +200,13 @@ export const selectLayerById = createCachedSelector(
 // transformed vertices are not redrawn when machine settings change
 export const selectLayerMachine = createCachedSelector(
   selectLayerById,
-  selectMachine,
+  selectCurrentMachine,
   (layer, machine) => {
     if (!layer) {
       return null
     } // zombie child
 
-    const shape = getShapeFromType(layer.type)
+    const shape = getShape(layer.type)
     return shape.usesMachine ? machine : null
   },
 )((state, id) => id)
@@ -224,7 +219,7 @@ const selectLayerFontsLoaded = createCachedSelector(
       return false
     }
 
-    const shape = getShapeFromType(layer.type)
+    const shape = getShape(layer.type)
     return shape.usesFonts ? fontsLoaded : false
   },
 )((state, id) => id)
@@ -343,7 +338,7 @@ const selectMachineVertices = createCachedSelector(
   selectLayerVertices,
   selectLayerIndex,
   selectNumVisibleLayers,
-  selectMachine,
+  selectCurrentMachine,
   (id, vertices, layerIndex, numLayers, machine) => {
     log("selectMachineVertices", id)
     if (vertices.length > 0) {
@@ -351,8 +346,9 @@ const selectMachineVertices = createCachedSelector(
         start: layerIndex === 0,
         end: layerIndex === numLayers - 1,
       }
-      const machineInstance = getMachineInstance(vertices, machine, layerInfo)
-      return machineInstance.polish().vertices
+      const machineModel = getMachine(machine)
+
+      return machineModel.polish(vertices, layerInfo)
     } else {
       return []
     }
@@ -552,10 +548,10 @@ export const selectConnectingVertices = createCachedSelector(
     const end = endVertices[0]
 
     if (startLayer.connectionMethod === "along perimeter") {
-      const machineInstance = getMachineInstance([], state.machine)
-      const startPerimeter = machineInstance.nearestPerimeterVertex(start)
-      const endPerimeter = machineInstance.nearestPerimeterVertex(end)
-      const perimeterConnection = machineInstance.tracePerimeter(
+      const machineModel = getMachine(state.machine)
+      const startPerimeter = machineModel.nearestPerimeterVertex(start)
+      const endPerimeter = machineModel.nearestPerimeterVertex(end)
+      const perimeterConnection = machineModel.tracePerimeter(
         startPerimeter,
         endPerimeter,
       )
@@ -614,7 +610,7 @@ export const selectVerticesStats = createSelector(
 export const selectLayerPreviewBounds = createCachedSelector(
   selectLayerById,
   selectMachineVertices,
-  selectMachine,
+  selectCurrentMachine,
   (layer, machineVertices, machine) => {
     if (!layer) {
       // zombie child

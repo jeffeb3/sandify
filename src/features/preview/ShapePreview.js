@@ -23,7 +23,7 @@ import { selectCurrentEffectId } from "@/features/effects/effectsSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import { selectPreviewSliderValue } from "@/features/preview/previewSlice"
 import EffectPreview from "@/features/preview/EffectPreview"
-import { getShapeFromType } from "@/features/shapes/factory"
+import { getShape } from "@/features/shapes/shapeFactory"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
@@ -81,7 +81,7 @@ const ShapePreview = (ownProps) => {
   const groupRef = React.useRef()
   const trRef = React.useRef()
   const isCurrent = layer?.id === currentLayerId
-  const model = getShapeFromType(layer?.type || "polygon")
+  const model = getShape(layer?.type || "polygon")
 
   useEffect(() => {
     if (layer?.visible && isCurrent && model.canChangeSize(layer)) {

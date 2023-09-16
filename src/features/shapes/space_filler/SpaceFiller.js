@@ -8,6 +8,7 @@ import {
 } from "@/common/lindenmayer"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { subtypes } from "./subtypes"
+import { getMachine } from "@/features/machines/machineFactory"
 
 const options = {
   fillerSubtype: {
@@ -63,15 +64,13 @@ export default class SpaceFiller extends Shape {
   }
 
   getVertices(state) {
-    const machine = state.machine
+    const machine = getMachine(state.machine)
     const iterations = state.shape.iterations || 1
 
-    let sizeX, sizeY
-    if (machine.rectangular) {
-      sizeX = machine.maxX - machine.minX
-      sizeY = machine.maxY - machine.minY
-    } else {
-      sizeX = sizeY = machine.maxRadius * 2.0
+    let { sizeX, sizeY } = machine
+    if (state.machine.type === "rectangular") {
+      sizeX = sizeX * 2
+      sizeY = sizeY * 2
     }
 
     // generate our vertices using a set of l-system rules

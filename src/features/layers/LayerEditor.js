@@ -13,7 +13,7 @@ import {
 } from "react-icons/ai"
 import CommentsBox from "@/components/CommentsBox"
 import ModelOption from "@/components/ModelOption"
-import { getShapeSelectOptions } from "@/features/shapes/factory"
+import { getShapeSelectOptions } from "@/features/shapes/shapeFactory"
 import { updateLayer, changeModelType } from "./layersSlice"
 import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
@@ -125,7 +125,7 @@ const LayerEditor = () => {
         {renderOption({ optionKey: "connectionMethod" })}
         {renderedLink}
       </div>
-      <div className="border-top px-3 py-3 mt-2">
+      <div className="px-3 py-2">
         {model.canTransform(layer) && (
           <Row className="align-items-center mt-1 mb-1">
             <Col sm={3}>Transform</Col>

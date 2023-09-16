@@ -1,6 +1,7 @@
 import { degToRad } from "@/common/geometry"
 import Victor from "victor"
 import Shape from "./Shape"
+import { getMachine } from "@/features/machines/machineFactory"
 
 const options = {
   wiperType: {
@@ -43,7 +44,7 @@ function boundPoint(good, bad, size_x, size_y) {
   var dx = good.x - bad.x
   var dy = good.y - bad.y
 
-  var fixed = Victor(bad.x, bad.y)
+  var fixed = new Victor(bad.x, bad.y)
   var distance = 0
   if (bad.x < -size_x || bad.x > size_x) {
     if (bad.x < -size_x) {
@@ -81,11 +82,12 @@ function nearEnough(end, point) {
 
 function spiralVertices(state) {
   // Determine the max radius
-  let maxRadius = state.machine.maxRadius
-  if (state.machine.rectangular) {
-    const halfHeight = (state.machine.maxY - state.machine.minY) / 2.0
-    const halfWidth = (state.machine.maxX - state.machine.minX) / 2.0
-    maxRadius = Math.sqrt(Math.pow(halfHeight, 2.0) + Math.pow(halfWidth, 2.0))
+  const machine = getMachine(state.machine)
+  const { height, width } = machine
+  let { maxRadius, type } = state.machine
+
+  if (type === "rectangular") {
+    maxRadius = Math.sqrt(Math.pow(height / 2, 2.0) + Math.pow(width / 2, 2.0))
   }
 
   let vertices = []
@@ -134,7 +136,7 @@ function linearVertices(state) {
   let width = 1
   let outputVertices = []
   let machine = state.machine
-  if (machine.rectangular) {
+  if (machine.type === "rectangular") {
     height = machine.maxY - machine.minY
     width = machine.maxX - machine.minX
   } else {
@@ -142,7 +144,7 @@ function linearVertices(state) {
     width = height
   }
 
-  let startLocation = Victor(-width / 2.0, height / 2.0)
+  let startLocation = new Victor(-width / 2.0, height / 2.0)
   let cosa = Math.cos(angle)
   let sina = Math.sin(angle)
 
@@ -153,8 +155,8 @@ function linearVertices(state) {
   if (Math.abs(sina) < 1.0e-10) {
     sina = 1.0e-10
   }
-  let orig_delta_w = Victor(state.shape.wiperSize / cosa, 0.0)
-  let orig_delta_h = Victor(0.0, -state.shape.wiperSize / sina)
+  let orig_delta_w = new Victor(state.shape.wiperSize / cosa, 0.0)
+  let orig_delta_h = new Victor(0.0, -state.shape.wiperSize / sina)
 
   if (angle > Math.PI / 4.0 && angle < 0.75 * Math.PI) {
     // flip the logic of x,y
@@ -163,14 +165,16 @@ function linearVertices(state) {
     orig_delta_h = temp
   }
   if (angle > Math.PI / 2.0) {
-    startLocation = Victor(-width / 2.0, -height / 2.0)
+    startLocation = new Victor(-width / 2.0, -height / 2.0)
     orig_delta_w = orig_delta_w.clone().multiply(Victor(-1.0, -1.0))
     orig_delta_h = orig_delta_h.clone().multiply(Victor(-1.0, -1.0))
   }
   let delta_w = orig_delta_w
   let delta_h = orig_delta_h
   let endLocation = startLocation.clone().multiply(Victor(-1.0, -1.0))
+
   outputVertices.push(startLocation)
+
   let nextWidthPoint = startLocation
   let nextHeightPoint = startLocation
 
