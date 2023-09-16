@@ -19,7 +19,7 @@ import layersReducer, {
   selectLayerVertices,
 } from "./layersSlice"
 import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
-import machineReducer from "@/features/machines/machineSlice"
+import machinesReducer from "@/features/machines/machinesSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"
@@ -41,15 +41,15 @@ describe("layers reducer", () => {
   const circleState = new Layer("circle").getInitialState()
 
   it("should handle initial state", () => {
-    polygonState.id = "1"
+    polygonState.id = "2" // default machine is "1"
 
     expect(layersReducer(undefined, {})).toEqual({
-      ids: ["1"],
+      ids: ["2"],
       entities: {
-        1: polygonState,
+        2: polygonState,
       },
-      current: "1",
-      selected: "1",
+      current: "2",
+      selected: "2",
     })
   })
 
@@ -478,7 +478,6 @@ describe("layers selectors", () => {
         3: { id: "3", layerId: "A", ...loopEffectState },
       },
     },
-    machine: {},
   }
 
   describe("selectLayerVertices", () => {
@@ -488,7 +487,7 @@ describe("layers selectors", () => {
         reducer: {
           effects: effectsReducer,
           layers: layersReducer,
-          machine: machineReducer,
+          machines: machinesReducer,
           fonts: fontsReducer,
         },
         preloadedState: initialState,

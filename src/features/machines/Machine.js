@@ -15,6 +15,7 @@ export const machineOptions = {
 export default class Machine {
   constructor(state) {
     this.state = Object.keys(state).length < 2 ? this.getInitialState() : state
+    this.type = this.state.type
     this.label = "Machine"
   }
 

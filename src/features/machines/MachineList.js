@@ -54,7 +54,7 @@ const MachineList = () => {
             key={machine.id}
             current={currentMachineId === machine.id}
             machine={machine}
-            handleLayerSelected={handleMachineSelected}
+            handleMachineSelected={handleMachineSelected}
             index={index}
           />
         ))}

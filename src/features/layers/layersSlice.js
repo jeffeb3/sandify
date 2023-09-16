@@ -340,6 +340,10 @@ const selectMachineVertices = createCachedSelector(
   selectNumVisibleLayers,
   selectCurrentMachine,
   (id, vertices, layerIndex, numLayers, machine) => {
+    if (!machine) {
+      return [] // zombie child
+    }
+
     log("selectMachineVertices", id)
     if (vertices.length > 0) {
       const layerInfo = {

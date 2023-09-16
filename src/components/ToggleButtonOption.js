@@ -20,18 +20,12 @@ const ToggleButtonOption = (props) => {
   }
 
   return (
-    <Row className={"align-items-center" + (visible ? "" : " d-none")}>
-      <Col
-        sm={5}
-        className="mb-1"
-      >
+    <Row className={"align-items-center mb-1" + (visible ? "" : " d-none")}>
+      <Col sm={5}>
         <Form.Label className="m-0">{option.title}</Form.Label>
       </Col>
 
-      <Col
-        sm={7}
-        className="mb-1"
-      >
+      <Col sm={7}>
         <ToggleButtonGroup
           type="radio"
           className="border"

@@ -3,18 +3,39 @@ import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { useSelector, useDispatch } from "react-redux"
-import { selectNumMachines } from "@/features/machines/machinesSlice"
+import {
+  selectNumMachines,
+  selectCurrentMachineId,
+  deleteMachine,
+} from "@/features/machines/machinesSlice"
 import MachineList from "./MachineList"
 import MachineEditor from "./MachineEditor"
+import CopyMachine from "./CopyMachine"
+import NewMachine from "./NewMachine"
 
 const MachineManager = () => {
   const dispatch = useDispatch()
   const numMachines = useSelector(selectNumMachines)
+  const currentMachineId = useSelector(selectCurrentMachineId)
 
   const canRemove = numMachines > 1
+  const [showNewMachine, setShowNewMachine] = useState(false)
+  const [showCopyMachine, setShowCopyMachine] = useState(false)
+
+  const toggleNewMachineModal = () => setShowNewMachine(!showNewMachine)
+  const toggleCopyMachineModal = () => setShowCopyMachine(!showCopyMachine)
+  const handleMachineRemoved = (id) => dispatch(deleteMachine(currentMachineId))
 
   return (
     <div>
+      <NewMachine
+        showModal={showNewMachine}
+        toggleModal={toggleNewMachineModal}
+      />
+      <CopyMachine
+        showModal={showCopyMachine}
+        toggleModal={toggleCopyMachineModal}
+      />
       <div className="p-3">
         <MachineList />
         <div className="d-flex align-items-center border-start border-end border-bottom">
@@ -24,8 +45,8 @@ const MachineManager = () => {
             variant="light"
             size="sm"
             data-tooltip-content="Create new machine"
-            data-tooltip-id="tooltip-new-layer"
-            //onClick={toggleNewLayerModal}
+            data-tooltip-id="tooltip-new-machine"
+            onClick={toggleNewMachineModal}
           >
             <FaPlusSquare />
           </Button>
@@ -36,7 +57,7 @@ const MachineManager = () => {
               variant="light"
               data-tooltip-content="Delete machine"
               data-tooltip-id="tooltip-delete-machine"
-              //onClick={handleLayerRemoved}
+              onClick={handleMachineRemoved}
             >
               <FaTrash />
             </Button>
@@ -47,7 +68,7 @@ const MachineManager = () => {
             variant="light"
             data-tooltip-content="Copy machine"
             data-tooltip-id="tooltip-copy-machine"
-            //onClick={toggleCopyModal}
+            onClick={toggleCopyMachineModal}
           >
             <FaCopy />
           </Button>

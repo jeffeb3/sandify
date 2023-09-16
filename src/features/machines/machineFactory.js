@@ -22,6 +22,10 @@ export const getDefaultMachineType = () => {
   return localStorage.getItem("defaultMachine") || "rectangular"
 }
 
+export const getDefaultMachine = () => {
+  return getMachine(getDefaultMachineType())
+}
+
 export const getMachineSelectOptions = () => {
   const types = Object.keys(machineFactory)
 

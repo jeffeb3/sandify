@@ -1,12 +1,7 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
 import { createSelector } from "reselect"
 import { v4 as uuidv4 } from "uuid"
-import {
-  insertOne,
-  prepareAfterAdd,
-  deleteOne,
-  updateOne,
-} from "@/common/slice"
+import { prepareAfterAdd, deleteOne, updateOne } from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import { getMachine, getDefaultMachineType } from "./machineFactory"
 
@@ -35,14 +30,26 @@ export const machinesSlice = createSlice({
   reducers: {
     addMachine: {
       reducer(state, action) {
-        insertOne(state, action)
+        adapter.addOne(state, action)
+        state.current = state.ids[state.ids.length - 1]
       },
       prepare(machine) {
         return prepareAfterAdd(machine)
       },
     },
     deleteMachine: (state, action) => {
+      const id = action.payload
+      const ids = state.ids
+      const deleteIdx = ids.findIndex((_id) => _id === id)
+      const currentMachineId = state.current
+
       deleteOne(adapter, state, action)
+
+      if (id === currentMachineId) {
+        const newIds = ids.filter((i) => i != id)
+        const idx = deleteIdx === ids.length - 1 ? deleteIdx - 1 : deleteIdx
+        state.current = newIds[idx]
+      }
     },
     updateMachine: (state, action) => {
       updateOne(adapter, state, action)
@@ -68,18 +75,6 @@ export const machinesSlice = createSlice({
       newMachineState.id = id
       adapter.setOne(state, newMachineState)
     },
-    /*    restoreDefaults: (state, action) => {
-      const id = action.payload
-      const { type, name, layerId } = state.entities[id]
-      const layer = new EffectLayer(type)
-
-      adapter.setOne(state, {
-        id,
-        name,
-        layerId,
-        ...layer.getInitialState(),
-      })
-    }, */
   },
 })
 
@@ -87,9 +82,9 @@ export default machinesSlice.reducer
 export const { actions: machinesActions } = machinesSlice
 export const {
   addMachine,
-  deleteMachine,
   updateMachine,
   setCurrentMachine,
+  deleteMachine,
   changeMachineType,
 } = machinesSlice.actions
 
@@ -99,6 +94,7 @@ export const {
 
 export const {
   selectAll: selectAllMachines,
+  selectIds: selectMachineIds,
   selectTotal: selectNumMachines,
   selectEntities: selectMachineEntities,
 } = adapter.getSelectors((state) => state.machines)
