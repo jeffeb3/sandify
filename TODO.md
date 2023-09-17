@@ -4,7 +4,7 @@
  - active effect is overly big; should be able to draw multiple bounded shapes vs a combined footprint
  - something weird going on with inability to select layer if effect hit area overlaps?
  - any selectable effect that hides the original shape should in theory be click-selectable
-- handle catastrophic state failure, and allow full reset
+
 - get rectangular preview image from Jeff
 - bump up version; maybe 1.0?
 

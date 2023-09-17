@@ -48,7 +48,9 @@ const loadPattern = (state, action) => {
 }
 
 const rootReducer = (state, action) => {
-  if (action.type === "RESET_PATTERN") {
+  if (action.type === "RESET_ALL") {
+    return combinedReducer(undefined, action)
+  } else if (action.type === "RESET_PATTERN") {
     return resetPattern(state, action)
   } else if (action.type === "LOAD_PATTERN") {
     return loadPattern(state, action)
