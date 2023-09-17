@@ -614,20 +614,28 @@ export const selectVerticesStats = createSelector(
 export const selectLayerPreviewBounds = createCachedSelector(
   selectLayerById,
   selectMachineVertices,
+  selectVisibleLayerEffects,
   selectCurrentMachine,
-  (layer, machineVertices, machine) => {
+  (layer, machineVertices, effects, machine) => {
     if (!layer) {
       // zombie child
       return []
     }
 
     const instance = new Layer(layer.type)
-    const vertices = instance.getVertices({
-      layer,
-      effects: [],
-      machine,
-      options: { bounds: true },
-    })
+    const hasSelectableEffect = effects.find(
+      (effect) => effect.type == "transformer" || effect.type == "mask",
+    )
+
+    // don't include layer vertices in bounds if there is a selectable transformer
+    const vertices = hasSelectableEffect
+      ? []
+      : instance.getVertices({
+          layer,
+          effects: [],
+          machine,
+          options: { bounds: true },
+        })
 
     const combinedVertices = [...vertices, ...machineVertices].flat()
     const previewedVertices = previewVertices(combinedVertices, layer)

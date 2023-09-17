@@ -39,8 +39,11 @@ const store = configureStore({
 
 if (persistState) {
   store.subscribe(() => {
-    saveState(store.getState(), persistSaveKey)
-    resetLogCounts()
+    const state = store.getState()
+    if (state.fonts.loaded) {
+      saveState(state, persistSaveKey)
+      resetLogCounts()
+    }
   })
 }
 

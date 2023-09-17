@@ -18,6 +18,7 @@ import {
   selectSliderBounds,
   selectLayerPreviewBounds,
   setCurrentLayer,
+  setCurrentEffect,
 } from "@/features/layers/layersSlice"
 import { selectCurrentEffectId } from "@/features/effects/effectsSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
@@ -49,6 +50,9 @@ const ShapePreview = (ownProps) => {
 
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
+  const selectableEffect = visibleEffects.findLast(
+    (effect) => effect.type == "transformer" || effect.type == "mask",
+  )
   const sliderValue = useSelector(selectPreviewSliderValue)
   const layerVertices = useSelector((state) =>
     selectPreviewVertices(state, ownProps.id),
@@ -367,7 +371,11 @@ const ShapePreview = (ownProps) => {
   }
 
   const handleClick = (e) => {
-    dispatch(setCurrentLayer(ownProps.id))
+    if (selectableEffect) {
+      dispatch(setCurrentEffect(selectableEffect.id))
+    } else {
+      dispatch(setCurrentLayer(ownProps.id))
+    }
     e.cancelBubble = true // don't bubble this up to the preview window
   }
 
