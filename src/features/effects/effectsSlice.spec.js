@@ -2,6 +2,7 @@ import { resetUniqueId } from "@/common/mocks"
 import effectsReducer, {
   addEffect,
   deleteEffect,
+  setSelectedEffect,
   setCurrentEffect,
   selectEffectsByLayerId,
   updateEffect,
@@ -115,6 +116,27 @@ describe("effects reducer", () => {
       },
       current: "1",
       selected: "1",
+    })
+  })
+
+  it("should handle setSelectedEffect", () => {
+    expect(
+      effectsReducer(
+        {
+          entities: {
+            0: {},
+            1: {},
+          },
+          selected: "1",
+        },
+        setSelectedEffect("0"),
+      ),
+    ).toEqual({
+      entities: {
+        0: {},
+        1: {},
+      },
+      selected: "0",
     })
   })
 

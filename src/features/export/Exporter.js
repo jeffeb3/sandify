@@ -132,29 +132,6 @@ export default class Exporter {
     this.line(key + ": " + value, add)
   }
 
-  optionLine(metamodel, instance, option, add = true) {
-    const val =
-      typeof instance[option] == "string"
-        ? instance[option].replace(/[\n\r]/g, " ")
-        : instance[option]
-    this.line(metamodel.getOptions()[option].title + ": " + val, add)
-  }
-
-  optionLines(metamodel, instance, options, add = true) {
-    options.forEach((option) => {
-      const metaOption = metamodel.getOptions()[option]
-      // TODO: fix
-      const visible =
-        metaOption.isVisible === undefined
-          ? true
-          : metaOption.isVisible(instance, instance)
-
-      if (visible) {
-        this.optionLine(metamodel, instance, option, add)
-      }
-    })
-  }
-
   indent() {
     this.indentLevel++
   }

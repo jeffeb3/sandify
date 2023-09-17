@@ -3,9 +3,7 @@
 - get rectangular preview image from Jeff
 - bump up version; maybe 1.0?
 
-- add any missing specs
-- code cleanup
-- review/test EVERYTHING
+- review/test
   - all shapes/effects
   - machines
   - exports (faithful representation?)

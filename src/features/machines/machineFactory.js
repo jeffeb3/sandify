@@ -8,14 +8,11 @@ export const machineFactory = {
 
 export const getMachine = (state) => {
   if (typeof state === "string") {
-    // "new" case
+    // "new" machine case
     state = { type: state }
   }
 
-  // todo: legacy case. remove this
-  const type = state.type || (state.rectangular ? "rectangular" : "polar")
-
-  return new machineFactory[type](state)
+  return new machineFactory[state.type](state)
 }
 
 export const getDefaultMachineType = () => {
