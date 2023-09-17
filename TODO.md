@@ -3,6 +3,9 @@
 - get rectangular preview image from Jeff
 - bump up version; maybe 1.0?
 
+- bug: track selection is wonky
+- bug: track resizing isn't working via mouse scroll wheel
+
 - review/test
   - all shapes/effects
   - machines
@@ -21,6 +24,7 @@
 - when shift key is pressed, step should move in finer increments
 
 ## NEW IN THIS VERSION
+
 - User interface
   - Layout improvements
   - Can zoom in/out in the preview window.

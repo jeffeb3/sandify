@@ -67,11 +67,12 @@ const ShapePreview = (ownProps) => {
   const shapePreviewVertices = useSelector((state) =>
     selectShapePreviewVertices(state, ownProps.id),
   )
+  const isCurrent = layer?.id === currentLayerId
   const sliderColors = useSelector(selectSliderColors, isEqual)
   const offsets = useSelector(selectVertexOffsets, isEqual)
   const sliderBounds = useSelector(selectSliderBounds, isEqual)
   const layerBounds = useSelector(
-    (state) => selectLayerPreviewBounds(state, ownProps.id),
+    (state) => selectLayerPreviewBounds(state, ownProps.id, !isCurrent),
     isEqual,
   )
 
@@ -84,7 +85,6 @@ const ShapePreview = (ownProps) => {
   const shapeRef = React.useRef()
   const groupRef = React.useRef()
   const trRef = React.useRef()
-  const isCurrent = layer?.id === currentLayerId
   const model = getShape(layer?.type || "polygon")
 
   useEffect(() => {
@@ -266,12 +266,14 @@ const ShapePreview = (ownProps) => {
         }
       } else {
         drawLayerVertices(context, sliderBounds)
-      }
 
-      if (isCurrent || activeEffect) {
-        drawLayerStartAndEndPoints(context)
-      } else if (!currentLayerId && !currentEffectId) {
-        drawStartAndEndPoints(context)
+        if (!layer.dragging) {
+          if (isCurrent || activeEffect) {
+            drawLayerStartAndEndPoints(context)
+          } else if (!currentLayerId && !currentEffectId) {
+            drawStartAndEndPoints(context)
+          }
+        }
       }
 
       if (isSliding) {
@@ -371,7 +373,7 @@ const ShapePreview = (ownProps) => {
   }
 
   const handleClick = (e) => {
-    if (selectableEffect) {
+    if (selectableEffect && !isCurrent) {
       dispatch(setCurrentEffect(selectableEffect.id))
     } else {
       dispatch(setCurrentLayer(ownProps.id))

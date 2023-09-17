@@ -25,6 +25,7 @@ export default class Circle extends Shape {
       ...{
         circleLobes: 1,
         circleDirection: "clockwise",
+        maintainAspectRatio: true,
       },
     }
   }

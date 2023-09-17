@@ -41,7 +41,7 @@ const loadPattern = (state, action) => {
   newState.layers.current = id
   newState.layers.selected = id
   newState.effects.selected = newState.layers.entities[id].effectIds[0]
-  newState.preview.sliderValue = 1.0
+  newState.preview.sliderValue = 0.0
   newState.preview.zoom = 1.0
 
   return combinedReducer(newState, action)

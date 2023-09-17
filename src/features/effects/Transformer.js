@@ -28,26 +28,40 @@ export default class Transformer extends Effect {
   }
 
   getInitialState(layer, layerVertices) {
-    // reverse rotation before calculating bounds
-    const vertices = [...layerVertices]
-    vertices.forEach((vertex) => {
-      vertex.rotateDeg(layer.rotation)
-    })
+    if (layerVertices) {
+      // reverse rotation before calculating bounds
+      const vertices = [...layerVertices]
+      vertices.forEach((vertex) => {
+        vertex.rotateDeg(layer.rotation)
+      })
 
-    const bounds = findBounds(layerVertices)
-    const { width, height } = dimensions(vertices)
-    const offsetX = (bounds[1].x + bounds[0].x) / 2
-    const offsetY = (bounds[1].y + bounds[0].y) / 2
+      const bounds = findBounds(layerVertices)
+      const { width, height } = dimensions(vertices)
+      const offsetX = (bounds[1].x + bounds[0].x) / 2
+      const offsetY = (bounds[1].y + bounds[0].y) / 2
 
-    return {
-      ...super.getInitialState(),
-      ...{
-        type: "transformer",
-        width,
-        height,
-        x: offsetX - layer.x,
-        y: offsetY - layer.y,
-      },
+      return {
+        ...super.getInitialState(),
+        ...{
+          type: "transformer",
+          width,
+          height,
+          x: offsetX - layer.x,
+          y: offsetY - layer.y,
+        },
+      }
+    } else {
+      // imported; values will be supplied
+      return {
+        ...super.getInitialState(),
+        ...{
+          type: "transformer",
+          width: 0,
+          height: 0,
+          x: 0,
+          y: 0,
+        },
+      }
     }
   }
 

@@ -526,8 +526,9 @@ export const selectConnectedVertices = createSelector(selectState, (state) => {
 // returns an array of vertices connecting a given layer to the next (if it exists)
 export const selectConnectingVertices = createCachedSelector(
   (state, id) => id,
+  selectCurrentMachine,
   selectState,
-  (layerId, state) => {
+  (layerId, machine, state) => {
     log("selectConnectingVertices", layerId)
 
     const visibleLayerIds = selectVisibleLayerIds(state)
@@ -552,7 +553,7 @@ export const selectConnectingVertices = createCachedSelector(
     const end = endVertices[0]
 
     if (startLayer.connectionMethod === "along perimeter") {
-      const machineModel = getMachine(state.machine)
+      const machineModel = getMachine(machine)
       const startPerimeter = machineModel.nearestPerimeterVertex(start)
       const endPerimeter = machineModel.nearestPerimeterVertex(end)
       const perimeterConnection = machineModel.tracePerimeter(
@@ -616,7 +617,8 @@ export const selectLayerPreviewBounds = createCachedSelector(
   selectMachineVertices,
   selectVisibleLayerEffects,
   selectCurrentMachine,
-  (layer, machineVertices, effects, machine) => {
+  (state, id, includeEffects) => includeEffects,
+  (layer, machineVertices, effects, machine, includeEffects) => {
     if (!layer) {
       // zombie child
       return []
@@ -628,23 +630,26 @@ export const selectLayerPreviewBounds = createCachedSelector(
     )
 
     // don't include layer vertices in bounds if there is a selectable transformer
-    const vertices = hasSelectableEffect
-      ? []
-      : instance.getVertices({
-          layer,
-          effects: [],
-          machine,
-          options: { bounds: true },
-        })
+    const vertices =
+      !includeEffects || !hasSelectableEffect
+        ? instance.getVertices({
+            layer,
+            effects: [],
+            machine,
+            options: { bounds: true },
+          })
+        : []
+    const effectVertices =
+      includeEffects || !hasSelectableEffect ? machineVertices : []
 
-    const combinedVertices = [...vertices, ...machineVertices].flat()
+    const combinedVertices = [...vertices, ...effectVertices].flat()
     const previewedVertices = previewVertices(combinedVertices, layer)
 
     // don't include connector vertices
     return findBounds(previewedVertices.filter((vertex) => !vertex.connect))
   },
 )({
-  keySelector: (state, id) => id,
+  keySelector: (state, id, includeEffects) => `${id}-${includeEffects}`,
   selectorCreator: createSelectorCreator(defaultMemoize, {
     equalityCheck: isEqual,
   }),

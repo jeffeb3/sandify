@@ -119,13 +119,15 @@ const EffectPreview = (ownProps) => {
   }
 
   function hitFunc(context, shape) {
-    const width = shape.getAttr("width")
-    const height = shape.getAttr("height")
-    const x = shape.getAttr("x")
-    const y = shape.getAttr("y")
+    if (isCurrent) {
+      const width = shape.getAttr("width")
+      const height = shape.getAttr("height")
+      const x = shape.getAttr("x")
+      const y = shape.getAttr("y")
 
-    context.rect(x - effect.x, y + effect.y, width, height)
-    context.fillStrokeShape(this)
+      context.rect(x - effect.x, y + effect.y, width, height)
+      context.fillStrokeShape(this)
+    }
   }
 
   const handleChange = (attrs) => {
