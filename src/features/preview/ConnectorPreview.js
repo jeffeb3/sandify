@@ -98,6 +98,10 @@ const ConnectorPreview = (ownProps) => {
     context.fillStrokeShape(shape)
   }
 
+  function hitFunc(context, shape) {
+    // don't draw anything so the connector is not clickable
+  }
+
   function drawConnector(context) {
     const { end } = bounds
     let oldColor = null
@@ -147,6 +151,7 @@ const ConnectorPreview = (ownProps) => {
           offsetX={startLayer.width / 2}
           offsetY={startLayer.height / 2}
           sceneFunc={sceneFunc}
+          hitFunc={hitFunc}
         ></Shape>
       )}
     </React.Fragment>

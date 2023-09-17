@@ -107,7 +107,7 @@ export default class Layer {
   }
 
   // returns an array of Victor vertices
-  getVertices({ layer, effects, machine }) {
+  getVertices({ layer, effects, machine, options = {} }) {
     const layerState = { shape: layer, machine }
 
     this.state = layer
@@ -120,7 +120,11 @@ export default class Layer {
 
     this.applyEffects(effects)
     this.transform()
-    this.vertices = this.model.finalizeVertices(this.vertices, layerState)
+    this.vertices = this.model.finalizeVertices(
+      this.vertices,
+      layerState,
+      options,
+    )
 
     return this.vertices
   }

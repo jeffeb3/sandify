@@ -622,7 +622,12 @@ export const selectLayerPreviewBounds = createCachedSelector(
     }
 
     const instance = new Layer(layer.type)
-    const vertices = instance.getVertices({ layer, effects: [], machine })
+    const vertices = instance.getVertices({
+      layer,
+      effects: [],
+      machine,
+      options: { bounds: true },
+    })
 
     const combinedVertices = [...vertices, ...machineVertices].flat()
     const previewedVertices = previewVertices(combinedVertices, layer)
