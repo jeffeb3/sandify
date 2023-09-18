@@ -1,17 +1,14 @@
 import React from "react"
-import { useSelector } from "react-redux"
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 import HappyHolidays from "./happy-holidays.svg"
 import PerlinRings from "./perlin-rings.svg"
 import KochCubeFlowers from "./koch-cube-flowers.svg"
-import { selectAppVersion } from "@/features/app/appSlice"
+import { SANDIFY_VERSION } from "@/features/app/appSlice"
 import "./About.scss"
 
 const About = () => {
-  const version = useSelector(selectAppVersion)
-
   return (
     <footer className="p-4">
       <Container
@@ -28,7 +25,7 @@ const About = () => {
               style={{ fontSize: "1.4rem" }}
               className="mb-2"
             >
-              v{version}
+              v{SANDIFY_VERSION}
             </div>
             <div className="tagline mb-2">
               create patterns for robots that draw in sand with ball bearings
@@ -37,33 +34,33 @@ const About = () => {
               Sandify turns your cold, empty-hearted, emotionless sand tables
               into cold, empty-hearted, emotionless sand table robots with
               enchanting patterns. Sandify is a labor of love, but if you&apos;d
-              like to support Sandify development financially, I do have a{" "}
-              <a href="https://github.com/sponsors/jeffeb3">
-                Donation system set up with github
-              </a>
-              . Or just <a href="https://www.paypal.me/jeffeb3">PayPal</a>.
+              like to support Sandify development financially, you can donate
+              through <a href="https://github.com/sponsors/jeffeb3">GitHub</a>{" "}
+              or <a href="https://www.paypal.me/jeffeb3">PayPal</a>.
             </p>
             <p>
-              Sandify was created by users in the
+              Sandify was created in 2017 by users in the
               <a href="https://forum.v1engineering.com/t/does-this-count-as-a-build/6037">
                 {" "}
                 V1Engineering.com
               </a>{" "}
-              forum.
+              forum. It&apos;s currently being developed by{" "}
+              <a href="https://github.com/jeffeb3">jeffeb3</a> and{" "}
+              <a href="https://github.com/bobnik">bobnik</a>.
             </p>
             <h2 className="mt-4">Getting started</h2>
             <p>
               Part of the fun of Sandify is playing it like you would a
               xylophone. Try it out first. The goal is to make it easy to make
-              your first pattern by just clicking and scrolling, finding
-              something you like. Check out the{" "}
+              your first pattern by clicking and scrolling, finding something
+              you like, and experimenting from there. Check out the{" "}
               <a href="https://github.com/jeffeb3/sandify/wiki">wiki</a> for
               some features that you might miss the first time through.
             </p>
             <h2>Exporting patterns</h2>
             <h3 className="mt-3">What sand machines are supported?</h3>
             <p>
-              Sandify supports gcode and theta-rho formats. Sandify was
+              Sandify supports gcode and theta rho formats. Sandify was
               originally designed for{" "}
               <a href="https://docs.v1engineering.com/zenxy/">
                 ZenXY on V1Engineering.com
@@ -74,7 +71,7 @@ const About = () => {
             </p>
             <h2>Importing layers</h2>
             Sandify supports import of pattern files as new layers. Supported
-            formats are .thr, .gcode, and .nc files.
+            formats are .thr, .gcode, and .nc.
             <h3 className="mt-3">Where can I find theta rho files?</h3>
             Sisyphus machines use theta rho (.thr) files. There is a large
             community sharing patterns.
@@ -88,12 +85,12 @@ const About = () => {
                   </li>
                   <li>
                     <a href="https://github.com/Dithermaster/sisyphus/">
-                      Dithermaster&apos;s github
+                      Dithermaster on GitHub
                     </a>
                   </li>
                   <li>
                     <a href="https://github.com/SlightlyLoony/JSisyphus">
-                      JSisyphus by Slightly Loony
+                      JSisyphus by Slightly Loony on GitHub
                     </a>
                   </li>
                 </ul>
@@ -107,7 +104,7 @@ const About = () => {
                   </li>
                   <li>
                     <a href="https://sisyphus-industries.com/community/community-tracks">
-                      Sisyphus Community
+                      Sisyphus Community Tracks
                     </a>
                   </li>
                   <li>
@@ -134,19 +131,20 @@ const About = () => {
               probably OK. Just be careful if you want to use them for something
               significant without explicit permission.
             </p>
-            <p>P.S. I am not a lawyer.</p>
-            <h2 className="mt-4">Github</h2>
+            <p>P.S. We are not lawyers.</p>
+            <h2 className="mt-4">GitHub</h2>
             <p>
               Sandify is hosted on{" "}
-              <a href="https://github.com/jeffeb3/sandify">Github</a>. Please
+              <a href="https://github.com/jeffeb3/sandify">GitHub</a>. Please
               post any problems, feature requests or comments in our{" "}
               <a href="https://github.com/jeffeb3/sandify/issues">
                 issue tracker
               </a>
-              . We&apos;re a community project, so{" "}
+              . We&apos;re a community project, and{" "}
               <a href="https://github.com/jeffeb3/sandify/blob/master/CONTRIBUTING.md">
-                we&apos;d love your help.
+                would love your help
               </a>
+              .
             </p>
             <h2 className="mt-4">License</h2>
             <p>

@@ -85,7 +85,7 @@ const ErrorFallback = ({ error }) => {
                 <p className="text-start ms-3">
                   As a last resort, you can reset all settings. If you think
                   you&apos;ve found an issue with Sandify, please let us know on{" "}
-                  <a href="https://github.com/jeffeb3/sandify/issues">Github</a>
+                  <a href="https://github.com/jeffeb3/sandify/issues">GitHub</a>
                   .
                 </p>
               </Col>

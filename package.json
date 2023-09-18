@@ -1,7 +1,7 @@
 {
   "name": "sandify",
   "homepage": "https://sandify.org",
-  "version": "0.2.8",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",

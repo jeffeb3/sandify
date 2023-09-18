@@ -6,10 +6,8 @@ import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
 import effectsReducer from "@/features/effects/effectsSlice"
 import fileReducer from "@/features/file/fileSlice"
-import appReducer from "./appSlice"
 
 const combinedReducer = combineReducers({
-  app: appReducer,
   effects: effectsReducer,
   exporter: exporterReducer,
   file: fileReducer,

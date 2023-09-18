@@ -81,7 +81,7 @@ export const scaleByWheel = (size, deltaX, deltaY) => {
 
     if (newSize === size) {
       // if the log scaled value isn't big enough to move the scale
-      newSize = Math.max(sign + size, 1)
+      newSize = Math.max(signY + size, 1)
     }
 
     return newSize
