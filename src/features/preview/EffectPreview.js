@@ -125,7 +125,7 @@ const EffectPreview = (ownProps) => {
       const x = shape.getAttr("x")
       const y = shape.getAttr("y")
 
-      context.rect(x - effect.x, y + effect.y, width, height)
+      context.rect(x - (effect.x || 0), y + (effect.y || 0), width, height)
       context.fillStrokeShape(this)
     }
   }
@@ -181,11 +181,14 @@ const EffectPreview = (ownProps) => {
     if (isCurrent) {
       e.evt.preventDefault()
 
-      if (Math.abs(e.evt.deltaY) > 0) {
+      const deltaX = e.evt.deltaX
+      const deltaY = e.evt.deltaY
+
+      if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
         dispatch(
           updateEffect({
-            width: scaleByWheel(effect.width, e.evt.deltaY),
-            height: scaleByWheel(effect.height, e.evt.deltaY),
+            width: scaleByWheel(effect.width, deltaX, deltaY),
+            height: scaleByWheel(effect.height, deltaX, deltaY),
             id: effect.id,
           }),
         )

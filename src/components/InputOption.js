@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
 import debounce from "lodash/debounce"
+import useKeyPress from "@/common/hooks/useKeyPress"
 
 const InputOption = ({
   data,
@@ -14,13 +15,17 @@ const InputOption = ({
   focusOnSelect = false,
   label = true,
 }) => {
+  inputRef ||= useRef()
   const [value, setValue] = useState(data[optionKey])
+  const shiftKeyPressed = useKeyPress("Shift", inputRef)
 
   useEffect(() => {
     setValue(data[optionKey])
   }, [data, optionKey])
 
   const option = options[optionKey]
+  const stepScale = shiftKeyPressed ? 0.1 : 1
+  const step = option.step ? option.step : 1
   const { delayKey } = option
   const optionType = option.type || "number"
   const minimum =
@@ -81,7 +86,7 @@ const InputOption = ({
       as={optionType === "textarea" ? "textarea" : "input"}
       name={`option-${optionKey}`}
       type={optionType}
-      step={option.step ? option.step : 1}
+      step={step * stepScale}
       min={!isNaN(minimum) ? minimum : ""}
       max={!isNaN(maximum) ? maximum : ""}
       value={value}

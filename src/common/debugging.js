@@ -1,7 +1,7 @@
 import { compact } from "lodash"
 
 // set to true to enable console logging
-const debug = true
+const debug = false
 
 // set to true to clear console before logging each state change
 const debugConsoleClear = false

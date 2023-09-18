@@ -50,8 +50,8 @@ const ShapePreview = (ownProps) => {
 
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
-  const selectableEffect = visibleEffects.findLast(
-    (effect) => effect.type == "transformer" || effect.type == "mask",
+  const selectableEffect = visibleEffects.findLast((effect) =>
+    ["transformer", "mask", "track"].includes(effect.type),
   )
   const sliderValue = useSelector(selectPreviewSliderValue)
   const layerVertices = useSelector((state) =>
@@ -360,11 +360,14 @@ const ShapePreview = (ownProps) => {
     if (isCurrent) {
       e.evt.preventDefault()
 
-      if (Math.abs(e.evt.deltaY) > 0) {
+      const deltaX = e.evt.deltaX
+      const deltaY = e.evt.deltaY
+
+      if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
         dispatch(
           updateLayer({
-            width: scaleByWheel(layer.width, e.evt.deltaY),
-            height: scaleByWheel(layer.height, e.evt.deltaY),
+            width: scaleByWheel(layer.width, deltaX, deltaY),
+            height: scaleByWheel(layer.height, deltaX, deltaY),
             id: layer.id,
           }),
         )

@@ -66,16 +66,24 @@ export const orderByKey = (keys, objects, keyName = "id") => {
   return compact(keys.map((key) => objectMap[key]))
 }
 
-// given a delta value from a mouse wheel, returns the equivalent layer delta; used for resizing.
-export const scaleByWheel = (size, deltaY) => {
-  const sign = Math.sign(deltaY)
-  const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * sign
-  let newSize = Math.max(roundP(size * scale, 0), 1)
+// given a delta values from a mouse wheel, returns the equivalent layer delta.
+// when shift key is pressed, this is apparently "horizontal" scrolling by the browser;
+// for us, it means we'll grow in increments of 1
+export const scaleByWheel = (size, deltaX, deltaY) => {
+  const signX = Math.sign(deltaX)
+  const signY = Math.sign(deltaY)
 
-  if (newSize === size) {
-    // if the log scaled value isn't big enough to move the scale
-    newSize = Math.max(sign + size, 1)
+  if (deltaX) {
+    return size + 1 * signX
+  } else {
+    const scale = 1 + (Math.log(Math.abs(deltaY)) / 30) * signY
+    let newSize = Math.max(roundP(size * scale, 0), 1)
+
+    if (newSize === size) {
+      // if the log scaled value isn't big enough to move the scale
+      newSize = Math.max(sign + size, 1)
+    }
+
+    return newSize
   }
-
-  return newSize
 }
