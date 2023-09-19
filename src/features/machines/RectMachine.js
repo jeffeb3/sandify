@@ -137,26 +137,6 @@ export default class RectMachine extends Machine {
     return (rDx < delta && dx < delta) || (rDy < delta && dy < delta)
   }
 
-  outlinePerimeter() {
-    const last = this.vertices[this.vertices.length - 1]
-
-    if (last) {
-      const s = this.nearestVertex(last)
-      const idx = this.nearestCornerIndex(s)
-      const corners = [
-        s,
-        this.corners[idx],
-        this.corners[(idx + 1) % 4],
-        this.corners[(idx + 2) % 4],
-        this.corners[(idx + 3) % 4],
-        this.corners[idx],
-      ]
-      this.vertices = this.vertices.concat(corners)
-    }
-
-    return this
-  }
-
   // Given two perimeter points, traces the shortest valid path between them (stays on
   // perimeter). Returns a list of intermediate points on that path (if any).
   // On further consideration, this could be redone using Dijsktra's algorithm, I believe,

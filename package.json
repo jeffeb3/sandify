@@ -13,6 +13,7 @@
     "buffer": "^6.0.3",
     "canvas": "^2.11.2",
     "color": "^4.2.3",
+    "convexhull-js": "^1.0.0",
     "core-js": "^3.11.0",
     "curve-matcher": "^1.1.1",
     "d3": "^7.6.1",

@@ -35,12 +35,11 @@ export default class Machine {
   }
 
   // given a set of vertices, ensure they adhere to the limits defined by the machine
-  polish(vertices, layerInfo) {
+  polish(vertices, layerInfo = {}) {
     this.vertices = vertices
     this.layerInfo = layerInfo
 
     this.enforceLimits().cleanVertices().limitPrecision().optimizePerimeter()
-    if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 

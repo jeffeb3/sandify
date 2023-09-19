@@ -328,7 +328,10 @@ export default class CirclePacker extends Shape {
     this.points.push(...arc(c.r, angle, a2, c.x, c.y))
 
     // connect along perimeter
-    const machine = getMachine(this.settings)
+    const machine = getMachine({
+      ...this.settings,
+      type: this.settings.rectangular ? "rectangular" : "polar",
+    })
     this.points.push(...machine.tracePerimeter(intersection, intersection2))
     this.points.push(intersection2)
 

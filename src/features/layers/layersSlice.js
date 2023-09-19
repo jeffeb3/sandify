@@ -151,6 +151,13 @@ const layersSlice = createSlice({
         state.selected = id
       }
     },
+    setSelectedLayer: (state, action) => {
+      const id = action.payload
+
+      if (state.entities[id]) {
+        state.selected = id
+      }
+    },
   },
 })
 
@@ -810,8 +817,12 @@ export const setCurrentLayer = (id) => {
 
 export const setCurrentEffect = (id) => {
   return (dispatch, getState) => {
+    const state = getState()
     dispatch(effectsSlice.actions.setCurrentEffect(id))
+
+    const effect = selectEffectById(state, id)
     dispatch(layersSlice.actions.setCurrentLayer(null))
+    dispatch(layersSlice.actions.setSelectedLayer(effect?.layerId))
   }
 }
 
@@ -824,5 +835,6 @@ export const {
   moveLayer,
   removeEffect,
   restoreDefaults,
+  setSelectedLayer,
   updateLayer,
 } = layersSlice.actions

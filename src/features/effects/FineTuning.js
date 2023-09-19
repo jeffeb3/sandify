@@ -1,4 +1,5 @@
 import Victor from "victor"
+import convexHull from "convexhull-js"
 import { arrayRotate } from "@/common/util"
 import {
   cloneVertices,
@@ -6,34 +7,39 @@ import {
   totalDistance,
   distance,
   boundingVerticesAtLength,
+  closest,
 } from "@/common/geometry"
 import Effect from "./Effect"
 
 const options = {
-  backtrackPct: {
-    title: "Backtrack at end (%)",
+  reverse: {
+    title: "1: Reverse path",
+    type: "checkbox",
+    isVisible: (model, state) => {
+      return !model.effect
+    },
+  },
+  rotateStartingPct: {
+    title: "2: Move start point (%)",
     min: 0,
     max: 100,
     step: 2,
   },
   drawPortionPct: {
-    title: "Draw portion of path (%)",
+    title: "3: Draw path (%)",
     min: 0,
     max: 100,
     step: 2,
   },
-  rotateStartingPct: {
-    title: "Rotate starting point (%)",
-    min: -100,
+  drawBorder: {
+    title: "4: Add perimeter border",
+    type: "checkbox",
+  },
+  backtrackPct: {
+    title: "5: Backtrack at end (%)",
+    min: 0,
     max: 100,
     step: 2,
-  },
-  reverse: {
-    title: "Reverse path",
-    type: "checkbox",
-    isVisible: (model, state) => {
-      return !model.effect
-    },
   },
 }
 
@@ -77,11 +83,15 @@ export default class FineTuning extends Effect {
       effect.rotateStartingPct === undefined ||
       effect.rotateStartingPct !== 0
     ) {
-      vertices = this.rotateStartingPoint(vertices, effect)
+      vertices = this.moveStartingPoint(vertices, effect)
     }
 
     if (effect.drawPortionPct !== undefined) {
       vertices = this.drawPortion(vertices, effect)
+    }
+
+    if (effect.drawBorder) {
+      vertices = this.drawBorder(vertices, effect)
     }
 
     if (effect.backtrackPct !== 0) {
@@ -91,23 +101,29 @@ export default class FineTuning extends Effect {
     return vertices
   }
 
-  // rotates the starting point of the shape based on a percentage of the overall length;
+  // moves the starting point of the shape based on a percentage of the overall length;
   // adds a new vertex along the path to match the given percentage.
-  rotateStartingPoint(vertices, effect) {
+  moveStartingPoint(vertices, effect) {
     let rotation = effect.rotateStartingPct
     if (rotation < 0) {
       rotation = 100 + rotation
     }
 
-    const loop = isLoop(vertices)
     const { vNew, index2 } = this.getBoundingSegment(vertices, rotation)
 
-    vertices.splice(index2, 0, vNew)
-    vertices = arrayRotate(vertices, index2)
+    if (isLoop(vertices)) {
+      // can do this efficiently by rotating where we start along the same vertices
+      vertices.splice(index2, 0, vNew)
+      vertices = arrayRotate(vertices, index2)
 
-    if (loop) {
       // close the loop
       vertices.push(Victor.fromObject(vertices[0]))
+    } else {
+      // can't rotate, so instead we'll reverse trace to get to our original starting
+      // point and then draw the shape normally from there.
+      const newVertices = vertices.splice(0, index2)
+      const reversedNewVertices = cloneVertices(newVertices).reverse()
+      vertices = [...reversedNewVertices, ...newVertices, ...vertices]
     }
 
     return vertices
@@ -139,6 +155,19 @@ export default class FineTuning extends Effect {
     backtrackVertices.push(vNew)
 
     return vertices.concat(backtrackVertices)
+  }
+
+  drawBorder(vertices, effect) {
+    let hull = convexHull(cloneVertices(vertices))
+    const last = vertices[vertices.length - 1]
+    const closestVertex = closest(hull, last)
+    const index = hull.indexOf(closestVertex)
+    hull = arrayRotate(hull, index)
+
+    hull.forEach((vertex) => {
+      vertices.push(vertex)
+    })
+    return vertices
   }
 
   // given an array of vertices and a percentage, returns a new vertex (vNew) positioned at

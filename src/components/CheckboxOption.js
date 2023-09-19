@@ -29,11 +29,8 @@ const CheckboxOption = ({
   }
 
   return (
-    <Row className={"align-items-center" + (visible ? "" : " d-none")}>
-      <Col
-        sm={5}
-        className="mb-1"
-      >
+    <Row className={"align-items-center mb-1" + (visible ? "" : " d-none")}>
+      <Col sm={5}>
         {label && (
           <Form.Label
             htmlFor="options-step"
@@ -46,7 +43,7 @@ const CheckboxOption = ({
 
       <Col
         sm={7}
-        className="mb-1 d-flex align-items-center"
+        className="d-flex align-items-center"
       >
         <Switch
           checked={data[optionKey]}

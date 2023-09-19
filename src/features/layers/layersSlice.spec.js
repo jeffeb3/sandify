@@ -15,6 +15,7 @@ import layersReducer, {
   moveLayer,
   restoreDefaults,
   setCurrentLayer,
+  setSelectedLayer,
   updateLayer,
   selectLayerVertices,
 } from "./layersSlice"
@@ -297,10 +298,46 @@ describe("layers reducer", () => {
     })
   })
 
+  it("should handle setSelectedLayer", () => {
+    expect(
+      layersReducer(
+        {
+          entities: {
+            0: {},
+            1: {},
+          },
+          selected: "1",
+        },
+        setSelectedLayer("0"),
+      ),
+    ).toEqual({
+      entities: {
+        0: {},
+        1: {},
+      },
+      selected: "0",
+    })
+  })
+
   describe("compound actions", () => {
     describe("addEffect", () => {
       it("should dispatch actions to create an effect and then add it to the layer", async () => {
-        const store = mockStore()
+        const store = mockStore({
+          layers: {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                effectIds: ["a", "b"],
+              },
+            },
+            ids: ["0"],
+          },
+          effects: {
+            entities: {},
+            ids: [],
+          },
+        })
         const effect = {
           name: "foo",
         }
@@ -416,7 +453,8 @@ describe("layers reducer", () => {
         expect(actions[2].type).toEqual("layers/addEffect")
         expect(actions[3].type).toEqual("effects/setCurrentEffect")
         expect(actions[4].type).toEqual("layers/setCurrentLayer")
-        expect(actions[5].type).toEqual("effects/addEffect")
+        expect(actions[5].type).toEqual("layers/setSelectedLayer")
+        expect(actions[6].type).toEqual("effects/addEffect")
       })
     })
 

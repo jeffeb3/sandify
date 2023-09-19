@@ -1,10 +1,8 @@
 ### TODO FOR RELEASE
 
 - get rectangular preview image from Jeff
-- bump up version; maybe 1.0?
-
-- bug: track selection is wonky
-- bug: track resizing isn't working via mouse scroll wheel
+- bug: wiper, 90 degrees with noise effect; change wiper size from 4 to 40, hangs browser
+- polar machine perimeter detection is still not great; adjusting perimeterConstant either draws way too many perimeter moves, or it chops off some of the perimeter; can we subsample to overcome this?
 
 - review/test
   - all shapes/effects
