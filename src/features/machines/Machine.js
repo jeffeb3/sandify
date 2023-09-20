@@ -44,6 +44,10 @@ export default class Machine {
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 
+    // remove unnecessary vertices along a straight line; the polar machine, for one, adds
+    // extra vertices to help with perimeter detection
+    this.vertices = downsample(this.vertices)
+
     // second call to limit precision for final cleanup
     this.limitPrecision()
 

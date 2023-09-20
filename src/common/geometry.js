@@ -329,6 +329,25 @@ export const subsample = (vertices, maxLength) => {
   return subsampledVertices
 }
 
+export const downsample = (vertices, tolerance = 0.0001) => {
+  let result = [vertices[0]]
+
+  for (let i = 1; i < vertices.length - 1; i++) {
+    let slope1 =
+      (vertices[i].y - vertices[i - 1].y) / (vertices[i].x - vertices[i - 1].x)
+    let slope2 =
+      (vertices[i + 1].y - vertices[i].y) / (vertices[i + 1].x - vertices[i].x)
+
+    if (Math.abs(slope1 - slope2) > tolerance) {
+      result.push(vertices[i])
+    }
+  }
+
+  result.push(vertices[vertices.length - 1])
+
+  return result
+}
+
 // Convert x,y vertices to theta, rho vertices
 export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
   let vertices = []

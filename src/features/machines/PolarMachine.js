@@ -1,5 +1,4 @@
 import {
-  angle,
   onSegment,
   arc,
   annotateVertex,
@@ -100,6 +99,20 @@ export default class PolarMachine extends Machine {
     }
   }
 
+  // remove all non-essential perimeter vertices. returns a list of segments
+  // involving non-perimeter paths
+  stripExtraPerimeterVertices() {
+    // Subsampling to protect against the case where there is a straight line connecting two
+    // perimeter points directly. In this case, we want to register that as a non-perimeter
+    // move, or it will be incorrectly optimized out of the final vertices. These extra vertices
+    // will be removed later by the machine if possible.
+    this.vertices = subsample(
+      this.vertices,
+      Math.min(this.sizeX, this.sizeY) / 50,
+    )
+    return super.stripExtraPerimeterVertices()
+  }
+
   // Finds the nearest vertex that is in the bounds of the circle. This will change the
   // shape. i.e. this doesn't care about the line segment, only about the point.
   nearestVertex(vertex) {
@@ -132,19 +145,6 @@ export default class PolarMachine extends Machine {
     }
   }
 
-  // Returns the distance along the perimeter between two points.
-  perimeterDistance(v1, v2) {
-    const startAngle = angle(v1)
-    const endAngle = angle(v2)
-    let deltaAngle = Math.abs(endAngle - startAngle)
-
-    if (deltaAngle > Math.PI) {
-      deltaAngle -= 2.0 * Math.PI
-    }
-
-    return Math.abs(deltaAngle) * this.state.maxRadius
-  }
-
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
     return arc(this.state.maxRadius, start.angle(), end.angle())
@@ -163,23 +163,11 @@ export default class PolarMachine extends Machine {
 
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta = 1) {
-    let rm = Math.pow(this.state.maxRadius, 2)
-    let r1 = Math.pow(v1.x, 2) + Math.pow(v1.y, 2)
-    let r2 = Math.pow(v2.x, 2) + Math.pow(v2.y, 2)
-    let d = this.perimeterDistance(v1, v2)
+    const rm = Math.sqrt(Math.pow(this.state.maxRadius, 2))
+    const r1 = Math.sqrt(Math.pow(v1.x, 2) + Math.pow(v1.y, 2))
+    const r2 = Math.sqrt(Math.pow(v2.x, 2) + Math.pow(v2.y, 2))
 
-    // Delta is purposefully large to accommodate the squaring of the compared values.
-    // Setting delta too small will result in perimeter moves being miscategorized.
-    // d is used to guard against the case where there is a straight line connecting two
-    // perimeter points directly. In this case, we want to register that as a non-perimeter
-    // move, or it will be incorrectly optimized out of the final vertices. The 3/50
-    // ratio could likely be refined further (relative to maxRadius), but it seems to produce
-    // accurate results at various machine sizes.
-    return (
-      Math.abs(r1 - rm) < delta &&
-      Math.abs(r2 - rm) < delta &&
-      d < (3 * this.state.maxRadius) / this.perimeterConstant
-    )
+    return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta
   }
 
   // The guts of logic for this limits enforcer. It will take a single line (defined by

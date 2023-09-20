@@ -34,7 +34,7 @@ const options = {
   maskBorder: {
     title: "Draw border",
     type: "checkbox",
-  }
+  },
 }
 
 export default class Mask extends Effect {
