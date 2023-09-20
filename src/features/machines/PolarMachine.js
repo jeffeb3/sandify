@@ -155,7 +155,7 @@ export default class PolarMachine extends Machine {
 
     if (last) {
       this.vertices = this.vertices.concat(
-        circle(this.state.maxRadius, parseInt((last.angle() * 64) / Math.PI)),
+        circle(this.state.maxRadius, last.angle()),
       )
     }
     return this
