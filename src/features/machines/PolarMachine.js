@@ -1,4 +1,11 @@
-import { angle, onSegment, arc, annotateVertex } from "@/common/geometry"
+import {
+  angle,
+  onSegment,
+  arc,
+  annotateVertex,
+  subsample,
+  circle,
+} from "@/common/geometry"
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
 
@@ -141,6 +148,17 @@ export default class PolarMachine extends Machine {
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
     return arc(this.state.maxRadius, start.angle(), end.angle())
+  }
+
+  outlinePerimeter() {
+    const last = this.vertices[this.vertices.length - 1]
+
+    if (last) {
+      this.vertices = this.vertices.concat(
+        circle(this.state.maxRadius, parseInt((last.angle() * 64) / Math.PI)),
+      )
+    }
+    return this
   }
 
   // Returns whether a given path lies on the perimeter of the circle.

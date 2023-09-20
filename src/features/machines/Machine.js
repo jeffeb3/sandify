@@ -1,4 +1,4 @@
-import { vertexRoundP, annotateVertices } from "@/common/geometry"
+import { vertexRoundP, annotateVertices, downsample } from "@/common/geometry"
 
 export const machineOptions = {
   name: {
@@ -40,11 +40,13 @@ export default class Machine {
     this.layerInfo = layerInfo
 
     this.enforceLimits().cleanVertices().limitPrecision().optimizePerimeter()
+    if (this.layerInfo.border) this.outlinePerimeter()
     if (this.layerInfo.start) this.addStartPoint()
     if (this.layerInfo.end) this.addEndPoint()
 
     // second call to limit precision for final cleanup
     this.limitPrecision()
+
     return this.vertices
   }
 

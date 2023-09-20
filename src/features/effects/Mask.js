@@ -31,6 +31,10 @@ const options = {
     title: "Invert",
     type: "checkbox",
   },
+  maskBorder: {
+    title: "Draw border",
+    type: "checkbox",
+  }
 }
 
 export default class Mask extends Effect {
@@ -64,6 +68,7 @@ export default class Mask extends Effect {
         maskMinimizeMoves: false,
         maskMachine: "rectangle",
         maskInvert: false,
+        maskBorder: false,
       },
     }
   }
@@ -112,7 +117,7 @@ export default class Mask extends Effect {
         maxRadius: effect.width / 2,
         mask: true,
       })
-      vertices = machine.polish(vertices)
+      vertices = machine.polish(vertices, { border: effect.maskBorder })
     }
 
     return vertices.map((vertex) => {
