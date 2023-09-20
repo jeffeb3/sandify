@@ -8,13 +8,13 @@ import Transformer from "./Transformer"
 import Warp from "./Warp"
 
 export const effectFactory = {
+  loop: Loop,
+  transformer: Transformer,
   fisheye: Fisheye,
   fineTuning: FineTuning,
-  loop: Loop,
   mask: Mask,
   noise: Noise,
   track: Track,
-  transformer: Transformer,
   warp: Warp,
 }
 

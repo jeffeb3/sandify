@@ -159,12 +159,12 @@ const LayerEditor = () => {
                       onClick={handleChangeMaintainAspectRatio}
                     >
                       {layer.maintainAspectRatio && (
-                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                        <IconContext.Provider value={{ size: "1.3em" }}>
                           <AiTwotoneLock />
                         </IconContext.Provider>
                       )}
                       {!layer.maintainAspectRatio && (
-                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                        <IconContext.Provider value={{ size: "1.3em" }}>
                           <AiTwotoneUnlock />
                         </IconContext.Provider>
                       )}
@@ -178,7 +178,7 @@ const LayerEditor = () => {
                     <Col xs={6}>
                       <div className="d-flex align-items-center mt-1">
                         <div className="me-1">
-                          <IconContext.Provider value={{ size: "1.3rem" }}>
+                          <IconContext.Provider value={{ size: "1.3em" }}>
                             <AiOutlineRotateRight />
                           </IconContext.Provider>
                         </div>
@@ -196,7 +196,7 @@ const LayerEditor = () => {
                         className="layer-button invisible"
                         variant="light"
                       >
-                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                        <IconContext.Provider value={{ size: "1.3em" }}>
                           <AiTwotoneLock />
                         </IconContext.Provider>
                       </Button>

@@ -17,6 +17,7 @@ import {
   selectCurrentEffectId,
   selectSelectedEffectId,
 } from "./effectsSlice"
+import { getEffect } from "@/features/effects/effectFactory"
 
 const EffectRow = ({
   current,
@@ -26,6 +27,7 @@ const EffectRow = ({
   handleToggleEffectVisible,
 }) => {
   const { name, id, visible } = effect
+  const instance = getEffect(effect.type)
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useSortable({
       id,
@@ -64,7 +66,15 @@ const EffectRow = ({
           </Button>
         </div>
 
-        <div className="no-select">{name}</div>
+        <div className="d-flex no-select flex-grow-1 align-items-center">
+          <div className="flex-grow-1">{name}</div>
+          <span
+            className="me-3"
+            style={{ fontSize: "80%" }}
+          >
+            {instance.label}
+          </span>
+        </div>
       </div>
     </ListGroup.Item>
   )

@@ -31,7 +31,7 @@ const options = {
 export default class NoiseWave extends Shape {
   constructor() {
     super("noise_wave")
-    this.label = "Noise Waves"
+    this.label = "Noise waves"
     this.selectGroup = "Erasers"
     this.usesMachine = true
     this.autosize = false

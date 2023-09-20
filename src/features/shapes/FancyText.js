@@ -52,7 +52,7 @@ const options = {
 export default class FancyText extends Shape {
   constructor() {
     super("fancyText")
-    this.label = "Fancy Text"
+    this.label = "Fancy text"
     this.usesMachine = true
     this.usesFonts = true
     this.stretch = true

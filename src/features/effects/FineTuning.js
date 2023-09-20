@@ -46,7 +46,7 @@ const options = {
 export default class FineTuning extends Effect {
   constructor() {
     super("fineTuning")
-    this.label = "Fine Tuning"
+    this.label = "Fine tuning"
     this.selectGroup = "effects"
   }
 

@@ -92,7 +92,7 @@ export default class Loop extends Effect {
       ...{
         // loop Options
         transformMethod: "smear",
-        numLoops: 5,
+        numLoops: 10,
 
         // grow options
         growEnabled: true,

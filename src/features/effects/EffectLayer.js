@@ -1,6 +1,10 @@
 import { getEffect } from "@/features/effects/effectFactory"
 
 export const effectOptions = {
+  name: {
+    title: "Name",
+    type: "text",
+  },
   x: {
     title: "X",
     inline: true,

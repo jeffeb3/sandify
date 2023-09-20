@@ -32,7 +32,7 @@ const options = {
 export default class FractalSpirograph extends Shape {
   constructor() {
     super("fractalSpirograph")
-    this.label = "Fractal Spirograph"
+    this.label = "Fractal spirograph"
     this.link =
       "https://benice-equation.blogspot.com/2012/01/fractal-spirograph.html"
     this.linkText = "this blog post on benice equations"

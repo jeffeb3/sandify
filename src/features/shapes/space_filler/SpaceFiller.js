@@ -33,7 +33,7 @@ const options = {
 export default class SpaceFiller extends Shape {
   constructor() {
     super("spaceFiller")
-    this.label = "Space Filler"
+    this.label = "Space filler"
     this.usesMachine = true
     this.autosize = false
     this.selectGroup = "Erasers"

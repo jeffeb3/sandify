@@ -32,7 +32,7 @@ const options = {
 export default class LSystem extends Shape {
   constructor() {
     super("lsystem")
-    this.label = "Fractal Line Writer"
+    this.label = "Fractal line writer"
     this.link = "https://en.wikipedia.org/wiki/L-system"
     this.linkText = "L-systems at Wikipedia"
   }

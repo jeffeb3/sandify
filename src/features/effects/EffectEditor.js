@@ -65,6 +65,7 @@ const EffectEditor = ({ id }) => {
 
   return (
     <div className="ps-1 flex-grow-1 mt-3 container-fluid pe-0">
+      {renderOption({ optionKey: "name" })}
       {renderedModelOptions}
       {model.canTransform(effect) && (
         <Row className="align-items-center mt-1 mb-1">
@@ -100,12 +101,12 @@ const EffectEditor = ({ id }) => {
                     onClick={handleChangeMaintainAspectRatio}
                   >
                     {effect.maintainAspectRatio && (
-                      <IconContext.Provider value={{ size: "1.3rem" }}>
+                      <IconContext.Provider value={{ size: "1.3em" }}>
                         <AiTwotoneLock />
                       </IconContext.Provider>
                     )}
                     {!effect.maintainAspectRatio && (
-                      <IconContext.Provider value={{ size: "1.3rem" }}>
+                      <IconContext.Provider value={{ size: "1.3em" }}>
                         <AiTwotoneUnlock />
                       </IconContext.Provider>
                     )}
@@ -119,7 +120,7 @@ const EffectEditor = ({ id }) => {
                   <Col xs={6}>
                     <div className="d-flex align-items-center mt-1">
                       <div className="me-1">
-                        <IconContext.Provider value={{ size: "1.3rem" }}>
+                        <IconContext.Provider value={{ size: "1.3em" }}>
                           <AiOutlineRotateRight />
                         </IconContext.Provider>
                       </div>
@@ -137,7 +138,7 @@ const EffectEditor = ({ id }) => {
                       className="layer-button invisible"
                       variant="light"
                     >
-                      <IconContext.Provider value={{ size: "1.3rem" }}>
+                      <IconContext.Provider value={{ size: "1.3em" }}>
                         <AiTwotoneLock />
                       </IconContext.Provider>
                     </Button>

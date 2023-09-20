@@ -1,6 +1,7 @@
 import {
   onSegment,
   arc,
+  angle,
   annotateVertex,
   subsample,
   circle,
@@ -143,6 +144,19 @@ export default class PolarMachine extends Machine {
     } else {
       return new Victor(0, 0)
     }
+  }
+
+  // Returns the distance along the perimeter between two points.
+  perimeterDistance(v1, v2) {
+    const startAngle = angle(v1)
+    const endAngle = angle(v2)
+    let deltaAngle = Math.abs(endAngle - startAngle)
+
+    if (deltaAngle > Math.PI) {
+      deltaAngle -= 2.0 * Math.PI
+    }
+
+    return Math.abs(deltaAngle) * this.state.maxRadius
   }
 
   // Returns points along the circle from the start to the end, tracing a circle of radius size.

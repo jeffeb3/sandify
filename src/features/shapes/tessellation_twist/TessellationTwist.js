@@ -86,7 +86,7 @@ const options = {
 export default class TessellationTwist extends Shape {
   constructor() {
     super("tessellationTwist")
-    this.label = "Tessellation Twist"
+    this.label = "Tessellation twist"
   }
 
   getInitialState() {

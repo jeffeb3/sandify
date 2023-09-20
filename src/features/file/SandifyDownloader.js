@@ -36,7 +36,7 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Save pattern as file</Modal.Title>
+        <Modal.Title>Save pattern as...</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -49,6 +49,11 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
           inputRef={inputRef}
           focusOnSelect={true}
         />
+        <div className="mt-4 fs-6 fst-italic">
+          Downloads a text-based .sdf file that contains no personal or browser
+          information. You can share this file with others, who can import your
+          design.
+        </div>
       </Modal.Body>
 
       <Modal.Footer>

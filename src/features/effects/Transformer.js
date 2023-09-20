@@ -12,7 +12,7 @@ export default class Transformer extends Effect {
   constructor() {
     super("transformer")
     this.dragPreview = true
-    this.label = "Transformer"
+    this.label = "Move and resize"
   }
 
   canMove(state) {

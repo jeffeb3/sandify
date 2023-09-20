@@ -36,7 +36,7 @@ const options = {
 export default class CirclePacker extends Shape {
   constructor() {
     super("circlePacker")
-    this.label = "Circle Packer"
+    this.label = "Circle packer"
     this.usesMachine = true
     this.autosize = false
     this.selectGroup = "Erasers"

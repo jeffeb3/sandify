@@ -40,7 +40,7 @@ const InputOption = ({
     typeof option.title === "function"
       ? option.title(model, data)
       : option.title
-  const inputWidth = optionType === "text" ? "auto" : "132px"
+  const inputWidth = optionType === "number" ? "132px" : "auto"
 
   if (!visible) {
     return null
