@@ -236,14 +236,22 @@ export default class InputText extends Shape {
 
   // hook to modify updates to a layer
   handleUpdate(layer, changes) {
-    if (changes.inputText || changes.inputFont || changes.rotateDir) {
-      const props = {
+    if (
+      changes.inputText !== undefined ||
+      changes.inputFont ||
+      changes.rotateDir
+    ) {
+      const newProps = {
         ...layer,
-        inputText: changes.inputText || layer.inputText,
+        inputText: changes.inputText || "a",
         inputFont: changes.inputFont || layer.inputFont,
       }
-      const oldVertices = this.getVertices({ shape: layer, creating: true })
-      const vertices = this.getVertices({ shape: props, creating: true })
+      const oldProps = {
+        ...layer,
+        inputText: layer.inputText || "a",
+      }
+      const oldVertices = this.getVertices({ shape: oldProps, creating: true })
+      const vertices = this.getVertices({ shape: newProps, creating: true })
       const { width: oldWidth, height: oldHeight } = dimensions(oldVertices)
       const { width, height } = dimensions(vertices)
 

@@ -108,14 +108,23 @@ export default class FancyText extends Shape {
 
   // hook to modify updates to a layer before they affect the state
   handleUpdate(layer, changes) {
-    if (changes.fancyText || changes.fancyFont || changes.fancyLineSpacing) {
-      const props = {
+    if (
+      changes.fancyText !== undefined ||
+      changes.fancyFont ||
+      changes.fancyLineSpacing
+    ) {
+      // default "a" value handles the empty string case to prevent weird resizing
+      const newProps = {
         ...layer,
-        fancyText: changes.fancyText || layer.fancyText,
+        fancyText: changes.fancyText || "a",
         fancyFont: changes.fancyFont || layer.fancyFont,
       }
-      const oldVertices = this.getVertices({ shape: layer, creating: true })
-      const vertices = this.getVertices({ shape: props, creating: true })
+      const oldProps = {
+        ...layer,
+        fancyText: layer.fancyText || "a",
+      }
+      const oldVertices = this.getVertices({ shape: oldProps, creating: true })
+      const vertices = this.getVertices({ shape: newProps, creating: true })
       const { width: oldWidth, height: oldHeight } = dimensions(oldVertices)
       const { width, height } = dimensions(vertices)
 

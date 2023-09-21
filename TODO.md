@@ -2,6 +2,8 @@
 
 - get rectangular preview image from Jeff
 - bug: wiper, 90 degrees with noise effect; change wiper size from 4 to 40, hangs browser
+- bug: create rectangular mask, resize it so aspect ratio isn't 1, change to circle; dimension of mask do not change to match 1:1 aspect ratio.
+- bug: border on rectangular mask doesn't always look right
 
 - review/test
   - all shapes/effects
