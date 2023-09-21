@@ -153,6 +153,27 @@ const EffectPreview = (ownProps) => {
     }
   }
 
+  const handleTransform = (e) => {
+    const ref = shapeRef.current
+    const scaleX = Math.abs(ref.scaleX())
+    const scaleY = Math.abs(ref.scaleY())
+    const width = roundP(Math.max(5, effect.width * scaleX), 0)
+    const height = roundP(Math.max(5, effect.height * scaleY), 0)
+    const originalRotation = roundP(effect.rotation, 0)
+    let rotation = roundP(ref.rotation(), 0)
+
+    if (
+      (width != effect.width || height != effect.height) &&
+      rotation == originalRotation + 180.0 * Math.sign(rotation)
+    ) {
+      // node has been flipped while scaling
+      ref.rotation(originalRotation)
+    }
+
+    ref.scaleX(scaleX)
+    ref.scaleY(scaleY)
+  }
+
   const handleTransformStart = (e) => {
     if (e.currentTarget === e.target) {
       handleChange({ dragging: true })
@@ -162,17 +183,24 @@ const EffectPreview = (ownProps) => {
   const handleTransformEnd = (e) => {
     if (e.currentTarget === e.target) {
       const node = shapeRef.current
-      const scaleX = node.scaleX()
-      const scaleY = node.scaleY()
+      const width = roundP(
+        Math.max(5, effect.width * Math.abs(node.scaleX())),
+        0,
+      )
+      const height = roundP(
+        Math.max(5, effect.height * Math.abs(node.scaleY())),
+        0,
+      )
+      const rotation = roundP(node.rotation(), 0)
 
       node.scaleX(1)
       node.scaleY(1)
 
       handleChange({
         dragging: false,
-        width: roundP(Math.max(5, effect.width * scaleX), 0),
-        height: roundP(Math.max(5, effect.height * scaleY), 0),
-        rotation: roundP(node.rotation(), 0),
+        width,
+        height,
+        rotation,
       })
     }
   }
@@ -241,6 +269,7 @@ const EffectPreview = (ownProps) => {
                 ? ["top-left", "top-right", "bottom-left", "bottom-right"]
                 : null
             }
+            onTransform={handleTransform}
           />
         )}
     </>

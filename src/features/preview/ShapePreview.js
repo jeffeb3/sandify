@@ -325,6 +325,26 @@ const ShapePreview = (ownProps) => {
     }
   }
 
+  const handleTransform = (e) => {
+    const ref = groupRef.current
+    const scaleX = Math.abs(ref.scaleX())
+    const scaleY = Math.abs(ref.scaleY())
+    const width = roundP(Math.max(5, layer.width * scaleX), 0)
+    const height = roundP(Math.max(5, layer.height * scaleY), 0)
+    const originalRotation = roundP(layer.rotation, 0)
+    let rotation = roundP(ref.rotation(), 0)
+
+    if (
+      (width != layer.width || height != layer.height) &&
+      rotation == originalRotation + 180.0 * Math.sign(rotation)
+    ) {
+      // node has been flipped while scaling
+      ref.rotation(originalRotation)
+    }
+    ref.scaleX(scaleX)
+    ref.scaleY(scaleY)
+  }
+
   const handleTransformStart = (e) => {
     if (e.currentTarget === e.target) {
       handleChange({ dragging: true })
@@ -334,19 +354,24 @@ const ShapePreview = (ownProps) => {
   const handleTransformEnd = (e) => {
     if (e.currentTarget === e.target) {
       const node = groupRef.current
-      const scaleX = node.scaleX()
-      const scaleY = node.scaleY()
+      const width = roundP(
+        Math.max(5, layer.width * Math.abs(node.scaleX())),
+        0,
+      )
+      const height = roundP(
+        Math.max(5, layer.height * Math.abs(node.scaleY())),
+        0,
+      )
+      const rotation = roundP(node.rotation(), 0)
 
       node.scaleX(1)
       node.scaleY(1)
 
-      const width = roundP(Math.max(5, layer.width * scaleX), 0)
-      const height = roundP(Math.max(5, layer.height * scaleY), 0)
       const changes = {
         dragging: false,
         width,
         height,
-        rotation: roundP(node.rotation(), 0),
+        rotation,
       }
 
       if (!layer.maintainAspectRatio) {
@@ -451,6 +476,7 @@ const ShapePreview = (ownProps) => {
               ? ["top-left", "top-right", "bottom-left", "bottom-right"]
               : null
           }
+          onTransform={handleTransform}
         />
       )}
     </Group>
