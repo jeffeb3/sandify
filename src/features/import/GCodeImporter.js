@@ -103,37 +103,7 @@ export default class GCodeImporter extends Importer {
     })
 
     toolpath.loadFromString(this.text, (err, results) => {
-      callback(this, this.normalizeCoords(props))
+      callback(this, props)
     })
-  }
-
-  normalizeCoords(props) {
-    const vertices = props.vertices
-    let minX = 1e9
-    let minY = 1e9
-    let maxX = -1e9
-    let maxY = -1e9
-
-    vertices.forEach((vertex) => {
-      minX = Math.min(vertex.x, minX)
-      minY = Math.min(vertex.y, minY)
-      maxX = Math.max(vertex.x, maxX)
-      maxY = Math.max(vertex.y, maxY)
-    })
-
-    const offsetX = (maxX + minX) / 2.0
-    const offsetY = (maxY + minY) / 2.0
-    const scaleX = 1.0 / (maxX - offsetX)
-    const scaleY = 1.0 / (maxY - offsetY)
-
-    //    props.originalAspectRatio = scaleX/scaleY
-    props.vertices = vertices.map((vertex) => {
-      return {
-        x: scaleX * (vertex.x - offsetX),
-        y: scaleY * (vertex.y - offsetY),
-      }
-    })
-
-    return props
   }
 }
