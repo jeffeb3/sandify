@@ -31,7 +31,6 @@ export default class PolarMachine extends Machine {
   constructor(state) {
     super(state)
     this.label = "Polar"
-    this.perimeterConstant = 50
     this.sizeX = this.state.maxRadius * 2
     this.sizeY = this.sizeX
     this.height = this.sizeX

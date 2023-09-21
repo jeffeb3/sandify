@@ -8,16 +8,9 @@ import rootReducer from "./rootSlice"
 const usePersistedState = true
 const persistState = true
 
-// if you want to save a multiple temporary states, use these keys. The first time
-// you save a new state, change persistSaveKey. Make a change, then change
-// persistInitKey to the same value. persistSaveKey is mostly obsolete now
-// given that a user can save their pattern to a file.
-const persistInitKey = "state"
-const persistSaveKey = "state"
-
 let persistedState =
   typeof jest === "undefined" && usePersistedState
-    ? loadState(persistInitKey) || undefined
+    ? loadState() || undefined
     : undefined
 
 // reset some values
@@ -41,7 +34,7 @@ if (persistState) {
   store.subscribe(() => {
     const state = store.getState()
     if (state.fonts.loaded) {
-      saveState(state, persistSaveKey)
+      saveState(state)
       resetLogCounts()
     }
   })

@@ -6,6 +6,7 @@ import fontsReducer from "@/features/fonts/fontsSlice"
 import layersReducer from "@/features/layers/layersSlice"
 import effectsReducer from "@/features/effects/effectsSlice"
 import fileReducer from "@/features/file/fileSlice"
+import { saveState } from "@/common/localStorage"
 
 const combinedReducer = combineReducers({
   effects: effectsReducer,
@@ -28,6 +29,11 @@ const resetPattern = (state, action) => {
   return combinedReducer(newState, action)
 }
 
+const resetAll = (state, action) => {
+  saveState({}) // explicitly clear state in local storage
+  return combinedReducer(undefined, action)
+}
+
 const loadPattern = (state, action) => {
   const { effects, layers } = action.payload
   const newState = JSON.parse(JSON.stringify(state)) // deep copy
@@ -47,7 +53,7 @@ const loadPattern = (state, action) => {
 
 const rootReducer = (state, action) => {
   if (action.type === "RESET_ALL") {
-    return combinedReducer(undefined, action)
+    return resetAll(state, action)
   } else if (action.type === "RESET_PATTERN") {
     return resetPattern(state, action)
   } else if (action.type === "LOAD_PATTERN") {
