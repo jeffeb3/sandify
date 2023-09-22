@@ -150,6 +150,7 @@ export default class RectMachine extends Machine {
         cloneVertex(this.corners[(idx + 2) % 4]),
         cloneVertex(this.corners[(idx + 3) % 4]),
         cloneVertex(this.corners[idx]),
+        cloneVertex(s),
       ]
       this.vertices = this.vertices.concat(corners)
     }

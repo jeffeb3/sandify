@@ -12,12 +12,17 @@ const options = {
     type: "togglebutton",
     choices: ["rectangle", "circle"],
     onChange: (model, changes, state) => {
-      if (changes.maskMachine === "circle") {
-        changes.rotation = 0
+      if (changes.maskMachine) {
+        if (changes.maskMachine === "circle") {
+          changes.rotation = 0
 
-        const size = Math.min(changes.width, changes.height)
-        changes.height = size
-        changes.width = size
+          const size = Math.max(state.width, state.height)
+          changes.height = size
+          changes.width = size
+          changes.maintainAspectRatio = true
+        } else {
+          changes.maintainAspectRatio = false
+        }
       }
 
       return changes

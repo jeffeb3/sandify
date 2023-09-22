@@ -16,6 +16,11 @@ const ToggleButtonOption = (props) => {
   const handleChange = (choice) => {
     let attrs = {}
     attrs[props.optionKey] = choice
+
+    if (option.onChange !== undefined) {
+      attrs = option.onChange(model, attrs, data)
+    }
+
     props.onChange(attrs)
   }
 
