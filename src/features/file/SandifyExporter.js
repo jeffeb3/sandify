@@ -1,7 +1,10 @@
+import { SANDIFY_VERSION } from "@/features/app/appSlice"
+
 export default class SandifyExporter {
   export(state) {
     const currentMachine = state.machines.entities[state.machines.current]
     const json = {
+      version: SANDIFY_VERSION,
       effects: { ...state.effects },
       layers: { ...state.layers },
       machine: { ...currentMachine },
