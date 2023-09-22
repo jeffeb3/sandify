@@ -633,7 +633,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
 
     const instance = new Layer(layer.type)
     const hasSelectableEffect = effects.find((effect) =>
-      ["transformer", "mask", "track"].includes(effect.type),
+      ["transformer", "mask"].includes(effect.type),
     )
 
     // don't include layer vertices in bounds if there is a selectable transformer

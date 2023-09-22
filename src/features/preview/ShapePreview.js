@@ -51,7 +51,7 @@ const ShapePreview = (ownProps) => {
   const index = useSelector((state) => selectLayerIndex(state, ownProps.id))
   const numLayers = useSelector(selectNumVisibleLayers)
   const selectableEffect = visibleEffects.findLast((effect) =>
-    ["transformer", "mask", "track"].includes(effect.type),
+    ["transformer", "mask"].includes(effect.type),
   )
   const sliderValue = useSelector(selectPreviewSliderValue)
   const layerVertices = useSelector((state) =>

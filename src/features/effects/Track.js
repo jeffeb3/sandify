@@ -7,6 +7,7 @@ import {
   circle,
   closest,
   calculateIntersection,
+  cloneVertex,
 } from "@/common/geometry"
 const options = {
   trackRotation: {
@@ -135,34 +136,35 @@ export default class Track extends Effect {
           indexVertices,
         )
         if (closestIntersection) {
-          let closestStartVertex = Victor.fromObject(
-            closestIntersection.intersection,
-          )
+          let closestStartVertex = closestIntersection.intersection
+          const closestIndexVertex = cloneVertex(closestStartVertex)
+
           indexVertices.splice(
             closestIntersection.indexB + 1,
             0,
-            closestStartVertex,
+            closestIndexVertex,
           )
+          const closestTrackVertex = cloneVertex(closestStartVertex)
           trackVertices.splice(
             closestIntersection.indexA + 1,
             0,
-            closestStartVertex,
+            closestTrackVertex,
           )
 
           const closestStartIndex = trackVertices.findIndex(
-            (vertex) => vertex == closestStartVertex,
+            (vertex) => vertex == closestTrackVertex,
           )
 
           // backtrack to get as close as possible to the first vertex in our next iteration so we
           // draw over it as little as possible
           const startIndex = indexVertices.findIndex(
-            (vertex) => vertex == closestStartVertex,
+            (vertex) => vertex == closestIndexVertex,
           )
           const backtrackVertices = indexVertices
             .slice(startIndex, indexVertices.length - 1)
             .reverse()
           backtrackVertices.forEach((vertex) =>
-            indexVertices.push(Victor.fromObject(vertex)),
+            indexVertices.push(cloneVertex(vertex)),
           )
 
           // now, draw the track from here to the first vertex in the next shape iteration
@@ -187,7 +189,7 @@ export default class Track extends Effect {
           }
 
           connectingVertices.forEach((vertex) =>
-            indexVertices.push(Victor.fromObject(vertex)),
+            indexVertices.push(cloneVertex(vertex)),
           )
         } else {
           // this case should not ever happen, but just in case
@@ -196,6 +198,7 @@ export default class Track extends Effect {
           )
         }
       }
+
       newVertices.push(indexVertices)
     }
 
@@ -236,7 +239,7 @@ export default class Track extends Effect {
       trackShape,
     } = effect
     const numShapes =
-      trackShape == "circle" && trackRotation === 360
+      trackShape == "circular" && trackRotation === 360
         ? trackNumShapes
         : trackNumShapes - 1
     const spiralRadius = width * trackSpiralRadiusPct
