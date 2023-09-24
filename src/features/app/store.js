@@ -13,15 +13,23 @@ let persistedState =
     ? loadState() || undefined
     : undefined
 
+// support a URL-based reset as a last resort
+const params = new URLSearchParams(window.location.search)
+const reset = params.get("reset")
+
 // reset some values
-if (persistedState) {
-  const importer = new SandifyImporter()
-  try {
-    // double JSON parsing ensures it's valid JSON before we try to import it
-    importer.import(JSON.stringify(persistedState))
-    persistedState.fonts.loaded = false
-  } catch (err) {
-    persistedState = undefined
+if (reset === "all") {
+  persistedState = undefined
+} else {
+  if (persistedState) {
+    const importer = new SandifyImporter()
+    try {
+      // double JSON parsing ensures it's valid JSON before we try to import it
+      importer.import(JSON.stringify(persistedState))
+      persistedState.fonts.loaded = false
+    } catch (err) {
+      persistedState = undefined
+    }
   }
 }
 
@@ -36,6 +44,10 @@ if (persistState) {
     if (state.fonts.loaded) {
       saveState(state)
       resetLogCounts()
+
+      if (reset) {
+        window.location.href = window.location.pathname
+      }
     }
   })
 }
