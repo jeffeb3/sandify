@@ -244,11 +244,11 @@ export const horizontalAlign = (selections, align = "left") => {
 }
 
 // returns an array of points drawing a circle of a given radius
-export const circle = (radius, start = 0, x = 0, y = 0) => {
+export const circle = (radius, start = 0, x = 0, y = 0, resolution = 128.0) => {
   let points = []
 
-  for (let i = 0; i <= 128; i++) {
-    let angle = ((Math.PI * 2.0) / 128.0) * i + start
+  for (let i = 0; i <= resolution; i++) {
+    let angle = ((Math.PI * 2.0) / resolution) * i + start
     points.push(
       new Victor(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius),
     )
@@ -333,12 +333,18 @@ export const downsample = (vertices, tolerance = 0.0001) => {
   let result = [vertices[0]]
 
   for (let i = 1; i < vertices.length - 1; i++) {
-    let slope1 =
-      (vertices[i].y - vertices[i - 1].y) / (vertices[i].x - vertices[i - 1].x)
-    let slope2 =
-      (vertices[i + 1].y - vertices[i].y) / (vertices[i + 1].x - vertices[i].x)
+    const v = vertices[i]
+    const vn = vertices[i + 1]
+    const vp = vertices[i - 1]
+    const slope1 = (v.y - vp.y) / (v.x - vp.x)
+    const slope2 = (vn.y - v.y) / (vn.x - v.x)
 
-    if (Math.abs(slope1 - slope2) > tolerance) {
+    const dy1 = Math.sign(v.y - vp.y)
+    const dy2 = Math.sign(vn.y - v.y)
+    const dx1 = Math.sign(v.x - vp.x)
+    const dx2 = Math.sign(vn.x - v.x)
+
+    if (dy1 != dy2 || dx1 != dx2 || Math.abs(slope1 - slope2) > tolerance) {
       result.push(vertices[i])
     }
   }
@@ -488,22 +494,6 @@ export const annotateVertices = (vertices, attrs) => {
   })
 
   return vertices
-}
-
-// returns the point in arr that is farthest to a given point
-export const farthest = (arr, point) => {
-  return arr.reduce(
-    (max, x, i, arr) => (x.distance(point) > max.distance(point) ? x : max),
-    arr[0],
-  )
-}
-
-// returns the point in arr that is closest to a given point
-export const closest = (arr, point) => {
-  return arr.reduce(
-    (max, x, i, arr) => (x.distance(point) < max.distance(point) ? x : max),
-    arr[0],
-  )
 }
 
 // returns the intersection point of two line segments

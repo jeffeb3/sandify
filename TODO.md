@@ -2,6 +2,8 @@
 
 - get rectangular preview image from Jeff
 - bug: wiper, 90 degrees with noise effect; change wiper size from 4 to 40, hangs browser
+- bug: edge-case optimization of pattern with inverted mask is adding a center point within the mask; workaround is to enable "minimize perimeter moves", but this isn't user-friendly obviously
+- add URL parameter to reset pattern; needed for cases where page is hanging
 
 - review/test
   - all shapes/effects
@@ -12,7 +14,7 @@
 
 ### FUTURE CONSIDERATION
 
-- refactor slider so it's precise like fine tuning
+- refactor slider so it's precise like fine tuning; support Shift key as well
 - use react-router-dom for routes so browser back button works with tabs
 - groups
   - selectLayersByGroupId - some kind of compound parent key "[a]-[b]"

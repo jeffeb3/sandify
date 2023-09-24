@@ -5,10 +5,17 @@ import {
   totalDistances,
   arc,
   circle,
-  closest,
   calculateIntersection,
   cloneVertex,
 } from "@/common/geometry"
+
+const orientations = {
+  unchanged: "as-is",
+  inward: "facing inward",
+  outward: "facing outward",
+  path: "along path",
+}
+
 const options = {
   trackRotation: {
     title: "Track rotation",
@@ -36,6 +43,14 @@ const options = {
       return state.trackPreserveShape
     },
     min: 1,
+  },
+  trackShapeOrientation: {
+    title: "Shape orientation",
+    type: "dropdown",
+    choices: orientations,
+    isVisible: (layer, state) => {
+      return state.trackPreserveShape
+    },
   },
 }
 
@@ -68,6 +83,7 @@ export default class Track extends Effect {
         trackSpiralRadiusPct: 0.5,
         trackPreserveShape: false,
         trackNumShapes: 5,
+        trackShapeOrientation: "outward",
       },
     }
   }
@@ -130,67 +146,59 @@ export default class Track extends Effect {
       )
 
       if (i < trackNumShapes - 1) {
-        // find the best intersection point and add it to our path
-        const closestIntersection = this.findTrackIntersectionPoint(
-          trackVertices,
-          indexVertices,
-        )
-        if (closestIntersection) {
-          let closestStartVertex = closestIntersection.intersection
-          const closestIndexVertex = cloneVertex(closestStartVertex)
+        // add vertex at the intersection of the track and the shape
+        let {
+          vertex: currentVertex,
+          index,
+          trackIndex,
+        } = this.addTrackConnectionPoints(indexVertices, trackVertices)
 
-          indexVertices.splice(
-            closestIntersection.indexB + 1,
-            0,
-            closestIndexVertex,
-          )
-          const closestTrackVertex = cloneVertex(closestStartVertex)
-          trackVertices.splice(
-            closestIntersection.indexA + 1,
-            0,
-            closestTrackVertex,
-          )
-
-          const closestStartIndex = trackVertices.findIndex(
-            (vertex) => vertex == closestTrackVertex,
-          )
-
-          // backtrack to get as close as possible to the first vertex in our next iteration so we
-          // draw over it as little as possible
-          const startIndex = indexVertices.findIndex(
-            (vertex) => vertex == closestIndexVertex,
-          )
+        if (currentVertex) {
+          // move to the intersection
           const backtrackVertices = indexVertices
-            .slice(startIndex, indexVertices.length - 1)
+            .slice(index, indexVertices.length - 1)
             .reverse()
           backtrackVertices.forEach((vertex) =>
             indexVertices.push(cloneVertex(vertex)),
           )
 
-          // now, draw the track from here to the first vertex in the next shape iteration
-          const nextVertices = this.getPreservedVerticesAtIndex(i + 1, effect, [
-            vertices[0],
-          ])
-          const closestEndVertex = closest(trackVertices, nextVertices[0])
-          const closestEndIndex = trackVertices.findIndex(
-            (vertex) => vertex == closestEndVertex,
+          // now, draw the track from the intersection to the next shape
+          const nextVertices = this.getPreservedVerticesAtIndex(
+            i + 1,
+            effect,
+            vertices,
           )
 
-          let connectingVertices
-          if (closestStartIndex <= closestEndIndex) {
-            connectingVertices = trackVertices.slice(
-              closestStartIndex,
-              closestEndIndex,
+          // add vertex at the intersection of the track and the next shape
+          const {
+            vertex: nextVertex,
+            index: nextIndex,
+            trackIndex: nextTrackIndex,
+          } = this.addTrackConnectionPoints(nextVertices, trackVertices, false)
+
+          if (nextVertex) {
+            let connectingVertices
+            if (trackIndex <= nextTrackIndex) {
+              connectingVertices = trackVertices.slice(
+                trackIndex,
+                nextTrackIndex,
+              )
+            } else {
+              connectingVertices = trackVertices
+                .slice(nextTrackIndex, trackIndex)
+                .reverse()
+            }
+
+            connectingVertices.forEach((vertex) =>
+              indexVertices.push(cloneVertex(vertex)),
             )
-          } else {
-            connectingVertices = trackVertices
-              .slice(closestEndIndex, closestStartIndex)
-              .reverse()
-          }
 
-          connectingVertices.forEach((vertex) =>
-            indexVertices.push(cloneVertex(vertex)),
-          )
+            // lastly, move from the intersection to the start of the next shape
+            const backtrackVertices = nextVertices.slice(0, nextIndex).reverse()
+            backtrackVertices.forEach((vertex) =>
+              indexVertices.push(cloneVertex(vertex)),
+            )
+          }
         } else {
           // this case should not ever happen, but just in case
           console.log(
@@ -205,8 +213,36 @@ export default class Track extends Effect {
     return newVertices.flat()
   }
 
-  // returhs the point in path B that intersects with the furthest possible point on path A
-  findTrackIntersectionPoint(pathA, pathB) {
+  // finds the intersection between the track and the shape, and splices the intersection
+  // vertex into both sets of vertices.
+  addTrackConnectionPoints(vertices, trackVertices, last = true) {
+    const intersection = this.findTrackIntersectionPoint(
+      trackVertices,
+      vertices,
+      last,
+    )
+    if (intersection) {
+      const vertex = cloneVertex(intersection.intersection)
+      vertices.splice(intersection.indexB + 1, 0, vertex)
+      const index = vertices.findIndex((v) => v == vertex)
+
+      const trackVertex = cloneVertex(intersection.intersection)
+      trackVertices.splice(intersection.indexA + 1, 0, trackVertex)
+      const trackIndex = trackVertices.findIndex((v) => v == trackVertex)
+
+      return {
+        vertex,
+        index,
+        trackVertex,
+        trackIndex,
+      }
+    } else {
+      return {}
+    }
+  }
+
+  // returhs the point in path B that intersects with path A
+  findTrackIntersectionPoint(pathA, pathB, last = true) {
     const intersections = []
     for (let i = 0; i < pathA.length - 1; i++) {
       for (let j = 0; j < pathB.length - 1; j++) {
@@ -227,7 +263,7 @@ export default class Track extends Effect {
     }
     intersections.sort((a, b) => b.indexA - a.indexA)
 
-    return intersections[0]
+    return intersections[last ? 0 : intersections.length - 1]
   }
 
   getPreservedVerticesAtIndex(index, effect, vertices) {
@@ -237,6 +273,7 @@ export default class Track extends Effect {
       trackNumShapes,
       trackRotation,
       trackShape,
+      trackShapeOrientation,
     } = effect
     const numShapes =
       trackShape == "circular" && trackRotation === 360
@@ -255,15 +292,34 @@ export default class Track extends Effect {
     const outputVertices = []
 
     for (let j = 0; j < vertices.length; j++) {
-      outputVertices.push(
-        new Victor(
-          vertices[j].x + offset * Math.cos(angle),
-          vertices[j].y + offset * Math.sin(angle),
-        ),
-      )
+      const vertex = cloneVertex(vertices[j])
+
+      if (trackShapeOrientation !== "unchanged") {
+        vertex.rotate(
+          Math.atan2(offset * Math.sin(angle), offset * Math.cos(angle)) +
+            this.additionalTrackRotation(trackShapeOrientation),
+        )
+      }
+
+      vertex.add({
+        x: offset * Math.cos(angle),
+        y: offset * Math.sin(angle),
+      })
+
+      outputVertices.push(vertex)
     }
 
     return outputVertices
+  }
+
+  additionalTrackRotation(orientation) {
+    if (orientation == "inward") {
+      return Math.PI / 2
+    } else if (orientation == "outward") {
+      return (3 * Math.PI) / 2
+    } else {
+      return 0
+    }
   }
 
   getOptions() {

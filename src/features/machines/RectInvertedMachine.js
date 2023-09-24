@@ -1,6 +1,8 @@
 import RectMachine from "./RectMachine"
 import Victor from "victor"
 import clip from "liang-barsky"
+import { cloneVertices } from "@/common/geometry"
+import { closest } from "@/common/proximity"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class RectInvertedMachine extends RectMachine {
@@ -66,6 +68,17 @@ export default class RectInvertedMachine extends RectMachine {
       return this.nearestPerimeterVertex(vertex)
     } else {
       return vertex
+    }
+  }
+
+  outlinePerimeter() {
+    const borderStart = new Victor(this.corners[0])
+    const border = cloneVertices(this.corners)
+    const closestVertex = closest(this.vertices, borderStart)
+
+    if (closestVertex) {
+      const closestIndex = this.vertices.indexOf(closestVertex)
+      this.vertices.splice(closestIndex, 0, ...border)
     }
   }
 }

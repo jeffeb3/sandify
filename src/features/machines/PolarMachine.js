@@ -14,13 +14,13 @@ const polarMachineOptions = {
     title: "Max radius (mm)",
     min: 0,
   },
-  polarEndPoint: {
-    title: "End point",
+  polarStartPoint: {
+    title: "Start point",
     type: "togglebutton",
     choices: ["none", "center", "perimeter"],
   },
-  polarStartPoint: {
-    title: "Start point",
+  polarEndPoint: {
+    title: "End point",
     type: "togglebutton",
     choices: ["none", "center", "perimeter"],
   },

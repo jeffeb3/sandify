@@ -15,7 +15,8 @@ export default defineConfig(() => ({
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      "tinyqueue": path.join(__dirname, 'node_modules', 'tinyqueue', 'index.js')
     }
   },
   build: {

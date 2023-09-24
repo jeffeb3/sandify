@@ -7,8 +7,8 @@ import {
   totalDistance,
   distance,
   boundingVerticesAtLength,
-  closest,
 } from "@/common/geometry"
+import { closest } from "@/common/proximity"
 import Effect from "./Effect"
 
 const options = {
@@ -75,27 +75,29 @@ export default class FineTuning extends Effect {
   }
 
   getVertices(effect, layer, vertices) {
-    if (effect.reverse) {
-      vertices = vertices.reverse()
-    }
+    if (vertices.length > 1) {
+      if (effect.reverse) {
+        vertices = vertices.reverse()
+      }
 
-    if (
-      effect.rotateStartingPct === undefined ||
-      effect.rotateStartingPct !== 0
-    ) {
-      vertices = this.moveStartingPoint(vertices, effect)
-    }
+      if (
+        effect.rotateStartingPct === undefined ||
+        effect.rotateStartingPct !== 0
+      ) {
+        vertices = this.moveStartingPoint(vertices, effect)
+      }
 
-    if (effect.drawPortionPct !== undefined) {
-      vertices = this.drawPortion(vertices, effect)
-    }
+      if (effect.drawPortionPct !== undefined) {
+        vertices = this.drawPortion(vertices, effect)
+      }
 
-    if (effect.drawBorder) {
-      vertices = this.drawBorder(vertices, effect)
-    }
+      if (effect.drawBorder) {
+        vertices = this.drawBorder(vertices, effect)
+      }
 
-    if (effect.backtrackPct !== 0) {
-      vertices = this.backtrack(vertices, effect)
+      if (effect.backtrackPct !== 0) {
+        vertices = this.backtrack(vertices, effect)
+      }
     }
 
     return vertices

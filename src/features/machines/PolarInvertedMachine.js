@@ -1,5 +1,7 @@
-import PolarMachine from "./PolarMachine"
 import Victor from "victor"
+import PolarMachine from "./PolarMachine"
+import { circle } from "@/common/geometry"
+import { nearestNeighbor } from "@/common/proximity"
 
 // Machine that clips vertices that fall inside the machine limits
 export default class PolarInvertedMachine extends PolarMachine {
@@ -77,5 +79,19 @@ export default class PolarInvertedMachine extends PolarMachine {
   // Returns the vertex if it's outside the bounds of the circle.
   inBounds(vertex) {
     return vertex.length() < this.state.maxRadius
+  }
+
+  outlinePerimeter() {
+    let border = circle(this.state.maxRadius)
+    const nearestVertex = nearestNeighbor(this.vertices, border)
+
+    if (nearestVertex) {
+      const nearestIndex = this.vertices.indexOf(nearestVertex)
+
+      // rotate our border to start from the nearest vertex; we're drawing this at a finer
+      // resolution because otherwise our downsampling can remove vertices.
+      border = circle(this.state.maxRadius, nearestVertex.angle(), 0, 0, 256)
+      this.vertices.splice(nearestIndex, 0, ...border)
+    }
   }
 }

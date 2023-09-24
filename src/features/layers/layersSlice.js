@@ -624,8 +624,8 @@ export const selectLayerPreviewBounds = createCachedSelector(
   selectMachineVertices,
   selectVisibleLayerEffects,
   selectCurrentMachine,
-  (state, id, includeEffects) => includeEffects,
-  (layer, machineVertices, effects, machine, includeEffects) => {
+  (state, id, isCurrent) => isCurrent,
+  (layer, machineVertices, effects, machine, isCurrent) => {
     if (!layer) {
       // zombie child
       return []
@@ -635,19 +635,21 @@ export const selectLayerPreviewBounds = createCachedSelector(
     const hasSelectableEffect = effects.find((effect) =>
       ["transformer", "mask"].includes(effect.type),
     )
+    const hasInvertedMask = effects.find((effect) => effect.maskInvert)
+    const includeVertices = !(hasSelectableEffect || hasInvertedMask)
+    const includeLayer = isCurrent || includeVertices
+    const includeEffects =
+      !(isCurrent || hasInvertedMask) || !hasSelectableEffect
 
-    // don't include layer vertices in bounds if there is a selectable transformer
-    const vertices =
-      !includeEffects || !hasSelectableEffect
-        ? instance.getVertices({
-            layer,
-            effects: [],
-            machine,
-            options: { bounds: true },
-          })
-        : []
-    const effectVertices =
-      includeEffects || !hasSelectableEffect ? machineVertices : []
+    const vertices = includeLayer
+      ? instance.getVertices({
+          layer,
+          effects: [],
+          machine,
+          options: { bounds: true },
+        })
+      : []
+    const effectVertices = includeEffects ? machineVertices : []
 
     const combinedVertices = [...vertices, ...effectVertices].flat()
     const previewedVertices = previewVertices(combinedVertices, layer)
@@ -656,7 +658,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
     return findBounds(previewedVertices.filter((vertex) => !vertex.connect))
   },
 )({
-  keySelector: (state, id, includeEffects) => `${id}-${includeEffects}`,
+  keySelector: (state, id, isCurrent) => `${id}-${isCurrent}`,
   selectorCreator: createSelectorCreator(defaultMemoize, {
     equalityCheck: isEqual,
   }),

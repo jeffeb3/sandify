@@ -72,7 +72,7 @@ const ShapePreview = (ownProps) => {
   const offsets = useSelector(selectVertexOffsets, isEqual)
   const sliderBounds = useSelector(selectSliderBounds, isEqual)
   const layerBounds = useSelector(
-    (state) => selectLayerPreviewBounds(state, ownProps.id, !isCurrent),
+    (state) => selectLayerPreviewBounds(state, ownProps.id, isCurrent),
     isEqual,
   )
 
@@ -267,7 +267,10 @@ const ShapePreview = (ownProps) => {
       } else {
         drawLayerVertices(context, sliderBounds)
 
-        if (!layer.dragging) {
+        if (
+          !layer.dragging ||
+          layer.type === "point" /* mini hack to draw point when dragging */
+        ) {
           if (isCurrent || activeEffect) {
             drawLayerStartAndEndPoints(context)
           } else if (!currentLayerId && !currentEffectId) {

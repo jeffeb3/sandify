@@ -116,7 +116,7 @@ export default class FancyText extends Shape {
       // default "a" value handles the empty string case to prevent weird resizing
       const newProps = {
         ...layer,
-        fancyText: changes.fancyText || "a",
+        fancyText: changes.fancyText || layer.fancyText || "a",
         fancyFont: changes.fancyFont || layer.fancyFont,
       }
       const oldProps = {

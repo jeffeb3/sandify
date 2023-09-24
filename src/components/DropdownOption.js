@@ -27,9 +27,12 @@ const DropdownOption = ({
     : Object.keys(choices).map((key) => {
         return { value: key, label: choices[key] }
       })
-  const currentLabel = choices.find(
-    (choice) => choice.value == currentChoice,
+  const currentLabel = (
+    choices.find((choice) => choice.value == currentChoice) || choices[0]
   ).label
+  const visible =
+    option.isVisible === undefined ? true : option.isVisible(model, data)
+
   const handleChange = (choice) => {
     const value = choice.value
     let attrs = {}
@@ -44,25 +47,25 @@ const DropdownOption = ({
 
   return (
     <Row
-      className="align-items-center"
+      className={"align-items-center mb-1" + (visible ? "" : " d-none")}
       key={index}
     >
-      <Col
-        sm={5}
-        className="mb-1"
-      >
-        <Form.Label htmlFor="options-dropdown">{option.title}</Form.Label>
+      <Col sm={5}>
+        <Form.Label
+          className="m-0"
+          htmlFor="options-dropdown"
+        >
+          {option.title}
+        </Form.Label>
       </Col>
 
-      <Col
-        sm={7}
-        className="mb-1"
-      >
+      <Col sm={7}>
         <Select
           value={{ value: currentChoice, label: currentLabel }}
           onChange={handleChange}
           options={choices}
           menuPortalTarget={document.body}
+          menuPlacement="auto"
           styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         />
       </Col>
