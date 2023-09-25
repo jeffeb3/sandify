@@ -17,6 +17,7 @@ import {
   getEffect,
 } from "./effectFactory"
 import EffectLayer from "./EffectLayer"
+import { selectSelectedEffectId } from "./effectsSlice"
 
 const defaultEffect = getDefaultEffect()
 const customStyles = {
@@ -31,6 +32,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectedLayer = useSelector(selectSelectedLayer)
+  const selectedEffectId = useSelector(selectSelectedEffectId)
   const selectedLayerVertices = useSelector((state) =>
     selectLayerVertices(state, selectedLayer.id),
   )
@@ -64,7 +66,6 @@ const NewEffect = ({ toggleModal, showModal }) => {
 
   const onEffectAdded = (event) => {
     const layer = new EffectLayer(type)
-
     event.preventDefault()
     dispatch(
       addEffect({
@@ -73,6 +74,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
           ...layer.getInitialState(selectedLayer, selectedLayerVertices),
           name,
         },
+        afterId: selectedEffectId,
       }),
     )
     toggleModal()

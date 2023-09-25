@@ -86,8 +86,19 @@ const layersSlice = createSlice({
       adapter.updateOne(state, { id: changes.id, changes })
     },
     addEffect: (state, action) => {
-      const { id, effectId } = action.payload
-      state.entities[id].effectIds.push(effectId)
+      const { id, effectId, afterId } = action.payload
+      const effectIds = state.entities[id].effectIds
+
+      let index
+      if (afterId) {
+        index = effectIds.findIndex((id) => id == afterId)
+        if (index == -1) {
+          index = null
+        }
+      }
+      index = index + 1 || effectIds.length
+
+      effectIds.splice(index, 0, effectId)
     },
     moveEffect: (state, action) => {
       const { id, oldIndex, newIndex } = action.payload
@@ -763,7 +774,7 @@ export const copyLayer = ({ id, name }) => {
   }
 }
 
-export const addEffect = ({ id, effect }) => {
+export const addEffect = ({ id, effect, afterId }) => {
   return (dispatch) => {
     // create the effect first, and then add it to the layer
     const action = dispatch(
@@ -772,7 +783,9 @@ export const addEffect = ({ id, effect }) => {
         layerId: id,
       }),
     )
-    dispatch(layersSlice.actions.addEffect({ id, effectId: action.meta.id }))
+    dispatch(
+      layersSlice.actions.addEffect({ id, effectId: action.meta.id, afterId }),
+    )
     dispatch(setCurrentEffect(id))
   }
 }

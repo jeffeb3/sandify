@@ -12,6 +12,7 @@
   - selectLayersByGroupId - some kind of compound parent key "[a]-[b]"
   - big thunk which just changes layer dimensions
   - if it has effects, can render those via selector
+- store pattern name and other desired attribution (?) in exported file and display it in preview window if provided
 
 ## NEW IN 1.0.0
 

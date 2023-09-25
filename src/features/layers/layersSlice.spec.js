@@ -100,33 +100,66 @@ describe("layers reducer", () => {
       })
     })
 
-    it("should handle addEffect", () => {
-      expect(
-        layersReducer(
-          {
-            entities: {
-              0: {
-                id: "0",
-                name: "foo",
-                effectIds: [],
+    describe("should handle addEffect", () => {
+      it("should add to end if no afterId specified", () => {
+        expect(
+          layersReducer(
+            {
+              entities: {
+                0: {
+                  id: "0",
+                  name: "foo",
+                  effectIds: [],
+                },
               },
+              ids: ["0"],
             },
-            ids: ["0"],
+            layersActions.addEffect({
+              id: "0",
+              effectId: "1",
+            }),
+          ),
+        ).toEqual({
+          entities: {
+            0: {
+              id: "0",
+              name: "foo",
+              effectIds: ["1"],
+            },
           },
-          layersActions.addEffect({
-            id: "0",
-            effectId: "1",
-          }),
-        ),
-      ).toEqual({
-        entities: {
-          0: {
-            id: "0",
-            name: "foo",
-            effectIds: ["1"],
+          ids: ["0"],
+        })
+      })
+
+      it("should add at a specified afterId", () => {
+        expect(
+          layersReducer(
+            {
+              entities: {
+                0: {
+                  id: "0",
+                  name: "foo",
+                  effectIds: ["1", "2"],
+                },
+              },
+              ids: ["0"],
+            },
+            layersActions.addEffect({
+              id: "0",
+              effectId: "3",
+              afterId: "1",
+            }),
+          ),
+        ).toEqual({
+          entities: {
+            0: {
+              id: "0",
+              name: "foo",
+              effectIds: ["1", "3", "2"],
+            },
           },
-        },
-        ids: ["0"],
+          ids: ["0"],
+        })
       })
     })
 
