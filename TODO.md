@@ -4,13 +4,6 @@
 - bug: wiper, 90 degrees with noise effect; change wiper size from 4 to 40, hangs browser
 - bug: edge-case optimization of pattern with inverted mask is adding a center point within the mask; workaround is to enable "minimize perimeter moves", but this isn't user-friendly obviously
 
-- review/test
-  - all shapes/effects
-  - machines
-  - exports (faithful representation?)
-  - imports
-  - save/load/new
-
 ### FUTURE CONSIDERATION
 
 - refactor slider so it's precise like fine tuning; support Shift key as well
@@ -19,9 +12,8 @@
   - selectLayersByGroupId - some kind of compound parent key "[a]-[b]"
   - big thunk which just changes layer dimensions
   - if it has effects, can render those via selector
-- when shift key is pressed, step should move in finer increments
 
-## NEW IN THIS VERSION
+## NEW IN 1.0.0
 
 - User interface
   - Layout improvements

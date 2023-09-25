@@ -51,7 +51,9 @@ export const effectsSlice = createSlice({
     setSelectedEffect: (state, action) => {
       const id = action.payload
 
-      if (state.entities[id]) {
+      if (!id) {
+        state.current = null // preserve selection
+      } else if (state.entities[id]) {
         state.selected = id
       }
     },

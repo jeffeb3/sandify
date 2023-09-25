@@ -69,7 +69,10 @@ const NewEffect = ({ toggleModal, showModal }) => {
     dispatch(
       addEffect({
         id: selectedLayer.id,
-        effect: layer.getInitialState(selectedLayer, selectedLayerVertices),
+        effect: {
+          ...layer.getInitialState(selectedLayer, selectedLayerVertices),
+          name
+        }
       }),
     )
     toggleModal()
