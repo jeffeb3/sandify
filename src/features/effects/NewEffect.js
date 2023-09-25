@@ -71,8 +71,8 @@ const NewEffect = ({ toggleModal, showModal }) => {
         id: selectedLayer.id,
         effect: {
           ...layer.getInitialState(selectedLayer, selectedLayerVertices),
-          name
-        }
+          name,
+        },
       }),
     )
     toggleModal()
