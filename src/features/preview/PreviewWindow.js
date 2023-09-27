@@ -23,6 +23,8 @@ const PreviewWindow = () => {
   const selectedLayer = useSelector(selectSelectedLayer, isEqual)
   const layerIds = useSelector(selectVisibleLayerIds, isEqual)
   const zoom = useSelector(selectPreviewZoom)
+  const stageZoom = zoom > 1 ? zoom : 1
+  const offsetZoom = zoom > 1 ? 1 : zoom
   const remainingLayerIds = layerIds.filter((id) => id !== selectedLayer?.id)
   const layerRef = useRef()
   const stagePadding = 22
@@ -68,15 +70,12 @@ const PreviewWindow = () => {
 
   // add hidden debugging option to toggle the hit canvas on the layer when the user
   // clicks on the layer while pressing the Alt key
-  const handleLayerClick = (e) => {
+  const handleStageClick = (e) => {
+    dispatch(setCurrentLayer(null))
     if (e.evt.altKey && layerRef.current) {
       layerRef.current.toggleHitCanvas()
       e.cancelBubble = true
     }
-  }
-
-  const handleStageClick = (e) => {
-    dispatch(setCurrentLayer(null))
   }
 
   // some awkward rendering to put the current layer as the last child in the layer to ensure
@@ -85,16 +84,17 @@ const PreviewWindow = () => {
     <Stage
       scaleX={scale * zoom}
       scaleY={scale * zoom}
-      height={height * scaleHeight * zoom + stagePadding}
-      width={width * scaleWidth * zoom + stagePadding}
-      offsetX={(-width * (scaleWidth / scale) - stagePadding * 0.5) / 2}
-      offsetY={(-height * (scaleHeight / scale) - stagePadding * 0.5) / 2}
+      height={height * scaleHeight * stageZoom + stagePadding}
+      width={width * scaleWidth * stageZoom + stagePadding}
+      offsetX={
+        (-width * (scaleWidth / scale / offsetZoom) - stagePadding * 0.5) / 2
+      }
+      offsetY={
+        (-height * (scaleHeight / scale / offsetZoom) - stagePadding * 0.5) / 2
+      }
       onClick={handleStageClick}
     >
-      <Layer
-        ref={layerRef}
-        onClick={handleLayerClick}
-      >
+      <Layer ref={layerRef}>
         {machine.type === "polar" && (
           <Circle
             x={0}

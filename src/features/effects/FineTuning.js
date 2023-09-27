@@ -162,7 +162,6 @@ export default class FineTuning extends Effect {
 
   drawBorder(vertices, effect) {
     let hull = convexHull(cloneVertices(vertices))
-    const start = vertices[0]
     const last = vertices[vertices.length - 1]
     const closestVertex = closest(hull, last)
     const index = hull.indexOf(closestVertex)

@@ -12,7 +12,9 @@
   - selectLayersByGroupId - some kind of compound parent key "[a]-[b]"
   - big thunk which just changes layer dimensions
   - if it has effects, can render those via selector
-- store pattern name and other desired attribution (?) in exported file and display it in preview window if provided
+- store pattern name and other desired attribution (?) in exported file and display it somewhere (either stats tab or in the preview window)
+- show pattern start/end type (e.g., 1-0) if start/end if specified
+- new fine tuning setting: when backtracking at end, optionally ignore border if enabled
 
 ## NEW IN 1.0.0
 
