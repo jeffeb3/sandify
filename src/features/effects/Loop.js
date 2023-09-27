@@ -19,11 +19,17 @@ const options = {
   },
   growValue: {
     title: "Scale (+/-)",
+    isVisible: (layer, state) => {
+      return state.growEnabled
+    },
   },
   growMethod: {
     title: "Scale by",
     type: "togglebutton",
     choices: ["constant", "function"],
+    isVisible: (layer, state) => {
+      return state.growEnabled
+    },
   },
   growMathInput: {
     title: "Scale function (i)",
@@ -45,11 +51,17 @@ const options = {
   spinValue: {
     title: "Spin (+/-)",
     step: 0.1,
+    isVisible: (layer, state) => {
+      return state.spinEnabled
+    },
   },
   spinMethod: {
     title: "Spin by",
     type: "togglebutton",
     choices: ["constant", "function"],
+    isVisible: (layer, state) => {
+      return state.spinEnabled
+    },
   },
   spinMathInput: {
     title: "Spin function (i)",
@@ -67,7 +79,7 @@ const options = {
   spinSwitchbacks: {
     title: "Switchbacks",
     isVisible: (layer, state) => {
-      return state.spinMethod === "constant"
+      return state.spinEnabled && state.spinMethod === "constant"
     },
   },
 }
