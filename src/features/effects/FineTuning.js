@@ -2,6 +2,7 @@ import Victor from "victor"
 import convexHull from "convexhull-js"
 import { arrayRotate } from "@/common/util"
 import {
+  cloneVertex,
   cloneVertices,
   isLoop,
   totalDistance,
@@ -161,6 +162,7 @@ export default class FineTuning extends Effect {
 
   drawBorder(vertices, effect) {
     let hull = convexHull(cloneVertices(vertices))
+    const start = vertices[0]
     const last = vertices[vertices.length - 1]
     const closestVertex = closest(hull, last)
     const index = hull.indexOf(closestVertex)
@@ -169,6 +171,8 @@ export default class FineTuning extends Effect {
     hull.forEach((vertex) => {
       vertices.push(vertex)
     })
+    vertices.push(cloneVertex(hull[0]))
+
     return vertices
   }
 
