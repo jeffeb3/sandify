@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 
 const selectedIndex = (state) => {
   const curr = state.entities[state.selected]
-  return state.ids.findIndex((id) => id === curr.id)
+  return curr ? state.ids.findIndex((id) => id === curr.id) : -1
 }
 
 // Insert an entity at a specific index, which is not supported by addOne.

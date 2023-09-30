@@ -42,6 +42,7 @@ export default class Fisheye extends Effect {
         fisheyeSubsample: true,
         width: 100,
         height: 100,
+        maintainAspectRatio: true,
       },
     }
   }

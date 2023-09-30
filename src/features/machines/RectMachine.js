@@ -97,7 +97,7 @@ export default class RectMachine extends Machine {
 
       let clipped = this.clipSegment(
         outPoint,
-        Victor.fromObject(outPoint).multiply(new Victor(scale, scale)),
+        cloneVertex(outPoint).multiply(new Victor(scale, scale)),
       )
       const newPoint = clipped[clipped.length - 1]
       if (outPoint === last) {
@@ -336,8 +336,8 @@ export default class RectMachine extends Machine {
       // The intersections are tested in some normal order, but the line could be going through them
       // in any direction. This check will flip the intersections if they are reversed somehow.
       if (
-        Victor.fromObject(intersections[0]).subtract(start).lengthSq() >
-        Victor.fromObject(intersections[1]).subtract(start).lengthSq()
+        cloneVertex(intersections[0]).subtract(start).lengthSq() >
+        cloneVertex(intersections[1]).subtract(start).lengthSq()
       ) {
         let temp = intersections[0]
         intersections[0] = intersections[1]
@@ -352,9 +352,7 @@ export default class RectMachine extends Machine {
     // box until we reach the other point.
     // Here, I'm going to split this line into two parts, and send each half line segment back
     // through the clipSegment algorithm. Eventually, that should result in only one of the other cases.
-    const midpoint = Victor.fromObject(start)
-      .add(end)
-      .multiply(new Victor(0.5, 0.5))
+    const midpoint = cloneVertex(start).add(end).multiply(new Victor(0.5, 0.5))
 
     // recurse, and find smaller segments until we don't end up in this place again.
     return [

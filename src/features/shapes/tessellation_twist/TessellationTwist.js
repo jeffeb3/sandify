@@ -2,6 +2,7 @@ import Victor from "victor"
 import Graph, { mix } from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerianTrail"
 import { difference } from "@/common/util"
+import { cloneVertices } from "@/common/geometry"
 import Shape from "../Shape"
 
 const vecTriangle = [
@@ -228,7 +229,7 @@ export default class TessellationTwist extends Shape {
     })
 
     // cloned because some vertices are included multiple times and we need to de-dupe
-    return walkedVertices.map((vertex) => vertex.clone())
+    return cloneVertices(walkedVertices)
   }
 
   getOptions() {

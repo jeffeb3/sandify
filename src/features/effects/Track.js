@@ -78,6 +78,7 @@ export default class Track extends Effect {
       ...{
         width: 50,
         height: 50,
+        maintainAspectRatio: true,
         trackShape: "circle",
         trackRotation: 360,
         trackSpiralRadiusPct: 0.5,

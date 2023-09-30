@@ -298,8 +298,8 @@ export const subsample = (vertices, maxLength) => {
 
   for (next = 0; next < vertices.length; next++) {
     if (previous !== undefined) {
-      const start = Victor.fromObject(vertices[previous])
-      const end = Victor.fromObject(vertices[next])
+      const start = cloneVertex(vertices[previous])
+      const end = cloneVertex(vertices[next])
 
       const delta = end.clone().subtract(start)
       const deltaSegment = end
@@ -330,6 +330,10 @@ export const subsample = (vertices, maxLength) => {
 }
 
 export const downsample = (vertices, tolerance = 0.0001) => {
+  if (vertices.length < 3) {
+    return vertices
+  }
+
   let result = [vertices[0]]
 
   for (let i = 1; i < vertices.length - 1; i++) {
@@ -370,8 +374,7 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
   for (let next = 0; next < subsampledVertices.length; ++next) {
     let rho =
-      (Victor.fromObject(subsampledVertices[next]).magnitude() / maxRadius) *
-      rhoMax
+      (cloneVertex(subsampledVertices[next]).magnitude() / maxRadius) * rhoMax
     rho = Math.min(rho, rhoMax)
 
     // What is the basic theta for this point?

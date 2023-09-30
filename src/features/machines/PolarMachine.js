@@ -3,6 +3,7 @@ import {
   arc,
   angle,
   annotateVertex,
+  cloneVertex,
   subsample,
   circle,
 } from "@/common/geometry"
@@ -64,9 +65,7 @@ export default class PolarMachine extends Machine {
       } else {
         const first = this.vertices[0]
         const scale = maxRadius / first.magnitude()
-        const startPoint = Victor.fromObject(first).multiply(
-          new Victor(scale, scale),
-        )
+        const startPoint = cloneVertex(first).multiply(new Victor(scale, scale))
         this.vertices.unshift(
           annotateVertex(new Victor(startPoint.x, startPoint.y), {
             connect: true,
@@ -88,9 +87,7 @@ export default class PolarMachine extends Machine {
       } else {
         const last = this.vertices[this.vertices.length - 1]
         const scale = maxRadius / last.magnitude()
-        const endPoint = Victor.fromObject(last).multiply(
-          new Victor(scale, scale),
-        )
+        const endPoint = cloneVertex(last).multiply(new Victor(scale, scale))
         this.vertices[this.vertices.length - 1].connect = true
         this.vertices.push(
           annotateVertex(new Victor(endPoint.x, endPoint.y), { connect: true }),
@@ -123,7 +120,7 @@ export default class PolarMachine extends Machine {
       const precisionModifier = 0.0001
       const scale = (size - precisionModifier) / vertex.length()
 
-      return vertex.clone().multiply(new Victor(scale, scale))
+      return cloneVertex(vertex).multiply(new Victor(scale, scale))
     } else {
       return vertex
     }

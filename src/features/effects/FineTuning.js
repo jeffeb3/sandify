@@ -120,7 +120,7 @@ export default class FineTuning extends Effect {
       vertices = arrayRotate(vertices, index2)
 
       // close the loop
-      vertices.push(Victor.fromObject(vertices[0]))
+      vertices.push(cloneVertex(vertices[0]))
     } else {
       // can't rotate, so instead we'll reverse trace to get to our original starting
       // point and then draw the shape normally from there.

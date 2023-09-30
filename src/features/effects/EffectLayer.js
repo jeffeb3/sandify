@@ -77,7 +77,6 @@ export default class EffectLayer {
     }
 
     if (this.model.canChangeSize(state)) {
-      state.maintainAspectRatio = false
       state.aspectRatio = 1.0
     }
 

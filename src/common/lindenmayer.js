@@ -1,5 +1,5 @@
 import Victor from "victor"
-import { vertexRoundP } from "./geometry"
+import { vertexRoundP, cloneVertex } from "./geometry"
 
 export const onSubtypeChange = (subtype, changes, attrs) => {
   // if we switch back with too many iterations, the code
@@ -56,7 +56,7 @@ export const lsystem = (config) => {
 
 const lsystemDraw = (vertex, angle, config) => {
   return vertexRoundP(
-    vertex.clone().add({
+    cloneVertex(vertex).add({
       x: -config.side * Math.cos(angle),
       y: -config.side * Math.sin(angle),
     }),
