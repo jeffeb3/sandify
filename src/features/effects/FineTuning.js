@@ -71,6 +71,7 @@ export default class FineTuning extends Effect {
         backtrackPct: 0,
         rotateStartingPct: 0,
         reverse: false,
+        drawBorder: false,
       },
     }
   }

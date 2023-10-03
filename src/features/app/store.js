@@ -25,7 +25,7 @@ if (reset === "all") {
     const importer = new SandifyImporter()
     try {
       // double JSON parsing ensures it's valid JSON before we try to import it
-      importer.import(JSON.stringify(persistedState))
+      persistedState = importer.import(JSON.stringify(persistedState))
       persistedState.fonts.loaded = false
     } catch (err) {
       persistedState = undefined
