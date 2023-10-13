@@ -1,0 +1,21 @@
+#preview-main {
+  background-color: #333;
+}
+
+.preview-wrapper {
+  overflow: auto;
+
+  .konvajs-content {
+    margin: 0 auto;
+  }
+
+  @media (max-width: 991px) {
+    height: 400px;
+  }
+
+  @media (min-width: 992px) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    height: calc(100vh - 118px);
+  }
+}

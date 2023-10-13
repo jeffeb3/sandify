@@ -1,153 +1,169 @@
-import { connect } from 'react-redux'
-import React, { Component } from 'react'
-import { Button, Card, Row, Col } from 'react-bootstrap'
-import Select from 'react-select'
-import CommentsBox from '../../components/CommentsBox'
-import InputOption from '../../components/InputOption'
-import DropdownOption from '../../components/DropdownOption'
-import CheckboxOption from '../../components/CheckboxOption'
-import ToggleButtonOption from '../../components/ToggleButtonOption'
-import Transforms from '../transforms/Transforms'
-import { updateLayer, setShapeType, restoreDefaults } from '../layers/layersSlice'
-import { getCurrentLayer } from './selectors'
-import { getShape, getShapeSelectOptions } from '../../models/shapes'
-import './Layer.scss'
+import { getShape } from "@/features/shapes/shapeFactory"
+import EffectLayer from "@/features/effects/EffectLayer"
+import { resizeVertices, centerOnOrigin } from "@/common/geometry"
+import { roundP } from "@/common/util"
 
-const mapStateToProps = (state, ownProps) => {
-  const layer = getCurrentLayer(state)
-  const shape = getShape(layer)
-
-  return {
-    layer: layer,
-    shape: shape,
-    options: shape.getOptions(),
-    selectOptions: getShapeSelectOptions(false),
-    showShapeSelectRender: layer.selectGroup !== 'import' && !layer.effect,
-    link: shape.link,
-    linkText: shape.linkText
-  }
+export const layerOptions = {
+  name: {
+    title: "Name",
+    type: "text",
+  },
+  x: {
+    title: "X",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canMove(state)
+    },
+  },
+  y: {
+    title: "Y",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canMove(state)
+    },
+  },
+  width: {
+    title: "W",
+    min: 1,
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canChangeSize(state)
+    },
+    onChange: (model, changes, state) => {
+      if (changes.width === "" || changes.width <= 0) {
+        changes.width = 1
+      }
+      if (state.maintainAspectRatio) {
+        changes.height = roundP(changes.width / state.aspectRatio, 2)
+      } else {
+        changes.aspectRatio = changes.width / state.height
+      }
+      return changes
+    },
+  },
+  height: {
+    title: "H",
+    min: 1,
+    inline: true,
+    onChange: (model, changes, state) => {
+      if (changes.height === "" || changes.height <= 0) {
+        changes.height = 1
+      }
+      if (state.maintainAspectRatio) {
+        changes.width = roundP(changes.height * state.aspectRatio, 2)
+      } else {
+        changes.aspectRatio = state.width / changes.height
+      }
+      return changes
+    },
+  },
+  maintainAspectRatio: {
+    title: "Lock aspect ratio",
+    type: "checkbox",
+  },
+  rotation: {
+    title: "Rotate (degrees)",
+    inline: true,
+    isVisible: (model, state) => {
+      return model.canRotate(state)
+    },
+  },
+  connectionMethod: {
+    title: "Connect to next layer",
+    type: "togglebutton",
+    choices: ["line", "along perimeter"],
+  },
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  const { id } = ownProps
+export default class Layer {
+  constructor(type) {
+    this.model = getShape(type)
+  }
 
-  return {
-    onChange: (attrs) => {
-      attrs.id = id
-      dispatch(updateLayer(attrs))
-    },
-    onChangeType: (selected) => {
-      dispatch(setShapeType({id: id, type: selected.value}))
-    },
-    onRestoreDefaults: (event) => {
-      dispatch(restoreDefaults(id))
+  getInitialState(props) {
+    const dimensions = this.model.initialDimensions(props)
+    const { width, height, aspectRatio } = dimensions
+
+    return {
+      ...this.model.getInitialState(props),
+      ...{
+        type: this.model.type,
+        connectionMethod: "line",
+        x: 0.0,
+        y: 0.0,
+        width,
+        height,
+        aspectRatio,
+        rotation: 0,
+        visible: true,
+        name: this.model.label,
+        effectIds: [],
+      },
     }
   }
-}
 
-class Layer extends Component {
-  render() {
-    const selectedOption = { value: this.props.shape.id, label: this.props.shape.name }
-    const optionsRender = Object.keys(this.props.options).map((key, index) => {
-      return this.getOptionComponent(key, index)
-    })
+  getOptions() {
+    return layerOptions
+  }
 
-    const linkText = this.props.linkText || this.props.link
-    const linkRender = this.props.link ? <Row><Col sm={5}></Col><Col sm={7}><p className="mt-2">See <a target="_blank" rel="noopener noreferrer" href={this.props.link}>{linkText}</a> for ideas.</p></Col></Row> : undefined
-    let optionsListRender = undefined
+  // returns an array of Victor vertices
+  getVertices({ layer, effects, machine, options = {} }) {
+    const layerState = { shape: layer, machine }
 
-    if (Object.entries(this.props.options).length > 0) {
-      optionsListRender =
-        <div className="m-0">
-          {optionsRender}
-        </div>
+    this.state = layer
+    this.vertices = this.model.getCachedVertices(layerState)
+
+    if (this.model.autosize) {
+      this.resize()
+      centerOnOrigin(this.vertices)
     }
 
-    let shapeSelectRender = undefined
-
-    if (this.props.showShapeSelectRender) {
-      shapeSelectRender =
-        <Row className="align-items-center">
-          <Col sm={5}>
-            Shape
-          </Col>
-
-          <Col sm={7}>
-            <Select
-              value={selectedOption}
-              onChange={this.props.onChangeType}
-              maxMenuHeight={305}
-              options={this.props.selectOptions} />
-          </Col>
-        </Row>
-    }
-
-    return (
-      <Card className="p-3 overflow-auto flex-grow-1" style={{borderTop: "1px solid #aaa", borderBottom: "none"}}>
-        <Row className="align-items-center mb-2">
-          <Col sm={5}>
-            <h2 className="panel m-0">Properties</h2>
-          </Col>
-          <Col sm={7}>
-            <Button className="ml-auto" variant="outline-primary" size="sm" onClick={this.props.onRestoreDefaults}>Restore defaults</Button>
-          </Col>
-        </Row>
-
-        { shapeSelectRender }
-
-        { linkRender }
-
-        <div className="pt-1">
-          { optionsListRender }
-          <Transforms id={this.props.layer.id} />
-        </div>
-      </Card>
+    this.applyEffects(effects)
+    this.transform()
+    this.vertices = this.model.finalizeVertices(
+      this.vertices,
+      layerState,
+      options,
     )
+
+    return this.vertices
   }
 
-  getOptionComponent(key, index) {
-    const option = this.props.options[key]
+  resize() {
+    const { width, height, aspectRatio } = this.state
 
-    if (option.type === 'dropdown') {
-      return  <DropdownOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
-    } else if (option.type === 'checkbox') {
-      return  <CheckboxOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
-    } else if (option.type === 'comments') {
-      return  <CommentsBox
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                comments={this.props.layer.comments} />
-    } else if (option.type === 'togglebutton') {
-      return  <ToggleButtonOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
+    if (this.model.stretch) {
+      // special case for shapes that always stretch to fit their dimensions (e.g., font shapes)
+      this.vertices = resizeVertices(this.vertices, width, height, true, 1)
     } else {
-      return  <InputOption
-                onChange={this.props.onChange}
-                options={this.props.options}
-                optionKey={key}
-                key={key}
-                index={index}
-                model={this.props.layer} />
+      this.vertices = resizeVertices(
+        this.vertices,
+        width,
+        height,
+        false,
+        aspectRatio,
+      )
     }
   }
-}
 
-export default connect(mapStateToProps, mapDispatchToProps)(Layer)
+  transform() {
+    const { x, y, rotation } = this.state
+
+    this.vertices.forEach((vertex) => {
+      vertex.rotateDeg(-rotation)
+      vertex.addX({ x: x || 0 }).addY({ y: y || 0 })
+    })
+  }
+
+  applyEffects(effects) {
+    effects.forEach((effect) => {
+      const effectLayer = new EffectLayer(effect.type)
+      this.vertices = effectLayer.getVertices(effect, this.state, this.vertices)
+    })
+  }
+
+  // used to preserve hidden attributes when loading from a file
+  getHiddenAttrs() {
+    return []
+  }
+}

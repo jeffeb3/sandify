@@ -1,3 +1,3 @@
-import 'jest-canvas-mock'
+import "jest-canvas-mock"
 
-jest.mock('react-ga')
+jest.mock("react-ga")

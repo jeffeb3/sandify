@@ -1,0 +1,23 @@
+.layer-button {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+
+  .active.list-group-item & {
+    color: white;
+    background-color: inherit;
+  }
+
+  .selected.list-group-item & {
+    background-color: #d2d2d2;
+  }
+}
+
+.cursor-move {
+  cursor: move;
+}
+
+#layers {
+  .list-group-item {
+    padding: 0.5rem 0.25rem;
+  }
+}

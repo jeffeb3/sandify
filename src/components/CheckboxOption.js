@@ -1,43 +1,56 @@
-import React, { Component } from 'react'
-import {
-  Col,
-  Row,
-  Form,
-} from 'react-bootstrap'
+import React from "react"
+import Col from "react-bootstrap/Col"
+import Row from "react-bootstrap/Row"
+import Form from "react-bootstrap/Form"
 import S from "react-switch"
-const Switch = S.default ? S.default: S // Fix: https://github.com/vitejs/vite/issues/2139
+const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 
-class CheckboxOption extends Component {
-  render() {
-    const option = this.props.options[this.props.optionKey]
-    const model = this.props.model
-    const visible = option.isVisible === undefined ? true : option.isVisible(model)
+const CheckboxOption = ({
+  options,
+  optionKey,
+  data,
+  model,
+  onChange,
+  label = true,
+}) => {
+  const option = options[optionKey]
+  const visible =
+    option.isVisible === undefined ? true : option.isVisible(model, data)
 
-    return (
-      <Row className={"align-items-center" + (visible ? '' : ' d-none')}>
-        <Col sm={5}>
-        <Form.Label htmlFor="options-step">
-          {option.title}
-        </Form.Label>
-        </Col>
+  const handleChange = (checked) => {
+    let attrs = {}
+    attrs[optionKey] = checked
 
-        <Col sm={7}>
-          <Switch
-            checked={model[this.props.optionKey]}
-            onChange={(checked) => {
-              let attrs = {}
-              attrs[this.props.optionKey] = checked
+    if (option.onChange !== undefined) {
+      attrs = option.onChange(model, attrs, data)
+    }
 
-              if (option.onChange !== undefined) {
-                attrs = option.onChange(attrs, model)
-              }
-
-              this.props.onChange(attrs)
-            }} />
-        </Col>
-      </Row>
-    )
+    onChange(attrs)
   }
-}
 
+  return (
+    <Row className={"align-items-center mb-1" + (visible ? "" : " d-none")}>
+      <Col sm={5}>
+        {label && (
+          <Form.Label
+            htmlFor="options-step"
+            className="mb-0"
+          >
+            {option.title}
+          </Form.Label>
+        )}
+      </Col>
+
+      <Col
+        sm={7}
+        className="d-flex align-items-center"
+      >
+        <Switch
+          checked={data[optionKey]}
+          onChange={handleChange}
+        />
+      </Col>
+    </Row>
+  )
+}
 export default CheckboxOption

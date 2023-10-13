@@ -1,34 +1,66 @@
-import React, { Component } from 'react'
-import { Col, Row } from 'react-bootstrap'
-import { Provider } from 'react-redux'
-import Header from './Header'
-import InputTabs from './InputTabs'
-import MachinePreview from '../preview/MachinePreview'
-import store from './store'
-import './App.scss'
+import React, { useState } from "react"
+import Tab from "react-bootstrap/Tab"
+import { Provider } from "react-redux"
+import { ToastContainer } from "react-toastify"
+import { ErrorBoundary } from "react-error-boundary"
+import PreviewManager from "@/features/preview/PreviewManager"
+import Header from "./Header"
+import About from "./About"
+import Sidebar from "./Sidebar"
+import store from "./store"
+import ErrorFallback from "./ErrorFallback"
+import "./App.scss"
 
-class App extends Component {
-  render() {
-    return (
-      <Provider store={store}>
+const App = () => {
+  const [eventKey, setEventKey] = useState("patterns")
+
+  return (
+    <Provider store={store}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <div className="App">
-          <Header />
-
+          <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            hideProgressBar={true}
+            theme="colored"
+          />
+          <Header
+            eventKey={eventKey}
+            setEventKey={setEventKey}
+          />
           <main>
-            <Row className="no-gutters">
-              <Col className="full-page d-flex flex-column">
-                <MachinePreview />
-              </Col>
+            <Tab.Container
+              activeKey={eventKey}
+              defaultActiveKey="patterns"
+            >
+              <Tab.Content>
+                <Tab.Pane eventKey="patterns">
+                  <div className="d-flex flex-column flex-lg-row">
+                    <div className="full-page d-flex flex-column flex-grow-1">
+                      <PreviewManager />
+                    </div>
+                    <div
+                      id="sidebar"
+                      className="flex-shrink-0"
+                    >
+                      <Sidebar />
+                    </div>
+                  </div>
+                </Tab.Pane>
 
-              <div id="sidebar">
-                <InputTabs />
-              </div>
-            </Row>
+                <Tab.Pane
+                  eventKey="about"
+                  className="full-page-tab"
+                >
+                  <About />
+                </Tab.Pane>
+              </Tab.Content>
+            </Tab.Container>
           </main>
         </div>
-      </Provider>
-    )
-  }
+      </ErrorBoundary>
+    </Provider>
+  )
 }
 
 export default App

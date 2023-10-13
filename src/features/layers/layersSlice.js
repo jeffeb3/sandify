@@ -1,178 +1,855 @@
-import { createSlice } from '@reduxjs/toolkit'
-import uniqueId from 'lodash/uniqueId'
-import arrayMove from 'array-move'
-import { getShape } from '../../models/shapes'
+import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
+import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
+import { createCachedSelector } from "re-reselect"
+import { v4 as uuidv4 } from "uuid"
+import Color from "color"
+import { arrayMoveImmutable } from "array-move"
+import { isEqual } from "lodash"
+import {
+  rotate,
+  offset,
+  totalDistance,
+  findBounds,
+  cloneVertex,
+} from "@/common/geometry"
+import { orderByKey } from "@/common/util"
+import { insertOne, prepareAfterAdd, deleteOne } from "@/common/slice"
+import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
+import Layer from "./Layer"
+import EffectLayer from "@/features/effects/EffectLayer"
+import { selectState } from "@/features/app/appSlice"
+import {
+  effectsSlice,
+  setSelectedEffect,
+  selectEffectById,
+  selectEffectsByLayerId,
+  selectCurrentEffect,
+  selectSelectedEffectId,
+} from "@/features/effects/effectsSlice"
+import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
+import { getMachine } from "@/features/machines/machineFactory"
+import { selectPreviewState } from "@/features/preview/previewSlice"
+import { log } from "@/common/debugging"
 
-const protectedAttrs = [
-  'repeatEnabled', 'canTransform', 'selectGroup', 'canChangeSize', 'autosize',
-  'usesMachine', 'shouldCache', 'canChangeHeight', 'canRotate', 'usesFont'
-]
-const newLayerType = localStorage.getItem('currentShape') || 'polygon'
-const newLayerName = getShape({type: newLayerType}).name.toLowerCase()
+// ------------------------------
+// Slice, reducers and atomic actions
+// ------------------------------
+
+const adapter = createEntityAdapter()
+const defaultLayer = new Layer(getDefaultShapeType())
+const defaultLayerId = uuidv4()
+const layerState = {
+  id: defaultLayerId,
+  ...defaultLayer.getInitialState(),
+}
+const notCopiedWhenTypeChanges = ["type"]
 
 const layersSlice = createSlice({
-  name: 'layer',
-  initialState: {
-    current: null,
-    selected: null,
-    newLayerType: newLayerType,
-    newLayerName: newLayerName,
-    newLayerNameOverride: false,
-    copyLayerName: null,
-    byId: {},
-    allIds: []
-  },
+  name: "layers",
+  initialState: adapter.getInitialState({
+    current: defaultLayerId,
+    selected: defaultLayerId,
+    entities: {
+      [defaultLayerId]: layerState,
+    },
+    ids: [defaultLayerId],
+  }),
   reducers: {
-    addLayer(state, action) {
-      let layer = { ...action.payload }
-      layer.id = uniqueId('layer-')
-      layer.name = layer.name || state.newLayerName
-      state.byId[layer.id] = layer
+    addLayer: {
+      reducer(state, action) {
+        const layer = insertOne(state, action)
 
-      const index = state.allIds.findIndex(id => id === state.current) + 1
-      state.allIds.splice(index, 0, layer.id)
-
-      state.current = layer.id
-      state.selected = layer.id
-      state.newLayerNameOverride = false
-      state.newLayerName = layer.name
-      if (layer.type !== 'file_import' && !layer.effect) {
-        localStorage.setItem('currentShape', layer.type)
-      }
+        state.selected = layer.id
+        layer.effectIds = []
+        if (layer.type !== "fileImport") {
+          localStorage.setItem("defaultShape", layer.type)
+        }
+      },
+      prepare(layer) {
+        return prepareAfterAdd(layer)
+      },
     },
-    moveLayer(state, action) {
+    deleteLayer: (state, action) => {
+      deleteOne(adapter, state, action)
+    },
+    moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
-      state.allIds = arrayMove(state.allIds, oldIndex, newIndex)
+      state.ids = arrayMoveImmutable(state.ids, oldIndex, newIndex)
     },
-    copyLayer(state, action) {
-      const source = state.byId[action.payload]
-      const layer = { ...source, name: state.copyLayerName }
-      layer.id = uniqueId('layer-')
-      state.byId[layer.id] = layer
-
-      const index = state.allIds.findIndex(id => id === state.current) + 1
-      state.allIds.splice(index, 0, layer.id)
-
-      state.current = layer.id
-      state.selected = layer.id
-    },
-    removeLayer(state, action) {
-      const deleteId = action.payload
-      const idx = state.allIds.findIndex(id => id === deleteId)
-      state.allIds.splice(idx, 1)
-      delete state.byId[deleteId]
-
-      if (deleteId === state.current) {
-        if (idx === state.allIds.length) {
-          state.current = state.allIds[idx-1]
-          state.selected = state.allIds[idx-1]
-        } else {
-          state.current = state.allIds[idx]
-          state.selected = state.allIds[idx]
-        }
-      }
-    },
-    restoreDefaults(state, action) {
-      const id = action.payload
-      const layer = state.byId[id]
-      const defaults = getShape(layer).getInitialState(layer)
-
-      state.byId[layer.id] = {
-        id: layer.id,
-        name: layer.name,
-        ...defaults
-      }
-    },
-    setCurrentLayer(state, action) {
-      const current = state.byId[action.payload]
-
-      if (current) {
-        state.current = current.id
-        state.selected = current.id
-        state.copyLayerName = current.name
-      }
-    },
-    setSelectedLayer(state, action) {
-      state.selected = action.payload
-    },
-    setShapeType(state, action) {
+    updateLayer: (state, action) => {
       const changes = action.payload
-      const defaults = getShape(changes).getInitialState()
-      const layer = state.byId[changes.id]
+      const layer = state.entities[changes.id]
+      const shape = getShape(layer.type)
 
-      layer.type = changes.type
-      Object.keys(defaults).forEach(attr => {
-        if (layer[attr] === undefined) {
-          layer[attr] = defaults[attr]
+      shape.handleUpdate(layer, changes)
+      adapter.updateOne(state, { id: changes.id, changes })
+    },
+    addEffect: (state, action) => {
+      const { id, effectId, afterId } = action.payload
+      const effectIds = state.entities[id].effectIds
+
+      let index
+      if (afterId) {
+        index = effectIds.findIndex((id) => id == afterId)
+        if (index == -1) {
+          index = null
+        }
+      }
+      index = index + 1 || effectIds.length
+
+      effectIds.splice(index, 0, effectId)
+    },
+    moveEffect: (state, action) => {
+      const { id, oldIndex, newIndex } = action.payload
+      const layer = state.entities[id]
+
+      layer.effectIds = arrayMoveImmutable(layer.effectIds, oldIndex, newIndex)
+    },
+    removeEffect: (state, action) => {
+      const { id, effectId } = action.payload
+      const layer = state.entities[id]
+      const idx = layer.effectIds.findIndex((id) => id === effectId)
+
+      layer.effectIds.splice(idx, 1)
+    },
+    changeModelType: (state, action) => {
+      const { type, id } = action.payload
+      const layer = state.entities[id]
+      const instance = new Layer(type)
+      const newLayer = instance.getInitialState()
+
+      Object.keys(newLayer).forEach((attr) => {
+        if (
+          !notCopiedWhenTypeChanges.includes(attr) &&
+          layer[attr] != undefined
+        ) {
+          newLayer[attr] = layer[attr]
         }
       })
 
-      protectedAttrs.forEach(attr => {
-        layer[attr] = defaults[attr]
-      })
-
-      state.byId[layer.id] = layer
-    },
-    setNewLayerType(state, action) {
-      let attrs = { newLayerType: action.payload }
-      if (!state.newLayerNameOverride) {
-        const shape = getShape({type: action.payload})
-        attrs.newLayerName = shape.name.toLowerCase()
+      newLayer.id = id
+      if (!instance.model.canMove(state)) {
+        newLayer.x = 0
+        newLayer.y = 0
       }
-      Object.assign(state, attrs)
+
+      if (!instance.model.canRotate(state)) {
+        newLayer.rotation = 0
+      }
+
+      adapter.setOne(state, newLayer)
     },
-    updateLayer(state, action) {
-      const layer = action.payload
-      state.byId[layer.id] = {...state.byId[layer.id], ...layer}
+    restoreDefaults: (state, action) => {
+      const id = action.payload
+      const { type, name, effectIds } = state.entities[id]
+      const layer = new Layer(type)
+
+      adapter.setOne(state, {
+        id,
+        name,
+        ...layer.getInitialState(),
+        effectIds,
+      })
     },
-    updateLayers(state, action) {
-      Object.assign(state, action.payload)
+    setCurrentLayer: (state, action) => {
+      const id = action.payload
+
+      if (!id) {
+        state.current = null
+      } else if (state.entities[id]) {
+        state.current = id
+        state.selected = id
+      }
     },
-    toggleRepeat(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].repeatEnabled = !state.byId[transform.id].repeatEnabled
+    setSelectedLayer: (state, action) => {
+      const id = action.payload
+
+      if (state.entities[id]) {
+        state.selected = id
+      }
     },
-    toggleGrow(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].growEnabled = !state.byId[transform.id].growEnabled
-    },
-    toggleSpin(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].spinEnabled = !state.byId[transform.id].spinEnabled
-    },
-    toggleTrack(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].trackEnabled = !state.byId[transform.id].trackEnabled
-    },
-    toggleTrackGrow(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].trackGrowEnabled = !state.byId[transform.id].trackGrowEnabled
-    },
-    toggleVisible(state, action) {
-      const transform = action.payload
-      state.byId[transform.id].visible = !state.byId[transform.id].visible
-    },
-  }
+  },
 })
 
+// ------------------------------
+// Selectors
+// ------------------------------
+
+// used in slice
+const { selectById } = adapter.getSelectors((state) => state.layers)
+
+// returns vertices suitable for display in the preview window
+const previewVertices = (vertices, layer) => {
+  return vertices.map((vertex) => {
+    vertex = cloneVertex(vertex)
+
+    let previewVertex = rotate(
+      offset(vertex, -layer.x, -layer.y),
+      layer.rotation,
+    )
+
+    // store original coordinates
+    previewVertex.origX = vertex.x
+    previewVertex.origY = vertex.y
+
+    return previewVertex
+  })
+}
+
 export const {
-  addLayer,
-  copyLayer,
-  moveLayer,
-  removeLayer,
-  restoreDefaults,
-  setCurrentLayer,
-  setSelectedLayer,
-  setShapeType,
-  setNewLayerType,
-  updateLayer,
-  updateLayers,
-  toggleRepeat,
-  toggleSpin,
-  toggleGrow,
-  toggleTrack,
-  toggleTrackGrow,
-  toggleVisible
-} = layersSlice.actions
+  selectAll: selectAllLayers,
+  selectIds: selectLayerIds,
+  selectEntities: selectLayerEntities,
+  selectTotal: selectNumLayers,
+} = adapter.getSelectors((state) => state.layers)
+
+export const selectLayers = createSelector(selectState, (state) => state.layers)
+
+// the default selectLayerById selector created by the layer entity adapter only caches
+// the latest invocation. The cached selector caches all invocations.
+export const selectLayerById = createCachedSelector(
+  selectLayers,
+  (state, id) => id,
+  (layers, id) => layers.entities[id],
+)((state, id) => id)
+
+// by returning null for shapes which don't use machine settings, this selector will ensure
+// transformed vertices are not redrawn when machine settings change
+export const selectLayerMachine = createCachedSelector(
+  selectLayerById,
+  selectCurrentMachine,
+  (layer, machine) => {
+    if (!layer) {
+      return null
+    } // zombie child
+
+    const shape = getShape(layer.type)
+    return shape.usesMachine ? machine : null
+  },
+)((state, id) => id)
+
+const selectLayerFontsLoaded = createCachedSelector(
+  selectLayerById,
+  selectFontsLoaded,
+  (layer, fontsLoaded) => {
+    if (!layer) {
+      return false
+    }
+
+    const shape = getShape(layer.type)
+    return shape.usesFonts ? fontsLoaded : false
+  },
+)((state, id) => id)
+
+export const selectCurrentLayerId = createSelector(
+  selectLayers,
+  (layers) => layers.current,
+)
+
+export const selectSelectedLayerId = createSelector(
+  selectLayers,
+  (layers) => layers.selected,
+)
+
+export const selectCurrentLayer = createSelector(
+  [selectLayerEntities, selectCurrentLayerId],
+  (layers, currentId) => {
+    return layers[currentId]
+  },
+)
+
+export const selectSelectedLayer = createSelector(
+  [selectLayerEntities, selectSelectedLayerId],
+  (layers, selectedId) => {
+    return layers[selectedId]
+  },
+)
+
+export const selectVisibleLayerIds = createSelector(
+  [selectLayerIds, selectLayerEntities],
+  (layerIds, layers) => {
+    return layerIds.filter((id) => layers[id].visible)
+  },
+)
+
+export const selectIsDragging = createSelector(
+  [selectLayerIds, selectLayerEntities],
+  (ids, layers) => {
+    log("selectIsDragging")
+    return (
+      ids.filter((id) => layers[id].visible && layers[id].dragging).length > 0
+    )
+  },
+)
+
+export const selectNumVisibleLayers = createSelector(
+  selectVisibleLayerIds,
+  (layers) => {
+    return layers.length
+  },
+)
+
+export const selectLayerIndex = createCachedSelector(
+  (state, id) => id,
+  selectVisibleLayerIds,
+  (layerId, visibleLayerIds) => {
+    return visibleLayerIds.findIndex((id) => id === layerId)
+  },
+)((state, id) => id)
+
+// returns a list of ordered effects for a given layer
+export const selectLayerEffects = createCachedSelector(
+  selectLayerById,
+  selectEffectsByLayerId,
+  (layer, effects) => {
+    // guard vs zombie child
+    return (layer && orderByKey(layer.effectIds, effects)) || []
+  },
+)((state, id) => id)
+
+// returns a list of visible ordered effects for a given layer
+export const selectVisibleLayerEffects = createCachedSelector(
+  selectLayerEffects,
+  (effects) => {
+    return effects.filter((effect) => effect.visible)
+  },
+)((state, id) => id)
+
+export const selectActiveEffect = createCachedSelector(
+  selectLayerById,
+  selectCurrentEffect,
+  (layer, currentEffect) => {
+    if (!layer) {
+      return null
+    }
+    if (layer.effectIds.includes(currentEffect?.id)) {
+      return currentEffect
+    }
+  },
+)((state, id) => id)
+
+// returns the vertices for a given layer
+export const selectLayerVertices = createCachedSelector(
+  selectLayerById,
+  selectVisibleLayerEffects,
+  selectLayerMachine,
+  selectLayerFontsLoaded,
+  (layer, effects, machine) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    const instance = new Layer(layer.type)
+    return instance.getVertices({ layer, effects, machine })
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns the machine-bound vertices for a given layer
+const selectMachineVertices = createCachedSelector(
+  (state, id) => id,
+  selectLayerVertices,
+  selectLayerIndex,
+  selectNumVisibleLayers,
+  selectCurrentMachine,
+  (id, vertices, layerIndex, numLayers, machine) => {
+    if (!machine) {
+      return [] // zombie child
+    }
+
+    log("selectMachineVertices", id)
+    if (vertices.length > 0) {
+      const layerInfo = {
+        start: layerIndex === 0,
+        end: layerIndex === numLayers - 1,
+      }
+      const machineModel = getMachine(machine)
+
+      return machineModel.polish(vertices, layerInfo)
+    } else {
+      return []
+    }
+  },
+)((state, id) => id)
+
+// returns preview vertices for a given layer, without effects
+export const selectShapePreviewVertices = createCachedSelector(
+  selectLayerById,
+  selectVisibleLayerEffects,
+  selectLayerMachine,
+  selectLayerFontsLoaded,
+  (layer, effects, machine, fontsLoaded) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    const instance = new Layer(layer.type)
+    const vertices = instance.getVertices({
+      layer,
+      effects: [],
+      machine,
+    })
+
+    return previewVertices(vertices, layer)
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// creates a selector that returns previewable vertices for a given layer
+export const selectPreviewVertices = createCachedSelector(
+  selectLayerVertices,
+  selectMachineVertices,
+  selectLayerById,
+  (originalVertices, machineVertices, layer) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    log("selectPreviewVertices", layer.id)
+    const vertices = layer.dragging ? originalVertices : machineVertices
+    return previewVertices(vertices, layer)
+  },
+)((state, id) => id)
+
+// returns the preview vertices for a dragging effect; this includes all effects up to
+// the given effect
+export const selectDraggingEffectVertices = createCachedSelector(
+  (state, id, effectId) => effectId,
+  selectVisibleLayerEffects,
+  selectLayerById,
+  selectLayerMachine,
+  (effectId, effects, layer, machine) => {
+    if (!layer) {
+      return []
+    } // zombie child
+
+    const instance = new Layer(layer.type)
+    const effect = effects.find((effect) => effect.id == effectId)
+
+    if (!effect) {
+      // no longer visible
+      return []
+    }
+
+    const effectInstance = new EffectLayer(effect.type)
+    const idx = effects.findIndex((effect) => effect.id == effectId)
+    const vertices = effectInstance.model.dragPreview
+      ? instance.getVertices({
+          layer,
+          effects: effects.slice(0, idx + 1),
+          machine,
+        })
+      : []
+
+    return previewVertices(previewVertices(vertices, layer), effect)
+  },
+)({
+  keySelector: (state, id, effectId) => id + effectId,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns the preview vertices for a layer when an effect is being dragged; this includes all
+// effects up prior to the dragged effect
+export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
+  (state, id, effectId) => effectId,
+  selectVisibleLayerEffects,
+  selectLayerById,
+  selectLayerMachine,
+  (effectId, effects, layer, machine) => {
+    if (!layer || !effectId) {
+      return []
+    } // zombie child or inactive effect
+
+    const instance = new Layer(layer.type)
+    const effect = effects.find((effect) => effect.id == effectId)
+
+    if (!effect) {
+      // no longer visible
+      return []
+    }
+
+    const idx = effects.findIndex((effect) => effect.id == effectId)
+    const vertices = instance.getVertices({
+      layer,
+      effects: effects.slice(0, idx),
+      machine,
+    })
+
+    return previewVertices(vertices, layer)
+  },
+)({
+  keySelector: (state, id, effectId) => id + effectId,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns whether an upstream effect from the given effect is being dragged
+export const selectIsUpstreamEffectDragging = createCachedSelector(
+  selectEffectById,
+  selectSelectedLayer,
+  selectCurrentEffect,
+  (effect, selectedLayer, currentEffect) => {
+    if (
+      !(effect && selectedLayer && currentEffect?.dragging) ||
+      effect.id === currentEffect.id ||
+      effect.layerId != currentEffect.layerId
+    ) {
+      return false
+    }
+
+    const idx = selectedLayer.effectIds.findIndex((id) => id === effect.id)
+    const draggingIdx = selectedLayer.effectIds.findIndex(
+      (id) => id === currentEffect.id,
+    )
+
+    return idx > draggingIdx
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns a array of all visible machine-bound vertices and the connections between them
+export const selectConnectedVertices = createSelector(selectState, (state) => {
+  if (!state.fonts.loaded) {
+    return []
+  } // wait for fonts
+
+  log("selectConnectedVertices")
+  const visibleLayerIds = selectVisibleLayerIds(state)
+
+  return visibleLayerIds
+    .map((id, idx) => {
+      const vertices = selectMachineVertices(state, id)
+      const connector = selectConnectingVertices(state, id)
+      return [...vertices, ...connector]
+    })
+    .flat()
+})
+
+// returns an array of vertices connecting a given layer to the next (if it exists)
+export const selectConnectingVertices = createCachedSelector(
+  (state, id) => id,
+  selectCurrentMachine,
+  selectState,
+  (layerId, machine, state) => {
+    log("selectConnectingVertices", layerId)
+
+    const visibleLayerIds = selectVisibleLayerIds(state)
+    const idx = selectLayerIndex(state, layerId)
+
+    if (idx == visibleLayerIds.length - 1) {
+      // last vertex
+      return []
+    }
+
+    const endId = visibleLayerIds[idx + 1]
+    const startLayer = selectLayerById(state, layerId)
+    const endLayer = selectLayerById(state, endId)
+
+    if (!startLayer || !endLayer) {
+      return [] // zombie child
+    }
+
+    const startVertices = selectMachineVertices(state, startLayer.id)
+    const endVertices = selectMachineVertices(state, endLayer.id)
+    const start = startVertices[startVertices.length - 1]
+    const end = endVertices[0]
+
+    if (startLayer.connectionMethod === "along perimeter") {
+      const machineModel = getMachine(machine)
+      const startPerimeter = machineModel.nearestPerimeterVertex(start)
+      const endPerimeter = machineModel.nearestPerimeterVertex(end)
+      const perimeterConnection = machineModel.tracePerimeter(
+        startPerimeter,
+        endPerimeter,
+      )
+
+      return [
+        start,
+        startPerimeter,
+        perimeterConnection,
+        endPerimeter,
+        end,
+      ].flat()
+    } else {
+      return [start, end]
+    }
+  },
+)((state, id) => id)
+
+// returns the starting offset for each layer, given previous layers
+export const selectVertexOffsets = createSelector(selectState, (state) => {
+  log("selectVertexOffsets")
+  const visibleLayerIds = selectVisibleLayerIds(state)
+  let offsets = {}
+  let offset = 0
+
+  visibleLayerIds.forEach((id) => {
+    const vertices = selectMachineVertices(state, id)
+    const connector = selectConnectingVertices(state, id)
+    offsets[id] = { start: offset, end: offset + vertices.length - 1 }
+
+    if (connector.length > 0) {
+      offsets[id + "-connector"] = {
+        start: offset + vertices.length,
+        end: offset + vertices.length + connector.length - 1,
+      }
+      offset += vertices.length + connector.length
+    }
+  })
+
+  return offsets
+})
+
+// returns statistics across all layers
+export const selectVerticesStats = createSelector(
+  selectConnectedVertices,
+  (vertices) => {
+    log("getVerticeStats")
+    return {
+      numPoints: vertices.length,
+      distance: Math.floor(totalDistance(vertices)),
+    }
+  },
+)
+
+// returns the bounds for a given preview layer; include the original shape
+// in the bounds to compensate for potential masking
+export const selectLayerPreviewBounds = createCachedSelector(
+  selectLayerById,
+  selectMachineVertices,
+  selectVisibleLayerEffects,
+  selectCurrentMachine,
+  (state, id, isCurrent) => isCurrent,
+  (layer, machineVertices, effects, machine, isCurrent) => {
+    if (!layer) {
+      // zombie child
+      return []
+    }
+
+    const instance = new Layer(layer.type)
+    const hasSelectableEffect = effects.find((effect) =>
+      ["transformer", "mask"].includes(effect.type),
+    )
+    const hasInvertedMask = effects.find((effect) => effect.maskInvert)
+    const includeVertices = !(hasSelectableEffect || hasInvertedMask)
+    const includeLayer = isCurrent || includeVertices
+    const includeEffects =
+      !(isCurrent || hasInvertedMask) || !hasSelectableEffect
+
+    const vertices = includeLayer
+      ? instance.getVertices({
+          layer,
+          effects: [],
+          machine,
+          options: { bounds: true },
+        })
+      : []
+    const effectVertices = includeEffects ? machineVertices : []
+
+    const combinedVertices = [...vertices, ...effectVertices].flat()
+    const previewedVertices = previewVertices(combinedVertices, layer)
+
+    // don't include connector vertices
+    return findBounds(previewedVertices.filter((vertex) => !vertex.connect))
+  },
+)({
+  keySelector: (state, id, isCurrent) => `${id}-${isCurrent}`,
+  selectorCreator: createSelectorCreator(defaultMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// given a set of vertices and a slider value, returns the indices of the
+// start and end vertices representing a preview slider moving through them.
+export const selectSliderBounds = createSelector(
+  [selectConnectedVertices, selectPreviewState],
+  (vertices, preview) => {
+    const slideSize = 2.0
+    const beginFraction = preview.sliderValue / 100.0
+    const endFraction = (slideSize + preview.sliderValue) / 100.0
+    let start = Math.round(vertices.length * beginFraction)
+    let end = Math.round(vertices.length * endFraction)
+
+    if (end >= vertices.length) {
+      end = vertices.length - 1
+    }
+
+    if (start > 0 && end - start <= 1) {
+      if (start < 1) {
+        end = Math.min(vertices.length, 1)
+      } else {
+        start = end - 1
+      }
+    }
+
+    return { start, end }
+  },
+)
+
+// returns a hash of { index => color } that specifies the gradient color of the
+// line drawn at each index.
+export const selectSliderColors = createSelector(
+  [selectSliderBounds, selectVertexOffsets],
+  (bounds, offsets) => {
+    log("selectSliderColors")
+    const colors = {}
+    const { start, end } = bounds
+
+    if (end !== start) {
+      let startColor = Color("yellow")
+      const colorStep = 3.0 / 8 / (end - start)
+
+      for (let i = end; i >= start; i--) {
+        colors[i] = startColor.darken(colorStep * (end - i)).hex()
+      }
+    }
+
+    return colors
+  },
+)
+
+// ------------------------------
+// Compound actions (thunks) that make multiple changes to the store across reducers,
+// but only render once.
+// ------------------------------
+
+export const deleteLayer = (id) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const ids = selectLayerIds(state)
+    const deleteIdx = ids.findIndex((_id) => _id === id)
+    const layer = selectById(state, id)
+    const selectedLayerId = selectSelectedLayerId(state)
+
+    // delete the effects, and then delete the layer
+    layer.effectIds.forEach((effectId) => {
+      dispatch(effectsSlice.actions.deleteEffect(effectId))
+    })
+    dispatch(layersSlice.actions.deleteLayer(id))
+
+    if (id === selectedLayerId) {
+      const newIds = ids.filter((i) => i != id)
+      const idx = deleteIdx === ids.length - 1 ? deleteIdx - 1 : deleteIdx
+      dispatch(setCurrentLayer(newIds[idx]))
+    }
+  }
+}
+
+export const copyLayer = ({ id, name }) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const layer = selectById(state, id)
+    const newLayer = {
+      ...layer,
+      name,
+    }
+
+    // create new layer
+    const action = dispatch(layersSlice.actions.addLayer(newLayer))
+    const newId = action.meta.id
+
+    // copy effects
+    layer.effectIds.map((effectId) => {
+      const effect = selectEffectById(state, effectId)
+      return dispatch(addEffect({ id: newId, effect }))
+    })
+
+    dispatch(setCurrentLayer(newId))
+  }
+}
+
+export const addEffect = ({ id, effect, afterId }) => {
+  return (dispatch) => {
+    // create the effect first, and then add it to the layer
+    const action = dispatch(
+      effectsSlice.actions.addEffect({
+        ...effect,
+        layerId: id,
+      }),
+    )
+    dispatch(
+      layersSlice.actions.addEffect({ id, effectId: action.meta.id, afterId }),
+    )
+    dispatch(setCurrentEffect(id))
+  }
+}
+
+export const deleteEffect = ({ id, effectId }) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    const effectIds = selectLayerById(state, id).effectIds
+    const deleteIdx = effectIds.findIndex((id) => id === effectId)
+    const selectedEffectId = selectSelectedEffectId(state)
+
+    dispatch(layersSlice.actions.removeEffect({ id, effectId }))
+    dispatch(effectsSlice.actions.deleteEffect(effectId))
+
+    if (effectIds.length > 1) {
+      if (effectId === selectedEffectId) {
+        const newIds = effectIds.filter((i) => i != effectId)
+        const idx =
+          deleteIdx === effectIds.length - 1 ? deleteIdx - 1 : deleteIdx
+
+        dispatch(setCurrentEffect(newIds[idx]))
+      }
+    } else {
+      dispatch(setCurrentLayer(id))
+    }
+  }
+}
+
+export const setCurrentLayer = (id) => {
+  return (dispatch, getState) => {
+    const state = getState()
+
+    if (id) {
+      const layer = selectLayerById(state, id)
+      dispatch(layersSlice.actions.setCurrentLayer(id))
+      dispatch(effectsSlice.actions.setCurrentEffect(null))
+      dispatch(setSelectedEffect(layer?.effectIds[0])) // this guard is a hack to get a test to run
+    } else {
+      dispatch(layersSlice.actions.setCurrentLayer(null))
+      dispatch(effectsSlice.actions.setCurrentEffect(null))
+    }
+  }
+}
+
+export const setCurrentEffect = (id) => {
+  return (dispatch, getState) => {
+    const state = getState()
+    dispatch(effectsSlice.actions.setCurrentEffect(id))
+
+    const effect = selectEffectById(state, id)
+    dispatch(layersSlice.actions.setCurrentLayer(null))
+    dispatch(layersSlice.actions.setSelectedLayer(effect?.layerId))
+  }
+}
 
 export default layersSlice.reducer
+export const { actions: layersActions } = layersSlice
+export const {
+  addLayer,
+  changeModelType,
+  moveEffect,
+  moveLayer,
+  removeEffect,
+  restoreDefaults,
+  setSelectedLayer,
+  updateLayer,
+} = layersSlice.actions

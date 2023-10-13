@@ -41,7 +41,8 @@ export const eulerianTrail = (options) => {
   }
 
   var deg = []
-  var inDeg = [], outDeg = []
+  var inDeg = [],
+    outDeg = []
 
   for (i = 0; i < options.edges.length; i += 1) {
     var edge = options.edges[i]
@@ -80,7 +81,7 @@ export const eulerianTrail = (options) => {
         oddVertex += 1
       }
     }
-    return {odd: oddVertex, start: start}
+    return { odd: oddVertex, start }
   }
 
   function checkUndirected() {
@@ -93,17 +94,17 @@ export const eulerianTrail = (options) => {
         oddVertex += 1
       }
     }
-    return {odd: oddVertex, start: start}
+    return { odd: oddVertex, start }
   }
 
   var check = options.directed ? checkDirected() : checkUndirected()
   if (check.odd % 2 !== 0 || check.odd > 2) {
-//    throw Error('the graph does not have an eulerian trail')
+    //    throw Error('the graph does not have an eulerian trail')
   }
   dfs(check.start)
 
   if (trail.length !== options.edges.length + 1) {
-//    throw Error('the graph does not have an eulerian trail')
+    //    throw Error('the graph does not have an eulerian trail')
   }
 
   trail.reverse()

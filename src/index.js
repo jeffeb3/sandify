@@ -1,10 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import './features/app/reactGA'
-import App from './features/app/App'
-import './index.css'
+import React from "react"
+import { createRoot } from "react-dom/client"
+import "./features/app/reactGA"
+import App from "./features/app/App"
+import "./index.css"
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-)
+if (import.meta.hot) {
+  import.meta.hot.on("vite:beforeFullReload", () => {
+    location.reload()
+  })
+}
+
+const root = createRoot(document.getElementById("root"))
+root.render(<App />)

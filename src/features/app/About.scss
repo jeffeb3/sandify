@@ -1,0 +1,13 @@
+.tagline {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.pattern-preview {
+  width: 300px;
+  padding: 20px;
+
+  @media (max-width: 991px) {
+    width: 100%;
+  }
+}

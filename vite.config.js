@@ -1,30 +1,27 @@
 import fs from 'fs/promises';
 import { defineConfig } from 'vite'
+import path from 'path'
 import react from '@vitejs/plugin-react'
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
-import nodePolyfills from 'rollup-plugin-node-polyfills'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig(() => ({
   server: {
     port: 3000
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    nodePolyfills(),
+  ],
   resolve: {
     alias: {
-      process: "rollup-plugin-node-polyfills/polyfills/process-es6",
-      timers: "rollup-plugin-node-polyfills/polyfills/timers",
-      stream: "rollup-plugin-node-polyfills/polyfills/stream",
-      events: "rollup-plugin-node-polyfills/polyfills/events",
-      util: "rollup-plugin-node-polyfills/polyfills/util",
-      buffer: "rollup-plugin-node-polyfills/polyfills/buffer-es6"
+      '@': path.resolve(__dirname, './src'),
+      "tinyqueue": path.join(__dirname, 'node_modules', 'tinyqueue', 'index.js')
     }
   },
   build: {
     outDir: 'build',
     target: 'esnext',
-    rollupOptions: {
-      plugins: [nodePolyfills()],
-    }
   },
   define: {
     "process.env": process.env ?? {},
@@ -39,7 +36,7 @@ export default defineConfig(() => ({
   optimizeDeps: {
     esbuildOptions: {
       plugins: [
-        NodeGlobalsPolyfillPlugin({ buffer: true }),
+        NodeGlobalsPolyfillPlugin({ buffer: false, process: true }),
         {
           name: "load-js-files-as-jsx",
           setup(build) {

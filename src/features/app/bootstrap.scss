@@ -1,0 +1,93 @@
+/**
+ Bootstrap 5 overrides
+ **/
+h2 {
+  font-size: 1.6rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+.navbar {
+  --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='lightgray' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>") !important;
+}
+
+.navbar-toggler {
+  border-color: lightgray;
+}
+
+.accordion-header {
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.accordion-button {
+  background-color: #eee !important;
+}
+
+.tab-content {
+  background-color: white;
+}
+
+.list-group-item.active {
+  z-index: auto;
+  background-color: lighten(#2983BA, 5%);
+}
+
+.list-group-item.selected {
+  background-color: #d2d2d2;
+}
+
+.btn-group {
+  .btn-light:focus, .btn-light.focus {
+    background-color: #f8f9fa;
+  }
+
+  .btn {
+    box-shadow: none !important;
+  }
+}
+
+.btn-light {
+  background-color: white;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgb(216 217 219 / 50%) !important;
+    border-color: #dae0e5 !important;
+  }
+}
+
+.btn-secondary {
+  background-color: #e9ecef;
+  color: #495057 !important;
+  border: none;
+
+  &:hover {
+    background-color: darken(#e9ecef, 5%);
+  }
+
+  &.focus, &:focus {
+    background-color: darken(#e9ecef, 5%);
+  }
+
+  &:not(:disabled):not(.disabled).active,
+  &:not(:disabled):not(.disabled):active {
+    background-color: darken(#e9ecef, 5%);
+  }
+}
+
+.border-secondary {
+  border-color: #adb5bd !important;
+}
+
+.no-select {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}

@@ -1,17 +1,18 @@
-import Victor from 'victor'
+import Victor from "victor"
+import colors from "@/common/colors"
 
 // translates shape coordinates into pixel coordinates with a centered origin
 export default class PreviewHelper {
   constructor(props) {
     this.props = props
-    this.width = this.props.layer.startingWidth || 0
-    this.height = this.props.layer.startingHeight || 0
+    this.width = this.props.layer.width || 0
+    this.height = this.props.layer.height || 0
   }
 
   toPixels(vertex) {
     // y for pixels starts at the top, and goes down
     if (vertex) {
-      return new Victor(vertex.x + this.width/2, -vertex.y + this.height/2)
+      return new Victor(vertex.x + this.width / 2, -vertex.y + this.height / 2)
     } else {
       return new Victor(0, 0)
     }
@@ -27,7 +28,7 @@ export default class PreviewHelper {
     context.lineTo(px.x, px.y)
   }
 
-  dot(context, vertex, radius=4, color='yellow') {
+  dot(context, vertex, radius = 4, color = colors.selectedShapeColor) {
     const px = this.toPixels(vertex)
     context.arc(px.x, px.y, radius, 0, 2 * Math.PI, true)
     context.fillStyle = context.strokeStyle
@@ -51,27 +52,11 @@ export default class PreviewHelper {
         if (sliderEnd) {
           context.beginPath()
 
-          this.moveTo(context, sliderEnd)
-          context.strokeStyle = 'yellow'
+          context.strokeStyle = "transparent"
           this.dot(context, sliderEnd)
           context.stroke()
-
-          this.markOriginalCoordinates(context, sliderEnd)
         }
       }
-    }
-  }
-
-  markOriginalCoordinates(context, vertex) {
-    if (this.props.markCoordinates && !this.props.currentLayer.dragging) {
-      const signX = vertex.x < 0 ? 1 : -1
-      const signY = vertex.y < 0 ? -1 : 1
-      const x = (vertex.origX || vertex.x).toFixed(2)
-      const y = (vertex.origY || vertex.y).toFixed(2)
-
-      context.fillStyle = 'white'
-      context.font = '10px Arial'
-      context.fillText('' + x + ', ' + y, vertex.x + 15 * signX, -vertex.y + 5 * signY)
     }
   }
 }

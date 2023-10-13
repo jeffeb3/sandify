@@ -1,12 +1,12 @@
-import { PriorityQueue } from './PriorityQueue.js'
-import Victor from 'victor'
+import { PriorityQueue } from "./PriorityQueue.js"
+import Victor from "victor"
 
 export const mix = (v1, v2, s) => {
   let u = [v1.x, v1.y]
   let v = [v2.x, v2.y]
   var result = []
 
-  for (var i = 0; i < u.length; ++i ) {
+  for (var i = 0; i < u.length; ++i) {
     result.push((1.0 - s) * u[i] + s * v[i])
   }
 
@@ -39,14 +39,14 @@ export default class Graph {
     }
   }
 
-  addEdge(node1, node2, weight=1) {
+  addEdge(node1, node2, weight = 1) {
     let node1Key = node1.toString()
     let node2Key = node2.toString()
     let edgeKey = [node1Key, node2Key].sort().toString()
 
     if (!this.edgeKeys.has(edgeKey)) {
-      this.adjacencyList[node1Key].push({node: node2, weight: weight})
-      this.adjacencyList[node2Key].push({node: node1, weight: weight})
+      this.adjacencyList[node1Key].push({ node: node2, weight })
+      this.adjacencyList[node2Key].push({ node: node1, weight })
       this.edgeKeys.add(edgeKey)
       this.edgeMap[edgeKey] = [node1.toString(), node2.toString()]
       this.clearCachedPaths()
@@ -59,7 +59,7 @@ export default class Graph {
   }
 
   neighbors(node) {
-    return this.adjacencyList[node.toString()].map(hash => hash.node)
+    return this.adjacencyList[node.toString()].map((hash) => hash.node)
   }
 
   dijkstraShortestPath(startNode, endNode) {
@@ -73,7 +73,7 @@ export default class Graph {
 
       times[startNode] = 0
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         if (node !== startNode) {
           times[node] = Infinity
         }
@@ -84,7 +84,7 @@ export default class Graph {
       while (!pq.isEmpty()) {
         let shortestStep = pq.dequeue()
         let currentNode = shortestStep[0]
-        this.adjacencyList[currentNode.toString()].forEach(neighbor => {
+        this.adjacencyList[currentNode.toString()].forEach((neighbor) => {
           let time = times[currentNode] + neighbor.weight
 
           if (time < times[neighbor.node]) {
@@ -98,12 +98,12 @@ export default class Graph {
       let path = [endNode.toString()]
       let lastStep = endNode
 
-      while(lastStep !== startNode) {
+      while (lastStep !== startNode) {
         path.unshift(backtrace[lastStep].toString())
         lastStep = backtrace[lastStep]
       }
 
-      shortest = path.map(node => this.nodeMap[node])
+      shortest = path.map((node) => this.nodeMap[node])
       this.cacheShortestPath(startNode, endNode, shortest)
     }
 
@@ -125,6 +125,6 @@ export default class Graph {
   }
 
   getPairedKey(node1, node2) {
-    return node1.toString() + '-' + node2.toString()
+    return node1.toString() + "-" + node2.toString()
   }
 }

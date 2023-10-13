@@ -1,16 +1,31 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'react-toastify/dist/ReactToastify.css';
+@import './bootstrap.scss';
+
+.react-tooltip {
+  z-index: 9999;
+}
+
 .App {
   background-color: #eee;
 }
 
 @media (min-width: 992px) {
   .full-page {
-    height: calc(100vh - 90px);
+    height: calc(100vh - 64px);
     overflow: auto;
-    border-right: 1px solid #aaa;
+
+    .tab-content {
+      height: 100%;
+    }
+
+    .tab-pane {
+      height: 100%;
+    }
   }
 
   .full-page-tab {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 114px);
     overflow: auto;
   }
 }
@@ -27,83 +42,4 @@
   @media(max-width: 992px) {
     width: 100%;
   }
-}
-
-@media (max-width: 991px) {
-  .no-gutters-md {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-h2.panel {
-  font-size: 1rem;
-  font-weight: bold;
-}
-
-/**
- Bootstrap 4 overrides
- **/
-.card-header {
-  background-color: rgba(0,0,0,.05);
-}
-
-.card {
-  h3 {
-    margin: 0;
-    font-size: 1.25rem;
-  }
-}
-
-.accordion > .card > .card-header {
-  margin-bottom: 0;
-}
-
-.card-body .form-label {
-  margin-bottom: 0;
-}
-
-h2 {
-  font-size: 1.6rem;
-}
-
-.bg-white {
-  background-color: white;
-}
-
-.card h3 {
-  margin-top: 0.5rem;
-}
-
-.tab-content {
-  background-color: white;
-}
-
-.card.active > .card-header {
-  background-color: #A0D4EB;
-}
-
-.list-group-item .active {
-  background-color: #2d6da4;
-}
-
-.btn-group {
-  .btn-light:focus, .btn-light.focus {
-    background-color: #f8f9fa;
-  }
-
-  .btn {
-    box-shadow: none !important;
-  }
-}
-
-.btn-group>.btn.active, .btn-group>.btn:active, .btn-group>.btn:focus {
-  z-index: inherit;
-}
-
-.no-select {
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+/Edge */
-  user-select: none; /* Standard */
 }
