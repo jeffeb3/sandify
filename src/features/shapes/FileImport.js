@@ -24,6 +24,7 @@ export default class FileImport extends Shape {
       ...{
         vertices: [],
         maintainAspectRatio: true,
+        fileName: "",
       },
       ...(props === undefined
         ? {}
