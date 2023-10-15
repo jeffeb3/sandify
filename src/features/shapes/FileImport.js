@@ -35,10 +35,11 @@ export default class FileImport extends Shape {
   }
 
   initialDimensions(props) {
-    if (!props) { // undefined during import integrity checks
+    if (!props) {
+      // undefined during import integrity checks
       return {
         width: 0,
-        height: 0
+        height: 0,
       }
     }
 
