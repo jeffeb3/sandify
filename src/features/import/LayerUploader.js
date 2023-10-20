@@ -7,7 +7,7 @@ import GCodeImporter from "@/features/import/GCodeImporter"
 import { addLayer } from "@/features/layers/layersSlice"
 import Layer from "@/features/layers/Layer"
 
-const ImportUploader = ({ toggleModal, showModal }) => {
+const LayerUploader = ({ toggleModal, showModal }) => {
   const machineState = useSelector(selectCurrentMachine)
   const dispatch = useDispatch()
   const inputRef = useRef()
@@ -18,14 +18,15 @@ const ImportUploader = ({ toggleModal, showModal }) => {
     }
   }, [showModal])
 
-  const handleFileImported = (importer, importedProps) => {
+  const handleFileImported = (importer, vertices) => {
     const layer = new Layer("fileImport")
     const layerProps = {
-      ...importedProps,
       machine: machineState,
+      vertices,
     }
     const attrs = {
       ...layer.getInitialState(layerProps),
+      fileName: importer.fileName,
       name: importer.fileName,
     }
 
@@ -52,6 +53,7 @@ const ImportUploader = ({ toggleModal, showModal }) => {
         }
 
         importer.import(handleFileImported)
+        inputRef.current.value = "" // reset to allow more uploads
       }
 
       reader.readAsText(file)
@@ -60,7 +62,7 @@ const ImportUploader = ({ toggleModal, showModal }) => {
 
   return (
     <Form.Control
-      id="importUpload"
+      id="layerImportUpload"
       ref={inputRef}
       type="file"
       accept=".thr,.gcode,.nc"
@@ -70,4 +72,4 @@ const ImportUploader = ({ toggleModal, showModal }) => {
   )
 }
 
-export default React.memo(ImportUploader)
+export default React.memo(LayerUploader)

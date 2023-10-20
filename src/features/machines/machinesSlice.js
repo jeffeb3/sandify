@@ -1,7 +1,7 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
 import { createSelector } from "reselect"
 import { v4 as uuidv4 } from "uuid"
-import { prepareAfterAdd, deleteOne, updateOne } from "@/common/slice"
+import { prepareAfterAdd, updateOne } from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import { getMachine, getDefaultMachineType } from "./machineFactory"
 
@@ -43,7 +43,7 @@ export const machinesSlice = createSlice({
       const deleteIdx = ids.findIndex((_id) => _id === id)
       const currentMachineId = state.current
 
-      deleteOne(adapter, state, action)
+      adapter.removeOne(state, action)
 
       if (id === currentMachineId) {
         const newIds = ids.filter((i) => i != id)

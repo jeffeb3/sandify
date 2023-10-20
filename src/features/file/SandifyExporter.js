@@ -6,10 +6,12 @@ export default class SandifyExporter {
     const json = {
       version: SANDIFY_VERSION,
       effects: { ...state.effects },
+      images: { ...state.images },
       layers: { ...state.layers },
       machine: { ...currentMachine },
     }
 
+    delete json.images.loaded
     delete json.layers.selected
     delete json.layers.current
     delete json.effects.selected

@@ -7,13 +7,18 @@ import LayerManager from "@/features/layers/LayerManager"
 import PreviewStats from "@/features/preview/PreviewStats"
 import { selectSelectedLayer } from "@/features/layers/layersSlice"
 import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
+import { loadImage, selectAllImages } from "@/features/images/imagesSlice"
 
 const Sidebar = () => {
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
+  const images = useSelector(selectAllImages)
 
   useEffect(() => {
     Object.keys(supportedFonts).forEach((url) => dispatch(loadFont(url)))
+    images.forEach((image) =>
+      dispatch(loadImage({ imageId: image.id, imageSrc: image.src })),
+    )
   }, [dispatch])
 
   if (layer) {

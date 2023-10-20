@@ -3,6 +3,7 @@ import machinesReducer from "@/features/machines/machinesSlice"
 import exporterReducer from "@/features/export/exporterSlice"
 import previewReducer from "@/features/preview/previewSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
+import imagesReducer from "@/features/images/imagesSlice"
 import layersReducer from "@/features/layers/layersSlice"
 import effectsReducer from "@/features/effects/effectsSlice"
 import fileReducer from "@/features/file/fileSlice"
@@ -13,6 +14,7 @@ const combinedReducer = combineReducers({
   exporter: exporterReducer,
   file: fileReducer,
   fonts: fontsReducer,
+  images: imagesReducer,
   layers: layersReducer,
   machines: machinesReducer,
   preview: previewReducer,
@@ -23,6 +25,7 @@ const resetPattern = (state, action) => {
 
   newState.layers = undefined
   newState.effects = undefined
+  newState.images = undefined
   newState.preview.zoom = 1.0
   newState.preview.sliderValue = 0.0
 
@@ -35,11 +38,12 @@ const resetAll = (state, action) => {
 }
 
 const loadPattern = (state, action) => {
-  const { effects, layers } = action.payload
+  const { layers, effects, images } = action.payload
   const newState = JSON.parse(JSON.stringify(state)) // deep copy
 
   newState.layers = layers
   newState.effects = effects
+  newState.images = images
 
   const id = newState.layers.ids[0]
   newState.layers.current = id

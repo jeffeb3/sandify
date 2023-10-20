@@ -4,7 +4,8 @@ import Nav from "react-bootstrap/Nav"
 import Navbar from "react-bootstrap/Navbar"
 import NavDropdown from "react-bootstrap/NavDropdown"
 import ExportDownloader from "@/features/export/ExportDownloader"
-import ImportUploader from "@/features/import/ImportUploader"
+import ImageUploader from "@/features/import/ImageUploader"
+import LayerUploader from "@/features/import/LayerUploader"
 import SandifyDownloader from "@/features/file/SandifyDownloader"
 import SandifyUploader from "@/features/file/SandifyUploader"
 import logo from "./logo.svg"
@@ -12,11 +13,13 @@ import "./Header.scss"
 
 const Header = ({ eventKey, setEventKey }) => {
   const [showExport, setShowExport] = useState(false)
-  const [showImport, setShowImport] = useState(0)
+  const [showImportLayer, setShowImportLayer] = useState(0)
+  const [showImportImage, setShowImportImage] = useState(0)
   const [showSave, setShowSave] = useState(false)
   const [showOpen, setShowOpen] = useState(0)
   const toggleExport = () => setShowExport(!showExport)
-  const toggleImport = () => setShowImport(showImport + 1)
+  const toggleImportLayer = () => setShowImportLayer(showImportLayer + 1)
+  const toggleImportImage = () => setShowImportImage(showImportImage + 1)
   const toggleSave = () => setShowSave(!showSave)
   const toggleOpen = () => setShowOpen(showOpen + 1)
   const dispatch = useDispatch()
@@ -51,11 +54,14 @@ const Header = ({ eventKey, setEventKey }) => {
             <NavDropdown.Item onClick={toggleOpen}>Open...</NavDropdown.Item>
             <NavDropdown.Item onClick={toggleSave}>Save as...</NavDropdown.Item>
             <NavDropdown.Divider />
-            <NavDropdown.Item onClick={toggleImport}>
-              Import...
+            <NavDropdown.Item onClick={toggleImportImage}>
+              Import image...
+            </NavDropdown.Item>
+            <NavDropdown.Item onClick={toggleImportLayer}>
+              Import layer...
             </NavDropdown.Item>
             <NavDropdown.Item onClick={toggleExport}>
-              Export as...
+              Export pattern as...
             </NavDropdown.Item>
           </NavDropdown>
           <Nav.Link
@@ -76,9 +82,13 @@ const Header = ({ eventKey, setEventKey }) => {
         showModal={showExport}
         toggleModal={toggleExport}
       />
-      <ImportUploader
-        showModal={showImport}
-        toggleModal={toggleImport}
+      <ImageUploader
+        showModal={showImportImage}
+        toggleModal={toggleImportImage}
+      />
+      <LayerUploader
+        showModal={showImportLayer}
+        toggleModal={toggleImportLayer}
       />
       <SandifyUploader
         showModal={showOpen}
