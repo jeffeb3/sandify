@@ -71,7 +71,7 @@ const layersSlice = createSlice({
       },
     },
     deleteLayer: (state, action) => {
-      deleteOne(adapter, state, action)
+      adapter.removeOne(state, action)
     },
     moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload

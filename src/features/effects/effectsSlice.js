@@ -2,12 +2,7 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
 import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { isEqual } from "lodash"
-import {
-  insertOne,
-  prepareAfterAdd,
-  deleteOne,
-  updateOne,
-} from "@/common/slice"
+import { insertOne, prepareAfterAdd, updateOne } from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import EffectLayer from "./EffectLayer"
 
@@ -33,7 +28,7 @@ export const effectsSlice = createSlice({
       },
     },
     deleteEffect: (state, action) => {
-      deleteOne(adapter, state, action)
+      adapter.removeOne(state, action)
     },
     updateEffect: (state, action) => {
       updateOne(adapter, state, action)
