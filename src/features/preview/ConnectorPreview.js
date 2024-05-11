@@ -108,8 +108,8 @@ const ConnectorPreview = (ownProps) => {
     let color = isCurrent
       ? currentColor
       : currentLayerId || currentEffectId
-      ? unselectedShapeColor
-      : noSelectionColor
+        ? unselectedShapeColor
+        : noSelectionColor
 
     context.beginPath()
     context.lineWidth = 1

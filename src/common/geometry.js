@@ -227,8 +227,8 @@ export const horizontalAlign = (selections, align = "left") => {
     align === "center"
       ? hAlignCenter
       : align === "left"
-      ? hAlignLeft
-      : hAlignRight
+        ? hAlignLeft
+        : hAlignRight
   const allBounds = findBounds(selections.flat())
   const dAll = dFn(allBounds)
 
