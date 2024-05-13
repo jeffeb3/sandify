@@ -1,5 +1,5 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
+import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { isEqual } from "lodash"
 import {
@@ -146,7 +146,7 @@ export const selectEffectSelectionVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
