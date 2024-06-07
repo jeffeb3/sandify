@@ -1,7 +1,11 @@
 import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "../Shape"
-import { subtypes } from "./subtypes"
+import { subtypes, getSubtype } from "./subtypes"
 import { centerOnOrigin } from "@/common/geometry"
+
+const hasSetting = (state, setting) => {
+  return getSubtype(state.imageSubtype).settings.includes(setting)
+}
 
 const options = {
   imageSubtype: {
@@ -9,16 +13,30 @@ const options = {
     type: "dropdown",
     choices: Object.keys(subtypes),
   },
+  imagePolygon: {
+    title: "Polygon (sides)",
+    min: 3,
+    max: 8,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imagePolygon")
+    },
+  },
   imageFrequency: {
     title: "Frequency",
     min: 5,
     max: 256,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageFrequency")
+    },
   },
   imageLineCount: {
     title: "Line count",
     min: 10,
     max: 200,
     step: 2,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageLineCount")
+    },
   },
   imageAmplitude: {
     title: "Amplitude",
@@ -31,21 +49,8 @@ const options = {
     min: 0.5,
     max: 2.9,
     step: 0.1,
-  },
-  imageModulation: {
-    title: "Modulation",
-    type: "togglebutton",
-    choices: ["AM", "FM", "both"],
     isVisible: (layer, state) => {
-      return state.imageSubtype == "squiggle"
-    },
-  },
-  imagePolygon: {
-    title: "Polygon (sides)",
-    min: 3,
-    max: 8,
-    isVisible: (layer, state) => {
-      return state.imageSubtype == "polyspiral"
+      return hasSetting(state, "imageSampling")
     },
   },
   imageSpacing: {
@@ -54,16 +59,49 @@ const options = {
     max: 5,
     step: 0.5,
     isVisible: (layer, state) => {
-      return state.imageSubtype == "polyspiral"
+      return hasSetting(state, "imageSpacing")
     },
   },
-  imageContrast: {
-    title: "Contrast",
-    min: -100.0,
-    max: 100.0,
+  imageModulation: {
+    title: "Modulation",
+    type: "togglebutton",
+    choices: ["AM", "FM", "both"],
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageModulation")
+    },
+  },
+  imageDirection: {
+    title: "Direction",
+    type: "togglebutton",
+    choices: ["clockwise", "counterclockwise"],
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageDirection")
+    },
+  },
+  imageStepSize: {
+    title: "Step size",
+    min: 1,
+    max: 20,
+    step: 0.1,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageStepSize")
+    },
+  },
+  imageAngle: {
+    title: "Angle",
+    min: 0,
+    max: 360,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageAngle")
+    },
   },
   imageBrightness: {
     title: "Brightness",
+    min: -100.0,
+    max: 100.0,
+  },
+  imageContrast: {
+    title: "Contrast",
     min: -100.0,
     max: 100.0,
   },
@@ -97,6 +135,9 @@ export default class imageImport extends Shape {
         imageInverted: false,
         imagePolygon: 4,
         imageSpacing: 1,
+        imageDirection: "clockwise",
+        imageStepSize: 5,
+        imageAngle: 0,
       },
     }
   }
@@ -161,6 +202,9 @@ export default class imageImport extends Shape {
       imageInverted,
       imagePolygon,
       imageSpacing,
+      imageDirection,
+      imageStepSize,
+      imageAngle,
     } = state.shape
     const canvas = document.getElementById(`${imageId}-canvas`)
 
@@ -185,22 +229,18 @@ export default class imageImport extends Shape {
       Inverted: imageInverted,
       Polygon: imagePolygon,
       Spacing: imageSpacing,
+      Direction: imageDirection,
+      Angle: imageAngle,
+      StepSize: imageStepSize,
       width: canvas.width,
       height: canvas.height,
     }
 
-    const lines = []
-    let reverse = false
+    const subtype = subtypes[imageSubtype] || subtypes["Squiggle"]
+    const algorithm = subtype.algorithm
+    const vertices = algorithm(config, image)
 
-    subtypes[imageSubtype](config, image).forEach((line) => {
-      if (reverse) {
-        line = line.reverse()
-      }
-      lines.push(line)
-      //      reverse = !reverse
-    })
-
-    return centerOnOrigin(lines.flat())
+    return centerOnOrigin(vertices)
   }
 
   getOptions() {

@@ -1,4 +1,4 @@
-import { pixelProcessor } from "./helpers"
+import { pixelProcessor, joinLines } from "./helpers"
 import Victor from "victor"
 
 const sawtooth = (config, data) => {
@@ -26,7 +26,7 @@ const sawtooth = (config, data) => {
     lines.push(line)
   }
 
-  return lines
+  return joinLines(lines)
 }
 
 export default sawtooth

@@ -1,4 +1,4 @@
-import { pixelProcessor } from "./helpers"
+import { pixelProcessor, joinLines } from "./helpers"
 import Victor from "victor"
 
 const squiggle = (config, data) => {
@@ -27,7 +27,7 @@ const squiggle = (config, data) => {
     lines.push(line)
   }
 
-  return lines
+  return joinLines(lines)
 }
 
 export default squiggle

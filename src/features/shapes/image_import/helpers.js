@@ -40,3 +40,18 @@ export const pixelProcessor = (config, imagePixels) => {
     return Math.max(maxBrightness - b, 0)
   }
 }
+
+export const joinLines = (lines) => {
+  let reverse = false
+  const newLines = []
+
+  lines.forEach((line) => {
+    if (reverse) {
+      line = line.reverse()
+    }
+    newLines.push(line)
+    reverse = !reverse
+  })
+
+  return newLines.flat()
+}
