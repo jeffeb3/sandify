@@ -57,5 +57,5 @@ export const subtypes = {
 
 // some protection against bad data
 export const getSubtype = (subtype) => {
-  return subtypes[subtype] || subtypes['Squiggle']
+  return subtypes[subtype] || subtypes["Squiggle"]
 }

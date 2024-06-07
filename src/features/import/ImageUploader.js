@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"
@@ -18,42 +19,47 @@ const ImageUploader = ({ toggleModal, showModal }) => {
 
   const handleFileSelected = (event) => {
     const file = event.target.files[0]
+    const maxSize = 1024 * 1024 // 1 MB
 
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const image = new Image()
+      if (file.size > maxSize) {
+        toast.error("This file is too large to import (maximum size 1 MB).")
+      } else {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const image = new Image()
 
-        image.onload = () => {
-          const layerInstance = new Layer("imageImport")
-          const layerProps = {
-            machine: machineState,
-            width: image.width,
-            height: image.height,
-          }
-          const layer = {
-            ...layerInstance.getInitialState(layerProps),
-            imageFileName: file.name,
-            name: file.name,
+          image.onload = () => {
+            const layerInstance = new Layer("imageImport")
+            const layerProps = {
+              machine: machineState,
+              width: image.width,
+              height: image.height,
+            }
+            const layer = {
+              ...layerInstance.getInitialState(layerProps),
+              imageFileName: file.name,
+              name: file.name,
+            }
+
+            dispatch(
+              addLayerWithImage({
+                layer,
+                image: {
+                  src: reader.result,
+                  height: image.height,
+                  width: image.width,
+                },
+              }),
+            )
+            inputRef.current.value = "" // reset to allow more uploads
           }
 
-          dispatch(
-            addLayerWithImage({
-              layer,
-              image: {
-                src: reader.result,
-                height: image.height,
-                width: image.width,
-              },
-            }),
-          )
-          inputRef.current.value = "" // reset to allow more uploads
+          image.src = reader.result
         }
 
-        image.src = reader.result
+        reader.readAsDataURL(file)
       }
-
-      reader.readAsDataURL(file)
     }
   }
 

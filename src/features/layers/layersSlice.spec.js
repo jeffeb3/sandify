@@ -564,21 +564,20 @@ describe("layers reducer", () => {
         })
 
         store.dispatch(
-          addLayerWithImage({ layer: { name: "layer" }, imageSrc: "SRC" }),
+          addLayerWithImage({
+            layer: { name: "layer" },
+            image: { src: "SRC" },
+          }),
         )
         const actions = store.getActions()
+
         expect(actions[0].type).toEqual("images/addImage")
         expect(actions[0].payload).toEqual({
           id: "1",
           src: "SRC",
         })
         expect(actions[0].meta.id).toEqual("1")
-        expect(actions[1].type).toEqual("layers/addLayer")
-        expect(actions[1].payload).toEqual({
-          id: "2",
-          name: "layer",
-          imageId: "1",
-        })
+        expect(actions[1].type).toEqual("images/getImage/pending")
       })
     })
   })
