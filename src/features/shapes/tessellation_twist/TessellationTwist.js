@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Graph, { mix } from "@/common/Graph"
-import { eulerianTrail } from "@/common/eulerianTrail"
+import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { difference } from "@/common/util"
 import { cloneVertices } from "@/common/geometry"
 import Shape from "../Shape"
