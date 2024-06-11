@@ -124,9 +124,11 @@ export default class CirclePacker extends Shape {
     let attempts = this.settings.rectangular
       ? this.settings.attempts * RECTANGULAR_ATTEMPTS_MULTIPLIER
       : this.settings.attempts
+
     if (attempts <= 0) {
       attempts = 1
     }
+
     const rounds = Math.floor(ROUNDS * (ROUNDS / attempts))
 
     for (let round = 0; round < rounds; round++) {
@@ -187,9 +189,10 @@ export default class CirclePacker extends Shape {
         angle = this.connectAlongPerimeter(prev, curr, angle)
       }
     }
-
     intersection = this.boundaryIntersection(prev)
+
     const angle2 = Math.atan2(intersection.y - prev.y, intersection.x - prev.x)
+
     this.points.push(...arc(prev.r, angle, angle2, prev.x, prev.y))
   }
 
@@ -276,6 +279,7 @@ export default class CirclePacker extends Shape {
     const a3 = Math.atan2(li2.y - to.y, li2.x - to.x)
 
     this.points.push(...arc(from.r, startingAngle, a2, from.x, from.y))
+
     return a3
   }
 
@@ -304,6 +308,7 @@ export default class CirclePacker extends Shape {
     if (stack.length > 0) {
       const p1 = stack[0]
       const li1 = closest(c.lineIntersection(c, p1), c)
+
       a1 = Math.atan2(li1.y - p1.y, li1.x - p1.x)
 
       if (stack.length > 1) {
@@ -326,6 +331,7 @@ export default class CirclePacker extends Shape {
 
     // draw arc to perimeter
     const a2 = Math.atan2(intersection.y - c.y, intersection.x - c.x)
+
     this.points.push(...arc(c.r, angle, a2, c.x, c.y))
 
     // connect along perimeter
@@ -333,6 +339,7 @@ export default class CirclePacker extends Shape {
       ...this.settings,
       type: this.settings.rectangular ? "rectangular" : "polar",
     })
+
     this.points.push(...machine.tracePerimeter(intersection, intersection2))
     this.points.push(intersection2)
 

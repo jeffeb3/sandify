@@ -66,8 +66,8 @@ export default class SpaceFiller extends Shape {
   getVertices(state) {
     const machine = getMachine(state.machine)
     const iterations = state.shape.iterations || 1
-
     let { sizeX, sizeY } = machine
+
     if (state.machine.type === "rectangular") {
       sizeX = sizeX * 2
       sizeY = sizeY * 2
@@ -75,8 +75,8 @@ export default class SpaceFiller extends Shape {
 
     // generate our vertices using a set of l-system rules
     let config = subtypes[state.shape.fillerSubtype]
-    config.iterations = iterations
 
+    config.iterations = iterations
     if (config.side === undefined) {
       config.side = 5
     }
