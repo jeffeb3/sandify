@@ -1,5 +1,5 @@
 import Victor from "victor"
-import Effect from "./Effect"
+import Effect from "../Effect"
 import noise from "@/common/noise"
 import { subsample } from "@/common/geometry"
 

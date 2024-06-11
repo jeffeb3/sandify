@@ -1,4 +1,5 @@
-// Adapted from https://gitlab.ilmiont.net/ilmiont/noisejs/. See NOTICE for licensing details.
+// Adapted from https://gitlab.ilmiont.net/ilmiont/noisejs/.
+// See LICENSE for licensing details.
 
 /**
  * Perlin fade function.
