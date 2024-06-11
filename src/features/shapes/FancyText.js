@@ -294,6 +294,7 @@ export default class FancyText extends Shape {
     const segment = this.shortestPathAroundLoop(start, end, points)
 
     segment.push(new Victor(next.x, next.y))
+
     return { segment, end, nextStart }
   }
 
@@ -355,6 +356,7 @@ export default class FancyText extends Shape {
       // determine, so we're hard-wiring the rules, e.g. ('i', 'j')
       const samplePoint = [points[i][0].x, points[i][0].y]
       let idx = childMap[i]
+
       if (idx === undefined) {
         idx = polygons.findIndex((polygon) => {
           return pointInPolygon(samplePoint, polygon)

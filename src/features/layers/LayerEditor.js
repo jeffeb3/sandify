@@ -34,7 +34,7 @@ const LayerEditor = () => {
   const link = model.link
   const linkText = model.linkText || "here"
   const renderedLink = link ? (
-    <div className="mt-3">
+    <div className="mt-3 ms-3 mb-4">
       See{" "}
       <a
         target="_blank"
@@ -42,8 +42,7 @@ const LayerEditor = () => {
         href={link}
       >
         {linkText}
-      </a>{" "}
-      for ideas.
+      </a> for more information.
     </div>
   ) : undefined
 
@@ -122,10 +121,9 @@ const LayerEditor = () => {
         {renderedModelSelection}
         {renderedModelOptions}
         {renderOption({ optionKey: "connectionMethod" })}
-        {renderedLink}
       </div>
-      <div className="px-3 py-2">
-        {model.canTransform(layer) && (
+      {model.canTransform(layer) && (
+        <div className="px-3 py-2">
           <Row className="align-items-center mt-1 mb-1">
             <Col sm={3}>Transform</Col>
             <Col sm={9}>
@@ -206,8 +204,10 @@ const LayerEditor = () => {
               )}
             </Col>
           </Row>
-        )}
-      </div>
+        </div>
+      )}
+      {renderedLink}
+
       <div className="border-top border-secondary px-3 pt-1">
         <EffectManager />
       </div>

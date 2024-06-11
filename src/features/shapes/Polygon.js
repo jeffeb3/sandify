@@ -47,21 +47,27 @@ export default class Polygon extends Shape {
   getVertices(state) {
     // beta is the fraction to have rounded.
     const beta = state.shape.roundFraction
+
     // alpha is the fration to have straight.
     const alpha = 1.0 - beta
+
     let points = []
+
     for (let i = 0; i <= state.shape.polygonSides; i++) {
       const angle = ((Math.PI * 2.0) / state.shape.polygonSides) * (0.5 + i)
+
       if (state.shape.roundCorners && beta !== 0.0) {
         // angles that make up the arc.
         const angleStart = ((Math.PI * 2.0) / state.shape.polygonSides) * i
         const angleEnd = ((Math.PI * 2.0) / state.shape.polygonSides) * (i + 1)
         const angleResolution = 0.1
+
         if (points.length > 0) {
           // Start with a line. We use a bunch of points for this, so they get stretch about evenly
           // as the curves do.
           const numberOfLinePoints =
             (angleEnd - angleStart) / angleResolution / beta
+
           points = points.concat(
             this.getLineVertices(
               points[points.length - 1],
@@ -101,6 +107,7 @@ export default class Polygon extends Shape {
   getLineVertices(startPoint, endPoint, numberOfPoints) {
     const resolution = 1.0 / numberOfPoints
     let points = []
+
     for (let d = resolution; d <= 1.0; d += resolution) {
       points.push(
         new Victor(
