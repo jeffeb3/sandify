@@ -1,5 +1,5 @@
 // adapted from https://github.com/mauriciopoppe/eulerian-trail/blob/master/lib/eulerian-trail.js
-// see NOTICE for license details
+// see LICENSE for license details
 // commented out thrown exceptions to return non-optimal eulerian paths
 export const eulerianTrail = (options) => {
   var g = []

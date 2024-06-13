@@ -35,9 +35,11 @@ export default class Star extends Shape {
 
   getVertices(state) {
     let points = []
+
     for (let i = 0; i <= state.shape.points * 2; i++) {
       let angle = ((Math.PI * 2.0) / (2.0 * state.shape.points)) * i
       let star_scale = 1.0
+
       if (i % 2 === 0) {
         star_scale *= state.shape.starRatio
       }
@@ -45,6 +47,7 @@ export default class Star extends Shape {
         new Victor(star_scale * Math.cos(angle), star_scale * Math.sin(angle)),
       )
     }
+
     return points
   }
 }

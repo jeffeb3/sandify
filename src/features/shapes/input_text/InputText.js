@@ -24,11 +24,13 @@ const options = {
 function getMaxX(points) {
   // Measure the width of the line
   let maxX = 0
+
   points.forEach((point) => {
     if (point.x > maxX) {
       maxX = point.x
     }
   })
+
   return maxX
 }
 
@@ -60,7 +62,8 @@ export default class InputText extends Shape {
     let textPoints = []
 
     for (let chi = 0; chi < state.shape.inputText.length; chi++) {
-      var nextLetter = state.shape.inputText[chi]
+      let nextLetter = state.shape.inputText[chi]
+
       if (
         prevLetter === "b" ||
         prevLetter === "v" ||
@@ -69,6 +72,7 @@ export default class InputText extends Shape {
       ) {
         // Save this letter before we possibly add in a '*'
         prevLetter = nextLetter
+
         if (
           nextLetter.search("[a-z]+") !== -1 &&
           state.shape.inputFont === "Cursive"
@@ -87,7 +91,8 @@ export default class InputText extends Shape {
         continue
       }
 
-      var shape = undefined
+      let shape = undefined
+
       if (state.shape.inputFont === "Cursive") {
         shape = CursiveFont(nextLetter)
       } else if (state.shape.inputFont === "Sans Serif") {
@@ -143,6 +148,7 @@ export default class InputText extends Shape {
     } else {
       // This variable controls "Top" vs. "Bottom"
       let direction = 1.0
+
       if (state.shape.rotateDir === "Bottom") {
         direction = -1.0
         lines.reverse()
@@ -180,6 +186,7 @@ export default class InputText extends Shape {
 
       lines.forEach((points) => {
         let maxX = getMaxX(points)
+
         // This widthOffset is in X.
         let widthOffset = maxX / 2.0
 
@@ -196,6 +203,7 @@ export default class InputText extends Shape {
 
           // Get the Y value of the first point in the next (this) line.
           let r = rOffset + rPerY * 0.0
+
           if (points.length > 0) {
             r = rOffset + rPerY * points[0].y
           }
@@ -221,7 +229,9 @@ export default class InputText extends Shape {
     }
 
     const scale = 2.5 // to normalize starting size
+
     textPoints.forEach((point) => point.multiply({ x: scale, y: scale }))
+
     return textPoints
   }
 
