@@ -33,18 +33,23 @@ const LayerEditor = () => {
   }
   const link = model.link
   const linkText = model.linkText || "here"
-  const renderedLink = link ? (
-    <div className="mt-3 ms-3 mb-4">
-      See{" "}
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href={link}
-      >
-        {linkText}
-      </a> for more information.
-    </div>
-  ) : undefined
+  const description = model.description ? model.description + " " : ""
+
+  const renderedLink =
+    link || description ? (
+      <div className="mt-3 mx-3 mb-4 bg-light p-4">
+        {description}
+        See{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href={link}
+        >
+          {linkText}
+        </a>{" "}
+        for more information.
+      </div>
+    ) : undefined
 
   const handleChangeType = (selected) => {
     dispatch(changeModelType({ id: layer.id, type: selected.value }))
@@ -206,11 +211,12 @@ const LayerEditor = () => {
           </Row>
         </div>
       )}
-      {renderedLink}
 
       <div className="border-top border-secondary px-3 pt-1">
         <EffectManager />
       </div>
+
+      {renderedLink}
     </div>
   )
 }

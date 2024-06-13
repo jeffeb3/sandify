@@ -41,6 +41,10 @@ export default class CirclePacker extends Shape {
     this.usesMachine = true
     this.autosize = false
     this.selectGroup = "Erasers"
+    this.link = "https://en.wikipedia.org/wiki/Circle_packing"
+    this.linkText = "Wikipedia"
+    this.description =
+      "Circle packing is an arrangement of circles of varying sizes such that no overlapping occurs and no circle can be enlarged without creating an overlap."
   }
 
   canMove(state) {

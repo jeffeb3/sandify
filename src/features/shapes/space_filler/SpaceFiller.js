@@ -37,8 +37,10 @@ export default class SpaceFiller extends Shape {
     this.usesMachine = true
     this.autosize = false
     this.selectGroup = "Erasers"
-    this.linkText = "Fractal charm: space filling curves"
-    this.link = "https://www.youtube.com/watch?v=RU0wScIj36o"
+    this.linkText = "Wikipedia"
+    this.description =
+      "A space-filling curve draws a single, continuous line that covers every point in a space without missing any spots or crossing itself."
+    this.link = "https://en.wikipedia.org/wiki/Space-filling_curve"
   }
 
   canMove(state) {

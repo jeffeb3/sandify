@@ -5,8 +5,10 @@ export default class Heart extends Shape {
   constructor() {
     super("heart")
     this.label = "Heart"
+    this.description =
+      "Heart curves can be defined mathematically a number of different ways. Our heart shape is a parametric equation."
     this.link = "http://mathworld.wolfram.com/HeartCurve.html"
-    this.linkText = "HeartCurve at Wolfram Mathworld"
+    this.linkText = "Wolfram Mathworld"
   }
 
   getInitialState() {
