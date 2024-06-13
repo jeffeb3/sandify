@@ -13,6 +13,10 @@ export default class Reuleaux extends Shape {
   constructor() {
     super("reuleaux")
     this.label = "Reuleaux"
+    this.description =
+      "A reuleaux polygon is a curve of constant width made up of circular arcs of constant radius. It's named after Frances Reuleaux, a 19th century German engineer who used Reuleaux triangles in his designs."
+    this.link = "https://en.wikipedia.org/wiki/Reuleaux_polygon"
+    this.linkText = "Wikipedia"
   }
 
   getInitialState() {

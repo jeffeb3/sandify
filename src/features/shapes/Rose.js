@@ -18,8 +18,10 @@ export default class Rose extends Shape {
   constructor() {
     super("rose")
     this.label = "Rose"
-    this.link = "http://mathworld.wolfram.com/Rose.html"
-    this.linkText = "Rose at Wolfram Mathworld"
+    this.link = "https://mathworld.wolfram.com/RoseCurve.html"
+    this.linkText = "Wolfram Mathworld"
+    this.description =
+      "A rose curve is a curve which has the shape of a petalled flower."
   }
 
   getInitialState() {

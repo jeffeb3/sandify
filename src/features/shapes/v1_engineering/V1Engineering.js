@@ -5,6 +5,10 @@ export default class V1Engineering extends Shape {
   constructor() {
     super("v1Engineering")
     this.label = "V1Engineering"
+    this.link = "https://www.v1e.com/"
+    this.linkText = "V1 Engineering"
+    this.description =
+      "This shape represents the V1 Engineering logo. V1 Engineering provides low-cost, customizable machine designs. Sandify was created in 2017 by users in their forum."
   }
 
   getInitialState() {

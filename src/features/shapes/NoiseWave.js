@@ -35,6 +35,10 @@ export default class NoiseWave extends Shape {
     this.selectGroup = "Erasers"
     this.usesMachine = true
     this.autosize = false
+    this.link = "https://en.wikipedia.org/wiki/Perlin_noise"
+    this.linkText = "Wikipedia"
+    this.description =
+      "Perlin noise is a type of gradient noise that can be used to generate textures and terrain. Here we use it to create an appealing series of wavy lines."
   }
 
   canMove(state) {
