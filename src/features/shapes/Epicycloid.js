@@ -20,7 +20,7 @@ export default class Epicycloid extends Shape {
     this.link = "http://mathworld.wolfram.com/Epicycloid.html"
     this.linkText = "Wolfram Mathworld"
     this.description =
-      "The clover shape is actually an epicycloid. Imagine two circles, with an outer circle rolling around an inner one. The path created by a point on the outer circle as it rolls is called an epicycloid."
+      "The clover shape is an epicycloid. Imagine two circles, with an outer circle rolling around an inner one. The path created by a point on the outer circle as it rolls is called an epicycloid."
   }
 
   getInitialState() {

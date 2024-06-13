@@ -20,7 +20,7 @@ export default class Star extends Shape {
     this.link = "http://mathworld.wolfram.com/Hypocycloid.html"
     this.linkText = "Wolfram Mathworld"
     this.description =
-      "The web shape is actually an hypocycloid. Imagine two circles, with an inner circle rolling around inside an outer one. The path created by a point on the inner circle as it rolls is called an hypocycloid."
+      "The web shape is a hypocycloid. Imagine two circles, with an inner circle rolling around inside an outer one. The path created by a point on the inner circle as it rolls is called a hypocycloid."
   }
 
   getInitialState() {

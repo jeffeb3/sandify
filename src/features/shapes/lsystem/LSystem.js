@@ -36,7 +36,7 @@ export default class LSystem extends Shape {
     this.link = "https://en.wikipedia.org/wiki/L-system"
     this.linkText = "Wikipedia"
     this.description =
-      "The fractal line writer shape is actually a Lindenmayer (or L) system. L-systems chain symbols together to specify instructions for moving in a 2d space (e.g., turn left or right, walk left or right). When applied recursively, they generate fractal-like patterns."
+      "The fractal line writer shape is a Lindenmayer (or L) system. L-systems chain symbols together to specify instructions for moving in a 2d space (e.g., turn left or right, walk left or right). When applied recursively, they generate fractal-like patterns."
   }
 
   getInitialState() {
