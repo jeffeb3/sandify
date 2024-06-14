@@ -1,7 +1,8 @@
+import { centerOnOrigin, dimensions, offset } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "../Shape"
 import { subtypes, getSubtype } from "./subtypes"
-import { centerOnOrigin } from "@/common/geometry"
+import RectMachine from "@/features/machines/RectMachine"
 
 const hasSetting = (state, setting) => {
   return getSubtype(state.imageSubtype).settings.includes(setting)
@@ -125,7 +126,7 @@ export default class imageImport extends Shape {
       ...super.getInitialState(),
       ...{
         imageSubtype: "squiggle",
-        imageFrequency: 22,
+        imageFrequency: 150,
         imageLineCount: 50,
         imageAmplitude: 1,
         imageSampling: 1,
@@ -238,9 +239,33 @@ export default class imageImport extends Shape {
 
     const subtype = subtypes[imageSubtype] || subtypes["Squiggle"]
     const algorithm = subtype.algorithm
-    const vertices = algorithm(config, image)
+    let vertices = algorithm(config, image)
 
-    return centerOnOrigin(vertices)
+    vertices = centerOnOrigin(vertices)
+    vertices = this.clipAtTop(canvas, vertices)
+
+    return vertices
+  }
+
+  clipAtTop(canvas, vertices) {
+    const dim = dimensions(vertices)
+
+    vertices = vertices.map((vertex) => {
+      return offset(vertex, 0, (canvas.height - dim.height) / 2)
+    })
+
+    const machine = new RectMachine({
+      minX: 0,
+      maxX: canvas.width,
+      minY: 0,
+      maxY: canvas.height,
+    })
+
+    vertices = machine.polish(vertices)
+
+    return vertices.map((vertex) => {
+      return offset(vertex, 0, (dim.height - canvas.height) / 2)
+    })
   }
 
   getOptions() {

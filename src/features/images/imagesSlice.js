@@ -72,8 +72,21 @@ export const loadImage = createAsyncThunk(
           willReadFrequently: true,
         })
 
-        canvas.height = image.height
-        canvas.width = image.width
+        // scale down resolution for both performance and aesthetic reasons
+        let cw = 800
+        let ch = 600
+        const w = image.width
+        const h = image.height
+
+        if (w > cw || h > ch) {
+          ch = Math.round((cw * h) / w)
+        } else if (w > 10 && h > 10) {
+          ch = h
+          cw = w
+        }
+
+        canvas.height = ch
+        canvas.width = cw
         context.clearRect(0, 0, canvas.width, canvas.height)
         context.drawImage(image, 0, 0, canvas.width, canvas.height)
 
