@@ -110,8 +110,8 @@ export default class Mask extends Effect {
             ? PolarInvertedMachine
             : PolarMachine
           : effect.maskInvert
-          ? RectInvertedMachine
-          : RectMachine
+            ? RectInvertedMachine
+            : RectMachine
 
       const machine = new machineClass({
         minX: 0,

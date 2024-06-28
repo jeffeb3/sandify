@@ -227,8 +227,8 @@ export const horizontalAlign = (selections, align = "left") => {
     align === "center"
       ? hAlignCenter
       : align === "left"
-      ? hAlignLeft
-      : hAlignRight
+        ? hAlignLeft
+        : hAlignRight
   const allBounds = findBounds(selections.flat())
   const dAll = dFn(allBounds)
 
@@ -295,6 +295,7 @@ export const subsample = (vertices, maxLength) => {
   let subsampledVertices = []
   let previous = undefined
   let next
+  const maxSegments = 1000
 
   for (next = 0; next < vertices.length; next++) {
     if (previous !== undefined) {
@@ -309,7 +310,13 @@ export const subsample = (vertices, maxLength) => {
         .multiply(Victor(maxLength, maxLength))
 
       // This loads up (start, end].
-      for (let step = 0; step < delta.magnitude() / maxLength; step++) {
+      const magnitude = delta.magnitude()
+
+      // If the magnitude is unreasonably large, cap the number of segments
+      // to prevent the creation of too many points
+      const segmentMaxLength = Math.max(magnitude / maxSegments, maxLength)
+
+      for (let step = 0; step < magnitude / segmentMaxLength; step++) {
         subsampledVertices.push(
           new Victor(
             start.x + step * deltaSegment.x,

@@ -1,5 +1,5 @@
 import configureMockStore from "redux-mock-store"
-import thunk from "redux-thunk"
+import { thunk } from "redux-thunk"
 import { resetUniqueId } from "@/common/mocks"
 import { configureStore } from "@reduxjs/toolkit"
 import layersReducer, {
@@ -27,7 +27,8 @@ import imagesReducer from "@/features/images/imagesSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"
 
-const mockStore = configureMockStore([thunk])
+const middleware = [thunk]
+const mockStore = configureMockStore(middleware)
 
 beforeEach(() => {
   resetUniqueId()

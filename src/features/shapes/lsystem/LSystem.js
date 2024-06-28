@@ -34,7 +34,9 @@ export default class LSystem extends Shape {
     super("lsystem")
     this.label = "Fractal line writer"
     this.link = "https://en.wikipedia.org/wiki/L-system"
-    this.linkText = "L-systems at Wikipedia"
+    this.linkText = "Wikipedia"
+    this.description =
+      "The fractal line writer shape is a Lindenmayer (or L) system. L-systems chain symbols together to specify instructions for moving in a 2d space (e.g., turn left or right, walk left or right). When applied recursively, they generate fractal-like patterns."
   }
 
   getInitialState() {
@@ -53,6 +55,7 @@ export default class LSystem extends Shape {
 
     // generate our vertices using a set of l-system rules
     let config = subtypes[shape.subtype]
+
     config.iterations = iterations
     config.side = 5
 
@@ -62,6 +65,7 @@ export default class LSystem extends Shape {
 
     let curve = lsystemPath(lsystem(config), config)
     const scale = 18.0 // to normalize starting size
+
     return resizeVertices(curve, scale, scale)
   }
 

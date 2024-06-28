@@ -1,5 +1,5 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
+import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import Color from "color"
@@ -355,7 +355,7 @@ export const selectLayerVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -409,7 +409,7 @@ export const selectShapePreviewVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -464,7 +464,7 @@ export const selectDraggingEffectVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -500,7 +500,7 @@ export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -528,7 +528,7 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -680,7 +680,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
   },
 )({
   keySelector: (state, id, isCurrent) => `${id}-${isCurrent}`,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })

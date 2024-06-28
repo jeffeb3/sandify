@@ -35,6 +35,10 @@ export default class NoiseWave extends Shape {
     this.selectGroup = "Erasers"
     this.usesMachine = true
     this.autosize = false
+    this.link = "https://en.wikipedia.org/wiki/Perlin_noise"
+    this.linkText = "Wikipedia"
+    this.description =
+      "Perlin noise is a type of gradient noise that can be used to generate textures and terrain. Here we use it to create an appealing series of wavy lines."
   }
 
   canMove(state) {
@@ -78,6 +82,7 @@ export default class NoiseWave extends Shape {
     noise.seed(shape.seed)
 
     const particles = []
+
     for (let i = 0; i < shape.numParticles; i++) {
       const p1 = {
         x: sizeX * rng() - sizeX / 2,
@@ -103,6 +108,7 @@ export default class NoiseWave extends Shape {
       for (let iterations = 0; iterations <= 1000; iterations++) {
         // This has side effects on the particle
         const newVertex = this.getParticleVertex(particle, shape)
+
         group.push(newVertex)
 
         // Stop if we entered and then exited the machine coordinates.
@@ -112,6 +118,7 @@ export default class NoiseWave extends Shape {
         }
         wasInside = inside
       }
+
       return group
     })
 
@@ -125,6 +132,7 @@ export default class NoiseWave extends Shape {
         const end = curve[0]
         const startPerimeter = machine.nearestPerimeterVertex(start)
         const endPerimeter = machine.nearestPerimeterVertex(end)
+
         vertices = vertices.concat(
           [
             startPerimeter,
@@ -158,12 +166,15 @@ export default class NoiseWave extends Shape {
   getCurve(vertexGroups, idx) {
     const pEndVertices = vertexGroups[idx]
     const pStartVertices = vertexGroups[idx + 1]
+
     return pStartVertices.reverse().concat(pEndVertices)
   }
 
   getParticleVertex(p, options) {
     let periodDenominator = 600 - options.noiseLevel
+
     if (options.noiseLevel >= 600) periodDenominator = 1
+
     const period = 1 / periodDenominator
     const v =
       options.noiseType === "Simplex"

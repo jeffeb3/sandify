@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Graph, { mix } from "@/common/Graph"
-import { eulerianTrail } from "@/common/eulerianTrail"
+import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { difference } from "@/common/util"
 import { cloneVertices } from "@/common/geometry"
 import Shape from "../Shape"
@@ -83,11 +83,16 @@ const options = {
   },
 }
 
-// Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve. See NOTICE for licensing details.
+// Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve.
+// See LICENSE for licensing details.
 export default class TessellationTwist extends Shape {
   constructor() {
     super("tessellationTwist")
     this.label = "Tessellation twist"
+    this.link = "https://en.wikipedia.org/wiki/Tessellation"
+    this.linkText = "Wikipedia"
+    this.description =
+      "The tessellation twist shape is form of tessellation. Tessellations cover a surface using tiles (in our case an equilateral triangle) with no overlaps or gaps."
   }
 
   getInitialState() {

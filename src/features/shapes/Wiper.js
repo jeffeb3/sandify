@@ -34,6 +34,7 @@ const outOfBounds = (point, width, height) => {
   if (point.y > height / 2.0) {
     return true
   }
+
   return false
 }
 
@@ -41,11 +42,12 @@ const outOfBounds = (point, width, height) => {
 // This will keep the shape. i.e. It will follow the line segment, and return the point on that line
 // segment.
 function boundPoint(good, bad, size_x, size_y) {
-  var dx = good.x - bad.x
-  var dy = good.y - bad.y
+  let dx = good.x - bad.x
+  let dy = good.y - bad.y
 
-  var fixed = new Victor(bad.x, bad.y)
-  var distance = 0
+  let fixed = new Victor(bad.x, bad.y)
+  let distance = 0
+
   if (bad.x < -size_x || bad.x > size_x) {
     if (bad.x < -size_x) {
       // we are leaving the left
@@ -54,8 +56,10 @@ function boundPoint(good, bad, size_x, size_y) {
       // we are leaving the right
       fixed.x = size_x
     }
+
     distance = (fixed.x - good.x) / dx
     fixed.y = good.y + distance * dy
+
     // We fixed x, but y might have the same problem, so we'll rerun this, with different points.
     return boundPoint(good, fixed, size_x, size_y)
   }
@@ -67,9 +71,11 @@ function boundPoint(good, bad, size_x, size_y) {
       // we are leaving the top
       fixed.y = size_y
     }
+
     distance = (fixed.y - good.y) / dy
     fixed.x = good.x + distance * dx
   }
+
   return fixed
 }
 
@@ -126,6 +132,7 @@ function spiralVertices(state) {
 function linearVertices(state) {
   // Get the angle between 0,180
   let angle = (180.0 - (state.shape.wiperAngleDeg % 360)) % 180.0
+
   if (angle < 0.0) {
     angle += 180.0
   }
@@ -136,6 +143,7 @@ function linearVertices(state) {
   let width = 1
   let outputVertices = []
   let machine = state.machine
+
   if (machine.type === "rectangular") {
     height = machine.maxY - machine.minY
     width = machine.maxX - machine.minX
@@ -169,6 +177,7 @@ function linearVertices(state) {
     orig_delta_w = orig_delta_w.clone().multiply(Victor(-1.0, -1.0))
     orig_delta_h = orig_delta_h.clone().multiply(Victor(-1.0, -1.0))
   }
+
   let delta_w = orig_delta_w
   let delta_h = orig_delta_h
   let endLocation = startLocation.clone().multiply(Victor(-1.0, -1.0))
@@ -179,6 +188,7 @@ function linearVertices(state) {
   let nextHeightPoint = startLocation
 
   let emergency_break = 0
+
   while (emergency_break < 1000) {
     emergency_break += 1
 
@@ -270,6 +280,7 @@ function linearVertices(state) {
       delta_w = orig_delta_h
     }
   }
+
   return outputVertices
 }
 
