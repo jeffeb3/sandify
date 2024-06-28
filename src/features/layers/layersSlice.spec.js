@@ -565,7 +565,10 @@ describe("layers reducer", () => {
 
         store.dispatch(
           addLayerWithImage({
-            layer: { name: "layer" },
+            layerProps: {
+              name: "layer",
+              machine: { type: "polar" },
+            },
             image: { src: "SRC" },
           }),
         )
