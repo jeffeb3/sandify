@@ -98,11 +98,13 @@ const options = {
   },
   imageBrightness: {
     title: "Brightness",
+    type: "slider",
     min: -100.0,
     max: 100.0,
   },
   imageContrast: {
     title: "Contrast",
+    type: "slider",
     min: -100.0,
     max: 100.0,
   },
