@@ -4,7 +4,6 @@ import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import { addLayerWithImage } from "@/features/layers/layersSlice"
-import Layer from "@/features/layers/Layer"
 
 const ImageUploader = ({ toggleModal, showModal }) => {
   const machineState = useSelector(selectCurrentMachine)
@@ -30,21 +29,16 @@ const ImageUploader = ({ toggleModal, showModal }) => {
           const image = new Image()
 
           image.onload = () => {
-            const layerInstance = new Layer("imageImport")
             const layerProps = {
               machine: machineState,
               width: image.width,
               height: image.height,
-            }
-            const layer = {
-              ...layerInstance.getInitialState(layerProps),
-              imageFileName: file.name,
               name: file.name,
             }
 
             dispatch(
               addLayerWithImage({
-                layer,
+                layerProps,
                 image: {
                   src: reader.result,
                   height: image.height,

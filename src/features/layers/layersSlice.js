@@ -857,16 +857,23 @@ export const setCurrentEffect = (id) => {
   }
 }
 
-export const addLayerWithImage = ({ layer, image }) => {
+export const addLayerWithImage = ({ layerProps, image }) => {
   return async (dispatch) => {
     const action = dispatch(addImage(image))
     const imageId = action.meta.id
+
+    await dispatch(loadImage({ imageId, imageSrc: image.src }))
+
+    const layerInstance = new Layer("imageImport")
     const layerWithImage = {
-      ...layer,
+      ...layerInstance.getInitialState({
+        ...layerProps,
+        imageId,
+      }),
+      name: layerProps.name,
       imageId,
     }
 
-    await dispatch(loadImage({ imageId, imageSrc: image.src }))
     dispatch(layersSlice.actions.addLayer(layerWithImage))
   }
 }

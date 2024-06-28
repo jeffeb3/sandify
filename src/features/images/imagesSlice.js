@@ -56,6 +56,39 @@ export const selectImagesLoaded = (state) => state.images.loaded
 // Thunks
 // ------------------------------
 
+// returns a sensibly downscaled dimensions for an loaded image (aesthetics and performance)
+const downscaledDimensions = (image) => {
+  let cw = 800
+  let ch = 600
+  const w = image.width
+  const h = image.height
+
+  if (w > cw || h > ch) {
+    const aspectRatio = w / h
+
+    if (w > h) {
+      ch = Math.round(cw / aspectRatio)
+
+      if (ch > 600) {
+        ch = 600
+        cw = Math.round(ch * aspectRatio)
+      }
+    } else {
+      cw = Math.round(ch * aspectRatio)
+
+      if (cw > 800) {
+        cw = 800
+        ch = Math.round(cw / aspectRatio)
+      }
+    }
+  } else {
+    cw = w
+    ch = h
+  }
+
+  return { width: cw, height: ch }
+}
+
 export const loadImage = createAsyncThunk(
   "images/getImage",
   async ({ imageId, imageSrc }) => {
@@ -71,24 +104,14 @@ export const loadImage = createAsyncThunk(
         const context = canvas.getContext("2d", {
           willReadFrequently: true,
         })
+        const { width, height } = downscaledDimensions(image)
 
-        // scale down resolution for both performance and aesthetic reasons
-        let cw = 800
-        let ch = 600
-        const w = image.width
-        const h = image.height
-
-        if (w > cw || h > ch) {
-          ch = Math.round((cw * h) / w)
-        } else if (w > 10 && h > 10) {
-          ch = h
-          cw = w
-        }
-
-        canvas.height = ch
-        canvas.width = cw
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.drawImage(image, 0, 0, canvas.width, canvas.height)
+        canvas.height = height
+        canvas.width = width
+        context.imageSmoothingEnabled = true
+        context.imageSmoothingQuality = "low"
+        context.clearRect(0, 0, width, height)
+        context.drawImage(image, 0, 0, width, height)
 
         resolve()
       }
