@@ -14,6 +14,7 @@ export const subtypes = {
       "imageAmplitude",
       "imageSampling",
       "imageModulation",
+      "imageBrightnessFilter",
     ],
   },
   Spiral: {
@@ -37,6 +38,7 @@ export const subtypes = {
       "imageLineCount",
       "imageAmplitude",
       "imageSpacing",
+      "imageBrightnessFilter",
     ],
   },
   Springs: {
@@ -47,6 +49,7 @@ export const subtypes = {
       "imageAmplitude",
       "imageSampling",
       "imageDirection",
+      "imageBrightnessFilter",
     ],
   },
   Waves: {

@@ -490,6 +490,10 @@ export const annotateVertex = (vertex, attrs) => {
   return vertex
 }
 
+export const concatClonedVertices = (arr, vertices) => {
+  vertices.forEach((vertex) => arr.push(cloneVertex(vertex)))
+}
+
 // add attributes to a given array of vertices
 export const annotateVertices = (vertices, attrs) => {
   vertices.forEach((vertex) => {

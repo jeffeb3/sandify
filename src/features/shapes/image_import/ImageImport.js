@@ -8,11 +8,47 @@ const hasSetting = (state, setting) => {
   return getSubtype(state.imageSubtype).settings.includes(setting)
 }
 
+// a change to clipped brightness can change the aspect ratio; given that this shape
+// stretches, we need to alter the dimensions to match to prevent distortion.
+const handleClippedBrightnessChange = (model, changes, state) => {
+  const currentVertices = model.getVertices({
+    shape: state,
+  })
+  const newVertices = model.getVertices({
+    shape: {
+      ...state,
+      ...changes,
+    },
+  })
+
+  const cDim = dimensions(currentVertices)
+  const nDim = dimensions(newVertices)
+  const cAr = cDim.width / cDim.height
+  const nAr = nDim.width / nDim.height
+
+  if (!isNaN(nAr) && !isNaN(cAr) && cAr != nAr) {
+    const ar = (nAr * state.aspectRatio) / cAr
+    changes.aspectRatio = ar
+
+    if (nAr > 1) {
+      changes.height = state.height * (state.aspectRatio / ar)
+    } else {
+      changes.width = state.width * (ar / state.aspectRatio)
+    }
+  }
+
+  return changes
+}
+
 const options = {
   imageSubtype: {
     title: "Type",
     type: "dropdown",
     choices: Object.keys(subtypes),
+    onChange: (model, changes, state) => {
+      changes.imageFrequency = changes.imageSubtype == "Springs" ? 50 : 150
+      return changes
+    },
   },
   imagePolygon: {
     title: "Polygon (sides)",
@@ -102,6 +138,19 @@ const options = {
     min: -100.0,
     max: 100.0,
   },
+  imageBrightnessFilter: {
+    title: "Brightness filter",
+    type: "slider",
+    range: true,
+    min: 0,
+    max: 255,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageBrightnessFilter")
+    },
+    onChange: (model, changes, state) => {
+      return handleClippedBrightnessChange(model, changes, state)
+    },
+  },
   imageContrast: {
     title: "Contrast",
     type: "slider",
@@ -141,6 +190,9 @@ export default class imageImport extends Shape {
         imageDirection: "clockwise",
         imageStepSize: 5,
         imageAngle: 0,
+        imageMinClippedBrightness: 0,
+        imageMaxClippedBrightness: 255,
+        imageBrightnessFilter: [0, 255],
       },
     }
   }
@@ -156,12 +208,20 @@ export default class imageImport extends Shape {
     }
 
     const machine = getMachine(props.machine)
-    const dimensions = this.fitLayerDimensionsToMachine(props, machine)
+    const initialVertices = this.getVertices({
+      shape: {
+        ...this.getInitialState(),
+        imageId: props.imageId,
+      },
+      ...props,
+    })
+    const dim = dimensions(initialVertices)
+    const fit = this.fitLayerDimensionsToMachine(dim, machine)
 
     return {
-      width: dimensions.width,
-      height: dimensions.height,
-      aspectRatio: 1,
+      width: fit.width,
+      height: fit.height,
+      aspectRatio: fit.width / fit.height,
     }
   }
 
@@ -176,18 +236,17 @@ export default class imageImport extends Shape {
     }
 
     const layerAspectRatio = layerWidth / layerHeight
-    const machineAspectRatio = machineWidth / machineHeight
 
-    if (layerAspectRatio > machineAspectRatio) {
-      return {
-        width: machineWidth * 0.8,
-        height: (machineWidth * 0.8) / layerAspectRatio,
-      }
+    let scale
+    if (layerAspectRatio > 1) {
+      scale = (machineWidth / layerWidth) * 0.8
     } else {
-      return {
-        width: machineHeight * 0.8 * layerAspectRatio,
-        height: machineHeight * 0.8,
-      }
+      scale = (machineHeight / layerHeight) * 0.8
+    }
+
+    return {
+      width: layerWidth * scale,
+      height: layerHeight * scale,
     }
   }
 
@@ -209,6 +268,9 @@ export default class imageImport extends Shape {
       imageStepSize,
       imageAngle,
     } = state.shape
+
+    const imageMinClippedBrightness = state.shape.imageBrightnessFilter[0]
+    const imageMaxClippedBrightness = state.shape.imageBrightnessFilter[1]
     const canvas = document.getElementById(`${imageId}-canvas`)
 
     if (!canvas) {
@@ -235,15 +297,19 @@ export default class imageImport extends Shape {
       Direction: imageDirection,
       Angle: imageAngle,
       StepSize: imageStepSize,
+      MaxClippedBrightness: imageMaxClippedBrightness,
+      MinClippedBrightness: imageMinClippedBrightness,
       width: canvas.width,
       height: canvas.height,
     }
 
     const subtype = subtypes[imageSubtype] || subtypes["Squiggle"]
-    const algorithm = subtype.algorithm
-    let vertices = algorithm(config, image)
+    let vertices = subtype.algorithm(config, image)
 
     vertices = centerOnOrigin(vertices)
+
+    // the algorithm can return vertices outside of original dimensions, so clip them;
+    // this is consistent with how plotterfun handles this case.
     vertices = this.clipAtTop(canvas, vertices)
 
     return vertices
