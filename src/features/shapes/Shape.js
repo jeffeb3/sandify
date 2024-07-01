@@ -65,7 +65,10 @@ export default class Shape extends Model {
   getCacheKey(state) {
     // include only model values in key
     const cacheState = { ...state }
-    cacheState.shape = pick(cacheState.shape, Object.keys(this.getOptions()))
+    cacheState.shape = pick(cacheState.shape, [
+      ...Object.keys(this.getOptions()),
+      "imageId",
+    ])
     cacheState.type = state.shape.type
     cacheState.dragging = state.shape.dragging
 

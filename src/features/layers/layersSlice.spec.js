@@ -5,6 +5,7 @@ import { configureStore } from "@reduxjs/toolkit"
 import layersReducer, {
   layersActions,
   addLayer,
+  addLayerWithImage,
   addEffect,
   changeModelType,
   deleteLayer,
@@ -22,6 +23,7 @@ import layersReducer, {
 import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
 import machinesReducer from "@/features/machines/machinesSlice"
 import fontsReducer from "@/features/fonts/fontsSlice"
+import imagesReducer from "@/features/images/imagesSlice"
 import EffectLayer from "@/features/effects/EffectLayer"
 import Layer from "./Layer"
 
@@ -447,6 +449,27 @@ describe("layers reducer", () => {
         expect(actions[1].type).toEqual("effects/deleteEffect")
         expect(actions[2].type).toEqual("layers/deleteLayer")
       })
+
+      it("should dispatch actions to delete an image if present", async () => {
+        const store = mockStore({
+          layers: {
+            entities: {
+              0: {
+                id: "0",
+                name: "foo",
+                imageId: "I",
+                effectIds: [],
+              },
+            },
+            ids: ["0"],
+          },
+        })
+
+        store.dispatch(deleteLayer("0"))
+        const actions = store.getActions()
+        expect(actions[0].type).toEqual("images/deleteImage")
+        expect(actions[1].type).toEqual("layers/deleteLayer")
+      })
     })
 
     describe("copyLayer", () => {
@@ -527,6 +550,40 @@ describe("layers reducer", () => {
       expect(actions[0].type).toEqual("layers/setCurrentLayer")
       expect(actions[1].type).toEqual("effects/setCurrentEffect")
     })
+
+    describe("addLayerWithImage", () => {
+      it("should dispatch actions to create an image and then create a layer pointing to that image", async () => {
+        const store = mockStore({
+          layers: {
+            entities: {},
+            ids: [],
+          },
+          images: {
+            entities: {},
+            ids: [],
+          },
+        })
+
+        store.dispatch(
+          addLayerWithImage({
+            layerProps: {
+              name: "layer",
+              machine: { type: "polar" },
+            },
+            image: { src: "SRC" },
+          }),
+        )
+        const actions = store.getActions()
+
+        expect(actions[0].type).toEqual("images/addImage")
+        expect(actions[0].payload).toEqual({
+          id: "1",
+          src: "SRC",
+        })
+        expect(actions[0].meta.id).toEqual("1")
+        expect(actions[1].type).toEqual("images/getImage/pending")
+      })
+    })
   })
 })
 
@@ -561,6 +618,7 @@ describe("layers selectors", () => {
           layers: layersReducer,
           machines: machinesReducer,
           fonts: fontsReducer,
+          images: imagesReducer,
         },
         preloadedState: initialState,
       })

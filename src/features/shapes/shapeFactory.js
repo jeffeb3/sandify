@@ -1,10 +1,11 @@
 import Circle from "./Circle"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"
-import FileImport from "./FileImport"
+import LayerImport from "./LayerImport"
 import FractalSpirograph from "./fractal_spirograph/FractalSpirograph"
 import Heart from "./Heart"
 import Hypocycloid from "./Hypocycloid"
+import ImageImport from "./image_import/ImageImport"
 import InputText from "./input_text/InputText"
 import LSystem from "./lsystem/LSystem"
 import Point from "./Point"
@@ -39,7 +40,8 @@ export const shapeFactory = {
   wiper: Wiper,
   spaceFiller: SpaceFiller,
   noise_wave: NoiseWave,
-  fileImport: FileImport,
+  fileImport: LayerImport,
+  imageImport: ImageImport,
 }
 
 export const getShape = (type, ...args) => {

@@ -164,6 +164,6 @@ export default class Layer {
 
   // used to preserve hidden attributes when loading from a file
   getHiddenAttrs() {
-    return []
+    return ["imageId"]
   }
 }

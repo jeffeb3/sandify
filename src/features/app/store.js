@@ -27,6 +27,7 @@ if (reset === "all") {
       // double JSON parsing ensures it's valid JSON before we try to import it
       persistedState = importer.import(JSON.stringify(persistedState))
       persistedState.fonts.loaded = false
+      persistedState.images.loaded = false
     } catch (err) {
       persistedState = undefined
     }

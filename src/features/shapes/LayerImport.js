@@ -10,10 +10,10 @@ const options = {
   },
 }
 
-export default class FileImport extends Shape {
+export default class LayerImport extends Shape {
   constructor() {
     super("fileImport")
-    this.label = "import"
+    this.label = "Import"
     this.usesMachine = true
     this.selectGroup = "import"
   }
@@ -24,6 +24,7 @@ export default class FileImport extends Shape {
       ...{
         vertices: [],
         maintainAspectRatio: true,
+        fileName: "",
       },
       ...(props === undefined
         ? {}
@@ -35,6 +36,15 @@ export default class FileImport extends Shape {
   }
 
   initialDimensions(props) {
+    if (!props) {
+      // undefined during import integrity checks
+      return {
+        width: 0,
+        height: 0,
+        aspectRatio: 1,
+      }
+    }
+
     const vertices = cloneVertices(props.vertices)
     const machine = getMachine(props.machine)
 
