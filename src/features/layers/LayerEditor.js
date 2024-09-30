@@ -33,19 +33,23 @@ const LayerEditor = () => {
   }
   const link = model.link
   const linkText = model.linkText || "here"
-  const renderedLink = link ? (
-    <div className="mt-3">
-      See{" "}
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href={link}
-      >
-        {linkText}
-      </a>{" "}
-      for ideas.
-    </div>
-  ) : undefined
+  const description = model.description ? model.description + " " : ""
+
+  const renderedLink =
+    link || description ? (
+      <div className="mt-3 mx-3 mb-4 bg-light p-4">
+        {description}
+        See{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href={link}
+        >
+          {linkText}
+        </a>{" "}
+        for more information.
+      </div>
+    ) : undefined
 
   const handleChangeType = (selected) => {
     dispatch(changeModelType({ id: layer.id, type: selected.value }))
@@ -122,10 +126,9 @@ const LayerEditor = () => {
         {renderedModelSelection}
         {renderedModelOptions}
         {renderOption({ optionKey: "connectionMethod" })}
-        {renderedLink}
       </div>
-      <div className="px-3 py-2">
-        {model.canTransform(layer) && (
+      {model.canTransform(layer) && (
+        <div className="px-3 py-2">
           <Row className="align-items-center mt-1 mb-1">
             <Col sm={3}>Transform</Col>
             <Col sm={9}>
@@ -206,11 +209,14 @@ const LayerEditor = () => {
               )}
             </Col>
           </Row>
-        )}
-      </div>
+        </div>
+      )}
+
       <div className="border-top border-secondary px-3 pt-1">
         <EffectManager />
       </div>
+
+      {renderedLink}
     </div>
   )
 }

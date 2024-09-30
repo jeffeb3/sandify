@@ -4,6 +4,7 @@ import DropdownOption from "@/components/DropdownOption"
 import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
 import QuadrantButtonsOption from "@/components/QuadrantButtonsOption"
+import SliderOption from "@/components/SliderOption"
 
 const ModelOption = ({
   model,
@@ -47,6 +48,13 @@ const ModelOption = ({
     case "quadrantbuttons":
       return (
         <QuadrantButtonsOption
+          key={optionKey}
+          {...props}
+        />
+      )
+    case "slider":
+      return (
+        <SliderOption
           key={optionKey}
           {...props}
         />

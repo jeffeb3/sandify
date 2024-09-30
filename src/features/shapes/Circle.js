@@ -36,6 +36,7 @@ export default class Circle extends Shape {
     if (state.shape.circleDirection === "counterclockwise") {
       for (let i = 128; i >= 0; i--) {
         let angle = ((Math.PI * 2.0) / 128.0) * i
+
         points.push(
           new Victor(
             Math.cos(angle),
@@ -46,6 +47,7 @@ export default class Circle extends Shape {
     } else {
       for (let i = 0; i <= 128; i++) {
         let angle = ((Math.PI * 2.0) / 128.0) * i
+
         points.push(
           new Victor(
             Math.cos(angle),

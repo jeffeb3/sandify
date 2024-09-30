@@ -1,5 +1,5 @@
 // https://fonts.google.com/attribution; see NOTICE for license details
-// Bubblegum, EBGaramond, Holtwood, Lobster, Montserrat, Rouge - SIL Open Font License 1.1
+// Bubblegum, EBGaramond, Holtwood, Lobster, Montserrat, Rouge, NotoEmoji - SIL Open Font License 1.1
 // OpenSans, Roboto, Mountains of Christmas - Apache License 2.0
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
@@ -12,6 +12,7 @@ export const supportedFonts = {
   "fonts/HoltwoodOneSC-Regular.ttf": "Holtwood",
   "fonts/Lobster-Regular.ttf": "Lobster",
   "fonts/Montserrat-Bold.ttf": "Montserrat",
+  "fonts/NotoEmoji-VariableFont_wght.ttf": "Noto Emoji",
   "fonts/OpenSans-Regular.ttf": "Open Sans",
   "fonts/Roboto-Black.ttf": "Roboto",
   "fonts/RougeScript-Regular.ttf": "Rouge Script",

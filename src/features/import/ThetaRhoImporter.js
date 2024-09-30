@@ -1,32 +1,18 @@
 import Importer from "./Importer"
 
 export default class ThetaRhoImporter extends Importer {
-  constructor(fileName, text) {
-    super(fileName, text)
-    this.label = "ThetaRho"
-  }
-
   // calls callback, returning an object containing relevant properties
   import(callback) {
     let hasVertex = false
-    let props = {
-      comments: [],
-      fileName: this.fileName,
-    }
-
     let lines = this.text.split("\n")
     let thetaRhos = []
 
     for (let ii = 0; ii < lines.length; ii++) {
       var line = lines[ii].trim()
 
-      if (line.length === 0) {
-        // blank lines
+      if (line.length === 0 || (line.indexOf("#") === 0 && !hasVertex)) {
+        // blank lines or comments
         continue
-      }
-
-      if (line.indexOf("#") === 0 && !hasVertex) {
-        props.comments.push(lines[ii])
       }
 
       if (line.indexOf("#") !== 0) {
@@ -45,8 +31,7 @@ export default class ThetaRhoImporter extends Importer {
       }
     }
 
-    props.vertices = this.convertToXY(thetaRhos)
-    callback(this, props)
+    callback(this, this.convertToXY(thetaRhos))
   }
 
   convertToXY(thetaRhos) {

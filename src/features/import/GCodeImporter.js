@@ -2,40 +2,27 @@ import Importer from "./Importer"
 import Toolpath from "gcode-toolpath"
 
 export default class GCodeImporter extends Importer {
-  constructor(fileName, text) {
-    super(fileName, text)
-    this.label = "Gcode"
-  }
-
   // calls callback, returning an object containing relevant properties
   import(callback) {
-    let props = {
-      comments: [],
-      vertices: [],
-      fileName: this.fileName,
-    }
-    let lines = this.text.split("\n")
+    const vertices = []
+    const lines = this.text.split("\n")
 
     // This assumes the line is already trimmed and not empty.
-    // The paranthesis isn't perfect, since it usually has a match, but I don't think anyone will
+    // The parenthesis isn't perfect, since it usually has a match, but I don't think anyone will
     // care. I think there are firmwares that do this same kind of hack.
     const isComment = (line) => {
       return line.indexOf(";") === 0 || line.indexOf("(") === 0
     }
 
     const addVertex = (x, y) => {
-      props.vertices.push({ x, y })
+      vertices.push({ x, y })
     }
 
-    // Read the initial comments
+    // Ignore initial comments
     for (let ii = 0; ii < lines.length; ii++) {
       let line = lines[ii].trim()
-      if (line.length === 0) {
-        // blank lines
+      if (line.length === 0 || isComment(line)) {
         continue
-      }
-      if (isComment(line)) {
-        props.comments.push(lines[ii])
       } else {
         break
       }
@@ -103,7 +90,7 @@ export default class GCodeImporter extends Importer {
     })
 
     toolpath.loadFromString(this.text, (err, results) => {
-      callback(this, props)
+      callback(this, vertices)
     })
   }
 }

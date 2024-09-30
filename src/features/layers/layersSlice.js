@@ -1,5 +1,5 @@
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector, createSelectorCreator, defaultMemoize } from "reselect"
+import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import Color from "color"
@@ -13,7 +13,7 @@ import {
   cloneVertex,
 } from "@/common/geometry"
 import { orderByKey } from "@/common/util"
-import { insertOne, prepareAfterAdd, deleteOne } from "@/common/slice"
+import { insertOne, prepareAfterAdd } from "@/common/slice"
 import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
 import Layer from "./Layer"
 import EffectLayer from "@/features/effects/EffectLayer"
@@ -26,7 +26,9 @@ import {
   selectCurrentEffect,
   selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
+import { imagesSlice, addImage, loadImage } from "@/features/images/imagesSlice"
 import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
+import { selectImagesLoaded } from "@/features/images/imagesSlice"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import { getMachine } from "@/features/machines/machineFactory"
 import { selectPreviewState } from "@/features/preview/previewSlice"
@@ -62,7 +64,7 @@ const layersSlice = createSlice({
 
         state.selected = layer.id
         layer.effectIds = []
-        if (layer.type !== "fileImport") {
+        if (layer.type !== "fileImport" && layer.type !== "imageImport") {
           localStorage.setItem("defaultShape", layer.type)
         }
       },
@@ -71,7 +73,7 @@ const layersSlice = createSlice({
       },
     },
     deleteLayer: (state, action) => {
-      deleteOne(adapter, state, action)
+      adapter.removeOne(state, action)
     },
     moveLayer: (state, action) => {
       const { oldIndex, newIndex } = action.payload
@@ -229,16 +231,20 @@ export const selectLayerMachine = createCachedSelector(
   },
 )((state, id) => id)
 
-const selectLayerFontsLoaded = createCachedSelector(
+const selectLayerDependentsLoaded = createCachedSelector(
   selectLayerById,
   selectFontsLoaded,
-  (layer, fontsLoaded) => {
+  selectImagesLoaded,
+  (layer, fontsLoaded, imagesLoaded) => {
     if (!layer) {
       return false
     }
 
     const shape = getShape(layer.type)
-    return shape.usesFonts ? fontsLoaded : false
+    const fontsReady = !shape.usesFonts || fontsLoaded
+    const imagesReady = !layer.imageId || imagesLoaded
+
+    return fontsReady && imagesReady
   },
 )((state, id) => id)
 
@@ -329,12 +335,16 @@ export const selectActiveEffect = createCachedSelector(
   },
 )((state, id) => id)
 
+export const selectAllImageIds = createSelector([selectAllLayers], (layers) => {
+  return layers.map((layer) => layer.imageId).filter((id) => id)
+})
+
 // returns the vertices for a given layer
 export const selectLayerVertices = createCachedSelector(
   selectLayerById,
   selectVisibleLayerEffects,
   selectLayerMachine,
-  selectLayerFontsLoaded,
+  selectLayerDependentsLoaded,
   (layer, effects, machine) => {
     if (!layer) {
       return []
@@ -345,7 +355,7 @@ export const selectLayerVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -382,7 +392,7 @@ export const selectShapePreviewVertices = createCachedSelector(
   selectLayerById,
   selectVisibleLayerEffects,
   selectLayerMachine,
-  selectLayerFontsLoaded,
+  selectLayerDependentsLoaded,
   (layer, effects, machine, fontsLoaded) => {
     if (!layer) {
       return []
@@ -399,7 +409,7 @@ export const selectShapePreviewVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -454,7 +464,7 @@ export const selectDraggingEffectVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -490,7 +500,7 @@ export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -518,7 +528,7 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
   },
 )({
   keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -670,7 +680,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
   },
 )({
   keySelector: (state, id, isCurrent) => `${id}-${isCurrent}`,
-  selectorCreator: createSelectorCreator(defaultMemoize, {
+  selectorCreator: createSelectorCreator(lruMemoize, {
     equalityCheck: isEqual,
   }),
 })
@@ -737,13 +747,19 @@ export const deleteLayer = (id) => {
     const layer = selectById(state, id)
     const selectedLayerId = selectSelectedLayerId(state)
 
-    // delete the effects, and then delete the layer
+    // delete any effects and/or image, and then delete the layer
     layer.effectIds.forEach((effectId) => {
       dispatch(effectsSlice.actions.deleteEffect(effectId))
     })
+
+    if (layer.imageId) {
+      dispatch(imagesSlice.actions.deleteImage(layer.imageId))
+    }
+
     dispatch(layersSlice.actions.deleteLayer(id))
 
     if (id === selectedLayerId) {
+      // set a new current layer
       const newIds = ids.filter((i) => i != id)
       const idx = deleteIdx === ids.length - 1 ? deleteIdx - 1 : deleteIdx
       dispatch(setCurrentLayer(newIds[idx]))
@@ -838,6 +854,27 @@ export const setCurrentEffect = (id) => {
     const effect = selectEffectById(state, id)
     dispatch(layersSlice.actions.setCurrentLayer(null))
     dispatch(layersSlice.actions.setSelectedLayer(effect?.layerId))
+  }
+}
+
+export const addLayerWithImage = ({ layerProps, image }) => {
+  return async (dispatch) => {
+    const action = dispatch(addImage(image))
+    const imageId = action.meta.id
+
+    await dispatch(loadImage({ imageId, imageSrc: image.src }))
+
+    const layerInstance = new Layer("imageImport")
+    const layerWithImage = {
+      ...layerInstance.getInitialState({
+        ...layerProps,
+        imageId,
+      }),
+      name: layerProps.name,
+      imageId,
+    }
+
+    dispatch(layersSlice.actions.addLayer(layerWithImage))
   }
 }
 

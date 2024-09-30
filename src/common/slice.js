@@ -28,10 +28,6 @@ export const prepareAfterAdd = (entity) => {
   return { payload: { ...entity, id }, meta: { id } }
 }
 
-export const deleteOne = (adapter, state, action) => {
-  adapter.removeOne(state, action.payload)
-}
-
 export const updateOne = (adapter, state, action) => {
   const entity = action.payload
 
