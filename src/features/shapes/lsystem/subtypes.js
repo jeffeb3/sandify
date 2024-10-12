@@ -106,7 +106,8 @@ export const subtypes = {
     rules: {
       F: "FF-F-F-F-FF",
     },
-    maxIterations: 5,
+    maxIterations: 4,
+    shortestPath: 3,
   },
   // http://algorithmicbotany.org/papers/abop/abop-ch1.pdf
   "Koch Cube 2": {
@@ -115,7 +116,8 @@ export const subtypes = {
     rules: {
       F: "FF-F+F-F-FF",
     },
-    maxIterations: 5,
+    maxIterations: 4,
+    shortestPath: 3,
   },
   // https://onlinemathtools.com/l-system-generator
   "Koch Curve": {
@@ -136,6 +138,7 @@ export const subtypes = {
       F: "FF-F-F-F-F-F+F",
     },
     maxIterations: 4,
+    shortestPath: 3,
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   "Koch Island": {
@@ -178,7 +181,8 @@ export const subtypes = {
       9: "--8++++6[+9++++7]--7",
     },
     angle: Math.PI / 5,
-    maxIterations: 6,
+    maxIterations: 5,
+    shortestPath: 5,
   },
   Plusses: {
     axiom: "XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX",
