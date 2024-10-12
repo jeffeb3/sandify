@@ -77,7 +77,7 @@ export default class Exporter {
       this.startComments()
       this.line("BEGIN PRE")
       this.endComments()
-      this.line(this.pre, this.pre !== "")
+      this.line(this.pre, this.pre !== "", false)
       this.startComments()
       this.line("END PRE")
       this.endComments()
@@ -91,7 +91,7 @@ export default class Exporter {
       this.startComments()
       this.line("BEGIN POST")
       this.endComments()
-      this.line(this.post, this.post !== "")
+      this.line(this.post, this.post !== "", false)
       this.startComments()
       this.line("END POST")
       this.endComments()
@@ -115,7 +115,7 @@ export default class Exporter {
     this.vertices = vertices
   }
 
-  line(content = "", add = true) {
+  line(content = "", add = true, sanitize = true) {
     if (add) {
       let padding = ""
       if (this.commenting) {
@@ -124,7 +124,10 @@ export default class Exporter {
           padding += "  "
         }
       }
-      this.lines.push(padding + this.sanitizeValue(content))
+
+      const preparedContent = sanitize ? this.sanitizeValue(content) : content
+
+      this.lines.push(padding + preparedContent)
     }
   }
 
