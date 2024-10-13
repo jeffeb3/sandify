@@ -1,5 +1,6 @@
 import Victor from "victor"
 import Effect from "./Effect"
+import { effectOptions } from "./EffectLayer"
 import { subsample, circle } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
@@ -9,16 +10,7 @@ const options = {
     type: "dropdown",
     choices: ["angle", "quad", "circle", "grid", "shear", "custom"],
     onChange: (model, changes, state) => {
-      if (["angle", "quad"].includes(changes.warpType)) {
-        changes.rotation = 45
-      } else if (changes.warpType == "shear") {
-        changes.rotation = 0
-        changes.x = 0
-        changes.y = 0
-      } else if (changes.warpType == "custom") {
-        changes.height = 40
-        changes.width = 40
-      }
+      onWarpTypeChanged(changes)
 
       return changes
     },
@@ -50,6 +42,19 @@ const options = {
     title: "Subsample points",
     type: "checkbox",
   },
+}
+
+const onWarpTypeChanged = (changes) => {
+  if (["angle", "quad"].includes(changes.warpType)) {
+    changes.rotation = 45
+  } else if (changes.warpType == "shear") {
+    changes.rotation = 0
+    changes.x = 0
+    changes.y = 0
+  } else if (changes.warpType == "custom") {
+    changes.height = 40
+    changes.width = 40
+  }
 }
 
 export default class Warp extends Effect {
@@ -222,5 +227,27 @@ export default class Warp extends Effect {
 
   getOptions() {
     return options
+  }
+
+  randomChanges(layer) {
+    const changes = super.randomChanges(layer)
+    const options = { ...effectOptions }
+
+    options.width.randomMax = 100
+    options.height.randomMax = 100
+    options.x.randomMin = -50
+    options.x.randomMax = 50
+    options.x.random = 0.5
+    options.y.randomMin = -50
+    options.y.randomMax = 50
+    options.y.random = 0.5
+    changes.width = this.randomChange("width", layer, options)
+    changes.height = this.randomChange("height", layer, options)
+    changes.x = this.randomChange("x", layer, options)
+    changes.x = this.randomChange("y", layer, options)
+
+    onWarpTypeChanged(changes)
+
+    return changes
   }
 }

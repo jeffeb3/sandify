@@ -1,4 +1,3 @@
-import { functionValue } from "@/common/util"
 import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
 import { pick } from "lodash"
 import { LRUCache } from "lru-cache"
@@ -108,71 +107,6 @@ export default class Shape extends Model {
   // complete. Returns an array of vertices.
   finalizeVertices(vertices, state) {
     return vertices
-  }
-
-  // returns a hash of random changes for a given layer based on the shape
-  // options
-  randomChanges(layer, exclude = []) {
-    const changes = { id: layer.id }
-    const options = this.getOptions()
-
-    Object.keys(options).forEach((key) => {
-      if (!exclude.includes(key)) {
-        const change = this.randomChange(key, layer, options)
-
-        if (change != null) {
-          changes[key] = change
-        }
-      }
-    })
-
-    return changes
-  }
-
-  randomChange(key, layer, options) {
-    const settings = options[key]
-    const random = settings.random == null ? 1 : settings.random
-    const randomize = Math.random() <= random
-    const type = settings.type
-
-    if (type == "textarea") {
-      // do nothing
-    } else if (type == "checkbox") {
-      const defaults = this.getInitialState()
-      let value = defaults[key]
-
-      if (random && Math.random() <= 0.5) {
-        value = !value
-      }
-
-      return value
-    } else if (type == "togglebutton" || type == "dropdown") {
-      let choices = functionValue(settings.choices, layer)
-      const choice = Math.floor(Math.random() * choices.length)
-
-      return choices[choice]
-    } else {
-      const defaults = this.getInitialState()
-      let min = settings.randomMin
-      if (min == null) {
-        min = functionValue(settings.min, layer) || 0
-      }
-      let max = settings.randomMax || functionValue(settings.max, layer)
-      if (max == null) {
-        max = defaults[key] * 3
-      }
-      const step = settings.step || 1
-
-      if (randomize) {
-        const random = Math.random() * (max - min) + min
-        const precision = step >= 1 ? step : Math.round(1 / step)
-        const value = Math.round(random * precision) / precision
-
-        return value
-      } else {
-        return min
-      }
-    }
   }
 
   // override as needed; hook to modify updates to a layer before they affect the state

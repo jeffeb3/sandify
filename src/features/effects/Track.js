@@ -20,6 +20,7 @@ const options = {
   trackRotation: {
     title: "Track rotation",
     step: 35,
+    randomMax: 360,
   },
   trackShape: {
     title: "Track type",
@@ -79,7 +80,7 @@ export default class Track extends Effect {
         width: 50,
         height: 50,
         maintainAspectRatio: true,
-        trackShape: "circle",
+        trackShape: "circular",
         trackRotation: 360,
         trackSpiralRadiusPct: 0.5,
         trackPreserveShape: false,

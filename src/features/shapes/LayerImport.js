@@ -16,6 +16,7 @@ export default class LayerImport extends Shape {
     this.label = "Import"
     this.usesMachine = true
     this.selectGroup = "import"
+    this.randomizable = false
   }
 
   getInitialState(props) {

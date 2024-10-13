@@ -5,6 +5,7 @@ import { isEqual } from "lodash"
 import { insertOne, prepareAfterAdd, updateOne } from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import EffectLayer from "./EffectLayer"
+import { getEffect } from "@/features/effects/effectFactory"
 
 // ------------------------------
 // Slice, reducers and atomic actions
@@ -64,6 +65,13 @@ export const effectsSlice = createSlice({
         ...layer.getInitialState(),
       })
     },
+    randomizeValues: (state, action) => {
+      const id = action.payload
+      const effectLayer = state.entities[id]
+      const effect = getEffect(effectLayer.type)
+      const changes = effect.randomChanges(effectLayer)
+      adapter.updateOne(state, { id, changes })
+    },
   },
 })
 
@@ -75,6 +83,7 @@ export const {
   setCurrentEffect,
   setSelectedEffect,
   restoreDefaults,
+  randomizeValues,
 } = effectsSlice.actions
 
 // ------------------------------

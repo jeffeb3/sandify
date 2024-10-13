@@ -46,6 +46,7 @@ export default class Mask extends Effect {
   constructor() {
     super("mask")
     this.label = "Mask"
+    this.randomizable = false
   }
 
   canMove(state) {
