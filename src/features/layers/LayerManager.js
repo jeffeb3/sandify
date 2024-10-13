@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react"
 import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
-import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
+import { FaTrash, FaCopy, FaPlusSquare, FaDiceFive } from "react-icons/fa"
 import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
 import {
   selectSelectedLayerId,
   selectNumLayers,
   restoreDefaults,
+  randomizeValues,
 } from "@/features/layers/layersSlice"
 import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
@@ -38,6 +39,10 @@ const LayerManager = () => {
 
   const handleRestoreDefaults = () => {
     dispatch(restoreDefaults(selectedLayerId))
+  }
+
+  const handleRandomizeValues = () => {
+    dispatch(randomizeValues(selectedLayerId))
   }
 
   return (
@@ -95,6 +100,16 @@ const LayerManager = () => {
             onClick={handleRestoreDefaults}
           >
             <MdOutlineSettingsBackupRestore />
+          </Button>
+          <Tooltip id="tooltip-randomize-layer" />
+          <Button
+            className="layer-button"
+            variant="light"
+            data-tooltip-content="Randomize values"
+            data-tooltip-id="tooltip-randomize-layer"
+            onClick={handleRandomizeValues}
+          >
+            <FaDiceFive />
           </Button>
         </div>
       </div>

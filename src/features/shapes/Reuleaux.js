@@ -6,6 +6,7 @@ const options = {
     title: "Number of sides",
     step: 1,
     min: 2,
+    randomMax: 8,
   },
 }
 

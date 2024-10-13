@@ -15,10 +15,12 @@ const options = {
   seed: {
     title: "Random seed",
     min: 1,
+    randomMax: 1000,
   },
   startingRadius: {
     title: "Minimum radius",
     min: 3,
+    randomMax: 40,
   },
   attempts: {
     title: "Circle uniformity",

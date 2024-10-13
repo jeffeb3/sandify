@@ -5,6 +5,7 @@ const options = {
   polygonSides: {
     title: "Number of sides",
     min: 3,
+    randomMax: 12,
   },
   roundCorners: {
     title: "Round corners",

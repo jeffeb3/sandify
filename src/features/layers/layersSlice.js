@@ -142,6 +142,15 @@ const layersSlice = createSlice({
 
       adapter.setOne(state, newLayer)
     },
+    randomizeValues: (state, action) => {
+      const id = action.payload
+      const layer = state.entities[id]
+      const shape = getShape(layer.type)
+      const changes = shape.randomChanges(layer)
+
+      shape.handleUpdate(layer, changes)
+      adapter.updateOne(state, { id: changes.id, changes })
+    },
     restoreDefaults: (state, action) => {
       const id = action.payload
       const { type, name, effectIds } = state.entities[id]
@@ -885,6 +894,7 @@ export const {
   changeModelType,
   moveEffect,
   moveLayer,
+  randomizeValues,
   removeEffect,
   restoreDefaults,
   setSelectedLayer,

@@ -87,3 +87,8 @@ export const scaleByWheel = (size, deltaX, deltaY) => {
     return newSize
   }
 }
+
+// convenience method to handle invocation of a function when present
+export const functionValue = (val, arg1, arg2) => {
+  return typeof val === "function" ? val(arg1, arg2) : val
+}

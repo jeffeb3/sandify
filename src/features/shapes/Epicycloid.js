@@ -6,10 +6,13 @@ const options = {
   epicycloidA: {
     title: "Large circle radius",
     min: 1,
+    randomMax: 16,
   },
   epicycloidB: {
     title: "Small circle radius",
     min: 1,
+    randomMax: 16,
+    random: 0.6,
   },
 }
 
@@ -61,5 +64,15 @@ export default class Epicycloid extends Shape {
 
   getOptions() {
     return options
+  }
+
+  randomChanges(layer) {
+    let changes = {}
+
+    while (changes.epicycloidA == changes.epicycloidB) {
+      changes = super.randomChanges(layer)
+    }
+
+    return changes
   }
 }

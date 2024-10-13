@@ -80,6 +80,8 @@ const options = {
     title: "Rotate and twist",
     step: 5,
     min: 0,
+    random: 0.6,
+    randomMax: 180,
   },
 }
 

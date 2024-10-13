@@ -5,6 +5,7 @@ const options = {
   circleLobes: {
     title: "Number of lobes",
     min: 1,
+    randomMax: 6,
   },
   circleDirection: {
     title: "Direction",

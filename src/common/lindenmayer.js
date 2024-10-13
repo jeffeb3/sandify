@@ -7,7 +7,7 @@ export const onSubtypeChange = (subtype, changes, attrs) => {
   if (subtype) {
     let max = subtype.maxIterations
     let min = subtype.minIterations
-    let iterations = attrs.iterations || 1
+    let iterations = changes.iterations || attrs.iterations || 1
 
     if (max) {
       iterations = Math.min(iterations, max)

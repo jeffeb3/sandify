@@ -6,11 +6,13 @@ const options = {
     title: "Numerator",
     step: 1,
     min: 1,
+    randomMax: 16,
   },
   roseD: {
     title: "Denominator",
     step: 1,
     min: 1,
+    randomMax: 16,
   },
 }
 
@@ -56,5 +58,15 @@ export default class Rose extends Shape {
 
   getOptions() {
     return options
+  }
+
+  randomChanges(layer) {
+    let changes = {}
+
+    while (changes.roseN == changes.roseD) {
+      changes = super.randomChanges(layer)
+    }
+
+    return changes
   }
 }

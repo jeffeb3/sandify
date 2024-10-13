@@ -6,10 +6,13 @@ const options = {
   hypocycloidA: {
     title: "Large circle radius",
     min: 1,
+    randomMax: 16,
   },
   hypocycloidB: {
     title: "Small circle radius",
     min: 1,
+    randomMax: 16,
+    random: 0.6,
   },
 }
 
@@ -58,5 +61,18 @@ export default class Star extends Shape {
 
   getOptions() {
     return options
+  }
+
+  randomChanges(layer) {
+    let changes = {}
+
+    while (
+      changes.hypocycloidA == changes.hypocycloidB ||
+      changes.hypocycloidA / changes.hypocycloidB == 2
+    ) {
+      changes = super.randomChanges(layer)
+    }
+
+    return changes
   }
 }

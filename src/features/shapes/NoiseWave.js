@@ -14,12 +14,14 @@ const options = {
   seed: {
     title: "Random seed",
     min: 1,
+    randomMax: 1000,
   },
   noiseLevel: {
     title: "Noise level",
     min: 0,
     max: 600,
     step: 10,
+    random: 0.5,
   },
   noiseType: {
     title: "Type",
