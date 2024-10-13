@@ -799,7 +799,7 @@ export const copyLayer = ({ id, name }) => {
   }
 }
 
-export const addEffect = ({ id, effect, afterId }) => {
+export const addEffect = ({ id, effect, afterId, randomize }) => {
   return (dispatch) => {
     // create the effect first, and then add it to the layer
     const action = dispatch(
@@ -808,9 +808,14 @@ export const addEffect = ({ id, effect, afterId }) => {
         layerId: id,
       }),
     )
-    dispatch(
-      layersSlice.actions.addEffect({ id, effectId: action.meta.id, afterId }),
-    )
+    const effectId = action.meta.id
+
+    dispatch(layersSlice.actions.addEffect({ id, effectId, afterId }))
+
+    if (randomize) {
+      dispatch(effectsSlice.actions.randomizeValues(effectId))
+    }
+
     dispatch(setCurrentEffect(id))
   }
 }
@@ -884,6 +889,17 @@ export const addLayerWithImage = ({ layerProps, image }) => {
     }
 
     dispatch(layersSlice.actions.addLayer(layerWithImage))
+  }
+}
+
+export const addLayerWithRandomValues = ({ layer, randomize }) => {
+  return async (dispatch) => {
+    const action = dispatch(layersSlice.actions.addLayer(layer))
+    const layerId = action.meta.id
+
+    if (randomize) {
+      dispatch(randomizeValues(layerId))
+    }
   }
 }
 

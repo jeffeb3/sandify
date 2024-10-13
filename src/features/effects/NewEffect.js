@@ -5,6 +5,8 @@ import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
+import S from "react-switch"
+const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 import Modal from "react-bootstrap/Modal"
 import {
   selectSelectedLayer,
@@ -39,6 +41,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
   const selectOptions = getEffectSelectOptions()
   const [type, setType] = useState(defaultEffect.type)
   const [name, setName] = useState(defaultEffect.label)
+  const [randomize, setRandomize] = useState(false)
   const selectedEffect = getEffect(type)
   const selectedOption = {
     value: selectedEffect.id,
@@ -64,6 +67,9 @@ const NewEffect = ({ toggleModal, showModal }) => {
     setName(event.target.value)
   }
 
+  const handleRandomizeChange = (value) => {
+    setRandomize(value)
+  }
   const onEffectAdded = (event) => {
     const layer = new EffectLayer(type)
     event.preventDefault()
@@ -75,6 +81,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
           name,
         },
         afterId: selectedEffectId,
+        randomize,
       }),
     )
     toggleModal()
@@ -115,6 +122,17 @@ const NewEffect = ({ toggleModal, showModal }) => {
               />
             </Col>
           </Row>
+          {selectedEffect.randomizable && (
+            <Row className="align-items-center mt-2">
+              <Col sm={5}>Randomize values</Col>
+              <Col sm={7}>
+                <Switch
+                  checked={randomize}
+                  onChange={handleRandomizeChange}
+                />
+              </Col>
+            </Row>
+          )}
         </Modal.Body>
 
         <Modal.Footer>

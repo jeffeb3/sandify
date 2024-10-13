@@ -6,6 +6,7 @@ import layersReducer, {
   layersActions,
   addLayer,
   addLayerWithImage,
+  addLayerWithRandomValues,
   addEffect,
   changeModelType,
   deleteLayer,
@@ -378,7 +379,7 @@ describe("layers reducer", () => {
           name: "foo",
         }
 
-        store.dispatch(addEffect({ id: "0", effect }))
+        store.dispatch(addEffect({ id: "0", effect, randomize: true }))
         const actions = store.getActions()
         expect(actions[0].type).toEqual("effects/addEffect")
         expect(actions[0].payload).toEqual({
@@ -389,6 +390,9 @@ describe("layers reducer", () => {
         expect(actions[0].meta.id).toEqual("1")
         expect(actions[1].type).toEqual("layers/addEffect")
         expect(actions[1].payload).toEqual({ id: "0", effectId: "1" })
+
+        expect(actions[2].type).toEqual("effects/randomizeValues")
+        expect(actions[3].type).toEqual("effects/setCurrentEffect")
       })
     })
 
@@ -582,6 +586,37 @@ describe("layers reducer", () => {
         })
         expect(actions[0].meta.id).toEqual("1")
         expect(actions[1].type).toEqual("images/getImage/pending")
+      })
+    })
+
+    describe("addLayerWithRandomValues", () => {
+      it("should dispatch actions to create a layer and randomize its values", async () => {
+        const store = mockStore({
+          layers: {
+            entities: {},
+            ids: [],
+          },
+          images: {
+            entities: {},
+            ids: [],
+          },
+        })
+
+        store.dispatch(
+          addLayerWithRandomValues({
+            layer: {
+              name: "layer",
+              type: "circle",
+            },
+            randomize: true,
+          }),
+        )
+        const actions = store.getActions()
+
+        expect(actions[0].type).toEqual("layers/addLayer")
+        expect(actions[0].meta.id).toEqual("1")
+        expect(actions[1].type).toEqual("layers/randomizeValues")
+        expect(actions[1].payload).toEqual("1")
       })
     })
   })
