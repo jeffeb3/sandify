@@ -15,6 +15,7 @@ const options = {
     title: "Number of circles",
     min: 1,
     max: 6,
+    randomMin: 2,
   },
   fractalSpirographRelativeSize: {
     title: "Relative size (parent to child circle)",

@@ -5,6 +5,8 @@ import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
+import S from "react-switch"
+const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 import Modal from "react-bootstrap/Modal"
 import {
   getShapeSelectOptions,
@@ -12,7 +14,7 @@ import {
   getShape,
 } from "@/features/shapes/shapeFactory"
 import Layer from "./Layer"
-import { addLayer } from "./layersSlice"
+import { addLayerWithRandomValues } from "./layersSlice"
 
 const defaultShape = getDefaultShape()
 const customStyles = {
@@ -29,7 +31,9 @@ const NewLayer = ({ toggleModal, showModal }) => {
   const selectOptions = getShapeSelectOptions()
   const [type, setType] = useState(defaultShape.type)
   const [name, setName] = useState(defaultShape.label)
+  const [randomize, setRandomize] = useState(false)
   const selectedShape = getShape(type)
+
   const selectedOption = {
     value: selectedShape.id,
     label: selectedShape.label,
@@ -54,6 +58,10 @@ const NewLayer = ({ toggleModal, showModal }) => {
     selectRef.current.focus()
   }
 
+  const handleRandomizeChange = (value) => {
+    setRandomize(value)
+  }
+
   const onLayerAdded = (event) => {
     event.preventDefault()
 
@@ -61,7 +69,12 @@ const NewLayer = ({ toggleModal, showModal }) => {
     const attrs = layer.getInitialState()
 
     attrs.name = name
-    dispatch(addLayer(attrs))
+    dispatch(
+      addLayerWithRandomValues({
+        layer: attrs,
+        randomize,
+      }),
+    )
     toggleModal()
   }
 
@@ -100,6 +113,17 @@ const NewLayer = ({ toggleModal, showModal }) => {
               />
             </Col>
           </Row>
+          {selectedShape.randomizable && (
+            <Row className="align-items-center mt-2">
+              <Col sm={5}>Randomize values</Col>
+              <Col sm={7}>
+                <Switch
+                  checked={randomize}
+                  onChange={handleRandomizeChange}
+                />
+              </Col>
+            </Row>
+          )}
         </Modal.Body>
 
         <Modal.Footer>

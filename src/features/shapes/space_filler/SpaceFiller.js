@@ -102,4 +102,17 @@ export default class SpaceFiller extends Shape {
   getOptions() {
     return options
   }
+
+  // hack to randomly select the subtype before randomizing the other shape values
+  randomChanges(layer) {
+    const subtypeChoices = Object.keys(subtypes)
+    const choice = Math.floor(Math.random() * subtypeChoices.length)
+    const subtype = subtypeChoices[choice]
+    const tempLayer = { ...layer, subtype }
+    const changes = super.randomChanges(tempLayer, ["fillerSubtype"])
+
+    changes.fillerSubtype = subtype
+
+    return onSubtypeChange(subtypes[changes.subtype], changes, tempLayer)
+  }
 }

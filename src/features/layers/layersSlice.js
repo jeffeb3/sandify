@@ -142,6 +142,15 @@ const layersSlice = createSlice({
 
       adapter.setOne(state, newLayer)
     },
+    randomizeValues: (state, action) => {
+      const id = action.payload
+      const layer = state.entities[id]
+      const shape = getShape(layer.type)
+      const changes = shape.randomChanges(layer)
+
+      shape.handleUpdate(layer, changes)
+      adapter.updateOne(state, { id: changes.id, changes })
+    },
     restoreDefaults: (state, action) => {
       const id = action.payload
       const { type, name, effectIds } = state.entities[id]
@@ -790,7 +799,7 @@ export const copyLayer = ({ id, name }) => {
   }
 }
 
-export const addEffect = ({ id, effect, afterId }) => {
+export const addEffect = ({ id, effect, afterId, randomize }) => {
   return (dispatch) => {
     // create the effect first, and then add it to the layer
     const action = dispatch(
@@ -799,9 +808,14 @@ export const addEffect = ({ id, effect, afterId }) => {
         layerId: id,
       }),
     )
-    dispatch(
-      layersSlice.actions.addEffect({ id, effectId: action.meta.id, afterId }),
-    )
+    const effectId = action.meta.id
+
+    dispatch(layersSlice.actions.addEffect({ id, effectId, afterId }))
+
+    if (randomize) {
+      dispatch(effectsSlice.actions.randomizeValues(effectId))
+    }
+
     dispatch(setCurrentEffect(id))
   }
 }
@@ -878,6 +892,17 @@ export const addLayerWithImage = ({ layerProps, image }) => {
   }
 }
 
+export const addLayerWithRandomValues = ({ layer, randomize }) => {
+  return async (dispatch) => {
+    const action = dispatch(layersSlice.actions.addLayer(layer))
+    const layerId = action.meta.id
+
+    if (randomize) {
+      dispatch(randomizeValues(layerId))
+    }
+  }
+}
+
 export default layersSlice.reducer
 export const { actions: layersActions } = layersSlice
 export const {
@@ -885,6 +910,7 @@ export const {
   changeModelType,
   moveEffect,
   moveLayer,
+  randomizeValues,
   removeEffect,
   restoreDefaults,
   setSelectedLayer,

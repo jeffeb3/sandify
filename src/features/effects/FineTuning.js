@@ -49,6 +49,7 @@ export default class FineTuning extends Effect {
     super("fineTuning")
     this.label = "Fine tuning"
     this.selectGroup = "effects"
+    this.randomizable = false
   }
 
   canChangeSize(state) {

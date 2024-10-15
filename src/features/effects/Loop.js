@@ -7,6 +7,8 @@ const options = {
   numLoops: {
     title: "Number of loops",
     min: 1,
+    randomMin: 3,
+    randomMax: 8,
   },
   transformMethod: {
     title: "When transforming shape",
@@ -43,6 +45,7 @@ const options = {
     isVisible: (layer, state) => {
       return false
     },
+    type: "hidden",
   },
   spinEnabled: {
     title: "Spin",
@@ -54,6 +57,7 @@ const options = {
     isVisible: (layer, state) => {
       return state.spinEnabled
     },
+    randomMax: 10,
   },
   spinMethod: {
     title: "Spin by",
@@ -75,12 +79,14 @@ const options = {
     isVisible: (layer, state) => {
       return false
     },
+    type: "hidden",
   },
   spinSwitchbacks: {
     title: "Switchbacks",
     isVisible: (layer, state) => {
       return state.spinEnabled && state.spinMethod === "constant"
     },
+    randomMax: 4,
   },
 }
 

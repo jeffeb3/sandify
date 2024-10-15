@@ -7,6 +7,7 @@ const options = {
   seed: {
     title: "Random seed",
     min: 1,
+    randomMax: 1000,
   },
   noiseMagnification: {
     title: "Magnification",

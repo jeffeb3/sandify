@@ -9,6 +9,7 @@ export default class Heart extends Shape {
       "Heart curves can be defined mathematically a number of different ways. Our heart shape is a parametric equation."
     this.link = "http://mathworld.wolfram.com/HeartCurve.html"
     this.linkText = "Wolfram Mathworld"
+    this.randomizable = false
   }
 
   getInitialState() {

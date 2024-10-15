@@ -170,6 +170,7 @@ export default class imageImport extends Shape {
     this.usesMachine = true
     this.stretch = true
     this.selectGroup = "import"
+    this.randomizable = false
   }
 
   getInitialState() {

@@ -13,6 +13,7 @@ export default class Transformer extends Effect {
     super("transformer")
     this.dragPreview = true
     this.label = "Move and resize"
+    this.randomizable = false
   }
 
   canMove(state) {

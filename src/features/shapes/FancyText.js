@@ -36,6 +36,8 @@ const options = {
     title: "Line spacing",
     type: "number",
     step: 0.5,
+    random: 0.0,
+    randomMax: 2,
   },
   fancyConnectLines: {
     title: "Connect rows",
@@ -422,5 +424,17 @@ export default class FancyText extends Shape {
 
   getOptions() {
     return options
+  }
+
+  randomChanges(layer) {
+    let changes = {
+      fancyFont: "Noto Emoji",
+    }
+
+    while (changes.fancyFont == "Noto Emoji") {
+      changes = super.randomChanges(layer)
+    }
+
+    return changes
   }
 }

@@ -12,12 +12,15 @@ const options = {
   wiperSize: {
     title: "Wiper size",
     min: 1,
+    randomMin: 3,
   },
   wiperAngleDeg: {
     title: "Wiper angle",
     isVisible: (layer, state) => {
       return state.wiperType === "Lines"
     },
+    randomMin: 0,
+    randomMax: 360,
   },
 }
 

@@ -2,25 +2,30 @@ import React, { useState, useEffect } from "react"
 import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
-import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
+import { FaTrash, FaCopy, FaPlusSquare, FaDiceFive } from "react-icons/fa"
 import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
 import {
   selectSelectedLayerId,
+  selectSelectedLayer,
   selectNumLayers,
   restoreDefaults,
+  randomizeValues,
 } from "@/features/layers/layersSlice"
 import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
 import LayerList from "./LayerList"
+import Layer from "./Layer"
 import "./LayerManager.scss"
 
 const LayerManager = () => {
   const dispatch = useDispatch()
   const selectedLayerId = useSelector(selectSelectedLayerId)
+  const selectedLayer = useSelector(selectSelectedLayer)
   const numLayers = useSelector(selectNumLayers)
   const canRemove = numLayers > 1
+  const model = new Layer(selectedLayer.type).model
 
   const [showNewLayer, setShowNewLayer] = useState(false)
   const [showCopyLayer, setShowCopyLayer] = useState(false)
@@ -38,6 +43,10 @@ const LayerManager = () => {
 
   const handleRestoreDefaults = () => {
     dispatch(restoreDefaults(selectedLayerId))
+  }
+
+  const handleRandomizeValues = () => {
+    dispatch(randomizeValues(selectedLayerId))
   }
 
   return (
@@ -96,6 +105,18 @@ const LayerManager = () => {
           >
             <MdOutlineSettingsBackupRestore />
           </Button>
+          <Tooltip id="tooltip-randomize-layer" />
+          {model.randomizable && (
+            <Button
+              className="layer-button"
+              variant="light"
+              data-tooltip-content="Randomize layer values"
+              data-tooltip-id="tooltip-randomize-layer"
+              onClick={handleRandomizeValues}
+            >
+              <FaDiceFive />
+            </Button>
+          )}
         </div>
       </div>
       <LayerEditor />

@@ -3,16 +3,21 @@ import Button from "react-bootstrap/Button"
 import Accordion from "react-bootstrap/Accordion"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
-import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
+import { FaTrash, FaCopy, FaPlusSquare, FaDiceFive } from "react-icons/fa"
 import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import {
   selectSelectedLayer,
   deleteEffect,
   selectLayerEffects,
 } from "@/features/layers/layersSlice"
-import { selectSelectedEffect, restoreDefaults } from "./effectsSlice"
+import {
+  selectSelectedEffect,
+  restoreDefaults,
+  randomizeValues,
+} from "./effectsSlice"
 import EffectEditor from "./EffectEditor"
 import EffectList from "./EffectList"
+import EffectLayer from "./EffectLayer"
 import NewEffect from "./NewEffect"
 import CopyEffect from "./CopyEffect"
 
@@ -23,6 +28,7 @@ const EffectManager = () => {
   const effects = useSelector((state) =>
     selectLayerEffects(state, selectedLayer.id),
   )
+  const model = selectedEffect && new EffectLayer(selectedEffect.type).model
   const numEffects = effects.length
   const [showNewEffect, setShowNewEffect] = useState(false)
   const [showCopyEffect, setShowCopyEffect] = useState(false)
@@ -41,6 +47,10 @@ const EffectManager = () => {
 
   const handleRestoreDefaults = () => {
     dispatch(restoreDefaults(selectedEffect.id))
+  }
+
+  const handleRandomizeValues = () => {
+    dispatch(randomizeValues(selectedEffect.id))
   }
 
   return (
@@ -118,6 +128,18 @@ const EffectManager = () => {
                   >
                     <MdOutlineSettingsBackupRestore />
                   </Button>
+                  <Tooltip id="tooltip-randomize-effect" />
+                  {model.randomizable && (
+                    <Button
+                      className="layer-button"
+                      variant="light"
+                      data-tooltip-content="Randomize effect values"
+                      data-tooltip-id="tooltip-randomize-effect"
+                      onClick={handleRandomizeValues}
+                    >
+                      <FaDiceFive />
+                    </Button>
+                  )}
                 </div>
               </div>
               <EffectEditor />

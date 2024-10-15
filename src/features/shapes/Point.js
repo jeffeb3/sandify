@@ -9,6 +9,7 @@ export default class Point extends Shape {
     this.startingHeight = 1
     this.shouldCache = false
     this.autosize = false
+    this.randomizable = false
   }
 
   canChangeSize(state) {
