@@ -365,13 +365,6 @@ export const downsample = (vertices, tolerance = 0.0001) => {
   return result
 }
 
-// Normalize the theta value to the range [0, 2*pi)
-export const normalizeTheta = (theta) => {
-  const TWO_PI = Math.PI * 2
-
-  return ((theta % TWO_PI) + TWO_PI) % TWO_PI
-}
-
 // Convert x,y vertices to theta, rho vertices
 export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
   let vertices = []
@@ -396,7 +389,9 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
       subsampledVertices[next].x,
       subsampledVertices[next].y,
     )
-    rawTheta = normalizeTheta(rawTheta)
+
+    // Convert to [0, 2pi]
+    rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
     // Compute the difference to the last point.
     let deltaTheta = rawTheta - previousRawTheta
@@ -413,7 +408,7 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
     previousRawTheta = rawTheta
     previousTheta = theta
-    vertices.push(new Victor(normalizeTheta(theta), rho))
+    vertices.push(new Victor(theta, rho))
   }
 
   return vertices
