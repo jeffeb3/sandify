@@ -116,8 +116,8 @@ export default class Exporter {
       layers = layers.reverse()
     }
 
-    layers.forEach((layer) => {
-      let vertices = this.transformVertices(layer.vertices)
+    layers.forEach((layer, index) => {
+      let vertices = this.transformVertices(layer.vertices, index, layers)
 
       if (this.props.reverse) vertices = vertices.reverse()
       layer.vertices = vertices

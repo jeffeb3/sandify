@@ -25,16 +25,31 @@ export default class ThetaRhoExporter extends Exporter {
   }
 
   // transforms vertices into a theta-rho format
-  transformVertices(vertices) {
+  transformVertices(vertices, index, layers) {
     // downsample larger lines into smaller ones
     const maxLength = 2.0
     const subsampledVertices = subsample(vertices, maxLength)
+
+    let theta, rawTheta
+
+    if (index == 0) {
+      theta = 0
+      rawTheta = 0
+    } else {
+      // preserve previous theta value
+      const prevVertices = layers[index - 1].vertices
+      const last = prevVertices[prevVertices.length - 1]
+      theta = last.theta
+      rawTheta = last.rawTheta // already transformed
+    }
 
     // convert to theta, rho
     return toThetaRho(
       subsampledVertices,
       this.props.maxRadius,
       parseFloat(this.props.polarRhoMax),
+      theta,
+      rawTheta,
     )
   }
 
