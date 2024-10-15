@@ -3,6 +3,7 @@ import Fisheye from "./Fisheye"
 import Loop from "./Loop"
 import Mask from "./Mask"
 import Noise from "./noise/Noise"
+import ProgramCode from "./ProgramCode"
 import Track from "./Track"
 import Transformer from "./Transformer"
 import Warp from "./Warp"
@@ -13,6 +14,7 @@ export const effectFactory = {
   fisheye: Fisheye,
   fineTuning: FineTuning,
   mask: Mask,
+  programCode: ProgramCode,
   noise: Noise,
   track: Track,
   warp: Warp,
