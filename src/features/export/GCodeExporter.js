@@ -10,58 +10,39 @@ export default class GCodeExporter extends Exporter {
     this.offsetY = this.props.offsetY
   }
 
-  exportCode(vertices) {
-    vertices.map(this.gcode).forEach((line) => this.line(line))
+  // collects stats for use in PRE and POST blocks
+  collectStats(vertices) {
+    return {
+      minx: Math.min(...vertices.map((v) => v.x)),
+      miny: Math.min(...vertices.map((v) => v.y)),
+      maxx: Math.max(...vertices.map((v) => v.x)),
+      maxy: Math.max(...vertices.map((v) => v.y)),
+      startx: vertices[0].x,
+      starty: vertices[0].y,
+      endx: vertices[vertices.length - 1].x,
+      endy: vertices[vertices.length - 1].y,
+    }
   }
 
-  // computes vertices compatible with the gcode format, and replaces
-  // placeholder variables in pre/post blocks.
-  computeOutputVertices(vertices) {
-    // Collect some statistics about these vertices.
-    let minx = 1e9
-    let miny = 1e9
-    let maxx = -1e9
-    let maxy = -1e9
-    this.vertices = vertices.map((vertex) => {
-      const x = vertex.x + this.offsetX
-      const y = vertex.y + this.offsetY
-      minx = Math.min(x, minx)
-      miny = Math.min(y, miny)
-      maxx = Math.max(x, maxx)
-      maxy = Math.max(y, maxy)
-
+  // transforms vertices to be compatible with the GCode format
+  transformVertices(vertices) {
+    return vertices.map((vertex) => {
       return {
         ...vertex,
-        x,
-        y,
+        x: vertex.x + this.offsetX,
+        y: vertex.y + this.offsetY,
       }
     })
-    let startx = this.vertices[0].x
-    let starty = this.vertices[0].y
-    let endx = this.vertices[this.vertices.length - 1].x
-    let endy = this.vertices[this.vertices.length - 1].y
-
-    // Replace pre/post placeholder variables
-    this.pre = this.pre.replace(/{startx}/gi, startx.toFixed(3))
-    this.pre = this.pre.replace(/{starty}/gi, starty.toFixed(3))
-    this.pre = this.pre.replace(/{endx}/gi, endx.toFixed(3))
-    this.pre = this.pre.replace(/{endy}/gi, endy.toFixed(3))
-    this.pre = this.pre.replace(/{minx}/gi, minx.toFixed(3))
-    this.pre = this.pre.replace(/{miny}/gi, miny.toFixed(3))
-    this.pre = this.pre.replace(/{maxx}/gi, maxx.toFixed(3))
-    this.pre = this.pre.replace(/{maxy}/gi, maxy.toFixed(3))
-    this.post = this.post.replace(/{startx}/gi, startx.toFixed(3))
-    this.post = this.post.replace(/{starty}/gi, starty.toFixed(3))
-    this.post = this.post.replace(/{endx}/gi, endx.toFixed(3))
-    this.post = this.post.replace(/{endy}/gi, endy.toFixed(3))
-    this.post = this.post.replace(/{minx}/gi, minx.toFixed(3))
-    this.post = this.post.replace(/{miny}/gi, miny.toFixed(3))
-    this.post = this.post.replace(/{maxx}/gi, maxx.toFixed(3))
-    this.post = this.post.replace(/{maxy}/gi, maxy.toFixed(3))
   }
 
-  gcode(vertex) {
-    let command = "G1" + " X" + vertex.x.toFixed(3) + " Y" + vertex.y.toFixed(3)
-    return command
+  // provides a GCode machine instruction for a given vertex
+  code(vertex) {
+    return (
+      "G1" +
+      " X" +
+      vertex.x.toFixed(this.digits) +
+      " Y" +
+      vertex.y.toFixed(this.digits)
+    )
   }
 }
