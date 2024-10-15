@@ -8,7 +8,7 @@ import { downloadFile } from "@/common/util"
 import DropdownOption from "@/components/DropdownOption"
 import InputOption from "@/components/InputOption"
 import CheckboxOption from "@/components/CheckboxOption"
-import { selectConnectedVertices } from "@/features/layers/layersSlice"
+import { selectLayersForExport } from "@/features/layers/layersSlice"
 import {
   selectExporterState,
   updateExporter,
@@ -57,7 +57,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
               Math.pow(machine.maxY - machine.minY, 2.0),
           )
         : machine.maxRadius,
-    vertices: useSelector(selectConnectedVertices),
+    layers: useSelector(selectLayersForExport),
   }
   const exporter = new exporters[fileType](props)
 

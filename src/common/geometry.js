@@ -366,10 +366,14 @@ export const downsample = (vertices, tolerance = 0.0001) => {
 }
 
 // Convert x,y vertices to theta, rho vertices
-export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
+export const toThetaRho = (
+  subsampledVertices,
+  maxRadius,
+  rhoMax,
+  previousTheta = 0,
+  previousRawTheta = 0,
+) => {
   let vertices = []
-  let previousTheta = 0
-  let previousRawTheta = 0
 
   // Normalize the radius
   if (rhoMax < 0) {
@@ -389,6 +393,7 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
       subsampledVertices[next].x,
       subsampledVertices[next].y,
     )
+
     // Convert to [0, 2pi]
     rawTheta = (rawTheta + 2.0 * Math.PI) % (2.0 * Math.PI)
 
@@ -407,7 +412,14 @@ export const toThetaRho = (subsampledVertices, maxRadius, rhoMax) => {
 
     previousRawTheta = rawTheta
     previousTheta = theta
-    vertices.push(new Victor(theta, rho))
+
+    const vertex = new Victor(theta, rho)
+
+    // small hack to preserve these values
+    vertex.theta = theta
+    vertex.rawTheta = rawTheta
+
+    vertices.push(vertex)
   }
 
   return vertices
@@ -462,7 +474,15 @@ export const toScaraGcode = (vertices, unitsPerCircle) => {
     const x = (unitsPerCircle * m1) / (2 * Math.PI)
     const y = (unitsPerCircle * m2) / (2 * Math.PI)
 
-    return new Victor(x, y)
+    // propagate theta if it exists
+    const vertex = new Victor(x, y)
+
+    if (thetaRho.theta) {
+      vertex.theta = thetaRho.theta
+      vertex.rawTheta = thetaRho.rawTheta
+    }
+
+    return vertex
   })
 }
 

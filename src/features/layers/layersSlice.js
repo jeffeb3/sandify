@@ -374,9 +374,10 @@ const selectMachineVertices = createCachedSelector(
   (state, id) => id,
   selectLayerVertices,
   selectLayerIndex,
+  selectLayerById,
   selectNumVisibleLayers,
   selectCurrentMachine,
-  (id, vertices, layerIndex, numLayers, machine) => {
+  (id, vertices, layerIndex, layer, numLayers, machine) => {
     if (!machine) {
       return [] // zombie child
     }
@@ -387,9 +388,8 @@ const selectMachineVertices = createCachedSelector(
         start: layerIndex === 0,
         end: layerIndex === numLayers - 1,
       }
-      const machineModel = getMachine(machine)
 
-      return machineModel.polish(vertices, layerInfo)
+      return getMachine(machine).polish(vertices, layerInfo)
     } else {
       return []
     }
@@ -551,13 +551,60 @@ export const selectConnectedVertices = createSelector(selectState, (state) => {
   log("selectConnectedVertices")
   const visibleLayerIds = selectVisibleLayerIds(state)
 
-  return visibleLayerIds
-    .map((id, idx) => {
-      const vertices = selectMachineVertices(state, id)
-      const connector = selectConnectingVertices(state, id)
-      return [...vertices, ...connector]
+  return visibleLayerIds.reduce((acc, id) => {
+    const vertices = selectMachineVertices(state, id)
+    const connector = selectConnectingVertices(state, id)
+
+    acc.push(...vertices, ...connector.slice(1, -1))
+
+    return acc
+  }, [])
+})
+
+// returns an array of layers (and connectors) in an object structure designed to be exported by
+// an exporter
+export const selectLayersForExport = createSelector(selectState, (state) => {
+  if (!state.fonts.loaded) {
+    return []
+  } // wait for fonts
+
+  log("selectLayersForExport")
+  const visibleLayerIds = selectVisibleLayerIds(state)
+  let connectorCnt = 0
+
+  return visibleLayerIds.reduce((acc, id, index) => {
+    const vertices = selectMachineVertices(state, id)
+    const connector = selectConnectingVertices(state, id)
+    const effects = selectEffectsByLayerId(state, id)
+    const info = selectLayerById(state, id)
+    const codeEffects = effects.filter(
+      (effect) => effect.type === "programCode",
+    )
+
+    acc.push({
+      name: info.name,
+      type: "LAYER",
+      index,
+      vertices,
+      code: codeEffects.map((effect) => {
+        return {
+          pre: effect.programCodePre,
+          post: effect.programCodePost,
+        }
+      }),
     })
-    .flat()
+
+    if (connector.length > 0) {
+      acc.push({
+        type: "CONNECTOR",
+        index: connectorCnt,
+        vertices: connector,
+      })
+      connectorCnt += 1
+    }
+
+    return acc
+  }, [])
 })
 
 // returns an array of vertices connecting a given layer to the next (if it exists)

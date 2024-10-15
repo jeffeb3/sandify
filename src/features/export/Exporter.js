@@ -30,15 +30,15 @@ export const exporterOptions = {
     title: "Units per circle",
     type: "number",
   },
-  post: {
-    title: "Program end code",
+  pre: {
+    title: "Program start code",
     type: "textarea",
     isVisible: (exporter, state) => {
       return state.fileType !== SVG
     },
   },
-  pre: {
-    title: "Program start code",
+  post: {
+    title: "Program end code",
     type: "textarea",
     isVisible: (exporter, state) => {
       return state.fileType !== SVG
@@ -52,70 +52,139 @@ export const exporterOptions = {
 export default class Exporter {
   constructor(props) {
     this.props = props
+    this.pre = props.pre
+    this.post = props.post
     this.lines = []
     this.indentLevel = 0
+    this.digits = 3
   }
 
   export() {
-    this.pre = this.props.pre
-    this.post = this.props.post
-    let vertices = this.props.vertices
+    this.layers = this.prepareLayers(this.props.layers)
 
-    if (this.props.reverse) {
-      vertices = vertices.reverse()
-    }
-    this.computeOutputVertices(vertices)
+    const allVertices = this.layers.map((layer) => layer.vertices).flat()
+    this.computeStats(allVertices, [this])
+
     this.header()
-    this.startComments()
-    this.line()
-    this.keyValueLine("File name", "'" + this.props.fileName + "'")
-    this.keyValueLine("File type", this.props.fileType)
-    this.line()
-    this.endComments()
+    this.comment(() => {
+      this.line()
+      this.keyValueLine("File name", "'" + this.props.fileName + "'")
+      this.keyValueLine("File type", this.props.fileType)
+      this.line()
+    })
 
     if (this.pre !== "") {
-      this.startComments()
-      this.line("BEGIN PRE")
-      this.endComments()
-      this.line(this.pre, this.pre !== "")
-      this.startComments()
-      this.line("END PRE")
-      this.endComments()
+      this.comment("BEGIN PRE")
+      this.line(this.pre, this.pre !== "", false)
+      this.comment("END PRE")
     }
 
-    this.line()
-    this.exportCode(this.vertices)
+    this.exportCode()
     this.line()
 
     if (this.post !== "") {
-      this.startComments()
-      this.line("BEGIN POST")
-      this.endComments()
-      this.line(this.post, this.post !== "")
-      this.startComments()
-      this.line("END POST")
-      this.endComments()
+      this.comment("BEGIN POST")
+      this.line(this.post, this.post !== "", false)
+      this.comment("END POST")
     }
+
     this.footer()
     this.line()
 
     return this.lines
   }
 
-  header() {
-    // default does nothing
+  // computes stats from vertices and replaces the corresponding stat variables within pre and
+  // post blocks
+  computeStats(vertices, objects) {
+    const values = this.collectStats(vertices)
+
+    Object.keys(values).forEach((variable) => {
+      objects.forEach((obj) => {
+        obj.pre = this.replaceVariable(obj.pre, variable, values[variable])
+        obj.post = this.replaceVariable(obj.post, variable, values[variable])
+      })
+    })
   }
 
-  footer() {
-    // default does nothing
+  // given layers and connectors with vertices, transforms those vertices into an exportable format
+  prepareLayers(layers) {
+    layers = [...layers]
+
+    // reverse both the order of the layers and the vertices within them
+    if (this.props.reverse) {
+      layers = layers.reverse()
+    }
+
+    layers.forEach((layer, index) => {
+      let vertices = this.transformVertices(layer.vertices, index, layers)
+
+      if (this.props.reverse) vertices = vertices.reverse()
+      layer.vertices = vertices
+    })
+
+    return layers
   }
 
-  computeOutputVertices(vertices) {
-    // default does nothing
-    this.vertices = vertices
+  exportCode() {
+    this.layers.forEach((layer) => {
+      const hasCode = layer.code && layer.code.length > 0
+
+      if (hasCode) {
+        this.computeStats(layer.vertices, layer.code)
+
+        this.line("")
+        this.actionComment(layer, "BEGIN PRE")
+
+        layer.code.forEach((block) => {
+          this.line(block.pre, block.pre !== "", false)
+        })
+        this.actionComment(layer, "END PRE")
+      }
+
+      this.line("")
+      this.actionComment(layer, "BEGIN")
+
+      layer.vertices.forEach((vertex) => {
+        this.line(this.code(vertex))
+      })
+
+      this.actionComment(layer, "END")
+
+      if (hasCode) {
+        this.line("")
+        this.actionComment(layer, "BEGIN POST")
+
+        layer.code.forEach((block) => {
+          this.line(block.post, block.post !== "", false)
+        })
+        this.actionComment(layer, "END POST")
+      }
+    })
   }
 
-  line(content = "", add = true) {
+  // override to transform vertices for export
+  transformVertices(vertices) {
+    return vertices
+  }
+
+  // override to collect stats for use in PRE and POST blocks
+  collectStats() {
+    return {}
+  }
+
+  // override to export a header
+  header() {}
+
+  // override to export a footer
+  footer() {}
+
+  // override to provide code for a given vertex
+  code(vertex) {
+    throw "Override this method"
+  }
+
+  line(content = "", add = true, sanitize = true) {
     if (add) {
       let padding = ""
       if (this.commenting) {
@@ -124,7 +193,10 @@ export default class Exporter {
           padding += "  "
         }
       }
-      this.lines.push(padding + this.sanitizeValue(content))
+
+      const preparedContent = sanitize ? this.sanitizeValue(content) : content
+
+      this.lines.push(padding + preparedContent)
     }
   }
 
@@ -146,6 +218,23 @@ export default class Exporter {
 
   endComments() {
     this.commenting = false
+  }
+
+  comment(fn) {
+    this.startComments()
+    typeof fn === "function" ? fn() : this.line(fn)
+    this.endComments()
+  }
+
+  actionComment(layer, action) {
+    const name = layer.name ? ` ${layer.name}` : ""
+    this.comment(`${action} ${layer.type}: ${layer.index}${name}`)
+  }
+
+  replaceVariable(str, variable, value) {
+    const regex = new RegExp(`{${variable}}`, "gi")
+
+    return str.replace(regex, value.toFixed(this.digits))
   }
 
   sanitizeValue(value) {
