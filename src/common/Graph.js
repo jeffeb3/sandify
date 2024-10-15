@@ -16,10 +16,13 @@ export const mix = (v1, v2, s) => {
 export const buildGraph = (nodes) => {
   const graph = new Graph()
 
+  if (nodes.length > 0) {
+    graph.addNode(nodes[0])
+  }
+
   for (let i = 0; i < nodes.length - 1; i++) {
     const node1 = nodes[i]
     const node2 = nodes[i + 1]
-    graph.addNode(node1)
     graph.addNode(node2)
     graph.addEdge(node1, node2)
   }
