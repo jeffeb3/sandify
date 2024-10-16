@@ -2,6 +2,7 @@ import Shape from "../Shape"
 import {
   lsystem,
   lsystemPath,
+  lsystemOptimize,
   onSubtypeChange,
   onMinIterations,
   onMaxIterations,
@@ -63,10 +64,10 @@ export default class LSystem extends Shape {
       config.angle = Math.PI / 2
     }
 
-    let curve = lsystemPath(lsystem(config), config)
+    const path = lsystemOptimize(lsystemPath(lsystem(config), config), config)
     const scale = 18.0 // to normalize starting size
 
-    return resizeVertices(curve, scale, scale)
+    return resizeVertices(path, scale, scale)
   }
 
   getOptions() {

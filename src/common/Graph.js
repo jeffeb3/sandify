@@ -13,6 +13,30 @@ export const mix = (v1, v2, s) => {
   return new Victor(result[0], result[1])
 }
 
+export const buildGraph = (nodes) => {
+  const graph = new Graph()
+
+  if (nodes.length > 0) {
+    graph.addNode(nodes[0])
+  }
+
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const node1 = nodes[i]
+    const node2 = nodes[i + 1]
+    graph.addNode(node2)
+    graph.addEdge(node1, node2)
+  }
+
+  return graph
+}
+
+export const edgeKey = (node1, node2) => {
+  const node1Key = node1.toString()
+  const node2Key = node2.toString()
+
+  return [node1Key, node2Key].sort().toString()
+}
+
 // note: requires string-based nodes to work properly
 export default class Graph {
   constructor() {
@@ -42,13 +66,13 @@ export default class Graph {
   addEdge(node1, node2, weight = 1) {
     let node1Key = node1.toString()
     let node2Key = node2.toString()
-    let edgeKey = [node1Key, node2Key].sort().toString()
+    let edge12Key = edgeKey(node1, node2)
 
-    if (!this.edgeKeys.has(edgeKey)) {
+    if (!this.edgeKeys.has(edge12Key)) {
       this.adjacencyList[node1Key].push({ node: node2, weight })
       this.adjacencyList[node2Key].push({ node: node1, weight })
-      this.edgeKeys.add(edgeKey)
-      this.edgeMap[edgeKey] = [node1.toString(), node2.toString()]
+      this.edgeKeys.add(edge12Key)
+      this.edgeMap[edge12Key] = [node1.toString(), node2.toString()]
       this.clearCachedPaths()
     }
   }
@@ -60,6 +84,10 @@ export default class Graph {
 
   neighbors(node) {
     return this.adjacencyList[node.toString()].map((hash) => hash.node)
+  }
+
+  getNode(node) {
+    return this.nodeMap[node.toString()]
   }
 
   dijkstraShortestPath(startNode, endNode) {
