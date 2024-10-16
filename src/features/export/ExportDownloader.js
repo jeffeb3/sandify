@@ -53,8 +53,8 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
     maxRadius:
       machine.type === "rectangular"
         ? Math.sqrt(
-            Math.pow((machine.maxX - machine.minX)/2, 2.0) +
-              Math.pow((machine.maxY - machine.minY)/2, 2.0),
+            Math.pow((machine.maxX - machine.minX) / 2, 2.0) +
+              Math.pow((machine.maxY - machine.minY) / 2, 2.0),
           )
         : machine.maxRadius,
     vertices: useSelector(selectConnectedVertices),
