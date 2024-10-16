@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
@@ -31,9 +31,36 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
   const dispatch = useDispatch()
   const machine = useSelector(selectCurrentMachine)
   const exporterState = useSelector(selectExporterState)
-  const { fileType, fileName } = exporterState
+  const {
+    fileType,
+    fileName,
+    pre,
+    post,
+    polarRhoMax,
+    unitsPerCircle,
+    reverse,
+  } = exporterState
+  const [fields, setFields] = useState({
+    fileType,
+    fileName,
+    pre,
+    post,
+    polarRhoMax,
+    unitsPerCircle,
+    reverse,
+  })
+  const [savedFields] = useState({
+    fileType,
+    fileName,
+    pre,
+    post,
+    polarRhoMax,
+    unitsPerCircle,
+    reverse,
+  })
+
   const props = {
-    ...exporterState,
+    ...fields,
     offsetX:
       machine.type === "rectangular"
         ? (machine.minX + machine.maxX) / 2.0
@@ -59,24 +86,33 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         : machine.maxRadius,
     vertices: useSelector(selectConnectedVertices),
   }
-  const exporter = new exporters[fileType](props)
+  const exporter = new exporters[fields.fileType](props)
 
-  const handleChange = (attrs) => {
-    dispatch(updateExporter(attrs))
+  const handleChange = (value) => {
+    setFields((prevFields) => ({
+      ...prevFields,
+      ...value,
+    }))
   }
 
   const handleDownload = () => {
-    let name = fileName
-    if (!fileName.includes(".")) {
+    let name = fields.fileName
+    if (!name.includes(".")) {
       name += exporter.fileExtension
     }
     const type =
-      fileType === SVG
+      fields.fileType === SVG
         ? "image/svg+xml;charset=utf-8"
         : "text/plain;charset=utf-8"
 
     exporter.export()
     downloadFile(name, exporter.lines.join("\n"), type)
+    dispatch(updateExporter(fields))
+    toggleModal()
+  }
+
+  const handleCancel = () => {
+    setFields(savedFields)
     toggleModal()
   }
 
@@ -199,9 +235,9 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         <Button
           id="code-close"
           variant="light"
-          onClick={toggleModal}
+          onClick={handleCancel}
         >
-          Close
+          Cancel
         </Button>
         <Button
           id="code-download"
