@@ -1,5 +1,52 @@
 import Victor from "victor"
 import { vertexRoundP, cloneVertex } from "./geometry"
+import { buildGraph, edgeKey } from "@/common/Graph"
+import { cloneVertices } from "@/common/geometry"
+
+const shortestPath = (nodes) => {
+  const graph = buildGraph(nodes)
+  const path = []
+  const visited = {}
+
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const node1 = nodes[i]
+    const node2 = nodes[i + 1]
+    let node1Key = node1.toString()
+    let edge12Key = edgeKey(node1, node2)
+
+    if (visited[edge12Key]) {
+      const unvisitedNode = nearestUnvisitedNode(i + 1, nodes, visited, graph)
+
+      if (unvisitedNode != null) {
+        const shortestSubPath = graph.dijkstraShortestPath(
+          node1Key,
+          unvisitedNode.toString(),
+        )
+
+        path.push(...cloneVertices(shortestSubPath.slice(1)))
+        i = nodes.indexOf(unvisitedNode) - 1
+      }
+    } else {
+      path.push(node2)
+      visited[edge12Key] = true
+    }
+  }
+
+  return path
+}
+
+const nearestUnvisitedNode = (nodeIndex, nodes, visited, graph) => {
+  for (let i = nodeIndex; i < nodes.length - 1; i++) {
+    const node1 = nodes[i]
+    const node2 = nodes[i + 1]
+
+    if (!visited[edgeKey(node1, node2)]) {
+      return node2
+    }
+  }
+
+  return null // all nodes visited
+}
 
 export const onSubtypeChange = (subtype, changes, attrs) => {
   // if we switch back with too many iterations, the code
@@ -121,4 +168,10 @@ export const lsystemPath = (instructions, config) => {
   }
 
   return currVertices
+}
+
+export const lsystemOptimize = (vertices, config) => {
+  return config.shortestPath >= config.iterations
+    ? shortestPath(vertices)
+    : vertices
 }
