@@ -18,6 +18,7 @@ import V1Engineering from "./v1_engineering/V1Engineering"
 import CirclePacker from "./circle_packer/CirclePacker"
 import NoiseWave from "./NoiseWave"
 import SpaceFiller from "./space_filler/SpaceFiller"
+import Voronoi from "./Voronoi"
 import Wiper from "./Wiper"
 
 export const shapeFactory = {
@@ -40,6 +41,7 @@ export const shapeFactory = {
   wiper: Wiper,
   spaceFiller: SpaceFiller,
   noise_wave: NoiseWave,
+  voronoi: Voronoi,
   fileImport: LayerImport,
   imageImport: ImageImport,
 }

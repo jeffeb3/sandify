@@ -7,6 +7,7 @@ import ProgramCode from "./ProgramCode"
 import Track from "./Track"
 import Transformer from "./Transformer"
 import Warp from "./Warp"
+import Voronoi from "./Voronoi"
 
 export const effectFactory = {
   loop: Loop,
@@ -18,6 +19,7 @@ export const effectFactory = {
   noise: Noise,
   track: Track,
   warp: Warp,
+  voronoi: Voronoi,
 }
 
 export const getEffect = (type, ...args) => {

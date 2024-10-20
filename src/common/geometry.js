@@ -217,6 +217,26 @@ export const centerOnOrigin = (vertices, bounds) => {
   return vertices
 }
 
+export const shiftToFirstQuadrant = (vertices) => {
+  let minX = Infinity
+  let minY = Infinity
+
+  vertices.forEach((vertex) => {
+    const { x, y } = vertex
+
+    if (x < minX) {
+      minX = x
+    }
+    if (y < minY) {
+      minY = y
+    }
+  })
+
+  return vertices.map((vertex) => {
+    return vertex.subtract(new Victor(minX, minY))
+  })
+}
+
 const hAlignRight = (bounds) => -bounds[1].x
 const hAlignLeft = (bounds) => 0 - bounds[0].x
 const hAlignCenter = (bounds) => -(bounds[1].x - bounds[0].x) / 2
@@ -240,6 +260,7 @@ export const horizontalAlign = (selections, align = "left") => {
       vertex.add(new Victor(-dAll + d, 0))
     })
   })
+
   return selections
 }
 
