@@ -12,7 +12,7 @@ Sandify supports a large number of shape types and effects, so be creative! Inpu
 
 ## Using Sandify
 
- - Head over to [sandify.org]((https://sandify.org).
+ - Head over to [sandify.org](https://sandify.org).
  - Adjust the machine limits to match your table.
  - Add shapes and effects until you create a pleasing pattern.
  - Export the code in a format supported by your table.
