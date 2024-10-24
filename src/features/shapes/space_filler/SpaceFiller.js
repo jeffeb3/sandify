@@ -2,6 +2,7 @@ import Shape from "../Shape"
 import {
   lsystem,
   lsystemPath,
+  lsystemOptimize,
   onSubtypeChange,
   onMinIterations,
   onMaxIterations,
@@ -86,7 +87,7 @@ export default class SpaceFiller extends Shape {
       config.angle = Math.PI / 2
     }
 
-    let curve = lsystemPath(lsystem(config), config)
+    let curve = lsystemOptimize(lsystemPath(lsystem(config), config), config)
     let scale = 1
 
     if (config.iterationsGrow) {

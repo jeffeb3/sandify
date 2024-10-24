@@ -58,7 +58,8 @@ export const subtypes = {
       9: "--8++++6[+9++++7]--7",
     },
     angle: Math.PI / 5,
-    maxIterations: 6,
+    maxIterations: 5,
+    shortestPath: 5,
     iterationsGrow: (config) => {
       return 1 + Math.max(1, 3 / config.iterations)
     },
