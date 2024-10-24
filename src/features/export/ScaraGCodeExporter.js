@@ -8,16 +8,32 @@ export default class ScaraGCodeExporter extends GCodeExporter {
     this.offsetY = 0
   }
 
-  computeOutputVertices(vertices) {
-    //  downsample larger lines into smaller ones, then convert to theta-rho
+  // transforms vertices into a SCARA GCode format
+  transformVertices(vertices, index, layers) {
+    let theta, rawTheta
+
+    if (index == 0) {
+      theta = 0
+      rawTheta = 0
+    } else {
+      // preserve previous theta value
+      const prevVertices = layers[index - 1].vertices
+      const last = prevVertices[prevVertices.length - 1]
+      theta = last.theta
+      rawTheta = last.rawTheta // already transformed
+    }
+
     vertices = toScaraGcode(
       toThetaRho(
         subsample(vertices, 2.0),
         this.props.maxRadius,
         parseFloat(this.props.polarRhoMax),
+        theta,
+        rawTheta,
       ),
       parseFloat(this.props.unitsPerCircle),
     )
-    return super.computeOutputVertices(vertices)
+
+    return super.transformVertices(vertices, index, layers)
   }
 }

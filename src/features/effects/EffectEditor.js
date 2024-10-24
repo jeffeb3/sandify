@@ -149,6 +149,9 @@ const EffectEditor = ({ id }) => {
           </Col>
         </Row>
       )}
+      {model.description && (
+        <div className="mt-3 mb-2 bg-light p-4">{model.description}</div>
+      )}
     </div>
   )
 }
