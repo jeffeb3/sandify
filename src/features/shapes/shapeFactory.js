@@ -36,12 +36,12 @@ export const shapeFactory = {
   lsystem: LSystem,
   fractalSpirograph: FractalSpirograph,
   tessellationTwist: TessellationTwist,
+  voronoi: Voronoi,
   point: Point,
   circlePacker: CirclePacker,
   wiper: Wiper,
   spaceFiller: SpaceFiller,
   noise_wave: NoiseWave,
-  voronoi: Voronoi,
   fileImport: LayerImport,
   imageImport: ImageImport,
 }
