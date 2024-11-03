@@ -92,3 +92,12 @@ export const scaleByWheel = (size, deltaX, deltaY) => {
 export const functionValue = (val, arg1, arg2) => {
   return typeof val === "function" ? val(arg1, arg2) : val
 }
+
+// shared logic via mixins
+export const mixin = (targetClass, mixinClass) => {
+  Object.getOwnPropertyNames(mixinClass.prototype).forEach((name) => {
+    if (name !== "constructor") {
+      targetClass.prototype[name] = mixinClass.prototype[name]
+    }
+  })
+}

@@ -12,6 +12,7 @@ import {
   restoreDefaults,
   randomizeValues,
 } from "@/features/layers/layersSlice"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import { deleteLayer } from "@/features/layers/layersSlice"
 import NewLayer from "./NewLayer"
 import CopyLayer from "./CopyLayer"
@@ -23,6 +24,7 @@ const LayerManager = () => {
   const dispatch = useDispatch()
   const selectedLayerId = useSelector(selectSelectedLayerId)
   const selectedLayer = useSelector(selectSelectedLayer)
+  const machineState = useSelector(selectCurrentMachine)
   const numLayers = useSelector(selectNumLayers)
   const canRemove = numLayers > 1
   const model = new Layer(selectedLayer.type).model
@@ -42,7 +44,12 @@ const LayerManager = () => {
   }, [numLayers])
 
   const handleRestoreDefaults = () => {
-    dispatch(restoreDefaults(selectedLayerId))
+    dispatch(
+      restoreDefaults({
+        id: selectedLayerId,
+        machine: machineState,
+      }),
+    )
   }
 
   const handleRandomizeValues = () => {

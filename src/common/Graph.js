@@ -90,6 +90,10 @@ export default class Graph {
     return this.nodeMap[node.toString()]
   }
 
+  findNode(fn) {
+    return Object.values(this.nodeMap).find(fn)
+  }
+
   dijkstraShortestPath(startNode, endNode) {
     let shortest = this.getCachedShortestPath(startNode, endNode)
 

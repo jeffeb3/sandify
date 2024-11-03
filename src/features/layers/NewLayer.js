@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import Select from "react-select"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
@@ -38,6 +39,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
     value: selectedShape.id,
     label: selectedShape.label,
   }
+  const machineState = useSelector(selectCurrentMachine)
 
   const handleNameFocus = (event) => {
     event.target.select()
@@ -66,7 +68,8 @@ const NewLayer = ({ toggleModal, showModal }) => {
     event.preventDefault()
 
     const layer = new Layer(type)
-    const attrs = layer.getInitialState()
+    const layerProps = { machine: machineState }
+    const attrs = layer.getInitialState(layerProps)
 
     attrs.name = name
     dispatch(

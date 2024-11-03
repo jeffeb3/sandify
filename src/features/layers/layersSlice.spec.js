@@ -296,7 +296,7 @@ describe("layers reducer", () => {
               },
             },
           },
-          restoreDefaults("0"),
+          restoreDefaults({ id: "0" }),
         ),
       ).toEqual({
         entities: {

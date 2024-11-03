@@ -152,14 +152,15 @@ const layersSlice = createSlice({
       adapter.updateOne(state, { id: changes.id, changes })
     },
     restoreDefaults: (state, action) => {
-      const id = action.payload
+      const { id, machine } = action.payload
       const { type, name, effectIds } = state.entities[id]
       const layer = new Layer(type)
+      const layerProps = { machine }
 
       adapter.setOne(state, {
         id,
         name,
-        ...layer.getInitialState(),
+        ...layer.getInitialState(layerProps),
         effectIds,
       })
     },
