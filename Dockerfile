@@ -1,6 +1,6 @@
 # Dockerfile for development of sandify
 
-FROM node:20.6.1
+FROM node:20.18.1
 
 RUN npm install -g npm
 #RUN npm install -g
