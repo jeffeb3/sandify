@@ -163,7 +163,7 @@ const options = {
   },
 }
 
-export default class imageImport extends Shape {
+export default class ImageImport extends Shape {
   constructor() {
     super("imageImport")
     this.label = "Import"

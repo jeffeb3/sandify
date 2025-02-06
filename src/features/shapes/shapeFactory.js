@@ -18,6 +18,7 @@ import V1Engineering from "./v1_engineering/V1Engineering"
 import CirclePacker from "./circle_packer/CirclePacker"
 import NoiseWave from "./NoiseWave"
 import SpaceFiller from "./space_filler/SpaceFiller"
+import Voronoi from "./Voronoi"
 import Wiper from "./Wiper"
 
 export const shapeFactory = {
@@ -35,6 +36,7 @@ export const shapeFactory = {
   lsystem: LSystem,
   fractalSpirograph: FractalSpirograph,
   tessellationTwist: TessellationTwist,
+  voronoi: Voronoi,
   point: Point,
   circlePacker: CirclePacker,
   wiper: Wiper,
