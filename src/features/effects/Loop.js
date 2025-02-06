@@ -1,6 +1,12 @@
 import Effect from "./Effect"
 import Victor from "victor"
-import { scale, rotate, centerOnOrigin, cloneVertex } from "@/common/geometry"
+import {
+  scale,
+  rotate,
+  centerOnOrigin,
+  cloneVertex,
+  subsample,
+} from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -144,9 +150,22 @@ export default class Loop extends Effect {
     }
 
     const outputVertices = []
+    let numLoops = effect.numLoops
+    let fractionalLength = vertices.length
+    const remainder = numLoops - (numLoops = Math.floor(numLoops))
 
-    for (var i = 0; i < effect.numLoops; i++) {
-      for (let j = 0; j < vertices.length; j++) {
+    if (remainder > 0) {
+      // ensure shapes with fewer vertices like polygon are subsampled to produce an
+      // accurate fractional loop
+      vertices = subsample(vertices, 2.0)
+      fractionalLength = Math.floor(vertices.length * remainder)
+      numLoops = numLoops + 1
+    }
+
+    for (var i = 0; i < numLoops; i++) {
+      const length = i == numLoops - 1 ? fractionalLength : vertices.length
+
+      for (let j = 0; j < length; j++) {
         let vertex = cloneVertex(vertices[j])
         let amount =
           effect.transformMethod === "smear" ? i + j / vertices.length : i
