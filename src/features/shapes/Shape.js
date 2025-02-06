@@ -68,6 +68,7 @@ export default class Shape extends Model {
     cacheState.shape = pick(cacheState.shape, [
       ...Object.keys(this.getOptions()),
       "imageId",
+      "id",
     ])
     cacheState.type = state.shape.type
     cacheState.dragging = state.shape.dragging
