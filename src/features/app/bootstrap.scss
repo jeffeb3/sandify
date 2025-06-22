@@ -17,6 +17,12 @@ h3 {
   border-color: lightgray;
 }
 
+@media (max-width: 991px) {
+  .navbar-brand {
+    flex-grow: 1;
+  }
+}
+
 .accordion-header {
   h3 {
     margin: 0;
