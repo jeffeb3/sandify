@@ -22,20 +22,22 @@ export default class SvgExporter extends Exporter {
     this.props.pre = this.props.post = "" // ignore props
   }
 
-  exportCode(vertices) {
-    var centeredVertices = vertices.map((vertex) => {
+  exportCode() {
+    const vertices = this.layers.map((layer) => layer.vertices).flat()
+    const centeredVertices = vertices.map((vertex) => {
       return {
         ...vertex,
         x: vertex.x + this.props.width / 2,
         y: this.props.height - (vertex.y + this.props.height / 2),
       }
     })
+    const svg = path()
 
-    let svg = path()
     if (centeredVertices.length > 0) {
       const firstPoint = centeredVertices[0]
       svg.moveTo(firstPoint.x, firstPoint.y)
     }
+
     centeredVertices.forEach((vertex) => svg.lineTo(vertex.x, vertex.y))
     this.line(
       "    <desc>pwidth:" +
@@ -85,11 +87,14 @@ export default class SvgExporter extends Exporter {
   line(content = "", add = true) {
     if (add) {
       let padding = ""
+
       if (this.commenting) {
         padding = ""
+
         for (let i = 0; i < this.indentLevel; i++) {
           padding += "  "
         }
+
         if (content) {
           this.lines.push(padding + "<!-- " + content + " -->")
         } else {
