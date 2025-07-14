@@ -1,3 +1,5 @@
+/* global document */
+
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
 import Col from "react-bootstrap/Col"

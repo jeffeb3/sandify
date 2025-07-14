@@ -1,3 +1,5 @@
+/* global document */
+
 import React, { useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import Select from "react-select"

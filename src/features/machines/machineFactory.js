@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import RectMachine from "./RectMachine"
 import PolarMachine from "./PolarMachine"
 

@@ -1,3 +1,5 @@
+/* global FileReader */
+
 import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"

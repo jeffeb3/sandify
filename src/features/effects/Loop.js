@@ -1,3 +1,5 @@
+/* global console */
+
 import Effect from "./Effect"
 import Victor from "victor"
 import {

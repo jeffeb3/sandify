@@ -41,13 +41,12 @@ export const edgeKey = (node1, node2) => {
 export default class Graph {
   constructor() {
     this.nodeMap = {}
-    // eslint-disable-next-line no-undef
+
     this.nodeKeys = new Set()
 
     this.adjacencyList = {}
     this.edgeMap = {}
 
-    // eslint-disable-next-line no-undef
     this.edgeKeys = new Set()
     this.clearCachedPaths()
   }

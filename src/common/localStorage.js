@@ -1,3 +1,5 @@
+/* global localStorage, console */
+
 // if you want to save a multiple temporary states, use these keys. The first time
 // you save a new state, change persistSaveKey. Make a change, then change
 // persistLoadKey to the same value. These keys are obsolete now
@@ -12,7 +14,7 @@ export const loadState = (key = persistLoadKey) => {
       return undefined
     }
     return JSON.parse(serializedState)
-  } catch (err) {
+  } catch {
     return undefined
   }
 }
