@@ -35,12 +35,13 @@ const Header = ({ eventKey, setEventKey }) => {
     >
       <Navbar.Brand href="/">
         <div className="d-flex align-items-center">
-          <img
-            src={logo}
-            className="app-logo me-2"
-            alt="logo"
-          />
-          <h1 className="d-inline m-0 me-3">sandify</h1>
+          <h1>
+            <img
+              src={logo}
+              className="app-logo me-2"
+              alt="sandify"
+            />
+          </h1>
         </div>
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
