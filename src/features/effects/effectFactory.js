@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import FineTuning from "./FineTuning"
 import Fisheye from "./Fisheye"
 import Loop from "./Loop"

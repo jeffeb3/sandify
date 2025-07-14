@@ -1,3 +1,5 @@
+/* global console */
+
 import RectMachine from "./RectMachine"
 import Victor from "victor"
 import { clip } from "liang-barsky"

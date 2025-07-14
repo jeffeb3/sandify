@@ -1,3 +1,5 @@
+/* global console */
+
 import Victor from "victor"
 import PolarMachine from "./PolarMachine"
 import { circle } from "@/common/geometry"

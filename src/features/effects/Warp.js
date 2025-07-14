@@ -1,3 +1,5 @@
+/* global console */
+
 import Victor from "victor"
 import Effect from "./Effect"
 import { effectOptions } from "./EffectLayer"

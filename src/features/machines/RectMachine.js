@@ -1,3 +1,5 @@
+/* global console */
+
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
 import {
