@@ -1,6 +1,6 @@
 import RectMachine from "./RectMachine"
 import Victor from "victor"
-import clip from "liang-barsky"
+import { clip } from "liang-barsky"
 import { cloneVertices } from "@/common/geometry"
 import { closest } from "@/common/proximity"
 

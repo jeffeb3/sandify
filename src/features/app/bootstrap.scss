@@ -1,6 +1,8 @@
 /**
  Bootstrap 5 overrides
  **/
+@use 'sass:color';
+
 h2 {
   font-size: 1.6rem;
 }
@@ -40,7 +42,7 @@ h3 {
 
 .list-group-item.active {
   z-index: auto;
-  background-color: lighten(#2983BA, 5%);
+  background-color: color.adjust(#2983BA, $lightness: 5%);
 }
 
 .list-group-item.selected {
@@ -74,16 +76,16 @@ h3 {
   border: none;
 
   &:hover {
-    background-color: darken(#e9ecef, 5%);
+    background-color: color.adjust(#e9ecef, $lightness: -5%);
   }
 
   &.focus, &:focus {
-    background-color: darken(#e9ecef, 5%);
+    background-color: color.adjust(#e9ecef, $lightness: -5%);
   }
 
   &:not(:disabled):not(.disabled).active,
   &:not(:disabled):not(.disabled):active {
-    background-color: darken(#e9ecef, 5%);
+    background-color: color.adjust(#e9ecef, $lightness: -5%);
   }
 }
 

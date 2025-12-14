@@ -1,5 +1,8 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
+import "bootstrap/dist/css/bootstrap.min.css"
+import "react-toastify/dist/ReactToastify.css"
+import "./features/app/bootstrap.scss"
 import "./features/app/reactGA"
 import App from "./features/app/App"
 import "./index.css"

@@ -23,9 +23,6 @@ export default defineConfig(() => ({
     outDir: 'build',
     target: 'esnext',
   },
-  define: {
-    "process.env": process.env ?? {},
-  },
   // We use this configuration to treat .js file as .jsx. In the future we should rename them all
   // to .jsx instead and remove this config
   esbuild: {
