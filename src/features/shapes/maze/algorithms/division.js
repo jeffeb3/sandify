@@ -10,10 +10,13 @@ const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
 const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
 const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
 
-const divide = (grid, x, y, width, height, rng) => {
+const divide = (grid, x, y, width, height, rng, horizontalBias = 0) => {
   if (width < 2 || height < 2) return
 
-  const horizontal = height > width || (height === width && rng() < 0.5)
+  // Calculate horizontal probability based on horizontalBias
+  // horizontalBias 0 = 0.1 (prefer vertical walls/horizontal corridors), 10 = 0.9 (prefer horizontal walls/vertical corridors)
+  const horizontalProb = 0.1 + (horizontalBias * 0.08)
+  const horizontal = height > width || (height === width && rng() < horizontalProb)
 
   if (horizontal) {
     // Divide horizontally
@@ -33,8 +36,8 @@ const divide = (grid, x, y, width, height, rng) => {
     }
 
     // Recursively divide the two sections
-    divide(grid, x, y, width, wallY - y + 1, rng)
-    divide(grid, x, wallY + 1, width, y + height - wallY - 1, rng)
+    divide(grid, x, y, width, wallY - y + 1, rng, horizontalBias)
+    divide(grid, x, wallY + 1, width, y + height - wallY - 1, rng, horizontalBias)
   } else {
     // Divide vertically
     const wallX = x + Math.floor(rng() * (width - 1))
@@ -53,12 +56,12 @@ const divide = (grid, x, y, width, height, rng) => {
     }
 
     // Recursively divide the two sections
-    divide(grid, x, y, wallX - x + 1, height, rng)
-    divide(grid, wallX + 1, y, x + width - wallX - 1, height, rng)
+    divide(grid, x, y, wallX - x + 1, height, rng, horizontalBias)
+    divide(grid, wallX + 1, y, x + width - wallX - 1, height, rng, horizontalBias)
   }
 }
 
-export const division = (grid, width, height, rng) => {
+export const division = (grid, { width, height, rng, horizontalBias = 0 }) => {
   // Start with all passages open (no walls)
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -74,5 +77,5 @@ export const division = (grid, width, height, rng) => {
   }
 
   // Recursively divide the space
-  divide(grid, 0, 0, width, height, rng)
+  divide(grid, 0, 0, width, height, rng, horizontalBias)
 }

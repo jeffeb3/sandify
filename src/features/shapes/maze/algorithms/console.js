@@ -3,7 +3,7 @@
 const S = 2
 const E = 4
 
-export const consoleDisplay = (grid, width, height) => {
+export const consoleDisplay = (grid, { width, height }) => {
   let mazeOutput = " " + "_".repeat(width * 2 - 1) + "\n"
 
   grid.forEach((row, y) => {

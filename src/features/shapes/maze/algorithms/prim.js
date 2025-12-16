@@ -10,7 +10,7 @@ const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
 const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
 const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
 
-export const prim = (grid, width, height, rng) => {
+export const prim = (grid, { width, height, rng, branchLevel = 0 }) => {
   const frontier = []
 
   // Start with a random cell
@@ -43,8 +43,14 @@ export const prim = (grid, width, height, rng) => {
 
   // Process frontier
   while (frontier.length > 0) {
-    // Pick random cell from frontier
-    const idx = Math.floor(rng() * frontier.length)
+    // Pick cell from frontier based on branchLevel
+    // branchLevel 0 = bushy (pick from start/FIFO), 10 = winding (pick from end/LIFO)
+    let idx
+    // Use power distribution to bias selection
+    // power > 1 → picks from start (bushy), power < 1 → picks from end (winding)
+    const t = branchLevel / 10 // 0 (bushy) to 1 (winding)
+    const power = 2 - 1.5 * t // 2 (bushy) to 0.5 (winding)
+    idx = Math.floor(Math.pow(rng(), power) * frontier.length)
     const [fx, fy] = frontier[idx]
     frontier.splice(idx, 1)
 

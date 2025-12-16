@@ -77,7 +77,7 @@ const walk = (grid, rng) => {
   }
 }
 
-export const wilson = (grid, width, height, rng) => {
+export const wilson = (grid, { width, height, rng }) => {
   let remaining = width * height - 1
 
   while (remaining > 0) {

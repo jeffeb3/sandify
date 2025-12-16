@@ -35,6 +35,12 @@ const options = {
     title: "Algorithm",
     type: "dropdown",
     choices: ["Wilson", "Backtracker", "Division", "Prim", "Kruskal", "Sidewinder"],
+    onChange: (model, changes, state) => {
+      if (changes.mazeType === "Kruskal") {
+        changes.mazeHorizontalBias = 5
+      }
+      return changes
+    },
   },
   mazeWidth: {
     title: "Maze width",
@@ -45,6 +51,36 @@ const options = {
     title: "Maze height",
     min: 1,
     max: 20,
+  },
+  mazeStraightness: {
+    title: "Straightness",
+    type: "slider",
+    min: 0,
+    max: 10,
+    step: 1,
+    isVisible: (layer, state) => {
+      return state.mazeType === "Backtracker" || state.mazeType === "Sidewinder"
+    },
+  },
+  mazeHorizontalBias: {
+    title: "Horizontal bias",
+    type: "slider",
+    min: 0,
+    max: 10,
+    step: 1,
+    isVisible: (layer, state) => {
+      return state.mazeType === "Division" || state.mazeType === "Kruskal"
+    },
+  },
+  mazeBranchLevel: {
+    title: "Branch level",
+    type: "slider",
+    min: 0,
+    max: 10,
+    step: 1,
+    isVisible: (layer, state) => {
+      return state.mazeType === "Prim"
+    },
   },
   seed: {
     title: "Random seed",
@@ -66,18 +102,21 @@ export default class Maze extends Shape {
         mazeType: "Wilson",
         mazeWidth: 8,
         mazeHeight: 8,
+        mazeStraightness: 0,
+        mazeHorizontalBias: 0,
+        mazeBranchLevel: 5,
         seed: 1,
       },
     }
   }
 
   getVertices(state) {
-    const { mazeType, mazeWidth, mazeHeight, seed } = state.shape
+    const { mazeType, mazeWidth, mazeHeight, mazeStraightness, mazeHorizontalBias, mazeBranchLevel, seed } = state.shape
     const width = Math.max(2, mazeWidth)
     const height = Math.max(2, mazeHeight)
 
     this.setup(width, height, seed)
-    this.generateMaze(mazeType, width, height)
+    this.generateMaze(mazeType, width, height, mazeStraightness, mazeHorizontalBias, mazeBranchLevel)
 
     return this.drawMaze(width, height)
   }
@@ -204,10 +243,17 @@ export default class Maze extends Shape {
       IN
   }
 
-  generateMaze(mazeType, width, height) {
+  generateMaze(mazeType, width, height, straightness, horizontalBias, branchLevel) {
     const algorithm = algorithms[mazeType.toLowerCase()] || wilson
 
-    algorithm(this.grid, width, height, this.rng)
+    algorithm(this.grid, {
+      width,
+      height,
+      rng: this.rng,
+      straightness,
+      horizontalBias,
+      branchLevel,
+    })
   }
 
   getOptions() {

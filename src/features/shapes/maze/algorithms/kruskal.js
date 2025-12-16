@@ -46,7 +46,7 @@ class UnionFind {
   }
 }
 
-export const kruskal = (grid, width, height, rng) => {
+export const kruskal = (grid, { width, height, rng, horizontalBias = 0 }) => {
   // Initialize all cells as separate sets
   const uf = new UnionFind(width * height)
 
@@ -57,25 +57,49 @@ export const kruskal = (grid, width, height, rng) => {
     }
   }
 
-  // Create list of all possible edges (walls)
-  const edges = []
+  // Create separate lists for horizontal and vertical edges
+  const horizontalEdges = []
+  const verticalEdges = []
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      // Add south edge
+      // Add south edge (vertical)
       if (y < height - 1) {
-        edges.push({ x, y, dir: S })
+        verticalEdges.push({ x, y, dir: S })
       }
-      // Add east edge
+      // Add east edge (horizontal)
       if (x < width - 1) {
-        edges.push({ x, y, dir: E })
+        horizontalEdges.push({ x, y, dir: E })
       }
     }
   }
 
-  // Shuffle edges randomly
-  for (let i = edges.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1))
-    ;[edges[i], edges[j]] = [edges[j], edges[i]]
+  // Shuffle each list independently
+  const shuffle = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1))
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+  }
+  shuffle(horizontalEdges)
+  shuffle(verticalEdges)
+
+  // Interleave edges based on horizontalBias
+  // horizontalBias 0 = prefer horizontal passages, 10 = prefer vertical passages
+  const horizontalProb = 0.9 - (horizontalBias * 0.08)
+  const edges = []
+  let hIdx = 0
+  let vIdx = 0
+
+  while (hIdx < horizontalEdges.length || vIdx < verticalEdges.length) {
+    if (hIdx >= horizontalEdges.length) {
+      edges.push(verticalEdges[vIdx++])
+    } else if (vIdx >= verticalEdges.length) {
+      edges.push(horizontalEdges[hIdx++])
+    } else if (rng() < horizontalProb) {
+      edges.push(horizontalEdges[hIdx++])
+    } else {
+      edges.push(verticalEdges[vIdx++])
+    }
   }
 
   // Process edges

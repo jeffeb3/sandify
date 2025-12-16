@@ -8,13 +8,17 @@ const W = 8
 const IN = 0x10
 const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
 
-export const sidewinder = (grid, width, height, rng) => {
+export const sidewinder = (grid, { width, height, rng, straightness = 0 }) => {
   // Mark all cells as IN
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       grid[y][x] = IN
     }
   }
+
+  // Calculate close probability based on straightness
+  // straightness 0 = 0.5 (default), straightness 10 = 0.1 (long corridors)
+  const closeProbability = 0.5 - (straightness * 0.04)
 
   // Process each row
   for (let y = 0; y < height; y++) {
@@ -26,7 +30,7 @@ export const sidewinder = (grid, width, height, rng) => {
       // At east boundary or randomly decide to close out the run
       const atEastBoundary = x === width - 1
       const atNorthBoundary = y === 0
-      const shouldCloseRun = atEastBoundary || (!atNorthBoundary && rng() < 0.5)
+      const shouldCloseRun = atEastBoundary || (!atNorthBoundary && rng() < closeProbability)
 
       if (shouldCloseRun) {
         // Pick random cell from run and carve north (unless at north boundary)
