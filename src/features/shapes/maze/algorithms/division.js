@@ -1,81 +1,94 @@
 // Recursive Division algorithm for maze generation
 // Divides space with walls, leaving passages - creates long straight corridors
+// NOTE: Only works with rectangular grids
 
-const N = 1
-const S = 2
-const E = 4
-const W = 8
-const IN = 0x10
-const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
-const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
-const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
+const divide = (grid, cells, rng, horizontalBias) => {
+  if (cells.length < 2) return
 
-const divide = (grid, x, y, width, height, rng, horizontalBias = 0) => {
-  if (width < 2 || height < 2) return
+  // Find bounds
+  const xs = cells.map((c) => c.x)
+  const ys = cells.map((c) => c.y)
+  const minX = Math.min(...xs)
+  const maxX = Math.max(...xs)
+  const minY = Math.min(...ys)
+  const maxY = Math.max(...ys)
+
+  const width = maxX - minX + 1
+  const height = maxY - minY + 1
+
+  if (width < 2 && height < 2) return
 
   // Calculate horizontal probability based on horizontalBias
-  // horizontalBias 0 = 0.1 (prefer vertical walls/horizontal corridors), 10 = 0.9 (prefer horizontal walls/vertical corridors)
-  const horizontalProb = 0.1 + (horizontalBias * 0.08)
-  const horizontal = height > width || (height === width && rng() < horizontalProb)
+  const horizontalProb = 0.1 + horizontalBias * 0.08
+  const horizontal =
+    height > width || (height === width && rng() < horizontalProb)
 
-  if (horizontal) {
-    // Divide horizontally
-    const wallY = y + Math.floor(rng() * (height - 1))
-    const passageX = x + Math.floor(rng() * width)
+  if (horizontal && height >= 2) {
+    // Divide horizontally - pick a y value to put wall below
+    const wallY = minY + Math.floor(rng() * (height - 1))
 
-    // Add horizontal wall with passage
-    for (let wx = x; wx < x + width; wx++) {
-      if (wx !== passageX) {
-        // Remove south passage from cells above the wall
-        grid[wallY][wx] &= ~S
-        // Remove north passage from cells below the wall
-        if (wallY + 1 < grid.length) {
-          grid[wallY + 1][wx] &= ~N
-        }
+    // Get cells in the wall row and the row below
+    const topCells = cells.filter((c) => c.y === wallY)
+    const bottomCells = cells.filter((c) => c.y === wallY + 1)
+
+    // Pick one passage to leave open
+    const passageX = minX + Math.floor(rng() * width)
+
+    // Unlink all except the passage
+    for (const topCell of topCells) {
+      if (topCell.x === passageX) continue
+      const bottomCell = bottomCells.find((c) => c.x === topCell.x)
+      if (bottomCell) {
+        grid.unlink(topCell, bottomCell)
       }
     }
 
-    // Recursively divide the two sections
-    divide(grid, x, y, width, wallY - y + 1, rng, horizontalBias)
-    divide(grid, x, wallY + 1, width, y + height - wallY - 1, rng, horizontalBias)
-  } else {
-    // Divide vertically
-    const wallX = x + Math.floor(rng() * (width - 1))
-    const passageY = y + Math.floor(rng() * height)
+    // Recursively divide top and bottom sections
+    const topSection = cells.filter((c) => c.y <= wallY)
+    const bottomSection = cells.filter((c) => c.y > wallY)
 
-    // Add vertical wall with passage
-    for (let wy = y; wy < y + height; wy++) {
-      if (wy !== passageY) {
-        // Remove east passage from cells left of the wall
-        grid[wy][wallX] &= ~E
-        // Remove west passage from cells right of the wall
-        if (wallX + 1 < grid[wy].length) {
-          grid[wy][wallX + 1] &= ~W
-        }
+    divide(grid, topSection, rng, horizontalBias)
+    divide(grid, bottomSection, rng, horizontalBias)
+  } else if (width >= 2) {
+    // Divide vertically - pick an x value to put wall right of
+    const wallX = minX + Math.floor(rng() * (width - 1))
+
+    // Get cells in the wall column and the column to the right
+    const leftCells = cells.filter((c) => c.x === wallX)
+    const rightCells = cells.filter((c) => c.x === wallX + 1)
+
+    // Pick one passage to leave open
+    const passageY = minY + Math.floor(rng() * height)
+
+    // Unlink all except the passage
+    for (const leftCell of leftCells) {
+      if (leftCell.y === passageY) continue
+      const rightCell = rightCells.find((c) => c.y === leftCell.y)
+      if (rightCell) {
+        grid.unlink(leftCell, rightCell)
       }
     }
 
-    // Recursively divide the two sections
-    divide(grid, x, y, wallX - x + 1, height, rng, horizontalBias)
-    divide(grid, wallX + 1, y, x + width - wallX - 1, height, rng, horizontalBias)
+    // Recursively divide left and right sections
+    const leftSection = cells.filter((c) => c.x <= wallX)
+    const rightSection = cells.filter((c) => c.x > wallX)
+
+    divide(grid, leftSection, rng, horizontalBias)
+    divide(grid, rightSection, rng, horizontalBias)
   }
 }
 
-export const division = (grid, { width, height, rng, horizontalBias = 0 }) => {
-  // Start with all passages open (no walls)
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let cell = IN
+export const division = (grid, { rng, horizontalBias = 5 }) => {
+  const allCells = grid.getAllCells()
 
-      if (y > 0) cell |= N
-      if (y < height - 1) cell |= S
-      if (x > 0) cell |= W
-      if (x < width - 1) cell |= E
-
-      grid[y][x] = cell
+  // Start with all cells fully connected
+  for (const cell of allCells) {
+    grid.markVisited(cell)
+    for (const neighbor of grid.getNeighbors(cell)) {
+      grid.link(cell, neighbor)
     }
   }
 
-  // Recursively divide the space
-  divide(grid, 0, 0, width, height, rng, horizontalBias)
+  // Recursively divide
+  divide(grid, allCells, rng, horizontalBias)
 }

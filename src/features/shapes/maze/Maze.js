@@ -1,17 +1,18 @@
-import Victor from "victor"
 import Shape from "../Shape"
 import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { difference } from "@/common/util"
 import { cloneVertices, centerOnOrigin } from "@/common/geometry"
+import RectangularGrid from "./RectangularGrid"
+import PolarGrid from "./PolarGrid"
 import { wilson } from "./algorithms/wilson"
 import { backtracker } from "./algorithms/backtracker"
 import { division } from "./algorithms/division"
 import { prim } from "./algorithms/prim"
 import { kruskal } from "./algorithms/kruskal"
 import { sidewinder } from "./algorithms/sidewinder"
-import { consoleDisplay } from "./algorithms/console"
+import { eller } from "./algorithms/eller"
 
 const algorithms = {
   wilson,
@@ -20,37 +21,86 @@ const algorithms = {
   prim,
   kruskal,
   sidewinder,
-  consoleDisplay,
+  eller,
 }
-const N = 1
-const S = 2
-const E = 4
-const W = 8
-const IN = 0x10 // good for tracking visited cells
-const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
-const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
-const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
+
 const options = {
+  mazeShape: {
+    title: "Shape",
+    type: "togglebutton",
+    choices: ["Rectangle", "Circle"],
+  },
   mazeType: {
     title: "Algorithm",
     type: "dropdown",
-    choices: ["Wilson", "Backtracker", "Division", "Prim", "Kruskal", "Sidewinder"],
-    onChange: (model, changes, state) => {
-      if (changes.mazeType === "Kruskal") {
-        changes.mazeHorizontalBias = 5
-      }
-      return changes
+    choices: [
+      "Wilson",
+      "Backtracker",
+      "Division",
+      "Prim",
+      "Kruskal",
+      "Sidewinder",
+      "Eller",
+    ],
+    isVisible: (layer, state) => {
+      return state.mazeShape !== "Circle"
+    },
+  },
+  mazeTypeCircle: {
+    title: "Algorithm",
+    type: "dropdown",
+    choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Circle"
     },
   },
   mazeWidth: {
     title: "Maze width",
     min: 1,
     max: 20,
+    isVisible: (layer, state) => {
+      return state.mazeShape !== "Circle"
+    },
   },
   mazeHeight: {
     title: "Maze height",
     min: 1,
     max: 20,
+    isVisible: (layer, state) => {
+      return state.mazeShape !== "Circle"
+    },
+  },
+  mazeRingCount: {
+    title: "Rings",
+    min: 2,
+    max: 15,
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Circle"
+    },
+  },
+  mazeWedgeCount: {
+    title: "Wedges",
+    min: 4,
+    max: 16,
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Circle"
+    },
+  },
+  mazeWedgeDoubling: {
+    title: "Doubling interval",
+    min: 1,
+    max: 10,
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Circle"
+    },
+  },
+  mazeWallType: {
+    title: "Wall type",
+    type: "togglebutton",
+    choices: ["Segment", "Arc"],
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Circle"
+    },
   },
   mazeStraightness: {
     title: "Straightness",
@@ -59,7 +109,10 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => {
-      return state.mazeType === "Backtracker" || state.mazeType === "Sidewinder"
+      return (
+        state.mazeShape !== "Circle" &&
+        (state.mazeType === "Backtracker" || state.mazeType === "Sidewinder")
+      )
     },
   },
   mazeHorizontalBias: {
@@ -69,7 +122,12 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => {
-      return state.mazeType === "Division" || state.mazeType === "Kruskal"
+      return (
+        state.mazeShape !== "Circle" &&
+        (state.mazeType === "Division" ||
+          state.mazeType === "Kruskal" ||
+          state.mazeType === "Eller")
+      )
     },
   },
   mazeBranchLevel: {
@@ -79,7 +137,11 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => {
-      return state.mazeType === "Prim"
+      // Works for both rectangular and circular Prim
+      const algo =
+        state.mazeShape === "Circle" ? state.mazeTypeCircle : state.mazeType
+
+      return algo === "Prim"
     },
   },
   seed: {
@@ -99,11 +161,17 @@ export default class Maze extends Shape {
     return {
       ...super.getInitialState(),
       ...{
+        mazeShape: "Rectangle",
         mazeType: "Wilson",
+        mazeTypeCircle: "Wilson",
         mazeWidth: 8,
         mazeHeight: 8,
+        mazeRingCount: 6,
+        mazeWedgeCount: 8,
+        mazeWedgeDoubling: 3,
+        mazeWallType: "Arc",
         mazeStraightness: 0,
-        mazeHorizontalBias: 0,
+        mazeHorizontalBias: 5,
         mazeBranchLevel: 5,
         seed: 1,
       },
@@ -111,18 +179,60 @@ export default class Maze extends Shape {
   }
 
   getVertices(state) {
-    const { mazeType, mazeWidth, mazeHeight, mazeStraightness, mazeHorizontalBias, mazeBranchLevel, seed } = state.shape
+    const {
+      mazeShape,
+      mazeType,
+      mazeTypeCircle,
+      mazeStraightness,
+      mazeHorizontalBias,
+      mazeBranchLevel,
+      seed,
+    } = state.shape
+
+    const rng = seedrandom(seed)
+    const grid = this.createGrid(state.shape, rng)
+    const algorithmName = mazeShape === "Circle" ? mazeTypeCircle : mazeType
+    const algorithm = algorithms[algorithmName.toLowerCase()]
+
+    algorithm(grid, {
+      rng,
+      straightness: mazeStraightness,
+      horizontalBias: mazeHorizontalBias,
+      branchLevel: mazeBranchLevel,
+    })
+
+    return this.drawMaze(grid)
+  }
+
+  createGrid(shape, rng) {
+    const {
+      mazeShape,
+      mazeWidth,
+      mazeHeight,
+      mazeRingCount,
+      mazeWedgeCount,
+      mazeWedgeDoubling,
+      mazeWallType,
+    } = shape
+
+    if (mazeShape === "Circle") {
+      return new PolarGrid(
+        Math.max(2, mazeRingCount),
+        Math.max(4, mazeWedgeCount),
+        Math.max(1, mazeWedgeDoubling),
+        rng,
+        mazeWallType === "Arc",
+      )
+    }
+
     const width = Math.max(2, mazeWidth)
     const height = Math.max(2, mazeHeight)
 
-    this.setup(width, height, seed)
-    this.generateMaze(mazeType, width, height, mazeStraightness, mazeHorizontalBias, mazeBranchLevel)
-
-    return this.drawMaze(width, height)
+    return new RectangularGrid(width, height, rng)
   }
 
-  drawMaze(mazeWidth, mazeHeight) {
-    const wallSegments = this.extractWallSegments(mazeWidth, mazeHeight)
+  drawMaze(grid) {
+    const wallSegments = grid.extractWalls()
     const graph = new Graph()
 
     wallSegments.forEach(([v1, v2]) => {
@@ -131,24 +241,22 @@ export default class Maze extends Shape {
       graph.addEdge(v1, v2)
     })
 
+    // Calculate Eulerian trail and track which edges we walk
     const trail = eulerianTrail({ edges: Object.values(graph.edgeMap) })
-    let prevKey
-    const walkedVertices = []
     const walkedEdges = new Set(
-      trail.slice(0, -1).map((key, i) => [key, trail[i + 1]].sort().toString())
+      trail.slice(0, -1).map((key, i) => [key, trail[i + 1]].sort().toString()),
     )
+    const missingEdges = {}
 
-    // find edges that weren't walked
-    const missingEdges = Array.from(
-      difference(walkedEdges, graph.edgeKeys),
-    ).reduce((hash, d) => {
-      d = d.split(",")
-      hash[d[0] + "," + d[1]] = d[2] + "," + d[3]
+    for (const edgeStr of difference(walkedEdges, graph.edgeKeys)) {
+      const [x1, y1, x2, y2] = edgeStr.split(",")
+      missingEdges[`${x1},${y1}`] = `${x2},${y2}`
+    }
 
-      return hash
-    }, {})
+    // Walk the trail, filling gaps with Dijkstra shortest paths
+    const walkedVertices = []
+    let prevKey
 
-    // walk the trail, filling gaps with Dijkstra shortest paths
     trail.forEach((key) => {
       const vertex = graph.nodeMap[key]
 
@@ -165,14 +273,13 @@ export default class Maze extends Shape {
         walkedVertices.push(vertex)
       }
 
-      // add back any missing edges
+      // Add back any missing edges
       if (missingEdges[key]) {
         const missingVertex = graph.nodeMap[missingEdges[key]]
         const edgeKey = [key, missingEdges[key]].sort().toString()
 
         if (graph.edgeMap[edgeKey]) {
-          walkedVertices.push(missingVertex)
-          walkedVertices.push(vertex)
+          walkedVertices.push(missingVertex, vertex)
         }
 
         delete missingEdges[key]
@@ -181,79 +288,11 @@ export default class Maze extends Shape {
       prevKey = key
     })
 
-    const clonedVertices = cloneVertices(walkedVertices)
+    const vertices = cloneVertices(walkedVertices)
 
-    centerOnOrigin(clonedVertices)
+    centerOnOrigin(vertices)
 
-    return clonedVertices
-  }
-
-  extractWallSegments(width, height) {
-    const walls = []
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const cell = this.grid[y][x]
-
-        // North wall (top of cell)
-        if (y === 0 || !(cell & N)) {
-          walls.push([
-            new Victor(x, y),
-            new Victor(x + 1, y),
-          ])
-        }
-
-        // South wall (bottom of cell)
-        if (y === height - 1 || !(cell & S)) {
-          walls.push([
-            new Victor(x, y + 1),
-            new Victor(x + 1, y + 1),
-          ])
-        }
-
-        // West wall (left of cell)
-        if (x === 0 || !(cell & W)) {
-          walls.push([
-            new Victor(x, y),
-            new Victor(x, y + 1),
-          ])
-        }
-
-        // East wall (right of cell)
-        if (x === width - 1 || !(cell & E)) {
-          walls.push([
-            new Victor(x + 1, y),
-            new Victor(x + 1, y + 1),
-          ])
-        }
-      }
-    }
-
-    return walls
-  }
-
-  setup(width, height, seed) {
-    this.rng = seedrandom(seed)
-    this.grid = Array(height)
-      .fill(0)
-      .map(() => Array(width).fill(0))
-
-    // initialize a random starting cell
-    this.grid[Math.floor(this.rng() * height)][Math.floor(this.rng() * width)] =
-      IN
-  }
-
-  generateMaze(mazeType, width, height, straightness, horizontalBias, branchLevel) {
-    const algorithm = algorithms[mazeType.toLowerCase()] || wilson
-
-    algorithm(this.grid, {
-      width,
-      height,
-      rng: this.rng,
-      straightness,
-      horizontalBias,
-      branchLevel,
-    })
+    return vertices
   }
 
   getOptions() {

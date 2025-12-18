@@ -1,3 +1,5 @@
+/* global console */
+
 // Utility for debugging maze generation - displays ASCII art in console
 
 const S = 2
@@ -33,6 +35,5 @@ export const consoleDisplay = (grid, { width, height }) => {
     mazeOutput += "\n"
   })
 
-  // eslint-disable-next-line no-console
   console.log(mazeOutput)
 }

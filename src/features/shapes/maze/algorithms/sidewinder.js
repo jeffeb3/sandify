@@ -1,53 +1,55 @@
 // Sidewinder algorithm for maze generation
 // Works row by row, creates horizontal bias with long east-west corridors
+// NOTE: Only works with rectangular grids
 
-const N = 1
-const S = 2
-const E = 4
-const W = 8
-const IN = 0x10
-const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
+export const sidewinder = (grid, { rng, straightness = 0 }) => {
+  // Mark all cells as visited
+  const allCells = grid.getAllCells()
 
-export const sidewinder = (grid, { width, height, rng, straightness = 0 }) => {
-  // Mark all cells as IN
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      grid[y][x] = IN
-    }
+  for (const cell of allCells) {
+    grid.markVisited(cell)
   }
 
   // Calculate close probability based on straightness
   // straightness 0 = 0.5 (default), straightness 10 = 0.1 (long corridors)
-  const closeProbability = 0.5 - (straightness * 0.04)
+  const closeProbability = 0.5 - straightness * 0.04
 
   // Process each row
-  for (let y = 0; y < height; y++) {
-    let run = []
+  for (let y = 0; y < grid.height; y++) {
+    const run = []
 
-    for (let x = 0; x < width; x++) {
-      run.push(x)
+    for (let x = 0; x < grid.width; x++) {
+      const cell = grid.getCell(x, y)
+
+      run.push(cell)
 
       // At east boundary or randomly decide to close out the run
-      const atEastBoundary = x === width - 1
+      const atEastBoundary = x === grid.width - 1
       const atNorthBoundary = y === 0
-      const shouldCloseRun = atEastBoundary || (!atNorthBoundary && rng() < closeProbability)
+      const shouldCloseRun =
+        atEastBoundary || (!atNorthBoundary && rng() < closeProbability)
 
       if (shouldCloseRun) {
         // Pick random cell from run and carve north (unless at north boundary)
         if (!atNorthBoundary) {
           const randomIdx = Math.floor(rng() * run.length)
-          const cellX = run[randomIdx]
+          const runCell = run[randomIdx]
+          const northCell = grid.getCell(runCell.x, runCell.y - 1)
 
-          grid[y][cellX] |= N
-          grid[y - 1][cellX] |= S
+          if (northCell) {
+            grid.link(runCell, northCell)
+          }
         }
 
         // Clear the run
-        run = []
+        run.length = 0
       } else {
         // Carve east
-        grid[y][x] |= E
-        grid[y][x + 1] |= W
+        const eastCell = grid.getCell(x + 1, y)
+
+        if (eastCell) {
+          grid.link(cell, eastCell)
+        }
       }
     }
   }

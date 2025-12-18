@@ -1,119 +1,92 @@
 // Kruskal's algorithm for maze generation
 // Works on edges, creates a "random forest" that merges together
+// Works with any grid type (RectangularGrid, PolarGrid, etc.)
 
-const N = 1
-const S = 2
-const E = 4
-const W = 8
-const IN = 0x10
-const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
-const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
-const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
-
-// Simple union-find data structure
+// Simple union-find data structure using cell keys
 class UnionFind {
-  constructor(size) {
-    this.parent = Array(size)
-      .fill(0)
-      .map((_, i) => i)
-    this.rank = Array(size).fill(0)
+  constructor() {
+    this.parent = new Map()
+    this.rank = new Map()
   }
 
-  find(x) {
-    if (this.parent[x] !== x) {
-      this.parent[x] = this.find(this.parent[x]) // path compression
+  makeSet(key) {
+    if (!this.parent.has(key)) {
+      this.parent.set(key, key)
+      this.rank.set(key, 0)
     }
-    return this.parent[x]
   }
 
-  union(x, y) {
-    const rootX = this.find(x)
-    const rootY = this.find(y)
+  find(key) {
+    if (this.parent.get(key) !== key) {
+      this.parent.set(key, this.find(this.parent.get(key))) // path compression
+    }
+    return this.parent.get(key)
+  }
 
-    if (rootX === rootY) return false
+  union(key1, key2) {
+    const root1 = this.find(key1)
+    const root2 = this.find(key2)
+
+    if (root1 === root2) return false
 
     // Union by rank
-    if (this.rank[rootX] < this.rank[rootY]) {
-      this.parent[rootX] = rootY
-    } else if (this.rank[rootX] > this.rank[rootY]) {
-      this.parent[rootY] = rootX
+    const rank1 = this.rank.get(root1)
+    const rank2 = this.rank.get(root2)
+
+    if (rank1 < rank2) {
+      this.parent.set(root1, root2)
+    } else if (rank1 > rank2) {
+      this.parent.set(root2, root1)
     } else {
-      this.parent[rootY] = rootX
-      this.rank[rootX]++
+      this.parent.set(root2, root1)
+      this.rank.set(root1, rank1 + 1)
     }
 
     return true
   }
 }
 
-export const kruskal = (grid, { width, height, rng, horizontalBias = 0 }) => {
-  // Initialize all cells as separate sets
-  const uf = new UnionFind(width * height)
+export const kruskal = (grid, { rng, horizontalBias = 5 }) => {
+  const uf = new UnionFind()
+  const allCells = grid.getAllCells()
 
-  // Mark all cells as IN
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      grid[y][x] = IN
-    }
+  // Initialize union-find with all cells
+  for (const cell of allCells) {
+    const key = grid.cellKey(cell)
+    uf.makeSet(key)
+    grid.markVisited(cell)
   }
 
-  // Create separate lists for horizontal and vertical edges
-  const horizontalEdges = []
-  const verticalEdges = []
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      // Add south edge (vertical)
-      if (y < height - 1) {
-        verticalEdges.push({ x, y, dir: S })
-      }
-      // Add east edge (horizontal)
-      if (x < width - 1) {
-        horizontalEdges.push({ x, y, dir: E })
-      }
-    }
-  }
-
-  // Shuffle each list independently
-  const shuffle = (arr) => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(rng() * (i + 1))
-      ;[arr[i], arr[j]] = [arr[j], arr[i]]
-    }
-  }
-  shuffle(horizontalEdges)
-  shuffle(verticalEdges)
-
-  // Interleave edges based on horizontalBias
-  // horizontalBias 0 = prefer horizontal passages, 10 = prefer vertical passages
-  const horizontalProb = 0.9 - (horizontalBias * 0.08)
+  // Collect all unique edges (cell pairs)
   const edges = []
-  let hIdx = 0
-  let vIdx = 0
+  const seenEdges = new Set()
 
-  while (hIdx < horizontalEdges.length || vIdx < verticalEdges.length) {
-    if (hIdx >= horizontalEdges.length) {
-      edges.push(verticalEdges[vIdx++])
-    } else if (vIdx >= verticalEdges.length) {
-      edges.push(horizontalEdges[hIdx++])
-    } else if (rng() < horizontalProb) {
-      edges.push(horizontalEdges[hIdx++])
-    } else {
-      edges.push(verticalEdges[vIdx++])
+  for (const cell of allCells) {
+    const cellKey = grid.cellKey(cell)
+    for (const neighbor of grid.getNeighbors(cell)) {
+      const neighborKey = grid.cellKey(neighbor)
+      // Create a canonical edge key to avoid duplicates
+      const edgeKey = [cellKey, neighborKey].sort().join("|")
+      if (!seenEdges.has(edgeKey)) {
+        seenEdges.add(edgeKey)
+        edges.push({ cell, neighbor })
+      }
     }
   }
 
-  // Process edges
-  for (const edge of edges) {
-    const { x, y, dir } = edge
-    const cell1 = y * width + x
-    const nx = x + DX[dir]
-    const ny = y + DY[dir]
-    const cell2 = ny * width + nx
+  // Shuffle edges
+  for (let i = edges.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[edges[i], edges[j]] = [edges[j], edges[i]]
+  }
 
-    // If cells are in different sets, connect them
-    if (uf.union(cell1, cell2)) {
-      grid[y][x] |= dir
-      grid[ny][nx] |= OPPOSITE[dir]
+  // Process edges - connect if in different sets
+  for (const { cell, neighbor } of edges) {
+    const cellKey = grid.cellKey(cell)
+    const neighborKey = grid.cellKey(neighbor)
+
+    if (uf.union(cellKey, neighborKey)) {
+      grid.link(cell, neighbor)
     }
   }
 }

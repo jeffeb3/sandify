@@ -1,58 +1,49 @@
 // Recursive Backtracker algorithm for maze generation
 // Creates long, winding passages using depth-first search
+// Works with any grid type (RectangularGrid, PolarGrid, etc.)
 
-const N = 1
-const S = 2
-const E = 4
-const W = 8
-const IN = 0x10
-const DX = { [E]: 1, [W]: -1, [N]: 0, [S]: 0 }
-const DY = { [E]: 0, [W]: 0, [N]: -1, [S]: 1 }
-const OPPOSITE = { [E]: W, [W]: E, [N]: S, [S]: N }
-
-export const backtracker = (grid, { width, height, rng, straightness = 0 }) => {
+export const backtracker = (grid, { rng, straightness = 0 }) => {
   const stack = []
-  const startX = Math.floor(rng() * width)
-  const startY = Math.floor(rng() * height)
+  const startCell = grid.getRandomCell()
 
-  grid[startY][startX] = IN
-  stack.push([startX, startY, null]) // Include last direction
+  grid.markVisited(startCell)
+  stack.push({ cell: startCell, lastNeighbor: null })
 
   while (stack.length > 0) {
-    const [cx, cy, lastDir] = stack[stack.length - 1]
-    const unvisitedNeighbors = []
+    const { cell, lastNeighbor } = stack[stack.length - 1]
 
-    // Check all four directions for unvisited neighbors
-    const directions = [N, S, E, W]
-    for (const dir of directions) {
-      const nx = cx + DX[dir]
-      const ny = cy + DY[dir]
-
-      if (
-        nx >= 0 &&
-        ny >= 0 &&
-        ny < height &&
-        nx < width &&
-        grid[ny][nx] === 0
-      ) {
-        unvisitedNeighbors.push({ dir, nx, ny })
-      }
-    }
+    // Get unvisited neighbors
+    const neighbors = grid.getNeighbors(cell)
+    const unvisitedNeighbors = neighbors.filter((n) => !grid.isVisited(n))
 
     if (unvisitedNeighbors.length > 0) {
       let chosenNeighbor
 
-      // Apply straightness bias if we have a previous direction
-      if (lastDir !== null && straightness > 0) {
-        const sameDirectionNeighbor = unvisitedNeighbors.find(n => n.dir === lastDir)
+      // Apply straightness bias if we have a previous neighbor and straightness > 0
+      // For straightness, we try to continue in a "similar direction"
+      // by preferring the neighbor that is furthest from the previous cell
+      if (
+        lastNeighbor !== null &&
+        straightness > 0 &&
+        unvisitedNeighbors.length > 1
+      ) {
+        const continueProb = straightness * 0.09
 
-        if (sameDirectionNeighbor) {
-          // Calculate probability to continue straight based on straightness
-          // straightness 0 = 0% bias, straightness 10 = 90% bias
-          const continueProb = straightness * 0.09
+        if (rng() < continueProb) {
+          // Find the neighbor most "opposite" to where we came from
+          // This approximates continuing straight
+          // For rectangular grids: opposite of lastNeighbor
+          // For polar grids: similar concept applies
+          const lastKey = grid.cellKey(lastNeighbor)
+          const oppositeNeighbor = unvisitedNeighbors.find((n) => {
+            // Check if this neighbor has lastNeighbor as a neighbor
+            // (meaning it's "continuing" past the current cell)
+            const nNeighbors = grid.getNeighbors(n)
+            return !nNeighbors.some((nn) => grid.cellKey(nn) === lastKey)
+          })
 
-          if (rng() < continueProb) {
-            chosenNeighbor = sameDirectionNeighbor
+          if (oppositeNeighbor) {
+            chosenNeighbor = oppositeNeighbor
           }
         }
       }
@@ -63,14 +54,12 @@ export const backtracker = (grid, { width, height, rng, straightness = 0 }) => {
         chosenNeighbor = unvisitedNeighbors[idx]
       }
 
-      const { dir, nx, ny } = chosenNeighbor
+      // Link current cell to chosen neighbor
+      grid.link(cell, chosenNeighbor)
+      grid.markVisited(chosenNeighbor)
 
-      // Remove wall between current cell and chosen neighbor
-      grid[cy][cx] |= dir
-      grid[ny][nx] |= OPPOSITE[dir] | IN
-
-      // Push neighbor onto stack with current direction
-      stack.push([nx, ny, dir])
+      // Push neighbor onto stack, tracking where we came from
+      stack.push({ cell: chosenNeighbor, lastNeighbor: cell })
     } else {
       // Backtrack
       stack.pop()
