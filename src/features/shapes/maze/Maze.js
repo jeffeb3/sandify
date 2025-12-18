@@ -7,6 +7,7 @@ import { cloneVertices, centerOnOrigin } from "@/common/geometry"
 import RectangularGrid from "./RectangularGrid"
 import PolarGrid from "./PolarGrid"
 import HexGrid from "./HexGrid"
+import TriangleGrid from "./TriangleGrid"
 import { wilson } from "./algorithms/wilson"
 import { backtracker } from "./algorithms/backtracker"
 import { division } from "./algorithms/division"
@@ -29,7 +30,7 @@ const options = {
   mazeShape: {
     title: "Shape",
     type: "togglebutton",
-    choices: ["Rectangle", "Hexagon", "Circle"],
+    choices: ["Rectangle", "Hexagon", "Triangle", "Circle"],
   },
   mazeType: {
     title: "Algorithm",
@@ -61,6 +62,14 @@ const options = {
     choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
     isVisible: (layer, state) => {
       return state.mazeShape === "Hexagon"
+    },
+  },
+  mazeTypeTriangle: {
+    title: "Algorithm",
+    type: "dropdown",
+    choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
+    isVisible: (layer, state) => {
+      return state.mazeShape === "Triangle"
     },
   },
   mazeWidth: {
@@ -119,7 +128,10 @@ const options = {
     step: 1,
     isVisible: (layer, state) => {
       if (state.mazeShape === "Circle") return false
-      if (state.mazeShape === "Hexagon") return state.mazeTypeHex === "Backtracker"
+      if (state.mazeShape === "Hexagon")
+        return state.mazeTypeHex === "Backtracker"
+      if (state.mazeShape === "Triangle")
+        return state.mazeTypeTriangle === "Backtracker"
 
       return state.mazeType === "Backtracker" || state.mazeType === "Sidewinder"
     },
@@ -146,9 +158,18 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => {
-      // Works for both rectangular and circular Prim
-      const algo =
-        state.mazeShape === "Circle" ? state.mazeTypeCircle : state.mazeType
+      // Works for rectangular, hex, triangle, and circular Prim
+      let algo
+
+      if (state.mazeShape === "Circle") {
+        algo = state.mazeTypeCircle
+      } else if (state.mazeShape === "Hexagon") {
+        algo = state.mazeTypeHex
+      } else if (state.mazeShape === "Triangle") {
+        algo = state.mazeTypeTriangle
+      } else {
+        algo = state.mazeType
+      }
 
       return algo === "Prim"
     },
@@ -174,6 +195,7 @@ export default class Maze extends Shape {
         mazeType: "Wilson",
         mazeTypeCircle: "Wilson",
         mazeTypeHex: "Wilson",
+        mazeTypeTriangle: "Wilson",
         mazeWidth: 8,
         mazeHeight: 8,
         mazeRingCount: 6,
@@ -194,6 +216,7 @@ export default class Maze extends Shape {
       mazeType,
       mazeTypeCircle,
       mazeTypeHex,
+      mazeTypeTriangle,
       mazeStraightness,
       mazeHorizontalBias,
       mazeBranchLevel,
@@ -202,12 +225,18 @@ export default class Maze extends Shape {
 
     const rng = seedrandom(seed)
     const grid = this.createGrid(state.shape, rng)
-    const algorithmName =
-      mazeShape === "Circle"
-        ? mazeTypeCircle
-        : mazeShape === "Hexagon"
-          ? mazeTypeHex
-          : mazeType
+    let algorithmName
+
+    if (mazeShape === "Circle") {
+      algorithmName = mazeTypeCircle
+    } else if (mazeShape === "Hexagon") {
+      algorithmName = mazeTypeHex
+    } else if (mazeShape === "Triangle") {
+      algorithmName = mazeTypeTriangle
+    } else {
+      algorithmName = mazeType
+    }
+
     const algorithm = algorithms[algorithmName.toLowerCase()]
 
     algorithm(grid, {
@@ -246,6 +275,10 @@ export default class Maze extends Shape {
 
     if (mazeShape === "Hexagon") {
       return new HexGrid(width, height, rng)
+    }
+
+    if (mazeShape === "Triangle") {
+      return new TriangleGrid(width, height, rng)
     }
 
     return new RectangularGrid(width, height, rng)
