@@ -25,10 +25,6 @@ export default class HexGrid {
         this.cells.push(this.createCell(q, r))
       }
     }
-
-    const startIndex = Math.floor(rng() * this.cells.length)
-
-    this.cells[startIndex].visited = true
   }
 
   createCell(q, r) {

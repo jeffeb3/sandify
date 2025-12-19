@@ -16,11 +16,6 @@ export default class RectangularGrid {
         this.cells.push(this.createCell(x, y))
       }
     }
-
-    // Mark a random cell as visited (for algorithm initialization)
-    const startIndex = Math.floor(rng() * this.cells.length)
-
-    this.cells[startIndex].visited = true
   }
 
   createCell(x, y) {
@@ -140,5 +135,48 @@ export default class RectangularGrid {
     }
 
     return walls
+  }
+
+  // Debug: dump maze as ASCII art (y=0 at bottom)
+  dump() {
+    let output = ""
+
+    for (let y = this.height - 1; y >= 0; y--) {
+      let topLine = ""
+
+      for (let x = 0; x < this.width; x++) {
+        const cell = this.getCell(x, y)
+        const southCell = this.getCell(x, y + 1)
+        const hasSouthLink = southCell && this.isLinked(cell, southCell)
+
+        topLine += "+" + (hasSouthLink ? "   " : "---")
+      }
+      topLine += "+"
+      output += topLine + "\n"
+
+      let cellLine = ""
+
+      for (let x = 0; x < this.width; x++) {
+        const cell = this.getCell(x, y)
+        const westCell = this.getCell(x - 1, y)
+        const hasWestLink = westCell && this.isLinked(cell, westCell)
+
+        cellLine += (hasWestLink ? " " : "|") + "   "
+      }
+      cellLine += "|"
+      output += cellLine + "\n"
+    }
+
+    let bottomLine = ""
+
+    for (let x = 0; x < this.width; x++) {
+      bottomLine += "+---"
+    }
+    bottomLine += "+"
+    output += bottomLine + "\n"
+
+    console.log(output)
+
+    return output
   }
 }

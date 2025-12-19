@@ -36,12 +36,6 @@ export default class PolarGrid {
         this.rings[r][w] = this.createCell(r, w)
       }
     }
-
-    // Mark a random cell as visited (for algorithm initialization)
-    const startRing = Math.floor(rng() * (ringCount + 1))
-    const startWedge = Math.floor(rng() * this.rings[startRing].length)
-
-    this.rings[startRing][startWedge].visited = true
   }
 
   createCell(ring, wedge) {
@@ -181,6 +175,28 @@ export default class PolarGrid {
 
   cellEquals(cell1, cell2) {
     return cell1.ring === cell2.ring && cell1.wedge === cell2.wedge
+  }
+
+  // Debug: dump maze structure
+  dump() {
+    let output = ""
+
+    for (let r = 0; r <= this.ringCount; r++) {
+      const wedgeCount = this.rings[r].length
+
+      output += `Ring ${r} (${wedgeCount} wedge${wedgeCount > 1 ? "s" : ""}):\n`
+
+      for (let w = 0; w < wedgeCount; w++) {
+        const cell = this.rings[r][w]
+        const links = Array.from(cell.links).sort().join(", ")
+
+        output += `  [${r}:${w}] -> ${links || "(none)"}\n`
+      }
+    }
+
+    console.log(output)
+
+    return output
   }
 
   extractWalls() {

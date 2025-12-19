@@ -9,13 +9,11 @@ export const wilson = (grid, { rng }) => {
   // Track visited cells (part of the maze tree)
   const visited = new Set()
 
-  // Find the initially visited cell (set during grid construction)
-  for (const cell of allCells) {
-    if (grid.isVisited(cell)) {
-      visited.add(grid.cellKey(cell))
-      break
-    }
-  }
+  // Pick a random cell to seed the maze tree
+  const seedCell = grid.getRandomCell()
+
+  grid.markVisited(seedCell)
+  visited.add(grid.cellKey(seedCell))
 
   // Keep going until all cells are in the maze
   while (visited.size < allCells.length) {

@@ -26,10 +26,6 @@ export default class TriangleGrid {
         this.cells.push(this.createCell(x, y))
       }
     }
-
-    const startIndex = Math.floor(rng() * this.cells.length)
-
-    this.cells[startIndex].visited = true
   }
 
   createCell(x, y) {

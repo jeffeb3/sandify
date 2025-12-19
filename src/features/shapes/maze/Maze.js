@@ -2,7 +2,7 @@ import Shape from "../Shape"
 import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
-import { difference } from "@/common/util"
+import { eulerizeEdges } from "@/common/chinesePostman"
 import { cloneVertices, centerOnOrigin } from "@/common/geometry"
 import RectangularGrid from "./grids/RectangularGrid"
 import PolarGrid from "./grids/PolarGrid"
@@ -25,6 +25,9 @@ const algorithms = {
   sidewinder,
   eller,
 }
+
+// Set to true to debug maze generation
+const DEBUG_MAZE = true
 
 const algorithmKeyByShape = {
   Rectangle: "mazeType",
@@ -225,6 +228,11 @@ export default class Maze extends Shape {
       branchLevel: mazeBranchLevel,
     })
 
+    if (DEBUG_MAZE && grid.dump) {
+      console.log(`\n=== ${algorithmName} on ${state.shape.mazeShape} ===`)
+      grid.dump()
+    }
+
     return this.drawMaze(grid)
   }
 
@@ -264,51 +272,18 @@ export default class Maze extends Shape {
       graph.addEdge(v1, v2)
     })
 
-    // Calculate Eulerian trail and track which edges we walk
-    const trail = eulerianTrail({ edges: Object.values(graph.edgeMap) })
-    const walkedEdges = new Set(
-      trail.slice(0, -1).map((key, i) => [key, trail[i + 1]].sort().toString()),
-    )
-    const missingEdges = {}
-
-    for (const edgeStr of difference(walkedEdges, graph.edgeKeys)) {
-      const [x1, y1, x2, y2] = edgeStr.split(",")
-      missingEdges[`${x1},${y1}`] = `${x2},${y2}`
+    const edges = Object.values(graph.edgeMap)
+    const dijkstraFn = (startKey, endKey) => {
+      return graph.dijkstraShortestPath(startKey, endKey)
     }
-
-    // Walk the trail, filling gaps with Dijkstra shortest paths
+    const { edges: eulerizedEdges } = eulerizeEdges(edges, dijkstraFn, graph.nodeMap)
+    const trail = eulerianTrail({ edges: eulerizedEdges })
     const walkedVertices = []
-    let prevKey
 
     trail.forEach((key) => {
       const vertex = graph.nodeMap[key]
 
-      if (prevKey) {
-        if (!graph.hasEdge(key, prevKey)) {
-          const path = graph.dijkstraShortestPath(prevKey, key)
-
-          path.shift()
-          walkedVertices.push(...path, vertex)
-        } else {
-          walkedVertices.push(vertex)
-        }
-      } else {
-        walkedVertices.push(vertex)
-      }
-
-      // Add back any missing edges
-      if (missingEdges[key]) {
-        const missingVertex = graph.nodeMap[missingEdges[key]]
-        const edgeKey = [key, missingEdges[key]].sort().toString()
-
-        if (graph.edgeMap[edgeKey]) {
-          walkedVertices.push(missingVertex, vertex)
-        }
-
-        delete missingEdges[key]
-      }
-
-      prevKey = key
+      walkedVertices.push(vertex)
     })
 
     const vertices = cloneVertices(walkedVertices)
