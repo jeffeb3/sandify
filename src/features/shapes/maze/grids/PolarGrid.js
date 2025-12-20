@@ -176,6 +176,60 @@ export default class PolarGrid extends Grid {
     }
   }
 
+  // Get midpoint of shared edge between two adjacent cells
+  getSharedEdgeMidpoint(cell1, cell2) {
+    const { ring: r1, wedge: w1 } = cell1
+    const { ring: r2, wedge: w2 } = cell2
+
+    // Center cell to ring 1
+    if (r1 === 0) {
+      const wedgeCount = this.rings[1].length
+      const anglePerWedge = (Math.PI * 2) / wedgeCount
+      const angle = (w2 + 0.5) * anglePerWedge
+
+      return { x: Math.cos(angle), y: Math.sin(angle) }
+    }
+
+    if (r2 === 0) {
+      const wedgeCount = this.rings[1].length
+      const anglePerWedge = (Math.PI * 2) / wedgeCount
+      const angle = (w1 + 0.5) * anglePerWedge
+
+      return { x: Math.cos(angle), y: Math.sin(angle) }
+    }
+
+    // Same ring (CW/CCW neighbors) - radial edge
+    if (r1 === r2) {
+      const wedgeCount = this.rings[r1].length
+      const anglePerWedge = (Math.PI * 2) / wedgeCount
+      const sharedAngle = Math.max(w1, w2) * anglePerWedge
+
+      // Handle wraparound
+      const angle =
+        Math.abs(w1 - w2) > 1 ? 0 : sharedAngle
+      const radius = r1 + 0.5
+
+      return {
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle),
+      }
+    }
+
+    // Different rings (inward/outward) - arc edge
+    const innerRing = Math.min(r1, r2)
+    const outerRing = Math.max(r1, r2)
+    const outerWedge = r1 > r2 ? w1 : w2
+    const outerWedgeCount = this.rings[outerRing].length
+    const anglePerWedge = (Math.PI * 2) / outerWedgeCount
+    const angle = (outerWedge + 0.5) * anglePerWedge
+    const radius = outerRing
+
+    return {
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle),
+    }
+  }
+
   // Get cells on the outer ring (perimeter) with their exit directions
   getEdgeCells() {
     const edgeCells = []

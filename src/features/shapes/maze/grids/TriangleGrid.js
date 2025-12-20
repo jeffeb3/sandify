@@ -94,26 +94,60 @@ export default class TriangleGrid extends Grid {
     return cell1.x === cell2.x && cell1.y === cell2.y
   }
 
-  // Get the center point of a cell (centroid of triangle)
+  // Get the center point of a cell (geometric center, not centroid)
+  // Using y + 0.5 ensures line-of-sight to all edges
   getCellCenter(cell) {
     const { x, y } = cell
     const h = this.triHeight
     const ys = this.yScale
     const baseX = x * 0.5
 
-    // Centroid is at 1/3 from base for triangles
-    if (this.isUpward(x, y)) {
-      // UP triangle: apex at top, base at bottom
-      return {
-        x: baseX + 0.5,
-        y: (y + 2 / 3) * h * ys,
+    return {
+      x: baseX + 0.5,
+      y: (y + 0.5) * h * ys,
+    }
+  }
+
+  // Get midpoint of shared edge between two adjacent cells
+  getSharedEdgeMidpoint(cell1, cell2) {
+    const c1 = this.getTriangleCorners(cell1.x, cell1.y)
+    const c2 = this.getTriangleCorners(cell2.x, cell2.y)
+    const dx = cell2.x - cell1.x
+    const dy = cell2.y - cell1.y
+
+    let p1, p2
+
+    if (dx === 1) {
+      // cell2 is east
+      if (cell1.upward) {
+        p1 = c1.top
+        p2 = c1.bottomRight
+      } else {
+        p1 = c1.topRight
+        p2 = c1.bottom
       }
+    } else if (dx === -1) {
+      // cell2 is west
+      if (cell1.upward) {
+        p1 = c1.top
+        p2 = c1.bottomLeft
+      } else {
+        p1 = c1.topLeft
+        p2 = c1.bottom
+      }
+    } else if (dy === 1) {
+      // cell2 is south (cell1 must be upward)
+      p1 = c1.bottomLeft
+      p2 = c1.bottomRight
     } else {
-      // DOWN triangle: apex at bottom, base at top
-      return {
-        x: baseX + 0.5,
-        y: (y + 1 / 3) * h * ys,
-      }
+      // cell2 is north (cell1 must be downward)
+      p1 = c1.topLeft
+      p2 = c1.topRight
+    }
+
+    return {
+      x: (p1[0] + p2[0]) / 2,
+      y: (p1[1] + p2[1]) / 2,
     }
   }
 

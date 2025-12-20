@@ -79,6 +79,26 @@ export default class RectangularGrid extends Grid {
     }
   }
 
+  // Get midpoint of shared edge between two adjacent cells
+  getSharedEdgeMidpoint(cell1, cell2) {
+    const dx = cell2.x - cell1.x
+    const dy = cell2.y - cell1.y
+
+    if (dy === -1) {
+      // cell2 is north
+      return { x: cell1.x + 0.5, y: cell1.y }
+    } else if (dy === 1) {
+      // cell2 is south
+      return { x: cell1.x + 0.5, y: cell1.y + 1 }
+    } else if (dx === 1) {
+      // cell2 is east
+      return { x: cell1.x + 1, y: cell1.y + 0.5 }
+    } else {
+      // cell2 is west
+      return { x: cell1.x, y: cell1.y + 0.5 }
+    }
+  }
+
   // Get all cells on the grid perimeter with their exit directions
   // edge property allows filtering to ensure exits are on opposite edges
   getEdgeCells() {

@@ -34,6 +34,16 @@ export default class Grid {
     return cell.visited
   }
 
+  // Get the midpoint of the shared edge between two linked cells
+  // Subclasses should override this for accurate passage midpoints
+  getSharedEdgeMidpoint(cell1, cell2) {
+    // Default: average of cell centers (fallback)
+    const c1 = this.getCellCenter(cell1)
+    const c2 = this.getCellCenter(cell2)
+
+    return { x: (c1.x + c2.x) / 2, y: (c1.y + c2.y) / 2 }
+  }
+
   // Factory to create a cached vertex function
   // round=true rounds to 6 decimals (needed for non-integer coordinates)
   createMakeVertex(vertexCache, round = true) {

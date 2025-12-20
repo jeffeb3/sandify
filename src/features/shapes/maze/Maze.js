@@ -7,7 +7,8 @@ import { eulerizeEdges } from "@/common/chinesePostman"
 import {
   cloneVertices,
   centerOnOrigin,
-  closestPointOnSegments,
+  catmullRomSpline,
+  calculateIntersection,
 } from "@/common/geometry"
 import RectangularGrid from "./grids/RectangularGrid"
 import PolarGrid from "./grids/PolarGrid"
@@ -342,20 +343,14 @@ export default class Maze extends Shape {
       return
     }
 
-    const secondCenter = solutionPath.length > 1
-      ? grid.getCellCenter(solutionPath[1])
-      : grid.getCellCenter(solutionPath[0])
-    const secondToLastCenter = solutionPath.length > 1
-      ? grid.getCellCenter(solutionPath[solutionPath.length - 2])
-      : grid.getCellCenter(solutionPath[0])
-    const entrance = closestPointOnSegments(secondCenter, startCell.arrowEdges)
-    const [entA, entB] = entrance.segment
-    const distToA =
-      (entrance.point.x - entA.x) ** 2 + (entrance.point.y - entA.y) ** 2
-    const distToB =
-      (entrance.point.x - entB.x) ** 2 + (entrance.point.y - entB.y) ** 2
-    const entranceVertex = distToA < distToB ? entA : entB
-    const entranceKey = entranceVertex.toString()
+    // Arrow geometry: edges[0][0] = tip, edges[1][1] = baseCenter
+    // Entrance arrow points IN: tip is inside maze (start here)
+    // Exit arrow points OUT: baseCenter is inside maze (end here)
+    const entranceTip = startCell.arrowEdges[0][0]
+    const exitBaseCenter = endCell.arrowEdges[1][1]
+
+    // Walk graph from trail end to entrance arrow
+    const entranceKey = entranceTip.toString()
     const trailEndKey = trail[trail.length - 1]
 
     if (graph.nodeMap[entranceKey]) {
@@ -368,24 +363,116 @@ export default class Maze extends Shape {
       }
     }
 
-    walkedVertices.push(entrance.point)
+    // Collect passage midpoints (shared edge centers between consecutive cells)
+    const passageMidpoints = []
 
-    for (let i = 1; i < solutionPath.length - 1; i++) {
-      const center = grid.getCellCenter(solutionPath[i])
+    for (let i = 0; i < solutionPath.length - 1; i++) {
+      const midpoint = grid.getSharedEdgeMidpoint(
+        solutionPath[i],
+        solutionPath[i + 1],
+      )
 
-      walkedVertices.push({ x: center.x, y: center.y })
+      passageMidpoints.push(midpoint)
     }
 
-    const exit = closestPointOnSegments(secondToLastCenter, endCell.arrowEdges)
-    const [exitA, exitB] = exit.segment
-    const distToExitA =
-      (exit.point.x - exitA.x) ** 2 + (exit.point.y - exitA.y) ** 2
-    const distToExitB =
-      (exit.point.x - exitB.x) ** 2 + (exit.point.y - exitB.y) ** 2
-    const exitVertex = distToExitA < distToExitB ? exitA : exitB
+    // Build path using only passage midpoints (doorways between cells)
+    const solutionWaypoints = [entranceTip, ...passageMidpoints, exitBaseCenter]
 
-    walkedVertices.push(exitVertex)
-    walkedVertices.push(exit.point)
+    // Apply spline smoothing, then clip at arrow edges
+    let smoothed = catmullRomSpline(solutionWaypoints, 6)
+
+    // Clip at entrance arrow and walk from tip to intersection
+    const entrance = this.clipAtArrow(smoothed, startCell.arrowEdges, true)
+
+    if (entrance.hit) {
+      smoothed = [
+        ...this.walkArrowToTip(entrance.edgeIndex, startCell.arrowEdges, true),
+        entrance.hit,
+        ...entrance.spline,
+      ]
+    }
+
+    // Clip at exit arrow and walk from intersection to tip
+    const exit = this.clipAtArrow(smoothed, endCell.arrowEdges, false)
+    const exitTip = endCell.arrowEdges[0][0]
+
+    if (exit.hit) {
+      smoothed = [
+        ...exit.spline,
+        exit.hit,
+        ...this.walkArrowToTip(exit.edgeIndex, endCell.arrowEdges, false),
+      ]
+    } else {
+      // No intersection - walk arrow edge: baseCenter → baseRight → tip
+      const baseRight = endCell.arrowEdges[2][1]
+
+      smoothed.push(baseRight)
+      smoothed.push(exitTip)
+    }
+
+    for (const pt of smoothed) {
+      walkedVertices.push(pt)
+    }
+  }
+
+  // Clip spline where it crosses an arrow edge
+  // Returns { spline, hit, edgeIndex }
+  clipAtArrow(spline, arrowEdges, fromStart) {
+    if (fromStart) {
+      for (let i = 0; i < spline.length - 1; i++) {
+        for (let e = 0; e < arrowEdges.length; e++) {
+          const [a, b] = arrowEdges[e]
+          const hit = calculateIntersection(spline[i], spline[i + 1], a, b)
+
+          if (hit) {
+            return { spline: spline.slice(i + 1), hit, edgeIndex: e }
+          }
+        }
+      }
+    } else {
+      for (let i = spline.length - 1; i > 0; i--) {
+        for (let e = 0; e < arrowEdges.length; e++) {
+          const [a, b] = arrowEdges[e]
+          const hit = calculateIntersection(spline[i - 1], spline[i], a, b)
+
+          if (hit) {
+            return { spline: spline.slice(0, i), hit, edgeIndex: e }
+          }
+        }
+      }
+    }
+
+    return { spline, hit: null, edgeIndex: -1 }
+  }
+
+  // Walk arrow edges from intersection to tip (or tip to intersection)
+  // Arrow edges: [tip→baseLeft, baseLeft→baseCenter, baseCenter→baseRight, baseRight→tip]
+  // Tip is at edges[0][0] (start of first edge)
+  walkArrowToTip(edgeIndex, arrowEdges, towardsTip) {
+    if (edgeIndex < 0) return []
+
+    const tip = arrowEdges[0][0]
+    const baseLeft = arrowEdges[0][1]
+    const baseRight = arrowEdges[3][0]
+
+    // Which side of the arrow did we hit?
+    // edges 0,1 are left side (tip→baseLeft→baseCenter)
+    // edges 2,3 are right side (baseCenter→baseRight→tip)
+    if (towardsTip) {
+      // Walking TO the tip (prepend to path)
+      if (edgeIndex <= 1) {
+        return edgeIndex === 0 ? [tip] : [tip, baseLeft]
+      } else {
+        return edgeIndex === 3 ? [tip] : [tip, baseRight]
+      }
+    } else {
+      // Walking FROM the tip (append to path)
+      if (edgeIndex <= 1) {
+        return edgeIndex === 0 ? [tip] : [baseLeft, tip]
+      } else {
+        return edgeIndex === 3 ? [tip] : [baseRight, tip]
+      }
+    }
   }
 
   getOptions() {

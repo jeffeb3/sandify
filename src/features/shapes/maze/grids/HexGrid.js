@@ -106,6 +106,47 @@ export default class HexGrid extends Grid {
     }
   }
 
+  // Get midpoint of shared edge between two adjacent cells
+  getSharedEdgeMidpoint(cell1, cell2) {
+    const corners = this.getHexCorners(cell1.q, cell1.r)
+    const dq = cell2.q - cell1.q
+    const dr = cell2.r - cell1.r
+    const rowOffset = this.getRowOffset(cell1.r)
+
+    let p1, p2
+
+    if (dr === 0 && dq === 1) {
+      // East
+      p1 = corners[4]
+      p2 = corners[3]
+    } else if (dr === 0 && dq === -1) {
+      // West
+      p1 = corners[0]
+      p2 = corners[1]
+    } else if (dr === -1 && dq === 1 - rowOffset) {
+      // Northeast
+      p1 = corners[5]
+      p2 = corners[4]
+    } else if (dr === -1 && dq === -rowOffset) {
+      // Northwest
+      p1 = corners[0]
+      p2 = corners[5]
+    } else if (dr === 1 && dq === 1 - rowOffset) {
+      // Southeast
+      p1 = corners[3]
+      p2 = corners[2]
+    } else {
+      // Southwest
+      p1 = corners[2]
+      p2 = corners[1]
+    }
+
+    return {
+      x: (p1[0] + p2[0]) / 2,
+      y: (p1[1] + p2[1]) / 2,
+    }
+  }
+
   // Get cells on the grid perimeter with their exit directions
   getEdgeCells() {
     const edgeCells = []
