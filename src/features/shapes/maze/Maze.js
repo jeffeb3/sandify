@@ -2,6 +2,7 @@
 import Shape from "../Shape"
 import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
+import { getMachine } from "@/features/machines/machineFactory"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
 import {
@@ -54,19 +55,19 @@ const options = {
   mazeShape: {
     title: "Shape",
     type: "togglebutton",
-    choices: ["Rectangle", "Hexagon", "Triangle", "Circle"],
+    choices: ["Rectangle", "Circle", "Hexagon", "Triangle"],
   },
   mazeType: {
     title: "Algorithm",
     type: "dropdown",
     choices: [
-      "Wilson",
       "Backtracker",
       "Division",
-      "Prim",
-      "Kruskal",
-      "Sidewinder",
       "Eller",
+      "Kruskal",
+      "Prim",
+      "Sidewinder",
+      "Wilson",
     ],
     isVisible: (layer, state) => {
       return state.mazeShape === "Rectangle"
@@ -75,7 +76,7 @@ const options = {
   mazeTypeCircle: {
     title: "Algorithm",
     type: "dropdown",
-    choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
+    choices: ["Backtracker", "Kruskal", "Prim", "Wilson"],
     isVisible: (layer, state) => {
       return state.mazeShape === "Circle"
     },
@@ -83,7 +84,7 @@ const options = {
   mazeTypeHex: {
     title: "Algorithm",
     type: "dropdown",
-    choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
+    choices: ["Backtracker", "Kruskal", "Prim", "Wilson"],
     isVisible: (layer, state) => {
       return state.mazeShape === "Hexagon"
     },
@@ -91,14 +92,14 @@ const options = {
   mazeTypeTriangle: {
     title: "Algorithm",
     type: "dropdown",
-    choices: ["Wilson", "Backtracker", "Prim", "Kruskal"],
+    choices: ["Backtracker", "Kruskal", "Prim", "Wilson"],
     isVisible: (layer, state) => {
       return state.mazeShape === "Triangle"
     },
   },
   mazeWidth: {
     title: "Maze width",
-    min: 1,
+    min: 2,
     max: 30,
     isVisible: (layer, state) => {
       return state.mazeShape !== "Circle"
@@ -106,7 +107,7 @@ const options = {
   },
   mazeHeight: {
     title: "Maze height",
-    min: 1,
+    min: 2,
     max: 30,
     isVisible: (layer, state) => {
       return state.mazeShape !== "Circle"
@@ -119,6 +120,16 @@ const options = {
     isVisible: (layer, state) => {
       return state.mazeShape === "Circle"
     },
+    onChange: (model, changes, state) => {
+      // Auto-adjust doubling interval to prevent overflow
+      const minDoubling = Math.ceil((changes.mazeRingCount - 1) / 5)
+
+      if (state.mazeWedgeDoubling < minDoubling) {
+        changes.mazeWedgeDoubling = minDoubling
+      }
+
+      return changes
+    },
   },
   mazeWedgeCount: {
     title: "Wedges",
@@ -130,7 +141,7 @@ const options = {
   },
   mazeWedgeDoubling: {
     title: "Doubling interval",
-    min: 1,
+    min: (state) => Math.ceil((state.mazeRingCount - 1) / 5),
     max: 10,
     isVisible: (layer, state) => {
       return state.mazeShape === "Circle"
@@ -215,10 +226,10 @@ export default class Maze extends Shape {
         mazeTypeCircle: "Wilson",
         mazeTypeHex: "Wilson",
         mazeTypeTriangle: "Wilson",
-        mazeWidth: 8,
-        mazeHeight: 8,
-        mazeRingCount: 6,
-        mazeWedgeCount: 8,
+        mazeWidth: 4,
+        mazeHeight: 12,
+        mazeRingCount: 10,
+        mazeWedgeCount: 10,
         mazeWedgeDoubling: 3,
         mazeWallType: "Arc",
         mazeStraightness: 0,
@@ -227,7 +238,73 @@ export default class Maze extends Shape {
         mazeShowExits: true,
         mazeShowSolution: false,
         seed: 1,
+        maintainAspectRatio: true,
       },
+    }
+  }
+
+  // Override to ensure uniform scaling (aspectRatio: 1.0 prevents distortion in resizeVertices)
+  initialDimensions(props) {
+    if (!props) {
+      return { width: 0, height: 0, aspectRatio: 1.0 }
+    }
+
+    const { width, height } = super.initialDimensions(props)
+    const machine = getMachine(props.machine)
+    const maxSize = Math.min(machine.width, machine.height) * 0.6
+    const scale = maxSize / Math.max(width, height)
+
+    return {
+      width: width * scale,
+      height: height * scale,
+      aspectRatio: 1.0,
+    }
+  }
+
+  getMazeAspectRatio(state) {
+    // Rectangle: width/height ratio; others are square due to yScale normalization
+    if (state.mazeShape === "Rectangle") {
+      return state.mazeWidth / state.mazeHeight
+    }
+
+    return 1
+  }
+
+  handleUpdate(layer, changes) {
+    // Enforce minimum dimensions
+    if (changes.mazeWidth !== undefined) {
+      changes.mazeWidth = Math.max(2, changes.mazeWidth)
+    }
+    if (changes.mazeHeight !== undefined) {
+      changes.mazeHeight = Math.max(2, changes.mazeHeight)
+    }
+
+    const relevantChange =
+      changes.mazeShape !== undefined ||
+      changes.mazeWidth !== undefined ||
+      changes.mazeHeight !== undefined
+
+    if (!relevantChange) {
+      return
+    }
+
+    const oldRatio = this.getMazeAspectRatio(layer)
+    const newState = { ...layer, ...changes }
+    const newRatio = this.getMazeAspectRatio(newState)
+
+    if (oldRatio === newRatio) {
+      return
+    }
+
+    // Scale dimensions to match new ratio, keeping max dimension the same
+    const maxDim = Math.max(layer.width, layer.height)
+
+    if (newRatio >= 1) {
+      changes.width = maxDim
+      changes.height = maxDim / newRatio
+    } else {
+      changes.width = maxDim * newRatio
+      changes.height = maxDim
     }
   }
 
@@ -253,27 +330,14 @@ export default class Maze extends Shape {
       branchLevel: mazeBranchLevel,
     })
 
-    let solutionPath = null
-
-    if (mazeShowExits && grid.findHardestExits) {
-      const exits = grid.findHardestExits()
-
-      if (exits) {
-        exits.startCell.exitType = "entrance"
-        exits.endCell.exitType = "exit"
-
-        if (mazeShowSolution && exits.path) {
-          solutionPath = exits.path
-        }
-      }
+    if (DEBUG_MAZE) {
+      this.debugMaze(algorithmName, state.shape.mazeShape, grid)
     }
 
-    if (DEBUG_MAZE && grid.dump) {
-      console.log(`\n=== ${algorithmName} on ${state.shape.mazeShape} ===`)
-      grid.dump()
-    }
-
-    return this.drawMaze(grid, solutionPath)
+    return this.drawMaze(
+      grid,
+      this.setupExits(grid, mazeShowExits, mazeShowSolution),
+    )
   }
 
   createGrid(shape, rng) {
@@ -288,10 +352,13 @@ export default class Maze extends Shape {
     } = shape
 
     if (mazeShape === "Circle") {
+      const rings = Math.max(2, mazeRingCount)
+      const minDoubling = Math.ceil((rings - 1) / 5)
+
       return new PolarGrid(
-        Math.max(2, mazeRingCount),
+        rings,
         Math.max(4, mazeWedgeCount),
-        Math.max(1, mazeWedgeDoubling),
+        Math.max(minDoubling, mazeWedgeDoubling),
         rng,
         mazeWallType === "Arc",
       )
@@ -300,6 +367,28 @@ export default class Maze extends Shape {
     const GridClass = gridByShape[mazeShape]
 
     return new GridClass(Math.max(2, mazeWidth), Math.max(2, mazeHeight), rng)
+  }
+
+  debugMaze(algorithmName, mazeShape, grid) {
+    console.log(`\n=== ${algorithmName} on ${mazeShape} ===`)
+    grid.dump()
+  }
+
+  setupExits(grid, showExits, showSolution) {
+    if (!showExits || !grid.findHardestExits) {
+      return null
+    }
+
+    const exits = grid.findHardestExits()
+
+    if (!exits) {
+      return null
+    }
+
+    exits.startCell.exitType = "entrance"
+    exits.endCell.exitType = "exit"
+
+    return showSolution && exits.path ? exits.path : null
   }
 
   drawMaze(grid, solutionPath = null) {
