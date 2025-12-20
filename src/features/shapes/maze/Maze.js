@@ -1,3 +1,4 @@
+/* global console */
 import Shape from "../Shape"
 import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
@@ -176,6 +177,10 @@ const options = {
       return getAlgorithm(state) === "Prim"
     },
   },
+  mazeShowExits: {
+    title: "Show entry/exit",
+    type: "checkbox",
+  },
   seed: {
     title: "Random seed",
     min: 1,
@@ -207,14 +212,20 @@ export default class Maze extends Shape {
         mazeStraightness: 0,
         mazeHorizontalBias: 5,
         mazeBranchLevel: 5,
+        mazeShowExits: true,
         seed: 1,
       },
     }
   }
 
   getVertices(state) {
-    const { mazeStraightness, mazeHorizontalBias, mazeBranchLevel, seed } =
-      state.shape
+    const {
+      mazeStraightness,
+      mazeHorizontalBias,
+      mazeBranchLevel,
+      mazeShowExits,
+      seed,
+    } = state.shape
 
     const rng = seedrandom(seed)
     const grid = this.createGrid(state.shape, rng)
@@ -228,12 +239,30 @@ export default class Maze extends Shape {
       branchLevel: mazeBranchLevel,
     })
 
+    // Find hardest exits (start/end openings) - supported for grids with getEdgeCells
+    let exitWalls = null
+
+    if (mazeShowExits && grid.findHardestExits) {
+      const exits = grid.findHardestExits()
+
+      if (exits && grid.getExitVertices) {
+        // Mark entrance vs exit for door swing direction
+        exits.startCell.exitType = "entrance"
+        exits.endCell.exitType = "exit"
+
+        exitWalls = {
+          start: grid.getExitVertices(exits.startCell),
+          end: grid.getExitVertices(exits.endCell),
+        }
+      }
+    }
+
     if (DEBUG_MAZE && grid.dump) {
       console.log(`\n=== ${algorithmName} on ${state.shape.mazeShape} ===`)
       grid.dump()
     }
 
-    return this.drawMaze(grid)
+    return this.drawMaze(grid, exitWalls)
   }
 
   createGrid(shape, rng) {
@@ -262,7 +291,7 @@ export default class Maze extends Shape {
     return new GridClass(Math.max(2, mazeWidth), Math.max(2, mazeHeight), rng)
   }
 
-  drawMaze(grid) {
+  drawMaze(grid, exitWalls = null) {
     const wallSegments = grid.extractWalls()
     const graph = new Graph()
 
@@ -276,16 +305,13 @@ export default class Maze extends Shape {
     const dijkstraFn = (startKey, endKey) => {
       return graph.dijkstraShortestPath(startKey, endKey)
     }
-    const { edges: eulerizedEdges } = eulerizeEdges(edges, dijkstraFn, graph.nodeMap)
+    const { edges: eulerizedEdges } = eulerizeEdges(
+      edges,
+      dijkstraFn,
+      graph.nodeMap,
+    )
     const trail = eulerianTrail({ edges: eulerizedEdges })
-    const walkedVertices = []
-
-    trail.forEach((key) => {
-      const vertex = graph.nodeMap[key]
-
-      walkedVertices.push(vertex)
-    })
-
+    const walkedVertices = trail.map((key) => graph.nodeMap[key])
     const vertices = cloneVertices(walkedVertices)
 
     centerOnOrigin(vertices)

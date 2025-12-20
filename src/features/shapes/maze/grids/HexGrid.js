@@ -1,10 +1,12 @@
 import Victor from "victor"
+import Grid from "./Grid"
 
 // Hexagonal grid for hex mazes
 // Uses pointy-top orientation with odd-r offset coordinates
 
-export default class HexGrid {
+export default class HexGrid extends Grid {
   constructor(width, height, rng) {
+    super()
     this.gridType = "hex"
     this.width = width
     this.height = height
@@ -116,8 +118,49 @@ export default class HexGrid {
     return cell1.q === cell2.q && cell1.r === cell2.r
   }
 
-  // Get the 6 corner vertices of a hexagon (pointy-top)
-  // Returns corners in order for wall drawing
+  // Get cells on the grid perimeter with their exit directions
+  // For hex grids, use e/w (east/west) exits for opposite edges
+  getEdgeCells() {
+    const edgeCells = []
+
+    for (const cell of this.cells) {
+      const { q } = cell
+
+      // Left edge (q=0): west exit
+      if (q === 0) {
+        edgeCells.push({ cell, direction: "w", edge: "w" })
+      }
+
+      // Right edge (q=width-1): east exit
+      if (q === this.width - 1) {
+        edgeCells.push({ cell, direction: "e", edge: "e" })
+      }
+    }
+
+    return edgeCells
+  }
+
+  getExitVertices(cell) {
+    const corners = this.getHexCorners(cell.q, cell.r)
+    const dir = cell.exitDirection
+
+    // corners: [p1(top-left), p2(bottom-left), p3(bottom), p4(bottom-right), p5(top-right), p6(top)]
+    switch (dir) {
+      case "w": // west edge: p1 to p2
+        return [
+          { x: corners[0][0], y: corners[0][1] },
+          { x: corners[1][0], y: corners[1][1] },
+        ]
+      case "e": // east edge: p4 to p5
+        return [
+          { x: corners[3][0], y: corners[3][1] },
+          { x: corners[4][0], y: corners[4][1] },
+        ]
+      default:
+        return null
+    }
+  }
+
   getHexCorners(q, r) {
     const rowXOffset = Math.abs(r % 2) * this.xOffset
     const ys = this.yScale
@@ -160,6 +203,42 @@ export default class HexGrid {
       return vertexCache.get(key)
     }
 
+    // Draw exit wall split at midpoint + arrow on top
+    // Scale up arrow for hex's edges
+    const arrowScale = 1.25
+    const addExitWithArrow = (x1, y1, x2, y2, direction, exitType) => {
+      // For pointy-top hex, west/east edges are vertical
+      // West (q=0): inward points right (+x)
+      // East (q=max): inward points left (-x)
+      const inwardDx = direction === "w" ? 1 : -1
+      const inwardDy = 0
+      const mx = (x1 + x2) / 2
+      const my = (y1 + y2) / 2
+
+      // Split wall at midpoint so arrow connects to graph
+      walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
+      walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
+
+      // Scale wall coords away from midpoint to enlarge arrow
+      const sx1 = mx + (x1 - mx) * arrowScale
+      const sy1 = my + (y1 - my) * arrowScale
+      const sx2 = mx + (x2 - mx) * arrowScale
+      const sy2 = my + (y2 - my) * arrowScale
+
+      // Add arrow (connects at midpoint)
+      this.addExitArrow(
+        walls,
+        makeVertex,
+        sx1,
+        sy1,
+        sx2,
+        sy2,
+        exitType,
+        inwardDx,
+        inwardDy,
+      )
+    }
+
     for (const cell of this.cells) {
       const { q, r } = cell
       const corners = this.getHexCorners(q, r)
@@ -169,10 +248,21 @@ export default class HexGrid {
       const west = this.getCell(q - 1, r)
 
       if (!west || !this.isLinked(cell, west)) {
-        walls.push([
-          makeVertex(corners[0][0], corners[0][1]),
-          makeVertex(corners[1][0], corners[1][1]),
-        ])
+        if (cell.exitDirection === "w") {
+          addExitWithArrow(
+            corners[0][0],
+            corners[0][1],
+            corners[1][0],
+            corners[1][1],
+            "w",
+            cell.exitType,
+          )
+        } else {
+          walls.push([
+            makeVertex(corners[0][0], corners[0][1]),
+            makeVertex(corners[1][0], corners[1][1]),
+          ])
+        }
       }
 
       // Edge between p2-p3 (southwest edge)
@@ -199,10 +289,21 @@ export default class HexGrid {
       const east = this.getCell(q + 1, r)
 
       if (!east || !this.isLinked(cell, east)) {
-        walls.push([
-          makeVertex(corners[3][0], corners[3][1]),
-          makeVertex(corners[4][0], corners[4][1]),
-        ])
+        if (cell.exitDirection === "e") {
+          addExitWithArrow(
+            corners[3][0],
+            corners[3][1],
+            corners[4][0],
+            corners[4][1],
+            "e",
+            cell.exitType,
+          )
+        } else {
+          walls.push([
+            makeVertex(corners[3][0], corners[3][1]),
+            makeVertex(corners[4][0], corners[4][1]),
+          ])
+        }
       }
 
       // Edge between p5-p6 (northeast edge)

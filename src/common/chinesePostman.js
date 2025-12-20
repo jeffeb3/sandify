@@ -159,9 +159,11 @@ export function eulerizeEdges(edges, dijkstraFn, nodeMap = null) {
 
   for (const match of matching) {
     // Handle both formats: {path} from Dijkstra or {pathKeys} from BFS
-    const path = match.path || (match.pathKeys && nodeMap
-      ? match.pathKeys.map(k => nodeMap[k] || { toString: () => k })
-      : match.pathKeys?.map(k => ({ toString: () => k })))
+    const path =
+      match.path ||
+      (match.pathKeys && nodeMap
+        ? match.pathKeys.map((k) => nodeMap[k] || { toString: () => k })
+        : match.pathKeys?.map((k) => ({ toString: () => k })))
 
     if (!path || path.length < 2) continue
 

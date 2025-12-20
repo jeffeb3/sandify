@@ -1,10 +1,12 @@
+/* global console */
 import Victor from "victor"
+import Grid from "./Grid"
 
 // Polar grid for circular mazes
 // Cells are arranged in concentric rings, with ring 0 being a single center cell
 // Outer rings can have more wedges (doubling) to maintain proportional cell sizes
 
-export default class PolarGrid {
+export default class PolarGrid extends Grid {
   constructor(
     ringCount,
     baseWedgeCount,
@@ -12,6 +14,7 @@ export default class PolarGrid {
     rng,
     useArcs = false,
   ) {
+    super()
     this.gridType = "polar"
     this.ringCount = ringCount
     this.baseWedgeCount = baseWedgeCount
@@ -177,6 +180,40 @@ export default class PolarGrid {
     return cell1.ring === cell2.ring && cell1.wedge === cell2.wedge
   }
 
+  // Get cells on the outer ring (perimeter) with their exit directions
+  getEdgeCells() {
+    const edgeCells = []
+    const outerRing = this.ringCount
+
+    for (const cell of this.rings[outerRing]) {
+      edgeCells.push({ cell, direction: "out", edge: "out" })
+    }
+
+    return edgeCells
+  }
+
+  // Get the two vertices of an exit wall (outer arc endpoints) for a cell
+  getExitVertices(cell) {
+    if (cell.ring !== this.ringCount) return null
+
+    const wedgeCount = this.rings[cell.ring].length
+    const anglePerWedge = (Math.PI * 2) / wedgeCount
+    const radius = this.ringCount + 1
+    const startAngle = cell.wedge * anglePerWedge
+    const endAngle = (cell.wedge + 1) * anglePerWedge
+
+    return [
+      {
+        x: Math.round(radius * Math.cos(startAngle) * 1000000) / 1000000,
+        y: Math.round(radius * Math.sin(startAngle) * 1000000) / 1000000,
+      },
+      {
+        x: Math.round(radius * Math.cos(endAngle) * 1000000) / 1000000,
+        y: Math.round(radius * Math.sin(endAngle) * 1000000) / 1000000,
+      },
+    ]
+  }
+
   // Debug: dump maze structure
   dump() {
     let output = ""
@@ -295,17 +332,125 @@ export default class PolarGrid {
       }
     }
 
-    // 3. OUTER PERIMETER (always walls)
+    // Helper to create vertex from cartesian coords (for arrow drawing)
+    const makeVertexXY = (x, y) => {
+      const rx = Math.round(x * 1000000) / 1000000
+      const ry = Math.round(y * 1000000) / 1000000
+      const key = `${rx},${ry}`
+
+      if (!vertexCache.has(key)) {
+        vertexCache.set(key, new Victor(rx, ry))
+      }
+
+      return vertexCache.get(key)
+    }
+
+    // Draw exit arc wall split at midpoint + arrow
+    const addExitArcWithArrow = (radius, startAngle, endAngle, exitType) => {
+      const midAngle = (startAngle + endAngle) / 2
+
+      // Draw arc in two halves (split at midpoint)
+      if (this.useArcs) {
+        const resolution = (Math.PI * 2.0) / 128.0
+
+        // First half: startAngle to midAngle
+        const delta1 = midAngle - startAngle
+        const numSteps1 = Math.max(1, Math.ceil(delta1 / resolution))
+
+        for (let step = 0; step < numSteps1; step++) {
+          const t1 = step / numSteps1
+          const t2 = (step + 1) / numSteps1
+          const a1 = startAngle + t1 * delta1
+          const a2 = startAngle + t2 * delta1
+
+          walls.push([makeVertex(radius, a1), makeVertex(radius, a2)])
+        }
+
+        // Second half: midAngle to endAngle
+        const delta2 = endAngle - midAngle
+        const numSteps2 = Math.max(1, Math.ceil(delta2 / resolution))
+
+        for (let step = 0; step < numSteps2; step++) {
+          const t1 = step / numSteps2
+          const t2 = (step + 1) / numSteps2
+          const a1 = midAngle + t1 * delta2
+          const a2 = midAngle + t2 * delta2
+
+          walls.push([makeVertex(radius, a1), makeVertex(radius, a2)])
+        }
+      } else {
+        // Straight segments split at midpoint
+        walls.push([makeVertex(radius, startAngle), makeVertex(radius, midAngle)])
+        walls.push([makeVertex(radius, midAngle), makeVertex(radius, endAngle)])
+      }
+
+      // Arrow at arc's true midpoint (not chord midpoint)
+      const arcMidX = radius * Math.cos(midAngle)
+      const arcMidY = radius * Math.sin(midAngle)
+
+      // Inward direction points toward center
+      const inwardDx = -Math.cos(midAngle)
+      const inwardDy = -Math.sin(midAngle)
+
+      // Arrow sizing based on ring width (constant = 1) for consistent size
+      const ringWidth = 1
+      const arrowScale = 0.5
+      const headWidth = ringWidth * arrowScale
+      const headHeight = headWidth * 0.8
+
+      // Tangent direction (perpendicular to inward, along the arc)
+      const tangentX = -Math.sin(midAngle)
+      const tangentY = Math.cos(midAngle)
+
+      if (exitType === "exit") {
+        // Exit: tip on arc, base inside maze, pointing OUT
+        const tipX = arcMidX
+        const tipY = arcMidY
+        const baseCenterX = arcMidX + inwardDx * headHeight
+        const baseCenterY = arcMidY + inwardDy * headHeight
+        const baseLeftX = baseCenterX - (tangentX * headWidth) / 2
+        const baseLeftY = baseCenterY - (tangentY * headWidth) / 2
+        const baseRightX = baseCenterX + (tangentX * headWidth) / 2
+        const baseRightY = baseCenterY + (tangentY * headWidth) / 2
+
+        walls.push([makeVertexXY(tipX, tipY), makeVertexXY(baseLeftX, baseLeftY)])
+        walls.push([makeVertexXY(baseLeftX, baseLeftY), makeVertexXY(baseCenterX, baseCenterY)])
+        walls.push([makeVertexXY(baseCenterX, baseCenterY), makeVertexXY(baseRightX, baseRightY)])
+        walls.push([makeVertexXY(baseRightX, baseRightY), makeVertexXY(tipX, tipY)])
+      } else {
+        // Entrance: base on arc, tip inside maze, pointing IN
+        const baseCenterX = arcMidX
+        const baseCenterY = arcMidY
+        const baseLeftX = arcMidX - (tangentX * headWidth) / 2
+        const baseLeftY = arcMidY - (tangentY * headWidth) / 2
+        const baseRightX = arcMidX + (tangentX * headWidth) / 2
+        const baseRightY = arcMidY + (tangentY * headWidth) / 2
+        const tipX = arcMidX + inwardDx * headHeight
+        const tipY = arcMidY + inwardDy * headHeight
+
+        walls.push([makeVertexXY(baseCenterX, baseCenterY), makeVertexXY(baseLeftX, baseLeftY)])
+        walls.push([makeVertexXY(baseLeftX, baseLeftY), makeVertexXY(tipX, tipY)])
+        walls.push([makeVertexXY(tipX, tipY), makeVertexXY(baseRightX, baseRightY)])
+        walls.push([makeVertexXY(baseRightX, baseRightY), makeVertexXY(baseCenterX, baseCenterY)])
+      }
+    }
+
+    // 3. OUTER PERIMETER (always walls, with exits)
     const outerRing = this.ringCount
     const outerWedgeCount = this.rings[outerRing].length
     const outerAnglePerWedge = (Math.PI * 2) / outerWedgeCount
     const outerRadius = this.ringCount + 1
 
     for (let w = 0; w < outerWedgeCount; w++) {
+      const cell = this.rings[outerRing][w]
       const startAngle = w * outerAnglePerWedge
       const endAngle = (w + 1) * outerAnglePerWedge
 
-      addArcWall(outerRadius, startAngle, endAngle)
+      if (cell.exitDirection === "out") {
+        addExitArcWithArrow(outerRadius, startAngle, endAngle, cell.exitType)
+      } else {
+        addArcWall(outerRadius, startAngle, endAngle)
+      }
     }
 
     return walls

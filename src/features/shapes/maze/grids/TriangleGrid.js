@@ -1,10 +1,12 @@
 import Victor from "victor"
+import Grid from "./Grid"
 
 // Triangular grid for delta mazes
 // Uses alternating up/down triangles based on coordinate parity
 
-export default class TriangleGrid {
+export default class TriangleGrid extends Grid {
   constructor(width, height, rng) {
+    super()
     this.gridType = "triangle"
     this.width = width
     this.height = height
@@ -115,6 +117,54 @@ export default class TriangleGrid {
     return cell1.x === cell2.x && cell1.y === cell2.y
   }
 
+  // Get cells on the grid perimeter with their exit directions
+  // For triangles: top/bottom rows and left/right edges
+  getEdgeCells() {
+    const edgeCells = []
+
+    for (const cell of this.cells) {
+      const { y, upward } = cell
+
+      // Top row: DOWN triangles have horizontal top edge
+      if (y === 0 && !upward) {
+        edgeCells.push({ cell, direction: "n", edge: "n" })
+      }
+
+      // Bottom row: UP triangles have horizontal bottom edge
+      if (y === this.height - 1 && upward) {
+        edgeCells.push({ cell, direction: "s", edge: "s" })
+      }
+    }
+
+    return edgeCells
+  }
+
+  // Get the two vertices of an exit wall for a cell
+  getExitVertices(cell) {
+    const corners = this.getTriangleCorners(cell.x, cell.y)
+    const dir = cell.exitDirection
+
+    if (cell.upward) {
+      // UP triangle: top, bottomLeft, bottomRight
+      if (dir === "s") {
+        return [
+          { x: corners.bottomLeft[0], y: corners.bottomLeft[1] },
+          { x: corners.bottomRight[0], y: corners.bottomRight[1] },
+        ]
+      }
+    } else {
+      // DOWN triangle: topLeft, topRight, bottom
+      if (dir === "n") {
+        return [
+          { x: corners.topLeft[0], y: corners.topLeft[1] },
+          { x: corners.topRight[0], y: corners.topRight[1] },
+        ]
+      }
+    }
+
+    return null
+  }
+
   getTriangleCorners(x, y) {
     const h = this.triHeight
     const ys = this.yScale
@@ -153,6 +203,40 @@ export default class TriangleGrid {
       return vertexCache.get(key)
     }
 
+    // Draw exit wall split at midpoint + arrow on top
+    // Scale down arrow for triangle's smaller edges
+    const arrowScale = 0.6
+    const addExitWithArrow = (x1, y1, x2, y2, direction, exitType) => {
+      // For horizontal edges: n = inward down, s = inward up
+      const inwardDx = 0
+      const inwardDy = direction === "n" ? 1 : -1
+      const mx = (x1 + x2) / 2
+      const my = (y1 + y2) / 2
+
+      // Split wall at midpoint so arrow connects to graph
+      walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
+      walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
+
+      // Scale wall coords toward midpoint to shrink arrow
+      const sx1 = mx + (x1 - mx) * arrowScale
+      const sy1 = my + (y1 - my) * arrowScale
+      const sx2 = mx + (x2 - mx) * arrowScale
+      const sy2 = my + (y2 - my) * arrowScale
+
+      // Add arrow (connects at midpoint)
+      this.addExitArrow(
+        walls,
+        makeVertex,
+        sx1,
+        sy1,
+        sx2,
+        sy2,
+        exitType,
+        inwardDx,
+        inwardDy,
+      )
+    }
+
     for (const cell of this.cells) {
       const { x, y, upward } = cell
       const corners = this.getTriangleCorners(x, y)
@@ -183,11 +267,23 @@ export default class TriangleGrid {
 
         // Bottom edge: bottomLeft to bottomRight (shared with south)
         const south = this.getCell(x, y + 1)
+
         if (!south || !this.isLinked(cell, south)) {
-          walls.push([
-            makeVertex(corners.bottomLeft[0], corners.bottomLeft[1]),
-            makeVertex(corners.bottomRight[0], corners.bottomRight[1]),
-          ])
+          if (cell.exitDirection === "s") {
+            addExitWithArrow(
+              corners.bottomLeft[0],
+              corners.bottomLeft[1],
+              corners.bottomRight[0],
+              corners.bottomRight[1],
+              "s",
+              cell.exitType,
+            )
+          } else {
+            walls.push([
+              makeVertex(corners.bottomLeft[0], corners.bottomLeft[1]),
+              makeVertex(corners.bottomRight[0], corners.bottomRight[1]),
+            ])
+          }
         }
       } else {
         // DOWN triangle: topLeft, topRight, bottom
@@ -209,11 +305,23 @@ export default class TriangleGrid {
 
         // Top edge: topLeft to topRight (shared with north)
         const north = this.getCell(x, y - 1)
+
         if (!north || !this.isLinked(cell, north)) {
-          walls.push([
-            makeVertex(corners.topLeft[0], corners.topLeft[1]),
-            makeVertex(corners.topRight[0], corners.topRight[1]),
-          ])
+          if (cell.exitDirection === "n") {
+            addExitWithArrow(
+              corners.topLeft[0],
+              corners.topLeft[1],
+              corners.topRight[0],
+              corners.topRight[1],
+              "n",
+              cell.exitType,
+            )
+          } else {
+            walls.push([
+              makeVertex(corners.topLeft[0], corners.topLeft[1]),
+              makeVertex(corners.topRight[0], corners.topRight[1]),
+            ])
+          }
         }
       }
     }
