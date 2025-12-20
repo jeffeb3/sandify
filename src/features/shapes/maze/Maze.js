@@ -4,7 +4,11 @@ import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
-import { cloneVertices, centerOnOrigin } from "@/common/geometry"
+import {
+  cloneVertices,
+  centerOnOrigin,
+  closestPointOnSegments,
+} from "@/common/geometry"
 import RectangularGrid from "./grids/RectangularGrid"
 import PolarGrid from "./grids/PolarGrid"
 import HexGrid from "./grids/HexGrid"
@@ -181,6 +185,13 @@ const options = {
     title: "Show entry/exit",
     type: "checkbox",
   },
+  mazeShowSolution: {
+    title: "Show solution",
+    type: "checkbox",
+    isVisible: (layer, state) => {
+      return state.mazeShowExits
+    },
+  },
   seed: {
     title: "Random seed",
     min: 1,
@@ -213,6 +224,7 @@ export default class Maze extends Shape {
         mazeHorizontalBias: 5,
         mazeBranchLevel: 5,
         mazeShowExits: true,
+        mazeShowSolution: false,
         seed: 1,
       },
     }
@@ -224,6 +236,7 @@ export default class Maze extends Shape {
       mazeHorizontalBias,
       mazeBranchLevel,
       mazeShowExits,
+      mazeShowSolution,
       seed,
     } = state.shape
 
@@ -239,20 +252,23 @@ export default class Maze extends Shape {
       branchLevel: mazeBranchLevel,
     })
 
-    // Find hardest exits (start/end openings) - supported for grids with getEdgeCells
     let exitWalls = null
+    let solutionPath = null
 
     if (mazeShowExits && grid.findHardestExits) {
       const exits = grid.findHardestExits()
 
       if (exits && grid.getExitVertices) {
-        // Mark entrance vs exit for door swing direction
         exits.startCell.exitType = "entrance"
         exits.endCell.exitType = "exit"
 
         exitWalls = {
           start: grid.getExitVertices(exits.startCell),
           end: grid.getExitVertices(exits.endCell),
+        }
+
+        if (mazeShowSolution && exits.path) {
+          solutionPath = exits.path
         }
       }
     }
@@ -262,7 +278,7 @@ export default class Maze extends Shape {
       grid.dump()
     }
 
-    return this.drawMaze(grid, exitWalls)
+    return this.drawMaze(grid, exitWalls, solutionPath)
   }
 
   createGrid(shape, rng) {
@@ -291,7 +307,7 @@ export default class Maze extends Shape {
     return new GridClass(Math.max(2, mazeWidth), Math.max(2, mazeHeight), rng)
   }
 
-  drawMaze(grid, exitWalls = null) {
+  drawMaze(grid, exitWalls = null, solutionPath = null) {
     const wallSegments = grid.extractWalls()
     const graph = new Graph()
 
@@ -312,11 +328,77 @@ export default class Maze extends Shape {
     )
     const trail = eulerianTrail({ edges: eulerizedEdges })
     const walkedVertices = trail.map((key) => graph.nodeMap[key])
+
+    if (solutionPath && solutionPath.length > 0 && exitWalls) {
+      this.drawSolution(
+        walkedVertices,
+        graph,
+        trail,
+        grid,
+        exitWalls,
+        solutionPath,
+      )
+    }
+
     const vertices = cloneVertices(walkedVertices)
 
     centerOnOrigin(vertices)
 
     return vertices
+  }
+
+  drawSolution(walkedVertices, graph, trail, grid, exitWalls, solutionPath) {
+    const startCell = solutionPath[0]
+    const endCell = solutionPath[solutionPath.length - 1]
+
+    if (!startCell.arrowEdges || !endCell.arrowEdges) {
+      return
+    }
+
+    const secondCenter = solutionPath.length > 1
+      ? grid.getCellCenter(solutionPath[1])
+      : grid.getCellCenter(solutionPath[0])
+    const secondToLastCenter = solutionPath.length > 1
+      ? grid.getCellCenter(solutionPath[solutionPath.length - 2])
+      : grid.getCellCenter(solutionPath[0])
+    const entrance = closestPointOnSegments(secondCenter, startCell.arrowEdges)
+    const [entA, entB] = entrance.segment
+    const distToA =
+      (entrance.point.x - entA.x) ** 2 + (entrance.point.y - entA.y) ** 2
+    const distToB =
+      (entrance.point.x - entB.x) ** 2 + (entrance.point.y - entB.y) ** 2
+    const entranceVertex = distToA < distToB ? entA : entB
+    const entranceKey = entranceVertex.toString()
+    const trailEndKey = trail[trail.length - 1]
+
+    if (graph.nodeMap[entranceKey]) {
+      const pathKeys = graph.dijkstraShortestPath(trailEndKey, entranceKey)
+
+      if (pathKeys && pathKeys.length > 1) {
+        for (let i = 1; i < pathKeys.length; i++) {
+          walkedVertices.push(graph.nodeMap[pathKeys[i]])
+        }
+      }
+    }
+
+    walkedVertices.push(entrance.point)
+
+    for (let i = 1; i < solutionPath.length - 1; i++) {
+      const center = grid.getCellCenter(solutionPath[i])
+
+      walkedVertices.push({ x: center.x, y: center.y })
+    }
+
+    const exit = closestPointOnSegments(secondToLastCenter, endCell.arrowEdges)
+    const [exitA, exitB] = exit.segment
+    const distToExitA =
+      (exit.point.x - exitA.x) ** 2 + (exit.point.y - exitA.y) ** 2
+    const distToExitB =
+      (exit.point.x - exitB.x) ** 2 + (exit.point.y - exitB.y) ** 2
+    const exitVertex = distToExitA < distToExitB ? exitA : exitB
+
+    walkedVertices.push(exitVertex)
+    walkedVertices.push(exit.point)
   }
 
   getOptions() {

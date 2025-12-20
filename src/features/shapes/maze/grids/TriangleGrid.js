@@ -117,6 +117,29 @@ export default class TriangleGrid extends Grid {
     return cell1.x === cell2.x && cell1.y === cell2.y
   }
 
+  // Get the center point of a cell (centroid of triangle)
+  getCellCenter(cell) {
+    const { x, y } = cell
+    const h = this.triHeight
+    const ys = this.yScale
+    const baseX = x * 0.5
+
+    // Centroid is at 1/3 from base for triangles
+    if (this.isUpward(x, y)) {
+      // UP triangle: apex at top, base at bottom
+      return {
+        x: baseX + 0.5,
+        y: (y + 2 / 3) * h * ys,
+      }
+    } else {
+      // DOWN triangle: apex at bottom, base at top
+      return {
+        x: baseX + 0.5,
+        y: (y + 1 / 3) * h * ys,
+      }
+    }
+  }
+
   // Get cells on the grid perimeter with their exit directions
   // For triangles: top/bottom rows and left/right edges
   getEdgeCells() {
@@ -205,8 +228,9 @@ export default class TriangleGrid extends Grid {
 
     // Draw exit wall split at midpoint + arrow on top
     // Scale down arrow for triangle's smaller edges
+    // Stores arrow tip on cell for solution path drawing
     const arrowScale = 0.6
-    const addExitWithArrow = (x1, y1, x2, y2, direction, exitType) => {
+    const addExitWithArrow = (cell, x1, y1, x2, y2, direction) => {
       // For horizontal edges: n = inward down, s = inward up
       const inwardDx = 0
       const inwardDy = direction === "n" ? 1 : -1
@@ -223,18 +247,22 @@ export default class TriangleGrid extends Grid {
       const sx2 = mx + (x2 - mx) * arrowScale
       const sy2 = my + (y2 - my) * arrowScale
 
-      // Add arrow (connects at midpoint)
-      this.addExitArrow(
+      // Add arrow (connects at midpoint) and store tip/base on cell
+      const arrow = this.addExitArrow(
         walls,
         makeVertex,
         sx1,
         sy1,
         sx2,
         sy2,
-        exitType,
+        cell.exitType,
         inwardDx,
         inwardDy,
       )
+
+      cell.arrowTip = arrow.tip
+      cell.arrowBase = arrow.base
+      cell.arrowEdges = arrow.edges
     }
 
     for (const cell of this.cells) {
@@ -271,12 +299,12 @@ export default class TriangleGrid extends Grid {
         if (!south || !this.isLinked(cell, south)) {
           if (cell.exitDirection === "s") {
             addExitWithArrow(
+              cell,
               corners.bottomLeft[0],
               corners.bottomLeft[1],
               corners.bottomRight[0],
               corners.bottomRight[1],
               "s",
-              cell.exitType,
             )
           } else {
             walls.push([
@@ -309,12 +337,12 @@ export default class TriangleGrid extends Grid {
         if (!north || !this.isLinked(cell, north)) {
           if (cell.exitDirection === "n") {
             addExitWithArrow(
+              cell,
               corners.topLeft[0],
               corners.topLeft[1],
               corners.topRight[0],
               corners.topRight[1],
               "n",
-              cell.exitType,
             )
           } else {
             walls.push([

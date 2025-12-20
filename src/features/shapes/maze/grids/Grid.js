@@ -40,22 +40,26 @@ export default class Grid {
     const mx = (x1 + x2) / 2
     const my = (y1 + y2) / 2
 
+    let tipX, tipY, baseCenterX, baseCenterY
+
+    let baseLeftX, baseLeftY, baseRightX, baseRightY
+
     if (exitType === "exit") {
       // Exit: tip touches wall, base inside maze, pointing OUT
 
       // Tip on wall
-      const tipX = mx
-      const tipY = my
+      tipX = mx
+      tipY = my
 
       // Base center inside maze (inward from tip)
-      const baseCenterX = mx + inUnitX * headHeight
-      const baseCenterY = my + inUnitY * headHeight
+      baseCenterX = mx + inUnitX * headHeight
+      baseCenterY = my + inUnitY * headHeight
 
       // Base points
-      const baseLeftX = baseCenterX - (wallUnitX * headWidth) / 2
-      const baseLeftY = baseCenterY - (wallUnitY * headWidth) / 2
-      const baseRightX = baseCenterX + (wallUnitX * headWidth) / 2
-      const baseRightY = baseCenterY + (wallUnitY * headWidth) / 2
+      baseLeftX = baseCenterX - (wallUnitX * headWidth) / 2
+      baseLeftY = baseCenterY - (wallUnitY * headWidth) / 2
+      baseRightX = baseCenterX + (wallUnitX * headWidth) / 2
+      baseRightY = baseCenterY + (wallUnitY * headWidth) / 2
 
       // Draw arrow head - connected through tip (on wall)
       walls.push([makeVertex(tipX, tipY), makeVertex(baseLeftX, baseLeftY)])
@@ -72,18 +76,18 @@ export default class Grid {
       // Entrance: base touches wall, tip inside maze, pointing IN
 
       // Base center on wall
-      const baseCenterX = mx
-      const baseCenterY = my
+      baseCenterX = mx
+      baseCenterY = my
 
       // Base points (on wall)
-      const baseLeftX = mx - (wallUnitX * headWidth) / 2
-      const baseLeftY = my - (wallUnitY * headWidth) / 2
-      const baseRightX = mx + (wallUnitX * headWidth) / 2
-      const baseRightY = my + (wallUnitY * headWidth) / 2
+      baseLeftX = mx - (wallUnitX * headWidth) / 2
+      baseLeftY = my - (wallUnitY * headWidth) / 2
+      baseRightX = mx + (wallUnitX * headWidth) / 2
+      baseRightY = my + (wallUnitY * headWidth) / 2
 
       // Tip inside maze (inward from base)
-      const tipX = mx + inUnitX * headHeight
-      const tipY = my + inUnitY * headHeight
+      tipX = mx + inUnitX * headHeight
+      tipY = my + inUnitY * headHeight
 
       // Draw arrow head - connected through baseCenter (on wall)
       walls.push([
@@ -97,9 +101,28 @@ export default class Grid {
         makeVertex(baseCenterX, baseCenterY),
       ])
     }
+
+    // Build arrow vertices (same Victor objects that go into walls/graph)
+    const tipV = makeVertex(tipX, tipY)
+    const baseLeftV = makeVertex(baseLeftX, baseLeftY)
+    const baseCenterV = makeVertex(baseCenterX, baseCenterY)
+    const baseRightV = makeVertex(baseRightX, baseRightY)
+
+    // Return vertices and edges
+    return {
+      tip: tipV,
+      base: baseCenterV,
+      edges: [
+        [tipV, baseLeftV],
+        [baseLeftV, baseCenterV],
+        [baseCenterV, baseRightV],
+        [baseRightV, tipV],
+      ],
+    }
   }
 
   // Find the two edge cells with maximum distance (hardest path)
+  // Returns { startCell, endCell, distance, path } where path is array of cells
   findHardestExits() {
     const edgeCells = this.getEdgeCells()
 
@@ -107,11 +130,14 @@ export default class Grid {
       return null
     }
 
-    const bfsDistances = (startCell) => {
+    // BFS that tracks both distances and parent pointers for path reconstruction
+    const bfsWithParents = (startCell) => {
       const distances = new Map()
+      const parents = new Map()
       const queue = [startCell]
 
       distances.set(this.cellKey(startCell), 0)
+      parents.set(this.cellKey(startCell), null)
 
       while (queue.length > 0) {
         const current = queue.shift()
@@ -123,23 +149,25 @@ export default class Grid {
 
             if (!distances.has(neighborKey)) {
               distances.set(neighborKey, currentDist + 1)
+              parents.set(neighborKey, current)
               queue.push(neighbor)
             }
           }
         }
       }
 
-      return distances
+      return { distances, parents }
     }
 
     let maxDistance = -1
     let bestStart = null
     let bestEnd = null
+    let bestParents = null
 
     // Check all pairs of edge cells
     for (let i = 0; i < edgeCells.length; i++) {
       const startEdge = edgeCells[i]
-      const distances = bfsDistances(startEdge.cell)
+      const { distances, parents } = bfsWithParents(startEdge.cell)
 
       for (let j = i + 1; j < edgeCells.length; j++) {
         const endEdge = edgeCells[j]
@@ -149,12 +177,22 @@ export default class Grid {
           maxDistance = dist
           bestStart = startEdge
           bestEnd = endEdge
+          bestParents = parents
         }
       }
     }
 
     if (!bestStart || !bestEnd) {
       return null
+    }
+
+    // Reconstruct path from start to end using parent pointers
+    const path = []
+    let current = bestEnd.cell
+
+    while (current !== null) {
+      path.unshift(current)
+      current = bestParents.get(this.cellKey(current))
     }
 
     // Mark the cells with their exit directions
@@ -165,6 +203,7 @@ export default class Grid {
       startCell: bestStart.cell,
       endCell: bestEnd.cell,
       distance: maxDistance,
+      path,
     }
   }
 }

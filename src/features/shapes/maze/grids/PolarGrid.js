@@ -180,6 +180,26 @@ export default class PolarGrid extends Grid {
     return cell1.ring === cell2.ring && cell1.wedge === cell2.wedge
   }
 
+  // Get the center point of a cell (for solution path drawing)
+  getCellCenter(cell) {
+    const { ring, wedge } = cell
+
+    // Ring 0 is the center cell
+    if (ring === 0) {
+      return { x: 0, y: 0 }
+    }
+
+    const wedgeCount = this.rings[ring].length
+    const anglePerWedge = (Math.PI * 2) / wedgeCount
+    const radius = ring + 0.5
+    const angle = (wedge + 0.5) * anglePerWedge
+
+    return {
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle),
+    }
+  }
+
   // Get cells on the outer ring (perimeter) with their exit directions
   getEdgeCells() {
     const edgeCells = []
@@ -346,7 +366,8 @@ export default class PolarGrid extends Grid {
     }
 
     // Draw exit arc wall split at midpoint + arrow
-    const addExitArcWithArrow = (radius, startAngle, endAngle, exitType) => {
+    // Stores arrow tip on cell for solution path drawing
+    const addExitArcWithArrow = (cell, radius, startAngle, endAngle) => {
       const midAngle = (startAngle + endAngle) / 2
 
       // Draw arc in two halves (split at midpoint)
@@ -402,16 +423,19 @@ export default class PolarGrid extends Grid {
       const tangentX = -Math.sin(midAngle)
       const tangentY = Math.cos(midAngle)
 
-      if (exitType === "exit") {
+      let tipX, tipY, baseCenterX, baseCenterY
+      let baseLeftX, baseLeftY, baseRightX, baseRightY
+
+      if (cell.exitType === "exit") {
         // Exit: tip on arc, base inside maze, pointing OUT
-        const tipX = arcMidX
-        const tipY = arcMidY
-        const baseCenterX = arcMidX + inwardDx * headHeight
-        const baseCenterY = arcMidY + inwardDy * headHeight
-        const baseLeftX = baseCenterX - (tangentX * headWidth) / 2
-        const baseLeftY = baseCenterY - (tangentY * headWidth) / 2
-        const baseRightX = baseCenterX + (tangentX * headWidth) / 2
-        const baseRightY = baseCenterY + (tangentY * headWidth) / 2
+        tipX = arcMidX
+        tipY = arcMidY
+        baseCenterX = arcMidX + inwardDx * headHeight
+        baseCenterY = arcMidY + inwardDy * headHeight
+        baseLeftX = baseCenterX - (tangentX * headWidth) / 2
+        baseLeftY = baseCenterY - (tangentY * headWidth) / 2
+        baseRightX = baseCenterX + (tangentX * headWidth) / 2
+        baseRightY = baseCenterY + (tangentY * headWidth) / 2
 
         walls.push([makeVertexXY(tipX, tipY), makeVertexXY(baseLeftX, baseLeftY)])
         walls.push([makeVertexXY(baseLeftX, baseLeftY), makeVertexXY(baseCenterX, baseCenterY)])
@@ -419,20 +443,37 @@ export default class PolarGrid extends Grid {
         walls.push([makeVertexXY(baseRightX, baseRightY), makeVertexXY(tipX, tipY)])
       } else {
         // Entrance: base on arc, tip inside maze, pointing IN
-        const baseCenterX = arcMidX
-        const baseCenterY = arcMidY
-        const baseLeftX = arcMidX - (tangentX * headWidth) / 2
-        const baseLeftY = arcMidY - (tangentY * headWidth) / 2
-        const baseRightX = arcMidX + (tangentX * headWidth) / 2
-        const baseRightY = arcMidY + (tangentY * headWidth) / 2
-        const tipX = arcMidX + inwardDx * headHeight
-        const tipY = arcMidY + inwardDy * headHeight
+        baseCenterX = arcMidX
+        baseCenterY = arcMidY
+        baseLeftX = arcMidX - (tangentX * headWidth) / 2
+        baseLeftY = arcMidY - (tangentY * headWidth) / 2
+        baseRightX = arcMidX + (tangentX * headWidth) / 2
+        baseRightY = arcMidY + (tangentY * headWidth) / 2
+
+        tipX = arcMidX + inwardDx * headHeight
+        tipY = arcMidY + inwardDy * headHeight
 
         walls.push([makeVertexXY(baseCenterX, baseCenterY), makeVertexXY(baseLeftX, baseLeftY)])
         walls.push([makeVertexXY(baseLeftX, baseLeftY), makeVertexXY(tipX, tipY)])
         walls.push([makeVertexXY(tipX, tipY), makeVertexXY(baseRightX, baseRightY)])
         walls.push([makeVertexXY(baseRightX, baseRightY), makeVertexXY(baseCenterX, baseCenterY)])
       }
+
+      // Build arrow vertices (same Victor objects that go into walls/graph)
+      const tipV = makeVertexXY(tipX, tipY)
+      const baseLeftV = makeVertexXY(baseLeftX, baseLeftY)
+      const baseCenterV = makeVertexXY(baseCenterX, baseCenterY)
+      const baseRightV = makeVertexXY(baseRightX, baseRightY)
+
+      // Store tip, base, and edges
+      cell.arrowTip = tipV
+      cell.arrowBase = baseCenterV
+      cell.arrowEdges = [
+        [tipV, baseLeftV],
+        [baseLeftV, baseCenterV],
+        [baseCenterV, baseRightV],
+        [baseRightV, tipV],
+      ]
     }
 
     // 3. OUTER PERIMETER (always walls, with exits)
@@ -447,7 +488,7 @@ export default class PolarGrid extends Grid {
       const endAngle = (w + 1) * outerAnglePerWedge
 
       if (cell.exitDirection === "out") {
-        addExitArcWithArrow(outerRadius, startAngle, endAngle, cell.exitType)
+        addExitArcWithArrow(cell, outerRadius, startAngle, endAngle)
       } else {
         addArcWall(outerRadius, startAngle, endAngle)
       }

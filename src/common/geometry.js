@@ -551,6 +551,46 @@ export const annotateVertices = (vertices, attrs) => {
   return vertices
 }
 
+// returns the closest point on line segment ab to point p
+export const closestPointOnSegment = (p, a, b) => {
+  const abX = b.x - a.x
+  const abY = b.y - a.y
+  const apX = p.x - a.x
+  const apY = p.y - a.y
+  const abLenSq = abX * abX + abY * abY
+
+  if (abLenSq === 0) {
+    return { x: a.x, y: a.y }
+  }
+
+  const t = Math.max(0, Math.min(1, (apX * abX + apY * abY) / abLenSq))
+
+  return { x: a.x + t * abX, y: a.y + t * abY }
+}
+
+// returns the closest point across multiple line segments to point p
+// also returns the segment it's on (for finding nearest graph vertices)
+export const closestPointOnSegments = (p, segments) => {
+  let closest = null
+  let closestSegment = null
+  let minDistSq = Infinity
+
+  for (const [a, b] of segments) {
+    const point = closestPointOnSegment(p, a, b)
+    const dx = point.x - p.x
+    const dy = point.y - p.y
+    const distSq = dx * dx + dy * dy
+
+    if (distSq < minDistSq) {
+      minDistSq = distSq
+      closest = point
+      closestSegment = [a, b]
+    }
+  }
+
+  return { point: closest, segment: closestSegment }
+}
+
 // returns the intersection point of two line segments
 export const calculateIntersection = (p1, p2, p3, p4) => {
   var denominator =
