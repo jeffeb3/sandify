@@ -99,7 +99,7 @@ const options = {
   mazeWidth: {
     title: "Maze width",
     min: 1,
-    max: 20,
+    max: 30,
     isVisible: (layer, state) => {
       return state.mazeShape !== "Circle"
     },
@@ -107,7 +107,7 @@ const options = {
   mazeHeight: {
     title: "Maze height",
     min: 1,
-    max: 20,
+    max: 30,
     isVisible: (layer, state) => {
       return state.mazeShape !== "Circle"
     },
@@ -343,13 +343,8 @@ export default class Maze extends Shape {
       return
     }
 
-    // Arrow geometry: edges[0][0] = tip, edges[1][1] = baseCenter
-    // Entrance arrow points IN: tip is inside maze (start here)
-    // Exit arrow points OUT: baseCenter is inside maze (end here)
     const entranceTip = startCell.arrowEdges[0][0]
     const exitBaseCenter = endCell.arrowEdges[1][1]
-
-    // Walk graph from trail end to entrance arrow
     const entranceKey = entranceTip.toString()
     const trailEndKey = trail[trail.length - 1]
 
