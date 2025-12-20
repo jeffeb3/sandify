@@ -8,7 +8,6 @@ import Grid from "./Grid"
 export default class RectangularGrid extends Grid {
   constructor(width, height, rng) {
     super()
-    this.gridType = "rectangular"
     this.width = width
     this.height = height
     this.rng = rng
@@ -68,28 +67,6 @@ export default class RectangularGrid extends Grid {
     return `${cell.x},${cell.y}`
   }
 
-  link(cell1, cell2) {
-    cell1.links.add(this.cellKey(cell2))
-    cell2.links.add(this.cellKey(cell1))
-  }
-
-  unlink(cell1, cell2) {
-    cell1.links.delete(this.cellKey(cell2))
-    cell2.links.delete(this.cellKey(cell1))
-  }
-
-  isLinked(cell1, cell2) {
-    return cell1.links.has(this.cellKey(cell2))
-  }
-
-  markVisited(cell) {
-    cell.visited = true
-  }
-
-  isVisited(cell) {
-    return cell.visited
-  }
-
   cellEquals(cell1, cell2) {
     return cell1.x === cell2.x && cell1.y === cell2.y
   }
@@ -99,38 +76,6 @@ export default class RectangularGrid extends Grid {
     return {
       x: cell.x + 0.5,
       y: cell.y + 0.5,
-    }
-  }
-
-  // Get the two vertices of an exit wall for a cell
-  // Returns [v1, v2] where v1 and v2 are {x, y} objects
-  getExitVertices(cell) {
-    const { x, y } = cell
-    const dir = cell.exitDirection
-
-    switch (dir) {
-      case "n":
-        return [
-          { x, y: 0 },
-          { x: x + 1, y: 0 },
-        ]
-      case "s":
-        return [
-          { x, y: this.height },
-          { x: x + 1, y: this.height },
-        ]
-      case "w":
-        return [
-          { x: 0, y },
-          { x: 0, y: y + 1 },
-        ]
-      case "e":
-        return [
-          { x: this.width, y },
-          { x: this.width, y: y + 1 },
-        ]
-      default:
-        return null
     }
   }
 
@@ -160,16 +105,7 @@ export default class RectangularGrid extends Grid {
   extractWalls() {
     const walls = []
     const vertexCache = new Map()
-
-    const makeVertex = (x, y) => {
-      const key = `${x},${y}`
-
-      if (!vertexCache.has(key)) {
-        vertexCache.set(key, new Victor(x, y))
-      }
-
-      return vertexCache.get(key)
-    }
+    const makeVertex = this.createMakeVertex(vertexCache, false)
 
     // Inward directions for each edge (into the maze)
     const inwardDir = {
@@ -179,33 +115,10 @@ export default class RectangularGrid extends Grid {
       e: { dx: -1, dy: 0 },
     }
 
-    // Draw exit wall split at midpoint + arrow on top
-    // Stores arrow tip on cell for solution path drawing
-    const addExitWithArrow = (cell, x1, y1, x2, y2, direction) => {
+    const addExit = (cell, x1, y1, x2, y2, direction) => {
       const { dx, dy } = inwardDir[direction]
-      const mx = (x1 + x2) / 2
-      const my = (y1 + y2) / 2
 
-      // Split wall at midpoint so arrow connects to graph
-      walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
-      walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
-
-      // Add arrow (connects at midpoint) and store tip/base on cell
-      const arrow = this.addExitArrow(
-        walls,
-        makeVertex,
-        x1,
-        y1,
-        x2,
-        y2,
-        cell.exitType,
-        dx,
-        dy,
-      )
-
-      cell.arrowTip = arrow.tip
-      cell.arrowBase = arrow.base
-      cell.arrowEdges = arrow.edges
+      this.addExitWithArrow(walls, makeVertex, cell, x1, y1, x2, y2, dx, dy)
     }
 
     for (let y = 0; y < this.height; y++) {
@@ -215,7 +128,7 @@ export default class RectangularGrid extends Grid {
         // North wall (top of cell)
         if (y === 0) {
           if (cell.exitDirection === "n") {
-            addExitWithArrow(cell, x, y, x + 1, y, "n")
+            addExit(cell, x, y, x + 1, y, "n")
           } else {
             walls.push([makeVertex(x, y), makeVertex(x + 1, y)])
           }
@@ -230,7 +143,7 @@ export default class RectangularGrid extends Grid {
         // West wall (left of cell)
         if (x === 0) {
           if (cell.exitDirection === "w") {
-            addExitWithArrow(cell, x, y, x, y + 1, "w")
+            addExit(cell, x, y, x, y + 1, "w")
           } else {
             walls.push([makeVertex(x, y), makeVertex(x, y + 1)])
           }
@@ -245,7 +158,7 @@ export default class RectangularGrid extends Grid {
         // South wall (bottom edge only for last row)
         if (y === this.height - 1) {
           if (cell.exitDirection === "s") {
-            addExitWithArrow(cell, x, y + 1, x + 1, y + 1, "s")
+            addExit(cell, x, y + 1, x + 1, y + 1, "s")
           } else {
             walls.push([makeVertex(x, y + 1), makeVertex(x + 1, y + 1)])
           }
@@ -254,7 +167,7 @@ export default class RectangularGrid extends Grid {
         // East wall (right edge only for last column)
         if (x === this.width - 1) {
           if (cell.exitDirection === "e") {
-            addExitWithArrow(cell, x + 1, y, x + 1, y + 1, "e")
+            addExit(cell, x + 1, y, x + 1, y + 1, "e")
           } else {
             walls.push([makeVertex(x + 1, y), makeVertex(x + 1, y + 1)])
           }

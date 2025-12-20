@@ -1,16 +1,97 @@
 // Base class for all maze grids
 // Provides shared functionality like finding hardest exits
 
+import Victor from "victor"
+
 const ARROW_HEAD_WIDTH = 0.625 // Arrow head width as fraction of wall length (25% bigger)
 const ARROW_HEAD_HEIGHT = 0.8 // Arrow head height relative to width
 
 export default class Grid {
   // Subclasses must implement:
   // - getEdgeCells() -> [{cell, direction, edge}, ...]
-  // - getExitVertices(cell) -> [{x, y}, {x, y}] (wall endpoints)
   // - cellKey(cell) -> string
   // - getNeighbors(cell) -> [cell, ...]
-  // - isLinked(cell1, cell2) -> boolean
+
+  link(cell1, cell2) {
+    cell1.links.add(this.cellKey(cell2))
+    cell2.links.add(this.cellKey(cell1))
+  }
+
+  unlink(cell1, cell2) {
+    cell1.links.delete(this.cellKey(cell2))
+    cell2.links.delete(this.cellKey(cell1))
+  }
+
+  isLinked(cell1, cell2) {
+    return cell1.links.has(this.cellKey(cell2))
+  }
+
+  markVisited(cell) {
+    cell.visited = true
+  }
+
+  isVisited(cell) {
+    return cell.visited
+  }
+
+  // Factory to create a cached vertex function
+  // round=true rounds to 6 decimals (needed for non-integer coordinates)
+  createMakeVertex(vertexCache, round = true) {
+    return (x, y) => {
+      const rx = round ? Math.round(x * 1000000) / 1000000 : x
+      const ry = round ? Math.round(y * 1000000) / 1000000 : y
+      const key = `${rx},${ry}`
+
+      if (!vertexCache.has(key)) {
+        vertexCache.set(key, new Victor(rx, ry))
+      }
+
+      return vertexCache.get(key)
+    }
+  }
+
+  // Helper to add an exit arrow with wall splitting
+  // This handles the common pattern: split wall, scale coords, draw arrow, store edges
+  addExitWithArrow(
+    walls,
+    makeVertex,
+    cell,
+    x1,
+    y1,
+    x2,
+    y2,
+    inwardDx,
+    inwardDy,
+    arrowScale = 1.0,
+  ) {
+    const mx = (x1 + x2) / 2
+    const my = (y1 + y2) / 2
+
+    // Split wall at midpoint so arrow connects to graph
+    walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
+    walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
+
+    // Scale wall coords for arrow sizing
+    const sx1 = mx + (x1 - mx) * arrowScale
+    const sy1 = my + (y1 - my) * arrowScale
+    const sx2 = mx + (x2 - mx) * arrowScale
+    const sy2 = my + (y2 - my) * arrowScale
+
+    // Add arrow (connects at midpoint) and store edges on cell
+    const arrow = this.addExitArrow(
+      walls,
+      makeVertex,
+      sx1,
+      sy1,
+      sx2,
+      sy2,
+      cell.exitType,
+      inwardDx,
+      inwardDy,
+    )
+
+    cell.arrowEdges = arrow.edges
+  }
 
   // Draw arrow marker inside the maze (no shaft)
   // Exit: tip touches wall, arrow head extends inward (pointing out)
@@ -102,21 +183,13 @@ export default class Grid {
       ])
     }
 
-    // Build arrow vertices (same Victor objects that go into walls/graph)
-    const tipV = makeVertex(tipX, tipY)
-    const baseLeftV = makeVertex(baseLeftX, baseLeftY)
-    const baseCenterV = makeVertex(baseCenterX, baseCenterY)
-    const baseRightV = makeVertex(baseRightX, baseRightY)
-
-    // Return vertices and edges
+    // Return edges (Victor objects that go into walls/graph)
     return {
-      tip: tipV,
-      base: baseCenterV,
       edges: [
-        [tipV, baseLeftV],
-        [baseLeftV, baseCenterV],
-        [baseCenterV, baseRightV],
-        [baseRightV, tipV],
+        [makeVertex(tipX, tipY), makeVertex(baseLeftX, baseLeftY)],
+        [makeVertex(baseLeftX, baseLeftY), makeVertex(baseCenterX, baseCenterY)],
+        [makeVertex(baseCenterX, baseCenterY), makeVertex(baseRightX, baseRightY)],
+        [makeVertex(baseRightX, baseRightY), makeVertex(tipX, tipY)],
       ],
     }
   }

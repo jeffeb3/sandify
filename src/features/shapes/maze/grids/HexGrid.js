@@ -7,7 +7,6 @@ import Grid from "./Grid"
 export default class HexGrid extends Grid {
   constructor(width, height, rng) {
     super()
-    this.gridType = "hex"
     this.width = width
     this.height = height
     this.rng = rng
@@ -92,28 +91,6 @@ export default class HexGrid extends Grid {
     return `${cell.q},${cell.r}`
   }
 
-  link(cell1, cell2) {
-    cell1.links.add(this.cellKey(cell2))
-    cell2.links.add(this.cellKey(cell1))
-  }
-
-  unlink(cell1, cell2) {
-    cell1.links.delete(this.cellKey(cell2))
-    cell2.links.delete(this.cellKey(cell1))
-  }
-
-  isLinked(cell1, cell2) {
-    return cell1.links.has(this.cellKey(cell2))
-  }
-
-  markVisited(cell) {
-    cell.visited = true
-  }
-
-  isVisited(cell) {
-    return cell.visited
-  }
-
   cellEquals(cell1, cell2) {
     return cell1.q === cell2.q && cell1.r === cell2.r
   }
@@ -130,46 +107,22 @@ export default class HexGrid extends Grid {
   }
 
   // Get cells on the grid perimeter with their exit directions
-  // For hex grids, use e/w (east/west) exits for opposite edges
   getEdgeCells() {
     const edgeCells = []
 
     for (const cell of this.cells) {
       const { q } = cell
 
-      // Left edge (q=0): west exit
       if (q === 0) {
         edgeCells.push({ cell, direction: "w", edge: "w" })
       }
 
-      // Right edge (q=width-1): east exit
       if (q === this.width - 1) {
         edgeCells.push({ cell, direction: "e", edge: "e" })
       }
     }
 
     return edgeCells
-  }
-
-  getExitVertices(cell) {
-    const corners = this.getHexCorners(cell.q, cell.r)
-    const dir = cell.exitDirection
-
-    // corners: [p1(top-left), p2(bottom-left), p3(bottom), p4(bottom-right), p5(top-right), p6(top)]
-    switch (dir) {
-      case "w": // west edge: p1 to p2
-        return [
-          { x: corners[0][0], y: corners[0][1] },
-          { x: corners[1][0], y: corners[1][1] },
-        ]
-      case "e": // east edge: p4 to p5
-        return [
-          { x: corners[3][0], y: corners[3][1] },
-          { x: corners[4][0], y: corners[4][1] },
-        ]
-      default:
-        return null
-    }
   }
 
   getHexCorners(q, r) {
@@ -201,58 +154,29 @@ export default class HexGrid extends Grid {
   extractWalls() {
     const walls = []
     const vertexCache = new Map()
+    const makeVertex = this.createMakeVertex(vertexCache)
 
-    const makeVertex = (x, y) => {
-      const rx = Math.round(x * 1000000) / 1000000
-      const ry = Math.round(y * 1000000) / 1000000
-      const key = `${rx},${ry}`
-
-      if (!vertexCache.has(key)) {
-        vertexCache.set(key, new Victor(rx, ry))
-      }
-
-      return vertexCache.get(key)
-    }
-
-    // Draw exit wall split at midpoint + arrow on top
-    // Scale up arrow for hex's edges
-    // Stores arrow tip on cell for solution path drawing
     const arrowScale = 1.25
-    const addExitWithArrow = (cell, x1, y1, x2, y2, direction) => {
+
+    const addExit = (cell, x1, y1, x2, y2, direction) => {
       // For pointy-top hex, west/east edges are vertical
       // West (q=0): inward points right (+x)
       // East (q=max): inward points left (-x)
       const inwardDx = direction === "w" ? 1 : -1
       const inwardDy = 0
-      const mx = (x1 + x2) / 2
-      const my = (y1 + y2) / 2
 
-      // Split wall at midpoint so arrow connects to graph
-      walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
-      walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
-
-      // Scale wall coords away from midpoint to enlarge arrow
-      const sx1 = mx + (x1 - mx) * arrowScale
-      const sy1 = my + (y1 - my) * arrowScale
-      const sx2 = mx + (x2 - mx) * arrowScale
-      const sy2 = my + (y2 - my) * arrowScale
-
-      // Add arrow (connects at midpoint) and store tip/base on cell
-      const arrow = this.addExitArrow(
+      this.addExitWithArrow(
         walls,
         makeVertex,
-        sx1,
-        sy1,
-        sx2,
-        sy2,
-        cell.exitType,
+        cell,
+        x1,
+        y1,
+        x2,
+        y2,
         inwardDx,
         inwardDy,
+        arrowScale,
       )
-
-      cell.arrowTip = arrow.tip
-      cell.arrowBase = arrow.base
-      cell.arrowEdges = arrow.edges
     }
 
     for (const cell of this.cells) {
@@ -265,14 +189,7 @@ export default class HexGrid extends Grid {
 
       if (!west || !this.isLinked(cell, west)) {
         if (cell.exitDirection === "w") {
-          addExitWithArrow(
-            cell,
-            corners[0][0],
-            corners[0][1],
-            corners[1][0],
-            corners[1][1],
-            "w",
-          )
+          addExit(cell, corners[0][0], corners[0][1], corners[1][0], corners[1][1], "w")
         } else {
           walls.push([
             makeVertex(corners[0][0], corners[0][1]),
@@ -306,14 +223,7 @@ export default class HexGrid extends Grid {
 
       if (!east || !this.isLinked(cell, east)) {
         if (cell.exitDirection === "e") {
-          addExitWithArrow(
-            cell,
-            corners[3][0],
-            corners[3][1],
-            corners[4][0],
-            corners[4][1],
-            "e",
-          )
+          addExit(cell, corners[3][0], corners[3][1], corners[4][0], corners[4][1], "e")
         } else {
           walls.push([
             makeVertex(corners[3][0], corners[3][1]),

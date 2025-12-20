@@ -7,7 +7,6 @@ import Grid from "./Grid"
 export default class TriangleGrid extends Grid {
   constructor(width, height, rng) {
     super()
-    this.gridType = "triangle"
     this.width = width
     this.height = height
     this.rng = rng
@@ -91,28 +90,6 @@ export default class TriangleGrid extends Grid {
     return `${cell.x},${cell.y}`
   }
 
-  link(cell1, cell2) {
-    cell1.links.add(this.cellKey(cell2))
-    cell2.links.add(this.cellKey(cell1))
-  }
-
-  unlink(cell1, cell2) {
-    cell1.links.delete(this.cellKey(cell2))
-    cell2.links.delete(this.cellKey(cell1))
-  }
-
-  isLinked(cell1, cell2) {
-    return cell1.links.has(this.cellKey(cell2))
-  }
-
-  markVisited(cell) {
-    cell.visited = true
-  }
-
-  isVisited(cell) {
-    return cell.visited
-  }
-
   cellEquals(cell1, cell2) {
     return cell1.x === cell2.x && cell1.y === cell2.y
   }
@@ -162,32 +139,6 @@ export default class TriangleGrid extends Grid {
     return edgeCells
   }
 
-  // Get the two vertices of an exit wall for a cell
-  getExitVertices(cell) {
-    const corners = this.getTriangleCorners(cell.x, cell.y)
-    const dir = cell.exitDirection
-
-    if (cell.upward) {
-      // UP triangle: top, bottomLeft, bottomRight
-      if (dir === "s") {
-        return [
-          { x: corners.bottomLeft[0], y: corners.bottomLeft[1] },
-          { x: corners.bottomRight[0], y: corners.bottomRight[1] },
-        ]
-      }
-    } else {
-      // DOWN triangle: topLeft, topRight, bottom
-      if (dir === "n") {
-        return [
-          { x: corners.topLeft[0], y: corners.topLeft[1] },
-          { x: corners.topRight[0], y: corners.topRight[1] },
-        ]
-      }
-    }
-
-    return null
-  }
-
   getTriangleCorners(x, y) {
     const h = this.triHeight
     const ys = this.yScale
@@ -213,56 +164,27 @@ export default class TriangleGrid extends Grid {
   extractWalls() {
     const walls = []
     const vertexCache = new Map()
+    const makeVertex = this.createMakeVertex(vertexCache)
 
-    const makeVertex = (x, y) => {
-      const rx = Math.round(x * 1000000) / 1000000
-      const ry = Math.round(y * 1000000) / 1000000
-      const key = `${rx},${ry}`
-
-      if (!vertexCache.has(key)) {
-        vertexCache.set(key, new Victor(rx, ry))
-      }
-
-      return vertexCache.get(key)
-    }
-
-    // Draw exit wall split at midpoint + arrow on top
-    // Scale down arrow for triangle's smaller edges
-    // Stores arrow tip on cell for solution path drawing
     const arrowScale = 0.6
-    const addExitWithArrow = (cell, x1, y1, x2, y2, direction) => {
+
+    const addExit = (cell, x1, y1, x2, y2, direction) => {
       // For horizontal edges: n = inward down, s = inward up
       const inwardDx = 0
       const inwardDy = direction === "n" ? 1 : -1
-      const mx = (x1 + x2) / 2
-      const my = (y1 + y2) / 2
 
-      // Split wall at midpoint so arrow connects to graph
-      walls.push([makeVertex(x1, y1), makeVertex(mx, my)])
-      walls.push([makeVertex(mx, my), makeVertex(x2, y2)])
-
-      // Scale wall coords toward midpoint to shrink arrow
-      const sx1 = mx + (x1 - mx) * arrowScale
-      const sy1 = my + (y1 - my) * arrowScale
-      const sx2 = mx + (x2 - mx) * arrowScale
-      const sy2 = my + (y2 - my) * arrowScale
-
-      // Add arrow (connects at midpoint) and store tip/base on cell
-      const arrow = this.addExitArrow(
+      this.addExitWithArrow(
         walls,
         makeVertex,
-        sx1,
-        sy1,
-        sx2,
-        sy2,
-        cell.exitType,
+        cell,
+        x1,
+        y1,
+        x2,
+        y2,
         inwardDx,
         inwardDy,
+        arrowScale,
       )
-
-      cell.arrowTip = arrow.tip
-      cell.arrowBase = arrow.base
-      cell.arrowEdges = arrow.edges
     }
 
     for (const cell of this.cells) {
@@ -298,7 +220,7 @@ export default class TriangleGrid extends Grid {
 
         if (!south || !this.isLinked(cell, south)) {
           if (cell.exitDirection === "s") {
-            addExitWithArrow(
+            addExit(
               cell,
               corners.bottomLeft[0],
               corners.bottomLeft[1],
@@ -336,7 +258,7 @@ export default class TriangleGrid extends Grid {
 
         if (!north || !this.isLinked(cell, north)) {
           if (cell.exitDirection === "n") {
-            addExitWithArrow(
+            addExit(
               cell,
               corners.topLeft[0],
               corners.topLeft[1],

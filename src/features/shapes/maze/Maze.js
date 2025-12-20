@@ -32,7 +32,7 @@ const algorithms = {
 }
 
 // Set to true to debug maze generation
-const DEBUG_MAZE = true
+const DEBUG_MAZE = false
 
 const algorithmKeyByShape = {
   Rectangle: "mazeType",
@@ -252,20 +252,14 @@ export default class Maze extends Shape {
       branchLevel: mazeBranchLevel,
     })
 
-    let exitWalls = null
     let solutionPath = null
 
     if (mazeShowExits && grid.findHardestExits) {
       const exits = grid.findHardestExits()
 
-      if (exits && grid.getExitVertices) {
+      if (exits) {
         exits.startCell.exitType = "entrance"
         exits.endCell.exitType = "exit"
-
-        exitWalls = {
-          start: grid.getExitVertices(exits.startCell),
-          end: grid.getExitVertices(exits.endCell),
-        }
 
         if (mazeShowSolution && exits.path) {
           solutionPath = exits.path
@@ -278,7 +272,7 @@ export default class Maze extends Shape {
       grid.dump()
     }
 
-    return this.drawMaze(grid, exitWalls, solutionPath)
+    return this.drawMaze(grid, solutionPath)
   }
 
   createGrid(shape, rng) {
@@ -307,7 +301,7 @@ export default class Maze extends Shape {
     return new GridClass(Math.max(2, mazeWidth), Math.max(2, mazeHeight), rng)
   }
 
-  drawMaze(grid, exitWalls = null, solutionPath = null) {
+  drawMaze(grid, solutionPath = null) {
     const wallSegments = grid.extractWalls()
     const graph = new Graph()
 
@@ -329,15 +323,8 @@ export default class Maze extends Shape {
     const trail = eulerianTrail({ edges: eulerizedEdges })
     const walkedVertices = trail.map((key) => graph.nodeMap[key])
 
-    if (solutionPath && solutionPath.length > 0 && exitWalls) {
-      this.drawSolution(
-        walkedVertices,
-        graph,
-        trail,
-        grid,
-        exitWalls,
-        solutionPath,
-      )
+    if (solutionPath && solutionPath.length > 0) {
+      this.drawSolution(walkedVertices, graph, trail, grid, solutionPath)
     }
 
     const vertices = cloneVertices(walkedVertices)
@@ -347,7 +334,7 @@ export default class Maze extends Shape {
     return vertices
   }
 
-  drawSolution(walkedVertices, graph, trail, grid, exitWalls, solutionPath) {
+  drawSolution(walkedVertices, graph, trail, grid, solutionPath) {
     const startCell = solutionPath[0]
     const endCell = solutionPath[solutionPath.length - 1]
 
