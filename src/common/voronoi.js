@@ -234,6 +234,7 @@ export class VoronoiMixin {
       voronoiMinDistance,
       voronoiMaxDistance,
       voronoiZoom,
+      voronoiUniformity = 0,
     } = options
     const width =
       voronoiPlacement == "poisson disk sampling"
@@ -268,6 +269,10 @@ export class VoronoiMixin {
         minDistance: voronoiMinDistance,
         maxDistance: voronoiMaxDistance,
       })
+    }
+
+    if (voronoiUniformity > 0) {
+      points = this.relaxPoints(points, width, height, voronoiUniformity)
     }
 
     return points
@@ -336,5 +341,45 @@ export class VoronoiMixin {
     }
 
     return graph.findNode(onEdge) || closestNode
+  }
+
+  // Lloyd relaxation: move each point to the centroid of its Voronoi cell
+  relaxPoints(points, width, height, iterations) {
+    let relaxedPoints = points
+
+    for (let i = 0; i < iterations; i++) {
+      const delaunay = Delaunay.from(relaxedPoints)
+      const voronoi = delaunay.voronoi([0, 0, width, height])
+
+      relaxedPoints = relaxedPoints.map((point, idx) => {
+        const cell = voronoi.cellPolygon(idx)
+        if (!cell || cell.length < 3) return point
+
+        // Calculate centroid of the cell polygon
+        let cx = 0
+        let cy = 0
+        let area = 0
+
+        for (let j = 0; j < cell.length - 1; j++) {
+          const [x0, y0] = cell[j]
+          const [x1, y1] = cell[j + 1]
+          const cross = x0 * y1 - x1 * y0
+
+          area += cross
+          cx += (x0 + x1) * cross
+          cy += (y0 + y1) * cross
+        }
+
+        area /= 2
+        if (Math.abs(area) < 1e-10) return point
+
+        cx /= 6 * area
+        cy /= 6 * area
+
+        return [cx, cy]
+      })
+    }
+
+    return relaxedPoints
   }
 }
