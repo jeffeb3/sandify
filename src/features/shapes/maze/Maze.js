@@ -177,9 +177,7 @@ const options = {
     isVisible: (layer, state) => {
       return (
         state.mazeShape !== "Circle" &&
-        (state.mazeType === "Division" ||
-          state.mazeType === "Kruskal" ||
-          state.mazeType === "Eller")
+        (state.mazeType === "Division" || state.mazeType === "Eller")
       )
     },
   },

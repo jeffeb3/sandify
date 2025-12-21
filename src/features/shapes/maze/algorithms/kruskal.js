@@ -46,7 +46,7 @@ class UnionFind {
   }
 }
 
-export const kruskal = (grid, { rng, horizontalBias = 5 }) => {
+export const kruskal = (grid, { rng }) => {
   const uf = new UnionFind()
   const allCells = grid.getAllCells()
 
