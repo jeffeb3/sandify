@@ -15,10 +15,9 @@ export default class HexGrid extends Grid {
     this.yOffset1 = Math.cos(Math.PI / 3) // ~0.5
     this.yOffset2 = 2 - this.yOffset1 // ~1.5
 
-    const rawWidth = (2 * width + 1) * this.xOffset
-    const rawHeight = height * this.yOffset2 + this.yOffset1
-
-    this.yScale = rawWidth / rawHeight
+    // Keep hexagons regular (no distortion)
+    // Maze.js getMazeAspectRatio() handles the actual grid aspect ratio
+    this.yScale = 1
     this.cells = []
 
     for (let r = 0; r < height; r++) {

@@ -215,6 +215,7 @@ export default class Maze extends Shape {
   constructor() {
     super("maze")
     this.label = "Maze"
+    this.stretch = true
   }
 
   getInitialState() {
@@ -226,7 +227,7 @@ export default class Maze extends Shape {
         mazeTypeCircle: "Wilson",
         mazeTypeHex: "Wilson",
         mazeTypeTriangle: "Wilson",
-        mazeWidth: 4,
+        mazeWidth: 12,
         mazeHeight: 12,
         mazeRingCount: 10,
         mazeWedgeCount: 10,
@@ -238,18 +239,17 @@ export default class Maze extends Shape {
         mazeShowExits: true,
         mazeShowSolution: false,
         seed: 1,
-        maintainAspectRatio: true,
       },
     }
   }
 
-  // Override to ensure uniform scaling (aspectRatio: 1.0 prevents distortion in resizeVertices)
+  // Size initial transformer to fit machine, using actual vertex aspect ratio
   initialDimensions(props) {
     if (!props) {
       return { width: 0, height: 0, aspectRatio: 1.0 }
     }
 
-    const { width, height } = super.initialDimensions(props)
+    const { width, height, aspectRatio } = super.initialDimensions(props)
     const machine = getMachine(props.machine)
     const maxSize = Math.min(machine.width, machine.height) * 0.6
     const scale = maxSize / Math.max(width, height)
@@ -257,21 +257,38 @@ export default class Maze extends Shape {
     return {
       width: width * scale,
       height: height * scale,
-      aspectRatio: 1.0,
+      aspectRatio,
     }
   }
 
   getMazeAspectRatio(state) {
-    // Rectangle: width/height ratio; others are square due to yScale normalization
     if (state.mazeShape === "Rectangle") {
       return state.mazeWidth / state.mazeHeight
+    }
+
+    if (state.mazeShape === "Triangle") {
+      const triHeight = Math.sqrt(3) / 2
+      const rawWidth = (state.mazeWidth + 1) * 0.5
+      const rawHeight = state.mazeHeight * triHeight
+
+      return rawWidth / rawHeight
+    }
+
+    if (state.mazeShape === "Hexagon") {
+      const xOffset = Math.sin(Math.PI / 3)
+      const rawWidth =
+        state.mazeHeight >= 2
+          ? (2 * state.mazeWidth + 1) * xOffset
+          : 2 * state.mazeWidth * xOffset
+      const rawHeight = 1.5 * state.mazeHeight + 0.5
+
+      return rawWidth / rawHeight
     }
 
     return 1
   }
 
   handleUpdate(layer, changes) {
-    // Enforce minimum dimensions
     if (changes.mazeWidth !== undefined) {
       changes.mazeWidth = Math.max(2, changes.mazeWidth)
     }
@@ -279,12 +296,21 @@ export default class Maze extends Shape {
       changes.mazeHeight = Math.max(2, changes.mazeHeight)
     }
 
-    const relevantChange =
-      changes.mazeShape !== undefined ||
-      changes.mazeWidth !== undefined ||
-      changes.mazeHeight !== undefined
+    // Scale transformer proportionally when maze dimensions change
+    // This preserves any manual distortion the user applied
+    if (changes.mazeWidth !== undefined && changes.mazeWidth !== layer.mazeWidth) {
+      const scale = changes.mazeWidth / layer.mazeWidth
 
-    if (!relevantChange) {
+      changes.width = layer.width * scale
+    }
+    if (changes.mazeHeight !== undefined && changes.mazeHeight !== layer.mazeHeight) {
+      const scale = changes.mazeHeight / layer.mazeHeight
+
+      changes.height = layer.height * scale
+    }
+
+    // When shape type changes, reset to natural aspect ratio
+    if (changes.mazeShape === undefined) {
       return
     }
 

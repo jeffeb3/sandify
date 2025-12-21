@@ -13,13 +13,9 @@ export default class TriangleGrid extends Grid {
 
     this.triHeight = Math.sqrt(3) / 2
 
-    // Calculate raw dimensions for aspect ratio
-    // Screen width: triangles overlap, so width = (W-1)*0.5 + 1 = 0.5*W + 0.5
-    // Screen height: H * triHeight
-    const rawWidth = 0.5 * width + 0.5
-    const rawHeight = height * this.triHeight
-
-    this.yScale = rawWidth / rawHeight
+    // Keep triangles regular (equilateral) - no distortion
+    // Maze.js getMazeAspectRatio() handles the actual grid aspect ratio
+    this.yScale = 1
     this.cells = []
 
     for (let y = 0; y < height; y++) {
