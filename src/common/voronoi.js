@@ -210,7 +210,7 @@ export class VoronoiMixin {
 
       if (!visited) {
         if (prev) {
-          const path = this.graph.dijkstraShortestPath(
+          const path = this.graph.bfsShortestPath(
             prev.toString(),
             neighbor.toString(),
           )
