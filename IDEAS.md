@@ -1,19 +1,27 @@
-# Shape Ideas
+# Sandify Ideas
+
+- [Shape Ideas](#shape-ideas)
+- [Effect Ideas](#effect-ideas)
+- [Rejected Shape Ideas](#rejected-shape-ideas)
+
+---
+
+## Shape Ideas
 
 Candidates for new shape types. All are algorithmic, render in 2D, and maintain integrity when optimized for contiguous drawing on a sand table. In addition, this provides a new list of categories that can be used to classify shapes in the UI during selection (more precise than our current **Shape** and **Eraser** categories).
 
 | Category | Existing Shapes | New Shapes | Enhancements |
 |----------|-----------------|-----------------|--------------|
-| [Constructions](#constructions) | - | [Envelope Curves](#envelope-curves) | |
+| [Constructions](#constructions) | - | [Envelope Curves](#envelope-curves), [Spanning Tree](#spanning-tree) | |
 | [Fields](#fields) | NoiseWave, Wiper | [Vector Fields](#vector-field-traces), [Attractors](#attractor-traces), [Noise Contours](#noise-contours), [Reaction-Diffusion](#reaction-diffusion) | [Wiper concentric](#wiper-concentric-pattern) |
 | [Fractals](#fractals) | LSystem, SpaceFiller | [IFS](#ifs-iterated-function-systems), [Escape-Time](#escape-time-boundary), [Lightning](#lightning-lichtenberg), [Space Colonization](#space-colonization) | [LSystem presets](#lsystem-additional-presets), [custom rules](#lsystem-custom-user-defined) |
 | [Imports](#imports) | sdf, png, jpg, webp, gcode, thr | [SVG](#svg-import), [DXF](#dxf-import) | |
 | [Interactive](#interactive) | - | [Doodle Draw](#doodle-draw) | |
 | [Interference](#interference) | - | [Moiré](#interference-pattern), [Cymatics](#cymatics) | |
 | Other | Point, V1Engineering | | |
-| [Packing](#packing) | CirclePacker, Voronoi | [Tangent Circles](#tangent-circles), [Subdivision](#subdivision) | [CirclePacker fill](#circlepacker-shape-and-fill-options), [Voronoi relaxation](#voronoi-lloyd-relaxation) |
+| [Packing](#packing) | CirclePacker, Voronoi | [Tangent Circles](#tangent-circles), [Subdivision](#subdivision) | [CirclePacker fill](#circlepacker-shape-and-fill-options) |
 | [Rolling Curves](#rolling-curves) | Epicycloid, Hypocycloid, FractalSpirograph | [Lissajous, Harmonograph, Guilloche](#oscillograph) | [Spirograph mode](#epicycloidhypocycloid-spirograph-mode), [FractalSpirograph options](#fractalspirograph-additional-options) |
-| [Simple Curves](#simple-curves) | Circle, Polygon, Star, Heart, Reuleaux, Rose | [Superformula](#superformula-gielis-curve) | [Heart variants](#heart-equation-variants), [Polygon vertex step](#polygon-vertex-step), [Maurer mode](#rose-maurer-mode) |
+| [Simple Curves](#simple-curves) | Circle, Polygon, Star, Heart, Reuleaux, Rose | [Superformula](#superformula-gielis-curve), [Butterfly](#butterfly-curve) | [Heart variants](#heart-equation-variants), [Polygon vertex step](#polygon-vertex-step), [Maurer mode](#rose-maurer-mode) |
 | [Spirals](#spirals) | - | [Spiral](#spiral), [Stepped Spiral](#stepped-spiral), [Phyllotaxis](#phyllotaxis) | |
 | Text | InputText, FancyText | | [InputText fonts](#inputtext-additional-fonts), [text on path](#text-text-on-path) |
 | [Tiles](#tiles) | TessellationTwist, Maze | [Truchet](#truchet-tiles), [Labyrinth](#labyrinth-tiles), [Celtic](#wovenceltic-tiles), [Meander](#meandergreek-key-tiles), [Girih](#girih-tiles), [Hyperbolic](#hyperbolic-tiling), [Curve Stitching](#curve-stitching-tiles) | [TessellationTwist options](#tessellationtwist-additional-options), [Maze algorithms/grids](#maze-additional-algorithms-and-grids) |
@@ -30,6 +38,26 @@ Lines tangent to a family of curves, forming a new curve.
 - Standalone (non-tile-based) string art constructions
 - Presets: nephroid (tangent to circle), cardioid (secant lines), parabola
 - Parameters: base shape, line count, construction type
+
+### Spanning Tree
+
+Minimum-length network connecting a set of seed points. Branching patterns with deliberate, optimized character.
+
+Variants:
+
+- MST (Minimum Spanning Tree) - Connects only seed points; O(n log n) via Kruskal/Prim
+- Steiner Tree - Adds junction points at 120° angles for shorter total length; uses heuristics
+
+Seed arrangements dramatically affect output:
+
+- Random → organic irregular branching
+- Grid → geometric, axis-aligned
+- Circular → radial spokes
+- Spiral → follows spiral flow
+
+Parameters: seed pattern, point count, mode (MST/Steiner)
+
+Contiguity: tree traversal (root → tips → back)
 
 ## Fields
 
@@ -245,6 +273,18 @@ r = (|cos(mθ/4)/a|^n2 + |sin(mθ/4)/b|^n3)^(-1/n1)
 - Parameters: m (symmetry), n1/n2/n3 (shape exponents), a/b (scaling)
 - Can generate starfish, flowers, polygons, organic forms
 - Superellipse is simplified case: `|x/a|^n + |y/b|^n = 1` (single exponent)
+
+### Butterfly Curve
+
+Fay's butterfly - a famous polar curve with wing-like lobes.
+
+```
+r = e^sin(θ) - 2cos(4θ) + sin⁵((2θ-π)/24)
+```
+
+- Fixed equation producing one iconic shape (like Heart)
+- Limited parameterization: tweaking constants distorts the butterfly identity
+- Low replay value but visually distinctive
 
 ## Spirals
 
@@ -494,23 +534,159 @@ Render text along a curved path instead of straight baseline.
 - Parameters: path shape, text alignment (start/center/end), letter spacing, flip orientation
 - Could reference another shape as the path source
 
-### Voronoi: Lloyd Relaxation
-
-Add "relaxation iterations" parameter to regularize cell shapes.
-
-Relaxed Voronoi produces a calmer, more orderly appearance - cells approach uniform hexagons rather than chaotic irregular shapes. Creates a honeycomb-like zen aesthetic. Useful when the organic randomness feels too busy.
-
-- Iterations = 0 (default): current behavior (irregular cells)
-- Iterations = 5-10: cells become more uniform hexagons
-- Complements weight functions: weight controls density, relaxation controls regularity
-
 ### Wiper: Concentric Pattern
 
 Currently Wiper has Lines (parallel zigzag) and Spiral (continuous Archimedean curve).
 
 Concentric - Discrete rings from outside-in or inside-out, connected by radial steps. Different visual rhythm than spiral - mandala-like. Could support circle or polygon rings.
 
-## Less Viable Ideas
+---
+
+## Effect Ideas
+
+Effects modify shape vertices. Classification of existing effects and candidates for new types.
+
+| Category | Existing Effects | New Effects | Enhancements |
+|----------|------------------|-------------|--------------|
+| [Transform](#transform-effects) | Loop, Transformer, Track | [Mirror](#mirror), [Kaleidoscope](#kaleidoscope), [Tile](#tile) | [Track paths](#track-additional-paths) |
+| [Distort](#distort-effects) | Warp, Fisheye, Noise, Voronoi | [Pixelate](#pixelate), [Spiral Wrap](#spiral-wrap), [Shatter](#shatter), [Fractal Edge](#fractal-edge) | [Warp types](#warp-additional-types) |
+| [Path](#path-effects) | Mask, FineTuning | [Simplify](#simplify) | [Mask shapes](#mask-additional-shapes), [FineTuning border](#finetuning-border-options) |
+| Other | ProgramCode | | |
+
+## Transform Effects
+
+Effects that replicate or reposition the shape.
+
+### Mirror
+
+Reflect shape across an axis.
+
+- Parameters: axis angle, axis offset from center, include original (yes/no)
+- Creates bilateral symmetry from asymmetric shapes
+- Low complexity: flip vertex coordinates across axis line
+
+### Kaleidoscope
+
+Rotational symmetry with alternating reflections.
+
+- Parameters: segment count (3-12), center offset
+- Replicates shape around center; alternating copies are mirrored
+- Creates snowflake/mandala-like patterns
+- Differs from Loop: reflection alternation produces fold-symmetry, not just rotation
+
+Needs prototyping to evaluate visual appeal and usability. May overlap with Loop; could alternatively be a Loop enhancement.
+
+### Tile
+
+Repeat shape in regular arrangements.
+
+- Modes: grid (NxM), linear (1xN with spacing), radial (ring at fixed radius)
+- Parameters: count, spacing, arrangement type
+- Unlike Loop: no scale/spin, pure repetition
+- Unlike Track: arranges copies, doesn't transform the shape along a path
+
+## Distort Effects
+
+Effects that dramatically transform vertex positions.
+
+### Pixelate
+
+Snap vertices to grid, creating stepped/blocky versions of smooth curves.
+
+- Parameters: grid size, grid angle
+- Retro 8-bit aesthetic from smooth organic curves
+- Low complexity: round vertex coordinates to grid, deduplicate
+
+### Spiral Wrap
+
+Wrap shape around a spiral path, bending/stretching it along the curve.
+
+- Parameters: tightness, turns, center offset
+- Rectangular-to-spiral coordinate transform
+- Unlike Track: actually deforms the shape, not just places copies
+- Medium complexity; requires subsampling for smooth curves
+
+### Shatter
+
+Break shape into fragments with broken glass aesthetic.
+
+Modes:
+- Connected - fragments linked by thin lines (one continuous path)
+- Cracked - fracture lines visible but shape intact (crazed ceramic)
+- Explode - separated pieces with return path to maintain contiguity
+
+Subdivision approaches:
+- Radial slices from center
+- Grid-based cuts
+- Random lines through shape
+
+Parameters: fragment count, explosion strength, seed, mode
+
+High complexity: requires shape subdivision, clipping, and path planning for contiguity.
+
+### Fractal Edge
+
+Replace shape edges with fractal L-system patterns.
+
+- Parameters: pattern type (Koch, Dragon, Cesàro), iterations, scale
+- Adds intricate crystalline/organic detail to shape boundaries
+- Best suited for angular shapes (Polygon, Star, imports)
+- Limited effect on smooth curves (Rose, Epicycloid, etc.) - no distinct edges to replace
+
+Note: Would require adding support to restrict effects by shape type; currently no such mechanism exists.
+
+## Path Effects
+
+Effects that modify path structure.
+
+### Simplify
+
+Reduce vertex count while preserving shape.
+
+- Parameter: tolerance (max deviation from original path)
+- Uses Ramer-Douglas-Peucker or similar algorithm
+- Speeds up rendering/export, cleans up noisy imports
+
+## Effect Enhancements
+
+### Track: Additional Paths
+
+Currently supports circular and spiral.
+
+- Ellipse - elliptical track with configurable aspect ratio
+- Lissajous - figure-8 and more complex oscillating paths; parameters: frequency ratio, phase
+
+### Warp: Additional Types
+
+Currently has angle, quad, circle, grid, shear, custom.
+
+- wave - Sinusoidal displacement along axis; parameters: amplitude, wavelength, axis angle
+- twist - Rotation amount varies with distance from center; spiral distortion
+- bulge - Local expand/contract from a point; complementary to Fisheye
+
+### Mask: Additional Shapes
+
+Currently supports rectangle and circle.
+
+- Polygon - n-sided regular polygon mask
+- Star - star-shaped mask
+- Custom - use another layer's shape as mask (reference layer)
+
+Custom mask is high complexity: requires generalizing machine abstraction or new polygon-clipping algorithm for arbitrary shapes (point-in-polygon, perimeter tracing, line-polygon intersection).
+
+### FineTuning: Border Options
+
+Currently "Add perimeter border" draws convex hull.
+
+Expand to dropdown with options:
+- Convex hull (current behavior)
+- Perimeter - trace actual shape outline
+
+---
+
+## Rejected Shape Ideas
+
+Ideas explored but not pursued.
 
 | Idea | Description | Reason |
 |------|-------------|--------|
