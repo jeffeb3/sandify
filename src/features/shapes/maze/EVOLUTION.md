@@ -19,6 +19,16 @@ Future directions and ideas for the maze feature.
 - Offset rectangular cells like brick pattern
 - 6 neighbors (2 horizontal, 4 diagonal)
 
+**Upsilon Grid**
+- Octagons with small squares at intersections
+- 8 neighbors for octagons, 4 for squares
+- Visually interesting tiling
+
+**Zeta Grid**
+- Rectangular cells with 45-degree diagonal passages allowed
+- 8 neighbors per cell instead of 4
+- Creates more organic-looking mazes
+
 ## Polar Enhancements
 
 **Radial Bias Parameter**
