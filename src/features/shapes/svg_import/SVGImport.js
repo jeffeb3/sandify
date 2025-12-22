@@ -106,6 +106,24 @@ export default class SVGImport extends Shape {
     }
   }
 
+  // Get SVG dimensions from viewBox or width/height attributes
+  getSvgSize(svg) {
+    const viewBox = svg.getAttribute("viewBox")
+
+    if (viewBox) {
+      const parts = viewBox.split(/[\s,]+/).map(parseFloat)
+
+      if (parts.length >= 4) {
+        return { width: parts[2], height: parts[3] }
+      }
+    }
+
+    const width = parseFloat(svg.getAttribute("width")) || 100
+    const height = parseFloat(svg.getAttribute("height")) || 100
+
+    return { width, height }
+  }
+
   // Parse SVG content and return array of paths (each path is array of vertices)
   parseSVG(svgContent, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     // Use innerHTML to parse SVG directly into HTML DOM context
@@ -127,6 +145,10 @@ export default class SVGImport extends Shape {
     try {
       this.expandUseElements(svg)
 
+      // Scale tolerance to SVG size for consistent curve smoothness
+      const { width, height } = this.getSvgSize(svg)
+      const tolerance = Math.min(width, height) / 1000
+
       const paths = []
       const selectors = "path, line, polyline, polygon, rect, circle, ellipse"
       const elements = svg.querySelectorAll(selectors)
@@ -140,7 +162,7 @@ export default class SVGImport extends Shape {
           return
         }
 
-        const result = this.elementToVertices(element)
+        const result = this.elementToVertices(element, tolerance)
 
         if (!result) {
           return
@@ -227,12 +249,12 @@ export default class SVGImport extends Shape {
     return brightness >= minBrightness && brightness <= maxBrightness
   }
 
-  elementToVertices(element) {
+  elementToVertices(element, tolerance = 0.5) {
     const tagName = element.tagName.toLowerCase()
 
     switch (tagName) {
       case "path":
-        return this.pathToVertices(element)
+        return this.pathToVertices(element, tolerance)
       case "line":
         return this.lineToVertices(element)
       case "polyline":
@@ -252,8 +274,7 @@ export default class SVGImport extends Shape {
 
   // <path d="..."> - use points-on-path for Bezier linearization
   // Returns array of paths (one per subpath in d attribute)
-  // Subsample to avoid long segments being flagged as outliers
-  pathToVertices(element) {
+  pathToVertices(element, tolerance = 0.5) {
     const d = element.getAttribute("d")
 
     if (!d) {
@@ -261,17 +282,14 @@ export default class SVGImport extends Shape {
     }
 
     try {
-      const tolerance = 0.5
+      // tolerance: curve subdivision (adaptive to SVG size)
+      // distance: point simplification (fixed for consistent performance)
       const distance = 0.5
       const pointArrays = pointsOnPath(d, tolerance, distance)
 
       return pointArrays
         .filter((points) => points.length > 0)
-        .map((points) => {
-          const vertices = points.map((pt) => new Victor(pt[0], pt[1]))
-
-          return subsample(vertices, SUBSAMPLE_LENGTH)
-        })
+        .map((points) => points.map((pt) => new Victor(pt[0], pt[1])))
     } catch {
       // Skip malformed paths (e.g., containing NaN)
       return null
