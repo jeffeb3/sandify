@@ -11,6 +11,11 @@ export const radToDeg = (rad) => {
   return (rad * 180.0) / Math.PI
 }
 
+// snap a value to the nearest grid point
+export const snapToGrid = (value, tolerance) => {
+  return Math.round(value / tolerance) * tolerance
+}
+
 export const distance = (v1, v2) => {
   return Math.sqrt(Math.pow(v1.x - v2.x, 2.0) + Math.pow(v1.y - v2.y, 2.0))
 }
@@ -305,6 +310,32 @@ export const ellipse = (rx, ry, cx = 0, cy = 0, resolution = 128.0) => {
 
   for (let i = 0; i <= resolution; i++) {
     let angle = ((Math.PI * 2.0) / resolution) * i
+    points.push(
+      new Victor(cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry),
+    )
+  }
+
+  return points
+}
+
+// returns an array of points drawing an elliptical arc
+export const ellipticalArc = (
+  rx,
+  ry,
+  startAngle,
+  endAngle,
+  cx = 0,
+  cy = 0,
+  resolution = 16,
+) => {
+  const steps = Math.max(
+    4,
+    Math.ceil((resolution * Math.abs(endAngle - startAngle)) / (Math.PI / 2)),
+  )
+  const points = []
+
+  for (let i = 0; i <= steps; i++) {
+    const angle = startAngle + ((endAngle - startAngle) * i) / steps
     points.push(
       new Victor(cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry),
     )

@@ -2,15 +2,17 @@ import Victor from "victor"
 import { pointsOnPath } from "points-on-path"
 import Shape from "./Shape"
 import Graph from "@/common/Graph"
-import UnionFind from "@/common/UnionFind"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
+import { getColorBrightness } from "@/common/colors"
 import {
   circle,
   ellipse,
+  ellipticalArc,
   centerOnOrigin,
   applyMatrixToVertices,
   cloneVertex,
+  snapToGrid,
 } from "@/common/geometry"
 
 const options = {
@@ -54,12 +56,9 @@ export default class SVGImport extends Shape {
         return [new Victor(0, 0)]
       }
 
-      // Flatten paths using CPP-based routing
-      const vertices = this.flattenPaths(paths)
+      const vertices = this.connectPaths(paths)
 
-      // Flip Y axis: SVG Y goes down, sand table Y goes up
       vertices.forEach((v) => (v.y = -v.y))
-
       centerOnOrigin(vertices)
 
       return vertices
@@ -88,21 +87,17 @@ export default class SVGImport extends Shape {
     document.body.appendChild(container)
 
     try {
-      // Expand <use> elements first
       this.expandUseElements(svg)
 
-      // Collect all drawable elements
       const paths = []
       const selectors = "path, line, polyline, polygon, rect, circle, ellipse"
       const elements = svg.querySelectorAll(selectors)
 
       elements.forEach((element) => {
-        // Skip elements inside <defs>
         if (element.closest("defs")) {
           return
         }
 
-        // Check visibility (stroke or fill)
         if (!this.isElementVisible(element)) {
           return
         }
@@ -113,10 +108,7 @@ export default class SVGImport extends Shape {
           return
         }
 
-        // Get cumulative transform
         const ctm = element.getCTM()
-
-        // pathToVertices returns array of paths (subpaths), others return single path
         const elementPaths = Array.isArray(result[0]) ? result : [result]
 
         elementPaths.forEach((vertices) => {
@@ -153,86 +145,26 @@ export default class SVGImport extends Shape {
         return
       }
 
-      // Clone the referenced element
       const clone = referenced.cloneNode(true)
+
       clone.removeAttribute("id")
 
-      // Apply use element's position
       const x = parseFloat(use.getAttribute("x")) || 0
       const y = parseFloat(use.getAttribute("y")) || 0
 
       if (x !== 0 || y !== 0) {
         const existingTransform = clone.getAttribute("transform") || ""
+
         clone.setAttribute(
           "transform",
           `translate(${x}, ${y}) ${existingTransform}`,
         )
       }
 
-      // Replace <use> with cloned content
       use.parentNode.replaceChild(clone, use)
     })
   }
 
-  // Parse a color string and return brightness (0-255), or null if unparseable
-  getColorBrightness(color) {
-    if (!color || color === "none") {
-      return null
-    }
-
-    const c = color.toLowerCase().trim()
-
-    // Handle hex colors
-    if (c.startsWith("#")) {
-      let hex = c.slice(1)
-
-      if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
-      }
-
-      if (hex.length === 6) {
-        const r = parseInt(hex.slice(0, 2), 16)
-        const g = parseInt(hex.slice(2, 4), 16)
-        const b = parseInt(hex.slice(4, 6), 16)
-
-        // Perceived brightness formula
-        return 0.299 * r + 0.587 * g + 0.114 * b
-      }
-    }
-
-    // Handle rgb() / rgba()
-    const rgbMatch = c.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
-
-    if (rgbMatch) {
-      const r = parseInt(rgbMatch[1], 10)
-      const g = parseInt(rgbMatch[2], 10)
-      const b = parseInt(rgbMatch[3], 10)
-
-      return 0.299 * r + 0.587 * g + 0.114 * b
-    }
-
-    // Handle common named colors
-    const namedColors = {
-      black: 0,
-      white: 255,
-      red: 76,
-      green: 150,
-      blue: 29,
-      yellow: 226,
-      orange: 156,
-      brown: 101,
-      gray: 128,
-      grey: 128,
-    }
-
-    if (namedColors[c] !== undefined) {
-      return namedColors[c]
-    }
-
-    return null
-  }
-
-  // Check if element should be rendered (stroke-only mode for sand tables)
   isElementVisible(element) {
     const stroke = this.getStyleProperty(element, "stroke")
     const fill = this.getStyleProperty(element, "fill")
@@ -257,7 +189,6 @@ export default class SVGImport extends Shape {
     let current = element
 
     while (current && current.tagName) {
-      // Check inline style first
       const style = current.getAttribute("style")
 
       if (style) {
@@ -267,21 +198,18 @@ export default class SVGImport extends Shape {
         }
       }
 
-      // Check attribute
       const attr = current.getAttribute(property)
 
       if (attr) {
         return attr
       }
 
-      // Walk up to parent
       current = current.parentElement
     }
 
     return null
   }
 
-  // Convert an SVG element to an array of vertices
   elementToVertices(element) {
     const tagName = element.tagName.toLowerCase()
 
@@ -357,7 +285,6 @@ export default class SVGImport extends Shape {
       vertices.push(new Victor(coords[i], coords[i + 1]))
     }
 
-    // Close polygon by repeating first point
     if (close && vertices.length > 0) {
       vertices.push(vertices[0].clone())
     }
@@ -402,15 +329,8 @@ export default class SVGImport extends Shape {
     vertices.push(new Victor(x + width - rx, y))
 
     // Top-right corner
-    this.addCornerArc(
-      vertices,
-      x + width - rx,
-      y + ry,
-      rx,
-      ry,
-      -Math.PI / 2,
-      0,
-      resolution,
+    vertices.push(
+      ...ellipticalArc(rx, ry, -Math.PI / 2, 0, x + width - rx, y + ry, resolution),
     )
 
     // Right edge
@@ -418,15 +338,8 @@ export default class SVGImport extends Shape {
     vertices.push(new Victor(x + width, y + height - ry))
 
     // Bottom-right corner
-    this.addCornerArc(
-      vertices,
-      x + width - rx,
-      y + height - ry,
-      rx,
-      ry,
-      0,
-      Math.PI / 2,
-      resolution,
+    vertices.push(
+      ...ellipticalArc(rx, ry, 0, Math.PI / 2, x + width - rx, y + height - ry, resolution),
     )
 
     // Bottom edge
@@ -434,15 +347,8 @@ export default class SVGImport extends Shape {
     vertices.push(new Victor(x + rx, y + height))
 
     // Bottom-left corner
-    this.addCornerArc(
-      vertices,
-      x + rx,
-      y + height - ry,
-      rx,
-      ry,
-      Math.PI / 2,
-      Math.PI,
-      resolution,
+    vertices.push(
+      ...ellipticalArc(rx, ry, Math.PI / 2, Math.PI, x + rx, y + height - ry, resolution),
     )
 
     // Left edge
@@ -450,36 +356,14 @@ export default class SVGImport extends Shape {
     vertices.push(new Victor(x, y + ry))
 
     // Top-left corner
-    this.addCornerArc(
-      vertices,
-      x + rx,
-      y + ry,
-      rx,
-      ry,
-      Math.PI,
-      (3 * Math.PI) / 2,
-      resolution,
+    vertices.push(
+      ...ellipticalArc(rx, ry, Math.PI, (3 * Math.PI) / 2, x + rx, y + ry, resolution),
     )
 
     // Close the path
     vertices.push(vertices[0].clone())
 
     return vertices
-  }
-
-  // Add an elliptical arc for rounded rect corners
-  addCornerArc(vertices, cx, cy, rx, ry, startAngle, endAngle, resolution) {
-    const steps = Math.max(
-      4,
-      Math.ceil((resolution * Math.abs(endAngle - startAngle)) / (Math.PI / 2)),
-    )
-
-    for (let i = 0; i <= steps; i++) {
-      const angle = startAngle + (endAngle - startAngle) * (i / steps)
-      vertices.push(
-        new Victor(cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry),
-      )
-    }
   }
 
   // <circle cx="" cy="" r="">
@@ -509,19 +393,11 @@ export default class SVGImport extends Shape {
     return ellipse(rx, ry, cx, cy, 128)
   }
 
-  snapToGrid(value, tolerance) {
-    return Math.round(value / tolerance) * tolerance
-  }
-
-  nodeKey(x, y, tolerance = 1) {
-    const sx = this.snapToGrid(x, tolerance)
-    const sy = this.snapToGrid(y, tolerance)
-
-    return `${sx.toFixed(2)},${sy.toFixed(2)}`
-  }
-
-  createNode(x, y, tolerance = 1) {
-    const key = this.nodeKey(x, y, tolerance)
+  // Nodes within tolerance share the same key - could extract to geometry.js if reused
+  proximityNode(x, y, tolerance = 1) {
+    const sx = snapToGrid(x, tolerance)
+    const sy = snapToGrid(y, tolerance)
+    const key = `${sx.toFixed(2)},${sy.toFixed(2)}`
 
     return { x, y, toString: () => key }
   }
@@ -537,7 +413,7 @@ export default class SVGImport extends Shape {
       if (path.length < 3) continue // Skip degenerate paths (need at least 3 for a shape)
 
       for (const pt of path) {
-        graph.addNode(this.createNode(pt.x, pt.y, tolerance))
+        graph.addNode(this.proximityNode(pt.x, pt.y, tolerance))
       }
 
       // Add edges for consecutive segments
@@ -545,8 +421,8 @@ export default class SVGImport extends Shape {
       for (let i = 0; i < path.length - 1; i++) {
         const pt1 = path[i]
         const pt2 = path[i + 1]
-        const node1 = this.createNode(pt1.x, pt1.y, tolerance)
-        const node2 = this.createNode(pt2.x, pt2.y, tolerance)
+        const node1 = this.proximityNode(pt1.x, pt1.y, tolerance)
+        const node2 = this.proximityNode(pt2.x, pt2.y, tolerance)
 
         if (node1.toString() !== node2.toString()) {
           graph.addEdge(node1, node2)
@@ -558,8 +434,8 @@ export default class SVGImport extends Shape {
       const endPt = path[path.length - 1]
 
       if (startPt.distance(endPt) < CLOSED_TOLERANCE) {
-        const node1 = this.createNode(endPt.x, endPt.y, tolerance)
-        const node2 = this.createNode(startPt.x, startPt.y, tolerance)
+        const node1 = this.proximityNode(endPt.x, endPt.y, tolerance)
+        const node2 = this.proximityNode(startPt.x, startPt.y, tolerance)
 
         if (node1.toString() !== node2.toString()) {
           graph.addEdge(node1, node2)
@@ -570,111 +446,17 @@ export default class SVGImport extends Shape {
     return graph
   }
 
-  // Find connected components in the graph
-  findComponents(graph) {
-    const visited = new Set()
-    const components = []
-
-    for (const nodeKey of graph.nodeKeys) {
-      if (visited.has(nodeKey)) continue
-
-      const component = []
-      const stack = [nodeKey]
-
-      while (stack.length > 0) {
-        const key = stack.pop()
-
-        if (visited.has(key)) continue
-
-        visited.add(key)
-        component.push(key)
-
-        const neighbors = graph.adjacencyList[key] || []
-
-        for (const { node } of neighbors) {
-          const neighborKey = node.toString()
-
-          if (!visited.has(neighborKey)) {
-            stack.push(neighborKey)
-          }
-        }
-      }
-
-      components.push(component)
-    }
-
-    return components
-  }
-
-  // Add bridge edges to connect disconnected components using MST (Kruskal's algorithm)
-  connectComponents(graph) {
-    const components = this.findComponents(graph)
-
-    if (components.length <= 1) return
-
-    // Build list of all possible bridges between all component pairs
-    // Then use Kruskal-style MST to connect them optimally
-    const allBridges = []
-
-    for (let i = 0; i < components.length; i++) {
-      for (let j = i + 1; j < components.length; j++) {
-        let bestDist = Infinity
-        let bestPair = null
-
-        // Find shortest bridge between component i and j
-        for (const key1 of components[i]) {
-          const node1 = graph.nodeMap[key1]
-
-          for (const key2 of components[j]) {
-            const node2 = graph.nodeMap[key2]
-            const dist = Math.hypot(node1.x - node2.x, node1.y - node2.y)
-
-            if (dist < bestDist) {
-              bestDist = dist
-              bestPair = [node1, node2]
-            }
-          }
-        }
-
-        if (bestPair) {
-          allBridges.push({
-            dist: bestDist,
-            pair: bestPair,
-            comp1: i,
-            comp2: j,
-          })
-        }
-      }
-    }
-
-    // Sort bridges by distance (shortest first)
-    allBridges.sort((a, b) => a.dist - b.dist)
-
-    const uf = new UnionFind()
-
-    for (let i = 0; i < components.length; i++) {
-      uf.makeSet(i)
-    }
-
-    // Kruskal's algorithm: add shortest bridges that connect new components
-    for (const bridge of allBridges) {
-      if (uf.union(bridge.comp1, bridge.comp2)) {
-        graph.addEdge(bridge.pair[0], bridge.pair[1])
-      }
-    }
-  }
-
   // Flatten paths into single vertex array using Chinese Postman algorithm
   // Graph contains ALL vertices and segments from ALL paths (open and closed)
   // CPP finds optimal traversal that covers every segment
-  flattenPaths(paths) {
+  connectPaths(paths) {
     if (paths.length === 0) return []
     if (paths.length === 1) return paths[0].map((v) => cloneVertex(v))
 
     const tolerance = 3 // Node merge tolerance in SVG units
     const graph = this.buildPathGraph(paths, tolerance)
 
-    this.connectComponents(graph)
+    graph.connectComponents()
 
     const edges = Object.values(graph.edgeMap)
     const dijkstraFn = (startKey, endKey) => graph.dijkstraShortestPath(startKey, endKey)
