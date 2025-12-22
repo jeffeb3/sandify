@@ -13,12 +13,20 @@ import {
   applyMatrixToVertices,
   cloneVertex,
   snapToGrid,
+  subsample,
 } from "@/common/geometry"
 
 const options = {
   svgContent: {
     title: "SVG content",
     type: "textarea",
+  },
+  fillBrightness: {
+    title: "Fill brightness",
+    type: "slider",
+    range: true,
+    min: 0,
+    max: 255,
   },
 }
 
@@ -39,18 +47,19 @@ export default class SVGImport extends Shape {
     return {
       ...super.getInitialState(),
       svgContent: props?.svgContent || DEFAULT_SVG,
+      fillBrightness: [0, 128],
     }
   }
 
   getVertices(state) {
-    const { svgContent } = state.shape
+    const { svgContent, fillBrightness } = state.shape
 
     if (!svgContent || svgContent.trim() === "") {
       return [new Victor(0, 0)]
     }
 
     try {
-      const paths = this.parseSVG(svgContent)
+      const paths = this.parseSVG(svgContent, fillBrightness)
 
       if (paths.length === 0) {
         return [new Victor(0, 0)]
@@ -69,7 +78,7 @@ export default class SVGImport extends Shape {
   }
 
   // Parse SVG content and return array of paths (each path is array of vertices)
-  parseSVG(svgContent) {
+  parseSVG(svgContent, fillBrightness = [0, 255]) {
     // Use innerHTML to parse SVG directly into HTML DOM context
     // This ensures elements are proper SVGGraphicsElement instances with getCTM()
     const container = document.createElement("div")
@@ -98,7 +107,7 @@ export default class SVGImport extends Shape {
           return
         }
 
-        if (!this.isElementVisible(element)) {
+        if (!this.isElementVisible(element, fillBrightness)) {
           return
         }
 
@@ -165,23 +174,25 @@ export default class SVGImport extends Shape {
     })
   }
 
-  isElementVisible(element) {
+  isElementVisible(element, fillBrightness = [0, 255]) {
     const stroke = this.getStyleProperty(element, "stroke")
     const fill = this.getStyleProperty(element, "fill")
 
-    // Draw if has stroke
+    // Always draw stroked elements
     if (stroke && stroke !== "none") {
       return true
     }
 
-    // Include all fills (traced as outlines)
-    // TODO: make this configurable via UI
-    // SVG default fill is black when not specified, so null or missing = black = include
-    if (fill !== "none") {
-      return true
+    // Check fill brightness against range
+    // SVG default fill is black when not specified, so null = black (brightness 0)
+    if (fill === "none") {
+      return false
     }
 
-    return false
+    const brightness = fill ? getColorBrightness(fill) : 0
+    const [minBrightness, maxBrightness] = fillBrightness
+
+    return brightness >= minBrightness && brightness <= maxBrightness
   }
 
   // Get a style property from element (checking attribute, style, and inherited from parents)
@@ -257,16 +268,18 @@ export default class SVGImport extends Shape {
   }
 
   // <line x1="" y1="" x2="" y2="">
+  // Subsample long edges to avoid outlier detection filtering
   lineToVertices(element) {
     const x1 = parseFloat(element.getAttribute("x1")) || 0
     const y1 = parseFloat(element.getAttribute("y1")) || 0
     const x2 = parseFloat(element.getAttribute("x2")) || 0
     const y2 = parseFloat(element.getAttribute("y2")) || 0
 
-    return [new Victor(x1, y1), new Victor(x2, y2)]
+    return subsample([new Victor(x1, y1), new Victor(x2, y2)], 40)
   }
 
   // <polyline points=""> or <polygon points="">
+  // Subsample long edges to avoid outlier detection filtering
   polylineToVertices(element, close) {
     const pointsAttr = element.getAttribute("points")
 
@@ -289,10 +302,11 @@ export default class SVGImport extends Shape {
       vertices.push(vertices[0].clone())
     }
 
-    return vertices
+    return subsample(vertices, 40)
   }
 
   // <rect x="" y="" width="" height="" rx="" ry="">
+  // Subsample long edges to avoid outlier detection filtering
   rectToVertices(element) {
     const x = parseFloat(element.getAttribute("x")) || 0
     const y = parseFloat(element.getAttribute("y")) || 0
@@ -310,14 +324,17 @@ export default class SVGImport extends Shape {
     ry = Math.min(ry, height / 2)
 
     if (rx === 0 && ry === 0) {
-      // Simple rectangle
-      return [
-        new Victor(x, y),
-        new Victor(x + width, y),
-        new Victor(x + width, y + height),
-        new Victor(x, y + height),
-        new Victor(x, y),
-      ]
+      // Simple rectangle - subsample to ensure edges < 50 units
+      return subsample(
+        [
+          new Victor(x, y),
+          new Victor(x + width, y),
+          new Victor(x + width, y + height),
+          new Victor(x, y + height),
+          new Victor(x, y),
+        ],
+        40,
+      )
     }
 
     // Rounded rectangle - build path with corner arcs
@@ -363,7 +380,8 @@ export default class SVGImport extends Shape {
     // Close the path
     vertices.push(vertices[0].clone())
 
-    return vertices
+    // Subsample to ensure edges < 50 units
+    return subsample(vertices, 40)
   }
 
   // <circle cx="" cy="" r="">
@@ -408,9 +426,30 @@ export default class SVGImport extends Shape {
   buildPathGraph(paths, tolerance = 1) {
     const graph = new Graph()
     const CLOSED_TOLERANCE = 0.5
+    const OUTLIER_THRESHOLD = 10 // Skip segments that are 10x longer than median
 
     for (const path of paths) {
       if (path.length < 3) continue // Skip degenerate paths (need at least 3 for a shape)
+
+      // Pre-compute segment lengths to detect outlier segments
+      const segmentLengths = []
+
+      for (let i = 0; i < path.length - 1; i++) {
+        segmentLengths.push(Math.hypot(
+          path[i + 1].x - path[i].x,
+          path[i + 1].y - path[i].y,
+        ))
+      }
+
+      // Find median segment length and mark outliers (any segment >> median)
+      const medianLength = this.median(segmentLengths)
+      const outlierIndices = new Set()
+
+      for (let i = 0; i < segmentLengths.length; i++) {
+        if (segmentLengths[i] > medianLength * OUTLIER_THRESHOLD) {
+          outlierIndices.add(i)
+        }
+      }
 
       for (const pt of path) {
         graph.addNode(this.proximityNode(pt.x, pt.y, tolerance))
@@ -418,7 +457,10 @@ export default class SVGImport extends Shape {
 
       // Add edges for consecutive segments
       // Note: pointsOnPath already separates subpaths (M commands), so no discontinuities within a path
+      // Skip outlier segments (e.g., long L commands that jump across filled shapes)
       for (let i = 0; i < path.length - 1; i++) {
+        if (outlierIndices.has(i)) continue
+
         const pt1 = path[i]
         const pt2 = path[i + 1]
         const node1 = this.proximityNode(pt1.x, pt1.y, tolerance)
@@ -444,6 +486,18 @@ export default class SVGImport extends Shape {
     }
 
     return graph
+  }
+
+  // Calculate median of an array of numbers
+  median(arr) {
+    if (arr.length === 0) return 0
+
+    const sorted = [...arr].sort((a, b) => a - b)
+    const mid = Math.floor(sorted.length / 2)
+
+    return sorted.length % 2 !== 0
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2
   }
 
   // Flatten paths into single vertex array using Chinese Postman algorithm
