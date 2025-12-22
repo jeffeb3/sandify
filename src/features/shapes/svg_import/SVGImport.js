@@ -1,7 +1,7 @@
 /* global console, document */
 import Victor from "victor"
 import { pointsOnPath } from "points-on-path"
-import Shape from "../Shape"
+import Shape, { adjustSizeForAspectRatio } from "../Shape"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
@@ -31,6 +31,7 @@ const options = {
     min: 0,
     max: 10,
     step: 1,
+    onChange: adjustSizeForAspectRatio,
   },
   fillBrightness: {
     title: "Fill brightness",
@@ -38,6 +39,7 @@ const options = {
     range: true,
     min: 0,
     max: 255,
+    onChange: adjustSizeForAspectRatio,
   },
 }
 
@@ -49,11 +51,18 @@ const DEFAULT_SVG = `<svg viewBox="0 0 100 100">
 // Subsample threshold - keeps edges short enough to avoid being flagged as outliers
 const SUBSAMPLE_LENGTH = 40
 
+// Resolution for linearizing circles and ellipses
+const CURVE_RESOLUTION = 128
+
+// Minimum distance between vertices to avoid duplicates
+const DUPLICATE_THRESHOLD = 0.01
+
 export default class SVGImport extends Shape {
   constructor() {
     super("svgImport")
     this.label = "SVG"
     this.usesMachine = true
+    this.stretch = true
     this.selectGroup = "import"
   }
 
@@ -62,8 +71,13 @@ export default class SVGImport extends Shape {
       ...super.getInitialState(),
       svgContent: props?.svgContent || DEFAULT_SVG,
       minStrokeWidth: 0,
-      fillBrightness: [0, 128],
+      fillBrightness: [0, 255],
+      maintainAspectRatio: true,
     }
+  }
+
+  initialDimensions(props) {
+    return this.scaledToMachine(props, 0.6)
   }
 
   getVertices(state) {
@@ -190,19 +204,19 @@ export default class SVGImport extends Shape {
   }
 
   isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
-    const stroke = this.getStyleProperty(element, "stroke")
-    const fill = this.getStyleProperty(element, "fill")
+    const styles = getComputedStyle(element)
+    const stroke = styles.stroke
+    const fill = styles.fill
 
     // Check stroked elements against minimum width threshold
     if (stroke && stroke !== "none") {
-      const strokeWidth =
-        parseFloat(this.getStyleProperty(element, "stroke-width")) || 1
+      const strokeWidth = parseFloat(styles.strokeWidth) || 1
 
       return strokeWidth >= minStrokeWidth
     }
 
     // Check fill brightness against range
-    // SVG default fill is black when not specified, so null = black (brightness 0)
+    // SVG default fill is black when not specified
     if (fill === "none") {
       return false
     }
@@ -211,32 +225,6 @@ export default class SVGImport extends Shape {
     const [minBrightness, maxBrightness] = fillBrightness
 
     return brightness >= minBrightness && brightness <= maxBrightness
-  }
-
-  // Get a style property from element (checking attribute, style, and inherited from parents)
-  getStyleProperty(element, property) {
-    let current = element
-
-    while (current && current.tagName) {
-      const style = current.getAttribute("style")
-
-      if (style) {
-        const match = style.match(new RegExp(`${property}\\s*:\\s*([^;]+)`))
-        if (match) {
-          return match[1].trim()
-        }
-      }
-
-      const attr = current.getAttribute(property)
-
-      if (attr) {
-        return attr
-      }
-
-      current = current.parentElement
-    }
-
-    return null
   }
 
   elementToVertices(element) {
@@ -264,6 +252,7 @@ export default class SVGImport extends Shape {
 
   // <path d="..."> - use points-on-path for Bezier linearization
   // Returns array of paths (one per subpath in d attribute)
+  // Subsample to avoid long segments being flagged as outliers
   pathToVertices(element) {
     const d = element.getAttribute("d")
 
@@ -278,7 +267,11 @@ export default class SVGImport extends Shape {
 
       return pointArrays
         .filter((points) => points.length > 0)
-        .map((points) => points.map((pt) => new Victor(pt[0], pt[1])))
+        .map((points) => {
+          const vertices = points.map((pt) => new Victor(pt[0], pt[1]))
+
+          return subsample(vertices, SUBSAMPLE_LENGTH)
+        })
     } catch {
       // Skip malformed paths (e.g., containing NaN)
       return null
@@ -442,7 +435,7 @@ export default class SVGImport extends Shape {
       return null
     }
 
-    return circle(r, 0, cx, cy, 128)
+    return circle(r, 0, cx, cy, CURVE_RESOLUTION)
   }
 
   // <ellipse cx="" cy="" rx="" ry="">
@@ -456,7 +449,7 @@ export default class SVGImport extends Shape {
       return null
     }
 
-    return ellipse(rx, ry, cx, cy, 128)
+    return ellipse(rx, ry, cx, cy, CURVE_RESOLUTION)
   }
 
   // Nodes within tolerance share the same key - could extract to geometry.js if reused
@@ -477,7 +470,7 @@ export default class SVGImport extends Shape {
     const OUTLIER_THRESHOLD = 10 // Skip segments that are 10x longer than median
 
     for (const path of paths) {
-      if (path.length < 3) continue // Skip degenerate paths (need at least 3 for a shape)
+      if (path.length < 2) continue // Skip degenerate paths (need at least 2 points for an edge)
 
       // Pre-compute segment lengths to detect outlier segments
       const segmentLengths = []
@@ -587,7 +580,7 @@ export default class SVGImport extends Shape {
       const last = vertices[vertices.length - 1]
       const dist = Math.hypot(point.x - last.x, point.y - last.y)
 
-      if (dist < 0.01) return // Skip near-duplicate
+      if (dist < DUPLICATE_THRESHOLD) return
     }
 
     vertices.push(cloneVertex(point))

@@ -2,7 +2,6 @@
 import Shape from "../Shape"
 import seedrandom from "seedrandom"
 import Graph from "@/common/Graph"
-import { getMachine } from "@/features/machines/machineFactory"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
 import {
@@ -241,22 +240,8 @@ export default class Maze extends Shape {
     }
   }
 
-  // Size initial transformer to fit machine, using actual vertex aspect ratio
   initialDimensions(props) {
-    if (!props) {
-      return { width: 0, height: 0, aspectRatio: 1.0 }
-    }
-
-    const { width, height, aspectRatio } = super.initialDimensions(props)
-    const machine = getMachine(props.machine)
-    const maxSize = Math.min(machine.width, machine.height) * 0.6
-    const scale = maxSize / Math.max(width, height)
-
-    return {
-      width: width * scale,
-      height: height * scale,
-      aspectRatio,
-    }
+    return this.scaledToMachine(props, 0.6)
   }
 
   getMazeAspectRatio(state) {

@@ -2,44 +2,12 @@
 
 import { centerOnOrigin, dimensions, offset } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
-import Shape from "../Shape"
+import Shape, { adjustSizeForAspectRatio } from "../Shape"
 import { subtypes, getSubtype } from "./subtypes"
 import RectMachine from "@/features/machines/RectMachine"
 
 const hasSetting = (state, setting) => {
   return getSubtype(state.imageSubtype).settings.includes(setting)
-}
-
-// a change to clipped brightness can change the aspect ratio; given that this shape
-// stretches, we need to alter the dimensions to match to prevent distortion.
-const handleClippedBrightnessChange = (model, changes, state) => {
-  const currentVertices = model.getVertices({
-    shape: state,
-  })
-  const newVertices = model.getVertices({
-    shape: {
-      ...state,
-      ...changes,
-    },
-  })
-
-  const cDim = dimensions(currentVertices)
-  const nDim = dimensions(newVertices)
-  const cAr = cDim.width / cDim.height
-  const nAr = nDim.width / nDim.height
-
-  if (!isNaN(nAr) && !isNaN(cAr) && cAr != nAr) {
-    const ar = (nAr * state.aspectRatio) / cAr
-    changes.aspectRatio = ar
-
-    if (nAr > 1) {
-      changes.height = state.height * (state.aspectRatio / ar)
-    } else {
-      changes.width = state.width * (ar / state.aspectRatio)
-    }
-  }
-
-  return changes
 }
 
 const options = {
@@ -149,9 +117,7 @@ const options = {
     isVisible: (layer, state) => {
       return hasSetting(state, "imageBrightnessFilter")
     },
-    onChange: (model, changes, state) => {
-      return handleClippedBrightnessChange(model, changes, state)
-    },
+    onChange: adjustSizeForAspectRatio,
   },
   imageContrast: {
     title: "Contrast",
