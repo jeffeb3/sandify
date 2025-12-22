@@ -1,6 +1,7 @@
+/* global console, document */
 import Victor from "victor"
 import { pointsOnPath } from "points-on-path"
-import Shape from "./Shape"
+import Shape from "../Shape"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
@@ -16,10 +17,20 @@ import {
   subsample,
 } from "@/common/geometry"
 
+// Set to true to show raw SVG content textarea
+const DEBUG = false
+
 const options = {
   svgContent: {
     title: "SVG content",
     type: "textarea",
+    isVisible: () => DEBUG,
+  },
+  minStrokeWidth: {
+    title: "Min stroke width",
+    min: 0,
+    max: 10,
+    step: 1,
   },
   fillBrightness: {
     title: "Fill brightness",
@@ -35,6 +46,9 @@ const DEFAULT_SVG = `<svg viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="40" stroke="black" fill="none"/>
 </svg>`
 
+// Subsample threshold - keeps edges short enough to avoid being flagged as outliers
+const SUBSAMPLE_LENGTH = 40
+
 export default class SVGImport extends Shape {
   constructor() {
     super("svgImport")
@@ -47,19 +61,20 @@ export default class SVGImport extends Shape {
     return {
       ...super.getInitialState(),
       svgContent: props?.svgContent || DEFAULT_SVG,
+      minStrokeWidth: 0,
       fillBrightness: [0, 128],
     }
   }
 
   getVertices(state) {
-    const { svgContent, fillBrightness } = state.shape
+    const { svgContent, minStrokeWidth, fillBrightness } = state.shape
 
     if (!svgContent || svgContent.trim() === "") {
       return [new Victor(0, 0)]
     }
 
     try {
-      const paths = this.parseSVG(svgContent, fillBrightness)
+      const paths = this.parseSVG(svgContent, minStrokeWidth, fillBrightness)
 
       if (paths.length === 0) {
         return [new Victor(0, 0)]
@@ -78,7 +93,7 @@ export default class SVGImport extends Shape {
   }
 
   // Parse SVG content and return array of paths (each path is array of vertices)
-  parseSVG(svgContent, fillBrightness = [0, 255]) {
+  parseSVG(svgContent, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     // Use innerHTML to parse SVG directly into HTML DOM context
     // This ensures elements are proper SVGGraphicsElement instances with getCTM()
     const container = document.createElement("div")
@@ -107,7 +122,7 @@ export default class SVGImport extends Shape {
           return
         }
 
-        if (!this.isElementVisible(element, fillBrightness)) {
+        if (!this.isElementVisible(element, minStrokeWidth, fillBrightness)) {
           return
         }
 
@@ -174,13 +189,16 @@ export default class SVGImport extends Shape {
     })
   }
 
-  isElementVisible(element, fillBrightness = [0, 255]) {
+  isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     const stroke = this.getStyleProperty(element, "stroke")
     const fill = this.getStyleProperty(element, "fill")
 
-    // Always draw stroked elements
+    // Check stroked elements against minimum width threshold
     if (stroke && stroke !== "none") {
-      return true
+      const strokeWidth =
+        parseFloat(this.getStyleProperty(element, "stroke-width")) || 1
+
+      return strokeWidth >= minStrokeWidth
     }
 
     // Check fill brightness against range
@@ -275,7 +293,7 @@ export default class SVGImport extends Shape {
     const x2 = parseFloat(element.getAttribute("x2")) || 0
     const y2 = parseFloat(element.getAttribute("y2")) || 0
 
-    return subsample([new Victor(x1, y1), new Victor(x2, y2)], 40)
+    return subsample([new Victor(x1, y1), new Victor(x2, y2)], SUBSAMPLE_LENGTH)
   }
 
   // <polyline points=""> or <polygon points="">
@@ -302,7 +320,7 @@ export default class SVGImport extends Shape {
       vertices.push(vertices[0].clone())
     }
 
-    return subsample(vertices, 40)
+    return subsample(vertices, SUBSAMPLE_LENGTH)
   }
 
   // <rect x="" y="" width="" height="" rx="" ry="">
@@ -324,7 +342,6 @@ export default class SVGImport extends Shape {
     ry = Math.min(ry, height / 2)
 
     if (rx === 0 && ry === 0) {
-      // Simple rectangle - subsample to ensure edges < 50 units
       return subsample(
         [
           new Victor(x, y),
@@ -333,7 +350,7 @@ export default class SVGImport extends Shape {
           new Victor(x, y + height),
           new Victor(x, y),
         ],
-        40,
+        SUBSAMPLE_LENGTH,
       )
     }
 
@@ -347,7 +364,15 @@ export default class SVGImport extends Shape {
 
     // Top-right corner
     vertices.push(
-      ...ellipticalArc(rx, ry, -Math.PI / 2, 0, x + width - rx, y + ry, resolution),
+      ...ellipticalArc(
+        rx,
+        ry,
+        -Math.PI / 2,
+        0,
+        x + width - rx,
+        y + ry,
+        resolution,
+      ),
     )
 
     // Right edge
@@ -356,7 +381,15 @@ export default class SVGImport extends Shape {
 
     // Bottom-right corner
     vertices.push(
-      ...ellipticalArc(rx, ry, 0, Math.PI / 2, x + width - rx, y + height - ry, resolution),
+      ...ellipticalArc(
+        rx,
+        ry,
+        0,
+        Math.PI / 2,
+        x + width - rx,
+        y + height - ry,
+        resolution,
+      ),
     )
 
     // Bottom edge
@@ -365,7 +398,15 @@ export default class SVGImport extends Shape {
 
     // Bottom-left corner
     vertices.push(
-      ...ellipticalArc(rx, ry, Math.PI / 2, Math.PI, x + rx, y + height - ry, resolution),
+      ...ellipticalArc(
+        rx,
+        ry,
+        Math.PI / 2,
+        Math.PI,
+        x + rx,
+        y + height - ry,
+        resolution,
+      ),
     )
 
     // Left edge
@@ -374,14 +415,21 @@ export default class SVGImport extends Shape {
 
     // Top-left corner
     vertices.push(
-      ...ellipticalArc(rx, ry, Math.PI, (3 * Math.PI) / 2, x + rx, y + ry, resolution),
+      ...ellipticalArc(
+        rx,
+        ry,
+        Math.PI,
+        (3 * Math.PI) / 2,
+        x + rx,
+        y + ry,
+        resolution,
+      ),
     )
 
     // Close the path
     vertices.push(vertices[0].clone())
 
-    // Subsample to ensure edges < 50 units
-    return subsample(vertices, 40)
+    return subsample(vertices, SUBSAMPLE_LENGTH)
   }
 
   // <circle cx="" cy="" r="">
@@ -435,10 +483,9 @@ export default class SVGImport extends Shape {
       const segmentLengths = []
 
       for (let i = 0; i < path.length - 1; i++) {
-        segmentLengths.push(Math.hypot(
-          path[i + 1].x - path[i].x,
-          path[i + 1].y - path[i].y,
-        ))
+        segmentLengths.push(
+          Math.hypot(path[i + 1].x - path[i].x, path[i + 1].y - path[i].y),
+        )
       }
 
       // Find median segment length and mark outliers (any segment >> median)
@@ -513,8 +560,13 @@ export default class SVGImport extends Shape {
     graph.connectComponents()
 
     const edges = Object.values(graph.edgeMap)
-    const dijkstraFn = (startKey, endKey) => graph.dijkstraShortestPath(startKey, endKey)
-    const { edges: eulerizedEdges } = eulerizeEdges(edges, dijkstraFn, graph.nodeMap)
+    const dijkstraFn = (startKey, endKey) =>
+      graph.dijkstraShortestPath(startKey, endKey)
+    const { edges: eulerizedEdges } = eulerizeEdges(
+      edges,
+      dijkstraFn,
+      graph.nodeMap,
+    )
     const trail = eulerianTrail({ edges: eulerizedEdges })
     const vertices = []
 
