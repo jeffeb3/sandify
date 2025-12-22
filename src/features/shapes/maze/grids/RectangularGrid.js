@@ -1,5 +1,4 @@
 /* global console */
-import Victor from "victor"
 import Grid from "./Grid"
 
 // Rectangular grid for standard mazes

@@ -1,4 +1,3 @@
-import Victor from "victor"
 import Grid from "./Grid"
 
 // Hexagonal grid for hex mazes
@@ -229,7 +228,14 @@ export default class HexGrid extends Grid {
 
       if (!west || !this.isLinked(cell, west)) {
         if (cell.exitDirection === "w") {
-          addExit(cell, corners[0][0], corners[0][1], corners[1][0], corners[1][1], "w")
+          addExit(
+            cell,
+            corners[0][0],
+            corners[0][1],
+            corners[1][0],
+            corners[1][1],
+            "w",
+          )
         } else {
           walls.push([
             makeVertex(corners[0][0], corners[0][1]),
@@ -263,7 +269,14 @@ export default class HexGrid extends Grid {
 
       if (!east || !this.isLinked(cell, east)) {
         if (cell.exitDirection === "e") {
-          addExit(cell, corners[3][0], corners[3][1], corners[4][0], corners[4][1], "e")
+          addExit(
+            cell,
+            corners[3][0],
+            corners[3][1],
+            corners[4][0],
+            corners[4][1],
+            "e",
+          )
         } else {
           walls.push([
             makeVertex(corners[3][0], corners[3][1]),

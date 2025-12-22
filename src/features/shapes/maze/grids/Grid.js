@@ -197,8 +197,14 @@ export default class Grid {
     return {
       edges: [
         [makeVertex(tipX, tipY), makeVertex(baseLeftX, baseLeftY)],
-        [makeVertex(baseLeftX, baseLeftY), makeVertex(baseCenterX, baseCenterY)],
-        [makeVertex(baseCenterX, baseCenterY), makeVertex(baseRightX, baseRightY)],
+        [
+          makeVertex(baseLeftX, baseLeftY),
+          makeVertex(baseCenterX, baseCenterY),
+        ],
+        [
+          makeVertex(baseCenterX, baseCenterY),
+          makeVertex(baseRightX, baseRightY),
+        ],
         [makeVertex(baseRightX, baseRightY), makeVertex(tipX, tipY)],
       ],
     }

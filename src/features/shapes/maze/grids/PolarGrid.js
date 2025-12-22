@@ -205,8 +205,7 @@ export default class PolarGrid extends Grid {
       const sharedAngle = Math.max(w1, w2) * anglePerWedge
 
       // Handle wraparound
-      const angle =
-        Math.abs(w1 - w2) > 1 ? 0 : sharedAngle
+      const angle = Math.abs(w1 - w2) > 1 ? 0 : sharedAngle
       const radius = r1 + 0.5
 
       return {
@@ -216,7 +215,6 @@ export default class PolarGrid extends Grid {
     }
 
     // Different rings (inward/outward) - arc edge
-    const innerRing = Math.min(r1, r2)
     const outerRing = Math.max(r1, r2)
     const outerWedge = r1 > r2 ? w1 : w2
     const outerWedgeCount = this.rings[outerRing].length
@@ -390,7 +388,10 @@ export default class PolarGrid extends Grid {
         }
       } else {
         // Straight segments split at midpoint
-        walls.push([makeVertex(radius, startAngle), makeVertex(radius, midAngle)])
+        walls.push([
+          makeVertex(radius, startAngle),
+          makeVertex(radius, midAngle),
+        ])
         walls.push([makeVertex(radius, midAngle), makeVertex(radius, endAngle)])
       }
 

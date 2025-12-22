@@ -1,4 +1,3 @@
-import Victor from "victor"
 import Grid from "./Grid"
 
 // Triangular grid for delta mazes
@@ -107,7 +106,6 @@ export default class TriangleGrid extends Grid {
   // Get midpoint of shared edge between two adjacent cells
   getSharedEdgeMidpoint(cell1, cell2) {
     const c1 = this.getTriangleCorners(cell1.x, cell1.y)
-    const c2 = this.getTriangleCorners(cell2.x, cell2.y)
     const dx = cell2.x - cell1.x
     const dy = cell2.y - cell1.y
 

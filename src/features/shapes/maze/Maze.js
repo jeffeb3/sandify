@@ -296,12 +296,18 @@ export default class Maze extends Shape {
 
     // Scale transformer proportionally when maze dimensions change
     // This preserves any manual distortion the user applied
-    if (changes.mazeWidth !== undefined && changes.mazeWidth !== layer.mazeWidth) {
+    if (
+      changes.mazeWidth !== undefined &&
+      changes.mazeWidth !== layer.mazeWidth
+    ) {
       const scale = changes.mazeWidth / layer.mazeWidth
 
       changes.width = layer.width * scale
     }
-    if (changes.mazeHeight !== undefined && changes.mazeHeight !== layer.mazeHeight) {
+    if (
+      changes.mazeHeight !== undefined &&
+      changes.mazeHeight !== layer.mazeHeight
+    ) {
       const scale = changes.mazeHeight / layer.mazeHeight
 
       changes.height = layer.height * scale
