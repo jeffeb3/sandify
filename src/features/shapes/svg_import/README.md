@@ -4,11 +4,7 @@ Imports SVG files and converts them to continuous drawing paths for sand tables.
 
 ## Architecture
 
-### Parsing Strategy
-
 We inject SVG content into a hidden DOM container rather than using DOMParser. This ensures elements are proper `SVGGraphicsElement` instances with access to `getCTM()` - the browser computes cumulative transforms for us.
-
-### Path Routing
 
 All geometry (open paths, closed shapes, disconnected elements) feeds into a unified graph:
 
@@ -36,18 +32,31 @@ This approach handles arbitrary SVG topology without special-casing open vs clos
 | `<rect>` | Includes rounded corners (`rx`/`ry`) |
 | `<circle>`, `<ellipse>` | Linearized to 128 points |
 | `<g>` | Flattened; supports transforms |
-| `<use>` | Expanded inline before processing |
 | CSS `<style>` blocks | Resolved via `getComputedStyle()` |
 
 ### Not Supported
 
 | Element | Description/Alternative |
 |---------|--------|
+| `<use>`, `<symbol>` | ViewBox mapping complexity; inline the content instead |
 | `<text>` | Convert to path in your SVG editor before export, or use the FancyText shape |
 | `<image>` | Use ImageImport shape. |
 | `<clipPath>`, `<mask>` | Requires boolean geometry operations, which are impractical. |
 | `<marker>` | Arrow heads, etc. |
 | Gradients, filters, patterns | No drawable geometry |
+
+## Sample images
+
+The sample SVGs Located in `samples/` serve as tests for various SVG element types.
+
+| File | Size | Tests |
+|------|------|-------|
+| tiger.svg | 900x900 | Complex bezier paths, nested groups, stroke+fill |
+| cartman.svg | 104x97 | Small SVG scaling, hand-coded simplicity |
+| eggs.svg | 430x473 | Group transforms (rotation/translation), gradient fills, filter skipping |
+| intertwingly.svg | 100x100 | Radial gradients with xlink:href, small abstract shapes |
+| car.svg | 900x600 | Inkscape-generated complexity, linear gradients |
+| shapes.svg | 200x200 | Basic elements: rect, circle, ellipse, polygon, polyline, line, rounded rect |
 
 ## Potential Enhancements
 

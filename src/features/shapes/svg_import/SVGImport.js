@@ -147,7 +147,6 @@ export default class SVGImport extends Shape {
     document.body.appendChild(container)
 
     try {
-      this.expandUseElements(svg)
       const scaleFactor = this.getScaleFactorForSmallSvg(svg)
 
       // Scale tolerance to SVG size for consistent curve smoothness
@@ -205,43 +204,6 @@ export default class SVGImport extends Shape {
     }
   }
 
-  // Expand <use> elements by cloning referenced content
-  expandUseElements(svg) {
-    const useElements = svg.querySelectorAll("use")
-
-    useElements.forEach((use) => {
-      const href = use.getAttribute("href") || use.getAttribute("xlink:href")
-
-      if (!href || !href.startsWith("#")) {
-        return
-      }
-
-      const id = href.slice(1)
-      const referenced = svg.getElementById(id)
-
-      if (!referenced) {
-        return
-      }
-
-      const clone = referenced.cloneNode(true)
-
-      clone.removeAttribute("id")
-
-      const x = parseFloat(use.getAttribute("x")) || 0
-      const y = parseFloat(use.getAttribute("y")) || 0
-
-      if (x !== 0 || y !== 0) {
-        const existingTransform = clone.getAttribute("transform") || ""
-
-        clone.setAttribute(
-          "transform",
-          `translate(${x}, ${y}) ${existingTransform}`,
-        )
-      }
-
-      use.parentNode.replaceChild(clone, use)
-    })
-  }
 
   isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     const styles = getComputedStyle(element)
@@ -402,9 +364,17 @@ export default class SVGImport extends Shape {
     const vertices = []
     const resolution = 16 // points per corner
 
+    // Subsample straight edges to match arc segment density
+    const arcLength = (Math.PI / 2) * Math.max(rx, ry)
+    const edgeSubsampleLength = arcLength / resolution
+
     // Top edge (left to right)
-    vertices.push(new Victor(x + rx, y))
-    vertices.push(new Victor(x + width - rx, y))
+    vertices.push(
+      ...subsample(
+        [new Victor(x + rx, y), new Victor(x + width - rx, y)],
+        edgeSubsampleLength,
+      ),
+    )
 
     // Top-right corner
     vertices.push(
@@ -420,8 +390,12 @@ export default class SVGImport extends Shape {
     )
 
     // Right edge
-    vertices.push(new Victor(x + width, y + ry))
-    vertices.push(new Victor(x + width, y + height - ry))
+    vertices.push(
+      ...subsample(
+        [new Victor(x + width, y + ry), new Victor(x + width, y + height - ry)],
+        edgeSubsampleLength,
+      ),
+    )
 
     // Bottom-right corner
     vertices.push(
@@ -437,8 +411,15 @@ export default class SVGImport extends Shape {
     )
 
     // Bottom edge
-    vertices.push(new Victor(x + width - rx, y + height))
-    vertices.push(new Victor(x + rx, y + height))
+    vertices.push(
+      ...subsample(
+        [
+          new Victor(x + width - rx, y + height),
+          new Victor(x + rx, y + height),
+        ],
+        edgeSubsampleLength,
+      ),
+    )
 
     // Bottom-left corner
     vertices.push(
@@ -454,8 +435,12 @@ export default class SVGImport extends Shape {
     )
 
     // Left edge
-    vertices.push(new Victor(x, y + height - ry))
-    vertices.push(new Victor(x, y + ry))
+    vertices.push(
+      ...subsample(
+        [new Victor(x, y + height - ry), new Victor(x, y + ry)],
+        edgeSubsampleLength,
+      ),
+    )
 
     // Top-left corner
     vertices.push(
@@ -473,7 +458,7 @@ export default class SVGImport extends Shape {
     // Close the path
     vertices.push(vertices[0].clone())
 
-    return subsample(vertices, SUBSAMPLE_LENGTH)
+    return vertices
   }
 
   // <circle cx="" cy="" r="">
