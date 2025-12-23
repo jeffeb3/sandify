@@ -1,3 +1,4 @@
+import seedrandom from "seedrandom"
 import Shape from "../Shape"
 import {
   lsystem,
@@ -28,6 +29,31 @@ const options = {
       return onMaxIterations(subtypes[state.subtype], state)
     },
   },
+  angleOffset: {
+    title: "Angle offset",
+    type: "slider",
+    min: -15,
+    max: 15,
+    step: 0.5,
+    default: 0,
+  },
+  lsystemBranchProbability: {
+    title: "Branch probability",
+    type: "slider",
+    min: 0,
+    max: 100,
+    step: 5,
+    default: 100,
+  },
+  seed: {
+    title: "Seed",
+    min: 1,
+    max: 999,
+    step: 1,
+    isVisible: (model, state) => {
+      return (state.lsystemBranchProbability ?? 100) < 100
+    },
+  },
 }
 
 export default class LSystem extends Shape {
@@ -46,6 +72,9 @@ export default class LSystem extends Shape {
       ...{
         iterations: 3,
         subtype: "McWorter's Pentadendrite",
+        angleOffset: 0,
+        seed: 1,
+        lsystemBranchProbability: 100,
       },
     }
   }
@@ -55,13 +84,17 @@ export default class LSystem extends Shape {
     const iterations = shape.iterations || 1
 
     // generate our vertices using a set of l-system rules
-    let config = subtypes[shape.subtype]
+    const subtype = subtypes[shape.subtype]
+    const baseAngle = subtype.angle !== undefined ? subtype.angle : Math.PI / 2
+    const offsetRadians = ((shape.angleOffset || 0) * Math.PI) / 180
 
-    config.iterations = iterations
-    config.side = 5
-
-    if (config.angle === undefined) {
-      config.angle = Math.PI / 2
+    const config = {
+      ...subtype,
+      iterations,
+      side: 5,
+      angle: baseAngle + offsetRadians,
+      rng: seedrandom(shape.seed),
+      branchProbability: (shape.lsystemBranchProbability ?? 100) / 100,
     }
 
     const path = lsystemOptimize(lsystemPath(lsystem(config), config), config)
