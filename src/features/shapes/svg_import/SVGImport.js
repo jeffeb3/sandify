@@ -179,7 +179,20 @@ export default class SVGImport extends Shape {
         elementPaths.forEach((vertices) => {
           if (vertices && vertices.length > 0) {
             if (ctm) {
-              applyMatrixToVertices(vertices, ctm)
+              // Scale CTM translation to work with scaled path coordinates
+              // Original: x' = a*x + c*y + e → With scaled input: x' = a*(x*s) + c*(y*s) + e*s
+              const adjustedCtm =
+                scaleFactor > 1
+                  ? {
+                      a: ctm.a,
+                      b: ctm.b,
+                      c: ctm.c,
+                      d: ctm.d,
+                      e: ctm.e * scaleFactor,
+                      f: ctm.f * scaleFactor,
+                    }
+                  : ctm
+              applyMatrixToVertices(vertices, adjustedCtm)
             }
             paths.push(vertices)
           }
@@ -232,6 +245,12 @@ export default class SVGImport extends Shape {
 
   isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     const styles = getComputedStyle(element)
+
+    // Skip elements with filters (blur, drop shadow, etc.) - these are effects, not geometry
+    if (styles.filter && styles.filter !== "none") {
+      return false
+    }
+
     const stroke = styles.stroke
     const fill = styles.fill
 
@@ -246,6 +265,11 @@ export default class SVGImport extends Shape {
     // SVG default fill is black when not specified
     if (fill === "none") {
       return false
+    }
+
+    // Gradient fills (url(...)) are always visible - can't extract brightness
+    if (fill && fill.startsWith("url(")) {
+      return true
     }
 
     const brightness = fill ? getColorBrightness(fill) : 0
@@ -288,8 +312,10 @@ export default class SVGImport extends Shape {
     }
 
     try {
-      // Scale up path data for small SVGs to get better precision from points-on-path
-      const scaledD = scaleFactor > 1 ? svgpath(d).scale(scaleFactor).toString() : d
+      // Scale up path data for small SVGs to get better precision from points-on-path.
+      // Vertices returned at scaled size - parseSVG handles CTM transform adjustments.
+      const scaledD =
+        scaleFactor > 1 ? svgpath(d).scale(scaleFactor).toString() : d
 
       const distance = 0.5
       const pointArrays = pointsOnPath(scaledD, tolerance, distance)
