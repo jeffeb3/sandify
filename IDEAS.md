@@ -15,7 +15,7 @@ Candidates for new shape types. All are algorithmic, render in 2D, and maintain 
 | [Constructions](#constructions) | - | [Envelope Curves](#envelope-curves), [Spanning Tree](#spanning-tree) | |
 | [Fields](#fields) | NoiseWave, Wiper | [Vector Fields](#vector-field-traces), [Attractors](#attractor-traces), [Noise Contours](#noise-contours), [Reaction-Diffusion](#reaction-diffusion) | [Wiper concentric](#wiper-concentric-pattern) |
 | [Fractals](#fractals) | LSystem, SpaceFiller | [IFS](#ifs-iterated-function-systems), [Escape-Time](#escape-time-boundary), [Lightning](#lightning-lichtenberg), [Space Colonization](#space-colonization) | [LSystem presets](#lsystem-additional-presets), [custom rules](#lsystem-custom-user-defined) |
-| [Imports](#imports) | sdf, png, jpg, webp, gcode, thr | [SVG](#svg-import), [DXF](#dxf-import) | |
+| [Imports](#imports) | sdf, png, jpg, webp, svg, gcode, thr | [DXF](#dxf-import) |
 | [Interactive](#interactive) | - | [Doodle Draw](#doodle-draw) | |
 | [Interference](#interference) | - | [Moiré](#interference-pattern), [Cymatics](#cymatics) | |
 | Other | Point, V1Engineering | | |
@@ -149,15 +149,7 @@ Parameters: attraction distance, kill distance, segment length, boundary shape, 
 
 ## Imports
 
-Additional file format imports. Extends existing sdf, png, jpg, webp, gcode, and thr importers.
-
-### SVG Import
-
-Vector graphics - the universal vector format.
-
-- Paths already defined, need linearization of Bezier curves
-- Could preserve or flatten layers/groups
-- Parameters: path simplification tolerance, scale, stroke-only vs fill
+Additional file format imports. Extends existing sdf, png, jpg, webp, gcode, svg, and thr importers.
 
 ### DXF Import
 
