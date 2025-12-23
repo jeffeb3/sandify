@@ -1,6 +1,7 @@
 /* global console, document */
 import Victor from "victor"
 import { pointsOnPath } from "points-on-path"
+import svgpath from "svgpath"
 import Shape, { adjustSizeForAspectRatio } from "../Shape"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
@@ -48,13 +49,10 @@ const DEFAULT_SVG = `<svg viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="40" stroke="black" fill="none"/>
 </svg>`
 
-// Subsample threshold - keeps edges short enough to avoid being flagged as outliers
 const SUBSAMPLE_LENGTH = 40
-
-// Resolution for linearizing circles and ellipses
+const SMALL_SVG_THRESHOLD = 500
+const TARGET_SVG_SIZE = 2000
 const CURVE_RESOLUTION = 128
-
-// Minimum distance between vertices to avoid duplicates
 const DUPLICATE_THRESHOLD = 0.01
 
 export default class SVGImport extends Shape {
@@ -106,6 +104,14 @@ export default class SVGImport extends Shape {
     }
   }
 
+  // Calculate scale factor for small SVGs (for path precision)
+  getScaleFactorForSmallSvg(svg) {
+    const { width, height } = this.getSvgSize(svg)
+    const minDim = Math.min(width, height)
+
+    return minDim < SMALL_SVG_THRESHOLD ? TARGET_SVG_SIZE / minDim : 1
+  }
+
   // Get SVG dimensions from viewBox or width/height attributes
   getSvgSize(svg) {
     const viewBox = svg.getAttribute("viewBox")
@@ -126,8 +132,6 @@ export default class SVGImport extends Shape {
 
   // Parse SVG content and return array of paths (each path is array of vertices)
   parseSVG(svgContent, minStrokeWidth = 0, fillBrightness = [0, 255]) {
-    // Use innerHTML to parse SVG directly into HTML DOM context
-    // This ensures elements are proper SVGGraphicsElement instances with getCTM()
     const container = document.createElement("div")
     container.style.position = "absolute"
     container.style.visibility = "hidden"
@@ -144,6 +148,7 @@ export default class SVGImport extends Shape {
 
     try {
       this.expandUseElements(svg)
+      const scaleFactor = this.getScaleFactorForSmallSvg(svg)
 
       // Scale tolerance to SVG size for consistent curve smoothness
       const { width, height } = this.getSvgSize(svg)
@@ -162,7 +167,7 @@ export default class SVGImport extends Shape {
           return
         }
 
-        const result = this.elementToVertices(element, tolerance)
+        const result = this.elementToVertices(element, tolerance, scaleFactor)
 
         if (!result) {
           return
@@ -249,12 +254,12 @@ export default class SVGImport extends Shape {
     return brightness >= minBrightness && brightness <= maxBrightness
   }
 
-  elementToVertices(element, tolerance = 0.5) {
+  elementToVertices(element, tolerance = 0.5, scaleFactor = 1) {
     const tagName = element.tagName.toLowerCase()
 
     switch (tagName) {
       case "path":
-        return this.pathToVertices(element, tolerance)
+        return this.pathToVertices(element, tolerance, scaleFactor)
       case "line":
         return this.lineToVertices(element)
       case "polyline":
@@ -274,7 +279,8 @@ export default class SVGImport extends Shape {
 
   // <path d="..."> - use points-on-path for Bezier linearization
   // Returns array of paths (one per subpath in d attribute)
-  pathToVertices(element, tolerance = 0.5) {
+  // For small SVGs, scales path data up before processing for better precision
+  pathToVertices(element, tolerance = 0.5, scaleFactor = 1) {
     const d = element.getAttribute("d")
 
     if (!d) {
@@ -282,10 +288,11 @@ export default class SVGImport extends Shape {
     }
 
     try {
-      // tolerance: curve subdivision (adaptive to SVG size)
-      // distance: point simplification (fixed for consistent performance)
+      // Scale up path data for small SVGs to get better precision from points-on-path
+      const scaledD = scaleFactor > 1 ? svgpath(d).scale(scaleFactor).toString() : d
+
       const distance = 0.5
-      const pointArrays = pointsOnPath(d, tolerance, distance)
+      const pointArrays = pointsOnPath(scaledD, tolerance, distance)
 
       return pointArrays
         .filter((points) => points.length > 0)
