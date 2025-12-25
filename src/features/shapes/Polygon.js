@@ -59,8 +59,9 @@ export default class Polygon extends Shape {
 
       if (state.shape.roundCorners && beta !== 0.0) {
         // angles that make up the arc.
-        const angleStart = ((Math.PI * 2.0) / state.shape.polygonSides) * i
-        const angleEnd = ((Math.PI * 2.0) / state.shape.polygonSides) * (i + 1)
+        const sides = state.shape.polygonSides
+        const angleStart = ((Math.PI * 2.0) / sides) * i
+        const angleEnd = ((Math.PI * 2.0) / sides) * (i + 1)
         const angleResolution = 0.1
 
         if (points.length > 0) {
@@ -80,7 +81,7 @@ export default class Polygon extends Shape {
             ),
           )
         }
-        if (i !== state.shape.polygonSides) {
+        if (i !== sides) {
           // Create the arc.
           for (
             let arcAngle = angleStart + angleResolution;
@@ -94,6 +95,8 @@ export default class Polygon extends Shape {
               ),
             )
           }
+        } else {
+          points.push(new Victor(points[0].x, points[0].y))
         }
       } else {
         // Not rounded corners.
