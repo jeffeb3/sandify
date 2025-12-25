@@ -349,18 +349,9 @@ export default class RectMachine extends Machine {
       return [...intersections, this.nearestVertex(end)]
     }
 
-    // Damn. We got here because we have a start and end that are failing different boundary checks,
-    // and the line segment doesn't intersect the box. We have to crawl around the outside of the
-    // box until we reach the other point.
-    // Here, I'm going to split this line into two parts, and send each half line segment back
-    // through the clipSegment algorithm. Eventually, that should result in only one of the other cases.
-    const midpoint = cloneVertex(start).add(end).multiply(new Victor(0.5, 0.5))
-
-    // recurse, and find smaller segments until we don't end up in this place again.
-    return [
-      ...this.clipSegment(start, midpoint),
-      ...this.clipSegment(midpoint, end),
-    ]
+    // Line doesn't intersect the box - return nearest vertices.
+    // optimizePerimeter will trace between them later.
+    return [this.nearestVertex(start), this.nearestVertex(end)]
   }
 
   // Intersect the line with the boundary, and return the point exactly on the boundary.

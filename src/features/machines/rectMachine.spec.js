@@ -103,6 +103,47 @@ describe("rect machine", () => {
     })
   })
 
+  describe("clipSegment", () => {
+    it("handles line outside box that misses all edges (no infinite recursion)", () => {
+      // Line from (-300, 240) to (-240, 300) goes around top-left corner
+      // Both points outside, different quadrants, AND=0, but no intersection
+      // This exercises the fallback case in clipSegment
+      const start = new Victor(-300, 240)
+      const end = new Victor(-240, 300)
+
+      const result = machine.clipSegment(start, end)
+
+      // Should return nearest vertices clamped to perimeter
+      expect(result.length).toBeGreaterThanOrEqual(1)
+      result.forEach((v) => {
+        expect(v.x).toBeGreaterThanOrEqual(-250)
+        expect(v.x).toBeLessThanOrEqual(250)
+        expect(v.y).toBeGreaterThanOrEqual(-250)
+        expect(v.y).toBeLessThanOrEqual(250)
+      })
+    })
+
+    it("returns both points when line is inside box", () => {
+      const start = new Victor(0, 0)
+      const end = new Victor(100, 100)
+
+      const result = machine.clipSegment(start, end)
+
+      expect(result).toEqual([start, end])
+    })
+
+    it("clips line that crosses box boundary", () => {
+      const start = new Victor(0, 0)
+      const end = new Victor(300, 0)
+
+      const result = machine.clipSegment(start, end)
+
+      expect(result.length).toBe(3)
+      expect(result[0]).toEqual(start)
+      expect(result[1].x).toBe(250) // clipped at right edge
+    })
+  })
+
   describe("nearestPerimeterVertex", () => {
     it("finds the nearest vertex", () => {
       expect(machine.nearestPerimeterVertex({ x: 10, y: 100 })).toEqual(
