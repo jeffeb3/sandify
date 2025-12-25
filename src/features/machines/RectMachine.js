@@ -129,6 +129,34 @@ export default class RectMachine extends Machine {
     return this.distance(this.tracePerimeter(v1, v2, true))
   }
 
+  // Returns the position of a vertex along the perimeter (0 to perimeterLength).
+  // Starts from bottom-left corner, goes clockwise.
+  // Used for optimized segment ordering.
+  getPerimeterPosition(vertex) {
+    const x = vertex.x
+    const y = vertex.y
+
+    // Bottom edge: y ≈ -sizeY, x from -sizeX to sizeX
+    if (Math.abs(y + this.sizeY) < 0.001) {
+      return x + this.sizeX // 0 to 2*sizeX
+    }
+    // Right edge: x ≈ sizeX, y from -sizeY to sizeY
+    if (Math.abs(x - this.sizeX) < 0.001) {
+      return 2 * this.sizeX + (y + this.sizeY) // 2*sizeX to 2*sizeX + 2*sizeY
+    }
+    // Top edge: y ≈ sizeY, x from sizeX to -sizeX
+    if (Math.abs(y - this.sizeY) < 0.001) {
+      return 2 * this.sizeX + 2 * this.sizeY + (this.sizeX - x) // ... to 4*sizeX + 2*sizeY
+    }
+    // Left edge: x ≈ -sizeX, y from sizeY to -sizeY
+    return 4 * this.sizeX + 2 * this.sizeY + (this.sizeY - y) // ... to 4*sizeX + 4*sizeY
+  }
+
+  // Returns the total perimeter length.
+  getPerimeterLength() {
+    return 4 * this.sizeX + 4 * this.sizeY
+  }
+
   // Returns whether a given path lies on the perimeter of the rectangle
   onPerimeter(v1, v2, delta = 0.0001) {
     const dx = Math.abs(Math.abs(v1.x) - this.sizeX)

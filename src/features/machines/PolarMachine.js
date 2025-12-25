@@ -155,6 +155,19 @@ export default class PolarMachine extends Machine {
     return Math.abs(deltaAngle) * this.state.maxRadius
   }
 
+  // Returns the position of a vertex along the perimeter (0 to 2π for circles).
+  // Used for optimized segment ordering.
+  getPerimeterPosition(vertex) {
+    let a = angle(vertex)
+    if (a < 0) a += 2 * Math.PI
+    return a
+  }
+
+  // Returns the total perimeter length.
+  getPerimeterLength() {
+    return 2 * Math.PI
+  }
+
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
     return arc(this.state.maxRadius, start.angle(), end.angle())

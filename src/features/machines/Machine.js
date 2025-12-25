@@ -223,42 +223,106 @@ export default class Machine {
     return segments
   }
 
-  // primitive O(n^2) algorithm that orders segments to try to minimize the distance traveled
+  // Orders segments to minimize perimeter travel distance using greedy nearest-neighbor.
+  // Complexity: O(n log n) for sorting + O(n log n) for n binary searches.
   minimizePerimeterMoves(segments) {
-    let walked = []
+    if (segments.length <= 2) {
+      return segments
+    }
+
+    const walked = []
     let current = segments.shift()
-    let currentIndex
     let lastSegment
 
     if (segments.length > 0) {
-      // reserve the last segment to ensure we don't draw an invalid line connecting
-      // to it
       lastSegment = segments.pop()
     }
 
-    walked.push(current)
-    while (segments.length > 0) {
-      // find segment that is the shortest distance from our current one
-      let minDist = Number.MAX_SAFE_INTEGER
-      let prev = current
-
-      segments.forEach((segment, index) => {
-        const dist = Math.min(
-          this.perimeterDistance(current[current.length - 1], segment[0]),
-          this.perimeterDistance(
-            current[current.length - 1],
-            segment[segment.length - 1],
-          ),
-        )
-
-        if (dist < minDist) {
-          currentIndex = index
-          minDist = dist
-        }
+    // Build sorted index of segment endpoints
+    const perimeterLength = this.getPerimeterLength()
+    const endpoints = []
+    segments.forEach((segment, index) => {
+      endpoints.push({
+        pos: this.getPerimeterPosition(segment[0]),
+        segIndex: index,
+        isEnd: false,
       })
+      endpoints.push({
+        pos: this.getPerimeterPosition(segment[segment.length - 1]),
+        segIndex: index,
+        isEnd: true,
+      })
+    })
+    endpoints.sort((a, b) => a.pos - b.pos)
 
-      // reverse if needed to connect
-      current = segments.splice(currentIndex, 1)[0]
+    const used = new Set()
+    walked.push(current)
+
+    while (used.size < segments.length) {
+      const currentPos = this.getPerimeterPosition(current[current.length - 1])
+
+      // Binary search to find insertion point
+      let lo = 0,
+        hi = endpoints.length
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1
+        if (endpoints[mid].pos < currentPos) lo = mid + 1
+        else hi = mid
+      }
+
+      // Scan outward from insertion point to find nearest unused segment
+      let bestSegIndex = -1
+      let bestDist = Number.MAX_SAFE_INTEGER
+      let left = lo - 1,
+        right = lo
+
+      while (bestSegIndex === -1 || (left >= 0 || right < endpoints.length)) {
+        // Check right
+        if (right < endpoints.length) {
+          const ep = endpoints[right]
+          if (!used.has(ep.segIndex)) {
+            let dist = ep.pos - currentPos
+            if (dist < 0) dist += perimeterLength
+            if (dist < bestDist) {
+              bestDist = dist
+              bestSegIndex = ep.segIndex
+            }
+            if (dist >= bestDist && bestSegIndex !== -1) {
+              right = endpoints.length // stop searching right
+            }
+          }
+          right++
+        }
+
+        // Check left
+        if (left >= 0) {
+          const ep = endpoints[left]
+          if (!used.has(ep.segIndex)) {
+            let dist = currentPos - ep.pos
+            if (dist < 0) dist += perimeterLength
+            if (dist < bestDist) {
+              bestDist = dist
+              bestSegIndex = ep.segIndex
+            }
+            if (dist >= bestDist && bestSegIndex !== -1) {
+              left = -1 // stop searching left
+            }
+          }
+          left--
+        }
+
+        // Early exit if we've found a segment and searched far enough
+        if (bestSegIndex !== -1 && left < 0 && right >= endpoints.length) {
+          break
+        }
+      }
+
+      // Mark segment as used and add to walked
+      used.add(bestSegIndex)
+      const prev = current
+      current = segments[bestSegIndex]
+
+      // Reverse if needed to connect closer endpoint
       if (
         this.perimeterDistance(prev[prev.length - 1], current[0]) >
         this.perimeterDistance(
