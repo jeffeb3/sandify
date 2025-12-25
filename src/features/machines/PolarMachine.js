@@ -173,9 +173,9 @@ export default class PolarMachine extends Machine {
 
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta = 1) {
-    const rm = Math.sqrt(Math.pow(this.state.maxRadius, 2))
-    const r1 = Math.sqrt(Math.pow(v1.x, 2) + Math.pow(v1.y, 2))
-    const r2 = Math.sqrt(Math.pow(v2.x, 2) + Math.pow(v2.y, 2))
+    const rm = this.state.maxRadius
+    const r1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y)
+    const r2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y)
 
     return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta
   }
