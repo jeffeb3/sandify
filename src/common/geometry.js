@@ -1,4 +1,7 @@
 import Victor from "victor"
+import { Clipper, FillRule, Path64 } from "clipper2-js"
+import convexHull from "convexhull-js"
+import concaveman from "concaveman"
 import { roundP } from "./util"
 
 // convert degrees to radians
@@ -18,6 +21,54 @@ export const snapToGrid = (value, tolerance) => {
 
 export const distance = (v1, v2) => {
   return Math.sqrt(Math.pow(v1.x - v2.x, 2.0) + Math.pow(v1.y - v2.y, 2.0))
+}
+
+// Calculate signed area of a polygon using the shoelace formula.
+// https://en.wikipedia.org/wiki/Shoelace_formula
+const polygonArea = (vertices) => {
+  let area = 0
+  const n = vertices.length
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+    area += vertices[i].x * vertices[j].y
+    area -= vertices[j].x * vertices[i].y
+  }
+
+  return area / 2
+}
+
+// Calculate the centroid (geometric center) of a set of vertices.
+// Excludes duplicate closing vertex if present (would skew the average).
+// https://en.wikipedia.org/wiki/Centroid
+export const centroid = (vertices) => {
+  if (vertices.length === 0) return { x: 0, y: 0 }
+
+  let len = vertices.length
+
+  // Exclude closing vertex if it duplicates the first
+  if (len > 1) {
+    const first = vertices[0]
+    const last = vertices[len - 1]
+    const tolerance = 0.1
+
+    if (
+      Math.abs(first.x - last.x) < tolerance &&
+      Math.abs(first.y - last.y) < tolerance
+    ) {
+      len--
+    }
+  }
+
+  let cx = 0
+  let cy = 0
+
+  for (let i = 0; i < len; i++) {
+    cx += vertices[i].x
+    cy += vertices[i].y
+  }
+
+  return { x: cx / len, y: cy / len }
 }
 
 export const totalDistance = (vertices) => {
@@ -703,4 +754,92 @@ export const calculateIntersection = (p1, p2, p3, p4) => {
     }
   }
   return null // intersection point is out of bounds
+}
+
+// Extract the outer boundary of a shape for border tracing.
+// Handles self-intersecting paths, fill patterns, and complex closed shapes.
+//
+// 1. Clipper2 Union with NonZero fill - merges self-intersecting regions
+// 2. Detect shape type (fill pattern vs closed shape) and select appropriate hull:
+//    - Fill patterns (Voronoi, TessellationTwist): use bounding box or convex hull
+//    - Closed shapes (Star, Rose, Fractal): use tight concave hull
+// 3. Apply optional scaling from centroid
+export const traceBoundary = (vertices, scale = 0) => {
+  if (vertices.length < 3) return [...vertices]
+
+  const SCALE = 1000
+  const bounds = findBounds(vertices)
+  const inputWidth = bounds[1].x - bounds[0].x
+  const inputHeight = bounds[1].y - bounds[0].y
+  const path = new Path64()
+
+  for (const v of vertices) {
+    path.push({ x: Math.round(v.x * SCALE), y: Math.round(v.y * SCALE) })
+  }
+
+  let boundary = Clipper.Union([path], null, FillRule.NonZero)
+
+  if (boundary.length === 0) return [...vertices]
+
+  // Filter out degenerate paths
+  const minArea = SCALE * SCALE
+  boundary = boundary.filter((p) => Math.abs(Clipper.area(p)) > minArea)
+
+  if (boundary.length === 0) return [...vertices]
+
+
+  // Collect all boundary points and compute both hull types for comparison
+  const allPoints = boundary.flatMap((p) => p.map((pt) => [pt.x, pt.y]))
+  const convexPoints = allPoints.map(([x, y]) => ({ x, y }))
+  const convex = convexHull(convexPoints)
+  let hull = concaveman(allPoints, 1.0)
+
+  // Detect fill patterns: high concave/convex ratio + Clipper2 reduced point count
+  // These shapes don't work well with concaveman (creates zigzag connections)
+  // so we fall back to bounding box or convex hull
+  const ratio = hull.length / convex.length
+  const clipperReduction = allPoints.length / vertices.length
+  const isFillPattern = ratio > 3 && allPoints.length > 50 && clipperReduction < 0.9
+
+  if (isFillPattern) {
+    // Check if rectangular (use bbox) or polygonal (use convex hull)
+    const bboxArea = inputWidth * inputHeight
+    const convexArea = Math.abs(polygonArea(convex))
+    const fillRatio = convexArea / (bboxArea * SCALE * SCALE)
+
+    if (fillRatio > 0.85) {
+      // Rectangular fill pattern - use clean bounding box
+      hull = [
+        [bounds[0].x * SCALE, bounds[0].y * SCALE],
+        [bounds[1].x * SCALE, bounds[0].y * SCALE],
+        [bounds[1].x * SCALE, bounds[1].y * SCALE],
+        [bounds[0].x * SCALE, bounds[1].y * SCALE],
+        [bounds[0].x * SCALE, bounds[0].y * SCALE],
+      ]
+      hull.bboxCenter = {
+        x: (bounds[0].x + bounds[1].x) / 2,
+        y: (bounds[0].y + bounds[1].y) / 2,
+      }
+    } else {
+      // Polygonal fill pattern - use convex hull of ORIGINAL vertices
+      // (Clipper2 output may lose extreme points)
+      const originalConvex = convexHull(vertices.map(v => ({ x: v.x, y: v.y })))
+      hull = originalConvex.map((p) => [p.x * SCALE, p.y * SCALE])
+    }
+  }
+
+  // Apply scaling from centroid
+  if (scale !== 0 && hull.length > 0) {
+    // Use bbox center for rectangular fills, otherwise vertex centroid
+    const center = hull.bboxCenter || centroid(vertices)
+    const cx = center.x * SCALE
+    const cy = center.y * SCALE
+    const scaleFactor = 1 + scale / 100
+    hull = hull.map(([x, y]) => [
+      cx + (x - cx) * scaleFactor,
+      cy + (y - cy) * scaleFactor,
+    ])
+  }
+
+  return hull.map(([x, y]) => new Victor(x / SCALE, y / SCALE))
 }

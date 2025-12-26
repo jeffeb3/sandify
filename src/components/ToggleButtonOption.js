@@ -9,7 +9,16 @@ const ToggleButtonOption = (props) => {
   const option = props.options[props.optionKey]
   const { data } = props
   const model = props.model || data
-  const currentChoice = data[props.optionKey]
+  let currentChoice = data[props.optionKey]
+
+  // Normalize boolean values in the case where this has been converted from a checkbox:
+  // false → first choice, true → second choice
+  if (currentChoice === false) {
+    currentChoice = option.choices[0]
+  } else if (currentChoice === true) {
+    currentChoice = option.choices[1]
+  }
+
   const visible =
     option.isVisible === undefined ? true : option.isVisible(model, data)
 

@@ -2,12 +2,14 @@ import Victor from "victor"
 import convexHull from "convexhull-js"
 import { arrayRotate } from "@/common/util"
 import {
+  centroid,
   cloneVertex,
   cloneVertices,
   isLoop,
   totalDistance,
   distance,
   boundingVerticesAtLength,
+  traceBoundary,
 } from "@/common/geometry"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
@@ -34,7 +36,15 @@ const options = {
   },
   drawBorder: {
     title: "4: Add perimeter border",
-    type: "checkbox",
+    type: "togglebutton",
+    choices: ["none", "tight", "loose"],
+  },
+  borderPadding: {
+    title: "Scale (%)",
+    step: 5,
+    isVisible: (model, state) => {
+      return state.drawBorder === "tight" || state.drawBorder === "loose"
+    },
   },
   backtrackPct: {
     title: "5: Backtrack at end (%)",
@@ -72,7 +82,8 @@ export default class FineTuning extends Effect {
         backtrackPct: 0,
         rotateStartingPct: 0,
         reverse: false,
-        drawBorder: false,
+        drawBorder: "none",
+        borderPadding: 0,
       },
     }
   }
@@ -94,8 +105,14 @@ export default class FineTuning extends Effect {
         vertices = this.drawPortion(vertices, effect)
       }
 
-      if (effect.drawBorder) {
-        vertices = this.drawBorder(vertices, effect)
+      // Normalize old values to new names
+      let borderMode = effect.drawBorder
+      if (borderMode === true || borderMode === "convex") borderMode = "loose"
+      else if (borderMode === false) borderMode = "none"
+      else if (borderMode === "trace" || borderMode === "concave") borderMode = "tight"
+
+      if (borderMode && borderMode !== "none") {
+        vertices = this.drawBorder(vertices, borderMode, effect.borderPadding || 0)
       }
 
       if (effect.backtrackPct !== 0) {
@@ -162,17 +179,49 @@ export default class FineTuning extends Effect {
     return vertices.concat(backtrackVertices)
   }
 
-  drawBorder(vertices, effect) {
-    let hull = convexHull(cloneVertices(vertices))
-    const last = vertices[vertices.length - 1]
-    const closestVertex = closest(hull, last)
-    const index = hull.indexOf(closestVertex)
-    hull = arrayRotate(hull, index)
+  drawBorder(vertices, mode, scale = 0) {
+    let border
 
-    hull.forEach((vertex) => {
+    if (mode === "tight") {
+      border = traceBoundary(cloneVertices(vertices), scale)
+    } else {
+      // "loose" mode - use convex hull
+      border = convexHull(cloneVertices(vertices))
+
+      // Apply scaling from centroid
+      if (scale !== 0 && border.length > 0) {
+        const center = centroid(vertices)
+        const scaleFactor = 1 + scale / 100
+        border = border.map((v) => {
+          return new Victor(
+            center.x + (v.x - center.x) * scaleFactor,
+            center.y + (v.y - center.y) * scaleFactor,
+          )
+        })
+      }
+    }
+
+    const last = vertices[vertices.length - 1]
+    const closestVertex = closest(border, last)
+    const index = border.indexOf(closestVertex)
+    border = arrayRotate(border, index)
+
+    // Check if we should trace CW or CCW by comparing distances
+    // to the second border vertex vs the last border vertex
+    if (border.length > 2) {
+      const d1 = distance(last, border[1])
+      const d2 = distance(last, border[border.length - 1])
+
+      if (d2 < d1) {
+        // Reverse to take the shorter path around
+        border = [border[0], ...border.slice(1).reverse()]
+      }
+    }
+
+    border.forEach((vertex) => {
       vertices.push(vertex)
     })
-    vertices.push(cloneVertex(hull[0]))
+    vertices.push(cloneVertex(border[0]))
 
     return vertices
   }
