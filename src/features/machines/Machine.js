@@ -276,7 +276,7 @@ export default class Machine {
       let left = lo - 1,
         right = lo
 
-      while (bestSegIndex === -1 || (left >= 0 || right < endpoints.length)) {
+      while (bestSegIndex === -1 || left >= 0 || right < endpoints.length) {
         // Check right
         if (right < endpoints.length) {
           const ep = endpoints[right]

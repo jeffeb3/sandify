@@ -9,8 +9,8 @@ import {
   totalDistance,
   distance,
   boundingVerticesAtLength,
-  traceBoundary,
 } from "@/common/geometry"
+import { traceBoundary } from "@/common/boundary"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
 
@@ -42,6 +42,8 @@ const options = {
   borderPadding: {
     title: "Scale (%)",
     step: 5,
+    min: (state) => (state.drawBorder === "tight" ? 0 : undefined),
+    max: (state) => (state.drawBorder === "tight" ? 65 : undefined),
     isVisible: (model, state) => {
       return state.drawBorder === "tight" || state.drawBorder === "loose"
     },
@@ -109,10 +111,13 @@ export default class FineTuning extends Effect {
       let borderMode = effect.drawBorder
       if (borderMode === true || borderMode === "convex") borderMode = "loose"
       else if (borderMode === false) borderMode = "none"
-      else if (borderMode === "trace" || borderMode === "concave") borderMode = "tight"
 
       if (borderMode && borderMode !== "none") {
-        vertices = this.drawBorder(vertices, borderMode, effect.borderPadding || 0)
+        vertices = this.drawBorder(
+          vertices,
+          borderMode,
+          effect.borderPadding || 0,
+        )
       }
 
       if (effect.backtrackPct !== 0) {

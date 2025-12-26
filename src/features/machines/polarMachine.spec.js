@@ -1,3 +1,4 @@
+/* global performance */
 import PolarMachine from "./PolarMachine"
 import Victor from "victor"
 

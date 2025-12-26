@@ -204,7 +204,6 @@ export default class SVGImport extends Shape {
     }
   }
 
-
   isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     const styles = getComputedStyle(element)
 

@@ -1,3 +1,4 @@
+/* global performance */
 import RectMachine from "./RectMachine"
 import Victor from "victor"
 
