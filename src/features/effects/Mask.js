@@ -1,16 +1,25 @@
 import Effect from "./Effect"
 import Victor from "victor"
-import { rotate, offset, circle } from "@/common/geometry"
+import {
+  circle,
+  resizeVertices,
+  cloneVertices,
+  centerOnOrigin,
+  toLocalSpace,
+  toWorldSpace,
+} from "@/common/geometry"
+import { traceBoundary } from "@/common/boundary"
 import PolarMachine from "@/features/machines/PolarMachine"
 import RectMachine from "@/features/machines/RectMachine"
 import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
 import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
+import PolygonMachine from "@/features/machines/PolygonMachine"
 
 const options = {
   maskMachine: {
     title: "Mask shape",
     type: "togglebutton",
-    choices: ["rectangle", "circle"],
+    choices: ["rectangle", "circle", "layer"],
     onChange: (model, changes, state) => {
       if (changes.maskMachine) {
         if (changes.maskMachine === "circle") {
@@ -23,10 +32,20 @@ const options = {
         } else {
           changes.maintainAspectRatio = false
         }
+
+        // Clear layer selection when switching away from layer mode
+        if (changes.maskMachine !== "layer") {
+          changes.maskLayerId = null
+        }
       }
 
       return changes
     },
+  },
+  maskLayerId: {
+    title: "Source layer",
+    type: "layerSelect",
+    isVisible: (model, state) => state.maskMachine === "layer",
   },
   maskMinimizeMoves: {
     title: "Minimize perimeter moves",
@@ -35,6 +54,7 @@ const options = {
   maskInvert: {
     title: "Invert",
     type: "checkbox",
+    isVisible: (model, state) => state.maskMachine !== "layer",
   },
   maskBorder: {
     title: "Draw border",
@@ -54,11 +74,11 @@ export default class Mask extends Effect {
   }
 
   canRotate(state) {
-    return state.maskMachine != "circle"
+    return state.maskMachine === "rectangle" || state.maskMachine === "layer"
   }
 
   canChangeAspectRatio(state) {
-    return state.maskMachine != "circle"
+    return state.maskMachine === "rectangle"
   }
 
   canChangeSize(state) {
@@ -75,6 +95,7 @@ export default class Mask extends Effect {
         maskMachine: "rectangle",
         maskInvert: false,
         maskBorder: false,
+        maskLayerId: null,
       },
     }
   }
@@ -99,9 +120,44 @@ export default class Mask extends Effect {
     }
   }
 
-  getVertices(effect, layer, vertices) {
+  getVertices(effect, layer, vertices, maskSourceVertices) {
+    // Layer-based masking
+    if (effect.maskMachine === "layer") {
+      // No valid source layer - pass through unchanged
+      if (!maskSourceVertices || maskSourceVertices.length < 3) {
+        return vertices
+      }
+
+      // Trace boundary first (handles self-intersecting shapes), then center, scale, and rotate
+      const boundary = traceBoundary(maskSourceVertices)
+      const centeredMask = centerOnOrigin(cloneVertices(boundary))
+      const scaledMask = resizeVertices(
+        cloneVertices(centeredMask),
+        effect.width,
+        effect.height,
+        true,
+      )
+
+      vertices = vertices.map((vertex) => {
+        return toLocalSpace(vertex, effect.x, effect.y, effect.rotation)
+      })
+
+      if (!effect.dragging) {
+        const machine = new PolygonMachine(
+          { minimizeMoves: effect.maskMinimizeMoves },
+          scaledMask,
+        )
+        vertices = machine.polish(vertices, { border: effect.maskBorder })
+      }
+
+      return vertices.map((vertex) => {
+        return toWorldSpace(vertex, effect.x, effect.y, effect.rotation)
+      })
+    }
+
+    // Standard rectangle/circle masking
     vertices = vertices.map((vertex) => {
-      return rotate(offset(vertex, -effect.x, -effect.y), effect.rotation)
+      return toLocalSpace(vertex, effect.x, effect.y, effect.rotation)
     })
 
     if (!effect.dragging) {
@@ -127,7 +183,7 @@ export default class Mask extends Effect {
     }
 
     return vertices.map((vertex) => {
-      return offset(rotate(vertex, -effect.rotation), effect.x, effect.y)
+      return toWorldSpace(vertex, effect.x, effect.y, effect.rotation)
     })
   }
 }

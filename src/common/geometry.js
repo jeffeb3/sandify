@@ -243,6 +243,16 @@ export const offset = (vertex, x, y) => {
   return vertex
 }
 
+// Transform vertex to local space (offset then rotate)
+export const toLocalSpace = (vertex, x, y, rotation) => {
+  return rotate(offset(vertex, -x, -y), rotation)
+}
+
+// Transform vertex back to world space (rotate back then offset)
+export const toWorldSpace = (vertex, x, y, rotation) => {
+  return offset(rotate(vertex, -rotation), x, y)
+}
+
 // applies a DOMMatrix (or object with a,b,c,d,e,f) to a vertex
 // | a c e |   | x |   | a*x + c*y + e |
 // | b d f | × | y | = | b*x + d*y + f |

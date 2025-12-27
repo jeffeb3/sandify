@@ -96,8 +96,8 @@ export default class EffectLayer {
     return effectOptions
   }
 
-  getVertices(effect, layer, vertices) {
-    return this.model.getVertices(effect, layer, vertices)
+  getVertices(effect, layer, vertices, maskSourceVertices) {
+    return this.model.getVertices(effect, layer, vertices, maskSourceVertices)
   }
 
   getSelectionVertices(effect) {

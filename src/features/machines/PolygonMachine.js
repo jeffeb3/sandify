@@ -1,28 +1,17 @@
 import Victor from "victor"
-import { Clipper, FillRule, Path64 } from "clipper2-js"
 import Machine, { machineOptions } from "./Machine"
 import { distance, cloneVertex, totalDistance } from "@/common/geometry"
-import { traceBoundary } from "@/common/boundary"
-
-const SCALE = 1000
 
 export default class PolygonMachine extends Machine {
   constructor(state, maskVertices) {
     super(state)
     this.label = "Polygon"
 
+    // Use mask vertices directly (caller should trace boundary if needed)
     if (maskVertices && maskVertices.length >= 3) {
-      this.boundary = traceBoundary(maskVertices, 0)
+      this.boundary = [...maskVertices]
     } else {
       this.boundary = []
-    }
-
-    this.clipperBoundary = new Path64()
-    for (const v of this.boundary) {
-      this.clipperBoundary.push({
-        x: Math.round(v.x * SCALE),
-        y: Math.round(v.y * SCALE),
-      })
     }
 
     // Precompute edges and perimeter length
@@ -42,39 +31,134 @@ export default class PolygonMachine extends Machine {
     }
   }
 
-  // Override enforceLimits to use Clipper2 intersection
-  enforceLimits() {
-    if (this.boundary.length < 3 || this.vertices.length < 2) {
-      return this
+  // Use base class enforceLimits which calls clipSegment for each segment
+
+  // Point-in-polygon test using ray casting
+  inBounds(point) {
+    if (this.boundary.length < 3) return false
+
+    let inside = false
+    const x = point.x
+    const y = point.y
+
+    for (let i = 0, j = this.boundary.length - 1; i < this.boundary.length; j = i++) {
+      const xi = this.boundary[i].x
+      const yi = this.boundary[i].y
+      const xj = this.boundary[j].x
+      const yj = this.boundary[j].y
+
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+        inside = !inside
+      }
     }
 
-    // Convert vertices to Clipper2 path
-    const subjectPath = new Path64()
-    for (const v of this.vertices) {
-      subjectPath.push({
-        x: Math.round(v.x * SCALE),
-        y: Math.round(v.y * SCALE),
-      })
+    return inside
+  }
+
+  // Return vertex constrained to inside bounds
+  nearestVertex(vertex) {
+    if (this.inBounds(vertex)) {
+      return cloneVertex(vertex)
+    }
+    return this.nearestPerimeterVertex(vertex)
+  }
+
+  // Clip a line segment against the polygon boundary
+  clipSegment(start, end) {
+    const startIn = this.inBounds(start)
+    const endIn = this.inBounds(end)
+
+    // Both inside - return the segment as-is
+    if (startIn && endIn) {
+      return [start, end]
     }
 
-    // Use Clipper2 intersection
-    const result = Clipper.Intersect(
-      [subjectPath],
-      [this.clipperBoundary],
-      FillRule.NonZero,
-    )
+    // Find intersections with polygon edges
+    const intersections = this.findIntersections(start, end)
 
-    // Convert result back to vertices
-    if (result.length > 0) {
-      // Take the largest result path
-      const largestPath = result.reduce((a, b) => (a.length > b.length ? a : b))
-      this.vertices = largestPath.map(
-        (pt) => new Victor(pt.x / SCALE, pt.y / SCALE),
-      )
-    } else {
-      this.vertices = []
+    // Both outside, no intersections - trace perimeter between nearest points
+    if (intersections.length === 0) {
+      const p1 = this.nearestPerimeterVertex(start)
+      const p2 = this.nearestPerimeterVertex(end)
+      return this.tracePerimeter(p1, p2, true)
     }
 
+    // Sort intersections by t parameter (position along segment)
+    intersections.sort((a, b) => a.t - b.t)
+
+    // Start inside, exit - stop at intersection, let next segment trace perimeter
+    if (startIn && !endIn) {
+      return [start, intersections[0].point]
+    }
+
+    // Start outside, enter
+    if (!startIn && endIn) {
+      return [intersections[intersections.length - 1].point, end]
+    }
+
+    // Both outside but crosses through (2+ intersections)
+    if (intersections.length >= 2) {
+      return [intersections[0].point, intersections[1].point]
+    }
+
+    // Fallback - single intersection or edge case, trace perimeter
+    const p1 = this.nearestPerimeterVertex(start)
+    const p2 = this.nearestPerimeterVertex(end)
+    return this.tracePerimeter(p1, p2, true)
+  }
+
+  // Find all intersections between a segment and polygon edges
+  findIntersections(start, end) {
+    const intersections = []
+    const dx = end.x - start.x
+    const dy = end.y - start.y
+    const lenSq = dx * dx + dy * dy
+
+    for (const edge of this.edges) {
+      const inter = this.lineIntersection(start, end, edge.p1, edge.p2)
+      if (inter) {
+        let t = 0
+        if (lenSq > 1e-10) {
+          t = ((inter.x - start.x) * dx + (inter.y - start.y) * dy) / lenSq
+        }
+        intersections.push({ point: inter, t })
+      }
+    }
+
+    return intersections
+  }
+
+  // Line segment intersection
+  lineIntersection(p1, p2, p3, p4) {
+    const d1x = p2.x - p1.x
+    const d1y = p2.y - p1.y
+    const d2x = p4.x - p3.x
+    const d2y = p4.y - p3.y
+
+    const cross = d1x * d2y - d1y * d2x
+    if (Math.abs(cross) < 1e-10) return null
+
+    const dx = p3.x - p1.x
+    const dy = p3.y - p1.y
+
+    const t = (dx * d2y - dy * d2x) / cross
+    const u = (dx * d1y - dy * d1x) / cross
+
+    // Check if intersection is within both segments
+    const eps = 1e-6
+    if (t > eps && t < 1 - eps && u >= 0 && u <= 1) {
+      return new Victor(p1.x + t * d1x, p1.y + t * d1y)
+    }
+
+    return null
+  }
+
+  // Override optimizePerimeter to preserve perimeter vertices for polygon masks
+  // The base class strips consecutive perimeter vertices as "redundant", but for
+  // polygon clipping the perimeter IS the clipping boundary and must be preserved
+  optimizePerimeter() {
+    // For polygon masks, we keep all vertices from enforceLimits
+    // The perimeter vertices are already correct from clipSegment's tracePerimeter calls
     return this
   }
 
@@ -182,15 +266,20 @@ export default class PolygonMachine extends Machine {
     }
 
     // Collect corner vertices along the path
-    if (goForward) {
-      let idx = edge1.index
-      while (idx !== edge2.index) {
+    // Each edge[i] goes from boundary[i] to boundary[i+1]
+    // When tracing from edge1 to edge2, we need the corner vertices between them
+    if (edge1.index === edge2.index) {
+      // Same edge - no intermediate vertices needed
+    } else if (goForward) {
+      // Forward: add boundary[edge1+1] through boundary[edge2]
+      let idx = (edge1.index + 1) % this.boundary.length
+      while (true) {
+        points.push(cloneVertex(this.boundary[idx]))
+        if (idx === edge2.index) break
         idx = (idx + 1) % this.boundary.length
-        if (idx !== edge2.index || this.boundary.length <= 2) {
-          points.push(cloneVertex(this.boundary[idx]))
-        }
       }
     } else {
+      // Backward: add boundary[edge1] down through boundary[edge2+1]
       let idx = edge1.index
       while (idx !== edge2.index) {
         points.push(cloneVertex(this.boundary[idx]))

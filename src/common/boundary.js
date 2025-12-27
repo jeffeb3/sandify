@@ -183,19 +183,32 @@ export const traceBoundary = (vertices, scale = 0) => {
   // 3. Extract contour at threshold (adjustable via scale param)
   // Produces smooth, uniform-offset boundaries like Photoshop's "Expand Selection"
   const traceSdf = () => {
-    const STROKE_WIDTH = 3 // Stroke expansion width
+    const NORMALIZED_SIZE = 100 // Normalize shape to this size for consistent resolution
+    const STROKE_WIDTH = 3 // Stroke expansion width (in normalized units)
     const PADDING = 0.5 // Padding as fraction of shape size
-    const MAX_BITMAP = 256 // Max bitmap dimension
-    const BASE_RESOLUTION = 4 // Pixels per unit (before capping)
+    const BITMAP_SIZE = 256 // Fixed bitmap size for normalized shape
     const EDGE_THRESHOLD = 0.5 // SDF value at shape edge
     const MIN_THRESHOLD = 0.05 // Minimum threshold (max expansion)
     const SCALE_MULTIPLIER = 1.5 // Boost scale effect
 
     try {
-      // Expand path as stroke
+      // Calculate normalization factor to bring shape to standard size
+      const originalMaxDim = Math.max(inputWidth, inputHeight)
+      const normFactor = originalMaxDim > 0 ? NORMALIZED_SIZE / originalMaxDim : 1
+
+      // Create normalized path for stroke expansion
+      const normalizedPath = new Path64()
+      for (const v of vertices) {
+        normalizedPath.push({
+          x: Math.round(v.x * normFactor * SCALE),
+          y: Math.round(v.y * normFactor * SCALE),
+        })
+      }
+
+      // Expand path as stroke (in normalized space)
       const strokeOffset = new ClipperOffset()
       strokeOffset.ArcTolerance = SCALE * PADDING
-      strokeOffset.addPath(path, JoinType.Round, EndType.Round)
+      strokeOffset.addPath(normalizedPath, JoinType.Round, EndType.Round)
       const strokeResult = []
       strokeOffset.execute(SCALE * STROKE_WIDTH, strokeResult)
 
@@ -206,15 +219,15 @@ export const traceBoundary = (vertices, scale = 0) => {
       } else {
         merged = [
           verticesConvex().map((p) => ({
-            x: Math.round(p.x * SCALE),
-            y: Math.round(p.y * SCALE),
+            x: Math.round(p.x * normFactor * SCALE),
+            y: Math.round(p.y * normFactor * SCALE),
           })),
         ]
       }
 
       if (merged.length === 0) return null
 
-      // Compute bounds with padding
+      // Compute bounds with padding (in normalized space)
       const sdfBounds = merged.flat().reduce(
         (acc, pt) => ({
           minX: Math.min(acc.minX, pt.x / SCALE),
@@ -228,9 +241,9 @@ export const traceBoundary = (vertices, scale = 0) => {
       const sdfHeight = sdfBounds.maxY - sdfBounds.minY
       const padding = Math.max(sdfWidth, sdfHeight) * PADDING
 
-      // Cap bitmap size to prevent stack overflow
+      // Fixed resolution for normalized space
       const maxDim = Math.max(sdfWidth, sdfHeight) + padding * 2
-      const resolution = Math.min(BASE_RESOLUTION, MAX_BITMAP / maxDim)
+      const resolution = BITMAP_SIZE / maxDim
       const bitmapWidth = Math.ceil((sdfWidth + padding * 2) * resolution)
       const bitmapHeight = Math.ceil((sdfHeight + padding * 2) * resolution)
 
@@ -272,10 +285,10 @@ export const traceBoundary = (vertices, scale = 0) => {
           a[0].length > b[0].length ? a : b,
         )[0]
 
-        // Convert bitmap coords back to original space
+        // Convert bitmap coords back to original space (undo normalization)
         const result = largestRing.map(([x, y]) => [
-          (x / resolution + sdfBounds.minX - padding) * SCALE,
-          (y / resolution + sdfBounds.minY - padding) * SCALE,
+          ((x / resolution + sdfBounds.minX - padding) / normFactor) * SCALE,
+          ((y / resolution + sdfBounds.minY - padding) / normFactor) * SCALE,
         ])
         result.sdfApplied = true
         return result

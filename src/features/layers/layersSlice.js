@@ -8,12 +8,16 @@ import Color from "color"
 import { arrayMoveImmutable } from "array-move"
 import { isEqual } from "lodash"
 import {
-  rotate,
-  offset,
   totalDistance,
   findBounds,
   cloneVertex,
+  resizeVertices,
+  cloneVertices,
+  centerOnOrigin,
+  toLocalSpace,
 } from "@/common/geometry"
+import { traceBoundary } from "@/common/boundary"
+import Victor from "victor"
 import { orderByKey } from "@/common/util"
 import { insertOne, prepareAfterAdd } from "@/common/slice"
 import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
@@ -198,10 +202,7 @@ const previewVertices = (vertices, layer) => {
   return vertices.map((vertex) => {
     vertex = cloneVertex(vertex)
 
-    let previewVertex = rotate(
-      offset(vertex, -layer.x, -layer.y),
-      layer.rotation,
-    )
+    let previewVertex = toLocalSpace(vertex, layer.x, layer.y, layer.rotation)
 
     // store original coordinates
     previewVertex.origX = vertex.x
@@ -351,19 +352,48 @@ export const selectAllImageIds = createSelector([selectAllLayers], (layers) => {
   return layers.map((layer) => layer.imageId).filter((id) => id)
 })
 
+// Returns the mask source layer's vertices when a mask effect has maskLayerId set
+// Validates that the source layer exists and precedes the target layer
+// Safe because layers are computed in order, so preceding layer is already cached
+// Note: invisible layers can still be mask sources
+const selectMaskSourceVertices = (state, layerId) => {
+  // Get the layer's visible effects
+  const effects = selectVisibleLayerEffects(state, layerId)
+
+  // Find mask effect with maskMachine === "layer" and maskLayerId set
+  const maskEffect = effects.find(
+    (e) => e.type === "mask" && e.maskMachine === "layer" && e.maskLayerId,
+  )
+  if (!maskEffect) return null
+
+  const maskLayerId = maskEffect.maskLayerId
+
+  // Validate: source layer must exist and precede target (visibility not required)
+  const allLayerIds = selectLayerIds(state)
+  const thisIdx = allLayerIds.indexOf(layerId)
+  const sourceIdx = allLayerIds.indexOf(maskLayerId)
+
+  // Invalid if: doesn't exist or comes after this layer
+  if (sourceIdx === -1 || sourceIdx >= thisIdx) return null
+
+  // Return source layer's vertices (computed on demand even if invisible)
+  return selectLayerVertices(state, maskLayerId)
+}
+
 // returns the vertices for a given layer
 export const selectLayerVertices = createCachedSelector(
   selectLayerById,
   selectVisibleLayerEffects,
   selectLayerMachine,
   selectLayerDependentsLoaded,
-  (layer, effects, machine) => {
+  (state, id) => selectMaskSourceVertices(state, id),
+  (layer, effects, machine, _dependentsLoaded, maskSourceVertices) => {
     if (!layer) {
       return []
     } // zombie child
 
     const instance = new Layer(layer.type)
-    return instance.getVertices({ layer, effects, machine })
+    return instance.getVertices({ layer, effects, machine, maskSourceVertices })
   },
 )({
   keySelector: (state, id) => id,
@@ -537,6 +567,69 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
     )
 
     return idx > draggingIdx
+  },
+)({
+  keySelector: (state, id) => id,
+  selectorCreator: createSelectorCreator(lruMemoize, {
+    equalityCheck: isEqual,
+  }),
+})
+
+// returns the selection vertices for an effect, with special handling for layer masks
+export const selectEffectSelectionVertices = createCachedSelector(
+  selectEffectById,
+  (state, effectId) => {
+    const effect = selectEffectById(state, effectId)
+    if (
+      effect?.type === "mask" &&
+      effect?.maskMachine === "layer" &&
+      effect?.maskLayerId
+    ) {
+      return selectLayerVertices(state, effect.maskLayerId)
+    }
+    return null
+  },
+  (effect, maskSourceVertices) => {
+    if (!effect) {
+      return []
+    }
+
+    // For layer masks with valid source, trace boundary then center and scale
+    // (rotation is handled by Shape component's rotation prop)
+    if (
+      effect.type === "mask" &&
+      effect.maskMachine === "layer" &&
+      maskSourceVertices &&
+      maskSourceVertices.length >= 3
+    ) {
+      // Trace boundary to handle self-intersecting shapes (e.g., Fractal Spirograph)
+      const boundary = traceBoundary(maskSourceVertices)
+      const centeredMask = centerOnOrigin(cloneVertices(boundary))
+
+      const result = resizeVertices(
+        cloneVertices(centeredMask),
+        effect.width,
+        effect.height,
+        true,
+      )
+
+      // DEBUG: Log selection vertices processing
+      console.log("[selectEffectSelectionVertices]", {
+        sourceCount: maskSourceVertices.length,
+        boundaryCount: boundary.length,
+        effectSize: { w: effect.width, h: effect.height },
+        resultBounds: result.length > 0 ? {
+          first: { x: result[0].x.toFixed(1), y: result[0].y.toFixed(1) },
+          sample: result.length > 10 ? { x: result[10].x.toFixed(1), y: result[10].y.toFixed(1) } : null
+        } : null
+      })
+
+      return result
+    }
+
+    // Fall back to standard selection vertices
+    const instance = new EffectLayer(effect.type)
+    return instance.getSelectionVertices(effect)
   },
 )({
   keySelector: (state, id) => id,

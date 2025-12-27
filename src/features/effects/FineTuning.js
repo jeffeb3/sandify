@@ -45,7 +45,14 @@ const options = {
     min: (state) => (state.drawBorder === "tight" ? 0 : undefined),
     max: (state) => (state.drawBorder === "tight" ? 65 : undefined),
     isVisible: (model, state) => {
-      return state.drawBorder === "tight" || state.drawBorder === "loose"
+      return state.drawBorder !== "none"
+    },
+  },
+  borderOnly: {
+    title: "Draw border only",
+    type: "checkbox",
+    isVisible: (model, state) => {
+      return state.drawBorder !== "none"
     },
   },
   backtrackPct: {
@@ -86,6 +93,7 @@ export default class FineTuning extends Effect {
         reverse: false,
         drawBorder: "none",
         borderPadding: 0,
+        borderOnly: false,
       },
     }
   }
@@ -117,6 +125,7 @@ export default class FineTuning extends Effect {
           vertices,
           borderMode,
           effect.borderPadding || 0,
+          effect.borderOnly || false,
         )
       }
 
@@ -184,7 +193,7 @@ export default class FineTuning extends Effect {
     return vertices.concat(backtrackVertices)
   }
 
-  drawBorder(vertices, mode, scale = 0) {
+  drawBorder(vertices, mode, scale = 0, borderOnly = false) {
     let border
 
     if (mode === "tight") {
@@ -204,6 +213,12 @@ export default class FineTuning extends Effect {
           )
         })
       }
+    }
+
+    // If borderOnly, return just the closed border path
+    if (borderOnly) {
+      border.push(cloneVertex(border[0]))
+      return border
     }
 
     const last = vertices[vertices.length - 1]
