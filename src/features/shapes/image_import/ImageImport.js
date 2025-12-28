@@ -3,6 +3,7 @@ import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "../Shape"
 import { subtypes, getSubtype } from "./subtypes"
 import RectMachine from "@/features/machines/RectMachine"
+import i18next from 'i18next'
 
 const hasSetting = (state, setting) => {
   return getSubtype(state.imageSubtype).settings.includes(setting)
@@ -42,7 +43,7 @@ const handleClippedBrightnessChange = (model, changes, state) => {
 
 const options = {
   imageSubtype: {
-    title: "Type",
+    title: i18next.t('shapes.imageImport.type'),
     type: "dropdown",
     choices: Object.keys(subtypes),
     onChange: (model, changes, state) => {
@@ -51,7 +52,7 @@ const options = {
     },
   },
   imagePolygon: {
-    title: "Polygon (sides)",
+    title: i18next.t('shapes.imageImport.polygon'),
     min: 3,
     max: 8,
     isVisible: (layer, state) => {
@@ -59,7 +60,7 @@ const options = {
     },
   },
   imageFrequency: {
-    title: "Frequency",
+    title: i18next.t('shapes.imageImport.frequency'),
     min: 5,
     max: 256,
     isVisible: (layer, state) => {
@@ -67,7 +68,7 @@ const options = {
     },
   },
   imageLineCount: {
-    title: "Line count",
+    title: i18next.t('shapes.imageImport.lineCount'),
     min: 10,
     max: 200,
     step: 2,
@@ -76,13 +77,13 @@ const options = {
     },
   },
   imageAmplitude: {
-    title: "Amplitude",
+    title: i18next.t('shapes.imageImport.amplitude'),
     min: 0.1,
     max: 5,
     step: 0.1,
   },
   imageSampling: {
-    title: "Sampling",
+    title: i18next.t('shapes.imageImport.sampling'),
     min: 0.5,
     max: 2.9,
     step: 0.1,
@@ -91,7 +92,7 @@ const options = {
     },
   },
   imageSpacing: {
-    title: "Spacing",
+    title: i18next.t('shapes.imageImport.spacing'),
     min: 1,
     max: 5,
     step: 0.5,
@@ -100,23 +101,30 @@ const options = {
     },
   },
   imageModulation: {
-    title: "Modulation",
+    title: i18next.t('shapes.imageImport.modulation'),
     type: "togglebutton",
-    choices: ["AM", "FM", "both"],
+    choices: [
+      {"title": i18next.t('shapes.imageImport.am'), "value": "AM"}, 
+      {"title": i18next.t('shapes.imageImport.fm'), "value": "FM"}, 
+      {"title": i18next.t('shapes.imageImport.both'), "value": "both"}
+    ],
     isVisible: (layer, state) => {
       return hasSetting(state, "imageModulation")
     },
   },
   imageDirection: {
-    title: "Direction",
+    title: i18next.t('shapes.imageImport.direction'),
     type: "togglebutton",
-    choices: ["clockwise", "counterclockwise"],
+    choices: [
+      {"title": i18next.t('shapes.imageImport.clockwise'), "value": "clockwise"}, 
+      {"title": i18next.t('shapes.imageImport.counterclockwise'), "value": "counterclockwise"}
+    ],
     isVisible: (layer, state) => {
       return hasSetting(state, "imageDirection")
     },
   },
   imageStepSize: {
-    title: "Step size",
+    title: i18next.t('shapes.imageImport.stepSize'),
     min: 1,
     max: 20,
     step: 0.1,
@@ -125,7 +133,7 @@ const options = {
     },
   },
   imageAngle: {
-    title: "Angle",
+    title: i18next.t('shapes.imageImport.angle'),
     min: 0,
     max: 360,
     isVisible: (layer, state) => {
@@ -133,13 +141,13 @@ const options = {
     },
   },
   imageBrightness: {
-    title: "Brightness",
+    title: i18next.t('shapes.imageImport.brightness'),
     type: "slider",
     min: -100.0,
     max: 100.0,
   },
   imageBrightnessFilter: {
-    title: "Brightness filter",
+    title: i18next.t('shapes.imageImport.brightnessFilter'),
     type: "slider",
     range: true,
     min: 0,
@@ -152,13 +160,13 @@ const options = {
     },
   },
   imageContrast: {
-    title: "Contrast",
+    title: i18next.t('shapes.imageImport.contrast'),
     type: "slider",
     min: -100.0,
     max: 100.0,
   },
   imageInverted: {
-    title: "Inverted",
+    title: i18next.t('shapes.imageImport.inverted'),
     type: "checkbox",
   },
 }
@@ -166,7 +174,7 @@ const options = {
 export default class ImageImport extends Shape {
   constructor() {
     super("imageImport")
-    this.label = "Import"
+    this.label = i18next.t('shapes.imageImport.imageImport')
     this.usesMachine = true
     this.stretch = true
     this.selectGroup = "import"

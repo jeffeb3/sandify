@@ -5,42 +5,45 @@ import { shapeSimilarity } from "curve-matcher"
 import { offset } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   numParticles: {
-    title: "Number of waves",
+    title: i18next.t('shapes.noiseWave.numberOfWaves'),
     min: 1,
   },
   seed: {
-    title: "Random seed",
+    title: i18next.t('shapes.noiseWave.randomSeed'),
     min: 1,
     randomMax: 1000,
   },
   noiseLevel: {
-    title: "Noise level",
+    title: i18next.t('shapes.noiseWave.noiseLevel'),
     min: 0,
     max: 600,
     step: 10,
     random: 0.5,
   },
   noiseType: {
-    title: "Type",
+    title: i18next.t('shapes.noiseWave.type'),
     type: "dropdown",
-    choices: ["Perlin", "Simplex"],
+    choices: [
+      {"title": i18next.t('shapes.noiseWave.perlin'), "value": "Perlin"},
+      {"title": i18next.t('shapes.noiseWave.simplex'), "value": "Simplex"}
+    ],
   },
 }
 
 export default class NoiseWave extends Shape {
   constructor() {
     super("noise_wave")
-    this.label = "Noise waves"
-    this.selectGroup = "Erasers"
+    this.label = i18next.t('shapes.noiseWave.noiseWave')
+    this.selectGroup = i18next.t('layer.erasers'),
     this.usesMachine = true
     this.autosize = false
     this.link = "https://en.wikipedia.org/wiki/Perlin_noise"
-    this.linkText = "Wikipedia"
-    this.description =
-      "Perlin noise is a type of gradient noise that can be used to generate textures and terrain. Here we use it to create an appealing series of wavy lines."
+    this.linkText = i18next.t('shapes.noiseWave.linkText')
+    this.description = i18next.t('shapes.noiseWave.description')
   }
 
   canMove(state) {

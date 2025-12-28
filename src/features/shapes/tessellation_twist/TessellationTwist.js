@@ -4,6 +4,7 @@ import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { difference } from "@/common/util"
 import { cloneVertices } from "@/common/geometry"
 import Shape from "../Shape"
+import i18next from 'i18next'
 
 const vecTriangle = [
   new Victor(-0.85, -0.4907477295),
@@ -68,16 +69,16 @@ function getEdges(edges, a, b, c, count, settings) {
 
 const options = {
   tessellationTwistNumSides: {
-    title: "Number of sides",
+    title: i18next.t('shapes.tessellationTwist.numSides'),
     min: 3,
   },
   tessellationTwistIterations: {
-    title: "Iterations",
+    title: i18next.t('shapes.tessellationTwist.iterations'),
     min: 0,
     max: 4,
   },
   tessellationTwistRotate: {
-    title: "Rotate and twist",
+    title: i18next.t('shapes.tessellationTwist.rotate'),
     step: 5,
     min: 0,
     random: 0.6,
@@ -90,11 +91,10 @@ const options = {
 export default class TessellationTwist extends Shape {
   constructor() {
     super("tessellationTwist")
-    this.label = "Tessellation twist"
+    this.label = i18next.t('shapes.tessellationTwist.tessellationTwist')
     this.link = "https://en.wikipedia.org/wiki/Tessellation"
-    this.linkText = "Wikipedia"
-    this.description =
-      "The tessellation twist shape is form of tessellation. Tessellations cover a surface using tiles (in our case an equilateral triangle) with no overlaps or gaps."
+    this.linkText = i18next.t('shapes.tessellationTwist.linkText')
+    this.description = i18next.t('shapes.tessellationTwist.description')
   }
 
   getInitialState() {

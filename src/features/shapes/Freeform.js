@@ -1,9 +1,10 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   freeformPoints: {
-    title: "Points",
+    title: i18next.t('shapes.freeform.points'),
     type: "input",
   },
 }

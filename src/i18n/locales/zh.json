@@ -70,5 +70,216 @@
   "previewStats": {
     "points": "顶点数",
     "distance": "移动距离 (毫米)"
+  },
+  "layer":{
+    "shapes":"形状",
+    "erasers":"清除",
+    "name": "名称",
+    "x": "X",
+    "y": "Y",
+    "width": "宽",
+    "height": "高",
+    "maintainAspectRatio": "锁定宽高比",
+    "rotation": "旋转（度）",
+    "connectionMethod": "连接到下一层",
+    "line": "直线",
+    "alongPerimeter": "沿边缘",
+    "type": "类型",
+    "transform": "变换",
+    "see": "点击",
+    "moreInformation": "查看更多信息。"
+  },
+  "shapes":{
+    "circle":{
+      "circle": "圆",
+      "numberOfLobes": "叶片数量",
+      "direction": "方向",
+      "clockwise": "顺时针",
+      "counterclockwise": "逆时针"
+    },
+    "epicycloid":{
+      "epicycloid": "外摆线",
+      "largeCircleRadius": "大圆半径",
+      "smallCircleRadius": "小圆半径",
+      "linkText": "Wolfram 数学世界",
+      "description": "三叶草形状是外摆线。想象两个圆，外圆绕着内圆滚动。外圆上的点在滚动过程中形成的轨迹称为外摆线。"
+    },
+    "fancyText":{
+      "fancyText": "花式文字",
+      "text": "文本",
+      "font": "字体",
+      "lineSpacing": "行间距",
+      "connectRows": "连接行",
+      "alignment": "对齐方式",
+      "inside": "内部",
+      "outside": "外部",
+      "left": "左对齐",
+      "center": "居中",
+      "right": "右对齐"
+    },
+    "freeform":{
+      "points": "点集"
+    },
+    "heart":{
+      "heart": "心形",
+      "linkText": "Wolfram 数学世界",
+      "description": "心形曲线可以通过多种数学方式定义。我们的心形是一个参数方程。"
+    },
+    "hypocycloid":{
+      "hypocycloid": "网形",
+      "largeCircleRadius": "大圆半径",
+      "smallCircleRadius": "小圆半径",
+      "linkText": "Wolfram 数学世界",
+      "description": "网形是内摆线。想象两个圆，内圆在外圆内部滚动。内圆上的点在滚动过程中形成的轨迹称为内摆线。"
+    },
+    "layerImport":{
+      "layerImport": "导入",
+      "sourceFile": "源文件"
+    },
+    "noiseWave":{
+      "noiseWave": "噪声波",
+      "numberOfWaves": "波浪数量",
+      "randomSeed": "随机种子",
+      "noiseLevel": "噪声级别",
+      "type": "类型",
+      "perlin": "Perlin",
+      "simplex": "Simplex",
+      "linkText": "维基百科",
+      "description": "Perlin 噪声是一种梯度噪声，可用于生成纹理和地形。这里我们用它来创建吸引人的波浪线系列。"
+    },
+    "point":{
+      "point": "点"
+    },
+    "polygon":{
+      "polygon": "多边形",
+      "numberOfSides": "边数",
+      "roundCorners": "圆角",
+      "roundFraction": "圆角程度"
+    },
+    "reuleaux":{
+      "reuleaux": "鲁洛多边形",
+      "numberOfSides": "边数",
+      "linkText": "维基百科",
+      "description": "鲁洛多边形是由恒定半径的圆弧组成的恒定宽度曲线。它以19世纪德国工程师弗朗西斯·鲁洛（Frances Reuleaux）命名，他在设计中使用了鲁洛三角形。"
+    },
+    "rose":{
+      "rose": "玫瑰线",
+      "numerator": "分子",
+      "denominator": "分母",
+      "linkText": "Wolfram 数学世界",
+      "description": "玫瑰线是一种具有花瓣形状的曲线。"
+    },
+    "star":{
+      "star": "星形",
+      "numberOfPoints": "顶点数",
+      "sizeOfPoints": "顶点大小"
+    },
+    "voronoi":{
+      "voronoi": "沃罗诺伊图",
+      "placement": "放置方式",
+      "weighted": "加权",
+      "poissonDiskSampling": "泊松圆盘采样",
+      "polygon": "多边形",
+      "voronoiDiagram": "voronoi",
+      "delaunay": "delaunay",
+      "weightFunction": "权重函数",
+      "zoom": "缩放",
+      "numberOfPoints": "点数",
+      "minDistance": "最小距离",
+      "maxDistance": "最大距离",
+      "waveFrequency": "波浪频率",
+      "randomSeed": "随机种子",
+      "linkText": "维基百科",
+      "description": "沃罗诺伊图根据一组种子点将空间划分为区域。每个区域包含所有比其他种子点更接近其种子点的点。"
+    },
+    "wiper":{
+      "wiper": "雨刮",
+      "wiperType": "雨刮类型",
+      "lines": "线条",
+      "spiral": "螺旋",
+      "wiperSize": "雨刮大小",
+      "wiperAngle": "雨刮角度"
+    },
+    "circlePacker":{
+      "circlePacker": "圆形包装",
+      "seed": "随机种子",
+      "startingRadius": "最小半径",
+      "attempts": "圆形均匀性",
+      "inBounds": "保持在边界内",
+      "linkText": "维基百科",
+      "description": "圆形包装是不同大小圆形的排列，使得不会发生重叠，且在不产生重叠的情况下无法放大任何圆形。"
+    },
+    "fractalSpirograph":{
+      "fractalSpirograph": "分形螺旋图",
+      "velocity": "速度",
+      "resolution": "分辨率",
+      "numCircles": "圆形数量",
+      "relativeSize": "相对大小（父圆到子圆）",
+      "alternateRotation": "交替旋转方向",
+      "linkText": "这篇博客文章",
+      "description": "分形螺旋图由一系列相互旋转的圆生成。图案是通过跟踪沿最外圆滚动的点创建的。"
+    },
+    "imageImport":{
+      "imageImport": "导入",
+      "type": "类型",
+      "polygon": "多边形（边数）",
+      "frequency": "频率",
+      "lineCount": "线条数量",
+      "amplitude": "振幅",
+      "sampling": "采样",
+      "spacing": "间距",
+      "modulation": "调制",
+      "am": "AM",
+      "fm": "FM",
+      "both": "两者",
+      "direction": "方向",
+      "clockwise": "顺时针",
+      "counterclockwise": "逆时针",
+      "stepSize": "步长",
+      "angle": "角度",
+      "brightness": "亮度",
+      "brightnessFilter": "亮度滤镜",
+      "contrast": "对比度",
+      "inverted": "反相"
+    },
+    "inputText":{
+      "inputText": "文本",
+      "text": "文本",
+      "font": "字体",
+      "cursive": "手写体",
+      "sansSerif": "无衬线体",
+      "monospace": "等宽字体",
+      "rotate": "旋转",
+      "top": "顶部",
+      "center": "中心",
+      "bottom": "底部"
+    },
+    "lSystem":{
+      "lSystem": "分形线绘制器",
+      "type": "类型",
+      "iterations": "迭代次数",
+      "linkText": "维基百科",
+      "description": "分形线绘制器是一种林登迈尔（L）系统。L系统将符号链接在一起以指定在二维空间中移动的指令（例如，左转或右转，左移或右移）。当递归应用时，它们会生成分形图案。"
+    },
+    "spaceFiller":{
+      "spaceFiller": "空间填充",
+      "type": "类型",
+      "iterations": "迭代次数",
+      "linkText": "维基百科",
+      "description": "空间填充曲线绘制一条连续的线，覆盖空间中的每个点，不会遗漏任何位置或自相交。"
+    },
+    "tessellationTwist":{
+      "tessellationTwist": "镶嵌扭转",
+      "numSides": "边数",
+      "iterations": "迭代次数",
+      "rotate": "旋转和扭转",
+      "linkText": "维基百科",
+      "description": "镶嵌扭转形状是镶嵌的一种形式。镶嵌使用瓦片（在我们的例子中是等边三角形）覆盖表面，没有重叠或间隙。"
+    },
+    "v1Engineering":{
+      "v1Engineering": "V1工程",
+      "linkText": "V1 Engineering",
+      "description": "这个形状代表 V1 Engineering 的标志。V1 Engineering 提供低成本、可定制的机器设计。Sandify 于 2017 年由其论坛用户创建。"
+    }
   }
 }

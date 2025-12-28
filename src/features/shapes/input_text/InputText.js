@@ -3,21 +3,30 @@ import Victor from "victor"
 import Shape from "@/features/shapes/Shape"
 import { arc, dimensions } from "@/common/geometry"
 import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
+import i18next from 'i18next'
 
 const options = {
   inputText: {
-    title: "Text",
+    title: i18next.t('shapes.inputText.text'),
     type: "textarea",
   },
   inputFont: {
-    title: "Font",
+    title: i18next.t('shapes.inputText.font'),
     type: "dropdown",
-    choices: ["Cursive", "Sans Serif", "Monospace"],
+    choices: [
+      {"title": i18next.t('shapes.inputText.cursive'), "value": "Cursive"}, 
+      {"title": i18next.t('shapes.inputText.sansSerif'), "value": "Sans Serif"}, 
+      {"title": i18next.t('shapes.inputText.monospace'), "value": "Monospace"}
+    ],
   },
   rotateDir: {
-    title: "Rotate",
+    title: i18next.t('shapes.inputText.rotate'),
     type: "dropdown",
-    choices: ["Top", "Center", "Bottom"],
+    choices: [
+      {"title": i18next.t('shapes.inputText.top'), "value": "Top"}, 
+      {"title": i18next.t('shapes.inputText.center'), "value": "Center"}, 
+      {"title": i18next.t('shapes.inputText.bottom'), "value": "Bottom"}
+    ],
   },
 }
 
@@ -38,7 +47,7 @@ export default class InputText extends Shape {
   constructor() {
     super("inputText")
     this.stretch = true
-    this.label = "Text"
+    this.label = i18next.t('shapes.inputText.inputText')
     this.usesMachine = true
   }
 

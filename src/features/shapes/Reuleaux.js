@@ -1,9 +1,10 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   reuleauxSides: {
-    title: "Number of sides",
+    title: i18next.t('shapes.reuleaux.numberOfSides'),
     step: 1,
     min: 2,
     randomMax: 8,
@@ -13,11 +14,10 @@ const options = {
 export default class Reuleaux extends Shape {
   constructor() {
     super("reuleaux")
-    this.label = "Reuleaux"
-    this.description =
-      "A reuleaux polygon is a curve of constant width made up of circular arcs of constant radius. It's named after Frances Reuleaux, a 19th century German engineer who used Reuleaux triangles in his designs."
+    this.label = i18next.t('shapes.reuleaux.reuleaux')
+    this.description = i18next.t('shapes.reuleaux.description')
     this.link = "https://en.wikipedia.org/wiki/Reuleaux_polygon"
-    this.linkText = "Wikipedia"
+    this.linkText = i18next.t('shapes.reuleaux.linkText')
   }
 
   getInitialState() {

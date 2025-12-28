@@ -9,10 +9,11 @@ import {
 } from "@/common/lindenmayer"
 import { subtypes } from "./subtypes"
 import { resizeVertices } from "@/common/geometry"
+import i18next from 'i18next'
 
 const options = {
   subtype: {
-    title: "Type",
+    title: i18next.t('shapes.lSystem.type'),
     type: "dropdown",
     choices: Object.keys(subtypes),
     onChange: (model, changes, state) => {
@@ -20,7 +21,7 @@ const options = {
     },
   },
   iterations: {
-    title: "Iterations",
+    title: i18next.t('shapes.lSystem.iterations'),
     min: (state) => {
       return onMinIterations(subtypes[state.subtype], state)
     },
@@ -33,11 +34,10 @@ const options = {
 export default class LSystem extends Shape {
   constructor() {
     super("lsystem")
-    this.label = "Fractal line writer"
+    this.label = i18next.t('shapes.lSystem.lSystem')
     this.link = "https://en.wikipedia.org/wiki/L-system"
-    this.linkText = "Wikipedia"
-    this.description =
-      "The fractal line writer shape is a Lindenmayer (or L) system. L-systems chain symbols together to specify instructions for moving in a 2d space (e.g., turn left or right, walk left or right). When applied recursively, they generate fractal-like patterns."
+    this.linkText = i18next.t('shapes.lSystem.linkText')
+    this.description = i18next.t('shapes.lSystem.description')
   }
 
   getInitialState() {

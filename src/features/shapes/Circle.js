@@ -1,23 +1,26 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   circleLobes: {
-    title: "Number of lobes",
+    title: i18next.t('shapes.circle.numberOfLobes'),
     min: 1,
     randomMax: 6,
   },
   circleDirection: {
-    title: "Direction",
+    title: i18next.t('shapes.circle.direction'),
     type: "togglebutton",
-    choices: ["clockwise", "counterclockwise"],
+    choices: [
+      {"title":i18next.t('shapes.circle.clockwise'), "value":"clockwise"}, 
+      {"title":i18next.t('shapes.circle.counterclockwise'), "value":"counterclockwise"}],
   },
 }
 
 export default class Circle extends Shape {
   constructor() {
     super("circle")
-    this.label = "Circle"
+    this.label = i18next.t('shapes.circle.circle')
   }
 
   getInitialState() {

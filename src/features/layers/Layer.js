@@ -2,28 +2,29 @@ import { getShape } from "@/features/shapes/shapeFactory"
 import EffectLayer from "@/features/effects/EffectLayer"
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { roundP } from "@/common/util"
+import i18next from 'i18next'
 
 export const layerOptions = {
   name: {
-    title: "Name",
+    title: i18next.t('layer.name'),
     type: "text",
   },
   x: {
-    title: "X",
+    title: i18next.t('layer.x'),
     inline: true,
     isVisible: (model, state) => {
       return model.canMove(state)
     },
   },
   y: {
-    title: "Y",
+    title: i18next.t('layer.y'),
     inline: true,
     isVisible: (model, state) => {
       return model.canMove(state)
     },
   },
   width: {
-    title: "W",
+    title: i18next.t('layer.width'),
     min: 1,
     inline: true,
     isVisible: (model, state) => {
@@ -42,7 +43,7 @@ export const layerOptions = {
     },
   },
   height: {
-    title: "H",
+    title: i18next.t('layer.height'),
     min: 1,
     inline: true,
     onChange: (model, changes, state) => {
@@ -58,20 +59,23 @@ export const layerOptions = {
     },
   },
   maintainAspectRatio: {
-    title: "Lock aspect ratio",
+    title: i18next.t('layer.maintainAspectRatio'),
     type: "checkbox",
   },
   rotation: {
-    title: "Rotate (degrees)",
+    title: i18next.t('layer.rotation'),
     inline: true,
     isVisible: (model, state) => {
       return model.canRotate(state)
     },
   },
   connectionMethod: {
-    title: "Connect to next layer",
+    title: i18next.t('layer.connectionMethod'),
     type: "togglebutton",
-    choices: ["line", "along perimeter"],
+    choices: [
+      {"title": i18next.t('layer.line'), "value": "line"}, 
+      {"title": i18next.t('layer.alongPerimeter'), "value": "along perimeter"}
+    ],
   },
 }
 

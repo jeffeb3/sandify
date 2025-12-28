@@ -1,18 +1,19 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   polygonSides: {
-    title: "Number of sides",
+    title: i18next.t('shapes.polygon.numberOfSides'),
     min: 3,
     randomMax: 12,
   },
   roundCorners: {
-    title: "Round corners",
+    title: i18next.t('shapes.polygon.roundCorners'),
     type: "checkbox",
   },
   roundFraction: {
-    title: "Round fraction",
+    title: i18next.t('shapes.polygon.roundFraction'),
     min: 0.05,
     max: 0.5,
     step: 0.025,
@@ -25,7 +26,7 @@ const options = {
 export default class Polygon extends Shape {
   constructor() {
     super("polygon")
-    this.label = "Polygon"
+    this.label = i18next.t('shapes.polygon.polygon')
   }
 
   getInitialState() {

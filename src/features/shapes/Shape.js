@@ -2,6 +2,7 @@ import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
 import { pick } from "lodash"
 import { LRUCache } from "lru-cache"
 import Model from "@/common/Model"
+import i18next from 'i18next'
 
 const cache = new LRUCache({
   length: (n, key) => {
@@ -16,7 +17,7 @@ export default class Shape extends Model {
     this.cache = []
 
     Object.assign(this, {
-      selectGroup: "Shapes",
+      selectGroup: i18next.t('layer.shapes'),
       shouldCache: true,
       autosize: true,
       startingWidth: 100,

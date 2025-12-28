@@ -5,20 +5,27 @@ import { centerOnOrigin } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
 import { VoronoiMixin, weightFunctions } from "@/common/voronoi"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 export const voronoiOptions = {
   voronoiPlacement: {
-    title: "Placement",
+    title: i18next.t('shapes.voronoi.placement'),
     type: "togglebutton",
-    choices: ["weighted", "poisson disk sampling"],
+    choices: [
+      {"title": i18next.t('shapes.voronoi.weighted'), "value": "weighted"},
+      {"title": i18next.t('shapes.voronoi.poissonDiskSampling'), "value": "poisson disk sampling"}
+    ],
   },
   voronoiPolygon: {
-    title: "Polygon",
+    title: i18next.t('shapes.voronoi.polygon'),
     type: "togglebutton",
-    choices: ["voronoi", "delaunay"],
+    choices: [
+      {"title": i18next.t('shapes.voronoi.voronoiDiagram'), "value": "voronoi"},
+      {"title": i18next.t('shapes.voronoi.delaunay'), "value": "delaunay"}
+    ],
   },
   voronoiWeightFunction: {
-    title: "Weight function",
+    title: i18next.t('shapes.voronoi.weightFunction'),
     type: "dropdown",
     choices: () => {
       return Object.keys(weightFunctions)
@@ -28,7 +35,7 @@ export const voronoiOptions = {
     },
   },
   voronoiZoom: {
-    title: "Zoom",
+    title: i18next.t('shapes.voronoi.zoom'),
     min: 1,
     step: 1,
     randomMax: 200,
@@ -40,7 +47,7 @@ export const voronoiOptions = {
     },
   },
   voronoiNumPoints: {
-    title: "Number of points",
+    title: i18next.t('shapes.voronoi.numberOfPoints'),
     min: 1,
     step: 1,
     randomMax: 200,
@@ -49,7 +56,7 @@ export const voronoiOptions = {
     },
   },
   voronoiMinDistance: {
-    title: "Min. distance",
+    title: i18next.t('shapes.voronoi.minDistance'),
     type: "slider",
     min: 20,
     max: 50,
@@ -58,7 +65,7 @@ export const voronoiOptions = {
     },
   },
   voronoiMaxDistance: {
-    title: "Max. distance",
+    title: i18next.t('shapes.voronoi.maxDistance'),
     type: "slider",
     min: 20,
     max: 50,
@@ -67,7 +74,7 @@ export const voronoiOptions = {
     },
   },
   voronoiFrequency: {
-    title: "Wave frequency",
+    title: i18next.t('shapes.voronoi.waveFrequency'),
     min: 1,
     max: 100,
     isVisible: (layer, state) => {
@@ -78,7 +85,7 @@ export const voronoiOptions = {
     },
   },
   seed: {
-    title: "Random seed",
+    title: i18next.t('shapes.voronoi.randomSeed'),
     min: 1,
     randomMax: 1000,
   },
@@ -87,11 +94,10 @@ export const voronoiOptions = {
 export default class Voronoi extends Shape {
   constructor() {
     super("voronoi")
-    this.label = "Voronoi"
-    this.description =
-      "A Voronoi diagram divides a space into regions based on a set of seed points. Each region contains all the points that are closer to its seed point than to any other seed point."
+    this.label = i18next.t('shapes.voronoi.voronoi')
+    this.description = i18next.t('shapes.voronoi.description')
     this.link = "https://en.wikipedia.org/wiki/Voronoi_diagram"
-    this.linkText = "Wikipedia"
+    this.linkText = i18next.t('shapes.voronoi.linkText')
     this.usesMachine = true
   }
 

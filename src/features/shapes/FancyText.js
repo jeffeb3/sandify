@@ -3,6 +3,7 @@ import { arrayRotate } from "@/common/util"
 import { pointsOnPath } from "points-on-path"
 import pointInPolygon from "point-in-polygon"
 import Shape from "./Shape"
+import i18next from 'i18next'
 import {
   subsample,
   centerOnOrigin,
@@ -22,39 +23,46 @@ const SPECIAL_CHILDREN = ["i", "j", "?"]
 
 const options = {
   fancyText: {
-    title: "Text",
+    title: i18next.t('shapes.fancyText.text'),
     type: "textarea",
   },
   fancyFont: {
-    title: "Font",
+    title: i18next.t('shapes.fancyText.font'),
     type: "dropdown",
     choices: () => {
       return Object.values(supportedFonts)
     },
   },
   fancyLineSpacing: {
-    title: "Line spacing",
+    title: i18next.t('shapes.fancyText.lineSpacing'),
     type: "number",
     step: 0.5,
     random: 0.0,
     randomMax: 2,
   },
   fancyConnectLines: {
-    title: "Connect rows",
+    title: i18next.t('shapes.fancyText.connectRows'),
     type: "togglebutton",
-    choices: ["inside", "outside"],
+    choices: [
+      {"title": i18next.t('shapes.fancyText.inside'), "value": "inside"},
+      {"title": i18next.t('shapes.fancyText.outside'), "value": "outside"}
+    ],
   },
   fancyAlignment: {
-    title: "Alignment",
+    title: i18next.t('shapes.fancyText.alignment'),
     type: "togglebutton",
-    choices: ["left", "center", "right"],
+    choices: [
+      {"title": i18next.t('shapes.fancyText.left'), "value": "left"},
+      {"title": i18next.t('shapes.fancyText.center'), "value": "center"},
+      {"title": i18next.t('shapes.fancyText.right'), "value": "right"}
+    ],
   },
 }
 
 export default class FancyText extends Shape {
   constructor() {
     super("fancyText")
-    this.label = "Fancy text"
+    this.label = i18next.t('shapes.fancyText.fancyText')
     this.usesMachine = true
     this.usesFonts = true
     this.stretch = true

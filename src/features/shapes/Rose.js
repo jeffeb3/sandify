@@ -1,15 +1,16 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   roseN: {
-    title: "Numerator",
+    title: i18next.t('shapes.rose.numerator'),
     step: 1,
     min: 1,
     randomMax: 16,
   },
   roseD: {
-    title: "Denominator",
+    title: i18next.t('shapes.rose.denominator'),
     step: 1,
     min: 1,
     randomMax: 16,
@@ -19,11 +20,10 @@ const options = {
 export default class Rose extends Shape {
   constructor() {
     super("rose")
-    this.label = "Rose"
+    this.label = i18next.t('shapes.rose.rose')
     this.link = "https://mathworld.wolfram.com/RoseCurve.html"
-    this.linkText = "Wolfram Mathworld"
-    this.description =
-      "A rose curve is a curve which has the shape of a petalled flower."
+    this.linkText = i18next.t('shapes.rose.linkText')
+    this.description = i18next.t('shapes.rose.description')
   }
 
   getInitialState() {

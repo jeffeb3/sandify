@@ -1,15 +1,16 @@
 import Victor from "victor"
 import Shape from "./Shape"
 import { reduce } from "@/common/util"
+import i18next from 'i18next'
 
 const options = {
   epicycloidA: {
-    title: "Large circle radius",
+    title: i18next.t('shapes.epicycloid.largeCircleRadius'),
     min: 1,
     randomMax: 16,
   },
   epicycloidB: {
-    title: "Small circle radius",
+    title: i18next.t('shapes.epicycloid.smallCircleRadius'),
     min: 1,
     randomMax: 16,
     random: 0.6,
@@ -19,11 +20,10 @@ const options = {
 export default class Epicycloid extends Shape {
   constructor() {
     super("epicycloid")
-    this.label = "Clover"
+    this.label = i18next.t('shapes.epicycloid.epicycloid')
     this.link = "http://mathworld.wolfram.com/Epicycloid.html"
-    this.linkText = "Wolfram Mathworld"
-    this.description =
-      "The clover shape is an epicycloid. Imagine two circles, with an outer circle rolling around an inner one. The path created by a point on the outer circle as it rolls is called an epicycloid."
+    this.linkText = i18next.t('shapes.epicycloid.linkText')
+    this.description = i18next.t('shapes.epicycloid.description')
   }
 
   getInitialState() {

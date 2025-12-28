@@ -10,10 +10,12 @@ import {
 import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { subtypes } from "./subtypes"
 import { getMachine } from "@/features/machines/machineFactory"
+import i18next from 'i18next'
+
 
 const options = {
   fillerSubtype: {
-    title: "Type",
+    title: i18next.t('shapes.spaceFiller.type'),
     type: "dropdown",
     choices: Object.keys(subtypes),
     onChange: (model, changes, state) => {
@@ -21,7 +23,7 @@ const options = {
     },
   },
   iterations: {
-    title: "Iterations",
+    title: i18next.t('shapes.spaceFiller.iterations'),
     min: (state) => {
       return onMinIterations(subtypes[state.fillerSubtype], state)
     },
@@ -34,13 +36,12 @@ const options = {
 export default class SpaceFiller extends Shape {
   constructor() {
     super("spaceFiller")
-    this.label = "Space filler"
+    this.label = i18next.t('shapes.spaceFiller.spaceFiller')
     this.usesMachine = true
     this.autosize = false
-    this.selectGroup = "Erasers"
-    this.linkText = "Wikipedia"
-    this.description =
-      "A space-filling curve draws a single, continuous line that covers every point in a space without missing any spots or crossing itself."
+    this.selectGroup = i18next.t('layer.erasers'),
+    this.linkText = i18next.t('shapes.spaceFiller.linkText')
+    this.description = i18next.t('shapes.spaceFiller.description')
     this.link = "https://en.wikipedia.org/wiki/Space-filling_curve"
   }
 

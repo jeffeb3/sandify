@@ -1,10 +1,11 @@
 import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 const options = {
   fileName: {
-    title: "Source file",
+    title: i18next.t('shapes.layerImport.sourceFile'),
     type: "inputText",
     plainText: "true",
   },
@@ -13,7 +14,7 @@ const options = {
 export default class LayerImport extends Shape {
   constructor() {
     super("fileImport")
-    this.label = "Import"
+    this.label = i18next.t('shapes.layerImport.layerImport')
     this.usesMachine = true
     this.selectGroup = "import"
     this.randomizable = false

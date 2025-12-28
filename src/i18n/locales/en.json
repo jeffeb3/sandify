@@ -71,5 +71,216 @@
   "previewStats": {
     "points": "Points",
     "distance": "Distance (mm)"
+  },
+  "layer":{
+    "shapes":"Shapes",
+    "erasers":"Erasers",
+    "name": "Name",
+    "x": "X",
+    "y": "Y",
+    "width": "W",
+    "height": "H",
+    "maintainAspectRatio": "Lock aspect ratio",
+    "rotation": "Rotate (degrees)",
+    "connectionMethod": "Connect to next layer",
+    "line": "line",
+    "alongPerimeter": "along perimeter",
+    "type": "Type",
+    "transform": "Transform",
+    "see": "See",
+    "moreInformation": "for more information."
+  },
+  "shapes":{
+    "circle":{
+      "circle": "Circle",
+      "numberOfLobes": "Number of lobes",
+      "direction": "Direction",
+      "clockwise": "clockwise",
+      "counterclockwise": "counterclockwise"
+    },
+    "epicycloid":{
+      "epicycloid": "Clover",
+      "largeCircleRadius": "Large circle radius",
+      "smallCircleRadius": "Small circle radius",
+      "linkText": "Wolfram Mathworld",
+      "description": "The clover shape is an epicycloid. Imagine two circles, with an outer circle rolling around an inner one. The path created by a point on the outer circle as it rolls is called an epicycloid."
+    },
+    "fancyText":{
+      "fancyText": "Fancy text",
+      "text": "Text",
+      "font": "Font",
+      "lineSpacing": "Line spacing",
+      "connectRows": "Connect rows",
+      "alignment": "Alignment",
+      "inside": "inside",
+      "outside": "outside",
+      "left": "left",
+      "center": "center",
+      "right": "right"
+    },
+    "freeform":{
+      "points": "Points"
+    },
+    "heart":{
+      "heart": "Heart",
+      "linkText": "Wolfram Mathworld",
+      "description": "Heart curves can be defined mathematically a number of different ways. Our heart shape is a parametric equation."
+    },
+    "hypocycloid":{
+      "hypocycloid": "Web",
+      "largeCircleRadius": "Large circle radius",
+      "smallCircleRadius": "Small circle radius",
+      "linkText": "Wolfram Mathworld",
+      "description": "The web shape is a hypocycloid. Imagine two circles, with an inner circle rolling around inside an outer one. The path created by a point on the inner circle as it rolls is called a hypocycloid."
+    },
+    "layerImport":{
+      "layerImport": "Import",
+      "sourceFile": "Source file"
+    },
+    "noiseWave":{
+      "noiseWave": "Noise waves",
+      "numberOfWaves": "Number of waves",
+      "randomSeed": "Random seed",
+      "noiseLevel": "Noise level",
+      "type": "Type",
+      "perlin": "Perlin",
+      "simplex": "Simplex",
+      "linkText": "Wikipedia",
+      "description": "Perlin noise is a type of gradient noise that can be used to generate textures and terrain. Here we use it to create an appealing series of wavy lines."
+    },
+    "point":{
+      "point": "Point"
+    },
+    "polygon":{
+      "polygon": "Polygon",
+      "numberOfSides": "Number of sides",
+      "roundCorners": "Round corners",
+      "roundFraction": "Round fraction"
+    },
+    "reuleaux":{
+      "reuleaux": "Reuleaux",
+      "numberOfSides": "Number of sides",
+      "linkText": "Wikipedia",
+      "description": "A reuleaux polygon is a curve of constant width made up of circular arcs of constant radius. It's named after Frances Reuleaux, a 19th century German engineer who used Reuleaux triangles in his designs."
+    },
+    "rose":{
+      "rose": "Rose",
+      "numerator": "Numerator",
+      "denominator": "Denominator",
+      "linkText": "Wolfram Mathworld",
+      "description": "A rose curve is a curve which has the shape of a petalled flower."
+    },
+    "star":{
+      "star": "Star",
+      "numberOfPoints": "Number of points",
+      "sizeOfPoints": "Size of points"
+    },
+    "voronoi":{
+      "voronoi": "Voronoi",
+      "placement": "Placement",
+      "weighted": "weighted",
+      "poissonDiskSampling": "poisson disk sampling",
+      "polygon": "Polygon",
+      "voronoiDiagram": "voronoi",
+      "delaunay": "delaunay",
+      "weightFunction": "Weight function",
+      "zoom": "Zoom",
+      "numberOfPoints": "Number of points",
+      "minDistance": "Min. distance",
+      "maxDistance": "Max. distance",
+      "waveFrequency": "Wave frequency",
+      "randomSeed": "Random seed",
+      "linkText": "Wikipedia",
+      "description": "A Voronoi diagram divides a space into regions based on a set of seed points. Each region contains all the points that are closer to its seed point than to any other seed point."
+    },
+    "wiper":{
+      "wiper": "Wiper",
+      "wiperType": "Wiper type",
+      "lines": "Lines",
+      "spiral": "Spiral",
+      "wiperSize": "Wiper size",
+      "wiperAngle": "Wiper angle"
+    },
+    "circlePacker":{
+      "circlePacker": "Circle packer",
+      "seed": "Random seed",
+      "startingRadius": "Minimum radius",
+      "attempts": "Circle uniformity",
+      "inBounds": "Stay in bounds",
+      "linkText": "Wikipedia",
+      "description": "Circle packing is an arrangement of circles of varying sizes such that no overlapping occurs and no circle can be enlarged without creating an overlap."
+    },
+    "fractalSpirograph":{
+      "fractalSpirograph": "Fractal spirograph",
+      "velocity": "Velocity",
+      "resolution": "Resolution",
+      "numCircles": "Number of circles",
+      "relativeSize": "Relative size (parent to child circle)",
+      "alternateRotation": "Alternate rotation direction",
+      "linkText": "this blog post",
+      "description": "Fractal spirographs are generated by a series of circles rotating around each other. The pattern is created by tracking a point as it rolls along the outermost circle."
+    },
+    "imageImport":{
+      "imageImport": "Import",
+      "type": "Type",
+      "polygon": "Polygon (sides)",
+      "frequency": "Frequency",
+      "lineCount": "Line count",
+      "amplitude": "Amplitude",
+      "sampling": "Sampling",
+      "spacing": "Spacing",
+      "modulation": "Modulation",
+      "am": "AM",
+      "fm": "FM",
+      "both": "both",
+      "direction": "Direction",
+      "clockwise": "clockwise",
+      "counterclockwise": "counterclockwise",
+      "stepSize": "Step size",
+      "angle": "Angle",
+      "brightness": "Brightness",
+      "brightnessFilter": "Brightness filter",
+      "contrast": "Contrast",
+      "inverted": "Inverted"
+    },
+    "inputText":{
+      "inputText": "Text",
+      "text": "Text",
+      "font": "Font",
+      "cursive": "Cursive",
+      "sansSerif": "Sans Serif",
+      "monospace": "Monospace",
+      "rotate": "Rotate",
+      "top": "Top",
+      "center": "Center",
+      "bottom": "Bottom"
+    },
+    "lSystem":{
+      "lSystem": "Fractal line writer",
+      "type": "Type",
+      "iterations": "Iterations",
+      "linkText": "Wikipedia",
+      "description": "The fractal line writer shape is a Lindenmayer (or L) system. L-systems chain symbols together to specify instructions for moving in a 2d space (e.g., turn left or right, walk left or right). When applied recursively, they generate fractal-like patterns."
+    },
+    "spaceFiller":{
+      "spaceFiller": "Space filler",
+      "type": "Type",
+      "iterations": "Iterations",
+      "linkText": "Wikipedia",
+      "description": "A space-filling curve draws a single, continuous line that covers every point in a space without missing any spots or crossing itself."
+    },
+    "tessellationTwist":{
+      "tessellationTwist": "Tessellation twist",
+      "numSides": "Number of sides",
+      "iterations": "Iterations",
+      "rotate": "Rotate and twist",
+      "linkText": "Wikipedia",
+      "description": "The tessellation twist shape is form of tessellation. Tessellations cover a surface using tiles (in our case an equilateral triangle) with no overlaps or gaps."
+    },
+    "v1Engineering":{
+      "v1Engineering": "V1Engineering",
+      "linkText": "V1 Engineering",
+      "description": "This shape represents the V1 Engineering logo. V1 Engineering provides low-cost, customizable machine designs. Sandify was created in 2017 by users in their forum."
+    }
   }
 }

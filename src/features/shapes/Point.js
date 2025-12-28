@@ -1,10 +1,11 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 export default class Point extends Shape {
   constructor() {
     super("point")
-    this.label = "Point"
+    this.label = i18next.t('shapes.point.point')
     this.startingWidth = 1
     this.startingHeight = 1
     this.shouldCache = false
