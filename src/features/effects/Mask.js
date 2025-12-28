@@ -26,6 +26,7 @@ const options = {
           changes.rotation = 0
 
           const size = Math.max(state.width, state.height)
+
           changes.height = size
           changes.width = size
           changes.maintainAspectRatio = true

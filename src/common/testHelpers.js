@@ -12,6 +12,20 @@ export const createSquare = (size = 50, center = { x: 0, y: 0 }) => {
   ]
 }
 
+// Create an equilateral triangle centered at origin
+export const createTriangle = (size = 50, center = { x: 0, y: 0 }, closed = true) => {
+  const height = (size * Math.sqrt(3)) / 2
+  const vertices = [
+    new Victor(center.x, center.y - (height * 2) / 3),          // top
+    new Victor(center.x - size / 2, center.y + height / 3),     // bottom-left
+    new Victor(center.x + size / 2, center.y + height / 3),     // bottom-right
+  ]
+  if (closed) {
+    vertices.push(vertices[0].clone())
+  }
+  return vertices
+}
+
 // Create a 5-pointed star centered at origin
 export const createStar = (outerRadius = 50, innerRadius = 20) => {
   const vertices = []
@@ -50,6 +64,41 @@ export const createOpenPath = () => {
     new Victor(0, 50),
     // NOT closed - gap back to start
   ]
+}
+
+// Create a rectangle with a bump on the right side
+// This simulates a wavy boundary to test perimeter tracing
+export const createBumpyRect = (width = 100, height = 100, bumpSize = 20) => {
+  const hw = width / 2
+  const hh = height / 2
+  const bh = bumpSize / 2
+  return [
+    new Victor(-hw, -hh),           // bottom-left
+    new Victor(hw, -hh),            // bottom-right
+    new Victor(hw, -bh),            // up to bump bottom
+    new Victor(hw + bumpSize, -bh), // bump out
+    new Victor(hw + bumpSize, bh),  // bump across
+    new Victor(hw, bh),             // bump back
+    new Victor(hw, hh),             // continue to top-right
+    new Victor(-hw, hh),            // top-left
+    new Victor(-hw, -hh),           // close
+  ]
+}
+
+// Create a hexagon centered at origin
+export const createHexagon = (radius = 50, center = { x: 0, y: 0 }) => {
+  const vertices = []
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI) / 3 - Math.PI / 2 // Start from top
+    vertices.push(
+      new Victor(
+        center.x + Math.cos(angle) * radius,
+        center.y + Math.sin(angle) * radius
+      )
+    )
+  }
+  vertices.push(vertices[0].clone()) // close
+  return vertices
 }
 
 // Create a grid of small disconnected squares (fill pattern)

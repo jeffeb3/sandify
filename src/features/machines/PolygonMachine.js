@@ -67,6 +67,7 @@ export default class PolygonMachine extends Machine {
     if (this.inBounds(vertex)) {
       return cloneVertex(vertex)
     }
+
     return this.nearestPerimeterVertex(vertex)
   }
 
@@ -97,13 +98,31 @@ export default class PolygonMachine extends Machine {
     const startIn = this.inBounds(start)
     const endIn = this.inBounds(end)
 
-    // Both inside - return the segment as-is
-    if (startIn && endIn) {
+    // Find intersections with polygon edges
+    const intersections = this.findIntersections(start, end)
+
+    // Both inside with no intersections - segment stays inside
+    if (startIn && endIn && intersections.length === 0) {
       return [start, end]
     }
 
-    // Find intersections with polygon edges
-    const intersections = this.findIntersections(start, end)
+    // Both inside but has intersections - segment passes through a concave notch
+    // Need to break at intersections and trace perimeter through the notch
+    if (startIn && endIn && intersections.length >= 2) {
+      intersections.sort((a, b) => a.t - b.t)
+      const result = [start, intersections[0].point]
+
+      // Add perimeter trace through the notch, then continue inside
+      const perimeterPath = this.tracePerimeter(
+        intersections[0].point,
+        intersections[1].point,
+        false,
+      )
+      result.push(...perimeterPath)
+      result.push(intersections[1].point, end)
+
+      return result
+    }
 
     // Both outside, no intersections - trace perimeter between nearest points
     if (intersections.length === 0) {
@@ -252,6 +271,135 @@ export default class PolygonMachine extends Machine {
   }
 
   addEndPoint() {
+    return this
+  }
+
+  // Override to trace perimeter between exit/entry points for concave shapes
+  enforceLimits() {
+    if (this.boundary.length < 3) {
+      return this
+    }
+
+    const DEBUG = false // eslint-disable-line no-unused-vars
+    let cleanVertices = []
+    let previous = null
+    let prevInBounds = null
+    let lastExitPoint = null
+    let hasBeenInside = false // Track if we've ever been inside the mask
+
+    if (DEBUG) {
+      console.log("=== enforceLimits START ===")
+      console.log("boundary vertices:", this.boundary.length)
+      console.log("input vertices:", this.vertices.length)
+      // Log which input vertices are inside/outside the mask
+      this.vertices.forEach((v, i) => {
+        console.log(`  vertex[${i}] (${v.x.toFixed(1)}, ${v.y.toFixed(1)}) inBounds=${this.inBounds(v)}`)
+      })
+    }
+
+    for (let next = 0; next < this.vertices.length; next++) {
+      const vertex = this.vertices[next]
+      const currInBounds = this.inBounds(vertex)
+
+      if (previous) {
+        const clipped = this.clipSegment(previous, vertex)
+
+        if (DEBUG) {
+          console.log(`\n[${next}] prev(${previous.x.toFixed(1)},${previous.y.toFixed(1)}) -> curr(${vertex.x.toFixed(1)},${vertex.y.toFixed(1)})`)
+          console.log(`    prevInBounds=${prevInBounds}, currInBounds=${currInBounds}`)
+          console.log(`    clipped: [${clipped.map((v) => `(${v.x.toFixed(1)},${v.y.toFixed(1)})`).join(", ")}]`)
+          console.log(`    lastExitPoint=${lastExitPoint ? `(${lastExitPoint.x.toFixed(1)},${lastExitPoint.y.toFixed(1)})` : "null"}`)
+        }
+
+        if (clipped.length > 0) {
+          const firstClipped = clipped[0]
+          const lastClipped = clipped[clipped.length - 1]
+
+          // Determine if this segment actually crosses into/out of the mask
+          // vs just tracing along the perimeter outside
+          const actuallyEnters = !prevInBounds && currInBounds  // outside -> inside
+          const actuallyExits = prevInBounds && !currInBounds   // inside -> outside
+          const crossesThrough = !prevInBounds && !currInBounds && clipped.length === 2  // outside -> inside -> outside
+          const bothInside = prevInBounds && currInBounds  // inside -> inside
+
+          // When we re-enter the mask (or cross through it) and we have a previous
+          // exit point, trace the perimeter from exit to entry. This ensures the
+          // clipped path follows the mask boundary instead of taking shortcuts.
+          if (lastExitPoint && (actuallyEnters || crossesThrough)) {
+            const entryPoint = firstClipped
+            const perimeterPath = this.tracePerimeter(lastExitPoint, entryPoint, false)
+
+            if (DEBUG) {
+              console.log(`    TRACE PERIMETER: exit(${lastExitPoint.x.toFixed(1)},${lastExitPoint.y.toFixed(1)}) -> entry(${entryPoint.x.toFixed(1)},${entryPoint.y.toFixed(1)})`)
+              console.log(`    path: [${perimeterPath.map((v) => `(${v.x.toFixed(1)},${v.y.toFixed(1)})`).join(", ")}]`)
+            }
+
+            cleanVertices.push(...perimeterPath)
+          }
+
+          // Only add clipped points when segment actually interacts with mask interior
+          // Skip outside->outside perimeter traces (no intersections)
+          const shouldAddClipped = actuallyEnters || actuallyExits || crossesThrough || bothInside
+          if (shouldAddClipped) {
+            for (const pt of clipped) {
+              cleanVertices.push(this.nearestVertex(pt))
+            }
+          }
+
+          // Track if we've actually been inside the mask
+          if (actuallyEnters || actuallyExits || crossesThrough || currInBounds) {
+            hasBeenInside = true
+          }
+
+          // Track exit point only when we actually exit from inside
+          // (not when we're just tracing perimeter outside)
+          if (actuallyExits || crossesThrough) {
+            lastExitPoint = lastClipped
+          } else if (currInBounds) {
+            lastExitPoint = null
+          }
+          // If still outside and was outside, keep lastExitPoint unchanged (for perimeter tracing later)
+        }
+      } else {
+        // First vertex
+        if (DEBUG) {
+          console.log(`[0] first vertex (${vertex.x.toFixed(1)},${vertex.y.toFixed(1)}), inBounds=${currInBounds}`)
+        }
+
+        if (currInBounds) {
+          // First vertex inside - add it
+          cleanVertices.push(cloneVertex(vertex))
+          hasBeenInside = true
+        }
+        // If first vertex is outside, don't add anything and don't set lastExitPoint.
+        // We only set lastExitPoint when we actually EXIT from inside the mask.
+        // The first segment's clipSegment will handle finding the entry point.
+      }
+
+      previous = vertex
+      prevInBounds = currInBounds
+    }
+
+    // Close the loop: if we started outside (first point on boundary) and
+    // ended with an exit point, trace perimeter back to start
+    if (cleanVertices.length > 0 && lastExitPoint) {
+      const firstPoint = cleanVertices[0]
+      const perimeterPath = this.tracePerimeter(lastExitPoint, firstPoint, false)
+
+      if (DEBUG) {
+        console.log(`\n    CLOSING LOOP: (${lastExitPoint.x.toFixed(1)},${lastExitPoint.y.toFixed(1)}) -> (${firstPoint.x.toFixed(1)},${firstPoint.y.toFixed(1)})`)
+        console.log(`    perimeterPath: [${perimeterPath.map((v) => `(${v.x.toFixed(1)},${v.y.toFixed(1)})`).join(", ")}]`)
+      }
+
+      cleanVertices.push(...perimeterPath)
+    }
+
+    if (DEBUG) {
+      console.log("\n=== enforceLimits END ===")
+      console.log("output vertices:", cleanVertices.length)
+    }
+
+    this.vertices = cleanVertices
     return this
   }
 

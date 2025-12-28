@@ -14,7 +14,7 @@ import calcSdf from "bitmap-sdf"
 import { contours } from "d3-contour"
 import { findBounds, distance, centroid } from "./geometry"
 
-const DEBUG = false
+const DEBUG = false // Set to true to debug SDF detection
 
 // Fill a polygon into a bitmap using scanline rasterization
 // Used for SDF-based border tracing
@@ -163,13 +163,13 @@ export const traceBoundary = (vertices, scale = 0) => {
       (isOpenPath && boundary.length === 1 && ratio >= SDF_RATIO_OPEN))
 
   if (DEBUG)
-    console.log("[traceBoundary] detection:", {
+    console.log("[traceBoundary] decision:", {
       boundaryPaths: boundary.length,
-      ratio: ratio.toFixed(1),
-      pointsPerPath: pointsPerPath.toFixed(0),
+      ratio: ratio.toFixed(2),
+      pointsPerPath: pointsPerPath.toFixed(1),
       isOpenPath,
-      useSdf,
       isFillPattern,
+      useSdf,
     })
 
   // Convex hull of original vertices - used when Clipper2 boundary
@@ -184,12 +184,25 @@ export const traceBoundary = (vertices, scale = 0) => {
   // Produces smooth, uniform-offset boundaries like Photoshop's "Expand Selection"
   const traceSdf = () => {
     const NORMALIZED_SIZE = 100 // Normalize shape to this size for consistent resolution
-    const STROKE_WIDTH = 3 // Stroke expansion width (in normalized units)
+    const STROKE_WIDTH_BASE = 3 // Base stroke expansion width (in normalized units)
+    // Multi-path shapes (like text) need more stroke to merge separate components
+    const STROKE_WIDTH = boundary.length > 1 ? STROKE_WIDTH_BASE * 2 : STROKE_WIDTH_BASE
     const PADDING = 0.5 // Padding as fraction of shape size
     const BITMAP_SIZE = 256 // Fixed bitmap size for normalized shape
+    const MAX_BITMAP_DIM = 512 // Cap bitmap dimensions to prevent performance issues
+    const MAX_INPUT_VERTICES = 5000 // Skip SDF for very complex shapes
+    const MAX_CONTOUR_POINTS = 2000 // Downsample contour if too many points
     const EDGE_THRESHOLD = 0.5 // SDF value at shape edge
     const MIN_THRESHOLD = 0.05 // Minimum threshold (max expansion)
     const SCALE_MULTIPLIER = 1.5 // Boost scale effect
+
+    // Early exit if input is too complex - fall back to concaveman
+    if (vertices.length > MAX_INPUT_VERTICES) {
+      if (DEBUG) console.log("[traceSdf] skipping - too many input vertices:", vertices.length)
+      return null
+    }
+
+    if (DEBUG) console.log("[traceSdf] starting...", { boundaryPaths: boundary.length, strokeWidth: STROKE_WIDTH, inputVertices: vertices.length })
 
     try {
       // Calculate normalization factor to bring shape to standard size
@@ -197,7 +210,7 @@ export const traceBoundary = (vertices, scale = 0) => {
       const normFactor = originalMaxDim > 0 ? NORMALIZED_SIZE / originalMaxDim : 1
 
       // Create normalized path for stroke expansion
-      const normalizedPath = new Path64()
+      let normalizedPath = new Path64()
       for (const v of vertices) {
         normalizedPath.push({
           x: Math.round(v.x * normFactor * SCALE),
@@ -205,9 +218,24 @@ export const traceBoundary = (vertices, scale = 0) => {
         })
       }
 
+      // Simplify path using Douglas-Peucker if too many vertices
+      const MAX_OFFSET_VERTICES = 500
+      if (normalizedPath.length > MAX_OFFSET_VERTICES) {
+        // epsilon controls simplification aggressiveness (in scaled units)
+        const epsilon = SCALE * 1.0 // 1.0 normalized units tolerance
+        normalizedPath = Clipper.simplifyPath(normalizedPath, epsilon, false)
+        if (DEBUG) console.log("[traceSdf] simplified path from", vertices.length, "to", normalizedPath.length, "vertices")
+
+        // If still too many after simplification, bail out
+        if (normalizedPath.length > MAX_OFFSET_VERTICES) {
+          if (DEBUG) console.log("[traceSdf] still too complex after simplification, bailing")
+          return null
+        }
+      }
+
       // Expand path as stroke (in normalized space)
       const strokeOffset = new ClipperOffset()
-      strokeOffset.ArcTolerance = SCALE * PADDING
+      strokeOffset.ArcTolerance = SCALE * 1.0 // Moderate arc tolerance for balance of speed/quality
       strokeOffset.addPath(normalizedPath, JoinType.Round, EndType.Round)
       const strokeResult = []
       strokeOffset.execute(SCALE * STROKE_WIDTH, strokeResult)
@@ -227,6 +255,13 @@ export const traceBoundary = (vertices, scale = 0) => {
 
       if (merged.length === 0) return null
 
+      // Check total point count in merged paths - bail if too large
+      const totalMergedPoints = merged.reduce((sum, p) => sum + p.length, 0)
+      if (totalMergedPoints > MAX_INPUT_VERTICES * 2) {
+        if (DEBUG) console.log("[traceSdf] merged paths too complex, bailing")
+        return null
+      }
+
       // Compute bounds with padding (in normalized space)
       const sdfBounds = merged.flat().reduce(
         (acc, pt) => ({
@@ -242,10 +277,10 @@ export const traceBoundary = (vertices, scale = 0) => {
       const padding = Math.max(sdfWidth, sdfHeight) * PADDING
 
       // Fixed resolution for normalized space
-      const maxDim = Math.max(sdfWidth, sdfHeight) + padding * 2
+      const maxDim = Math.max(sdfWidth, sdfHeight, 1) + padding * 2 // min 1 to avoid division issues
       const resolution = BITMAP_SIZE / maxDim
-      const bitmapWidth = Math.ceil((sdfWidth + padding * 2) * resolution)
-      const bitmapHeight = Math.ceil((sdfHeight + padding * 2) * resolution)
+      const bitmapWidth = Math.min(MAX_BITMAP_DIM, Math.ceil((sdfWidth + padding * 2) * resolution))
+      const bitmapHeight = Math.min(MAX_BITMAP_DIM, Math.ceil((sdfHeight + padding * 2) * resolution))
 
       // Rasterize merged paths to bitmap
       const bitmap = new Uint8ClampedArray(bitmapWidth * bitmapHeight)
@@ -268,7 +303,7 @@ export const traceBoundary = (vertices, scale = 0) => {
         radius: bitmapWidth / 4,
       })
 
-      // Threshold: edge value = tight, lower = further out
+      // Threshold: higher = tighter (inside stroke), lower = further out
       const thresholdRange = EDGE_THRESHOLD - MIN_THRESHOLD
       const threshold = Math.max(
         EDGE_THRESHOLD - (scale / 100) * thresholdRange * SCALE_MULTIPLIER,
@@ -281,22 +316,46 @@ export const traceBoundary = (vertices, scale = 0) => {
 
       if (contourResult.length > 0 && contourResult[0].coordinates.length > 0) {
         const rings = contourResult[0].coordinates
+        const ringSizes = rings.map(r => r[0].length).sort((a, b) => b - a)
+        if (DEBUG) console.log("[traceSdf] rings:", rings.length, "sizes:", ringSizes)
+
+        // If multiple rings and largest is much bigger than rest, it's likely
+        // the outer bitmap boundary (letters didn't merge) - fall back to concaveman
+        if (rings.length > 1 && ringSizes[0] > ringSizes[1] * 4) {
+          if (DEBUG) console.log("[traceSdf] largest ring appears to be bitmap boundary, falling back")
+          return null
+        }
+
         const largestRing = rings.reduce((a, b) =>
           a[0].length > b[0].length ? a : b,
         )[0]
 
         // Convert bitmap coords back to original space (undo normalization)
-        const result = largestRing.map(([x, y]) => [
+        let rawPoints = largestRing.map(([x, y]) => [
           ((x / resolution + sdfBounds.minX - padding) / normFactor) * SCALE,
           ((y / resolution + sdfBounds.minY - padding) / normFactor) * SCALE,
         ])
-        result.sdfApplied = true
-        return result
+
+        // Downsample if too many points to prevent concaveman from hanging
+        if (rawPoints.length > MAX_CONTOUR_POINTS) {
+          const step = Math.ceil(rawPoints.length / MAX_CONTOUR_POINTS)
+          rawPoints = rawPoints.filter((_, i) => i % step === 0)
+          if (DEBUG) console.log("[traceSdf] downsampled contour from", largestRing.length, "to", rawPoints.length)
+        }
+
+        // Smooth the SDF contour using concaveman to remove marching squares artifacts
+        // This creates a cleaner boundary for polygon clipping
+        const smoothed = concaveman(rawPoints, 1.0)
+        smoothed.sdfApplied = true
+        if (DEBUG) console.log("[traceSdf] success, smoothed:", smoothed.length, "points")
+        return smoothed
       }
-    } catch {
-      // SDF failed
+      if (DEBUG) console.log("[traceSdf] no contour result")
+    } catch (e) {
+      if (DEBUG) console.log("[traceSdf] error:", e.message)
     }
 
+    if (DEBUG) console.log("[traceSdf] returning null (fallback to concaveman)")
     return null
   }
 

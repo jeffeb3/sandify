@@ -1,6 +1,6 @@
 import PolygonMachine from "./PolygonMachine"
 import Victor from "victor"
-import { createStar } from "@/common/testHelpers"
+import { createStar, createTriangle, createBumpyRect, createHexagon } from "@/common/testHelpers"
 import { circle } from "@/common/geometry"
 
 // Wrapper for geometry's circle to match test usage (radius, segments, center)
@@ -75,6 +75,35 @@ describe("PolygonMachine", () => {
 
         // Should include perimeter vertices
         expect(result.length).toBeGreaterThan(2)
+      })
+
+      it("handles segment through concave notch (both endpoints inside)", () => {
+        // Both points are inside the star (in different arms), but a straight
+        // line between them passes through a concave notch (outside the star)
+        // This tests the fix for concave polygon clipping
+        //
+        // Points in bottom arm and right arm, line crosses the notch between them
+        const start = new Victor(0, -35) // inside bottom arm
+        const end = new Victor(30, -12) // inside right arm
+
+        // Verify both points are actually inside the star
+        expect(machine.inBounds(start)).toBe(true)
+        expect(machine.inBounds(end)).toBe(true)
+
+        // Verify the line actually crosses the boundary (goes through notch)
+        const intersections = machine.findIntersections(start, end)
+        expect(intersections.length).toBeGreaterThanOrEqual(2)
+
+        const result = machine.clipSegment(start, end)
+
+        // Should have more than 2 points (start, exit, perimeter vertex, entry, end)
+        expect(result.length).toBeGreaterThan(2)
+
+        // All result points should be inside or on the boundary
+        result.forEach((pt) => {
+          const nearest = machine.nearestVertex(pt)
+          expect(pt.distance(nearest)).toBeLessThan(1)
+        })
       })
     })
 
@@ -226,6 +255,138 @@ describe("PolygonMachine", () => {
         // Should preserve roughly the same number of vertices
         // (might lose one due to closing point)
         expect(result.length).toBeGreaterThanOrEqual(smallCircle.length - 2)
+      })
+
+      it("closes the loop when shape starts and ends outside", () => {
+        // Large triangle - first vertex (bottom tip in screen coords) is well below star
+        // This tests the loop-closing logic in enforceLimits
+        const triangle = createTriangle(150, { x: 0, y: 0 })
+
+        // First point (top) should be outside the star
+        expect(machine.inBounds(triangle[0])).toBe(false)
+
+        const result = machine.polish([...triangle])
+
+        // Result should form a closed shape with perimeter tracing
+        expect(result.length).toBeGreaterThan(3)
+
+        // All points should be inside or on the boundary
+        result.forEach((pt) => {
+          const nearest = machine.nearestVertex(pt)
+          expect(pt.distance(nearest)).toBeLessThan(1)
+        })
+      })
+    })
+  })
+
+  describe("with bumpy rectangle boundary (perimeter tracing)", () => {
+    let machine
+    let bumpyRect
+
+    beforeEach(() => {
+      // Rectangle 100x100 with a 20-unit bump on the right side
+      // The bump extends from x=50 to x=70, between y=-10 and y=10
+      bumpyRect = createBumpyRect(100, 100, 20)
+      machine = new PolygonMachine({ minimizeMoves: false }, bumpyRect)
+    })
+
+    describe("perimeter tracing follows the bump", () => {
+      it("includes bump vertices when clipping a shape that crosses the bump area", () => {
+        // Create a horizontal line that goes through the bump area
+        // This line exits the rectangle at x=50, then re-enters at x=50
+        // The clipped result should trace AROUND the bump, not cut straight
+        const horizontalLine = [
+          new Victor(-60, 0),  // outside left
+          new Victor(80, 0),   // outside right (past the bump)
+        ]
+
+        const result = machine.polish([...horizontalLine])
+
+        // The result should include points from the bump
+        // Bump vertices are at (70, -10), (70, 10), (50, -10), (50, 10)
+        const hasPointInBumpArea = result.some(v => v.x > 55 && v.x <= 70)
+
+        expect(hasPointInBumpArea).toBe(true)
+      })
+
+      it("traces around bump when horizontal line crosses the bump", () => {
+        // A horizontal line at y=0 that crosses the bump area
+        // Goes from inside the rect, through the bump, and out
+        const line = [
+          new Victor(0, 0),    // inside rect
+          new Victor(80, 0),   // outside, past the bump
+        ]
+
+        const result = machine.polish([...line])
+
+        // Result should:
+        // 1. Start at (0, 0)
+        // 2. Exit at x=70 (bump edge), trace perimeter to re-enter
+        // 3. But wait, y=0 is inside bump, so it should go all the way to x=70
+
+        // The line should reach the bump's outer edge at x=70
+        const hasOuterBumpVertex = result.some(v => v.x >= 69)
+        expect(hasOuterBumpVertex).toBe(true)
+      })
+
+      it("traces bump perimeter when line exits and re-enters", () => {
+        // A line that exits the base rect (not through bump), goes around outside,
+        // and re-enters. This should trace the perimeter including the bump.
+        //
+        // Start inside at (0, 30) - above the bump region
+        // Go to (80, 30) - outside the rect (exits at x=50)
+        // Then to (80, -30) - still outside
+        // Then to (0, -30) - back inside (enters at x=50)
+        //
+        // The perimeter from exit (50, 30) to entry (50, -30) should trace
+        // around the bump: down to (50, 10), out to (70, 10), down to (70, -10),
+        // back to (50, -10), then down to (50, -30)
+        const path = [
+          new Victor(0, 30),   // inside, above bump
+          new Victor(80, 30),  // outside right
+          new Victor(80, -30), // outside right, lower
+          new Victor(0, -30),  // back inside, below bump
+        ]
+
+        const result = machine.polish([...path])
+
+        // Should have points at x=70 (the bump's outer edge)
+        const hasOuterBumpVertex = result.some(v => v.x >= 69)
+        expect(hasOuterBumpVertex).toBe(true)
+
+        // Should have the bump corner vertices (x=70)
+        const outerBumpVertices = result.filter(v => v.x >= 69)
+        expect(outerBumpVertices.length).toBe(2) // Two corners at (70, 10) and (70, -10)
+
+        // Should have the full perimeter traced (start, exit, 4 bump-related, entry, end)
+        expect(result.length).toBeGreaterThanOrEqual(8)
+      })
+
+      it("clipped path should not cut through the bump (all points inside or on boundary)", () => {
+        // A path that starts inside, exits through the bump, and returns
+        // This tests that the clipping respects the bump boundary
+        const crossingPath = [
+          new Victor(0, 0),     // inside center
+          new Victor(80, 0),    // exits through bump (bump is at y=[-10,10])
+          new Victor(80, 40),   // outside, above bump
+          new Victor(0, 40),    // re-enters through top edge
+        ]
+
+        const result = machine.polish([...crossingPath])
+
+        // All result points should be inside or on the boundary
+        result.forEach((pt) => {
+          const nearest = machine.nearestVertex(pt)
+          const distToBoundary = pt.distance(nearest)
+          expect(distToBoundary).toBeLessThan(1)
+        })
+
+        // Should include the bump's outer edge (x=70)
+        const hasOuterBump = result.some(v => v.x >= 69)
+        expect(hasOuterBump).toBe(true)
+
+        // Result should have multiple vertices tracing the boundary
+        expect(result.length).toBeGreaterThanOrEqual(5)
       })
     })
   })
