@@ -1,7 +1,7 @@
 /* global document */
 
 import React from "react"
-import { useSelector, useStore } from "react-redux"
+import { useSelector, useStore, shallowEqual } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -29,9 +29,10 @@ const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
   const precedingLayerIds =
     effectLayerIndex > 0 ? allLayerIds.slice(0, effectLayerIndex) : []
 
-  // Build choices from preceding layers
-  const layers = useSelector((state) =>
-    precedingLayerIds.map((id) => selectLayerById(state, id)),
+  // Build choices from preceding layers (use shallowEqual to avoid new array reference triggering re-renders)
+  const layers = useSelector(
+    (state) => precedingLayerIds.map((id) => selectLayerById(state, id)),
+    shallowEqual,
   )
 
   const choices = [

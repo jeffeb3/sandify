@@ -4,6 +4,7 @@ import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
 import {
   distance,
+  totalDistance,
   vertexRoundP,
   cloneVertex,
   annotateVertices,
@@ -126,7 +127,7 @@ export default class RectMachine extends Machine {
 
   // Returns the distance along the perimeter between two points
   perimeterDistance(v1, v2) {
-    return this.distance(this.tracePerimeter(v1, v2, true))
+    return totalDistance(this.tracePerimeter(v1, v2, true))
   }
 
   // Returns the position of a vertex along the perimeter (0 to perimeterLength).
@@ -421,16 +422,6 @@ export default class RectMachine extends Machine {
     }
 
     return fixed
-  }
-
-  // Returns the distance walked from the first vertex to the last vertex.
-  distance(vertices) {
-    let d = 0
-    for (let i = 0; i < vertices.length; i++) {
-      if (i > 0) d = d + distance(vertices[i], vertices[i - 1])
-    }
-
-    return d
   }
 
   // Determines which of 8 neighbor areas the point is in:

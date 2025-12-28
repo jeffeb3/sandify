@@ -1,31 +1,11 @@
 import PolygonMachine from "./PolygonMachine"
 import Victor from "victor"
+import { createStar } from "@/common/testHelpers"
+import { circle } from "@/common/geometry"
 
-// Create a 5-pointed star centered at origin
-// Outer radius 50, inner radius 20
-const createStar = (outerRadius = 50, innerRadius = 20) => {
-  const vertices = []
-  for (let i = 0; i < 10; i++) {
-    const angle = (i * Math.PI) / 5 - Math.PI / 2 // Start from top
-    const radius = i % 2 === 0 ? outerRadius : innerRadius
-    vertices.push(new Victor(Math.cos(angle) * radius, Math.sin(angle) * radius))
-  }
-  return vertices
-}
-
-// Create a circle approximation
+// Wrapper for geometry's circle to match test usage (radius, segments, center)
 const createCircle = (radius = 30, segments = 32, center = { x: 0, y: 0 }) => {
-  const vertices = []
-  for (let i = 0; i <= segments; i++) {
-    const angle = (i / segments) * 2 * Math.PI
-    vertices.push(
-      new Victor(
-        center.x + Math.cos(angle) * radius,
-        center.y + Math.sin(angle) * radius
-      )
-    )
-  }
-  return vertices
+  return circle(radius, 0, center.x, center.y, segments)
 }
 
 describe("PolygonMachine", () => {
@@ -108,6 +88,109 @@ describe("PolygonMachine", () => {
 
         // Should include multiple star vertices
         expect(trace.length).toBeGreaterThan(2)
+      })
+    })
+
+    describe("nearestPerimeterVertex", () => {
+      it("returns point on boundary for point inside", () => {
+        const result = machine.nearestPerimeterVertex({ x: 0, y: 0 })
+
+        // Should be on the star boundary
+        expect(result).toBeInstanceOf(Victor)
+        // The nearest edge from center is an inner edge at ~20 units
+        expect(result.length()).toBeCloseTo(20, 0)
+      })
+
+      it("returns point on boundary for point outside", () => {
+        const result = machine.nearestPerimeterVertex({ x: 100, y: 0 })
+
+        // Should be on the star boundary (rightmost tip at ~50)
+        expect(result).toBeInstanceOf(Victor)
+        expect(result.x).toBeLessThanOrEqual(51)
+      })
+
+      it("projects to nearest edge", () => {
+        // Point far to the right - should project to rightmost tip area
+        const result = machine.nearestPerimeterVertex({ x: 100, y: 0 })
+
+        // Should be on the boundary, roughly at the right tip
+        expect(result.x).toBeGreaterThan(40)
+        expect(result.x).toBeLessThanOrEqual(51)
+      })
+    })
+
+    describe("onPerimeter", () => {
+      it("returns true for two points on same edge", () => {
+        // Get two points on the same edge using proper interpolation
+        const edge = machine.edges[0]
+        const mid1 = new Victor(
+          edge.p1.x * 0.7 + edge.p2.x * 0.3,
+          edge.p1.y * 0.7 + edge.p2.y * 0.3,
+        )
+        const mid2 = new Victor(
+          edge.p1.x * 0.3 + edge.p2.x * 0.7,
+          edge.p1.y * 0.3 + edge.p2.y * 0.7,
+        )
+
+        expect(machine.onPerimeter(mid1, mid2)).toBe(true)
+      })
+
+      it("returns false for points on different edges", () => {
+        const p1 = machine.edges[0].p1
+        const p2 = machine.edges[5].p1
+
+        expect(machine.onPerimeter(p1, p2)).toBe(false)
+      })
+    })
+
+    describe("getPerimeterPosition and getPerimeterLength", () => {
+      it("returns 0 for first boundary vertex", () => {
+        const pos = machine.getPerimeterPosition(starVertices[0])
+
+        expect(pos).toBeCloseTo(0, 1)
+      })
+
+      it("returns total perimeter length", () => {
+        const length = machine.getPerimeterLength()
+
+        // Star perimeter should be positive
+        expect(length).toBeGreaterThan(0)
+        // Rough estimate: 10 edges, average ~30 units each
+        expect(length).toBeGreaterThan(200)
+        expect(length).toBeLessThan(500)
+      })
+
+      it("positions increase around perimeter", () => {
+        const pos0 = machine.getPerimeterPosition(starVertices[0])
+        const pos1 = machine.getPerimeterPosition(starVertices[1])
+        const pos2 = machine.getPerimeterPosition(starVertices[2])
+
+        expect(pos1).toBeGreaterThan(pos0)
+        expect(pos2).toBeGreaterThan(pos1)
+      })
+    })
+
+    describe("perimeterDistance", () => {
+      it("returns distance between adjacent vertices", () => {
+        const v1 = starVertices[0]
+        const v2 = starVertices[1]
+        const dist = machine.perimeterDistance(v1, v2)
+
+        // Should be approximately the edge length
+        const directDist = v1.distance(v2)
+        expect(dist).toBeCloseTo(directDist, 0)
+      })
+
+      it("returns shorter path for opposite vertices", () => {
+        // Get vertices on opposite sides
+        const v1 = starVertices[0]
+        const v5 = starVertices[5] // Halfway around
+
+        const dist = machine.perimeterDistance(v1, v5)
+        const totalPerimeter = machine.getPerimeterLength()
+
+        // Should be less than half the perimeter (takes shorter path)
+        expect(dist).toBeLessThanOrEqual(totalPerimeter / 2 + 1)
       })
     })
 

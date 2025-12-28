@@ -613,17 +613,6 @@ export const selectEffectSelectionVertices = createCachedSelector(
         true,
       )
 
-      // DEBUG: Log selection vertices processing
-      console.log("[selectEffectSelectionVertices]", {
-        sourceCount: maskSourceVertices.length,
-        boundaryCount: boundary.length,
-        effectSize: { w: effect.width, h: effect.height },
-        resultBounds: result.length > 0 ? {
-          first: { x: result[0].x.toFixed(1), y: result[0].y.toFixed(1) },
-          sample: result.length > 10 ? { x: result[10].x.toFixed(1), y: result[10].y.toFixed(1) } : null
-        } : null
-      })
-
       return result
     }
 

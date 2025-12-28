@@ -39,8 +39,9 @@ const options = {
     type: "togglebutton",
     choices: ["none", "tight", "loose"],
   },
+  // \u00A0 is a hacky way to indent these options under drawBorder
   borderPadding: {
-    title: "Scale (%)",
+    title: "\u00A0\u00A0\u00A0\u00A0Padding (%)",
     step: 5,
     min: (state) => (state.drawBorder === "tight" ? 0 : undefined),
     max: (state) => (state.drawBorder === "tight" ? 65 : undefined),
@@ -49,7 +50,7 @@ const options = {
     },
   },
   borderOnly: {
-    title: "Draw border only",
+    title: "\u00A0\u00A0\u00A0\u00A0Border only",
     type: "checkbox",
     isVisible: (model, state) => {
       return state.drawBorder !== "none"
