@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Sandify",
+    "patterns": "图案",
+    "about": "关于",
+    "settings": "设置"
+  },
+  "header": {
+    "sandifyTitle": "Sandify",
+    "patternsTab": "图案",
+    "aboutTab": "关于",
+    "language": "语言",
+    "file": "文件",
+    "new": "新建",
+    "open": "打开...",
+    "saveAs": "另存为...",
+    "importImage": "导入图像...",
+    "importLayer": "导入图层...",
+    "exportPattern": "导出图案为..."
+  },
+  "sidebar": {
+    "patterns": "图案",
+    "parameters": "参数",
+    "export": "导出",
+    "options": "选项",
+    "layers": "图层",
+    "machines": "机器",
+    "stats": "统计"
+  },
+  "about": {
+    "title": "关于 Sandify",
+    "description": "Sandify 是一个基于网络的用于创建美丽沙盘图案的应用程序。",
+    "tagline": "为使用滚珠在沙子中绘画的机器人创建图案",
+    "features": {
+      "title": "功能特性",
+      "patternGeneration": "图案生成",
+      "realTimePreview": "实时预览",
+      "exportOptions": "导出选项",
+      "customizable": "可定制参数"
+    },
+    "author": "由 Jeff Epler 创建",
+    "license": "许可证",
+    "sourceCode": "源代码"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "ok": "确定",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功"
+  },
+  "language": {
+    "english": "English",
+    "chinese": "中文"
+  }
+}

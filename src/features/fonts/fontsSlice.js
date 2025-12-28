@@ -17,6 +17,8 @@ export const supportedFonts = {
   "fonts/Roboto-Black.ttf": "Roboto",
   "fonts/RougeScript-Regular.ttf": "Rouge Script",
   "fonts/MountainsofChristmas-Regular.ttf": "Mountains of Christmas",
+  "fonts/SourceHanSerifCN-Bold.ttf": "Song",
+  
 }
 
 export const loadFont = createAsyncThunk("fonts/getFont", async (url) => {

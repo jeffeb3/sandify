@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Container from "react-bootstrap/Container"
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
@@ -9,6 +10,8 @@ import { SANDIFY_VERSION } from "@/features/app/appSlice"
 import "./About.scss"
 
 const About = () => {
+  const { t } = useTranslation()
+  
   return (
     <footer className="p-4">
       <Container
@@ -28,7 +31,7 @@ const About = () => {
               v{SANDIFY_VERSION}
             </div>
             <div className="tagline mb-2">
-              create patterns for robots that draw in sand with ball bearings
+              {t("about.tagline")}
             </div>
             <p>
               Sandify turns your cold, empty-hearted, emotionless sand tables

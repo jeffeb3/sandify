@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Sandify",
+    "patterns": "Patterns",
+    "about": "About",
+    "settings": "Settings"
+  },
+  "header": {
+    "sandifyTitle": "Sandify",
+    "patternsTab": "Patterns",
+    "aboutTab": "About",
+    "language": "Language",
+    "file": "File",
+    "new": "New",
+    "open": "Open...",
+    "saveAs": "Save as...",
+    "importImage": "Import image...",
+    "importLayer": "Import layer...",
+    "exportPattern": "Export pattern as..."
+  },
+  "sidebar": {
+    "patterns": "Patterns",
+    "parameters": "Parameters",
+    "export": "Export",
+    "options": "Options",
+    "layers": "Layers",
+    "machines": "Machines",
+    "stats": "Stats"
+  },
+  "about": {
+    "title": "About Sandify",
+    "description": "Sandify is a web-based application for creating beautiful sand table patterns.",
+    "tagline": "create patterns for robots that draw in sand with ball bearings",
+    "features": {
+      "title": "Features",
+      "patternGeneration": "Pattern Generation",
+      "realTimePreview": "Real-time Preview",
+      "exportOptions": "Export Options",
+      "customizable": "Customizable Parameters"
+    },
+    "author": "Created by Jeff Epler",
+    "license": "License",
+    "sourceCode": "Source Code"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "language": {
+    "english": "English",
+    "chinese": "中文"
+  }
+}
