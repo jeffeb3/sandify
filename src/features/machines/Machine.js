@@ -1,13 +1,15 @@
 import { vertexRoundP, annotateVertices, downsample } from "@/common/geometry"
+import i18next from 'i18next'
+
 
 export const machineOptions = {
   name: {
-    title: "Name",
+    title: i18next.t('common.name'),
     type: "text",
     isEnabled: (model, state) => !state.imported,
   },
   minimizeMoves: {
-    title: "Minimize perimeter moves",
+    title: i18next.t('machine.minimizePerimeterMoves'),
     type: "checkbox",
   },
 }
@@ -23,7 +25,7 @@ export default class Machine {
   // override as needed; redux state of a newly created instance
   getInitialState() {
     return {
-      name: "default machine",
+      name: i18next.t('machine.defaultMachine'),
       minimizeMoves: false,
       imported: false,
     }

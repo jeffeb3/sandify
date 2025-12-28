@@ -48,10 +48,27 @@
     "ok": "确定",
     "loading": "加载中...",
     "error": "错误",
-    "success": "成功"
+    "success": "成功",
+    "name": "名称"
   },
   "language": {
     "english": "English",
     "chinese": "中文"
+  },
+  "machine": {
+    "type": "机器类型",
+    "defaultMachine":"默认机器",
+    "minimizePerimeterMoves":"最小化轮廓移动",
+    "polar":"极坐标",
+    "maxRadius":"最大半径 (毫米)",
+    "startPoint":"修改起点",
+    "endPoint":"修改终点",
+    "none": "不修改",
+    "center": "中心",
+    "perimeter": "边缘"
+  },
+  "previewStats": {
+    "points": "顶点数",
+    "distance": "移动距离 (毫米)"
   }
 }

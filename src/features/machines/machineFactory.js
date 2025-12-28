@@ -16,7 +16,7 @@ export const getMachine = (state) => {
 }
 
 export const getDefaultMachineType = () => {
-  return localStorage.getItem("defaultMachine") || "rectangular"
+  return localStorage.getItem("defaultMachine") || "polar"
 }
 
 export const getDefaultMachine = () => {

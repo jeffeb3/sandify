@@ -10,8 +10,10 @@ import {
   changeMachineType,
 } from "./machinesSlice"
 import { getMachine, getMachineSelectOptions } from "./machineFactory"
+import { useTranslation } from "react-i18next"
 
 const MachineEditor = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const machine = useSelector(selectCurrentMachine)
   const type = machine?.type || "rectangular" // guard zombie child
@@ -38,7 +40,7 @@ const MachineEditor = () => {
         sm={5}
         className="mb-1"
       >
-        Type
+        {t("machine.type")}
       </Col>
 
       <Col

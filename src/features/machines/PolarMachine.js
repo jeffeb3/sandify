@@ -9,21 +9,30 @@ import {
 } from "@/common/geometry"
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
+import i18next from 'i18next'
 
 const polarMachineOptions = {
   maxRadius: {
-    title: "Max radius (mm)",
+    title: i18next.t('machine.maxRadius'),
     min: 0,
   },
   polarStartPoint: {
-    title: "Start point",
+    title: i18next.t('machine.startPoint'),
     type: "togglebutton",
-    choices: ["none", "center", "perimeter"],
+    choices: [
+      {"title":i18next.t('machine.none'), "value":"none"}, 
+      {"title":i18next.t('machine.center'), "value":"center"}, 
+      {"title":i18next.t('machine.perimeter'), "value":"perimeter"}
+    ],
   },
   polarEndPoint: {
-    title: "End point",
+    title: i18next.t('machine.endPoint'),
     type: "togglebutton",
-    choices: ["none", "center", "perimeter"],
+    choices: [
+      {"title":i18next.t('machine.none'), "value":"none"}, 
+      {"title":i18next.t('machine.center'), "value":"center"}, 
+      {"title":i18next.t('machine.perimeter'), "value":"perimeter"}
+    ],
   },
   ...machineOptions,
 }
@@ -31,7 +40,7 @@ const polarMachineOptions = {
 export default class PolarMachine extends Machine {
   constructor(state) {
     super(state)
-    this.label = "Polar"
+    this.label = i18next.t('machine.polar')
     this.sizeX = this.state.maxRadius * 2
     this.sizeY = this.sizeX
     this.height = this.sizeX

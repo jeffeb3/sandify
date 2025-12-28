@@ -48,10 +48,28 @@
     "ok": "OK",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "name": "Name"
   },
   "language": {
     "english": "English",
     "chinese": "中文"
+  },
+  "machine": {
+    "type": "Macheine Type",
+    "defaultMachine":"Default Machine",
+    "minimizePerimeterMoves":"Minimize Perimeter Moves",
+    "polar":"Polar",
+    "maxRadius":"Max Radius (mm)",
+    "startPoint":"Start point",
+    "endPoint":"End point",
+    "none": "none",
+    "center": "center",
+    "perimeter": "perimeter"
+
+  },
+  "previewStats": {
+    "points": "Points",
+    "distance": "Distance (mm)"
   }
 }
