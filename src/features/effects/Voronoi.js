@@ -11,26 +11,29 @@ import {
   cloneVertices,
   vertexRoundP,
 } from "@/common/geometry"
+import i18n from "@/i18n"
 
 export const voronoiOptions = {
   seed: {
-    title: "Random seed",
+    title: i18n.t("effects.voronoi.randomSeed"),
     min: 1,
     randomMax: 1000,
   },
   voronoiPolygon: {
-    title: "Polygon",
+    title: i18n.t("effects.voronoi.polygon"),
     type: "togglebutton",
-    choices: ["voronoi", "delaunay"],
+    choices: [
+      {"title": i18n.t("effects.voronoi.voronoiType"), "value": "voronoi"}, 
+      {"title": i18n.t("effects.voronoi.delaunay"), "value": "delaunay"}
+    ],
   },
 }
 
 export default class Voronoi extends Effect {
   constructor() {
     super("voronoi")
-    this.label = "Voronoi"
-    this.description =
-      "A Voronoi diagram divides a space into regions based on a set of seed points. Each region contains all the points that are closer to its seed point than to any other seed point."
+    this.label = i18n.t("effects.voronoi.voronoi")
+    this.description = i18n.t("effects.voronoi.description")
     this.shouldCache = true
   }
 

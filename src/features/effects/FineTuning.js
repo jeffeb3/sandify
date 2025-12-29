@@ -11,33 +11,34 @@ import {
 } from "@/common/geometry"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
+import i18n from "@/i18n"
 
 const options = {
   reverse: {
-    title: "1: Reverse path",
+    title: i18n.t("effects.fineTuning.reversePath"),
     type: "checkbox",
     isVisible: (model, state) => {
       return !model.effect
     },
   },
   rotateStartingPct: {
-    title: "2: Move start point (%)",
+    title: i18n.t("effects.fineTuning.moveStartPoint"),
     min: 0,
     max: 100,
     step: 2,
   },
   drawPortionPct: {
-    title: "3: Draw path (%)",
+    title: i18n.t("effects.fineTuning.drawPath"),
     min: 0,
     max: 100,
     step: 2,
   },
   drawBorder: {
-    title: "4: Add perimeter border",
+    title: i18n.t("effects.fineTuning.addPerimeterBorder"),
     type: "checkbox",
   },
   backtrackPct: {
-    title: "5: Backtrack at end (%)",
+    title: i18n.t("effects.fineTuning.backtrackAtEnd"),
     min: 0,
     max: 100,
     step: 2,
@@ -47,7 +48,7 @@ const options = {
 export default class FineTuning extends Effect {
   constructor() {
     super("fineTuning")
-    this.label = "Fine tuning"
+    this.label = i18n.t("effects.fineTuning.fineTuning")
     this.selectGroup = "effects"
     this.randomizable = false
   }

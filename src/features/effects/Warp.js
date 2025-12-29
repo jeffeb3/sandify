@@ -3,12 +3,20 @@ import Effect from "./Effect"
 import { effectOptions } from "./EffectLayer"
 import { subsample, circle } from "@/common/geometry"
 import { evaluate } from "mathjs"
+import i18n from "@/i18n"
 
 const options = {
   warpType: {
-    title: "Warp type",
+    title: i18n.t("effects.warp.warpType"),
     type: "dropdown",
-    choices: ["angle", "quad", "circle", "grid", "shear", "custom"],
+    choices: [
+      {"title": i18n.t("effects.warp.angle"), "value": "angle"},
+      {"title": i18n.t("effects.warp.quad"), "value": "quad"},
+      {"title": i18n.t("effects.warp.circle"), "value": "circle"},
+      {"title": i18n.t("effects.warp.grid"), "value": "grid"},
+      {"title": i18n.t("effects.warp.shear"), "value": "shear"},
+      {"title": i18n.t("effects.warp.custom"), "value": "custom"}
+    ],
     onChange: (model, changes, state) => {
       onWarpTypeChanged(changes)
 
@@ -16,14 +24,14 @@ const options = {
     },
   },
   period: {
-    title: "Period",
+    title: i18n.t("effects.warp.period"),
     step: 0.2,
     isVisible: (layer, state) => {
       return !["custom", "shear"].includes(state.warpType)
     },
   },
   xMathInput: {
-    title: "X(x,y)",
+    title: i18n.t("effects.warp.xXy"),
     delayKey: "xMath",
     type: "text",
     isVisible: (layer, state) => {
@@ -31,7 +39,7 @@ const options = {
     },
   },
   yMathInput: {
-    title: "Y(x,y)",
+    title: i18n.t("effects.warp.yXy"),
     delayKey: "yMath",
     type: "text",
     isVisible: (layer, state) => {
@@ -39,7 +47,7 @@ const options = {
     },
   },
   subsample: {
-    title: "Subsample points",
+    title: i18n.t("effects.warp.subsamplePoints"),
     type: "checkbox",
   },
 }
@@ -60,7 +68,7 @@ const onWarpTypeChanged = (changes) => {
 export default class Warp extends Effect {
   constructor() {
     super("warp")
-    this.label = "Warp"
+    this.label = i18n.t("effects.warp.warp")
   }
 
   canMove(state) {

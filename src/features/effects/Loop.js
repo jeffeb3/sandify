@@ -8,39 +8,46 @@ import {
   subsample,
 } from "@/common/geometry"
 import { evaluate } from "mathjs"
+import i18n from "@/i18n"
 
 const options = {
   numLoops: {
-    title: "Number of loops",
+    title: i18n.t("effects.loop.numberOfLoops"),
     min: 1,
     randomMin: 3,
     randomMax: 8,
   },
   transformMethod: {
-    title: "When transforming shape",
+    title: i18n.t("effects.loop.whenTransformingShape"),
     type: "togglebutton",
-    choices: ["smear", "intact"],
+    choices: [
+      {"title": i18n.t("effects.loop.smear"), "value": "smear"}, 
+      {"title": i18n.t("effects.loop.intact"), "value": "intact"}
+    ],
   },
   growEnabled: {
-    title: "Scale",
+    title: i18n.t("effects.loop.scale"),
     type: "checkbox",
   },
   growValue: {
-    title: "Scale (+/-)",
+    title: i18n.t("effects.loop.scalePlusMinus"),
     isVisible: (layer, state) => {
       return state.growEnabled
     },
   },
   growMethod: {
-    title: "Scale by",
+    title: i18n.t("effects.loop.scaleBy"),
     type: "togglebutton",
-    choices: ["constant", "function"],
+    choices: [
+      {"title": i18n.t("effects.loop.constant"), "value": "constant"}, 
+      {"title": i18n.t("effects.loop.function"), "value": "function"}
+    ],
     isVisible: (layer, state) => {
       return state.growEnabled
     },
   },
   growMathInput: {
-    title: "Scale function (i)",
+    title: i18n.t("effects.loop.scaleFunction"),
     type: "text",
     delayKey: "growMath",
     isVisible: (layer, state) => {
@@ -54,11 +61,11 @@ const options = {
     type: "hidden",
   },
   spinEnabled: {
-    title: "Spin",
+    title: i18n.t("effects.loop.spin"),
     type: "checkbox",
   },
   spinValue: {
-    title: "Spin (+/-)",
+    title: i18n.t("effects.loop.spinPlusMinus"),
     step: 0.1,
     isVisible: (layer, state) => {
       return state.spinEnabled
@@ -66,15 +73,18 @@ const options = {
     randomMax: 10,
   },
   spinMethod: {
-    title: "Spin by",
+    title: i18n.t("effects.loop.spinBy"),
     type: "togglebutton",
-    choices: ["constant", "function"],
+    choices: [
+      {"title": i18n.t("effects.loop.constant"), "value": "constant"}, 
+      {"title": i18n.t("effects.loop.function"), "value": "function"}
+    ],
     isVisible: (layer, state) => {
       return state.spinEnabled
     },
   },
   spinMathInput: {
-    title: "Spin function (i)",
+    title: i18n.t("effects.loop.spinFunction"),
     type: "text",
     delayKey: "spinMath",
     isVisible: (layer, state) => {
@@ -88,7 +98,7 @@ const options = {
     type: "hidden",
   },
   spinSwitchbacks: {
-    title: "Switchbacks",
+    title: i18n.t("effects.loop.switchbacks"),
     isVisible: (layer, state) => {
       return state.spinEnabled && state.spinMethod === "constant"
     },
@@ -99,7 +109,7 @@ const options = {
 export default class Loop extends Effect {
   constructor() {
     super("loop")
-    this.label = "Loop"
+    this.label = i18n.t("effects.loop.loop")
   }
 
   canRotate(state) {

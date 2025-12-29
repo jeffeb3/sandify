@@ -2,15 +2,16 @@ import Victor from "victor"
 import Effect from "../Effect"
 import noise from "@/common/noise"
 import { subsample } from "@/common/geometry"
+import i18n from "@/i18n"
 
 const options = {
   seed: {
-    title: "Random seed",
+    title: i18n.t("effects.noise.randomSeed"),
     min: 1,
     randomMax: 1000,
   },
   noiseMagnification: {
-    title: "Magnification",
+    title: i18n.t("effects.noise.magnification"),
     min: 1,
     max: 100,
     step: 1,
@@ -19,27 +20,33 @@ const options = {
     },
   },
   noiseAmplitude: {
-    title: "Amplitude",
+    title: i18n.t("effects.noise.amplitude"),
     min: 0,
     max: 20,
     step: 1,
   },
   noiseType: {
-    title: "Noise type",
+    title: i18n.t("effects.noise.noiseType"),
     type: "togglebutton",
-    choices: ["Perlin", "Simplex"],
+    choices: [
+      {"title": i18n.t("effects.noise.perlin"), "value": "Perlin"}, 
+      {"title": i18n.t("effects.noise.simplex"), "value": "Simplex"}
+    ],
   },
   noiseApplication: {
-    title: "Application",
+    title: i18n.t("effects.noise.application"),
     type: "togglebutton",
-    choices: ["Contour", "Linear"],
+    choices: [
+      {"title": i18n.t("effects.noise.contour"), "value": "Contour"}, 
+      {"title": i18n.t("effects.noise.linear"), "value": "Linear"}
+    ],
   },
 }
 
 export default class Noise extends Effect {
   constructor() {
     super("noise")
-    this.label = "Noise"
+    this.label = i18n.t("effects.noise.noise")
   }
 
   canRotate(state) {

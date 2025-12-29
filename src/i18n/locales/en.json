@@ -49,7 +49,8 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "name": "Name"
+    "name": "Name",
+    "create": "Create"
   },
   "language": {
     "english": "English",
@@ -281,6 +282,122 @@
       "v1Engineering": "V1Engineering",
       "linkText": "V1 Engineering",
       "description": "This shape represents the V1 Engineering logo. V1 Engineering provides low-cost, customizable machine designs. Sandify was created in 2017 by users in their forum."
+    }
+  },
+  "effects": {
+    "noise":{
+      "noise": "Noise",
+      "randomSeed": "Random seed",
+      "magnification": "Magnification",
+      "amplitude": "Amplitude",
+      "noiseType": "Noise type",
+      "perlin": "Perlin",
+      "simplex": "Simplex",
+      "application": "Application",
+      "contour": "Contour",
+      "linear": "Linear"
+    },
+    "effectLayer":{
+      "name": "Name",
+      "x": "X",
+      "y": "Y",
+      "w": "W",
+      "h": "H",
+      "lockAspectRatio": "Lock aspect ratio",
+      "rotateDegrees": "Rotate (degrees)",
+      "addEffect": "Add effect"
+    },
+    "fineTuning":{
+      "fineTuning": "Fine tuning",
+      "reversePath": "1: Reverse path",
+      "moveStartPoint": "2: Move start point (%)",
+      "drawPath": "3: Draw path (%)",
+      "addPerimeterBorder": "4: Add perimeter border",
+      "backtrackAtEnd": "5: Backtrack at end (%)"
+    },
+    "fisheye":{
+      "fisheye": "Fisheye",
+      "subsamplePoints": "Subsample points",
+      "distortion": "Distortion"
+    },
+    "loop":{
+      "loop": "Loop",
+      "numberOfLoops": "Number of loops",
+      "whenTransformingShape": "When transforming shape",
+      "smear": "smear",
+      "intact": "intact",
+      "scale": "Scale",
+      "scalePlusMinus": "Scale (+/-)",
+      "scaleBy": "Scale by",
+      "constant": "constant",
+      "function": "function",
+      "scaleFunction": "Scale function (i)",
+      "spin": "Spin",
+      "spinPlusMinus": "Spin (+/-)",
+      "spinBy": "Spin by",
+      "spinFunction": "Spin function (i)",
+      "switchbacks": "Switchbacks"
+    },
+    "mask":{
+      "mask": "Mask",
+      "maskShape": "Mask shape",
+      "rectangle": "rectangle",
+      "circle": "circle",
+      "minimizePerimeterMoves": "Minimize perimeter moves",
+      "invert": "Invert",
+      "drawBorder": "Draw border"
+    },
+    "programCode":{
+      "programCode": "Program code",
+      "startCode": "Start code",
+      "endCode": "End code",
+      "description": "When exporting the pattern to a file, the provided program code is added before and/or after this layer is rendered."
+    },
+    "track":{
+      "track": "Track",
+      "trackRotation": "Track rotation",
+      "trackType": "Track type",
+      "circular": "circular",
+      "spiral": "spiral",
+      "spiralTightness": "Spiral tightness",
+      "preserveShape": "Preserve shape",
+      "numberOfTimesToDrawShapeAlongTrack": "Number of times to draw shape along track",
+      "shapeOrientation": "Shape orientation",
+      "asIs": "as-is",
+      "facingInward": "facing inward",
+      "facingOutward": "facing outward",
+      "alongPath": "along path"
+    },
+    "transformer":{
+      "moveAndResize": "Move and resize"
+    },
+    "voronoi":{
+      "voronoi": "Voronoi",
+      "randomSeed": "Random seed",
+      "polygon": "Polygon",
+      "voronoiType": "voronoi",
+      "delaunay": "delaunay",
+      "description": "A Voronoi diagram divides a space into regions based on a set of seed points. Each region contains all the points that are closer to its seed point than to any other seed point."
+    },
+    "warp":{
+      "warp": "Warp",
+      "warpType": "Warp type",
+      "angle": "angle",
+      "quad": "quad",
+      "circle": "circle",
+      "grid": "grid",
+      "shear": "shear",
+      "custom": "custom",
+      "period": "Period",
+      "xXy": "X(x,y)",
+      "yXy": "Y(x,y)",
+      "subsamplePoints": "Subsample points"
+    },
+    "newEffect":{
+      "create": "Create new effect",
+      "type": "Type",
+      "name": "Name",
+      "randomize": "Randomize values"
     }
   }
 }

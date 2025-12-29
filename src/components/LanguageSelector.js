@@ -6,7 +6,11 @@ const LanguageSelector = () => {
   const { i18n, t } = useTranslation()
 
   const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng)
+    if (i18n.language !== lng) {
+      i18n.changeLanguage(lng)
+      // 刷新整个页面以更新语言
+      window.location.reload()
+    }
   }
 
   const getCurrentLanguageLabel = () => {
@@ -25,6 +29,19 @@ const LanguageSelector = () => {
         variant="outline-secondary"
         size="sm"
         id="language-selector"
+        style={{ 
+          color: 'white', 
+          borderColor: 'white',
+          backgroundColor: 'transparent'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'white';
+          e.target.style.color = 'black';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'transparent';
+          e.target.style.color = 'white';
+        }}
       >
         {getCurrentLanguageLabel()}
       </Dropdown.Toggle>

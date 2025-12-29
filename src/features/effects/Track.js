@@ -8,45 +8,49 @@ import {
   calculateIntersection,
   cloneVertex,
 } from "@/common/geometry"
+import i18n from "@/i18n"
 
 const orientations = {
-  unchanged: "as-is",
-  inward: "facing inward",
-  outward: "facing outward",
-  path: "along path",
+  unchanged: i18n.t("effects.track.asIs"),
+  inward: i18n.t("effects.track.facingInward"),
+  outward: i18n.t("effects.track.facingOutward"),
+  path: i18n.t("effects.track.alongPath"),
 }
 
 const options = {
   trackRotation: {
-    title: "Track rotation",
+    title: i18n.t("effects.track.trackRotation"),
     step: 35,
     randomMax: 360,
   },
   trackShape: {
-    title: "Track type",
+    title: i18n.t("effects.track.trackType"),
     type: "togglebutton",
-    choices: ["circular", "spiral"],
+    choices: [
+      {"title": i18n.t("effects.track.circular"), "value": "circular"}, 
+      {"title": i18n.t("effects.track.spiral"), "value": "spiral"}
+    ],
   },
   trackSpiralRadiusPct: {
-    title: "Spiral tightness",
+    title: i18n.t("effects.track.spiralTightness"),
     isVisible: (layer, state) => {
       return state.trackShape == "spiral"
     },
     step: 0.1,
   },
   trackPreserveShape: {
-    title: "Preserve shape",
+    title: i18n.t("effects.track.preserveShape"),
     type: "checkbox",
   },
   trackNumShapes: {
-    title: "Number of times to draw shape along track",
+    title: i18n.t("effects.track.numberOfTimesToDrawShapeAlongTrack"),
     isVisible: (layer, state) => {
       return state.trackPreserveShape
     },
     min: 1,
   },
   trackShapeOrientation: {
-    title: "Shape orientation",
+    title: i18n.t("effects.track.shapeOrientation"),
     type: "dropdown",
     choices: orientations,
     isVisible: (layer, state) => {
@@ -58,7 +62,7 @@ const options = {
 export default class Track extends Effect {
   constructor() {
     super("track")
-    this.label = "Track"
+    this.label = i18n.t("effects.track.track")
   }
 
   canChangeSize(state) {

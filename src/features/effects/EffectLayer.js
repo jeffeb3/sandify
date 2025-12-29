@@ -1,26 +1,27 @@
 import { getEffect } from "@/features/effects/effectFactory"
+import i18n from "@/i18n"
 
 export const effectOptions = {
   name: {
-    title: "Name",
+    title: i18n.t("effects.effectLayer.name"),
     type: "text",
   },
   x: {
-    title: "X",
+    title: i18n.t("effects.effectLayer.x"),
     inline: true,
     isVisible: (model, state) => {
       return model.canMove(state)
     },
   },
   y: {
-    title: "Y",
+    title: i18n.t("effects.effectLayer.y"),
     inline: true,
     isVisible: (model, state) => {
       return model.canMove(state)
     },
   },
   width: {
-    title: "W",
+    title: i18n.t("effects.effectLayer.w"),
     min: 1,
     inline: true,
     isVisible: (model, state) => {
@@ -36,7 +37,7 @@ export const effectOptions = {
     },
   },
   height: {
-    title: "H",
+    title: i18n.t("effects.effectLayer.h"),
     min: 1,
     inline: true,
     onChange: (model, changes, state) => {
@@ -49,11 +50,11 @@ export const effectOptions = {
     },
   },
   maintainAspectRatio: {
-    title: "Lock aspect ratio",
+    title: i18n.t("effects.effectLayer.lockAspectRatio"),
     type: "checkbox",
   },
   rotation: {
-    title: "Rotate (degrees)",
+    title: i18n.t("effects.effectLayer.rotateDegrees"),
     inline: true,
     isVisible: (model, state) => {
       return model.canRotate(state)

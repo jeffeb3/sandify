@@ -49,7 +49,8 @@
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",
-    "name": "名称"
+    "name": "名称",
+    "create": "创建"
   },
   "language": {
     "english": "English",
@@ -280,6 +281,122 @@
       "v1Engineering": "V1工程",
       "linkText": "V1 Engineering",
       "description": "这个形状代表 V1 Engineering 的标志。V1 Engineering 提供低成本、可定制的机器设计。Sandify 于 2017 年由其论坛用户创建。"
+    }
+  },
+  "effects": {
+    "noise":{
+      "noise": "噪声",
+      "randomSeed": "随机种子",
+      "magnification": "放大倍数",
+      "amplitude": "振幅",
+      "noiseType": "噪声类型",
+      "perlin": "Perlin",
+      "simplex": "Simplex",
+      "application": "应用方式",
+      "contour": "轮廓",
+      "linear": "线性"
+    },
+    "effectLayer":{
+      "name": "名称",
+      "x": "X",
+      "y": "Y", 
+      "w": "宽",
+      "h": "高",
+      "lockAspectRatio": "锁定宽高比",
+      "rotateDegrees": "旋转（度）",
+      "addEffect": "新建效果"
+    },
+    "fineTuning":{
+      "fineTuning": "微调",
+      "reversePath": "1: 反转路径",
+      "moveStartPoint": "2: 移动起点 (%)",
+      "drawPath": "3: 绘制路径 (%)",
+      "addPerimeterBorder": "4: 添加周长边框",
+      "backtrackAtEnd": "5: 结束回退 (%)"
+    },
+    "fisheye":{
+      "fisheye": "鱼眼",
+      "subsamplePoints": "子采样点",
+      "distortion": "畸变"
+    },
+    "loop":{
+      "loop": "循环",
+      "numberOfLoops": "循环次数",
+      "whenTransformingShape": "变换形状时",
+      "smear": "拖影",
+      "intact": "完整",
+      "scale": "缩放",
+      "scalePlusMinus": "缩放 (+/-)",
+      "scaleBy": "缩放方式",
+      "constant": "常量",
+      "function": "函数",
+      "scaleFunction": "缩放函数 (i)",
+      "spin": "旋转",
+      "spinPlusMinus": "旋转 (+/-)",
+      "spinBy": "旋转方式",
+      "spinFunction": "旋转函数 (i)",
+      "switchbacks": "往返"
+    },
+    "mask":{
+      "mask": "遮罩",
+      "maskShape": "遮罩形状",
+      "rectangle": "矩形",
+      "circle": "圆形",
+      "minimizePerimeterMoves": "最小化周长移动",
+      "invert": "反转",
+      "drawBorder": "绘制边框"
+    },
+    "programCode":{
+      "programCode": "程序代码",
+      "startCode": "开始代码",
+      "endCode": "结束代码",
+      "description": "将图案导出到文件时，提供的程序代码会在渲染此图层之前和/或之后添加。"
+    },
+    "track":{
+      "track": "轨迹",
+      "trackRotation": "轨迹旋转",
+      "trackType": "轨迹类型",
+      "circular": "圆形",
+      "spiral": "螺旋",
+      "spiralTightness": "螺旋紧密度",
+      "preserveShape": "保持形状",
+      "numberOfTimesToDrawShapeAlongTrack": "沿轨迹绘制形状的次数",
+      "shapeOrientation": "形状方向",
+      "asIs": "原样",
+      "facingInward": "面向内",
+      "facingOutward": "面向外",
+      "alongPath": "沿路径"
+    },
+    "transformer":{
+      "moveAndResize": "移动和调整大小"
+    },
+    "voronoi":{
+      "voronoi": "沃罗诺伊",
+      "randomSeed": "随机种子",
+      "polygon": "多边形",
+      "voronoiType": "voronoi",
+      "delaunay": "delaunay",
+      "description": "沃罗诺伊图根据一组种子点将空间分割成区域。每个区域包含所有比其他种子点更接近其种子点的点。"
+    },
+    "warp":{
+      "warp": "扭曲",
+      "warpType": "扭曲类型",
+      "angle": "角度",
+      "quad": "四边形",
+      "circle": "圆形",
+      "grid": "网格",
+      "shear": "剪切",
+      "custom": "自定义",
+      "period": "周期",
+      "xXy": "X(x,y)",
+      "yXy": "Y(x,y)",
+      "subsamplePoints": "子采样点"
+    },
+    "newEffect":{
+      "create": "创建新效果",
+      "type": "类型",
+      "name": "名称",
+      "randomize": "随机化值"
     }
   }
 }

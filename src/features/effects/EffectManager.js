@@ -20,8 +20,11 @@ import EffectList from "./EffectList"
 import EffectLayer from "./EffectLayer"
 import NewEffect from "./NewEffect"
 import CopyEffect from "./CopyEffect"
+import { useTranslation } from "react-i18next"
+
 
 const EffectManager = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectedLayer = useSelector(selectSelectedLayer)
   const selectedEffect = useSelector(selectSelectedEffect)
@@ -69,7 +72,7 @@ const EffectManager = () => {
           variant="secondary"
           onClick={toggleNewEffectModal}
         >
-          Add effect
+          {t('effects.effectLayer.addEffect')}
         </Button>
       )}
       {numEffects > 0 && (

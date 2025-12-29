@@ -5,12 +5,16 @@ import PolarMachine from "@/features/machines/PolarMachine"
 import RectMachine from "@/features/machines/RectMachine"
 import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
 import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
+import i18n from "@/i18n"
 
 const options = {
   maskMachine: {
-    title: "Mask shape",
+    title: i18n.t("effects.mask.maskShape"),
     type: "togglebutton",
-    choices: ["rectangle", "circle"],
+    choices: [
+      {"title": i18n.t("effects.mask.rectangle"), "value": "rectangle"}, 
+      {"title": i18n.t("effects.mask.circle"), "value": "circle"}
+    ],
     onChange: (model, changes, state) => {
       if (changes.maskMachine) {
         if (changes.maskMachine === "circle") {
@@ -29,15 +33,15 @@ const options = {
     },
   },
   maskMinimizeMoves: {
-    title: "Minimize perimeter moves",
+    title: i18n.t("effects.mask.minimizePerimeterMoves"),
     type: "checkbox",
   },
   maskInvert: {
-    title: "Invert",
+    title: i18n.t("effects.mask.invert"),
     type: "checkbox",
   },
   maskBorder: {
-    title: "Draw border",
+    title: i18n.t("effects.mask.drawBorder"),
     type: "checkbox",
   },
 }
@@ -45,7 +49,7 @@ const options = {
 export default class Mask extends Effect {
   constructor() {
     super("mask")
-    this.label = "Mask"
+    this.label = i18n.t("effects.mask.mask")
     this.randomizable = false
   }
 
