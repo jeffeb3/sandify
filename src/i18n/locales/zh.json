@@ -50,7 +50,8 @@
     "error": "错误",
     "success": "成功",
     "name": "名称",
-    "create": "创建"
+    "create": "创建",
+    "copy": "复制"
   },
   "newLayer": {
     "create": "创建新图层",
@@ -72,6 +73,28 @@
     "copyEffect": "复制特效",
     "restoreDefaults": "恢复特效默认值",
     "randomizeValues": "随机化数值"
+  },
+  "machineManager": {
+    "createMachine": "创建新机器",
+    "deleteMachine": "删除机器",
+    "copyMachine": "复制机器"
+  },
+  "newMachine": {
+    "create": "创建新机器",
+    "type": "类型",
+    "name": "名称"
+  },
+  "copyMachine": {
+    "title": "复制 {{name}}",
+    "name": "名称"
+  },
+  "copyLayer": {
+    "title": "复制 {{name}}",
+    "name": "名称"
+  },
+  "copyEffect": {
+    "title": "复制 {{name}}",
+    "name": "名称"
   },
   "fileDownloader": {
     "savePatternAs": "另存图案为...",

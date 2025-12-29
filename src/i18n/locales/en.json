@@ -50,7 +50,8 @@
     "error": "Error",
     "success": "Success",
     "name": "Name",
-    "create": "Create"
+    "create": "Create",
+    "copy": "Copy"
   },
   "newLayer": {
     "create": "Create new layer",
@@ -72,6 +73,28 @@
     "copyEffect": "Copy effect",
     "restoreDefaults": "Restore effect defaults",
     "randomizeValues": "Randomize effect values"
+  },
+  "machineManager": {
+    "createMachine": "Create new machine",
+    "deleteMachine": "Delete machine",
+    "copyMachine": "Copy machine"
+  },
+  "newMachine": {
+    "create": "Create new machine",
+    "type": "Type",
+    "name": "Name"
+  },
+  "copyMachine": {
+    "title": "Copy {{name}}",
+    "name": "Name"
+  },
+  "copyLayer": {
+    "title": "Copy {{name}}",
+    "name": "Name"
+  },
+  "copyEffect": {
+    "title": "Copy {{name}}",
+    "name": "Name"
   },
   "fileDownloader": {
     "savePatternAs": "Save pattern as...",

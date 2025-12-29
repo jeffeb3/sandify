@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { FaTrash, FaCopy, FaPlusSquare } from "react-icons/fa"
 import { useSelector, useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import {
   selectNumMachines,
   selectCurrentMachineId,
@@ -14,6 +15,7 @@ import CopyMachine from "./CopyMachine"
 import NewMachine from "./NewMachine"
 
 const MachineManager = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const numMachines = useSelector(selectNumMachines)
   const currentMachineId = useSelector(selectCurrentMachineId)
@@ -44,7 +46,7 @@ const MachineManager = () => {
             className="ms-2 layer-button"
             variant="light"
             size="sm"
-            data-tooltip-content="Create new machine"
+            data-tooltip-content={t('machineManager.createMachine')}
             data-tooltip-id="tooltip-new-machine"
             onClick={toggleNewMachineModal}
           >
@@ -55,7 +57,7 @@ const MachineManager = () => {
             <Button
               className="layer-button"
               variant="light"
-              data-tooltip-content="Delete machine"
+              data-tooltip-content={t('machineManager.deleteMachine')}
               data-tooltip-id="tooltip-delete-machine"
               onClick={handleMachineRemoved}
             >
@@ -66,7 +68,7 @@ const MachineManager = () => {
           <Button
             className="layer-button"
             variant="light"
-            data-tooltip-content="Copy machine"
+            data-tooltip-content={t('machineManager.copyMachine')}
             data-tooltip-id="tooltip-copy-machine"
             onClick={toggleCopyMachineModal}
           >

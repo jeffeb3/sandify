@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import Select from "react-select"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
@@ -23,6 +24,7 @@ const customStyles = {
 }
 
 const NewMachine = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectOptions = getMachineSelectOptions()
@@ -74,13 +76,13 @@ const NewMachine = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create new machine</Modal.Title>
+        <Modal.Title>{t('newMachine.create')}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onMachineAdded}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Type</Col>
+            <Col sm={5}>{t('newMachine.type')}</Col>
             <Col sm={7}>
               <Select
                 ref={selectRef}
@@ -93,7 +95,7 @@ const NewMachine = ({ toggleModal, showModal }) => {
             </Col>
           </Row>
           <Row className="align-items-center mt-2">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t('newMachine.name')}</Col>
             <Col sm={7}>
               <Form.Control
                 value={name}
@@ -110,14 +112,14 @@ const NewMachine = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             id="new-layer-add"
             variant="primary"
             type="submit"
           >
-            Create
+            {t('common.create')}
           </Button>
         </Modal.Footer>
       </Form>

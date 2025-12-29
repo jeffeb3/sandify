@@ -5,9 +5,11 @@ import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
 import { useDispatch, useSelector } from "react-redux"
+import { useTranslation } from "react-i18next"
 import { selectCurrentMachine, addMachine } from "./machinesSlice"
 
 const CopyMachine = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const currentMachine = useSelector(selectCurrentMachine)
   const namedInputRef = useRef(null)
@@ -49,13 +51,13 @@ const CopyMachine = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {currentMachine?.name || ""}</Modal.Title>
+        <Modal.Title>{t('copyMachine.title', { name: currentMachine?.name || "" })}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleCopyMachine}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t('copyMachine.name')}</Col>
             <Col sm={7}>
               <Form.Control
                 ref={namedInputRef}
@@ -73,14 +75,14 @@ const CopyMachine = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             id="copy-layer-copy"
             variant="primary"
             type="submit"
           >
-            Copy
+            {t('common.copy')}
           </Button>
         </Modal.Footer>
       </Form>
