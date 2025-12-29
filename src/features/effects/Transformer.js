@@ -5,14 +5,15 @@ import {
   findBounds,
 } from "@/common/geometry"
 import Effect from "./Effect"
+import i18n from "@/i18n"
 
-const options = {}
+const options = () => ({})
 
 export default class Transformer extends Effect {
   constructor() {
     super("transformer")
     this.dragPreview = true
-    this.label = "Move and resize"
+    this.label = i18n.t("effects.transformer.moveAndResize")
     this.randomizable = false
   }
 
@@ -88,6 +89,6 @@ export default class Transformer extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -1,5 +1,6 @@
 import React from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Button from "react-bootstrap/Button"
@@ -19,6 +20,7 @@ import EffectManager from "@/features/effects/EffectManager"
 import { selectSelectedLayer } from "./layersSlice"
 
 const LayerEditor = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
   const instance = new Layer(layer.type)
@@ -39,7 +41,7 @@ const LayerEditor = () => {
     link || description ? (
       <div className="mt-3 mx-3 mb-4 bg-light p-4">
         {description}
-        See{" "}
+        {t("layer.see")}{" "}
         <a
           target="_blank"
           rel="noopener noreferrer"
@@ -47,7 +49,7 @@ const LayerEditor = () => {
         >
           {linkText}
         </a>{" "}
-        for more information.
+        {t("layer.moreInformation")}
       </div>
     ) : undefined
 
@@ -75,7 +77,7 @@ const LayerEditor = () => {
         sm={5}
         className="mb-1"
       >
-        Type
+        {t("layer.type")}
       </Col>
 
       <Col
@@ -130,7 +132,7 @@ const LayerEditor = () => {
       {model.canTransform(layer) && (
         <div className="px-3 py-2">
           <Row className="align-items-center mt-1 mb-1">
-            <Col sm={3}>Transform</Col>
+            <Col sm={3}>{t("layer.transform")}</Col>
             <Col sm={9}>
               <div className="d-flex">
                 <div className="d-flex flex-column">

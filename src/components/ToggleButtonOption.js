@@ -41,7 +41,20 @@ const ToggleButtonOption = (props) => {
           onChange={handleChange}
         >
           {option.choices.map((choice) => {
-            return (
+            if(typeof choice === 'object') {
+              return (
+              <ToggleButton
+                key={choice.value}
+                id={`${props.optionKey}-${choice.value}`}
+                variant="light"
+                value={choice.value}
+              >
+                {choice.title}
+              </ToggleButton>
+            )
+            }
+            else {
+              return (
               <ToggleButton
                 key={choice}
                 id={`${props.optionKey}-${choice}`}
@@ -51,6 +64,8 @@ const ToggleButtonOption = (props) => {
                 {choice}
               </ToggleButton>
             )
+            }
+            
           })}
         </ToggleButtonGroup>
       </Col>

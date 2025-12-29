@@ -9,29 +9,38 @@ import {
 } from "@/common/geometry"
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
+import i18next from 'i18next'
 
-const polarMachineOptions = {
+const polarMachineOptions = () => ({
   maxRadius: {
-    title: "Max radius (mm)",
+    title: i18next.t('machine.polar.maxRadius'),
     min: 0,
   },
   polarStartPoint: {
-    title: "Start point",
+    title: i18next.t('machine.polar.startPoint'),
     type: "togglebutton",
-    choices: ["none", "center", "perimeter"],
+    choices: [
+      {"title":i18next.t('machine.polar.none'), "value":"none"}, 
+      {"title":i18next.t('machine.polar.center'), "value":"center"}, 
+      {"title":i18next.t('machine.polar.perimeter'), "value":"perimeter"}
+    ],
   },
   polarEndPoint: {
-    title: "End point",
+    title: i18next.t('machine.polar.endPoint'),
     type: "togglebutton",
-    choices: ["none", "center", "perimeter"],
+    choices: [
+      {"title":i18next.t('machine.polar.none'), "value":"none"}, 
+      {"title":i18next.t('machine.polar.center'), "value":"center"}, 
+      {"title":i18next.t('machine.polar.perimeter'), "value":"perimeter"}
+    ],
   },
-  ...machineOptions,
-}
+  ...machineOptions(),
+})
 
 export default class PolarMachine extends Machine {
   constructor(state) {
     super(state)
-    this.label = "Polar"
+    this.label = i18next.t('machine.polar.polar')
     this.sizeX = this.state.maxRadius * 2
     this.sizeY = this.sizeX
     this.height = this.sizeX
@@ -51,7 +60,7 @@ export default class PolarMachine extends Machine {
   }
 
   getOptions() {
-    return polarMachineOptions
+    return polarMachineOptions()
   }
 
   addStartPoint() {

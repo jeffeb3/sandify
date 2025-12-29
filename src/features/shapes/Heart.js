@@ -1,14 +1,14 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
 export default class Heart extends Shape {
   constructor() {
     super("heart")
-    this.label = "Heart"
-    this.description =
-      "Heart curves can be defined mathematically a number of different ways. Our heart shape is a parametric equation."
+    this.label = i18next.t('shapes.heart.heart')
+    this.description = i18next.t('shapes.heart.description')
     this.link = "http://mathworld.wolfram.com/HeartCurve.html"
-    this.linkText = "Wolfram Mathworld"
+    this.linkText = i18next.t('shapes.heart.linkText')
     this.randomizable = false
   }
 

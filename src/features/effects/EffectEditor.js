@@ -14,8 +14,11 @@ import ModelOption from "@/components/ModelOption"
 import { updateEffect } from "./effectsSlice"
 import EffectLayer from "./EffectLayer"
 import { selectSelectedEffect } from "./effectsSlice"
+import { useTranslation } from "react-i18next"
+
 
 const EffectEditor = ({ id }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const effect = useSelector(selectSelectedEffect)
   const type = effect?.type || "mask" // guard zombie child
@@ -69,7 +72,7 @@ const EffectEditor = ({ id }) => {
       {renderedModelOptions}
       {model.canTransform(effect) && (
         <Row className="align-items-center mt-1 mb-1">
-          <Col sm={3}>Transform</Col>
+          <Col sm={3}>{t('layer.transform')}</Col>
           <Col sm={9}>
             <div className="d-flex">
               <div className="d-flex flex-column">

@@ -20,8 +20,11 @@ import EffectList from "./EffectList"
 import EffectLayer from "./EffectLayer"
 import NewEffect from "./NewEffect"
 import CopyEffect from "./CopyEffect"
+import { useTranslation } from "react-i18next"
+
 
 const EffectManager = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectedLayer = useSelector(selectSelectedLayer)
   const selectedEffect = useSelector(selectSelectedEffect)
@@ -69,7 +72,7 @@ const EffectManager = () => {
           variant="secondary"
           onClick={toggleNewEffectModal}
         >
-          Add effect
+          {t('effects.effectLayer.addEffect')}
         </Button>
       )}
       {numEffects > 0 && (
@@ -77,8 +80,8 @@ const EffectManager = () => {
           defaultActiveKey={1}
           className="mt-3"
         >
-          <Accordion.Item eventKey={1}>
-            <Accordion.Header className="d-flex">Effects</Accordion.Header>
+            <Accordion.Item eventKey={1}>
+            <Accordion.Header className="d-flex">{t('effectManager.effects')}</Accordion.Header>
             <Accordion.Body>
               <EffectList
                 effects={effects}
@@ -90,7 +93,7 @@ const EffectManager = () => {
                   className="ms-2 layer-button"
                   variant="light"
                   size="sm"
-                  data-tooltip-content="Create new effect"
+                  data-tooltip-content={t('effectManager.createEffect')}
                   data-tooltip-id="tooltip-new-layer"
                   onClick={toggleNewEffectModal}
                 >
@@ -101,7 +104,7 @@ const EffectManager = () => {
                   <Button
                     className="layer-button"
                     variant="light"
-                    data-tooltip-content="Delete effect"
+                    data-tooltip-content={t('effectManager.deleteEffect')}
                     data-tooltip-id="tooltip-delete-layer"
                     onClick={handleEffectDeleted}
                   >
@@ -111,8 +114,7 @@ const EffectManager = () => {
                   <Button
                     className="layer-button"
                     variant="light"
-                    data-tip="Copy effect"
-                    data-tooltip-content="Copy effect"
+                    data-tooltip-content={t('effectManager.copyEffect')}
                     data-tooltip-id="tooltip-copy-layer"
                     onClick={toggleCopyModal}
                   >
@@ -122,7 +124,7 @@ const EffectManager = () => {
                   <Button
                     className="layer-button"
                     variant="light"
-                    data-tooltip-content="Restore effect defaulta"
+                    data-tooltip-content={t('effectManager.restoreDefaults')}
                     data-tooltip-id="tooltip-restore-effect"
                     onClick={handleRestoreDefaults}
                   >
@@ -133,7 +135,7 @@ const EffectManager = () => {
                     <Button
                       className="layer-button"
                       variant="light"
-                      data-tooltip-content="Randomize effect values"
+                      data-tooltip-content={t('effectManager.randomizeValues')}
                       data-tooltip-id="tooltip-randomize-effect"
                       onClick={handleRandomizeValues}
                     >

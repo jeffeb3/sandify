@@ -6,6 +6,7 @@ import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
 import S from "react-switch"
+import { useTranslation } from "react-i18next"
 const Switch = S.default ? S.default : S // Fix: https://github.com/vitejs/vite/issues/2139
 import Modal from "react-bootstrap/Modal"
 import {
@@ -31,6 +32,7 @@ const customStyles = {
 }
 
 const NewEffect = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectedLayer = useSelector(selectSelectedLayer)
@@ -94,13 +96,13 @@ const NewEffect = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create new effect</Modal.Title>
+        <Modal.Title>{t('effects.newEffect.create')}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onEffectAdded}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Type</Col>
+            <Col sm={5}>{t('effects.newEffect.type')}</Col>
             <Col sm={7}>
               <Select
                 ref={selectRef}
@@ -113,7 +115,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
             </Col>
           </Row>
           <Row className="align-items-center mt-2">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t('effects.newEffect.name')}</Col>
             <Col sm={7}>
               <Form.Control
                 value={name}
@@ -124,7 +126,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
           </Row>
           {selectedEffect.randomizable && (
             <Row className="align-items-center mt-2">
-              <Col sm={5}>Randomize values</Col>
+              <Col sm={5}>{t('effects.newEffect.randomize')}</Col>
               <Col sm={7}>
                 <Switch
                   checked={randomize}
@@ -141,14 +143,14 @@ const NewEffect = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             id="new-layer-add"
             variant="primary"
             type="submit"
           >
-            Create
+            {t('common.create')}
           </Button>
         </Modal.Footer>
       </Form>

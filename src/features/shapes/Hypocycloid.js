@@ -1,29 +1,29 @@
 import Victor from "victor"
 import { reduce } from "@/common/util"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   hypocycloidA: {
-    title: "Large circle radius",
+    title: i18next.t('shapes.hypocycloid.largeCircleRadius'),
     min: 1,
     randomMax: 16,
   },
   hypocycloidB: {
-    title: "Small circle radius",
+    title: i18next.t('shapes.hypocycloid.smallCircleRadius'),
     min: 1,
     randomMax: 16,
     random: 0.6,
   },
-}
+})
 
 export default class Star extends Shape {
   constructor() {
     super("hypocycloid")
-    this.label = "Web"
+    this.label = i18next.t('shapes.hypocycloid.hypocycloid')
     this.link = "http://mathworld.wolfram.com/Hypocycloid.html"
-    this.linkText = "Wolfram Mathworld"
-    this.description =
-      "The web shape is a hypocycloid. Imagine two circles, with an inner circle rolling around inside an outer one. The path created by a point on the inner circle as it rolls is called a hypocycloid."
+    this.linkText = i18next.t('shapes.hypocycloid.linkText')
+    this.description = i18next.t('shapes.hypocycloid.description')
   }
 
   getInitialState() {
@@ -60,7 +60,7 @@ export default class Star extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   randomChanges(layer) {

@@ -1,24 +1,25 @@
 import Victor from "victor"
 import Shape from "./Shape"
+import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   points: {
-    title: "Number of points",
+    title: i18next.t('shapes.star.numberOfPoints'),
     min: 2,
     randomMax: 8,
   },
   starRatio: {
-    title: "Size of points",
+    title: i18next.t('shapes.star.sizeOfPoints'),
     step: 0.05,
     min: 0.05,
     max: 0.8,
   },
-}
+})
 
 export default class Star extends Shape {
   constructor() {
     super("star")
-    this.label = "Star"
+    this.label = i18next.t('shapes.star.star')
   }
 
   getInitialState() {
@@ -32,7 +33,7 @@ export default class Star extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   getVertices(state) {

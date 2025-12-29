@@ -1,22 +1,22 @@
 import Effect from "./Effect"
+import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   programCodePre: {
-    title: "Start code",
+    title: i18n.t("effects.programCode.startCode"),
     type: "textarea",
   },
   programCodePost: {
-    title: "End code",
+    title: i18n.t("effects.programCode.endCode"),
     type: "textarea",
   },
-}
+})
 
 export default class ProgramCode extends Effect {
   constructor() {
     super("programCode")
-    this.label = "Program code"
-    this.description =
-      "When exporting the pattern to a file, the provided program code is added before and/or after this layer is rendered."
+    this.label = i18n.t("effects.programCode.programCode")
+    this.description = i18n.t("effects.programCode.description")
   }
 
   canChangeSize(state) {
@@ -46,6 +46,6 @@ export default class ProgramCode extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -1,11 +1,13 @@
 import React, { useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import Modal from "react-bootstrap/Modal"
 import Button from "react-bootstrap/Button"
 import InputOption from "@/components/InputOption"
 import { updateFile, selectFileState, fileOptions, download } from "./fileSlice"
 
 const SandifyDownloader = ({ showModal, toggleModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const fileState = useSelector(selectFileState)
   const { fileName } = fileState
@@ -36,13 +38,13 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Save pattern as...</Modal.Title>
+        <Modal.Title>{t('fileDownloader.savePatternAs')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <InputOption
           onChange={handleChange}
-          options={fileOptions}
+          options={fileOptions()}
           key="fileName"
           optionKey="fileName"
           data={{ fileName }}
@@ -50,9 +52,7 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
           focusOnSelect={true}
         />
         <div className="mt-4 fs-6 fst-italic">
-          Downloads a text-based .sdf file that contains no personal or browser
-          information. You can share this file with others, who can import your
-          design.
+          {t('fileDownloader.description')}
         </div>
       </Modal.Body>
 
@@ -62,14 +62,14 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
           variant="light"
           onClick={toggleModal}
         >
-          Close
+          {t('common.cancel')}
         </Button>
         <Button
           id="code-download"
           variant="primary"
           onClick={handleDownload}
         >
-          Download
+          {t('fileDownloader.download')}
         </Button>
       </Modal.Footer>
     </Modal>

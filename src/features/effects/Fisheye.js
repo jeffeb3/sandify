@@ -2,24 +2,25 @@ import Victor from "victor"
 import * as d3Fisheye from "d3-fisheye"
 import { circle, subsample } from "@/common/geometry"
 import Effect from "./Effect"
+import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   fisheyeSubsample: {
-    title: "Subsample points",
+    title: i18n.t("effects.fisheye.subsamplePoints"),
     type: "checkbox",
   },
   fisheyeDistortion: {
-    title: "Distortion",
+    title: i18n.t("effects.fisheye.distortion"),
     min: -2,
     max: 40,
     step: 1,
   },
-}
+})
 
 export default class Fisheye extends Effect {
   constructor() {
     super("fisheye")
-    this.label = "Fisheye"
+    this.label = i18n.t("effects.fisheye.fisheye")
   }
 
   canMove(state) {
@@ -70,6 +71,6 @@ export default class Fisheye extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

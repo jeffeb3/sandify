@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -6,6 +7,7 @@ import ToggleButton from "react-bootstrap/ToggleButton"
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 
 const QuadrantButtonsOption = (props) => {
+  const { t } = useTranslation()
   const option = props.options[props.optionKey]
   const { data } = props
   const value = data[props.optionKey]
@@ -35,6 +37,7 @@ const QuadrantButtonsOption = (props) => {
             type="checkbox"
             name="origin"
             className="flex-wrap"
+            style={{ width: '100%' }}
             value={value}
             onChange={handleChange}
           >
@@ -43,36 +46,36 @@ const QuadrantButtonsOption = (props) => {
               value={1}
               id="origin-upper-left"
               className="px-4"
-              style={{ borderRadius: 0 }}
+              style={{ borderRadius: 0, width: '50%' }}
             >
-              upper left
+              {t('machine.rect.upperLeft')}
             </ToggleButton>
             <ToggleButton
               variant="light"
               value={2}
               id="origin-upper-right"
               className="px-4"
-              style={{ borderRadius: 0 }}
+              style={{ borderRadius: 0, width: '50%' }}
             >
-              upper right
+              {t('machine.rect.upperRight')}
             </ToggleButton>
             <ToggleButton
               variant="light"
               value={0}
               id="origin-lower-left"
               className="px-4"
-              style={{ borderRadius: 0 }}
+              style={{ borderRadius: 0, width: '50%' }}
             >
-              lower left
+              {t('machine.rect.lowerLeft')}
             </ToggleButton>
             <ToggleButton
               variant="light"
               value={3}
               id="origin-lower-right"
               className="px-4"
-              style={{ borderRadius: 0 }}
+              style={{ borderRadius: 0, width: '50%' }}
             >
-              lower right
+              {t('machine.rect.lowerRight')}
             </ToggleButton>
           </ToggleButtonGroup>
         </div>

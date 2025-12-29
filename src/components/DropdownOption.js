@@ -22,7 +22,13 @@ const DropdownOption = ({
 
   choices = Array.isArray(choices)
     ? choices.map((choice) => {
-        return { value: choice, label: choice }
+        if(typeof choice === 'object') {
+          return { value: choice.value, label: choice.title }
+        }
+        else {
+          return { value: choice, label: choice }
+        }
+        
       })
     : Object.keys(choices).map((key) => {
         return { value: key, label: choices[key] }

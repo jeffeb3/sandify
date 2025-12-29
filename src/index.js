@@ -1,6 +1,7 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
 import "./features/app/reactGA"
+import "./i18n" // Initialize i18n
 import App from "./features/app/App"
 import "./index.css"
 

@@ -6,47 +6,47 @@ import { circle, arc } from "@/common/geometry"
 import { closest, farthest } from "@/common/proximity"
 import { getMachine } from "@/features/machines/machineFactory"
 import Victor from "victor"
+import i18next from 'i18next'
 
 const ROUNDS = 100 // default number of rounds to attempt to create and grow circles
 const RECTANGULAR_ATTEMPTS_MULTIPLIER = 4
 const ATTEMPTS_MODIFIER = 5
 
-const options = {
+const options = () => ({
   seed: {
-    title: "Random seed",
+    title: i18next.t('shapes.circlePacker.seed'),
     min: 1,
     randomMax: 1000,
   },
   startingRadius: {
-    title: "Minimum radius",
+    title: i18next.t('shapes.circlePacker.startingRadius'),
     min: 3,
     randomMax: 40,
   },
   attempts: {
-    title: "Circle uniformity",
+    title: i18next.t('shapes.circlePacker.attempts'),
     min: 1,
     max: 100,
     step: 4,
   },
   inBounds: {
-    title: "Stay in bounds",
+    title: i18next.t('shapes.circlePacker.inBounds'),
     type: "checkbox",
   },
-}
+})
 
 // adapted initially from Coding Challenge #50; Animated Circle Packing, https://www.youtube.com/watch?v=QHEQuoIKgNE
 // no license was specified
 export default class CirclePacker extends Shape {
   constructor() {
     super("circlePacker")
-    this.label = "Circle packer"
+    this.label = i18next.t('shapes.circlePacker.circlePacker')
     this.usesMachine = true
     this.autosize = false
-    this.selectGroup = "Erasers"
+    this.selectGroup = i18next.t('layer.erasers'),
     this.link = "https://en.wikipedia.org/wiki/Circle_packing"
-    this.linkText = "Wikipedia"
-    this.description =
-      "Circle packing is an arrangement of circles of varying sizes such that no overlapping occurs and no circle can be enlarged without creating an overlap."
+    this.linkText = i18next.t('shapes.circlePacker.linkText')
+    this.description = i18next.t('shapes.circlePacker.description')
   }
 
   canMove(state) {
@@ -367,6 +367,6 @@ export default class CirclePacker extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

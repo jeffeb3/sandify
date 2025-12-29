@@ -2,27 +2,31 @@ import { degToRad } from "@/common/geometry"
 import Victor from "victor"
 import Shape from "./Shape"
 import { getMachine } from "@/features/machines/machineFactory"
+import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   wiperType: {
-    title: "Wiper type",
+    title: i18next.t('shapes.wiper.wiperType'),
     type: "togglebutton",
-    choices: ["Lines", "Spiral"],
+    choices: [
+      {"title": i18next.t('shapes.wiper.lines'), "value": "Lines"},
+      {"title": i18next.t('shapes.wiper.spiral'), "value": "Spiral"}
+    ],
   },
   wiperSize: {
-    title: "Wiper size",
+    title: i18next.t('shapes.wiper.wiperSize'),
     min: 1,
     randomMin: 3,
   },
   wiperAngleDeg: {
-    title: "Wiper angle",
+    title: i18next.t('shapes.wiper.wiperAngle'),
     isVisible: (layer, state) => {
       return state.wiperType === "Lines"
     },
     randomMin: 0,
     randomMax: 360,
   },
-}
+})
 
 const outOfBounds = (point, width, height) => {
   if (point.x < -width / 2.0) {
@@ -290,8 +294,8 @@ function linearVertices(state) {
 export default class Wiper extends Shape {
   constructor() {
     super("wiper")
-    this.label = "Wiper"
-    this.selectGroup = "Erasers"
+    this.label = i18next.t('shapes.wiper.wiper')
+    this.selectGroup = i18next.t('layer.erasers'),
     this.usesMachine = true
     this.shouldCache = false
     this.autosize = false
@@ -329,6 +333,6 @@ export default class Wiper extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

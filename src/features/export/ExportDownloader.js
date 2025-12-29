@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Button from "react-bootstrap/Button"
@@ -28,6 +29,7 @@ const exporters = {
 }
 
 const ExportDownloader = ({ showModal, toggleModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const machine = useSelector(selectCurrentMachine)
   const exporterState = useSelector(selectExporterState)
@@ -123,13 +125,13 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
       onHide={toggleModal}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Export to a file</Modal.Title>
+        <Modal.Title>{t('exportDownloader.exportToAFile')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <DropdownOption
           onChange={handleChange}
-          options={exporterOptions}
+          options={exporterOptions()}
           optionKey="fileType"
           key="fileType"
           index={0}
@@ -148,16 +150,16 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
                 rel="noopener noreferrer"
                 href="https://github.com/jeffeb3/sandify/wiki/Scara-GCode"
               >
-                Read more
+                {t('exportDownloader.readMore')}
               </a>{" "}
-              about SCARA GCode.
+              {t('exportDownloader.aboutScaraGCode')}
             </Col>
           </Row>
         )}
 
         <InputOption
           onChange={handleChange}
-          options={exporterOptions}
+          options={exporterOptions()}
           key="fileName"
           optionKey="fileName"
           index={1}
@@ -167,7 +169,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         {(fileType === THETARHO || fileType === SCARA) && (
           <InputOption
             onChange={handleChange}
-            options={exporterOptions}
+            options={exporterOptions()}
             key="polarRhoMax"
             optionKey="polarRhoMax"
             index={2}
@@ -178,7 +180,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         {fileType === SCARA && (
           <InputOption
             onChange={handleChange}
-            options={exporterOptions}
+            options={exporterOptions()}
             key="unitsPerCircle"
             optionKey="unitsPerCircle"
             index={2}
@@ -188,7 +190,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
 
         <InputOption
           onChange={handleChange}
-          options={exporterOptions}
+          options={exporterOptions()}
           key="pre"
           optionKey="pre"
           index={3}
@@ -197,7 +199,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
 
         <InputOption
           onChange={handleChange}
-          options={exporterOptions}
+          options={exporterOptions()}
           key="post"
           optionKey="post"
           index={4}
@@ -207,7 +209,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         <Row>
           <Col sm={5}></Col>
           <Col sm={7}>
-            See the{" "}
+            {t('exportDownloader.see')}{" "}
             <a
               target="_blank"
               rel="noopener noreferrer"
@@ -215,14 +217,14 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
             >
               wiki{" "}
             </a>{" "}
-            for details on program export variables.
+            {t('exportDownloader.forDetailsOnProgramExportVariables')}
           </Col>
         </Row>
 
         <div className="mt-2">
           <CheckboxOption
             onChange={handleChange}
-            options={exporterOptions}
+            options={exporterOptions()}
             optionKey="reverse"
             key="reverse"
             index={5}
@@ -237,14 +239,14 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
           variant="light"
           onClick={handleCancel}
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button
           id="code-download"
           variant="primary"
           onClick={handleDownload}
         >
-          Download
+          {t('exportDownloader.download')}
         </Button>
       </Modal.Footer>
     </Modal>

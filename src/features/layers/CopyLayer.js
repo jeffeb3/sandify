@@ -5,10 +5,12 @@ import Form from "react-bootstrap/Form"
 import Button from "react-bootstrap/Button"
 import Modal from "react-bootstrap/Modal"
 import { useDispatch, useSelector } from "react-redux"
+import { useTranslation } from "react-i18next"
 import { copyLayer } from "./layersSlice"
 import { selectSelectedLayer } from "./layersSlice"
 
 const CopyLayer = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectedLayer = useSelector(selectSelectedLayer)
   const namedInputRef = useRef(null)
@@ -48,13 +50,13 @@ const CopyLayer = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {selectedLayer.name}</Modal.Title>
+        <Modal.Title>{t('copyLayer.title', { name: selectedLayer.name })}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleCopyLayer}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t('copyLayer.name')}</Col>
             <Col sm={7}>
               <Form.Control
                 ref={namedInputRef}
@@ -72,14 +74,14 @@ const CopyLayer = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             id="copy-layer-copy"
             variant="primary"
             type="submit"
           >
-            Copy
+            {t('common.copy')}
           </Button>
         </Modal.Footer>
       </Form>
