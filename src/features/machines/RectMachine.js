@@ -7,26 +7,27 @@ import {
   annotateVertices,
 } from "@/common/geometry"
 import clip from "liang-barsky"
+import i18next from 'i18next'
 
 const rectMachineOptions = {
   minX: {
-    title: "Min x (mm)",
+    title: i18next.t('machine.rect.minX'),
     min: 0,
   },
   maxX: {
-    title: "Max x (mm)",
+    title: i18next.t('machine.rect.maxX'),
     min: 0,
   },
   minY: {
-    title: "Min y (mm)",
+    title: i18next.t('machine.rect.minY'),
     min: 0,
   },
   maxY: {
-    title: "Max y (mm)",
+    title: i18next.t('machine.rect.maxY'),
     min: 0,
   },
   rectOrigin: {
-    title: "Force origin",
+    title: i18next.t('machine.rect.forceOrigin'),
     type: "quadrantbuttons",
   },
   ...machineOptions,
@@ -35,7 +36,7 @@ const rectMachineOptions = {
 export default class RectMachine extends Machine {
   constructor(state) {
     super(state)
-    this.label = "Rectangular"
+    this.label = i18next.t('machine.rect.rectangular')
     this.sizeX = Math.abs((this.state.maxX - this.state.minX) / 2.0)
     this.sizeY = Math.abs((this.state.maxY - this.state.minY) / 2.0)
     this.height = this.sizeY * 2

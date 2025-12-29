@@ -60,13 +60,27 @@
     "type": "机器类型",
     "defaultMachine":"默认机器",
     "minimizePerimeterMoves":"最小化轮廓移动",
-    "polar":"极坐标",
-    "maxRadius":"最大半径 (毫米)",
-    "startPoint":"修改起点",
-    "endPoint":"修改终点",
-    "none": "不修改",
-    "center": "中心",
-    "perimeter": "边缘"
+    "polar": {
+      "polar":"极坐标",
+      "maxRadius":"最大半径 (毫米)",
+      "startPoint":"修改起点",
+      "endPoint":"修改终点",
+      "none": "不修改",
+      "center": "中心",
+      "perimeter": "边缘"
+    },
+    "rect": {
+      "rectangular": "矩形",
+      "minX": "最小 X (毫米)",
+      "maxX": "最大 X (毫米)",
+      "minY": "最小 Y (毫米)",
+      "maxY": "最大 Y (毫米)",
+      "forceOrigin": "强制原点",
+      "upperLeft": "左上",
+      "upperRight": "右上",
+      "lowerLeft": "左下",
+      "lowerRight": "右下"
+    }
   },
   "previewStats": {
     "points": "顶点数",

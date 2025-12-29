@@ -60,13 +60,27 @@
     "type": "Macheine Type",
     "defaultMachine":"Default Machine",
     "minimizePerimeterMoves":"Minimize Perimeter Moves",
-    "polar":"Polar",
-    "maxRadius":"Max Radius (mm)",
-    "startPoint":"Start point",
-    "endPoint":"End point",
-    "none": "none",
-    "center": "center",
-    "perimeter": "perimeter"
+    "polar": {
+      "polar": "Polar",
+      "maxRadius":"Max Radius (mm)",
+      "startPoint":"Start point",
+      "endPoint":"End point",
+      "none": "none",
+      "center": "center",
+      "perimeter": "perimeter"
+    },
+    "rect": {
+      "rectangular": "Rectangular",
+      "minX": "Min x (mm)",
+      "maxX": "Max x (mm)",
+      "minY": "Min y (mm)",
+      "maxY": "Max y (mm)",
+      "forceOrigin": "Force origin",
+      "upperLeft": "upper left",
+      "upperRight": "upper right",
+      "lowerLeft": "lower left",
+      "lowerRight": "lower right"
+    }
 
   },
   "previewStats": {
