@@ -13,7 +13,7 @@ import { getMachine } from "@/features/machines/machineFactory"
 import i18next from 'i18next'
 
 
-const options = {
+const options = () => ({
   fillerSubtype: {
     title: i18next.t('shapes.spaceFiller.type'),
     type: "dropdown",
@@ -31,7 +31,7 @@ const options = {
       return onMaxIterations(subtypes[state.fillerSubtype], state)
     },
   },
-}
+})
 
 export default class SpaceFiller extends Shape {
   constructor() {
@@ -102,7 +102,7 @@ export default class SpaceFiller extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   // hack to randomly select the subtype before randomizing the other shape values

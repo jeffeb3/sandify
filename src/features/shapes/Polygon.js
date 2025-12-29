@@ -2,7 +2,7 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   polygonSides: {
     title: i18next.t('shapes.polygon.numberOfSides'),
     min: 3,
@@ -21,7 +21,7 @@ const options = {
       return state.roundCorners
     },
   },
-}
+})
 
 export default class Polygon extends Shape {
   constructor() {
@@ -43,7 +43,7 @@ export default class Polygon extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   getVertices(state) {

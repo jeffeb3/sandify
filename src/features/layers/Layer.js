@@ -4,7 +4,7 @@ import { resizeVertices, centerOnOrigin } from "@/common/geometry"
 import { roundP } from "@/common/util"
 import i18next from 'i18next'
 
-export const layerOptions = {
+export const layerOptions = () => ({
   name: {
     title: i18next.t('layer.name'),
     type: "text",
@@ -77,7 +77,7 @@ export const layerOptions = {
       {"title": i18next.t('layer.alongPerimeter'), "value": "along perimeter"}
     ],
   },
-}
+})
 
 export default class Layer {
   constructor(type) {
@@ -107,7 +107,7 @@ export default class Layer {
   }
 
   getOptions() {
-    return layerOptions
+    return layerOptions()
   }
 
   // returns an array of Victor vertices

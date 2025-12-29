@@ -4,7 +4,7 @@ import noise from "@/common/noise"
 import { subsample } from "@/common/geometry"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   seed: {
     title: i18n.t("effects.noise.randomSeed"),
     min: 1,
@@ -41,7 +41,7 @@ const options = {
       {"title": i18n.t("effects.noise.linear"), "value": "Linear"}
     ],
   },
-}
+})
 
 export default class Noise extends Effect {
   constructor() {
@@ -141,6 +141,6 @@ export default class Noise extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -2,7 +2,7 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   points: {
     title: i18next.t('shapes.star.numberOfPoints'),
     min: 2,
@@ -14,7 +14,7 @@ const options = {
     min: 0.05,
     max: 0.8,
   },
-}
+})
 
 export default class Star extends Shape {
   constructor() {
@@ -33,7 +33,7 @@ export default class Star extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   getVertices(state) {

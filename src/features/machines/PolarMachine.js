@@ -11,7 +11,7 @@ import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
 import i18next from 'i18next'
 
-const polarMachineOptions = {
+const polarMachineOptions = () => ({
   maxRadius: {
     title: i18next.t('machine.polar.maxRadius'),
     min: 0,
@@ -34,8 +34,8 @@ const polarMachineOptions = {
       {"title":i18next.t('machine.polar.perimeter'), "value":"perimeter"}
     ],
   },
-  ...machineOptions,
-}
+  ...machineOptions(),
+})
 
 export default class PolarMachine extends Machine {
   constructor(state) {
@@ -60,7 +60,7 @@ export default class PolarMachine extends Machine {
   }
 
   getOptions() {
-    return polarMachineOptions
+    return polarMachineOptions()
   }
 
   addStartPoint() {

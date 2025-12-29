@@ -10,7 +10,7 @@ import {
 import { evaluate } from "mathjs"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   numLoops: {
     title: i18n.t("effects.loop.numberOfLoops"),
     min: 1,
@@ -104,7 +104,7 @@ const options = {
     },
     randomMax: 4,
   },
-}
+})
 
 export default class Loop extends Effect {
   constructor() {
@@ -233,6 +233,6 @@ export default class Loop extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -11,7 +11,7 @@ import { subtypes } from "./subtypes"
 import { resizeVertices } from "@/common/geometry"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   subtype: {
     title: i18next.t('shapes.lSystem.type'),
     type: "dropdown",
@@ -29,7 +29,7 @@ const options = {
       return onMaxIterations(subtypes[state.subtype], state)
     },
   },
-}
+})
 
 export default class LSystem extends Shape {
   constructor() {
@@ -71,7 +71,7 @@ export default class LSystem extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   // hack to randomly select the subtype before randomizing the other shape values

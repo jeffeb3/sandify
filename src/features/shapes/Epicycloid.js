@@ -3,7 +3,7 @@ import Shape from "./Shape"
 import { reduce } from "@/common/util"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   epicycloidA: {
     title: i18next.t('shapes.epicycloid.largeCircleRadius'),
     min: 1,
@@ -15,7 +15,7 @@ const options = {
     randomMax: 16,
     random: 0.6,
   },
-}
+})
 
 export default class Epicycloid extends Shape {
   constructor() {
@@ -63,7 +63,7 @@ export default class Epicycloid extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   randomChanges(layer) {

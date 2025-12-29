@@ -13,7 +13,7 @@ import { closest } from "@/common/proximity"
 import Effect from "./Effect"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   reverse: {
     title: i18n.t("effects.fineTuning.reversePath"),
     type: "checkbox",
@@ -43,7 +43,7 @@ const options = {
     max: 100,
     step: 2,
   },
-}
+})
 
 export default class FineTuning extends Effect {
   constructor() {
@@ -201,6 +201,6 @@ export default class FineTuning extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

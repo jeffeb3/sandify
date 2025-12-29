@@ -13,7 +13,7 @@ import {
 } from "@/common/geometry"
 import i18n from "@/i18n"
 
-export const voronoiOptions = {
+export const voronoiOptions = () => ({
   seed: {
     title: i18n.t("effects.voronoi.randomSeed"),
     min: 1,
@@ -27,7 +27,7 @@ export const voronoiOptions = {
       {"title": i18n.t("effects.voronoi.delaunay"), "value": "delaunay"}
     ],
   },
-}
+})
 
 export default class Voronoi extends Effect {
   constructor() {
@@ -84,7 +84,7 @@ export default class Voronoi extends Effect {
   }
 
   getOptions() {
-    return voronoiOptions
+    return voronoiOptions()
   }
 
   generatePointsFromVertices(vertices) {

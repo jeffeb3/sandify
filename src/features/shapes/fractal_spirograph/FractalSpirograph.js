@@ -3,7 +3,7 @@ import Shape from "../Shape"
 import Orbit from "./Orbit"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   fractalSpirographVelocity: {
     title: i18next.t('shapes.fractalSpirograph.velocity'),
     min: 2,
@@ -27,7 +27,7 @@ const options = {
     title: i18next.t('shapes.fractalSpirograph.alternateRotation'),
     type: "checkbox",
   },
-}
+})
 
 // Inspired/adapted from https://thecodingtrain.com/CodingChallenges/061-fractal-spirograph
 // No license was specified.
@@ -95,6 +95,6 @@ export default class FractalSpirograph extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

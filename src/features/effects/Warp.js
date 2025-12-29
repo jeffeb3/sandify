@@ -5,7 +5,7 @@ import { subsample, circle } from "@/common/geometry"
 import { evaluate } from "mathjs"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   warpType: {
     title: i18n.t("effects.warp.warpType"),
     type: "dropdown",
@@ -50,7 +50,7 @@ const options = {
     title: i18n.t("effects.warp.subsamplePoints"),
     type: "checkbox",
   },
-}
+})
 
 const onWarpTypeChanged = (changes) => {
   if (["angle", "quad"].includes(changes.warpType)) {
@@ -234,7 +234,7 @@ export default class Warp extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   randomChanges(layer) {

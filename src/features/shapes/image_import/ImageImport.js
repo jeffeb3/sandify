@@ -41,7 +41,7 @@ const handleClippedBrightnessChange = (model, changes, state) => {
   return changes
 }
 
-const options = {
+const options = () => ({
   imageSubtype: {
     title: i18next.t('shapes.imageImport.type'),
     type: "dropdown",
@@ -169,7 +169,7 @@ const options = {
     title: i18next.t('shapes.imageImport.inverted'),
     type: "checkbox",
   },
-}
+})
 
 export default class ImageImport extends Shape {
   constructor() {
@@ -346,6 +346,6 @@ export default class ImageImport extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

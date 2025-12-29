@@ -7,7 +7,7 @@ import {
 import Effect from "./Effect"
 import i18n from "@/i18n"
 
-const options = {}
+const options = () => ({})
 
 export default class Transformer extends Effect {
   constructor() {
@@ -89,6 +89,6 @@ export default class Transformer extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

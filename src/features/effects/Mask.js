@@ -7,7 +7,7 @@ import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
 import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   maskMachine: {
     title: i18n.t("effects.mask.maskShape"),
     type: "togglebutton",
@@ -44,7 +44,7 @@ const options = {
     title: i18n.t("effects.mask.drawBorder"),
     type: "checkbox",
   },
-}
+})
 
 export default class Mask extends Effect {
   constructor() {
@@ -84,7 +84,7 @@ export default class Mask extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   getSelectionVertices(effect) {

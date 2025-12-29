@@ -9,7 +9,7 @@ import {
 import clip from "liang-barsky"
 import i18next from 'i18next'
 
-const rectMachineOptions = {
+const rectMachineOptions = () => ({
   minX: {
     title: i18next.t('machine.rect.minX'),
     min: 0,
@@ -30,8 +30,8 @@ const rectMachineOptions = {
     title: i18next.t('machine.rect.forceOrigin'),
     type: "quadrantbuttons",
   },
-  ...machineOptions,
-}
+  ...machineOptions(),
+})
 
 export default class RectMachine extends Machine {
   constructor(state) {
@@ -64,7 +64,7 @@ export default class RectMachine extends Machine {
   }
 
   getOptions() {
-    return rectMachineOptions
+    return rectMachineOptions()
   }
 
   addStartPoint() {

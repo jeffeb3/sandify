@@ -21,7 +21,7 @@ import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
 const MIN_SPACING_MULTIPLIER = 1.2
 const SPECIAL_CHILDREN = ["i", "j", "?"]
 
-const options = {
+const options = () => ({
   fancyText: {
     title: i18next.t('shapes.fancyText.text'),
     type: "textarea",
@@ -57,7 +57,7 @@ const options = {
       {"title": i18next.t('shapes.fancyText.right'), "value": "right"}
     ],
   },
-}
+})
 
 export default class FancyText extends Shape {
   constructor() {
@@ -431,7 +431,7 @@ export default class FancyText extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   randomChanges(layer) {

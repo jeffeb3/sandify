@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import Select from "react-select"
 import Col from "react-bootstrap/Col"
@@ -27,6 +28,7 @@ const customStyles = {
 }
 
 const NewLayer = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectOptions = getShapeSelectOptions()
@@ -88,13 +90,13 @@ const NewLayer = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create new layer</Modal.Title>
+        <Modal.Title>{t('newLayer.create')}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onLayerAdded}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Type</Col>
+            <Col sm={5}>{t('newLayer.type')}</Col>
             <Col sm={7}>
               <Select
                 ref={selectRef}
@@ -107,7 +109,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
             </Col>
           </Row>
           <Row className="align-items-center mt-2">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t('newLayer.name')}</Col>
             <Col sm={7}>
               <Form.Control
                 value={name}
@@ -118,7 +120,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
           </Row>
           {selectedShape.randomizable && (
             <Row className="align-items-center mt-2">
-              <Col sm={5}>Randomize values</Col>
+              <Col sm={5}>{t('newLayer.randomizeValues')}</Col>
               <Col sm={7}>
                 <Switch
                   checked={randomize}
@@ -135,14 +137,14 @@ const NewLayer = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             id="new-layer-add"
             variant="primary"
             type="submit"
           >
-            Create
+            {t('common.create')}
           </Button>
         </Modal.Footer>
       </Form>

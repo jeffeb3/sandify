@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import Button from "react-bootstrap/Button"
 import { Tooltip } from "react-tooltip"
 import { useSelector, useDispatch } from "react-redux"
+import { useTranslation } from "react-i18next"
 import { FaTrash, FaCopy, FaPlusSquare, FaDiceFive } from "react-icons/fa"
 import { MdOutlineSettingsBackupRestore } from "react-icons/md"
 import LayerEditor from "@/features/layers/LayerEditor"
@@ -21,6 +22,7 @@ import Layer from "./Layer"
 import "./LayerManager.scss"
 
 const LayerManager = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectedLayerId = useSelector(selectSelectedLayerId)
   const selectedLayer = useSelector(selectSelectedLayer)
@@ -74,7 +76,7 @@ const LayerManager = () => {
             className="ms-2 layer-button"
             variant="light"
             size="sm"
-            data-tooltip-content="Create new layer"
+            data-tooltip-content={t('layerManager.createLayer')}
             data-tooltip-id="tooltip-new-layer"
             onClick={toggleNewLayerModal}
           >
@@ -85,7 +87,7 @@ const LayerManager = () => {
             <Button
               className="layer-button"
               variant="light"
-              data-tooltip-content="Delete layer"
+              data-tooltip-content={t('layerManager.deleteLayer')}
               data-tooltip-id="tooltip-delete-layer"
               onClick={handleLayerRemoved}
             >
@@ -96,7 +98,7 @@ const LayerManager = () => {
           <Button
             className="layer-button"
             variant="light"
-            data-tooltip-content="Copy layer"
+            data-tooltip-content={t('layerManager.copyLayer')}
             data-tooltip-id="tooltip-copy-layer"
             onClick={toggleCopyModal}
           >
@@ -106,7 +108,7 @@ const LayerManager = () => {
           <Button
             className="layer-button"
             variant="light"
-            data-tooltip-content="Restore layer defaults"
+            data-tooltip-content={t('layerManager.restoreDefaults')}
             data-tooltip-id="tooltip-restore-layer"
             onClick={handleRestoreDefaults}
           >
@@ -117,7 +119,7 @@ const LayerManager = () => {
             <Button
               className="layer-button"
               variant="light"
-              data-tooltip-content="Randomize layer values"
+              data-tooltip-content={t('layerManager.randomizeValues')}
               data-tooltip-id="tooltip-randomize-layer"
               onClick={handleRandomizeValues}
             >

@@ -12,7 +12,7 @@ const ROUNDS = 100 // default number of rounds to attempt to create and grow cir
 const RECTANGULAR_ATTEMPTS_MULTIPLIER = 4
 const ATTEMPTS_MODIFIER = 5
 
-const options = {
+const options = () => ({
   seed: {
     title: i18next.t('shapes.circlePacker.seed'),
     min: 1,
@@ -33,7 +33,7 @@ const options = {
     title: i18next.t('shapes.circlePacker.inBounds'),
     type: "checkbox",
   },
-}
+})
 
 // adapted initially from Coding Challenge #50; Animated Circle Packing, https://www.youtube.com/watch?v=QHEQuoIKgNE
 // no license was specified
@@ -367,6 +367,6 @@ export default class CirclePacker extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

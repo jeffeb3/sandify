@@ -7,7 +7,7 @@ import { VoronoiMixin, weightFunctions } from "@/common/voronoi"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-export const voronoiOptions = {
+export const voronoiOptions = () => ({
   voronoiPlacement: {
     title: i18next.t('shapes.voronoi.placement'),
     type: "togglebutton",
@@ -89,7 +89,7 @@ export const voronoiOptions = {
     min: 1,
     randomMax: 1000,
   },
-}
+})
 
 export default class Voronoi extends Shape {
   constructor() {
@@ -171,7 +171,7 @@ export default class Voronoi extends Shape {
   }
 
   getOptions() {
-    return voronoiOptions
+    return voronoiOptions()
   }
 }
 

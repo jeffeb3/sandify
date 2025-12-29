@@ -2,7 +2,7 @@ import { vertexRoundP, annotateVertices, downsample } from "@/common/geometry"
 import i18next from 'i18next'
 
 
-export const machineOptions = {
+export const machineOptions = () => ({
   name: {
     title: i18next.t('common.name'),
     type: "text",
@@ -12,7 +12,7 @@ export const machineOptions = {
     title: i18next.t('machine.minimizePerimeterMoves'),
     type: "checkbox",
   },
-}
+})
 
 // inherit all machine classes from this base class
 export default class Machine {

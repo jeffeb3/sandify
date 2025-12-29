@@ -10,14 +10,14 @@ import {
 } from "@/common/geometry"
 import i18n from "@/i18n"
 
-const orientations = {
+const orientations = () => ({
   unchanged: i18n.t("effects.track.asIs"),
   inward: i18n.t("effects.track.facingInward"),
   outward: i18n.t("effects.track.facingOutward"),
   path: i18n.t("effects.track.alongPath"),
-}
+})
 
-const options = {
+const options = () => ({
   trackRotation: {
     title: i18n.t("effects.track.trackRotation"),
     step: 35,
@@ -52,12 +52,12 @@ const options = {
   trackShapeOrientation: {
     title: i18n.t("effects.track.shapeOrientation"),
     type: "dropdown",
-    choices: orientations,
+    choices: orientations(),
     isVisible: (layer, state) => {
       return state.trackPreserveShape
     },
   },
-}
+})
 
 export default class Track extends Effect {
   constructor() {
@@ -329,7 +329,7 @@ export default class Track extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   spiral(effect) {

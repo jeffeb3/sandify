@@ -52,6 +52,27 @@
     "name": "Name",
     "create": "Create"
   },
+  "newLayer": {
+    "create": "Create new layer",
+    "type": "Type",
+    "name": "Name",
+    "randomizeValues": "Randomize values"
+  },
+  "layerManager": {
+    "createLayer": "Create new layer",
+    "deleteLayer": "Delete layer",
+    "copyLayer": "Copy layer",
+    "restoreDefaults": "Restore layer defaults",
+    "randomizeValues": "Randomize layer values"
+  },
+  "effectManager": {
+    "effects": "Effects",
+    "createEffect": "Create new effect",
+    "deleteEffect": "Delete effect",
+    "copyEffect": "Copy effect",
+    "restoreDefaults": "Restore effect defaults",
+    "randomizeValues": "Randomize effect values"
+  },
   "fileDownloader": {
     "savePatternAs": "Save pattern as...",
     "fileName": "File name",

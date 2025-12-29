@@ -4,7 +4,7 @@ import { circle, subsample } from "@/common/geometry"
 import Effect from "./Effect"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   fisheyeSubsample: {
     title: i18n.t("effects.fisheye.subsamplePoints"),
     type: "checkbox",
@@ -15,7 +15,7 @@ const options = {
     max: 40,
     step: 1,
   },
-}
+})
 
 export default class Fisheye extends Effect {
   constructor() {
@@ -71,6 +71,6 @@ export default class Fisheye extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

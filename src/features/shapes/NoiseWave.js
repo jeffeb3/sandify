@@ -7,7 +7,7 @@ import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   numParticles: {
     title: i18next.t('shapes.noiseWave.numberOfWaves'),
     min: 1,
@@ -32,7 +32,7 @@ const options = {
       {"title": i18next.t('shapes.noiseWave.simplex'), "value": "Simplex"}
     ],
   },
-}
+})
 
 export default class NoiseWave extends Shape {
   constructor() {
@@ -194,6 +194,6 @@ export default class NoiseWave extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -1,7 +1,7 @@
 import Effect from "./Effect"
 import i18n from "@/i18n"
 
-const options = {
+const options = () => ({
   programCodePre: {
     title: i18n.t("effects.programCode.startCode"),
     type: "textarea",
@@ -10,7 +10,7 @@ const options = {
     title: i18n.t("effects.programCode.endCode"),
     type: "textarea",
   },
-}
+})
 
 export default class ProgramCode extends Effect {
   constructor() {
@@ -46,6 +46,6 @@ export default class ProgramCode extends Effect {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

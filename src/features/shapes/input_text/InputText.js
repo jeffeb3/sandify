@@ -5,7 +5,7 @@ import { arc, dimensions } from "@/common/geometry"
 import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   inputText: {
     title: i18next.t('shapes.inputText.text'),
     type: "textarea",
@@ -28,7 +28,7 @@ const options = {
       {"title": i18next.t('shapes.inputText.bottom'), "value": "Bottom"}
     ],
   },
-}
+})
 
 function getMaxX(points) {
   // Measure the width of the line
@@ -285,6 +285,6 @@ export default class InputText extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

@@ -3,13 +3,13 @@ import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   fileName: {
     title: i18next.t('shapes.layerImport.sourceFile'),
     type: "inputText",
     plainText: "true",
   },
-}
+})
 
 export default class LayerImport extends Shape {
   constructor() {
@@ -61,6 +61,6 @@ export default class LayerImport extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

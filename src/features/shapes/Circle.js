@@ -2,7 +2,7 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   circleLobes: {
     title: i18next.t('shapes.circle.numberOfLobes'),
     min: 1,
@@ -15,7 +15,7 @@ const options = {
       {"title":i18next.t('shapes.circle.clockwise'), "value":"clockwise"}, 
       {"title":i18next.t('shapes.circle.counterclockwise'), "value":"counterclockwise"}],
   },
-}
+})
 
 export default class Circle extends Shape {
   constructor() {
@@ -65,6 +65,6 @@ export default class Circle extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

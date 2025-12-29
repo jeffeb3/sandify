@@ -2,7 +2,7 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   roseN: {
     title: i18next.t('shapes.rose.numerator'),
     step: 1,
@@ -15,7 +15,7 @@ const options = {
     min: 1,
     randomMax: 16,
   },
-}
+})
 
 export default class Rose extends Shape {
   constructor() {
@@ -57,7 +57,7 @@ export default class Rose extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 
   randomChanges(layer) {

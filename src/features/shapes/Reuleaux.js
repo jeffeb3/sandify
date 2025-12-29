@@ -2,14 +2,14 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   reuleauxSides: {
     title: i18next.t('shapes.reuleaux.numberOfSides'),
     step: 1,
     min: 2,
     randomMax: 8,
   },
-}
+})
 
 export default class Reuleaux extends Shape {
   constructor() {
@@ -69,6 +69,6 @@ export default class Reuleaux extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

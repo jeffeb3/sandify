@@ -67,7 +67,7 @@ function getEdges(edges, a, b, c, count, settings) {
   getEdges(edges, a, ab, ac, count - 1, settings)
 }
 
-const options = {
+const options = () => ({
   tessellationTwistNumSides: {
     title: i18next.t('shapes.tessellationTwist.numSides'),
     min: 3,
@@ -84,7 +84,7 @@ const options = {
     random: 0.6,
     randomMax: 180,
   },
-}
+})
 
 // Adapted from https://codepen.io/rafaelpascoalrodrigues/pen/KpBJve.
 // See LICENSE for licensing details.
@@ -240,6 +240,6 @@ export default class TessellationTwist extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

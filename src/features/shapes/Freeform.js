@@ -2,12 +2,12 @@ import Victor from "victor"
 import Shape from "./Shape"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   freeformPoints: {
     title: i18next.t('shapes.freeform.points'),
     type: "input",
   },
-}
+})
 
 export default class Freeform extends Shape {
   constructor() {
@@ -37,6 +37,6 @@ export default class Freeform extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

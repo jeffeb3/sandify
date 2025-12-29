@@ -4,7 +4,7 @@ import Shape from "./Shape"
 import { getMachine } from "@/features/machines/machineFactory"
 import i18next from 'i18next'
 
-const options = {
+const options = () => ({
   wiperType: {
     title: i18next.t('shapes.wiper.wiperType'),
     type: "togglebutton",
@@ -26,7 +26,7 @@ const options = {
     randomMin: 0,
     randomMax: 360,
   },
-}
+})
 
 const outOfBounds = (point, width, height) => {
   if (point.x < -width / 2.0) {
@@ -333,6 +333,6 @@ export default class Wiper extends Shape {
   }
 
   getOptions() {
-    return options
+    return options()
   }
 }

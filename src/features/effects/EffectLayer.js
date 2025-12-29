@@ -1,7 +1,7 @@
 import { getEffect } from "@/features/effects/effectFactory"
 import i18n from "@/i18n"
 
-export const effectOptions = {
+export const effectOptions = () => ({
   name: {
     title: i18n.t("effects.effectLayer.name"),
     type: "text",
@@ -60,7 +60,7 @@ export const effectOptions = {
       return model.canRotate(state)
     },
   },
-}
+})
 
 export default class EffectLayer {
   constructor(type) {
@@ -94,7 +94,7 @@ export default class EffectLayer {
   }
 
   getOptions() {
-    return effectOptions
+    return effectOptions()
   }
 
   getVertices(effect, layer, vertices) {

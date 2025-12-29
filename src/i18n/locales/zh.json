@@ -52,6 +52,27 @@
     "name": "名称",
     "create": "创建"
   },
+  "newLayer": {
+    "create": "创建新图层",
+    "type": "类型",
+    "name": "名称",
+    "randomizeValues": "随机化数值"
+  },
+  "layerManager": {
+    "createLayer": "创建新图层",
+    "deleteLayer": "删除图层",
+    "copyLayer": "复制图层",
+    "restoreDefaults": "恢复默认值",
+    "randomizeValues": "随机化数值"
+  },
+  "effectManager": {
+    "effects": "特效",
+    "createEffect": "创建新特效",
+    "deleteEffect": "删除特效",
+    "copyEffect": "复制特效",
+    "restoreDefaults": "恢复特效默认值",
+    "randomizeValues": "随机化数值"
+  },
   "fileDownloader": {
     "savePatternAs": "另存图案为...",
     "fileName": "文件名",
@@ -429,7 +450,7 @@
       "subsamplePoints": "子采样点"
     },
     "newEffect":{
-      "create": "创建新效果",
+      "create": "创建新特效",
       "type": "类型",
       "name": "名称",
       "randomize": "随机化值"
