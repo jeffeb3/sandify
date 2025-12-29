@@ -52,6 +52,28 @@
     "name": "Name",
     "create": "Create"
   },
+  "fileDownloader": {
+    "savePatternAs": "Save pattern as...",
+    "fileName": "File name",
+    "download": "Download",
+    "description": "Downloads a text-based .sdf file that contains no personal or browser information. You can share this file with others, who can import your design."
+  },
+  "exportDownloader": {
+    "exportToAFile": "Export to a file",
+    "exportAs": "Export as",
+    "fileName": "File name",
+    "maximumRhoValue": "Maximum rho value (0-1)",
+    "unitsPerCircle": "Units per circle",
+    "programStartCode": "Program start code",
+    "programEndCode": "Program end code",
+    "reversePath": "Reverse path in the code",
+    "readMore": "Read more",
+    "aboutScaraGCode": "about SCARA GCode.",
+    "see": "See",
+    "forDetailsOnProgramExportVariables": "for details on program export variables.",
+    "download": "Download",
+    "scaraGCode": "SCARA GCode (experimental)"
+  },
   "language": {
     "english": "English",
     "chinese": "中文"

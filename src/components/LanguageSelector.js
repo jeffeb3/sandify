@@ -9,7 +9,7 @@ const LanguageSelector = () => {
     if (i18n.language !== lng) {
       i18n.changeLanguage(lng)
       // 刷新整个页面以更新语言
-      window.location.reload()
+      // window.location.reload()
     }
   }
 

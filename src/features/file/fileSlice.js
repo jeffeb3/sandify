@@ -3,13 +3,15 @@ import { createSelector } from "reselect"
 import { downloadFile } from "@/common/util"
 import { selectState } from "@/features/app/appSlice"
 import SandifyExporter from "./SandifyExporter"
+import i18next from 'i18next'
 
-export const fileOptions = {
-  fileName: {
-    title: "File name",
-    type: "string",
-  },
-}
+
+export const fileOptions = () => ({
+    fileName: {
+      title: i18next.t('fileDownloader.fileName'),
+      type: "string",
+    },
+  })
 
 // ------------------------------
 // Slice, reducers and atomic actions

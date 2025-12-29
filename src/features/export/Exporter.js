@@ -4,50 +4,53 @@ export const [GCODE, THETARHO, SVG, SCARA] = [
   "svg",
   "scara",
 ]
-export const exportTypes = {
+
+import i18next from 'i18next'
+
+export const exportTypes = () => ({
   gcode: "GCode",
   thetarho: "Theta Rho",
   svg: "SVG",
-  scara: "SCARA GCode (experimental)",
-}
+  scara: i18next.t('exportDownloader.scaraGCode'),
+})
 
-export const exporterOptions = {
+export const exporterOptions = () => ({
   fileName: {
-    title: "File name",
+    title: i18next.t('exportDownloader.fileName'),
     type: "string",
   },
   fileType: {
-    title: "Export as",
+    title: i18next.t('exportDownloader.exportAs'),
     type: "dropdown",
-    choices: exportTypes,
+    choices: exportTypes(),
   },
   polarRhoMax: {
-    title: "Maximum rho value (0-1)",
+    title: i18next.t('exportDownloader.maximumRhoValue'),
     min: 0,
     max: 1,
   },
   unitsPerCircle: {
-    title: "Units per circle",
+    title: i18next.t('exportDownloader.unitsPerCircle'),
     type: "number",
   },
   pre: {
-    title: "Program start code",
+    title: i18next.t('exportDownloader.programStartCode'),
     type: "textarea",
     isVisible: (exporter, state) => {
       return state.fileType !== SVG
     },
   },
   post: {
-    title: "Program end code",
+    title: i18next.t('exportDownloader.programEndCode'),
     type: "textarea",
     isVisible: (exporter, state) => {
       return state.fileType !== SVG
     },
   },
   reverse: {
-    title: "Reverse path in the code",
+    title: i18next.t('exportDownloader.reversePath'),
   },
-}
+})
 
 export default class Exporter {
   constructor(props) {

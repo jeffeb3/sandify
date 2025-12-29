@@ -52,6 +52,28 @@
     "name": "名称",
     "create": "创建"
   },
+  "fileDownloader": {
+    "savePatternAs": "另存图案为...",
+    "fileName": "文件名",
+    "download": "下载",
+    "description": "下载基于文本的 .sdf 文件，不包含任何个人或浏览器信息。您可以将此文件分享给他人，他们可以导入您的设计。"
+  },
+  "exportDownloader": {
+    "exportToAFile": "导出到文件",
+    "exportAs": "导出为",
+    "fileName": "文件名",
+    "maximumRhoValue": "最大 rho 值 (0-1)",
+    "unitsPerCircle": "每圈单位",
+    "programStartCode": "程序开始代码",
+    "programEndCode": "程序结束代码",
+    "reversePath": "在代码中反转路径",
+    "readMore": "阅读更多",
+    "aboutScaraGCode": "关于 SCARA GCode。",
+    "see": "查看",
+    "forDetailsOnProgramExportVariables": "了解程序导出变量的详细信息。",
+    "download": "下载",
+    "scaraGCode": "SCARA GCode (实验性)"
+  },
   "language": {
     "english": "English",
     "chinese": "中文"
