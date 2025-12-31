@@ -747,3 +747,39 @@ export const calculateIntersection = (p1, p2, p3, p4) => {
   }
   return null // intersection point is out of bounds
 }
+
+// Point-in-polygon test using ray casting (even-odd rule)
+// Returns true if point (px, py) is inside the polygon defined by ring
+// ring is an array of [x, y] coordinate pairs
+export const pointInPolygon = (px, py, ring) => {
+  let inside = false
+
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i]
+    const [xj, yj] = ring[j]
+
+    if (((yi > py) !== (yj > py)) &&
+        (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+      inside = !inside
+    }
+  }
+
+  return inside
+}
+
+// Calculate signed area of a polygon using the shoelace formula
+// https://en.wikipedia.org/wiki/Shoelace_formula
+// Positive = counter-clockwise, negative = clockwise
+export const polygonArea = (vertices) => {
+  let area = 0
+  const n = vertices.length
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+
+    area += vertices[i].x * vertices[j].y
+    area -= vertices[j].x * vertices[i].y
+  }
+
+  return area / 2
+}

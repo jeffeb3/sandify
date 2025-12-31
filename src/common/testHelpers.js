@@ -1,8 +1,10 @@
 import Victor from "victor"
+import { getShape } from "@/features/shapes/shapeFactory"
 
 // Create a square centered at origin (or specified center)
 export const createSquare = (size = 50, center = { x: 0, y: 0 }) => {
   const half = size / 2
+
   return [
     new Victor(center.x - half, center.y - half),
     new Victor(center.x + half, center.y - half),
@@ -20,9 +22,11 @@ export const createTriangle = (size = 50, center = { x: 0, y: 0 }, closed = true
     new Victor(center.x - size / 2, center.y + height / 3),     // bottom-left
     new Victor(center.x + size / 2, center.y + height / 3),     // bottom-right
   ]
+
   if (closed) {
     vertices.push(vertices[0].clone())
   }
+
   return vertices
 }
 
@@ -32,10 +36,12 @@ export const createStar = (outerRadius = 50, innerRadius = 20) => {
   for (let i = 0; i < 10; i++) {
     const angle = (i * Math.PI) / 5 - Math.PI / 2 // Start from top
     const radius = i % 2 === 0 ? outerRadius : innerRadius
+
     vertices.push(
       new Victor(Math.cos(angle) * radius, Math.sin(angle) * radius),
     )
   }
+
   return vertices
 }
 
@@ -43,13 +49,16 @@ export const createStar = (outerRadius = 50, innerRadius = 20) => {
 export const createFigure8 = (radius = 30) => {
   const vertices = []
   const segments = 32
+
   for (let i = 0; i <= segments; i++) {
     const t = (i / segments) * 2 * Math.PI
     // Lemniscate of Bernoulli approximation
     const x = radius * Math.sin(t)
     const y = (radius / 2) * Math.sin(2 * t)
+
     vertices.push(new Victor(x, y))
   }
+
   return vertices
 }
 
@@ -72,6 +81,7 @@ export const createBumpyRect = (width = 100, height = 100, bumpSize = 20) => {
   const hw = width / 2
   const hh = height / 2
   const bh = bumpSize / 2
+
   return [
     new Victor(-hw, -hh),           // bottom-left
     new Victor(hw, -hh),            // bottom-right
@@ -88,6 +98,7 @@ export const createBumpyRect = (width = 100, height = 100, bumpSize = 20) => {
 // Create a hexagon centered at origin
 export const createHexagon = (radius = 50, center = { x: 0, y: 0 }) => {
   const vertices = []
+
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 - Math.PI / 2 // Start from top
     vertices.push(
@@ -98,25 +109,22 @@ export const createHexagon = (radius = 50, center = { x: 0, y: 0 }) => {
     )
   }
   vertices.push(vertices[0].clone()) // close
+
   return vertices
 }
 
-// Create a grid of small disconnected squares (fill pattern)
-export const createFillPattern = (gridSize = 5, squareSize = 8, gap = 2) => {
-  const vertices = []
-  const step = squareSize + gap
-
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      const x = col * step
-      const y = row * step
-      // Add each small square as a closed path
-      vertices.push(new Victor(x, y))
-      vertices.push(new Victor(x + squareSize, y))
-      vertices.push(new Victor(x + squareSize, y + squareSize))
-      vertices.push(new Victor(x, y + squareSize))
-      vertices.push(new Victor(x, y))
-    }
+// Get vertices from a real shape by type.
+// Uses the actual shape classes with their default initial state.
+export const getShapeVertices = (type, overrides = {}) => {
+  const shape = getShape(type)
+  const initialState = shape.getInitialState()
+  const state = {
+    shape: {
+      ...initialState,
+      seed: 1, // Fixed seed for reproducibility
+      ...overrides,
+    },
   }
-  return vertices
+
+  return shape.getVertices(state)
 }

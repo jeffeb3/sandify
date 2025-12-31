@@ -574,6 +574,28 @@ export default class Maze extends Shape {
     }
   }
 
+  // Return best boundary algorithm for maze shape type
+  getBoundaryAlgorithm(selected, state) {
+    if (selected !== "auto") {
+      return selected
+    }
+
+    const { mazeShape, mazeShowExits } = state.shape
+
+    if (mazeShape === "Rectangle") {
+      return "convex"
+    }
+
+    // Triangle with exit arrows: concave handles the arrow vertices better
+    if (mazeShape === "Triangle" && mazeShowExits) {
+      return "concave"
+    }
+
+    // Circle, Hexagon, Triangle (no exits) work best with expand
+    return "expand"
+  }
+
+
   getOptions() {
     return options
   }

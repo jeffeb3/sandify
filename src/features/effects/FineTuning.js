@@ -13,6 +13,7 @@ import {
 import { traceBoundary } from "@/common/boundary"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
+import { getShape } from "@/features/shapes/shapeFactory"
 
 const options = {
   reverse: {
@@ -35,25 +36,30 @@ const options = {
     step: 2,
   },
   drawBorder: {
-    title: "4: Add perimeter border",
-    type: "togglebutton",
-    choices: ["none", "tight", "loose"],
+    title: "4: Add border",
+    type: "checkbox",
   },
   // \u00A0 is a hacky way to indent these options under drawBorder
-  borderPadding: {
-    title: "\u00A0\u00A0\u00A0\u00A0Padding (%)",
-    step: 5,
-    min: (state) => (state.drawBorder === "tight" ? 0 : undefined),
-    max: (state) => (state.drawBorder === "tight" ? 65 : undefined),
+  borderAlgorithm: {
+    title: "\u00A0\u00A0\u00A0\u00A0Algorithm",
+    type: "dropdown",
+    choices: ["auto", "expand", "concave", "footprint", "convex"],
     isVisible: (model, state) => {
-      return state.drawBorder !== "none"
+      return state.drawBorder === true
+    },
+  },
+  borderPadding: {
+    title: "\u00A0\u00A0\u00A0\u00A0Pad (%)",
+    step: 5,
+    isVisible: (model, state) => {
+      return state.drawBorder === true
     },
   },
   borderOnly: {
-    title: "\u00A0\u00A0\u00A0\u00A0Border only",
+    title: "\u00A0\u00A0\u00A0\u00A0Draw border only",
     type: "checkbox",
     isVisible: (model, state) => {
-      return state.drawBorder !== "none"
+      return state.drawBorder === true
     },
   },
   backtrackPct: {
@@ -92,7 +98,8 @@ export default class FineTuning extends Effect {
         backtrackPct: 0,
         rotateStartingPct: 0,
         reverse: false,
-        drawBorder: "none",
+        drawBorder: false,
+        borderAlgorithm: "auto",
         borderPadding: 0,
         borderOnly: false,
       },
@@ -116,15 +123,17 @@ export default class FineTuning extends Effect {
         vertices = this.drawPortion(vertices, effect)
       }
 
-      // Normalize old values to new names
-      let borderMode = effect.drawBorder
-      if (borderMode === true || borderMode === "convex") borderMode = "loose"
-      else if (borderMode === false) borderMode = "none"
+      if (effect.drawBorder) {
+        const shape = getShape(layer.type)
+        const state = { shape: layer }
+        const algorithm = shape.getBoundaryAlgorithm(
+          effect.borderAlgorithm || "auto",
+          state,
+        )
 
-      if (borderMode && borderMode !== "none") {
         vertices = this.drawBorder(
           vertices,
-          borderMode,
+          algorithm,
           effect.borderPadding || 0,
           effect.borderOnly || false,
         )
@@ -160,6 +169,7 @@ export default class FineTuning extends Effect {
       // point and then draw the shape normally from there.
       const newVertices = vertices.splice(0, index2)
       const reversedNewVertices = cloneVertices(newVertices).reverse()
+
       vertices = [...reversedNewVertices, ...newVertices, ...vertices]
     }
 
@@ -189,24 +199,24 @@ export default class FineTuning extends Effect {
       effect.backtrackPct,
     )
     const backtrackVertices = cloneVertices(reversedVertices.slice(0, index2))
+
     backtrackVertices.push(vNew)
 
     return vertices.concat(backtrackVertices)
   }
 
-  drawBorder(vertices, mode, scale = 0, borderOnly = false) {
+  drawBorder(vertices, algorithm = "auto", scale = 0, borderOnly = false) {
     let border
 
-    if (mode === "tight") {
-      border = traceBoundary(cloneVertices(vertices), scale)
-    } else {
-      // "loose" mode - use convex hull
+    if (algorithm === "convex") {
+      // Convex hull border
       border = convexHull(cloneVertices(vertices))
 
       // Apply scaling from centroid
       if (scale !== 0 && border.length > 0) {
         const center = centroid(vertices)
         const scaleFactor = 1 + scale / 100
+
         border = border.map((v) => {
           return new Victor(
             center.x + (v.x - center.x) * scaleFactor,
@@ -214,6 +224,13 @@ export default class FineTuning extends Effect {
           )
         })
       }
+    } else {
+      // Convert algorithm string to number for traceBoundary
+      // null = auto-detect (production behavior)
+      const stageMap = { auto: null, expand: 1, concave: 0, footprint: 2 }
+      const stageNum = stageMap[algorithm] ?? null
+
+      border = traceBoundary(cloneVertices(vertices), scale, stageNum)
     }
 
     // If borderOnly, return just the closed border path
@@ -225,6 +242,7 @@ export default class FineTuning extends Effect {
     const last = vertices[vertices.length - 1]
     const closestVertex = closest(border, last)
     const index = border.indexOf(closestVertex)
+
     border = arrayRotate(border, index)
 
     // Check if we should trace CW or CCW by comparing distances
