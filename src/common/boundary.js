@@ -282,10 +282,14 @@ export const boundaryAlgorithm = (vertices) => {
   //   Multi-path with high ratio (but not fill patterns)
   //   Open fractals (single path, open, moderate ratio)
   //   Very high ratio single-path (lsystem with ratio 54)
+  //   Open paths with degenerate Clipper results (zero-area paths from precision issues)
   // Moderate-ratio single-path closed shapes (Maze, Hypocycloid) use expand
+  const hasZeroAreaPaths = maxArea < minArea  // Very small area indicates degenerate geometry
+  const hasDegenerateRatio = ratio <= 1  // Hull collapsed to convex hull
   const useFootprint =
     (boundary.length > 1 && ratio > SDF_RATIO_MULTI && !isFillPattern) ||
-    (isOpenPath && boundary.length === 1 && ratio >= SDF_RATIO_OPEN) ||
+    (isOpenPath && boundary.length === 1 && (ratio >= SDF_RATIO_OPEN || hasDegenerateRatio)) ||
+    (isOpenPath && boundary.length > 1 && (hasZeroAreaPaths || hasDegenerateRatio)) ||  // Degenerate open path
     (boundary.length === 1 && ratio > SDF_RATIO_VERY_HIGH)
 
   // Determine algorithm
