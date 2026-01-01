@@ -14,6 +14,16 @@ import RectMachine from "@/features/machines/RectMachine"
 import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
 import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
 import PolygonMachine from "@/features/machines/PolygonMachine"
+import PolygonInvertedMachine from "@/features/machines/PolygonInvertedMachine"
+
+const machineMap = {
+  rectangle: { normal: RectMachine, inverted: RectInvertedMachine },
+  circle: { normal: PolarMachine, inverted: PolarInvertedMachine },
+  layer: { normal: PolygonMachine, inverted: PolygonInvertedMachine },
+}
+
+const getMachineClass = (maskMachine, invert) =>
+  machineMap[maskMachine][invert ? "inverted" : "normal"]
 
 const options = {
   maskMachine: {
@@ -55,7 +65,6 @@ const options = {
   maskInvert: {
     title: "Invert",
     type: "checkbox",
-    isVisible: (model, state) => state.maskMachine !== "layer",
   },
   maskBorder: {
     title: "Draw border",
@@ -144,10 +153,12 @@ export default class Mask extends Effect {
       })
 
       if (!effect.dragging) {
-        const machine = new PolygonMachine(
+        const MachineClass = getMachineClass("layer", effect.maskInvert)
+        const machine = new MachineClass(
           { minimizeMoves: effect.maskMinimizeMoves },
           scaledMask,
         )
+
         vertices = machine.polish(vertices, { border: effect.maskBorder })
       }
 
@@ -162,16 +173,8 @@ export default class Mask extends Effect {
     })
 
     if (!effect.dragging) {
-      const machineClass =
-        effect.maskMachine === "circle"
-          ? effect.maskInvert
-            ? PolarInvertedMachine
-            : PolarMachine
-          : effect.maskInvert
-            ? RectInvertedMachine
-            : RectMachine
-
-      const machine = new machineClass({
+      const MachineClass = getMachineClass(effect.maskMachine, effect.maskInvert)
+      const machine = new MachineClass({
         minX: 0,
         maxX: effect.width,
         minY: 0,
@@ -180,6 +183,7 @@ export default class Mask extends Effect {
         maxRadius: effect.width / 2,
         mask: true,
       })
+
       vertices = machine.polish(vertices, { border: effect.maskBorder })
     }
 

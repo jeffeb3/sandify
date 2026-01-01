@@ -1,20 +1,22 @@
 import Victor from "victor"
 import { getShape } from "@/features/shapes/shapeFactory"
 
-// Create a square centered at origin (or specified center)
-export const createSquare = (size = 50, center = { x: 0, y: 0 }) => {
-  const half = size / 2
+export const createRect = (width = 50, height = 50, center = { x: 0, y: 0 }) => {
+  const hw = width / 2
+  const hh = height / 2
 
   return [
-    new Victor(center.x - half, center.y - half),
-    new Victor(center.x + half, center.y - half),
-    new Victor(center.x + half, center.y + half),
-    new Victor(center.x - half, center.y + half),
-    new Victor(center.x - half, center.y - half), // close the path
+    new Victor(center.x - hw, center.y - hh),
+    new Victor(center.x + hw, center.y - hh),
+    new Victor(center.x + hw, center.y + hh),
+    new Victor(center.x - hw, center.y + hh),
+    new Victor(center.x - hw, center.y - hh), // close the path
   ]
 }
 
-// Create an equilateral triangle centered at origin
+export const createSquare = (size = 50, center = { x: 0, y: 0 }) =>
+  createRect(size, size, center)
+
 export const createTriangle = (size = 50, center = { x: 0, y: 0 }, closed = true) => {
   const height = (size * Math.sqrt(3)) / 2
   const vertices = [
@@ -30,9 +32,9 @@ export const createTriangle = (size = 50, center = { x: 0, y: 0 }, closed = true
   return vertices
 }
 
-// Create a 5-pointed star centered at origin
 export const createStar = (outerRadius = 50, innerRadius = 20) => {
   const vertices = []
+
   for (let i = 0; i < 10; i++) {
     const angle = (i * Math.PI) / 5 - Math.PI / 2 // Start from top
     const radius = i % 2 === 0 ? outerRadius : innerRadius
@@ -71,7 +73,6 @@ export const createOpenPath = () => {
     new Victor(30, 30),
     new Victor(30, 50),
     new Victor(0, 50),
-    // NOT closed - gap back to start
   ]
 }
 
@@ -101,6 +102,7 @@ export const createHexagon = (radius = 50, center = { x: 0, y: 0 }) => {
 
   for (let i = 0; i < 6; i++) {
     const angle = (i * Math.PI) / 3 - Math.PI / 2 // Start from top
+
     vertices.push(
       new Victor(
         center.x + Math.cos(angle) * radius,
