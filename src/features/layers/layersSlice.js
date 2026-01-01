@@ -613,6 +613,15 @@ export const selectEffectSelectionVertices = createCachedSelector(
         true,
       )
 
+      // Ensure the selection path is closed
+      if (result.length > 0) {
+        const first = result[0]
+        const last = result[result.length - 1]
+        if (first.distance(last) > 0.01) {
+          result.push(first.clone())
+        }
+      }
+
       return result
     }
 

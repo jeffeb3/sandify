@@ -1,6 +1,13 @@
 import Victor from "victor"
+import { Clipper, FillRule, Path64 } from "clipper2-js"
 import Machine, { machineOptions } from "./Machine"
-import { distance, cloneVertex, totalDistance } from "@/common/geometry"
+import { distance, cloneVertex, totalDistance, pointInPolygon } from "@/common/geometry"
+
+// Constants
+const CLIPPER_SCALE = 1000      // Scale factor for Clipper2 integer coordinates
+const CLOSED_PATH_EPSILON = 0.01 // Max gap to consider path closed
+const EDGE_EPSILON = 1e-6       // Tolerance for on-edge detection
+const PARALLEL_EPSILON = 1e-10  // Tolerance for parallel line detection
 
 export default class PolygonMachine extends Machine {
   constructor(state, maskVertices) {
@@ -173,8 +180,10 @@ export default class PolygonMachine extends Machine {
     return totalDistance(this.tracePerimeter(v1, v2, true))
   }
 
-  // Trace the perimeter between two points (shortest path)
-  tracePerimeter(p1, p2, includeOriginalPoints = false) {
+  // Trace the perimeter between two points.
+  // If inputRing provided, prefer path with more vertices inside the input polygon.
+  // Otherwise, use shortest path.
+  tracePerimeter(p1, p2, includeOriginalPoints = false, inputRing = null) {
     if (this.boundary.length < 3) {
       return includeOriginalPoints ? [p1, p2] : []
     }
@@ -187,49 +196,67 @@ export default class PolygonMachine extends Machine {
       return includeOriginalPoints ? [p1, p2] : []
     }
 
-    // Get positions along perimeter
+    // Helper to collect vertices in a given direction
+    const collectPath = (forward) => {
+      const pts = []
+      if (includeOriginalPoints) {
+        pts.push(p1)
+      }
+
+      if (edge1.index === edge2.index) {
+        // Same edge - no intermediate vertices needed
+      } else if (forward) {
+        let idx = (edge1.index + 1) % this.boundary.length
+        while (true) {
+          pts.push(cloneVertex(this.boundary[idx]))
+          if (idx === edge2.index) break
+          idx = (idx + 1) % this.boundary.length
+        }
+      } else {
+        let idx = edge1.index
+        while (idx !== edge2.index) {
+          pts.push(cloneVertex(this.boundary[idx]))
+          idx = (idx - 1 + this.boundary.length) % this.boundary.length
+        }
+      }
+
+      if (includeOriginalPoints) {
+        pts.push(p2)
+      }
+      return pts
+    }
+
+    // Get positions along perimeter for distance calculation
     const pos1 = this.getPerimeterPosition(p1)
     const pos2 = this.getPerimeterPosition(p2)
-
-    // Calculate forward and backward distances and choose the shorter one
     const forwardDist =
       pos2 >= pos1 ? pos2 - pos1 : this.perimeterLen - pos1 + pos2
     const backwardDist = this.perimeterLen - forwardDist
-    const goForward = forwardDist <= backwardDist
-    const points = []
 
-    if (includeOriginalPoints) {
-      points.push(p1)
+    // If no input constraint, use shortest path
+    if (!inputRing) {
+      return collectPath(forwardDist <= backwardDist)
     }
 
-    // Collect corner vertices along the path
-    // Each edge[i] goes from boundary[i] to boundary[i+1]
-    // When tracing from edge1 to edge2, we need the corner vertices between them
-    if (edge1.index === edge2.index) {
-      // Same edge - no intermediate vertices needed
-    } else if (goForward) {
-      // Forward: add boundary[edge1+1] through boundary[edge2]
-      let idx = (edge1.index + 1) % this.boundary.length
-      while (true) {
-        points.push(cloneVertex(this.boundary[idx]))
-        if (idx === edge2.index) break
-        idx = (idx + 1) % this.boundary.length
-      }
+    // Get both paths and count vertices inside input polygon
+    const forwardPath = collectPath(true)
+    const backwardPath = collectPath(false)
+
+    const countInside = (path) =>
+      path.filter((pt) => pointInPolygon(pt.x, pt.y, inputRing)).length
+
+    const forwardInside = countInside(forwardPath)
+    const backwardInside = countInside(backwardPath)
+
+    // Prefer path with more vertices inside input polygon
+    // If equal, use shorter path
+    if (forwardInside > backwardInside) {
+      return forwardPath
+    } else if (backwardInside > forwardInside) {
+      return backwardPath
     } else {
-      // Backward: add boundary[edge1] down through boundary[edge2+1]
-      let idx = edge1.index
-
-      while (idx !== edge2.index) {
-        points.push(cloneVertex(this.boundary[idx]))
-        idx = (idx - 1 + this.boundary.length) % this.boundary.length
-      }
+      return forwardDist <= backwardDist ? forwardPath : backwardPath
     }
-
-    if (includeOriginalPoints) {
-      points.push(p2)
-    }
-
-    return points
   }
 
   getPerimeterPosition(vertex) {
@@ -281,11 +308,38 @@ export default class PolygonMachine extends Machine {
     }
 
     const DEBUG = false // eslint-disable-line no-unused-vars
+
+    // Check if input is a closed polygon
+    let isClosed = false
+    if (this.vertices.length > 2) {
+      const first = this.vertices[0]
+      const last = this.vertices[this.vertices.length - 1]
+      isClosed = first.distance(last) < CLOSED_PATH_EPSILON
+    }
+
+    // For closed polygons, use Clipper2 intersection for accurate results.
+    // This handles cases where mask vertices are entirely inside the input shape.
+    if (isClosed) {
+      const clipperResult = this.clipperIntersect(this.vertices)
+      if (clipperResult && clipperResult.length > 0) {
+        this.vertices = clipperResult
+        return this
+      }
+      // Fall through to line-by-line if Clipper fails
+    }
+
+    // For open paths (or if Clipper fails), use line-by-line approach
     let cleanVertices = []
     let previous = null
     let prevInBounds = null
     let lastExitPoint = null
-    let hasBeenInside = false // Track if we've ever been inside the mask
+
+    // Build input polygon ring for constraining perimeter traces (closed polygons only)
+    let inputRing = null
+    if (isClosed) {
+      const inputVerts = this.vertices.slice(0, -1)
+      inputRing = inputVerts.map(v => [v.x, v.y])
+    }
 
     if (DEBUG) {
       console.log("=== enforceLimits START ===")
@@ -319,7 +373,7 @@ export default class PolygonMachine extends Machine {
           // vs just tracing along the perimeter outside
           const actuallyEnters = !prevInBounds && currInBounds  // outside -> inside
           const actuallyExits = prevInBounds && !currInBounds   // inside -> outside
-          const crossesThrough = !prevInBounds && !currInBounds && clipped.length === 2  // outside -> inside -> outside
+          const crossesThrough = !prevInBounds && !currInBounds && clipped.length >= 2  // outside -> crosses mask -> outside
           const bothInside = prevInBounds && currInBounds  // inside -> inside
 
           // When we re-enter the mask (or cross through it) and we have a previous
@@ -327,7 +381,7 @@ export default class PolygonMachine extends Machine {
           // clipped path follows the mask boundary instead of taking shortcuts.
           if (lastExitPoint && (actuallyEnters || crossesThrough)) {
             const entryPoint = firstClipped
-            const perimeterPath = this.tracePerimeter(lastExitPoint, entryPoint, false)
+            const perimeterPath = this.traceAndFilterPerimeter(lastExitPoint, entryPoint, inputRing)
 
             if (DEBUG) {
               console.log(`    TRACE PERIMETER: exit(${lastExitPoint.x.toFixed(1)},${lastExitPoint.y.toFixed(1)}) -> entry(${entryPoint.x.toFixed(1)},${entryPoint.y.toFixed(1)})`)
@@ -344,11 +398,6 @@ export default class PolygonMachine extends Machine {
             for (const pt of clipped) {
               cleanVertices.push(this.nearestVertex(pt))
             }
-          }
-
-          // Track if we've actually been inside the mask
-          if (actuallyEnters || actuallyExits || crossesThrough || currInBounds) {
-            hasBeenInside = true
           }
 
           // Track exit point only when we actually exit from inside
@@ -369,7 +418,6 @@ export default class PolygonMachine extends Machine {
         if (currInBounds) {
           // First vertex inside - add it
           cleanVertices.push(cloneVertex(vertex))
-          hasBeenInside = true
         }
         // If first vertex is outside, don't add anything and don't set lastExitPoint.
         // We only set lastExitPoint when we actually EXIT from inside the mask.
@@ -384,7 +432,7 @@ export default class PolygonMachine extends Machine {
     // ended with an exit point, trace perimeter back to start
     if (cleanVertices.length > 0 && lastExitPoint) {
       const firstPoint = cleanVertices[0]
-      const perimeterPath = this.tracePerimeter(lastExitPoint, firstPoint, false)
+      const perimeterPath = this.traceAndFilterPerimeter(lastExitPoint, firstPoint, inputRing)
 
       if (DEBUG) {
         console.log(`\n    CLOSING LOOP: (${lastExitPoint.x.toFixed(1)},${lastExitPoint.y.toFixed(1)}) -> (${firstPoint.x.toFixed(1)},${firstPoint.y.toFixed(1)})`)
@@ -392,6 +440,7 @@ export default class PolygonMachine extends Machine {
       }
 
       cleanVertices.push(...perimeterPath)
+      cleanVertices.push(cloneVertex(firstPoint)) // Close back to start
     }
 
     if (DEBUG) {
@@ -419,7 +468,7 @@ export default class PolygonMachine extends Machine {
 
       if (inter) {
         let t = 0
-        if (lenSq > 1e-10) {
+        if (lenSq > PARALLEL_EPSILON) {
           t = ((inter.x - start.x) * dx + (inter.y - start.y) * dy) / lenSq
         }
         intersections.push({ point: inter, t })
@@ -436,7 +485,7 @@ export default class PolygonMachine extends Machine {
     const d2y = p4.y - p3.y
 
     const cross = d1x * d2y - d1y * d2x
-    if (Math.abs(cross) < 1e-10) return null
+    if (Math.abs(cross) < PARALLEL_EPSILON) return null
 
     const dx = p3.x - p1.x
     const dy = p3.y - p1.y
@@ -445,8 +494,7 @@ export default class PolygonMachine extends Machine {
     const u = (dx * d1y - dy * d1x) / cross
 
     // Check if intersection is within both segments
-    const eps = 1e-6
-    if (t > eps && t < 1 - eps && u >= 0 && u <= 1) {
+    if (t > EDGE_EPSILON && t < 1 - EDGE_EPSILON && u >= 0 && u <= 1) {
       return new Victor(p1.x + t * d1x, p1.y + t * d1y)
     }
 
@@ -459,7 +507,7 @@ export default class PolygonMachine extends Machine {
     const dy = p2.y - p1.y
     const lenSq = dx * dx + dy * dy
 
-    if (lenSq < 1e-10) {
+    if (lenSq < PARALLEL_EPSILON) {
       return new Victor(p1.x, p1.y)
     }
 
@@ -484,7 +532,7 @@ export default class PolygonMachine extends Machine {
     for (const edge of this.edges) {
       const d = this.distToEdge(point, edge.p1, edge.p2)
 
-      if (d < 1e-6) return edge // Early exit for on-boundary points
+      if (d < EDGE_EPSILON) return edge // Early exit for on-boundary points
 
       if (d < nearestDist) {
         nearestDist = d
@@ -493,5 +541,68 @@ export default class PolygonMachine extends Machine {
     }
 
     return nearestEdge
+  }
+
+  // Trace perimeter between two points and filter to stay within input polygon.
+  // Combines tracePerimeter + pointInPolygon filtering.
+  traceAndFilterPerimeter(p1, p2, inputRing) {
+    let path = this.tracePerimeter(p1, p2, false, inputRing)
+    if (inputRing) {
+      path = path.filter(pt => pointInPolygon(pt.x, pt.y, inputRing))
+    }
+    return path
+  }
+
+  // Convert array of vertices to Clipper2 Path64 format
+  verticesToPath64(vertices) {
+    const path = new Path64()
+    for (const v of vertices) {
+      path.push({
+        x: Math.round(v.x * CLIPPER_SCALE),
+        y: Math.round(v.y * CLIPPER_SCALE)
+      })
+    }
+    return path
+  }
+
+  // Compute intersection of input polygon with mask polygon using Clipper2.
+  // Returns array of Victor vertices, or null if intersection fails/empty.
+  clipperIntersect(inputVertices) {
+    if (this.boundary.length < 3 || inputVertices.length < 3) {
+      return null
+    }
+
+    const inputPath = this.verticesToPath64(inputVertices)
+    const maskPath = this.verticesToPath64(this.boundary)
+
+    const result = Clipper.Intersect([inputPath], [maskPath], FillRule.NonZero)
+
+    if (!result || result.length === 0) {
+      return null
+    }
+
+    // Take the largest path (by vertex count) if multiple result paths
+    let largestPath = result[0]
+    for (let i = 1; i < result.length; i++) {
+      if (result[i].length > largestPath.length) {
+        largestPath = result[i]
+      }
+    }
+
+    // Convert back to Victor vertices
+    const vertices = largestPath.map(pt =>
+      new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE)
+    )
+
+    // Close the path if needed
+    if (vertices.length > 0) {
+      const first = vertices[0]
+      const last = vertices[vertices.length - 1]
+      if (first.distance(last) > CLOSED_PATH_EPSILON) {
+        vertices.push(first.clone())
+      }
+    }
+
+    return vertices
   }
 }

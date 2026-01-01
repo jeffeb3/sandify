@@ -1,7 +1,8 @@
 import PolygonMachine from "./PolygonMachine"
 import Victor from "victor"
-import { createStar, createTriangle, createBumpyRect, createHexagon } from "@/common/testHelpers"
-import { circle } from "@/common/geometry"
+import { createStar, createTriangle, createBumpyRect, createOpenPath, getShapeVertices } from "@/common/testHelpers"
+import { circle, resizeVertices } from "@/common/geometry"
+import { traceBoundary } from "@/common/boundary"
 
 // Wrapper for geometry's circle to match test usage (radius, segments, center)
 const createCircle = (radius = 30, segments = 32, center = { x: 0, y: 0 }) => {
@@ -387,6 +388,241 @@ describe("PolygonMachine", () => {
 
         // Result should have multiple vertices tracing the boundary
         expect(result.length).toBeGreaterThanOrEqual(5)
+      })
+    })
+  })
+
+  describe("rectangle inside pentagon mask (real shapes)", () => {
+    it("closes the path when rectangle vertex is exactly on pentagon boundary", () => {
+      // Get real shape vertices - pentagon as mask
+      const pentagonVertices = getShapeVertices("polygon", { polygonSides: 5 })
+
+      // Create pentagon mask boundary and scale it to 100x100
+      const pentagonBoundary = traceBoundary(pentagonVertices)
+      const scaledPentagon = resizeVertices([...pentagonBoundary], 100, 100)
+
+      // Create a smaller rectangle centered at origin (40x40)
+      // Then shift it so one corner lands exactly on the pentagon boundary
+      const rectHalf = 20
+      const rectangle = [
+        new Victor(-rectHalf, -rectHalf),  // bottom-left
+        new Victor(rectHalf, -rectHalf),   // bottom-right
+        new Victor(rectHalf, rectHalf),    // top-right
+        new Victor(-rectHalf, rectHalf),   // top-left
+        new Victor(-rectHalf, -rectHalf),  // close
+      ]
+
+      // Pentagon top vertex is at (0, 50) after scaling to 100x100
+      // Shift rectangle up so top edge is at y=50 (on the pentagon top vertex)
+      const shiftY = 50 - rectHalf  // = 30, so top-right will be at (20, 50)
+      const shiftedRect = rectangle.map(v => new Victor(v.x, v.y + shiftY))
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, scaledPentagon)
+      const result = machine.polish([...shiftedRect])
+
+      // Result should have vertices
+      expect(result.length).toBeGreaterThan(0)
+
+      // The path should close - first and last vertex should be the same or very close
+      const first = result[0]
+      const last = result[result.length - 1]
+      const closingGap = first.distance(last)
+
+      // If path doesn't close, this will fail
+      expect(closingGap).toBeLessThan(1)
+    })
+
+    it("closes the path when rectangle is entirely inside pentagon", () => {
+      const rectangleVertices = getShapeVertices("polygon", { polygonSides: 4 })
+      const pentagonVertices = getShapeVertices("polygon", { polygonSides: 5 })
+
+      // Small rectangle entirely inside larger pentagon
+      const scaledRect = resizeVertices([...rectangleVertices], 50, 50)
+      const pentagonBoundary = traceBoundary(pentagonVertices)
+      const scaledPentagon = resizeVertices([...pentagonBoundary], 150, 150)
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, scaledPentagon)
+      const result = machine.polish([...scaledRect])
+
+      // All rectangle vertices should be preserved (inside mask)
+      expect(result.length).toBeGreaterThanOrEqual(4)
+
+      // Path should close
+      const first = result[0]
+      const last = result[result.length - 1]
+      expect(first.distance(last)).toBeLessThan(1)
+    })
+
+    it("includes star perimeter vertices that are inside the rectangle", () => {
+      // Rectangle 100x100 centered at origin
+      const rectHalf = 50
+      const rectangle = [
+        new Victor(-rectHalf, -rectHalf),
+        new Victor(rectHalf, -rectHalf),
+        new Victor(rectHalf, rectHalf),
+        new Victor(-rectHalf, rectHalf),
+        new Victor(-rectHalf, -rectHalf),
+      ]
+
+      // Star mask 100x100, offset to (-18, -18)
+      const starVertices = getShapeVertices("star")
+      const starBoundary = traceBoundary(starVertices)
+      const scaledStar = resizeVertices([...starBoundary], 100, 100)
+      const offsetStar = scaledStar.map(v => new Victor(v.x - 18, v.y - 18))
+
+      // Find star vertices that are inside the rectangle
+      const starVerticesInsideRect = offsetStar.filter(v =>
+        v.x > -rectHalf && v.x < rectHalf && v.y > -rectHalf && v.y < rectHalf
+      )
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, offsetStar)
+      const result = machine.polish([...rectangle])
+
+      // The result should include vertices near the star vertices that are inside the rect
+      starVerticesInsideRect.forEach(starV => {
+        const hasNearbyVertex = result.some(v => v.distance(starV) < 2)
+        expect(hasNearbyVertex).toBe(true)
+      })
+    })
+
+    it("clips rectangle to star mask offset to corner - keeps interior only", () => {
+      // Rectangle 100x100 centered at origin
+      const rectHalf = 50
+      const rectangle = [
+        new Victor(-rectHalf, -rectHalf),
+        new Victor(rectHalf, -rectHalf),
+        new Victor(rectHalf, rectHalf),
+        new Victor(-rectHalf, rectHalf),
+        new Victor(-rectHalf, -rectHalf),
+      ]
+
+      // Star mask 100x100, offset to bottom-left (-18, -18)
+      // This positions the star so only part overlaps with rectangle
+      const starVertices = getShapeVertices("star")
+      const starBoundary = traceBoundary(starVertices)
+      const scaledStar = resizeVertices([...starBoundary], 100, 100)
+
+      // Offset star to (-18, -18) relative to rectangle center
+      const offsetStar = scaledStar.map(v => new Victor(v.x - 18, v.y - 18))
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, offsetStar)
+      const result = machine.polish([...rectangle])
+
+      // Result should have vertices
+      expect(result.length).toBeGreaterThan(0)
+
+      // All result vertices should be inside or on BOTH the rectangle AND the star
+      // (i.e., the intersection of both shapes)
+      result.forEach((v, i) => {
+        // Must be within rectangle bounds (with small tolerance)
+        expect(v.x).toBeGreaterThanOrEqual(-rectHalf - 1)
+        expect(v.x).toBeLessThanOrEqual(rectHalf + 1)
+        expect(v.y).toBeGreaterThanOrEqual(-rectHalf - 1)
+        expect(v.y).toBeLessThanOrEqual(rectHalf + 1)
+      })
+    })
+  })
+
+  describe("open path clipping (line-by-line fallback)", () => {
+    it("clips open L-shaped path against star mask", () => {
+      const starVertices = createStar(50, 20)
+      const machine = new PolygonMachine({ minimizeMoves: false }, starVertices)
+
+      // Open L-path that extends beyond star
+      const openPath = createOpenPath()
+
+      const result = machine.polish([...openPath])
+
+      // Should have vertices (path intersects the star)
+      expect(result.length).toBeGreaterThan(0)
+
+      // All result points should be inside or on the star boundary
+      result.forEach((pt) => {
+        const nearest = machine.nearestVertex(pt)
+        expect(pt.distance(nearest)).toBeLessThan(1)
+      })
+    })
+
+    it("clips line that starts outside and enters mask", () => {
+      // Rectangle mask 100x100
+      const rectMask = [
+        new Victor(-50, -50),
+        new Victor(50, -50),
+        new Victor(50, 50),
+        new Victor(-50, 50),
+      ]
+      const machine = new PolygonMachine({ minimizeMoves: false }, rectMask)
+
+      // Line from outside to inside (open path, 3 segments)
+      const path = [
+        new Victor(-100, 0),  // outside
+        new Victor(0, 0),     // inside
+        new Victor(0, 100),   // exits top
+      ]
+
+      const result = machine.polish([...path])
+
+      // Should have clipped vertices
+      expect(result.length).toBeGreaterThanOrEqual(2)
+
+      // All points should be within bounds
+      result.forEach((pt) => {
+        expect(pt.x).toBeGreaterThanOrEqual(-51)
+        expect(pt.x).toBeLessThanOrEqual(51)
+        expect(pt.y).toBeGreaterThanOrEqual(-51)
+        expect(pt.y).toBeLessThanOrEqual(51)
+      })
+    })
+  })
+
+  describe("edge cases", () => {
+    it("passes through input unchanged when boundary has fewer than 3 vertices", () => {
+      const invalidBoundary = [new Victor(0, 0), new Victor(10, 10)]
+      const machine = new PolygonMachine({ minimizeMoves: false }, invalidBoundary)
+
+      const input = [new Victor(5, 5), new Victor(15, 15)]
+      const result = machine.polish([...input])
+
+      // With invalid boundary, enforceLimits returns early - input passes through
+      expect(result.length).toBe(input.length)
+    })
+
+    it("returns empty when input is empty", () => {
+      const starVertices = createStar(50, 20)
+      const machine = new PolygonMachine({ minimizeMoves: false }, starVertices)
+
+      const result = machine.polish([])
+
+      expect(result.length).toBe(0)
+    })
+
+    it("handles null/undefined mask vertices gracefully", () => {
+      const machine = new PolygonMachine({ minimizeMoves: false }, null)
+
+      expect(machine.boundary.length).toBe(0)
+      expect(machine.inBounds({ x: 0, y: 0 })).toBe(false)
+    })
+
+    it("handles shape entirely outside mask", () => {
+      const starVertices = createStar(50, 20)
+      const machine = new PolygonMachine({ minimizeMoves: false }, starVertices)
+
+      // Small square far outside the star
+      const farSquare = [
+        new Victor(200, 200),
+        new Victor(210, 200),
+        new Victor(210, 210),
+        new Victor(200, 210),
+        new Victor(200, 200),
+      ]
+
+      const result = machine.polish([...farSquare])
+
+      // Should trace perimeter of mask (nearest points)
+      // Result may have vertices, but they should all be on star boundary
+      result.forEach((pt) => {
+        const nearest = machine.nearestVertex(pt)
+        expect(pt.distance(nearest)).toBeLessThan(1)
       })
     })
   })
