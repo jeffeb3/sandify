@@ -60,20 +60,20 @@ export default class PolygonInvertedMachine extends PolygonMachine {
     const result = Clipper.Difference([inputPath], [maskPath], FillRule.NonZero)
 
     if (!result) {
-      return null  // Clipper failed
+      return null // Clipper failed
     }
 
     if (result.length === 0) {
-      return []  // Shape is entirely inside mask
+      return [] // Shape is entirely inside mask
     }
 
     // Convert all paths to Victor vertices
-    const allPaths = result.map(path =>
-      path.map(pt => new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE))
+    const allPaths = result.map((path) =>
+      path.map((pt) => new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE)),
     )
 
     // Close each path if not already closed
-    allPaths.forEach(path => {
+    allPaths.forEach((path) => {
       if (path.length > 0 && !isPathClosed(path)) {
         path.push(path[0].clone())
       }
@@ -109,8 +109,10 @@ export default class PolygonInvertedMachine extends PolygonMachine {
       const node = graph.nodeMap[nodeKey]
 
       if (node) {
-        if (vertices.length === 0 ||
-            vertices[vertices.length - 1].distance(node) > CLOSED_PATH_EPSILON) {
+        if (
+          vertices.length === 0 ||
+          vertices[vertices.length - 1].distance(node) > CLOSED_PATH_EPSILON
+        ) {
           vertices.push(new Victor(node.x, node.y))
         }
       }
@@ -126,7 +128,7 @@ export default class PolygonInvertedMachine extends PolygonMachine {
   // - Start outside, enter → [start, entryPoint]
   // - Crosses through → [start, entryPoint] + perimeter + [exitPoint, end]
   clipSegment(start, end) {
-    const startInside = this.inBounds(start)  // inBounds = inside polygon mask
+    const startInside = this.inBounds(start) // inBounds = inside polygon mask
     const endInside = this.inBounds(end)
 
     // Both inside the mask = clip out entirely
@@ -177,7 +179,8 @@ export default class PolygonInvertedMachine extends PolygonMachine {
 
   // For inverted: points inside polygon mask should project to perimeter
   nearestVertex(vertex) {
-    if (this.inBounds(vertex)) {  // inBounds = inside polygon mask
+    if (this.inBounds(vertex)) {
+      // inBounds = inside polygon mask
       return this.nearestPerimeterVertex(vertex)
     }
     return vertex

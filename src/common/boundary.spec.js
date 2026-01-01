@@ -204,7 +204,6 @@ describe("traceBoundary", () => {
     })
   })
 
-
   describe("scale parameter", () => {
     it("expands boundary when scale > 0", () => {
       const square = createSquare(100)
@@ -390,7 +389,10 @@ describe("traceBoundary", () => {
       // They work better with expand (centroid scaling) than footprint (raster approach)
 
       it("maze uses expand", () => {
-        const { result } = expectAlgorithm("maze", { mazeWidth: 8, mazeHeight: 8 })
+        const { result } = expectAlgorithm("maze", {
+          mazeWidth: 8,
+          mazeHeight: 8,
+        })
         expect(result.algorithm).toBe("expand")
         expect(result.boundaryPaths).toBe(1)
       })

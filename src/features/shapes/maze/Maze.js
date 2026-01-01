@@ -595,7 +595,6 @@ export default class Maze extends Shape {
     return "expand"
   }
 
-
   getOptions() {
     return options
   }

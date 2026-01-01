@@ -1,16 +1,24 @@
 import Victor from "victor"
 import { Clipper, FillRule, Path64 } from "clipper2-js"
 import Machine, { machineOptions } from "./Machine"
-import { distance, cloneVertex, totalDistance, pointInPolygon, snapToGrid, projectToSegment, distanceToSegment } from "@/common/geometry"
+import {
+  distance,
+  cloneVertex,
+  totalDistance,
+  pointInPolygon,
+  snapToGrid,
+  projectToSegment,
+  distanceToSegment,
+} from "@/common/geometry"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
 
-const CLIPPER_SCALE = 1000      // Scale factor for Clipper2 integer coordinates
+const CLIPPER_SCALE = 1000 // Scale factor for Clipper2 integer coordinates
 const CLOSED_PATH_EPSILON = 0.01 // Max gap to consider path closed
-const EDGE_EPSILON = 1e-6       // Tolerance for on-edge detection
-const PARALLEL_EPSILON = 1e-10  // Tolerance for parallel line detection
-const NODE_TOLERANCE = 1        // Proximity tolerance for graph node merging
+const EDGE_EPSILON = 1e-6 // Tolerance for on-edge detection
+const PARALLEL_EPSILON = 1e-10 // Tolerance for parallel line detection
+const NODE_TOLERANCE = 1 // Proximity tolerance for graph node merging
 
 // Helper: check if a path forms a closed loop
 const isPathClosed = (vertices) => {
@@ -37,8 +45,12 @@ const segmentsIntersect = (p1, p2, p3, p4) => {
   const u = (dx * d1y - dy * d1x) / cross
 
   // Check if intersection is strictly inside both segments (not at endpoints)
-  return t > EDGE_EPSILON && t < 1 - EDGE_EPSILON &&
-         u > EDGE_EPSILON && u < 1 - EDGE_EPSILON
+  return (
+    t > EDGE_EPSILON &&
+    t < 1 - EDGE_EPSILON &&
+    u > EDGE_EPSILON &&
+    u < 1 - EDGE_EPSILON
+  )
 }
 
 // Helper: check if a path is self-intersecting
@@ -49,7 +61,7 @@ const isSelfIntersecting = (vertices) => {
   if (vertices.length < 4) return false
 
   const n = vertices.length
-  const VERTEX_TOLERANCE = 0.5  // Tolerance for "same position" detection
+  const VERTEX_TOLERANCE = 0.5 // Tolerance for "same position" detection
 
   // Check if any vertex position is visited multiple times (like Rose center)
   // Use a grid-based approach for efficiency
@@ -61,8 +73,12 @@ const isSelfIntersecting = (vertices) => {
     const prevIndex = visited.get(key)
     // If we've seen this position before and it's not adjacent, path revisits this point
     // Exclude the closing vertex (last matching first) - that's normal path closure
-    const isClosingVertex = (i === n - 1 && prevIndex === 0)
-    if (prevIndex !== undefined && Math.abs(i - prevIndex) > 2 && !isClosingVertex) {
+    const isClosingVertex = i === n - 1 && prevIndex === 0
+    if (
+      prevIndex !== undefined &&
+      Math.abs(i - prevIndex) > 2 &&
+      !isClosingVertex
+    ) {
       return true
     }
     visited.set(key, i)
@@ -91,8 +107,7 @@ export default class PolygonMachine extends Machine {
   constructor(state, maskVertices) {
     super(state)
     this.label = "Polygon"
-    this.boundary =
-      maskVertices?.length >= 3 ? [...maskVertices] : []
+    this.boundary = maskVertices?.length >= 3 ? [...maskVertices] : []
     this.edges = []
     this.perimeterLen = 0
     this.edgeCumulativeLen = [0]
@@ -132,7 +147,11 @@ export default class PolygonMachine extends Machine {
     const x = point.x
     const y = point.y
 
-    for (let i = 0, j = this.boundary.length - 1; i < this.boundary.length; j = i++) {
+    for (
+      let i = 0, j = this.boundary.length - 1;
+      i < this.boundary.length;
+      j = i++
+    ) {
       const xi = this.boundary[i].x
       const yi = this.boundary[i].y
       const xj = this.boundary[j].x
@@ -199,7 +218,13 @@ export default class PolygonMachine extends Machine {
         intersections[1].point,
         false,
       )
-      return [start, intersections[0].point, ...perimeterPath, intersections[1].point, end]
+      return [
+        start,
+        intersections[0].point,
+        ...perimeterPath,
+        intersections[1].point,
+        end,
+      ]
     }
 
     // Both outside, no intersections - trace perimeter between nearest points
@@ -432,7 +457,7 @@ export default class PolygonMachine extends Machine {
     let inputRing = null
     if (isClosed && !selfIntersecting) {
       const inputVerts = this.vertices.slice(0, -1)
-      inputRing = inputVerts.map(v => [v.x, v.y])
+      inputRing = inputVerts.map((v) => [v.x, v.y])
     }
 
     for (let next = 0; next < this.vertices.length; next++) {
@@ -448,24 +473,30 @@ export default class PolygonMachine extends Machine {
 
           // Determine if this segment actually crosses into/out of the mask
           // vs just tracing along the perimeter outside
-          const actuallyEnters = !prevInBounds && currInBounds  // outside -> inside
-          const actuallyExits = prevInBounds && !currInBounds   // inside -> outside
-          const crossesThrough = !prevInBounds && !currInBounds && clipped.length >= 2  // outside -> crosses mask -> outside
-          const bothInside = prevInBounds && currInBounds  // inside -> inside
+          const actuallyEnters = !prevInBounds && currInBounds // outside -> inside
+          const actuallyExits = prevInBounds && !currInBounds // inside -> outside
+          const crossesThrough =
+            !prevInBounds && !currInBounds && clipped.length >= 2 // outside -> crosses mask -> outside
+          const bothInside = prevInBounds && currInBounds // inside -> inside
 
           // When we re-enter the mask (or cross through it) and we have a previous
           // exit point, trace the perimeter from exit to entry. This ensures the
           // clipped path follows the mask boundary instead of taking shortcuts.
           if (lastExitPoint && (actuallyEnters || crossesThrough)) {
             const entryPoint = firstClipped
-            const perimeterPath = this.traceAndFilterPerimeter(lastExitPoint, entryPoint, inputRing)
+            const perimeterPath = this.traceAndFilterPerimeter(
+              lastExitPoint,
+              entryPoint,
+              inputRing,
+            )
 
             cleanVertices.push(...perimeterPath)
           }
 
           // Only add clipped points when segment actually interacts with mask interior
           // Skip outside->outside perimeter traces (no intersections)
-          const shouldAddClipped = actuallyEnters || actuallyExits || crossesThrough || bothInside
+          const shouldAddClipped =
+            actuallyEnters || actuallyExits || crossesThrough || bothInside
           if (shouldAddClipped) {
             for (const pt of clipped) {
               cleanVertices.push(this.nearestVertex(pt))
@@ -499,7 +530,11 @@ export default class PolygonMachine extends Machine {
     // ended with an exit point, trace perimeter back to start
     if (cleanVertices.length > 0 && lastExitPoint) {
       const firstPoint = cleanVertices[0]
-      const perimeterPath = this.traceAndFilterPerimeter(lastExitPoint, firstPoint, inputRing)
+      const perimeterPath = this.traceAndFilterPerimeter(
+        lastExitPoint,
+        firstPoint,
+        inputRing,
+      )
 
       cleanVertices.push(...perimeterPath)
       cleanVertices.push(cloneVertex(firstPoint)) // Close back to start
@@ -592,7 +627,7 @@ export default class PolygonMachine extends Machine {
     let path = this.tracePerimeter(p1, p2, false, inputRing)
 
     if (inputRing) {
-      path = path.filter(pt => pointInPolygon(pt.x, pt.y, inputRing))
+      path = path.filter((pt) => pointInPolygon(pt.x, pt.y, inputRing))
     }
 
     return path
@@ -604,7 +639,7 @@ export default class PolygonMachine extends Machine {
     for (const v of vertices) {
       path.push({
         x: Math.round(v.x * CLIPPER_SCALE),
-        y: Math.round(v.y * CLIPPER_SCALE)
+        y: Math.round(v.y * CLIPPER_SCALE),
       })
     }
     return path
@@ -622,21 +657,21 @@ export default class PolygonMachine extends Machine {
     const result = Clipper.Intersect([inputPath], [maskPath], FillRule.NonZero)
 
     if (!result) {
-      return null  // Clipper failed
+      return null // Clipper failed
     }
 
     if (result.length === 0) {
-      return []  // No intersection - shapes don't overlap
+      return [] // No intersection - shapes don't overlap
     }
 
     // Convert all paths to Victor vertices and combine them
     // For multiple disconnected regions, we connect them with the shortest jumps
-    const allPaths = result.map(path =>
-      path.map(pt => new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE))
+    const allPaths = result.map((path) =>
+      path.map((pt) => new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE)),
     )
 
     // Close each path if not already closed
-    allPaths.forEach(path => {
+    allPaths.forEach((path) => {
       if (path.length > 0 && !isPathClosed(path)) {
         path.push(path[0].clone())
       }
@@ -670,8 +705,10 @@ export default class PolygonMachine extends Machine {
 
       if (node) {
         // Skip duplicate consecutive vertices
-        if (vertices.length === 0 ||
-            vertices[vertices.length - 1].distance(node) > CLOSED_PATH_EPSILON) {
+        if (
+          vertices.length === 0 ||
+          vertices[vertices.length - 1].distance(node) > CLOSED_PATH_EPSILON
+        ) {
           vertices.push(new Victor(node.x, node.y))
         }
       }
@@ -688,10 +725,12 @@ export default class PolygonMachine extends Machine {
       if (path.length < 2) continue
 
       // Create nodes for all vertices in path
-      const nodes = path.map(pt => this.proximityNode(pt.x, pt.y, NODE_TOLERANCE))
+      const nodes = path.map((pt) =>
+        this.proximityNode(pt.x, pt.y, NODE_TOLERANCE),
+      )
 
       // Add nodes and edges
-      nodes.forEach(node => graph.addNode(node))
+      nodes.forEach((node) => graph.addNode(node))
       for (let i = 0; i < nodes.length - 1; i++) {
         if (nodes[i].toString() !== nodes[i + 1].toString()) {
           graph.addEdge(nodes[i], nodes[i + 1])

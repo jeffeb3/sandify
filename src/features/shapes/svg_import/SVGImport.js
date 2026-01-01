@@ -1,4 +1,4 @@
-/* global console, document */
+/* global console, document, window */
 import Victor from "victor"
 import { pointsOnPath } from "points-on-path"
 import svgpath from "svgpath"
@@ -205,7 +205,7 @@ export default class SVGImport extends Shape {
   }
 
   isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
-    const styles = getComputedStyle(element)
+    const styles = window.getComputedStyle(element)
 
     // Skip elements with filters (blur, drop shadow, etc.) - these are effects, not geometry
     if (styles.filter && styles.filter !== "none") {

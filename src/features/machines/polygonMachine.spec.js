@@ -1,6 +1,12 @@
 import PolygonMachine from "./PolygonMachine"
 import Victor from "victor"
-import { createStar, createTriangle, createBumpyRect, createOpenPath, getShapeVertices } from "@/common/testHelpers"
+import {
+  createStar,
+  createTriangle,
+  createBumpyRect,
+  createOpenPath,
+  getShapeVertices,
+} from "@/common/testHelpers"
 import { circle, resizeVertices } from "@/common/geometry"
 import { traceBoundary } from "@/common/boundary"
 
@@ -243,7 +249,7 @@ describe("PolygonMachine", () => {
 
         // Should include the rightmost star point (47.6, -15.5)
         const hasRightPoint = result.some(
-          (v) => v.x > 45 && v.y < 0 && v.y > -20
+          (v) => v.x > 45 && v.y < 0 && v.y > -20,
         )
         expect(hasRightPoint).toBe(true)
       })
@@ -297,15 +303,15 @@ describe("PolygonMachine", () => {
         // This line exits the rectangle at x=50, then re-enters at x=50
         // The clipped result should trace AROUND the bump, not cut straight
         const horizontalLine = [
-          new Victor(-60, 0),  // outside left
-          new Victor(80, 0),   // outside right (past the bump)
+          new Victor(-60, 0), // outside left
+          new Victor(80, 0), // outside right (past the bump)
         ]
 
         const result = machine.polish([...horizontalLine])
 
         // The result should include points from the bump
         // Bump vertices are at (70, -10), (70, 10), (50, -10), (50, 10)
-        const hasPointInBumpArea = result.some(v => v.x > 55 && v.x <= 70)
+        const hasPointInBumpArea = result.some((v) => v.x > 55 && v.x <= 70)
 
         expect(hasPointInBumpArea).toBe(true)
       })
@@ -314,8 +320,8 @@ describe("PolygonMachine", () => {
         // A horizontal line at y=0 that crosses the bump area
         // Goes from inside the rect, through the bump, and out
         const line = [
-          new Victor(0, 0),    // inside rect
-          new Victor(80, 0),   // outside, past the bump
+          new Victor(0, 0), // inside rect
+          new Victor(80, 0), // outside, past the bump
         ]
 
         const result = machine.polish([...line])
@@ -326,7 +332,7 @@ describe("PolygonMachine", () => {
         // 3. But wait, y=0 is inside bump, so it should go all the way to x=70
 
         // The line should reach the bump's outer edge at x=70
-        const hasOuterBumpVertex = result.some(v => v.x >= 69)
+        const hasOuterBumpVertex = result.some((v) => v.x >= 69)
         expect(hasOuterBumpVertex).toBe(true)
       })
 
@@ -343,20 +349,20 @@ describe("PolygonMachine", () => {
         // around the bump: down to (50, 10), out to (70, 10), down to (70, -10),
         // back to (50, -10), then down to (50, -30)
         const path = [
-          new Victor(0, 30),   // inside, above bump
-          new Victor(80, 30),  // outside right
+          new Victor(0, 30), // inside, above bump
+          new Victor(80, 30), // outside right
           new Victor(80, -30), // outside right, lower
-          new Victor(0, -30),  // back inside, below bump
+          new Victor(0, -30), // back inside, below bump
         ]
 
         const result = machine.polish([...path])
 
         // Should have points at x=70 (the bump's outer edge)
-        const hasOuterBumpVertex = result.some(v => v.x >= 69)
+        const hasOuterBumpVertex = result.some((v) => v.x >= 69)
         expect(hasOuterBumpVertex).toBe(true)
 
         // Should have the bump corner vertices (x=70)
-        const outerBumpVertices = result.filter(v => v.x >= 69)
+        const outerBumpVertices = result.filter((v) => v.x >= 69)
         expect(outerBumpVertices.length).toBe(2) // Two corners at (70, 10) and (70, -10)
 
         // Should have the full perimeter traced (start, exit, 4 bump-related, entry, end)
@@ -367,10 +373,10 @@ describe("PolygonMachine", () => {
         // A path that starts inside, exits through the bump, and returns
         // This tests that the clipping respects the bump boundary
         const crossingPath = [
-          new Victor(0, 0),     // inside center
-          new Victor(80, 0),    // exits through bump (bump is at y=[-10,10])
-          new Victor(80, 40),   // outside, above bump
-          new Victor(0, 40),    // re-enters through top edge
+          new Victor(0, 0), // inside center
+          new Victor(80, 0), // exits through bump (bump is at y=[-10,10])
+          new Victor(80, 40), // outside, above bump
+          new Victor(0, 40), // re-enters through top edge
         ]
 
         const result = machine.polish([...crossingPath])
@@ -383,7 +389,7 @@ describe("PolygonMachine", () => {
         })
 
         // Should include the bump's outer edge (x=70)
-        const hasOuterBump = result.some(v => v.x >= 69)
+        const hasOuterBump = result.some((v) => v.x >= 69)
         expect(hasOuterBump).toBe(true)
 
         // Result should have multiple vertices tracing the boundary
@@ -405,19 +411,22 @@ describe("PolygonMachine", () => {
       // Then shift it so one corner lands exactly on the pentagon boundary
       const rectHalf = 20
       const rectangle = [
-        new Victor(-rectHalf, -rectHalf),  // bottom-left
-        new Victor(rectHalf, -rectHalf),   // bottom-right
-        new Victor(rectHalf, rectHalf),    // top-right
-        new Victor(-rectHalf, rectHalf),   // top-left
-        new Victor(-rectHalf, -rectHalf),  // close
+        new Victor(-rectHalf, -rectHalf), // bottom-left
+        new Victor(rectHalf, -rectHalf), // bottom-right
+        new Victor(rectHalf, rectHalf), // top-right
+        new Victor(-rectHalf, rectHalf), // top-left
+        new Victor(-rectHalf, -rectHalf), // close
       ]
 
       // Pentagon top vertex is at (0, 50) after scaling to 100x100
       // Shift rectangle up so top edge is at y=50 (on the pentagon top vertex)
-      const shiftY = 50 - rectHalf  // = 30, so top-right will be at (20, 50)
-      const shiftedRect = rectangle.map(v => new Victor(v.x, v.y + shiftY))
+      const shiftY = 50 - rectHalf // = 30, so top-right will be at (20, 50)
+      const shiftedRect = rectangle.map((v) => new Victor(v.x, v.y + shiftY))
 
-      const machine = new PolygonMachine({ minimizeMoves: false }, scaledPentagon)
+      const machine = new PolygonMachine(
+        { minimizeMoves: false },
+        scaledPentagon,
+      )
       const result = machine.polish([...shiftedRect])
 
       // Result should have vertices
@@ -441,7 +450,10 @@ describe("PolygonMachine", () => {
       const pentagonBoundary = traceBoundary(pentagonVertices)
       const scaledPentagon = resizeVertices([...pentagonBoundary], 150, 150)
 
-      const machine = new PolygonMachine({ minimizeMoves: false }, scaledPentagon)
+      const machine = new PolygonMachine(
+        { minimizeMoves: false },
+        scaledPentagon,
+      )
       const result = machine.polish([...scaledRect])
 
       // All rectangle vertices should be preserved (inside mask)
@@ -468,19 +480,23 @@ describe("PolygonMachine", () => {
       const starVertices = getShapeVertices("star")
       const starBoundary = traceBoundary(starVertices)
       const scaledStar = resizeVertices([...starBoundary], 100, 100)
-      const offsetStar = scaledStar.map(v => new Victor(v.x - 18, v.y - 18))
+      const offsetStar = scaledStar.map((v) => new Victor(v.x - 18, v.y - 18))
 
       // Find star vertices that are inside the rectangle
-      const starVerticesInsideRect = offsetStar.filter(v =>
-        v.x > -rectHalf && v.x < rectHalf && v.y > -rectHalf && v.y < rectHalf
+      const starVerticesInsideRect = offsetStar.filter(
+        (v) =>
+          v.x > -rectHalf &&
+          v.x < rectHalf &&
+          v.y > -rectHalf &&
+          v.y < rectHalf,
       )
 
       const machine = new PolygonMachine({ minimizeMoves: false }, offsetStar)
       const result = machine.polish([...rectangle])
 
       // The result should include vertices near the star vertices that are inside the rect
-      starVerticesInsideRect.forEach(starV => {
-        const hasNearbyVertex = result.some(v => v.distance(starV) < 2)
+      starVerticesInsideRect.forEach((starV) => {
+        const hasNearbyVertex = result.some((v) => v.distance(starV) < 2)
         expect(hasNearbyVertex).toBe(true)
       })
     })
@@ -503,7 +519,7 @@ describe("PolygonMachine", () => {
       const scaledStar = resizeVertices([...starBoundary], 100, 100)
 
       // Offset star to (-18, -18) relative to rectangle center
-      const offsetStar = scaledStar.map(v => new Victor(v.x - 18, v.y - 18))
+      const offsetStar = scaledStar.map((v) => new Victor(v.x - 18, v.y - 18))
 
       const machine = new PolygonMachine({ minimizeMoves: false }, offsetStar)
       const result = machine.polish([...rectangle])
@@ -555,9 +571,9 @@ describe("PolygonMachine", () => {
 
       // Line from outside to inside (open path, 3 segments)
       const path = [
-        new Victor(-100, 0),  // outside
-        new Victor(0, 0),     // inside
-        new Victor(0, 100),   // exits top
+        new Victor(-100, 0), // outside
+        new Victor(0, 0), // inside
+        new Victor(0, 100), // exits top
       ]
 
       const result = machine.polish([...path])
@@ -588,15 +604,15 @@ describe("PolygonMachine", () => {
       //   +-------+
       // When a tall rectangle spans across the notch, Clipper returns 2 disconnected regions
       const cMask = [
-        new Victor(-50, -50),  // bottom-left
-        new Victor(50, -50),   // bottom-right
-        new Victor(50, -15),   // notch bottom-right
-        new Victor(10, -15),   // notch bottom-left
-        new Victor(10, 15),    // notch top-left
-        new Victor(50, 15),    // notch top-right
-        new Victor(50, 50),    // top-right
-        new Victor(-50, 50),   // top-left
-        new Victor(-50, -50),  // close
+        new Victor(-50, -50), // bottom-left
+        new Victor(50, -50), // bottom-right
+        new Victor(50, -15), // notch bottom-right
+        new Victor(10, -15), // notch bottom-left
+        new Victor(10, 15), // notch top-left
+        new Victor(50, 15), // notch top-right
+        new Victor(50, 50), // top-right
+        new Victor(-50, 50), // top-left
+        new Victor(-50, -50), // close
       ]
 
       // Tall thin rectangle that spans across the notch
@@ -606,15 +622,15 @@ describe("PolygonMachine", () => {
         new Victor(40, -40),
         new Victor(40, 40),
         new Victor(20, 40),
-        new Victor(20, -40),  // close
+        new Victor(20, -40), // close
       ]
 
       const machine = new PolygonMachine({ minimizeMoves: false }, cMask)
       const result = machine.polish([...tallRect])
 
       // Should have vertices in BOTH the top region (y > 15) and bottom region (y < -15)
-      const hasTopVertices = result.some(v => v.y > 20)
-      const hasBottomVertices = result.some(v => v.y < -20)
+      const hasTopVertices = result.some((v) => v.y > 20)
+      const hasBottomVertices = result.some((v) => v.y < -20)
 
       expect(hasTopVertices).toBe(true)
       expect(hasBottomVertices).toBe(true)
@@ -664,8 +680,8 @@ describe("PolygonMachine", () => {
       })
 
       // Should not have any vertices in the notch area (x > 10 && |y| < 15)
-      const verticesInNotch = result.filter(v =>
-        v.x > 10 && v.x < 50 && v.y > -15 && v.y < 15
+      const verticesInNotch = result.filter(
+        (v) => v.x > 10 && v.x < 50 && v.y > -15 && v.y < 15,
       )
       expect(verticesInNotch.length).toBe(0)
     })
@@ -674,7 +690,10 @@ describe("PolygonMachine", () => {
   describe("edge cases", () => {
     it("passes through input unchanged when boundary has fewer than 3 vertices", () => {
       const invalidBoundary = [new Victor(0, 0), new Victor(10, 10)]
-      const machine = new PolygonMachine({ minimizeMoves: false }, invalidBoundary)
+      const machine = new PolygonMachine(
+        { minimizeMoves: false },
+        invalidBoundary,
+      )
 
       const input = [new Victor(5, 5), new Victor(15, 15)]
       const result = machine.polish([...input])

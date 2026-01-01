@@ -173,7 +173,10 @@ export default class Mask extends Effect {
     })
 
     if (!effect.dragging) {
-      const MachineClass = getMachineClass(effect.maskMachine, effect.maskInvert)
+      const MachineClass = getMachineClass(
+        effect.maskMachine,
+        effect.maskInvert,
+      )
       const machine = new MachineClass({
         minX: 0,
         maxX: effect.width,

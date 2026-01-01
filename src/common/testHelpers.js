@@ -1,7 +1,11 @@
 import Victor from "victor"
 import { getShape } from "@/features/shapes/shapeFactory"
 
-export const createRect = (width = 50, height = 50, center = { x: 0, y: 0 }) => {
+export const createRect = (
+  width = 50,
+  height = 50,
+  center = { x: 0, y: 0 },
+) => {
   const hw = width / 2
   const hh = height / 2
 
@@ -17,12 +21,16 @@ export const createRect = (width = 50, height = 50, center = { x: 0, y: 0 }) => 
 export const createSquare = (size = 50, center = { x: 0, y: 0 }) =>
   createRect(size, size, center)
 
-export const createTriangle = (size = 50, center = { x: 0, y: 0 }, closed = true) => {
+export const createTriangle = (
+  size = 50,
+  center = { x: 0, y: 0 },
+  closed = true,
+) => {
   const height = (size * Math.sqrt(3)) / 2
   const vertices = [
-    new Victor(center.x, center.y - (height * 2) / 3),          // top
-    new Victor(center.x - size / 2, center.y + height / 3),     // bottom-left
-    new Victor(center.x + size / 2, center.y + height / 3),     // bottom-right
+    new Victor(center.x, center.y - (height * 2) / 3), // top
+    new Victor(center.x - size / 2, center.y + height / 3), // bottom-left
+    new Victor(center.x + size / 2, center.y + height / 3), // bottom-right
   ]
 
   if (closed) {
@@ -84,15 +92,15 @@ export const createBumpyRect = (width = 100, height = 100, bumpSize = 20) => {
   const bh = bumpSize / 2
 
   return [
-    new Victor(-hw, -hh),           // bottom-left
-    new Victor(hw, -hh),            // bottom-right
-    new Victor(hw, -bh),            // up to bump bottom
+    new Victor(-hw, -hh), // bottom-left
+    new Victor(hw, -hh), // bottom-right
+    new Victor(hw, -bh), // up to bump bottom
     new Victor(hw + bumpSize, -bh), // bump out
-    new Victor(hw + bumpSize, bh),  // bump across
-    new Victor(hw, bh),             // bump back
-    new Victor(hw, hh),             // continue to top-right
-    new Victor(-hw, hh),            // top-left
-    new Victor(-hw, -hh),           // close
+    new Victor(hw + bumpSize, bh), // bump across
+    new Victor(hw, bh), // bump back
+    new Victor(hw, hh), // continue to top-right
+    new Victor(-hw, hh), // top-left
+    new Victor(-hw, -hh), // close
   ]
 }
 
@@ -106,8 +114,8 @@ export const createHexagon = (radius = 50, center = { x: 0, y: 0 }) => {
     vertices.push(
       new Victor(
         center.x + Math.cos(angle) * radius,
-        center.y + Math.sin(angle) * radius
-      )
+        center.y + Math.sin(angle) * radius,
+      ),
     )
   }
   vertices.push(vertices[0].clone()) // close

@@ -758,8 +758,7 @@ export const pointInPolygon = (px, py, ring) => {
     const [xi, yi] = ring[i]
     const [xj, yj] = ring[j]
 
-    if (((yi > py) !== (yj > py)) &&
-        (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
       inside = !inside
     }
   }

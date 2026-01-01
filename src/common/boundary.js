@@ -1,31 +1,30 @@
-  import Victor from "victor"
-import {
-  Clipper,
-  FillRule,
-  Path64,
-  ClipperOffset,
-  JoinType,
-  EndType,
-} from "clipper2-js"
+import Victor from "victor"
+import { Clipper, FillRule, Path64 } from "clipper2-js"
 import convexHull from "convexhull-js"
 import concaveman from "concaveman"
 import calcSdf from "bitmap-sdf"
 import { contours } from "d3-contour"
-import { findBounds, distance, centroid, pointInPolygon, polygonArea } from "./geometry"
+import {
+  findBounds,
+  distance,
+  centroid,
+  pointInPolygon,
+  polygonArea,
+} from "./geometry"
 
 // Detection thresholds for algorithm selection
-const OPEN_PATH_THRESHOLD = 0.01        // Gap > 1% of size = open path
-const MIN_AREA_RATIO = 0.0001           // Filter fragments < 0.01% of input area
-const FILL_PATTERN_RATIO_MIN = 3        // Min ratio for fill patterns
-const FILL_PATTERN_MIN_POINTS = 50      // Min points to consider fill pattern
-const FILL_PATTERN_MAX_PPP = 25         // Max points-per-path for small fill patterns
-const FILL_PATTERN_MANY_PATHS = 10      // Many paths threshold (relaxes PPP check)
-const FILL_PATTERN_MAX_PPP_MANY = 60    // Max PPP when many paths present
-const FILL_PATTERN_MAX_PATHS = 40       // Too many paths = fractal, not fill pattern
-const SDF_RATIO_MULTI = 3               // Ratio threshold for multi-path (text)
-const SDF_RATIO_OPEN = 2                // Ratio threshold for open fractals
-const SDF_RATIO_VERY_HIGH = 40          // Very high ratio single-path = footprint (lsystem)
-const DOMINANCE_RATIO = 5               // Path area ratio for "largest dominates"
+const OPEN_PATH_THRESHOLD = 0.01 // Gap > 1% of size = open path
+const MIN_AREA_RATIO = 0.0001 // Filter fragments < 0.01% of input area
+const FILL_PATTERN_RATIO_MIN = 3 // Min ratio for fill patterns
+const FILL_PATTERN_MIN_POINTS = 50 // Min points to consider fill pattern
+const FILL_PATTERN_MAX_PPP = 25 // Max points-per-path for small fill patterns
+const FILL_PATTERN_MANY_PATHS = 10 // Many paths threshold (relaxes PPP check)
+const FILL_PATTERN_MAX_PPP_MANY = 60 // Max PPP when many paths present
+const FILL_PATTERN_MAX_PATHS = 40 // Too many paths = fractal, not fill pattern
+const SDF_RATIO_MULTI = 3 // Ratio threshold for multi-path (text)
+const SDF_RATIO_OPEN = 2 // Ratio threshold for open fractals
+const SDF_RATIO_VERY_HIGH = 40 // Very high ratio single-path = footprint (lsystem)
+const DOMINANCE_RATIO = 5 // Path area ratio for "largest dominates"
 const SCALE = 1000
 
 // Fill a polygon into a bitmap using scanline rasterization
@@ -82,7 +81,13 @@ const fillPolygonToBitmap = (bitmap, width, height, vertices) => {
 // Stroke (draw outline of) a polygon into a bitmap using Bresenham's line algorithm
 // Unlike fillPolygonToBitmap, this only draws the edges, not the interior
 // thickness controls how wide the stroke is
-const strokePolygonToBitmap = (bitmap, width, height, vertices, thickness = 1) => {
+const strokePolygonToBitmap = (
+  bitmap,
+  width,
+  height,
+  vertices,
+  thickness = 1,
+) => {
   if (vertices.length < 2) return
 
   const halfThick = Math.floor(thickness / 2)
@@ -234,7 +239,8 @@ export const boundaryAlgorithm = (vertices) => {
   const sortedAreas = [...pathAreas].sort((a, b) => b - a)
   const maxArea = sortedAreas[0]
   const secondArea = sortedAreas[1] || 0
-  const largestDominates = boundary.length > 1 &&
+  const largestDominates =
+    boundary.length > 1 &&
     (secondArea === 0 || maxArea / secondArea > DOMINANCE_RATIO)
   let hull
 
@@ -267,13 +273,13 @@ export const boundaryAlgorithm = (vertices) => {
   // These need footprint, not the simpler fill pattern handling
   const manyPaths = boundary.length > FILL_PATTERN_MANY_PATHS
   const tooManyPaths = boundary.length > FILL_PATTERN_MAX_PATHS
-  const pppThreshold = manyPaths ?
-    FILL_PATTERN_MAX_PPP_MANY :
-    FILL_PATTERN_MAX_PPP
+  const pppThreshold = manyPaths
+    ? FILL_PATTERN_MAX_PPP_MANY
+    : FILL_PATTERN_MAX_PPP
 
   const isFillPattern =
     boundary.length > 1 &&
-    !tooManyPaths &&  // Too many paths = fractal, not fill pattern
+    !tooManyPaths && // Too many paths = fractal, not fill pattern
     ratio > FILL_PATTERN_RATIO_MIN &&
     allPoints.length > FILL_PATTERN_MIN_POINTS &&
     pointsPerPath < pppThreshold
@@ -284,12 +290,16 @@ export const boundaryAlgorithm = (vertices) => {
   //   Very high ratio single-path (lsystem with ratio 54)
   //   Open paths with degenerate Clipper results (zero-area paths from precision issues)
   // Moderate-ratio single-path closed shapes (Maze, Hypocycloid) use expand
-  const hasZeroAreaPaths = maxArea < minArea  // Very small area indicates degenerate geometry
-  const hasDegenerateRatio = ratio <= 1  // Hull collapsed to convex hull
+  const hasZeroAreaPaths = maxArea < minArea // Very small area indicates degenerate geometry
+  const hasDegenerateRatio = ratio <= 1 // Hull collapsed to convex hull
   const useFootprint =
     (boundary.length > 1 && ratio > SDF_RATIO_MULTI && !isFillPattern) ||
-    (isOpenPath && boundary.length === 1 && (ratio >= SDF_RATIO_OPEN || hasDegenerateRatio)) ||
-    (isOpenPath && boundary.length > 1 && (hasZeroAreaPaths || hasDegenerateRatio)) ||  // Degenerate open path
+    (isOpenPath &&
+      boundary.length === 1 &&
+      (ratio >= SDF_RATIO_OPEN || hasDegenerateRatio)) ||
+    (isOpenPath &&
+      boundary.length > 1 &&
+      (hasZeroAreaPaths || hasDegenerateRatio)) || // Degenerate open path
     (boundary.length === 1 && ratio > SDF_RATIO_VERY_HIGH)
 
   // Determine algorithm
@@ -297,8 +307,12 @@ export const boundaryAlgorithm = (vertices) => {
 
   if (useFootprint) {
     algorithm = "footprint"
-    reason = ratio > SDF_RATIO_VERY_HIGH ? "very high ratio" :
-      (boundary.length > 1 ? "multi-path" : "open path")
+    reason =
+      ratio > SDF_RATIO_VERY_HIGH
+        ? "very high ratio"
+        : boundary.length > 1
+          ? "multi-path"
+          : "open path"
   } else if (isFillPattern) {
     algorithm = "concave"
     reason = "fill pattern"
@@ -394,8 +408,10 @@ const applyEdgeOffset = (hull, scale, vertices) => {
     const [x0, y0] = dedupedHull[(i - 1 + n) % n]
     const [x1, y1] = dedupedHull[i]
     const [x2, y2] = dedupedHull[(i + 1) % n]
-    const v1x = x0 - x1, v1y = y0 - y1
-    const v2x = x2 - x1, v2y = y2 - y1
+    const v1x = x0 - x1,
+      v1y = y0 - y1
+    const v2x = x2 - x1,
+      v2y = y2 - y1
     const cross = v1x * v2y - v1y * v2x
     const dot = v1x * v2x + v1y * v2y
     const angle = Math.atan2(Math.abs(cross), dot)
@@ -495,7 +511,10 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
   const dilationD = ((dilationScale / 100) * smallerDim) / 2
   const BITMAP_SIZE = 512
   const MAX_CONTOUR_POINTS = 1000
-  const worldHull = dedupedHull.map(([x, y]) => ({ x: x / SCALE, y: y / SCALE }))
+  const worldHull = dedupedHull.map(([x, y]) => ({
+    x: x / SCALE,
+    y: y / SCALE,
+  }))
   const hullWorldBounds = worldHull.reduce(
     (acc, v) => ({
       minX: Math.min(acc.minX, v.x),
@@ -503,7 +522,7 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
       minY: Math.min(acc.minY, v.y),
       maxY: Math.max(acc.maxY, v.y),
     }),
-    { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
+    { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity },
   )
   const worldD = dilationD / SCALE
   const padding = worldD * 2
@@ -512,7 +531,7 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
   const bitmapScale = BITMAP_SIZE / Math.max(worldWidth, worldHeight)
   const bitmapWidth = Math.ceil(worldWidth * bitmapScale)
   const bitmapHeight = Math.ceil(worldHeight * bitmapScale)
-  const bitmapHull = worldHull.map(v => ({
+  const bitmapHull = worldHull.map((v) => ({
     x: (v.x - hullWorldBounds.minX + padding) * bitmapScale,
     y: (v.y - hullWorldBounds.minY + padding) * bitmapScale,
   }))
@@ -559,7 +578,8 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
       const center = centroid(vertices)
       const centerX = center.x * SCALE
       const centerY = center.y * SCALE
-      const scaleFactor = (1 + scale / 100) / (1 + DILATION_SCALE_THRESHOLD / 100)
+      const scaleFactor =
+        (1 + scale / 100) / (1 + DILATION_SCALE_THRESHOLD / 100)
 
       offsetPoints = offsetPoints.map(([x, y]) => [
         centerX + (x - centerX) * scaleFactor,
@@ -601,9 +621,10 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   }
 
   const detection = boundaryAlgorithm(vertices)
-  const { isFillPattern, isOpenPath, ratio, largestDominates } = detection
-  const useFootprint = algorithm === 2 || (algorithm === null && detection.algorithm === "footprint")
-  const autoAlgorithm = detection.algorithm
+  const { isFillPattern, largestDominates } = detection
+  const useFootprint =
+    algorithm === 2 ||
+    (algorithm === null && detection.algorithm === "footprint")
   const bounds = findBounds(vertices)
   const inputWidth = bounds[1].x - bounds[0].x
   const inputHeight = bounds[1].y - bounds[0].y
@@ -623,11 +644,12 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       const center = centroid(vertices)
       const scaleFactor = 1 + scale / 100
 
-      return fallbackHull.map((v) =>
-        new Victor(
-          center.x + (v.x - center.x) * scaleFactor,
-          center.y + (v.y - center.y) * scaleFactor,
-        )
+      return fallbackHull.map(
+        (v) =>
+          new Victor(
+            center.x + (v.x - center.x) * scaleFactor,
+            center.y + (v.y - center.y) * scaleFactor,
+          ),
       )
     }
 
@@ -653,7 +675,6 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   const pathAreas = boundary.map((p) => Math.abs(Clipper.area(p)))
   const sortedAreas = [...pathAreas].sort((a, b) => b - a)
   const maxArea = sortedAreas[0]
-  const secondArea = sortedAreas[1] || 0
   let hull
 
   if (boundary.length === 1) {
@@ -726,24 +747,31 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       }
       segments.sort((a, b) => a - b)
 
-      const ds_med = segments.length > 0 ? segments[Math.floor(segments.length / 2)] : 1
+      const ds_med =
+        segments.length > 0 ? segments[Math.floor(segments.length / 2)] : 1
       const D = Math.max(inputWidth, inputHeight, 1)
 
       // World-space base width: clamp between 0.5% and 2% of bbox diagonal
       const k = 3
       const w_world_min = 0.005 * D
       const w_world_max = 0.02 * D
-      const w_world_base = Math.max(w_world_min, Math.min(k * ds_med, w_world_max))
+      const w_world_base = Math.max(
+        w_world_min,
+        Math.min(k * ds_med, w_world_max),
+      )
 
       // Add scale-based expansion to stroke width for uniform border growth
       const smallerDim = Math.min(inputWidth, inputHeight)
-      const scaleExpansion = (scale / 100) * smallerDim / 2
+      const scaleExpansion = ((scale / 100) * smallerDim) / 2
       const w_world = w_world_base + scaleExpansion
 
       // Setup bitmap with padding
       const padding = Math.max(inputWidth, inputHeight) * PADDING_RATIO
       const bitmapWidth = BITMAP_SIZE
-      const bitmapHeight = Math.round(BITMAP_SIZE * (inputHeight + 2 * padding) / (inputWidth + 2 * padding))
+      const bitmapHeight = Math.round(
+        (BITMAP_SIZE * (inputHeight + 2 * padding)) /
+          (inputWidth + 2 * padding),
+      )
 
       // Scale factor: world coords to bitmap coords
       const scaleX = bitmapWidth / (inputWidth + 2 * padding)
@@ -754,7 +782,7 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       const w_px = Math.max(2, Math.round(w_world * bitmapScale))
 
       // Transform vertices to bitmap space
-      const bitmapVertices = vertices.map(v => ({
+      const bitmapVertices = vertices.map((v) => ({
         x: (v.x - bounds[0].x + padding) * bitmapScale,
         y: (v.y - bounds[0].y + padding) * bitmapScale,
       }))
@@ -764,11 +792,22 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       const bitmap = new Uint8ClampedArray(bitmapWidth * bitmapHeight)
 
       // Stroke the original vertices - this is the actual pen path
-      strokePolygonToBitmap(bitmap, bitmapWidth, bitmapHeight, bitmapVertices, w_px)
+      strokePolygonToBitmap(
+        bitmap,
+        bitmapWidth,
+        bitmapHeight,
+        bitmapVertices,
+        w_px,
+      )
 
       // Small dilation to smooth edges and merge filled regions with strokes
       const SMOOTH_RADIUS = Math.max(2, Math.round(w_px * 0.15))
-      const finalBitmap = dilate(bitmap, bitmapWidth, bitmapHeight, SMOOTH_RADIUS)
+      const finalBitmap = dilate(
+        bitmap,
+        bitmapWidth,
+        bitmapHeight,
+        SMOOTH_RADIUS,
+      )
 
       // Compute SDF on dilated bitmap
       const sdf = calcSdf(finalBitmap, {
@@ -784,7 +823,10 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
         .size([bitmapWidth, bitmapHeight])
         .thresholds([EDGE_THRESHOLD])(sdf)
 
-      if (contourResult.length === 0 || contourResult[0].coordinates.length === 0) {
+      if (
+        contourResult.length === 0 ||
+        contourResult[0].coordinates.length === 0
+      ) {
         return null
       }
 
@@ -854,8 +896,7 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       rawPoints.sdfApplied = true
 
       return rawPoints
-
-    } catch (e) {
+    } catch {
       return null
     }
   }
@@ -865,8 +906,8 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   // - footprint: complex shapes, multi-path text, open fractals
   // - concave: fill patterns (Voronoi, Tessellation)
   // - expand: simple closed shapes (Star, Heart, Circle, Polygon, etc.)
-  const useExpand = algorithm === 1 ||
-    (algorithm === null && !useFootprint && !isFillPattern)
+  const useExpand =
+    algorithm === 1 || (algorithm === null && !useFootprint && !isFillPattern)
 
   if (useFootprint) {
     hull = traceInkFootprint() || hull
@@ -904,8 +945,13 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
 
   if (hull.sdfApplied) result.sdfApplied = true
 
-  result.algorithm = useFootprint ? "footprint" :
-    (useExpand ? "expand" : (isFillPattern ? "concave" : "concave"))
+  result.algorithm = useFootprint
+    ? "footprint"
+    : useExpand
+      ? "expand"
+      : isFillPattern
+        ? "concave"
+        : "concave"
 
   return result
 }

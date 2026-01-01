@@ -17,7 +17,6 @@ import {
   toLocalSpace,
 } from "@/common/geometry"
 import { traceBoundary } from "@/common/boundary"
-import Victor from "victor"
 import { orderByKey } from "@/common/util"
 import { insertOne, prepareAfterAdd } from "@/common/slice"
 import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
