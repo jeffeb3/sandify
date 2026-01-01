@@ -24,7 +24,7 @@ Candidates for new shape types. All are algorithmic, render in 2D, and maintain 
 | [Simple Curves](#simple-curves) | Circle, Polygon, Star, Heart, Reuleaux, Rose | [Superformula](#superformula-gielis-curve), [Butterfly](#butterfly-curve) | [Heart variants](#heart-equation-variants), [Polygon vertex step](#polygon-vertex-step), [Maurer mode](#rose-maurer-mode) |
 | [Spirals](#spirals) | - | [Spiral](#spiral), [Stepped Spiral](#stepped-spiral), [Phyllotaxis](#phyllotaxis) | |
 | Text | InputText, FancyText | | [InputText fonts](#inputtext-additional-fonts), [text on path](#text-text-on-path) |
-| [Tiles](#tiles) | TessellationTwist, Maze | [Truchet](#truchet-tiles), [Labyrinth](#labyrinth-tiles), [Celtic](#wovenceltic-tiles), [Meander](#meandergreek-key-tiles), [Girih](#girih-tiles), [Hyperbolic](#hyperbolic-tiling), [Curve Stitching](#curve-stitching-tiles) | [TessellationTwist options](#tessellationtwist-additional-options), [Maze algorithms/grids](#maze-additional-algorithms-and-grids) |
+| [Tiles](#tiles) | TessellationTwist, Maze, FlowTile | [Labyrinth](#labyrinth-tiles), [Celtic](#wovenceltic-tiles), [Meander](#meandergreek-key-tiles), [Girih](#girih-tiles), [Hyperbolic](#hyperbolic-tiling), [Curve Stitching](#curve-stitching-tiles) | [TessellationTwist options](#tessellationtwist-additional-options), [Maze algorithms/grids](#maze-additional-algorithms-and-grids), [Truchet enhancements](#truchet-tiles) |
 | [Topology](#topology) | - | [Knot](#knot), [Braid](#braid), [Linked Rings](#linked-rings), [3D Wireframe](#3d-wireframe) | |
 
 ## Constructions
@@ -318,15 +318,8 @@ Grid-based patterns where tiles connect at edges to form continuous paths.
 
 ### Truchet Tiles
 
-Classic tile system where each tile contains connectors between edge midpoints. Random or rule-based rotation creates meandering continuous paths. See [intertwined quarter circles](https://observablehq.com/@xenomachina/truchet-tiles-variant-intertwined-quarter-circles).
+Enhancements to existing Flow Tile shape:
 
-- Parameters: grid size, tile size, rotation pattern (random, alternating, noise-based)
-- Guaranteed edge connectivity
-
-Variants:
-
-- Arc - Quarter-circle arcs connecting adjacent edges; smooth flowing curves
-- Diagonal - Straight diagonal lines; angular maze-like patterns
 - Multi-scale - Recursive subdivision where tiles split into smaller Truchet patterns; organic density variation
 - Hex - Adapted to hexagonal grid with 120° arcs and three-way connections; different topology
 - Triangle - On triangular grids with 60° arc connections
@@ -471,11 +464,7 @@ InputText already uses single-stroke fonts ideal for sand tables. The Hershey fo
 
 Missing classic L-systems that could be added:
 
-- Lévy C Curve - elegant symmetric fractal, simple rules
-- Dragon Curve - classic folding paper fractal
-- Terdragon - triangular dragon variant
 - Moore Curve - Hilbert variant that closes into a loop
-- Peano Curve - the original space-filling curve
 - Minkowski Sausage - Koch island variant
 
 ### LSystem: Custom User-Defined
@@ -542,7 +531,7 @@ Effects modify shape vertices. Classification of existing effects and candidates
 |----------|------------------|-------------|--------------|
 | [Transform](#transform-effects) | Loop, Transformer, Track | [Mirror](#mirror), [Kaleidoscope](#kaleidoscope), [Tile](#tile) | [Track paths](#track-additional-paths) |
 | [Distort](#distort-effects) | Warp, Fisheye, Noise, Voronoi | [Pixelate](#pixelate), [Spiral Wrap](#spiral-wrap), [Shatter](#shatter), [Fractal Edge](#fractal-edge) | [Warp types](#warp-additional-types) |
-| [Path](#path-effects) | Mask, FineTuning | [Simplify](#simplify) | [Mask shapes](#mask-additional-shapes), [FineTuning border](#finetuning-border-options) |
+| [Path](#path-effects) | Mask, FineTuning | [Simplify](#simplify) | [FineTuning border](#finetuning-border-options) |
 | Other | ProgramCode | | |
 
 ## Transform Effects
@@ -655,16 +644,6 @@ Currently has angle, quad, circle, grid, shear, custom.
 - wave - Sinusoidal displacement along axis; parameters: amplitude, wavelength, axis angle
 - twist - Rotation amount varies with distance from center; spiral distortion
 - bulge - Local expand/contract from a point; complementary to Fisheye
-
-### Mask: Additional Shapes
-
-Currently supports rectangle and circle.
-
-- Polygon - n-sided regular polygon mask
-- Star - star-shaped mask
-- Custom - use another layer's shape as mask (reference layer)
-
-Custom mask is high complexity: requires generalizing machine abstraction or new polygon-clipping algorithm for arbitrary shapes (point-in-polygon, perimeter tracing, line-polygon intersection).
 
 ### FineTuning: Border Options
 
