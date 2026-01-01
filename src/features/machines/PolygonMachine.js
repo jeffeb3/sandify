@@ -646,26 +646,38 @@ export default class PolygonMachine extends Machine {
   }
 
   // Compute intersection of input polygon with mask polygon using Clipper2.
-  // Returns array of Victor vertices, empty array if no intersection, or null if Clipper fails.
   clipperIntersect(inputVertices) {
+    return this.clipperOperation(inputVertices, "intersect")
+  }
+
+  // Compute difference of input polygon minus mask polygon using Clipper2.
+  clipperDifference(inputVertices) {
+    return this.clipperOperation(inputVertices, "difference")
+  }
+
+  // Generic Clipper boolean operation (intersect, difference)
+  // Returns array of Victor vertices, empty array if no overlap, or null if Clipper fails.
+  clipperOperation(inputVertices, operation) {
     if (this.boundary.length < 3 || inputVertices.length < 3) {
       return null
     }
 
     const inputPath = this.verticesToPath64(inputVertices)
     const maskPath = this.verticesToPath64(this.boundary)
-    const result = Clipper.Intersect([inputPath], [maskPath], FillRule.NonZero)
+    const result =
+      operation === "difference"
+        ? Clipper.Difference([inputPath], [maskPath], FillRule.NonZero)
+        : Clipper.Intersect([inputPath], [maskPath], FillRule.NonZero)
 
     if (!result) {
-      return null // Clipper failed
+      return null
     }
 
     if (result.length === 0) {
-      return [] // No intersection - shapes don't overlap
+      return []
     }
 
-    // Convert all paths to Victor vertices and combine them
-    // For multiple disconnected regions, we connect them with the shortest jumps
+    // Convert all paths to Victor vertices
     const allPaths = result.map((path) =>
       path.map((pt) => new Victor(pt.x / CLIPPER_SCALE, pt.y / CLIPPER_SCALE)),
     )
@@ -677,13 +689,16 @@ export default class PolygonMachine extends Machine {
       }
     })
 
-    // If only one path, return it directly
     if (allPaths.length === 1) {
       return allPaths[0]
     }
 
-    // Use graph-based approach (like SVG import) to connect multiple paths
-    // This minimizes travel by finding optimal Eulerian trail through all edges
+    // Use graph-based approach to connect multiple paths optimally
+    return this.traceClipperPaths(allPaths)
+  }
+
+  // Connect multiple Clipper result paths using Eulerian trail
+  traceClipperPaths(allPaths) {
     const graph = this.buildClipperGraph(allPaths)
 
     graph.connectComponents()
@@ -699,12 +714,10 @@ export default class PolygonMachine extends Machine {
     const trail = eulerianTrail({ edges: eulerizedEdges })
     const vertices = []
 
-    // Convert trail back to vertices
     for (const nodeKey of trail) {
       const node = graph.nodeMap[nodeKey]
 
       if (node) {
-        // Skip duplicate consecutive vertices
         if (
           vertices.length === 0 ||
           vertices[vertices.length - 1].distance(node) > CLOSED_PATH_EPSILON
