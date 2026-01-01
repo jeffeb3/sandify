@@ -27,6 +27,18 @@ const SDF_RATIO_VERY_HIGH = 40 // Very high ratio single-path = footprint (lsyst
 const DOMINANCE_RATIO = 5 // Path area ratio for "largest dominates"
 const SCALE = 1000
 
+// Algorithm name to numeric value mapping for traceBoundary
+// null = auto, 0 = concave, 1 = expand, 2 = footprint, 3 = convex
+export const boundaryAlgorithmMap = {
+  auto: null,
+  expand: 1,
+  concave: 0,
+  footprint: 2,
+  convex: 3,
+}
+
+export const boundaryAlgorithmChoices = Object.keys(boundaryAlgorithmMap)
+
 // Fill a polygon into a bitmap using scanline rasterization
 // Used for SDF-based border tracing
 const fillPolygonToBitmap = (bitmap, width, height, vertices) => {
@@ -902,15 +914,35 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   }
 
   // Select algorithm based on parameter or auto-detect
+  // Algorithm values: 0 = concave, 1 = expand, 2 = footprint, 3 = convex, null = auto
   // Auto-detect logic (when algorithm === null):
   // - footprint: complex shapes, multi-path text, open fractals
   // - concave: fill patterns (Voronoi, Tessellation)
   // - expand: simple closed shapes (Star, Heart, Circle, Polygon, etc.)
   const useExpand =
     algorithm === 1 || (algorithm === null && !useFootprint && !isFillPattern)
+  const useConvex = algorithm === 3
+  const useConcave = algorithm === 0
+  const autoFillPattern = algorithm === null && isFillPattern && !useFootprint
 
   if (useFootprint) {
     hull = traceInkFootprint() || hull
+  } else if (useConvex) {
+    // Convex mode: use convex hull, apply centroid scale
+    hull = convex.map((pt) => [pt.x, pt.y])
+
+    if (scale !== 0 && hull.length > 0) {
+      const center = centroid(vertices)
+      const centerX = center.x * SCALE
+      const centerY = center.y * SCALE
+      const scaleFactor = 1 + scale / 100
+
+      hull = hull.map(([x, y]) => [
+        centerX + (x - centerX) * scaleFactor,
+        centerY + (y - centerY) * scaleFactor,
+      ])
+    }
+    hull.sdfApplied = true // Skip edge offset below
   } else if (useExpand) {
     // Expand mode: use concaveman hull (already computed), apply centroid scale
     // Mark as sdfApplied to skip edge offset math below
@@ -928,7 +960,11 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
       ])
     }
     hull.sdfApplied = true // Skip edge offset below
-  } else if (isFillPattern || (boundary.length > 1 && !useFootprint)) {
+  } else if (useConcave) {
+    // Explicit concave: use concaveman hull (already computed), apply edge offset below
+    // hull is already set from concaveman, just let it fall through to edge offset
+  } else if (autoFillPattern || boundary.length > 1) {
+    // Auto-detected fill patterns or multi-boundary shapes
     hull = traceFillPattern()
   }
 
@@ -947,10 +983,10 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
 
   result.algorithm = useFootprint
     ? "footprint"
-    : useExpand
-      ? "expand"
-      : isFillPattern
-        ? "concave"
+    : useConvex
+      ? "convex"
+      : useExpand
+        ? "expand"
         : "concave"
 
   return result

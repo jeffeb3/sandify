@@ -8,7 +8,11 @@ import {
   toLocalSpace,
   toWorldSpace,
 } from "@/common/geometry"
-import { traceBoundary } from "@/common/boundary"
+import {
+  traceBoundary,
+  boundaryAlgorithmMap,
+  boundaryAlgorithmChoices,
+} from "@/common/boundary"
 import PolarMachine from "@/features/machines/PolarMachine"
 import RectMachine from "@/features/machines/RectMachine"
 import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
@@ -56,6 +60,12 @@ const options = {
   maskLayerId: {
     title: "Source layer",
     type: "layerSelect",
+    isVisible: (model, state) => state.maskMachine === "layer",
+  },
+  maskBoundaryAlgorithm: {
+    title: "Boundary algorithm",
+    type: "dropdown",
+    choices: boundaryAlgorithmChoices,
     isVisible: (model, state) => state.maskMachine === "layer",
   },
   maskMinimizeMoves: {
@@ -106,6 +116,7 @@ export default class Mask extends Effect {
         maskInvert: false,
         maskBorder: false,
         maskLayerId: null,
+        maskBoundaryAlgorithm: "auto",
       },
     }
   }
@@ -139,7 +150,9 @@ export default class Mask extends Effect {
       }
 
       // Trace boundary first (handles self-intersecting shapes), then center, scale, and rotate
-      const boundary = traceBoundary(maskSourceVertices)
+      const algorithm =
+        boundaryAlgorithmMap[effect.maskBoundaryAlgorithm || "auto"]
+      const boundary = traceBoundary(maskSourceVertices, 0, algorithm)
       const centeredMask = centerOnOrigin(cloneVertices(boundary))
       const scaledMask = resizeVertices(
         cloneVertices(centeredMask),

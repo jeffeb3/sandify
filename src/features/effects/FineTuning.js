@@ -10,7 +10,11 @@ import {
   distance,
   boundingVerticesAtLength,
 } from "@/common/geometry"
-import { traceBoundary } from "@/common/boundary"
+import {
+  traceBoundary,
+  boundaryAlgorithmMap,
+  boundaryAlgorithmChoices,
+} from "@/common/boundary"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
 import { getShape } from "@/features/shapes/shapeFactory"
@@ -43,7 +47,7 @@ const options = {
   borderAlgorithm: {
     title: "\u00A0\u00A0\u00A0\u00A0Algorithm",
     type: "dropdown",
-    choices: ["auto", "expand", "concave", "footprint", "convex"],
+    choices: boundaryAlgorithmChoices,
     isVisible: (model, state) => {
       return state.drawBorder === true
     },
@@ -227,8 +231,7 @@ export default class FineTuning extends Effect {
     } else {
       // Convert algorithm string to number for traceBoundary
       // null = auto-detect (production behavior)
-      const stageMap = { auto: null, expand: 1, concave: 0, footprint: 2 }
-      const stageNum = stageMap[algorithm] ?? null
+      const stageNum = boundaryAlgorithmMap[algorithm] ?? null
 
       border = traceBoundary(cloneVertices(vertices), scale, stageNum)
     }
