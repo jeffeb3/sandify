@@ -767,6 +767,28 @@ export const pointInPolygon = (px, py, ring) => {
   return inside
 }
 
+// Project a point onto a line segment, returning the closest point on the segment
+export const projectToSegment = (point, p1, p2) => {
+  const dx = p2.x - p1.x
+  const dy = p2.y - p1.y
+  const lenSq = dx * dx + dy * dy
+
+  if (lenSq < 1e-10) {
+    return new Victor(p1.x, p1.y)
+  }
+
+  let t = ((point.x - p1.x) * dx + (point.y - p1.y) * dy) / lenSq
+  t = Math.max(0, Math.min(1, t))
+
+  return new Victor(p1.x + t * dx, p1.y + t * dy)
+}
+
+// Distance from a point to a line segment
+export const distanceToSegment = (point, p1, p2) => {
+  const projected = projectToSegment(point, p1, p2)
+  return distance(point, projected)
+}
+
 // Calculate signed area of a polygon using the shoelace formula
 // https://en.wikipedia.org/wiki/Shoelace_formula
 // Positive = counter-clockwise, negative = clockwise

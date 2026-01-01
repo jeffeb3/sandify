@@ -575,6 +575,102 @@ describe("PolygonMachine", () => {
     })
   })
 
+  describe("multiple Clipper intersection regions (Chinese Postman)", () => {
+    it("includes all disconnected clipped regions when rectangle spans C-shaped mask notch", () => {
+      // C-shaped mask: rectangle with a notch cut from the right side
+      // This creates a shape like:
+      //   +-------+
+      //   |       |
+      //   |  +-+  |
+      //   |  | |  |
+      //   |  +-+  |
+      //   |       |
+      //   +-------+
+      // When a tall rectangle spans across the notch, Clipper returns 2 disconnected regions
+      const cMask = [
+        new Victor(-50, -50),  // bottom-left
+        new Victor(50, -50),   // bottom-right
+        new Victor(50, -15),   // notch bottom-right
+        new Victor(10, -15),   // notch bottom-left
+        new Victor(10, 15),    // notch top-left
+        new Victor(50, 15),    // notch top-right
+        new Victor(50, 50),    // top-right
+        new Victor(-50, 50),   // top-left
+        new Victor(-50, -50),  // close
+      ]
+
+      // Tall thin rectangle that spans across the notch
+      // This rectangle overlaps both the top and bottom "arms" of the C
+      const tallRect = [
+        new Victor(20, -40),
+        new Victor(40, -40),
+        new Victor(40, 40),
+        new Victor(20, 40),
+        new Victor(20, -40),  // close
+      ]
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, cMask)
+      const result = machine.polish([...tallRect])
+
+      // Should have vertices in BOTH the top region (y > 15) and bottom region (y < -15)
+      const hasTopVertices = result.some(v => v.y > 20)
+      const hasBottomVertices = result.some(v => v.y < -20)
+
+      expect(hasTopVertices).toBe(true)
+      expect(hasBottomVertices).toBe(true)
+
+      // All result vertices should be inside or on the C-mask boundary
+      result.forEach((v) => {
+        const nearest = machine.nearestVertex(v)
+        expect(v.distance(nearest)).toBeLessThan(1)
+      })
+    })
+
+    it("connects multiple regions without creating paths outside the mask", () => {
+      // Same C-shaped mask as above
+      const cMask = [
+        new Victor(-50, -50),
+        new Victor(50, -50),
+        new Victor(50, -15),
+        new Victor(10, -15),
+        new Victor(10, 15),
+        new Victor(50, 15),
+        new Victor(50, 50),
+        new Victor(-50, 50),
+        new Victor(-50, -50),
+      ]
+
+      // Rectangle that creates 2 disconnected regions
+      const tallRect = [
+        new Victor(20, -40),
+        new Victor(40, -40),
+        new Victor(40, 40),
+        new Victor(20, 40),
+        new Victor(20, -40),
+      ]
+
+      const machine = new PolygonMachine({ minimizeMoves: false }, cMask)
+      const result = machine.polish([...tallRect])
+
+      // All vertices should be inside or on boundary (no shortcuts through the notch)
+      result.forEach((v) => {
+        // Point should either be inside the C-mask or on its perimeter
+        const isInside = machine.inBounds(v)
+        const nearestOnPerimeter = machine.nearestPerimeterVertex(v)
+        const distToPerimeter = v.distance(nearestOnPerimeter)
+
+        // Either inside or very close to perimeter
+        expect(isInside || distToPerimeter < 1).toBe(true)
+      })
+
+      // Should not have any vertices in the notch area (x > 10 && |y| < 15)
+      const verticesInNotch = result.filter(v =>
+        v.x > 10 && v.x < 50 && v.y > -15 && v.y < 15
+      )
+      expect(verticesInNotch.length).toBe(0)
+    })
+  })
+
   describe("edge cases", () => {
     it("passes through input unchanged when boundary has fewer than 3 vertices", () => {
       const invalidBoundary = [new Victor(0, 0), new Victor(10, 10)]
