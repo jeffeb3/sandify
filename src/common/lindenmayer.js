@@ -11,20 +11,20 @@ const shortestPath = (nodes) => {
   for (let i = 0; i < nodes.length - 1; i++) {
     const node1 = nodes[i]
     const node2 = nodes[i + 1]
-    let node1Key = node1.toString()
-    let edge12Key = edgeKey(node1, node2)
+    const node1Key = node1.toString()
+    const edge12Key = edgeKey(node1, node2)
 
     if (visited[edge12Key]) {
-      const unvisitedNode = nearestUnvisitedNode(i + 1, nodes, visited, graph)
+      const result = nearestUnvisitedNode(i + 1, nodes, visited, graph)
 
-      if (unvisitedNode != null) {
+      if (result) {
         const shortestSubPath = graph.dijkstraShortestPath(
           node1Key,
-          unvisitedNode.toString(),
+          result.node.toString(),
         )
 
         path.push(...cloneVertices(shortestSubPath.slice(1)))
-        i = nodes.indexOf(unvisitedNode) - 1
+        i = result.index - 1
       }
     } else {
       path.push(node2)
@@ -41,7 +41,7 @@ const nearestUnvisitedNode = (nodeIndex, nodes, visited, graph) => {
     const node2 = nodes[i + 1]
 
     if (!visited[edgeKey(node1, node2)]) {
-      return node2
+      return { node: node2, index: i + 1 }
     }
   }
 
@@ -98,6 +98,7 @@ export const lsystem = (config) => {
     }
     input = output
   }
+
   return output
 }
 
@@ -111,10 +112,26 @@ const lsystemDraw = (vertex, angle, config) => {
   )
 }
 
+// Skip to matching closing bracket, accounting for nesting
+const skipBranch = (instructions, startIndex) => {
+  let depth = 1
+  let i = startIndex + 1
+
+  while (i < instructions.length && depth > 0) {
+    if (instructions[i] === "[") depth++
+    else if (instructions[i] === "]") depth--
+    i++
+  }
+
+  return i - 1 // return index of matching ]
+}
+
 export const lsystemPath = (instructions, config) => {
   let vertex = new Victor(0, 0)
   let currVertices = [vertex]
   let angle = -Math.PI / 2
+  const rng = config.rng || Math.random
+  const branchProb = config.branchProbability ?? 1
 
   if (config.startingAngle) {
     angle =
@@ -125,6 +142,7 @@ export const lsystemPath = (instructions, config) => {
 
   // This will store the previous return paths we are not working on.
   let returnPaths = []
+
   for (let i = 0; i < instructions.length; i++) {
     let char = instructions[i]
 
@@ -145,11 +163,19 @@ export const lsystemPath = (instructions, config) => {
         returnPaths.slice(-1)[0].push("B")
       }
     } else if (char === "[") {
-      // open a branch
-      returnPaths.push([])
+      // Randomly skip branch based on probability
+      if (branchProb < 1 && rng() > branchProb) {
+        i = skipBranch(instructions, i)
+      } else {
+        // open a branch
+        returnPaths.push([])
+      }
     } else if (char === "]") {
       // Return to the beginning of the branch
-      let returnPath = returnPaths.pop().reverse()
+      let returnPath = returnPaths.pop()
+
+      if (!returnPath) continue
+      returnPath.reverse()
 
       for (let j = 0; j < returnPath.length; j++) {
         let revChar = returnPath[j]
