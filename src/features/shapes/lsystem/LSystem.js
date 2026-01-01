@@ -44,6 +44,15 @@ const options = {
     max: 100,
     step: 5,
     default: 100,
+    isVisible: (model, state) => {
+      const subtype = subtypes[state.subtype]
+
+      if (!subtype) return false
+
+      const allRules = subtype.axiom + Object.values(subtype.rules).join("")
+
+      return allRules.includes("[")
+    },
   },
   seed: {
     title: "Seed",
@@ -51,7 +60,14 @@ const options = {
     max: 999,
     step: 1,
     isVisible: (model, state) => {
-      return (state.lsystemBranchProbability ?? 100) < 100
+      const subtype = subtypes[state.subtype]
+
+      if (!subtype) return false
+
+      const allRules = subtype.axiom + Object.values(subtype.rules).join("")
+      const hasBranches = allRules.includes("[")
+
+      return hasBranches && (state.lsystemBranchProbability ?? 100) < 100
     },
   },
 }
@@ -82,12 +98,9 @@ export default class LSystem extends Shape {
   getVertices(state) {
     const shape = state.shape
     const iterations = shape.iterations || 1
-
-    // generate our vertices using a set of l-system rules
     const subtype = subtypes[shape.subtype]
     const baseAngle = subtype.angle !== undefined ? subtype.angle : Math.PI / 2
     const offsetRadians = ((shape.angleOffset || 0) * Math.PI) / 180
-
     const config = {
       ...subtype,
       iterations,
@@ -96,7 +109,6 @@ export default class LSystem extends Shape {
       rng: seedrandom(shape.seed),
       branchProbability: (shape.lsystemBranchProbability ?? 100) / 100,
     }
-
     const path = lsystemOptimize(lsystemPath(lsystem(config), config), config)
     const scale = 18.0 // to normalize starting size
 
