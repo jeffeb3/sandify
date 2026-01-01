@@ -1,3 +1,5 @@
+/* global console */
+
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
 import {
@@ -6,7 +8,7 @@ import {
   cloneVertex,
   annotateVertices,
 } from "@/common/geometry"
-import clip from "liang-barsky"
+import { clip } from "liang-barsky"
 
 const rectMachineOptions = {
   minX: {

@@ -1,3 +1,5 @@
+/* global console */
+
 import { compact } from "lodash"
 
 // set to true to enable console logging

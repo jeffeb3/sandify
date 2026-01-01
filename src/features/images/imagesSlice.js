@@ -1,3 +1,5 @@
+/* global document, Image */
+
 import {
   createSlice,
   createEntityAdapter,

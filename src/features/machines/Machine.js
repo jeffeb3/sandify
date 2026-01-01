@@ -242,7 +242,6 @@ export default class Machine {
       let minDist = Number.MAX_SAFE_INTEGER
       let prev = current
 
-      /* eslint-disable no-loop-func */
       segments.forEach((segment, index) => {
         const dist = Math.min(
           this.perimeterDistance(current[current.length - 1], segment[0]),
@@ -257,7 +256,6 @@ export default class Machine {
           minDist = dist
         }
       })
-      /* eslint-enable no-loop-func */
 
       // reverse if needed to connect
       current = segments.splice(currentIndex, 1)[0]

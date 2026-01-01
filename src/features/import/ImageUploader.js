@@ -1,3 +1,5 @@
+/* global FileReader, Image */
+
 import { toast } from "react-toastify"
 import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"

@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
 import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
 import { createCachedSelector } from "re-reselect"

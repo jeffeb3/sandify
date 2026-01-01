@@ -666,6 +666,7 @@ const raysolConverter = (vertices) => {
 
 export const MonospaceFont = (ch) => {
   let upper = ch.toUpperCase()
+
   // eslint-disable-next-line no-prototype-builtins
   if (billsey.hasOwnProperty(upper)) {
     return billseyConverter(billsey[upper])

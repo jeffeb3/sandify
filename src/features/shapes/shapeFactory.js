@@ -1,3 +1,5 @@
+/* global localStorage */
+
 import Circle from "./Circle"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"

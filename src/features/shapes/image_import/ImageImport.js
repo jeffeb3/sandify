@@ -1,3 +1,5 @@
+/* global document */
+
 import { centerOnOrigin, dimensions, offset } from "@/common/geometry"
 import { getMachine } from "@/features/machines/machineFactory"
 import Shape from "../Shape"

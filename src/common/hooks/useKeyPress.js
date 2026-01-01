@@ -1,3 +1,5 @@
+/* global window */
+
 import { useState, useEffect } from "react"
 
 const useKeyPress = (targetKey, inputRef) => {

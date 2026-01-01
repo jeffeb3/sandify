@@ -1,3 +1,5 @@
+/* global URLSearchParams, window */
+
 import { configureStore } from "@reduxjs/toolkit"
 import { loadState, saveState } from "@/common/localStorage"
 import { resetLogCounts } from "@/common/debugging"
@@ -28,7 +30,7 @@ if (reset === "all") {
       persistedState = importer.import(JSON.stringify(persistedState))
       persistedState.fonts.loaded = false
       persistedState.images.loaded = false
-    } catch (err) {
+    } catch {
       persistedState = undefined
     }
   }
