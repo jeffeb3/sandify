@@ -1,6 +1,6 @@
 // https://fonts.google.com/attribution; see NOTICE for license details
-// Bubblegum, EBGaramond, Holtwood, Lobster, Montserrat, Rouge, NotoEmoji - SIL Open Font License 1.1
-// OpenSans, Roboto, Mountains of Christmas - Apache License 2.0
+// Bubblegum, Caveat, EBGaramond, FiraCode, Holtwood, Lobster, Montserrat, Rouge, NotoEmoji - SIL Open Font License 1.1
+// OpenSans, PermanentMarker, Roboto, Mountains of Christmas - Apache License 2.0
 // SourceHanSerifCN - SIL Open Font License 1.1, Copyright 2017-2022 Adobe
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
@@ -11,6 +11,14 @@ const globalFonts = {}
 // Fonts with available weight variants
 // Format: { fontName: { weight: url } }
 export const fontVariants = {
+  Caveat: {
+    Regular: "fonts/Caveat-Regular.ttf",
+    Bold: "fonts/Caveat-Bold.ttf",
+  },
+  "Fira Code": {
+    Regular: "fonts/FiraCode-Regular.ttf",
+    Bold: "fonts/FiraCode-Bold.ttf",
+  },
   Garamond: {
     Regular: "fonts/EBGaramond-Regular.ttf",
     Bold: "fonts/EBGaramond-Bold.ttf",
@@ -40,6 +48,7 @@ const singleWeightFonts = {
   "fonts/Lobster-Regular.ttf": "Lobster",
   "fonts/MountainsofChristmas-Regular.ttf": "Mountains of Christmas",
   "fonts/NotoEmoji-VariableFont_wght.ttf": "Noto Emoji",
+  "fonts/PermanentMarker-Regular.ttf": "Permanent Marker",
   "fonts/RougeScript-Regular.ttf": "Rouge Script",
 }
 
@@ -56,6 +65,8 @@ export const supportedFonts = {
 // List of font names for the dropdown (without weight suffix)
 export const fontNames = [
   "Bubblegum Sans",
+  "Caveat",
+  "Fira Code",
   "Garamond",
   "Holtwood",
   "Lobster",
@@ -63,6 +74,7 @@ export const fontNames = [
   "Mountains of Christmas",
   "Noto Emoji",
   "Open Sans",
+  "Permanent Marker",
   "Roboto",
   "Rouge Script",
   "Source Han Serif",
