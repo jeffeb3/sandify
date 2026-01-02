@@ -172,7 +172,7 @@ export default class FancyText extends Shape {
         oldHeight == 0
           ? this.startingHeight
           : (layer.height * height) / oldHeight
-      changes.aspectRatio = changes.width / layer.height
+      changes.aspectRatio = changes.width / changes.height
     }
   }
 
