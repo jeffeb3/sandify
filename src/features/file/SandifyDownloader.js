@@ -1,4 +1,5 @@
 import React, { useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { useSelector, useDispatch } from "react-redux"
 import Modal from "react-bootstrap/Modal"
 import Button from "react-bootstrap/Button"
@@ -6,6 +7,7 @@ import InputOption from "@/components/InputOption"
 import { updateFile, selectFileState, fileOptions, download } from "./fileSlice"
 
 const SandifyDownloader = ({ showModal, toggleModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const fileState = useSelector(selectFileState)
   const { fileName } = fileState
@@ -36,7 +38,7 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Save pattern as...</Modal.Title>
+        <Modal.Title>{t("Save pattern as...")}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -62,14 +64,14 @@ const SandifyDownloader = ({ showModal, toggleModal }) => {
           variant="light"
           onClick={toggleModal}
         >
-          Close
+          {t("Cancel")}
         </Button>
         <Button
           id="code-download"
           variant="primary"
           onClick={handleDownload}
         >
-          Download
+          {t("Download")}
         </Button>
       </Modal.Footer>
     </Modal>

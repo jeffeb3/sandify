@@ -17,7 +17,7 @@ import ShapePreview from "./ShapePreview"
 import ConnectorPreview from "./ConnectorPreview"
 import { setPreviewSize, selectPreviewZoom } from "./previewSlice"
 
-const PreviewWindow = () => {
+const PreviewWindow = ({ isActive }) => {
   const dispatch = useDispatch()
   const machine = useSelector(selectCurrentMachine)
   const machineInstance = getMachine(machine)
@@ -41,7 +41,7 @@ const PreviewWindow = () => {
         parseInt(getComputedStyle(wrapper).getPropertyValue("height")) -
         2 * stagePadding
 
-      if (canvasWidth !== width || canvasHeight !== height) {
+      if (width > 0 && height > 0) {
         dispatch(setPreviewSize({ width, height }))
       }
     }
@@ -55,7 +55,7 @@ const PreviewWindow = () => {
     return () => {
       window.removeEventListener("resize", throttledResize, false)
     }
-  }, [])
+  }, [dispatch, isActive])
 
   const { width, height } = machineInstance
   const scaleWidth = canvasWidth / width
