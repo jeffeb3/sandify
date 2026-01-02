@@ -42,4 +42,4 @@ Keys in `zh.json` are alphabetized for easier lookup.
      xx: xxTranslations,  // add here
    }
    ```
-3. Add to the language selector in `src/features/app/LanguageSelector.js`
+3. Add to the language selector in `src/features/app/Settings.js`
