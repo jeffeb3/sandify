@@ -7,73 +7,140 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import opentype from "opentype.js"
 
 const globalFonts = {}
-export const supportedFonts = {
-  "fonts/BubblegumSans-Regular.ttf": "Bubblegum Sans",
-  "fonts/EBGaramond-Regular.ttf": "Garamond",
-  "fonts/HoltwoodOneSC-Regular.ttf": "Holtwood",
-  "fonts/Lobster-Regular.ttf": "Lobster",
-  "fonts/Montserrat-Bold.ttf": "Montserrat",
-  "fonts/NotoEmoji-VariableFont_wght.ttf": "Noto Emoji",
-  "fonts/OpenSans-Regular.ttf": "Open Sans",
-  "fonts/Roboto-Black.ttf": "Roboto",
-  "fonts/RougeScript-Regular.ttf": "Rouge Script",
-  "fonts/MountainsofChristmas-Regular.ttf": "Mountains of Christmas",
-  "fonts/SourceHanSerifCN-Regular.ttf": "Source Han Serif",
-  "fonts/SourceHanSerifCN-Bold.ttf": "Source Han Serif Bold",
+
+// Fonts with available weight variants
+// Format: { fontName: { weight: url } }
+export const fontVariants = {
+  Garamond: {
+    Regular: "fonts/EBGaramond-Regular.ttf",
+    Bold: "fonts/EBGaramond-Bold.ttf",
+  },
+  Montserrat: {
+    Regular: "fonts/Montserrat-Regular.ttf",
+    Bold: "fonts/Montserrat-Bold.ttf",
+  },
+  "Open Sans": {
+    Regular: "fonts/OpenSans-Regular.ttf",
+    Bold: "fonts/OpenSans-Bold.ttf",
+  },
+  Roboto: {
+    Regular: "fonts/Roboto-Regular.ttf",
+    Black: "fonts/Roboto-Black.ttf",
+  },
+  "Source Han Serif": {
+    Regular: "fonts/SourceHanSerifCN-Regular.ttf",
+    Bold: "fonts/SourceHanSerifCN-Bold.ttf",
+  },
 }
 
-const fontNameToUrl = Object.fromEntries(
-  Object.entries(supportedFonts).map(([url, name]) => [name, url]),
-)
+// Fonts without weight variants (single weight only)
+const singleWeightFonts = {
+  "fonts/BubblegumSans-Regular.ttf": "Bubblegum Sans",
+  "fonts/HoltwoodOneSC-Regular.ttf": "Holtwood",
+  "fonts/Lobster-Regular.ttf": "Lobster",
+  "fonts/MountainsofChristmas-Regular.ttf": "Mountains of Christmas",
+  "fonts/NotoEmoji-VariableFont_wght.ttf": "Noto Emoji",
+  "fonts/RougeScript-Regular.ttf": "Rouge Script",
+}
+
+// Build supportedFonts from both sources (for backwards compatibility)
+export const supportedFonts = {
+  ...singleWeightFonts,
+  ...Object.fromEntries(
+    Object.entries(fontVariants).flatMap(([fontName, weights]) =>
+      Object.entries(weights).map(([weight, url]) => [url, `${fontName}|${weight}`]),
+    ),
+  ),
+}
+
+// List of font names for the dropdown (without weight suffix)
+export const fontNames = [
+  "Bubblegum Sans",
+  "Garamond",
+  "Holtwood",
+  "Lobster",
+  "Montserrat",
+  "Mountains of Christmas",
+  "Noto Emoji",
+  "Open Sans",
+  "Roboto",
+  "Rouge Script",
+  "Source Han Serif",
+]
+
+// Get available weights for a font (returns null if single-weight font)
+export const getFontWeights = (fontName) => {
+  return fontVariants[fontName] ? Object.keys(fontVariants[fontName]) : null
+}
+
+// Get the URL for a font + weight combo
+export const getFontUrl = (fontName, weight = "Regular") => {
+  if (fontVariants[fontName]) {
+    return fontVariants[fontName][weight] || fontVariants[fontName].Regular
+  }
+  // Single-weight font - find by name
+  return Object.entries(singleWeightFonts).find(([, name]) => name === fontName)?.[0]
+}
+
+// Get the cache key for a font (used in globalFonts)
+const getFontKey = (fontName, weight) => {
+  return fontVariants[fontName] ? `${fontName}|${weight}` : fontName
+}
 
 // Load font by URL
 export const loadFont = createAsyncThunk(
   "fonts/getFont",
   async (url, { getState }) => {
-    const fontName = supportedFonts[url]
+    const fontKey = supportedFonts[url]
 
-    if (globalFonts[fontName]) {
-      return fontName
+    if (globalFonts[fontKey]) {
+      return fontKey
     }
 
     const font = await opentype.load(url)
-    globalFonts[fontName] = font
-    return fontName
+
+    globalFonts[fontKey] = font
+
+    return fontKey
   },
   {
     condition: (url, { getState }) => {
-      const fontName = supportedFonts[url]
+      const fontKey = supportedFonts[url]
       const state = getState().fonts
 
-      return !state.loadedFonts[fontName] && !state.loadingFonts[fontName]
+      return !state.loadedFonts[fontKey] && !state.loadingFonts[fontKey]
     },
   },
 )
 
+// Load font by name and optional weight
 export const loadFontByName = createAsyncThunk(
   "fonts/loadByName",
-  async (fontName, { dispatch }) => {
-    const url = fontNameToUrl[fontName]
+  async ({ fontName, weight = "Regular" }, { dispatch }) => {
+    const url = getFontUrl(fontName, weight)
 
     if (!url) {
-      throw new Error(`Unknown font: ${fontName}`)
+      throw new Error(`Unknown font: ${fontName} ${weight}`)
     }
 
     await dispatch(loadFont(url))
 
-    return fontName
+    return getFontKey(fontName, weight)
   },
   {
-    condition: (fontName, { getState }) => {
+    condition: ({ fontName, weight = "Regular" }, { getState }) => {
+      const fontKey = getFontKey(fontName, weight)
       const state = getState().fonts
 
-      return !state.loadedFonts[fontName] && !state.loadingFonts[fontName]
+      return !state.loadedFonts[fontKey] && !state.loadingFonts[fontKey]
     },
   },
 )
 
-export const getFont = (name) => {
-  return globalFonts[name]
+// Get a loaded font by name and optional weight
+export const getFont = (fontName, weight = "Regular") => {
+  const fontKey = getFontKey(fontName, weight)
+  return globalFonts[fontKey]
 }
 
 export const fontsSlice = createSlice({
@@ -104,10 +171,14 @@ export const fontsSlice = createSlice({
 })
 
 // Selectors
-export const selectFontLoaded = (state, fontName) =>
-  !!state.fonts.loadedFonts[fontName]
+export const selectFontLoaded = (state, fontName, weight = "Regular") => {
+  const fontKey = getFontKey(fontName, weight)
+  return !!state.fonts.loadedFonts[fontKey]
+}
 
-export const selectFontLoading = (state, fontName) =>
-  !!state.fonts.loadingFonts[fontName]
+export const selectFontLoading = (state, fontName, weight = "Regular") => {
+  const fontKey = getFontKey(fontName, weight)
+  return !!state.fonts.loadingFonts[fontKey]
+}
 
 export default fontsSlice.reducer

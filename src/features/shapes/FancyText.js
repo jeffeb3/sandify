@@ -15,7 +15,7 @@ import {
   dimensions,
 } from "@/common/geometry"
 import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
-import { getFont, supportedFonts } from "@/features/fonts/fontsSlice"
+import { getFont, fontNames, getFontWeights } from "@/features/fonts/fontsSlice"
 
 const MIN_SPACING_MULTIPLIER = 1.2
 const SPECIAL_CHILDREN = ["i", "j", "?"]
@@ -28,9 +28,13 @@ const options = {
   fancyFont: {
     title: "Font",
     type: "dropdown",
-    choices: () => {
-      return Object.values(supportedFonts)
-    },
+    choices: () => fontNames,
+  },
+  fancyFontWeight: {
+    title: "Weight",
+    type: "dropdown",
+    choices: (data) => getFontWeights(data?.fancyFont) || ["Regular"],
+    isVisible: (model, data) => data?.fancyFont && getFontWeights(data.fancyFont) !== null,
   },
   fancyLineSpacing: {
     title: "Line spacing",
@@ -66,6 +70,7 @@ export default class FancyText extends Shape {
       ...{
         fancyText: "Sandify",
         fancyFont: "Garamond",
+        fancyFontWeight: "Regular",
         fancyAlignment: "left",
         fancyConnectLines: "inside",
         fancyLineSpacing: 1.0,
@@ -75,7 +80,7 @@ export default class FancyText extends Shape {
   }
 
   getVertices(state) {
-    const font = getFont(state.shape.fancyFont)
+    const font = getFont(state.shape.fancyFont, state.shape.fancyFontWeight)
 
     if (font) {
       let words = state.shape.fancyText
@@ -118,14 +123,26 @@ export default class FancyText extends Shape {
 
   // hook to modify updates to a layer before they affect the state
   handleUpdate(layer, changes) {
+    // Reset weight to Regular if switching to a font that doesn't have the current weight
+    if (changes.fancyFont) {
+      const newWeights = getFontWeights(changes.fancyFont)
+      if (newWeights && !newWeights.includes(layer.fancyFontWeight)) {
+        changes.fancyFontWeight = "Regular"
+      } else if (!newWeights) {
+        changes.fancyFontWeight = "Regular"
+      }
+    }
+
     if (
       changes.fancyText !== undefined ||
       changes.fancyFont ||
+      changes.fancyFontWeight ||
       changes.fancyLineSpacing
     ) {
       const newFontName = changes.fancyFont || layer.fancyFont
-      const newFont = getFont(newFontName)
-      const oldFont = getFont(layer.fancyFont)
+      const newWeight = changes.fancyFontWeight || layer.fancyFontWeight || "Regular"
+      const newFont = getFont(newFontName, newWeight)
+      const oldFont = getFont(layer.fancyFont, layer.fancyFontWeight)
 
       // Skip dimension recalculation if fonts aren't loaded yet.
       // The listener middleware will trigger a re-update when the font loads.
@@ -138,6 +155,7 @@ export default class FancyText extends Shape {
         ...layer,
         fancyText: changes.fancyText || layer.fancyText || "a",
         fancyFont: newFontName,
+        fancyFontWeight: newWeight,
       }
       const oldProps = {
         ...layer,

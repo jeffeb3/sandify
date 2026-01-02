@@ -16,13 +16,22 @@ const listenerMiddleware = createListenerMiddleware()
 listenerMiddleware.startListening({
   actionCreator: loadFont.fulfilled,
   effect: (action, listenerApi) => {
-    const fontName = action.payload
+    const fontKey = action.payload // e.g., "Garamond|Regular" or "Bubblegum Sans"
     const state = listenerApi.getState()
     const layers = state.layers.entities
+    const [fontName, weight = "Regular"] = fontKey.includes("|")
+      ? fontKey.split("|")
+      : [fontKey, "Regular"]
 
     Object.values(layers).forEach((layer) => {
       if (layer.type === "fancyText" && layer.fancyFont === fontName) {
-        listenerApi.dispatch(updateLayer({ id: layer.id, fancyFont: fontName }))
+        const layerWeight = layer.fancyFontWeight || "Regular"
+
+        if (layerWeight === weight) {
+          listenerApi.dispatch(
+            updateLayer({ id: layer.id, fancyFont: fontName, fancyFontWeight: weight }),
+          )
+        }
       }
     })
   },

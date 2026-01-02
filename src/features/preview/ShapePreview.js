@@ -91,9 +91,14 @@ const ShapePreview = (ownProps) => {
   // Load font on-demand when a FancyText layer needs it
   useEffect(() => {
     if (layer && model.usesFonts && layer.fancyFont) {
-      dispatch(loadFontByName(layer.fancyFont))
+      dispatch(
+        loadFontByName({
+          fontName: layer.fancyFont,
+          weight: layer.fancyFontWeight || "Regular",
+        }),
+      )
     }
-  }, [dispatch, layer?.fancyFont, model.usesFonts])
+  }, [dispatch, layer?.fancyFont, layer?.fancyFontWeight, model.usesFonts])
 
   useEffect(() => {
     if (layer?.visible && isCurrent && model.canChangeSize(layer)) {
