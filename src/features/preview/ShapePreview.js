@@ -25,6 +25,7 @@ import EffectLayer from "@/features/effects/EffectLayer"
 import { selectPreviewSliderValue } from "@/features/preview/previewSlice"
 import EffectPreview from "@/features/preview/EffectPreview"
 import { getShape } from "@/features/shapes/shapeFactory"
+import { loadFontByName } from "@/features/fonts/fontsSlice"
 import { roundP, scaleByWheel } from "@/common/util"
 import PreviewHelper from "./PreviewHelper"
 import { log } from "@/common/debugging"
@@ -86,6 +87,13 @@ const ShapePreview = (ownProps) => {
   const groupRef = React.useRef()
   const trRef = React.useRef()
   const model = getShape(layer?.type || "polygon")
+
+  // Load font on-demand when a FancyText layer needs it
+  useEffect(() => {
+    if (layer && model.usesFonts && layer.fancyFont) {
+      dispatch(loadFontByName(layer.fancyFont))
+    }
+  }, [dispatch, layer?.fancyFont, model.usesFonts])
 
   useEffect(() => {
     if (layer?.visible && isCurrent && model.canChangeSize(layer)) {

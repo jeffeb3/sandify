@@ -86,6 +86,14 @@ export default class FancyText extends Shape {
       }
 
       words = words.map((word) => this.drawWord(word, font, state))
+
+      // Handle case where font doesn't have glyphs for the text (e.g., Chinese in Latin font)
+      const hasValidVertices = words.some((word) => word.length > 0)
+
+      if (!hasValidVertices) {
+        return [new Victor(0, 0)]
+      }
+
       let { offsets, vertices } = this.addVerticalSpacing(words, font, state)
 
       horizontalAlign(vertices, state.shape.fancyAlignment)
@@ -115,11 +123,21 @@ export default class FancyText extends Shape {
       changes.fancyFont ||
       changes.fancyLineSpacing
     ) {
+      const newFontName = changes.fancyFont || layer.fancyFont
+      const newFont = getFont(newFontName)
+      const oldFont = getFont(layer.fancyFont)
+
+      // Skip dimension recalculation if fonts aren't loaded yet.
+      // The listener middleware will trigger a re-update when the font loads.
+      if (!newFont || !oldFont) {
+        return
+      }
+
       // default "a" value handles the empty string case to prevent weird resizing
       const newProps = {
         ...layer,
         fancyText: changes.fancyText || layer.fancyText || "a",
-        fancyFont: changes.fancyFont || layer.fancyFont,
+        fancyFont: newFontName,
       }
       const oldProps = {
         ...layer,

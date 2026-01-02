@@ -29,7 +29,7 @@ import {
   selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
 import { imagesSlice, addImage, loadImage } from "@/features/images/imagesSlice"
-import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
+import { selectFontLoaded } from "@/features/fonts/fontsSlice"
 import { selectImagesLoaded } from "@/features/images/imagesSlice"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import { getMachine } from "@/features/machines/machineFactory"
@@ -245,18 +245,18 @@ export const selectLayerMachine = createCachedSelector(
 
 const selectLayerDependentsLoaded = createCachedSelector(
   selectLayerById,
-  selectFontsLoaded,
   selectImagesLoaded,
-  (layer, fontsLoaded, imagesLoaded) => {
+  (state, id) => state,
+  (layer, imagesLoaded, state) => {
     if (!layer) {
       return false
     }
 
     const shape = getShape(layer.type)
-    const fontsReady = !shape.usesFonts || fontsLoaded
+    const fontLoaded = !shape.usesFonts || selectFontLoaded(state, layer.fancyFont)
     const imagesReady = !layer.imageId || imagesLoaded
 
-    return fontsReady && imagesReady
+    return fontLoaded && imagesReady
   },
 )((state, id) => id)
 
