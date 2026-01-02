@@ -57,7 +57,10 @@ export const supportedFonts = {
   ...singleWeightFonts,
   ...Object.fromEntries(
     Object.entries(fontVariants).flatMap(([fontName, weights]) =>
-      Object.entries(weights).map(([weight, url]) => [url, `${fontName}|${weight}`]),
+      Object.entries(weights).map(([weight, url]) => [
+        url,
+        `${fontName}|${weight}`,
+      ]),
     ),
   ),
 }
@@ -91,7 +94,9 @@ export const getFontUrl = (fontName, weight = "Regular") => {
     return fontVariants[fontName][weight] || fontVariants[fontName].Regular
   }
   // Single-weight font - find by name
-  return Object.entries(singleWeightFonts).find(([, name]) => name === fontName)?.[0]
+  return Object.entries(singleWeightFonts).find(
+    ([, name]) => name === fontName,
+  )?.[0]
 }
 
 // Get the cache key for a font (used in globalFonts)

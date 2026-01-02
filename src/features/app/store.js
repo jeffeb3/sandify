@@ -29,7 +29,11 @@ listenerMiddleware.startListening({
 
         if (layerWeight === weight) {
           listenerApi.dispatch(
-            updateLayer({ id: layer.id, fancyFont: fontName, fancyFontWeight: weight }),
+            updateLayer({
+              id: layer.id,
+              fancyFont: fontName,
+              fancyFontWeight: weight,
+            }),
           )
         }
       }

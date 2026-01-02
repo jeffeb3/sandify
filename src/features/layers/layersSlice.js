@@ -254,7 +254,8 @@ const selectLayerDependentsLoaded = createCachedSelector(
 
     const shape = getShape(layer.type)
     const fontLoaded =
-      !shape.usesFonts || selectFontLoaded(state, layer.fancyFont, layer.fancyFontWeight)
+      !shape.usesFonts ||
+      selectFontLoaded(state, layer.fancyFont, layer.fancyFontWeight)
     const imagesReady = !layer.imageId || imagesLoaded
 
     return fontLoaded && imagesReady

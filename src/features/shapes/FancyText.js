@@ -34,7 +34,8 @@ const options = {
     title: "Weight",
     type: "dropdown",
     choices: (data) => getFontWeights(data?.fancyFont) || ["Regular"],
-    isVisible: (model, data) => data?.fancyFont && getFontWeights(data.fancyFont) !== null,
+    isVisible: (model, data) =>
+      data?.fancyFont && getFontWeights(data.fancyFont) !== null,
   },
   fancyLineSpacing: {
     title: "Line spacing",
@@ -140,7 +141,8 @@ export default class FancyText extends Shape {
       changes.fancyLineSpacing
     ) {
       const newFontName = changes.fancyFont || layer.fancyFont
-      const newWeight = changes.fancyFontWeight || layer.fancyFontWeight || "Regular"
+      const newWeight =
+        changes.fancyFontWeight || layer.fancyFontWeight || "Regular"
       const newFont = getFont(newFontName, newWeight)
       const oldFont = getFont(layer.fancyFont, layer.fancyFontWeight)
 
