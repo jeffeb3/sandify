@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -6,6 +7,7 @@ import ToggleButton from "react-bootstrap/ToggleButton"
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 
 const QuadrantButtonsOption = (props) => {
+  const { t } = useTranslation()
   const option = props.options[props.optionKey]
   const { data } = props
   const value = data[props.optionKey]
@@ -22,7 +24,7 @@ const QuadrantButtonsOption = (props) => {
         sm={5}
         className="mb-1"
       >
-        <Form.Label className="m-0">{option.title}</Form.Label>
+        <Form.Label className="m-0">{t(option.title)}</Form.Label>
       </Col>
 
       <Col
@@ -45,7 +47,7 @@ const QuadrantButtonsOption = (props) => {
               className="px-4"
               style={{ borderRadius: 0 }}
             >
-              upper left
+              {t("upper left")}
             </ToggleButton>
             <ToggleButton
               variant="light"
@@ -54,7 +56,7 @@ const QuadrantButtonsOption = (props) => {
               className="px-4"
               style={{ borderRadius: 0 }}
             >
-              upper right
+              {t("upper right")}
             </ToggleButton>
             <ToggleButton
               variant="light"
@@ -63,7 +65,7 @@ const QuadrantButtonsOption = (props) => {
               className="px-4"
               style={{ borderRadius: 0 }}
             >
-              lower left
+              {t("lower left")}
             </ToggleButton>
             <ToggleButton
               variant="light"
@@ -72,7 +74,7 @@ const QuadrantButtonsOption = (props) => {
               className="px-4"
               style={{ borderRadius: 0 }}
             >
-              lower right
+              {t("lower right")}
             </ToggleButton>
           </ToggleButtonGroup>
         </div>

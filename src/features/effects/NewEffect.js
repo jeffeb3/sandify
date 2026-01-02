@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import Select from "react-select"
 import Col from "react-bootstrap/Col"
@@ -31,6 +32,7 @@ const customStyles = {
 }
 
 const NewEffect = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectRef = useRef()
   const selectedLayer = useSelector(selectSelectedLayer)
@@ -38,14 +40,17 @@ const NewEffect = ({ toggleModal, showModal }) => {
   const selectedLayerVertices = useSelector((state) =>
     selectLayerVertices(state, selectedLayer.id),
   )
-  const selectOptions = getEffectSelectOptions()
+  const selectOptions = getEffectSelectOptions().map((opt) => ({
+    ...opt,
+    label: t(opt.label),
+  }))
   const [type, setType] = useState(defaultEffect.type)
   const [name, setName] = useState(defaultEffect.label)
   const [randomize, setRandomize] = useState(false)
   const selectedEffect = getEffect(type)
   const selectedOption = {
     value: selectedEffect.id,
-    label: selectedEffect.label,
+    label: t(selectedEffect.label),
   }
 
   const handleNameFocus = (event) => {
@@ -94,13 +99,13 @@ const NewEffect = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Create new effect</Modal.Title>
+        <Modal.Title>{t("Create new effect")}</Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={onEffectAdded}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Type</Col>
+            <Col sm={5}>{t("Type")}</Col>
             <Col sm={7}>
               <Select
                 ref={selectRef}
@@ -113,7 +118,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
             </Col>
           </Row>
           <Row className="align-items-center mt-2">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t("Name")}</Col>
             <Col sm={7}>
               <Form.Control
                 value={name}
@@ -124,7 +129,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
           </Row>
           {selectedEffect.randomizable && (
             <Row className="align-items-center mt-2">
-              <Col sm={5}>Randomize values</Col>
+              <Col sm={5}>{t("Randomize values")}</Col>
               <Col sm={7}>
                 <Switch
                   checked={randomize}
@@ -141,14 +146,14 @@ const NewEffect = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             id="new-layer-add"
             variant="primary"
             type="submit"
           >
-            Create
+            {t("Create")}
           </Button>
         </Modal.Footer>
       </Form>

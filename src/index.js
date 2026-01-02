@@ -2,6 +2,7 @@
 
 import React from "react"
 import { createRoot } from "react-dom/client"
+import "./i18n"
 import "bootstrap/dist/css/bootstrap.min.css"
 import "react-toastify/dist/ReactToastify.css"
 import "./features/app/bootstrap-overrides.scss"

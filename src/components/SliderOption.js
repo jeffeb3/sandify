@@ -1,5 +1,6 @@
 import Slider from "rc-slider"
 import React, { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -12,6 +13,7 @@ const SliderOption = ({
   model,
   label = true,
 }) => {
+  const { t } = useTranslation()
   const [value, setValue] = useState(data[optionKey])
 
   useEffect(() => {
@@ -114,7 +116,7 @@ const SliderOption = ({
             htmlFor={`option-${optionKey}`}
             className="mb-0"
           >
-            {title}
+            {t(title)}
           </Form.Label>
         )}
       </Col>

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import Button from "react-bootstrap/Button"
 import Modal from "react-bootstrap/Modal"
 import Col from "react-bootstrap/Col"
@@ -9,6 +10,7 @@ import { selectSelectedEffect } from "./effectsSlice"
 import { addEffect } from "@/features/layers/layersSlice"
 
 const CopyEffect = ({ toggleModal, showModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const selectedEffect = useSelector(selectSelectedEffect)
   const namedInputRef = useRef(null)
@@ -53,13 +55,15 @@ const CopyEffect = ({ toggleModal, showModal }) => {
       onEntered={handleInitialFocus}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Copy {selectedEffect?.name || ""}</Modal.Title>
+        <Modal.Title>
+          {t("Copy")} {selectedEffect?.name || ""}
+        </Modal.Title>
       </Modal.Header>
 
       <Form onSubmit={handleCopyEffect}>
         <Modal.Body>
           <Row className="align-items-center">
-            <Col sm={5}>Name</Col>
+            <Col sm={5}>{t("Name")}</Col>
             <Col sm={7}>
               <Form.Control
                 ref={namedInputRef}
@@ -77,14 +81,14 @@ const CopyEffect = ({ toggleModal, showModal }) => {
             variant="light"
             onClick={toggleModal}
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             id="copy-layer-copy"
             variant="primary"
             type="submit"
           >
-            Copy
+            {t("Copy")}
           </Button>
         </Modal.Footer>
       </Form>

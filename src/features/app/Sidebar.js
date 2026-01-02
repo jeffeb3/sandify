@@ -1,4 +1,5 @@
 import React, { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import Tab from "react-bootstrap/Tab"
 import Tabs from "react-bootstrap/Tabs"
 import { useDispatch, useSelector } from "react-redux"
@@ -10,6 +11,7 @@ import { loadFont, supportedFonts } from "@/features/fonts/fontsSlice"
 import { loadImage, selectAllImages } from "@/features/images/imagesSlice"
 
 const Sidebar = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
   const images = useSelector(selectAllImages)
@@ -26,7 +28,7 @@ const Sidebar = () => {
       <Tabs defaultActiveKey="draw">
         <Tab
           eventKey="draw"
-          title="Layers"
+          title={t("Layers")}
           className="full-page-tab"
         >
           <LayerManager />
@@ -34,7 +36,7 @@ const Sidebar = () => {
 
         <Tab
           eventKey="machines"
-          title="Machines"
+          title={t("Machines")}
           className="full-page-tab"
         >
           <MachineManager />
@@ -42,7 +44,7 @@ const Sidebar = () => {
 
         <Tab
           eventKey="stats"
-          title="Stats"
+          title={t("Stats")}
           className="full-page-tab"
         >
           <PreviewStats />

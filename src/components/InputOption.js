@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -16,6 +17,7 @@ const InputOption = ({
   label = true,
 }) => {
   inputRef ||= useRef()
+  const { t } = useTranslation()
   const [value, setValue] = useState(data[optionKey])
   const shiftKeyPressed = useKeyPress("Shift", inputRef)
 
@@ -109,7 +111,7 @@ const InputOption = ({
               htmlFor={`option-${optionKey}`}
               className="mb-0"
             >
-              {title}
+              {t(title)}
             </Form.Label>
           )}
         </Col>
@@ -130,7 +132,7 @@ const InputOption = ({
             className="me-2 mb-0"
             style={{ width: "22px" }}
           >
-            {title}
+            {t(title)}
           </Form.Label>
         )}
         {renderedInput}

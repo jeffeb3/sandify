@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Button from "react-bootstrap/Button"
 import ListGroup from "react-bootstrap/ListGroup"
 import { Tooltip } from "react-tooltip"
@@ -29,6 +30,7 @@ const LayerRow = ({
   layer,
   handleLayerSelected,
   handleToggleLayerVisible,
+  t,
 }) => {
   const { name, id, visible } = layer
   const activeClass = current ? "active" : selected ? "selected" : ""
@@ -65,7 +67,7 @@ const LayerRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
-            data-tooltip-content={visible ? "Hide layer" : "Show layer"}
+            data-tooltip-content={visible ? t("Hide layer") : t("Show layer")}
             data-tooltip-id={tooltipId}
             data-tooltip-place="top-end"
             onClick={(e) => {
@@ -82,7 +84,7 @@ const LayerRow = ({
             className="me-2"
             style={{ fontSize: "80%" }}
           >
-            {instance.model.label}
+            {t(instance.model.label)}
           </span>
         </div>
       </div>
@@ -91,6 +93,7 @@ const LayerRow = ({
 }
 
 const LayerList = () => {
+  const { t } = useTranslation()
   // row has to be dragged 3 pixels before dragging starts; this allows the buttons
   // on the row to work properly.
   const sensors = useSensors(
@@ -157,6 +160,7 @@ const LayerList = () => {
                 handleLayerSelected={handleLayerSelected}
                 handleToggleLayerVisible={handleToggleLayerVisible}
                 index={index}
+                t={t}
               />
             ))}
           </ListGroup>
