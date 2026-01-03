@@ -569,12 +569,21 @@ export const selectConnectedVertices = createSelector(selectState, (state) => {
 // returns an array of layers (and connectors) in an object structure designed to be exported by
 // an exporter
 export const selectLayersForExport = createSelector(selectState, (state) => {
-  if (!state.fonts.loaded) {
+  const visibleLayerIds = selectVisibleLayerIds(state)
+
+  // Wait for fonts needed by visible FancyText layers
+  const allFontsReady = visibleLayerIds.every((id) => {
+    const layer = selectLayerById(state, id)
+
+    if (layer.type !== "fancyText") return true
+    return selectFontLoaded(state, layer.fancyFont, layer.fancyFontWeight || "Regular")
+  })
+
+  if (!allFontsReady) {
     return []
-  } // wait for fonts
+  }
 
   log("selectLayersForExport")
-  const visibleLayerIds = selectVisibleLayerIds(state)
   let connectorCnt = 0
 
   return visibleLayerIds.reduce((acc, id, index) => {
