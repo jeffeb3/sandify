@@ -195,6 +195,7 @@ export const boundaryAlgorithm = (vertices) => {
     return {
       algorithm: "expand",
       reason: "too few vertices",
+      boundary: [],
       boundaryPaths: 0,
       ratio: 0,
       pointsPerPath: 0,
@@ -224,6 +225,7 @@ export const boundaryAlgorithm = (vertices) => {
     return {
       algorithm: "expand",
       reason: "no boundary",
+      boundary: [],
       boundaryPaths: 0,
       ratio: 0,
       pointsPerPath: 0,
@@ -336,6 +338,7 @@ export const boundaryAlgorithm = (vertices) => {
   return {
     algorithm,
     reason,
+    boundary,
     boundaryPaths: boundary.length,
     ratio: Math.round(ratio * 100) / 100,
     pointsPerPath: Math.round(pointsPerPath * 10) / 10,
@@ -633,20 +636,10 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   }
 
   const detection = boundaryAlgorithm(vertices)
-  const { isFillPattern, largestDominates } = detection
+  const { boundary, isFillPattern, largestDominates } = detection
   const useFootprint =
     algorithm === 2 ||
     (algorithm === null && detection.algorithm === "footprint")
-  const bounds = findBounds(vertices)
-  const inputWidth = bounds[1].x - bounds[0].x
-  const inputHeight = bounds[1].y - bounds[0].y
-  const path = new Path64()
-
-  for (const v of vertices) {
-    path.push({ x: Math.round(v.x * SCALE), y: Math.round(v.y * SCALE) })
-  }
-
-  let boundary = Clipper.Union([path], null, FillRule.NonZero)
 
   if (boundary.length === 0) {
     // Fallback to convex hull when Clipper fails (e.g., twisted tessellation)
@@ -668,22 +661,10 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
     return fallbackHull.map((v) => new Victor(v.x, v.y))
   }
 
-  // Filter out degenerate paths
-  const inputArea = inputWidth * inputHeight * SCALE * SCALE
-  const minArea = inputArea * MIN_AREA_RATIO
-  const maxPathArea = Math.max(
-    ...boundary.map((p) => Math.abs(Clipper.area(p))),
-  )
-
-  if (maxPathArea > 0) {
-    const filtered = boundary.filter((p) => Math.abs(Clipper.area(p)) > minArea)
-
-    if (filtered.length > 0) {
-      boundary = filtered
-    }
-  }
-
   // Determine which boundary paths to use
+  const bounds = findBounds(vertices)
+  const inputWidth = bounds[1].x - bounds[0].x
+  const inputHeight = bounds[1].y - bounds[0].y
   const pathAreas = boundary.map((p) => Math.abs(Clipper.area(p)))
   const sortedAreas = [...pathAreas].sort((a, b) => b - a)
   const maxArea = sortedAreas[0]
