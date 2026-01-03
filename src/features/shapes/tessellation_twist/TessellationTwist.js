@@ -200,7 +200,7 @@ export default class TessellationTwist extends Shape {
       if (prevKey) {
         if (!graph.hasEdge(key, prevKey)) {
           // non-eulerian move, so we'll walk the shortest valid path between them
-          let path = graph.dijkstraShortestPath(prevKey, key)
+          let path = graph.bfsShortestPath(prevKey, key)
           path.shift()
           path.forEach((node) => walkedVertices.push(node))
           walkedVertices.push(vertex)

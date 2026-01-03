@@ -18,7 +18,7 @@ const shortestPath = (nodes) => {
       const unvisitedNode = nearestUnvisitedNode(i + 1, nodes, visited, graph)
 
       if (unvisitedNode != null) {
-        const shortestSubPath = graph.dijkstraShortestPath(
+        const shortestSubPath = graph.bfsShortestPath(
           node1Key,
           unvisitedNode.toString(),
         )
