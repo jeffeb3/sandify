@@ -19,7 +19,7 @@ const DropdownOption = ({
 
   let choices = option.choices
   if (typeof choices === "function") {
-    choices = choices()
+    choices = choices(data)
   }
 
   choices = Array.isArray(choices)
