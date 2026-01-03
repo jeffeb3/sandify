@@ -576,7 +576,11 @@ export const selectLayersForExport = createSelector(selectState, (state) => {
     const layer = selectLayerById(state, id)
 
     if (layer.type !== "fancyText") return true
-    return selectFontLoaded(state, layer.fancyFont, layer.fancyFontWeight || "Regular")
+    return selectFontLoaded(
+      state,
+      layer.fancyFont,
+      layer.fancyFontWeight || "Regular",
+    )
   })
 
   if (!allFontsReady) {
