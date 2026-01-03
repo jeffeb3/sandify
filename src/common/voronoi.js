@@ -5,6 +5,7 @@ import seedrandom from "seedrandom"
 import { Delaunay } from "d3-delaunay"
 import PoissonDiskSampling from "poisson-disk-sampling"
 import Victor from "victor"
+import KDBush from "kdbush"
 
 function linearWeight(i, seed, numPoints, options) {
   return 1 + (2 * i) / (numPoints * options.voronoiZoom)
@@ -117,17 +118,33 @@ function wavePatternWeight(points, width, height, options) {
 }
 
 function densityWeight(points, width, height, options) {
-  return points.map((point, i) => {
-    const [x, y] = point
+  // Build spatial index O(n log n)
+  const index = new KDBush(points.length)
+  points.forEach(([x, y]) => index.add(x, y))
+  index.finish()
+
+  // Estimate initial search radius based on average spacing
+  const area = width * height
+  const avgSpacing = Math.sqrt(area / points.length)
+  let searchRadius = avgSpacing * 2
+
+  return points.map(([x, y], i) => {
     let nearestDistance = Infinity
 
-    points.forEach((otherPoint, j) => {
+    // Find nearest neighbor using spatial index O(log n) average
+    let neighbors = index.within(x, y, searchRadius)
+    while (neighbors.length < 2 && searchRadius < Math.max(width, height)) {
+      searchRadius *= 2
+      neighbors = index.within(x, y, searchRadius)
+    }
+
+    for (const j of neighbors) {
       if (i !== j) {
-        const [x2, y2] = otherPoint
+        const [x2, y2] = points[j]
         const distance = Math.sqrt((x - x2) ** 2 + (y - y2) ** 2)
         nearestDistance = Math.min(nearestDistance, distance)
       }
-    })
+    }
 
     const weight = nearestDistance // larger distances (sparser areas) get higher weight
 

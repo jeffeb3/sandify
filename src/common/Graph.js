@@ -1,3 +1,4 @@
+import { PriorityQueue } from "./PriorityQueue"
 import Victor from "victor"
 
 export const mix = (v1, v2, s) => {
@@ -136,17 +137,14 @@ export default class Graph {
     return shortest
   }
 
-  // Dijkstra's algorithm - use when edges have varying weights.
-  // Note: if weighted edges are needed, optimize with a binary heap for
-  // O((V+E) log V) instead of current O(V * E log V) from array sort.
+  // Dijkstra's algorithm with binary heap - O((V+E) log V)
   dijkstraShortestPath(startNode, endNode) {
     let shortest = this.getCachedShortestPath(startNode, endNode)
 
     if (shortest === undefined) {
       const times = {}
       const backtrace = {}
-      const visited = new Set()
-      const pq = [[startNode, 0]]
+      const pq = new PriorityQueue()
 
       times[startNode] = 0
       this.nodeKeys.forEach((node) => {
@@ -155,12 +153,10 @@ export default class Graph {
         }
       })
 
-      while (pq.length > 0) {
-        pq.sort((a, b) => a[1] - b[1])
-        const [currentNode] = pq.shift()
+      pq.enqueue([startNode, 0])
 
-        if (visited.has(currentNode)) continue
-        visited.add(currentNode)
+      while (!pq.isEmpty()) {
+        const [currentNode] = pq.dequeue()
 
         for (const neighbor of this.adjacencyList[currentNode]) {
           const neighborKey = neighbor.node.toString()
@@ -169,7 +165,7 @@ export default class Graph {
           if (time < times[neighborKey]) {
             times[neighborKey] = time
             backtrace[neighborKey] = currentNode
-            pq.push([neighborKey, time])
+            pq.enqueue([neighborKey, time])
           }
         }
       }
