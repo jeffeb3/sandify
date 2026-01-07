@@ -2,6 +2,10 @@
 
 Sandify uses [i18next](https://www.i18next.com/) with a natural language keys pattern.
 
+Outside of these translations, sandify code, comments, and (ideally) git commit messages should be in English.
+
+Any additional translations and maintenance is welcome. Any translations should be as close to English as reasonably possible. Translations do not have to be literally the same.
+
 ## How It Works
 
 English strings are used as translation keys:
