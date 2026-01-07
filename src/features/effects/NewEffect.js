@@ -45,7 +45,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
     label: t(opt.label),
   }))
   const [type, setType] = useState(defaultEffect.type)
-  const [name, setName] = useState(defaultEffect.label)
+  const [name, setName] = useState(t(defaultEffect.label))
   const [randomize, setRandomize] = useState(false)
   const selectedEffect = getEffect(type)
   const selectedOption = {
@@ -65,7 +65,7 @@ const NewEffect = ({ toggleModal, showModal }) => {
     const effect = getEffect(selected.value)
 
     setType(selected.value)
-    setName(effect.label.toLowerCase())
+    setName(t(effect.label).toLowerCase())
   }
 
   const handleChangeNewName = (event) => {

@@ -33,7 +33,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
   const selectRef = useRef()
   const selectOptions = getShapeSelectOptions()
   const [type, setType] = useState(defaultShape.type)
-  const [name, setName] = useState(defaultShape.label)
+  const [name, setName] = useState(t(defaultShape.label))
   const [randomize, setRandomize] = useState(false)
   const selectedShape = getShape(type)
 
@@ -51,7 +51,7 @@ const NewLayer = ({ toggleModal, showModal }) => {
     const shape = getShape(selected.value)
 
     setType(selected.value)
-    setName(shape.label.toLowerCase())
+    setName(t(shape.label).toLowerCase())
   }
 
   const handleChangeNewName = (event) => {
