@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useDispatch } from "react-redux"
 import Nav from "react-bootstrap/Nav"
 import Navbar from "react-bootstrap/Navbar"
@@ -12,6 +13,7 @@ import logo from "./logo.svg"
 import "./Header.scss"
 
 const Header = ({ eventKey, setEventKey }) => {
+  const { t } = useTranslation()
   const [showExport, setShowExport] = useState(false)
   const [showImportLayer, setShowImportLayer] = useState(0)
   const [showImportImage, setShowImportImage] = useState(0)
@@ -48,34 +50,44 @@ const Header = ({ eventKey, setEventKey }) => {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="me-auto">
           <NavDropdown
-            title="File"
+            title={t("File")}
             id="file-dropdown"
           >
-            <NavDropdown.Item onClick={handleNew}>New</NavDropdown.Item>
-            <NavDropdown.Item onClick={toggleOpen}>Open...</NavDropdown.Item>
-            <NavDropdown.Item onClick={toggleSave}>Save as...</NavDropdown.Item>
+            <NavDropdown.Item onClick={handleNew}>{t("New")}</NavDropdown.Item>
+            <NavDropdown.Item onClick={toggleOpen}>
+              {t("Open...")}
+            </NavDropdown.Item>
+            <NavDropdown.Item onClick={toggleSave}>
+              {t("Save as...")}
+            </NavDropdown.Item>
             <NavDropdown.Divider />
             <NavDropdown.Item onClick={toggleImportImage}>
-              Import image...
+              {t("Import image...")}
             </NavDropdown.Item>
             <NavDropdown.Item onClick={toggleImportLayer}>
-              Import layer...
+              {t("Import layer...")}
             </NavDropdown.Item>
             <NavDropdown.Item onClick={toggleExport}>
-              Export pattern as...
+              {t("Export pattern as...")}
             </NavDropdown.Item>
           </NavDropdown>
           <Nav.Link
             active={eventKey === "patterns"}
             onClick={() => setEventKey("patterns")}
           >
-            Patterns
+            {t("Patterns")}
+          </Nav.Link>
+          <Nav.Link
+            active={eventKey === "settings"}
+            onClick={() => setEventKey("settings")}
+          >
+            {t("Settings")}
           </Nav.Link>
           <Nav.Link
             active={eventKey === "about"}
             onClick={() => setEventKey("about")}
           >
-            About
+            {t("About")}
           </Nav.Link>
         </Nav>
       </Navbar.Collapse>

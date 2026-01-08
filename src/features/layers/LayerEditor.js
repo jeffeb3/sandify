@@ -1,6 +1,7 @@
 /* global document */
 
 import React from "react"
+import { useTranslation, Trans } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
@@ -21,35 +22,50 @@ import EffectManager from "@/features/effects/EffectManager"
 import { selectSelectedLayer } from "./layersSlice"
 
 const LayerEditor = () => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
   const instance = new Layer(layer.type)
   const model = instance.model
   const layerOptions = instance.getOptions()
   const modelOptions = model.getOptions()
-  const selectOptions = getShapeSelectOptions()
+  const selectOptions = getShapeSelectOptions().map((group) => ({
+    ...group,
+    label: t(group.label),
+    options: group.options.map((opt) => ({ ...opt, label: t(opt.label) })),
+  }))
   const allowModelSelection = model.selectGroup !== "import"
   const selectedOption = {
     value: model.type,
-    label: model.label,
+    label: t(model.label),
   }
   const link = model.link
   const linkText = model.linkText || "here"
-  const description = model.description ? model.description + " " : ""
+  const description = model.description || ""
+  const translatedDescription = description
+    ? t(`description.${model.type}`, { defaultValue: description })
+    : ""
+  const translatedLinkText = t(`linkText.${model.type}`, {
+    defaultValue: linkText,
+  })
 
   const renderedLink =
     link || description ? (
       <div className="mt-3 mx-3 mb-4 bg-light p-4">
-        {description}
-        See{" "}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href={link}
-        >
-          {linkText}
-        </a>{" "}
-        for more information.
+        {translatedDescription}{" "}
+        <Trans
+          i18nKey="layer.seeMoreInfo"
+          values={{ linkText: translatedLinkText }}
+          components={[
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={link}
+            >
+              {translatedLinkText}
+            </a>,
+          ]}
+        />
       </div>
     ) : undefined
 
@@ -77,7 +93,7 @@ const LayerEditor = () => {
         sm={5}
         className="mb-1"
       >
-        Type
+        {t("Type")}
       </Col>
 
       <Col
@@ -132,7 +148,7 @@ const LayerEditor = () => {
       {model.canTransform(layer) && (
         <div className="px-3 py-2">
           <Row className="align-items-center mt-1 mb-1">
-            <Col sm={3}>Transform</Col>
+            <Col sm={3}>{t("Transform")}</Col>
             <Col sm={9}>
               <div className="d-flex">
                 <div className="d-flex flex-column">
@@ -159,7 +175,7 @@ const LayerEditor = () => {
                     <Button
                       className="layer-button"
                       variant="light"
-                      data-tooltip-content="Maintain aspect ratio"
+                      data-tooltip-content={t("Maintain aspect ratio")}
                       data-tooltip-id="tooltip-maintain-aspect-ratio"
                       onClick={handleChangeMaintainAspectRatio}
                     >
