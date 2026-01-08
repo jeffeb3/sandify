@@ -293,6 +293,22 @@ export const selectVisibleLayerIds = createSelector(
   },
 )
 
+// Check if all fonts needed by visible FancyText layers are loaded
+export const selectFontsLoaded = createSelector(selectState, (state) => {
+  const visibleLayerIds = selectVisibleLayerIds(state)
+
+  return visibleLayerIds.every((id) => {
+    const layer = selectLayerById(state, id)
+
+    if (layer.type !== "fancyText") return true
+    return selectFontLoaded(
+      state,
+      layer.fancyFont,
+      layer.fancyFontWeight || "Regular",
+    )
+  })
+})
+
 export const selectIsDragging = createSelector(
   [selectLayerIds, selectLayerEntities],
   (ids, layers) => {
@@ -549,9 +565,9 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
 
 // returns a array of all visible machine-bound vertices and the connections between them
 export const selectConnectedVertices = createSelector(selectState, (state) => {
-  if (!state.fonts.loaded) {
+  if (!selectFontsLoaded(state)) {
     return []
-  } // wait for fonts
+  }
 
   log("selectConnectedVertices")
   const visibleLayerIds = selectVisibleLayerIds(state)
@@ -569,25 +585,12 @@ export const selectConnectedVertices = createSelector(selectState, (state) => {
 // returns an array of layers (and connectors) in an object structure designed to be exported by
 // an exporter
 export const selectLayersForExport = createSelector(selectState, (state) => {
-  const visibleLayerIds = selectVisibleLayerIds(state)
-
-  // Wait for fonts needed by visible FancyText layers
-  const allFontsReady = visibleLayerIds.every((id) => {
-    const layer = selectLayerById(state, id)
-
-    if (layer.type !== "fancyText") return true
-    return selectFontLoaded(
-      state,
-      layer.fancyFont,
-      layer.fancyFontWeight || "Regular",
-    )
-  })
-
-  if (!allFontsReady) {
+  if (!selectFontsLoaded(state)) {
     return []
   }
 
   log("selectLayersForExport")
+  const visibleLayerIds = selectVisibleLayerIds(state)
   let connectorCnt = 0
 
   return visibleLayerIds.reduce((acc, id, index) => {
