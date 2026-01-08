@@ -10,6 +10,17 @@ export const subtypes = {
     startingAngle: Math.PI,
     maxIterations: 2,
   },
+  // https://en.wikipedia.org/wiki/L-system#Example_7:_Fractal_plant
+  "Anklet of Krishna": {
+    axiom: "-X--X",
+    draw: ["F"],
+    rules: {
+      X: "XFX--XFX",
+    },
+    angle: Math.PI / 4,
+    minIterations: 2,
+    maxIterations: 6,
+  },
   // http://www.kevs3d.co.uk/dev/lsystems/
   "Cog Triangle": {
     axiom: "W----W----W",
@@ -77,6 +88,16 @@ export const subtypes = {
     },
     angle: Math.PI / 9,
     maxIterations: 8,
+  },
+  "Fractal Tree 6": {
+    axiom: "F",
+    draw: ["F"],
+    rules: {
+      F: "FF+[+F-F-F]-[-F+F+F]",
+    },
+    angle: Math.PI / 8,
+    minIterations: 2,
+    maxIterations: 5,
   },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   "Gosper (flowsnake)": {
@@ -160,6 +181,17 @@ export const subtypes = {
     startingAngle: -Math.PI / 3,
     maxIterations: 5,
   },
+  // https://en.wikipedia.org/wiki/L%C3%A9vy_C_curve
+  "Lévy C Curve": {
+    axiom: "F",
+    draw: ["F"],
+    rules: {
+      F: "+F--F+",
+    },
+    angle: Math.PI / 4,
+    minIterations: 6,
+    maxIterations: 14,
+  },
   // http://mathforum.org/advanced/robertd/lsys2d.html
   "McWorter's Pentadendrite": {
     axiom: "F-F-F-F-F",
@@ -222,5 +254,16 @@ export const subtypes = {
       }
     },
     maxIterations: 8,
+  },
+  // https://en.wikipedia.org/wiki/Terdragon
+  Terdragon: {
+    axiom: "F",
+    draw: ["F"],
+    rules: {
+      F: "F+F-F",
+    },
+    angle: (2 * Math.PI) / 3,
+    minIterations: 3,
+    maxIterations: 10,
   },
 }

@@ -45,7 +45,33 @@ const SliderOption = ({
   }
 
   const handleInputChange = (e) => {
+    const newValue = parseFloat(e.target.value)
+
     handleChange(e.target.value)
+    if (!isNaN(newValue) && newValue >= minimum && newValue <= maximum) {
+      handleChangeComplete(newValue)
+    }
+  }
+
+  const handleInputBlur = (e) => {
+    let newValue = parseFloat(e.target.value)
+
+    if (isNaN(newValue)) {
+      newValue = 0
+    } else if (newValue < minimum) {
+      newValue = minimum
+    } else if (newValue > maximum) {
+      newValue = maximum
+    }
+
+    handleChange(newValue)
+    handleChangeComplete(newValue)
+  }
+
+  const handleInputKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.target.blur()
+    }
   }
 
   const handleChangeComplete = (newValue) => {
@@ -59,6 +85,12 @@ const SliderOption = ({
   }
 
   let marks
+  const parsedValue = parseFloat(value)
+  const clampedValue = Math.min(
+    Math.max(isNaN(parsedValue) ? minimum : parsedValue, minimum),
+    maximum,
+  )
+
   if (isNaN(minimum) || isNaN(maximum)) {
     marks = {}
   } else if (option.range) {
@@ -71,7 +103,7 @@ const SliderOption = ({
   } else {
     marks = {
       [minimum]: `${minimum}`,
-      [value]: `${value}`,
+      [clampedValue]: `${clampedValue}`,
       [maximum]: `${maximum}`,
     }
   }
@@ -86,7 +118,7 @@ const SliderOption = ({
         marks={marks}
         range={option.range}
         allowCross={false}
-        value={value}
+        value={clampedValue}
         onChangeComplete={handleChangeComplete}
         onChange={handleChange}
       />
@@ -105,6 +137,8 @@ const SliderOption = ({
       value={value}
       autoComplete="off"
       onChange={handleInputChange}
+      onBlur={handleInputBlur}
+      onKeyDown={handleInputKeyDown}
     />
   )
 
