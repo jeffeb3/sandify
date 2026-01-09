@@ -56,6 +56,19 @@ const options = {
     title: "Shape",
     type: "togglebutton",
     choices: ["Rectangle", "Circle", "Hexagon", "Triangle"],
+    onChange: (model, changes, state) => {
+      // Try to preserve the current algorithm when switching shapes
+      const oldAlgoKey = algorithmKeyByShape[state.mazeShape]
+      const newAlgoKey = algorithmKeyByShape[changes.mazeShape]
+      const currentAlgo = state[oldAlgoKey]
+      const newShapeChoices = options[newAlgoKey].choices
+
+      if (newShapeChoices.includes(currentAlgo)) {
+        changes[newAlgoKey] = currentAlgo
+      }
+
+      return changes
+    },
   },
   mazeType: {
     title: "Algorithm",
@@ -221,12 +234,12 @@ export default class Maze extends Shape {
       ...super.getInitialState(),
       ...{
         mazeShape: "Rectangle",
-        mazeType: "Wilson",
-        mazeTypeCircle: "Wilson",
-        mazeTypeHex: "Wilson",
-        mazeTypeTriangle: "Wilson",
-        mazeWidth: 12,
-        mazeHeight: 12,
+        mazeType: "Backtracker",
+        mazeTypeCircle: "Backtracker",
+        mazeTypeHex: "Backtracker",
+        mazeTypeTriangle: "Backtracker",
+        mazeWidth: 20,
+        mazeHeight: 20,
         mazeRingCount: 10,
         mazeWedgeCount: 10,
         mazeWedgeDoubling: 3,
