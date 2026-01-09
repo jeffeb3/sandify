@@ -2,7 +2,6 @@
 // Processes one row at a time using disjoint sets - very memory efficient
 // Creates horizontal bias similar to Sidewinder but more variety
 // NOTE: Only works with rectangular grids (row-based processing)
-// Reference: https://weblog.jamisbuck.org/2010/12/29/maze-generation-eller-s-algorithm
 
 export const eller = (grid, { rng, horizontalBias = 5 }) => {
   // Mark all cells as visited

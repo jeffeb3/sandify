@@ -1,7 +1,6 @@
 // Wilson's algorithm for maze generation
 // Uses loop-erased random walks to generate uniform spanning trees
 // Works with any grid type (RectangularGrid, PolarGrid, etc.)
-// adapted from https://weblog.jamisbuck.org/2011/1/20/maze-generation-wilson-s-algorithm
 
 export const wilson = (grid, { rng }) => {
   const allCells = grid.getAllCells()
