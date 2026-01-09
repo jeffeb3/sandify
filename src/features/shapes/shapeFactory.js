@@ -10,6 +10,7 @@ import Hypocycloid from "./Hypocycloid"
 import ImageImport from "./image_import/ImageImport"
 import InputText from "./input_text/InputText"
 import LSystem from "./lsystem/LSystem"
+import Maze from "./maze/Maze"
 import Point from "./Point"
 import Polygon from "./Polygon"
 import Reuleaux from "./Reuleaux"
@@ -38,6 +39,7 @@ export const shapeFactory = {
   lsystem: LSystem,
   fractalSpirograph: FractalSpirograph,
   tessellationTwist: TessellationTwist,
+  maze: Maze,
   voronoi: Voronoi,
   point: Point,
   circlePacker: CirclePacker,
