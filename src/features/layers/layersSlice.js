@@ -29,7 +29,7 @@ import {
   selectSelectedEffectId,
 } from "@/features/effects/effectsSlice"
 import { imagesSlice, addImage, loadImage } from "@/features/images/imagesSlice"
-import { selectFontsLoaded } from "@/features/fonts/fontsSlice"
+import { selectFontLoaded } from "@/features/fonts/fontsSlice"
 import { selectImagesLoaded } from "@/features/images/imagesSlice"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
 import { getMachine } from "@/features/machines/machineFactory"
@@ -245,18 +245,20 @@ export const selectLayerMachine = createCachedSelector(
 
 const selectLayerDependentsLoaded = createCachedSelector(
   selectLayerById,
-  selectFontsLoaded,
   selectImagesLoaded,
-  (layer, fontsLoaded, imagesLoaded) => {
+  (state, id) => state,
+  (layer, imagesLoaded, state) => {
     if (!layer) {
       return false
     }
 
     const shape = getShape(layer.type)
-    const fontsReady = !shape.usesFonts || fontsLoaded
+    const fontLoaded =
+      !shape.usesFonts ||
+      selectFontLoaded(state, layer.fancyFont, layer.fancyFontWeight)
     const imagesReady = !layer.imageId || imagesLoaded
 
-    return fontsReady && imagesReady
+    return fontLoaded && imagesReady
   },
 )((state, id) => id)
 
@@ -290,6 +292,22 @@ export const selectVisibleLayerIds = createSelector(
     return layerIds.filter((id) => layers[id].visible)
   },
 )
+
+// Check if all fonts needed by visible FancyText layers are loaded
+export const selectFontsLoaded = createSelector(selectState, (state) => {
+  const visibleLayerIds = selectVisibleLayerIds(state)
+
+  return visibleLayerIds.every((id) => {
+    const layer = selectLayerById(state, id)
+
+    if (layer.type !== "fancyText") return true
+    return selectFontLoaded(
+      state,
+      layer.fancyFont,
+      layer.fancyFontWeight || "Regular",
+    )
+  })
+})
 
 export const selectIsDragging = createSelector(
   [selectLayerIds, selectLayerEntities],
@@ -547,9 +565,9 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
 
 // returns a array of all visible machine-bound vertices and the connections between them
 export const selectConnectedVertices = createSelector(selectState, (state) => {
-  if (!state.fonts.loaded) {
+  if (!selectFontsLoaded(state)) {
     return []
-  } // wait for fonts
+  }
 
   log("selectConnectedVertices")
   const visibleLayerIds = selectVisibleLayerIds(state)
@@ -567,9 +585,9 @@ export const selectConnectedVertices = createSelector(selectState, (state) => {
 // returns an array of layers (and connectors) in an object structure designed to be exported by
 // an exporter
 export const selectLayersForExport = createSelector(selectState, (state) => {
-  if (!state.fonts.loaded) {
+  if (!selectFontsLoaded(state)) {
     return []
-  } // wait for fonts
+  }
 
   log("selectLayersForExport")
   const visibleLayerIds = selectVisibleLayerIds(state)
