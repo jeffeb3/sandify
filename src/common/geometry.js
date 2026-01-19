@@ -15,6 +15,39 @@ export const distance = (v1, v2) => {
   return Math.sqrt(Math.pow(v1.x - v2.x, 2.0) + Math.pow(v1.y - v2.y, 2.0))
 }
 
+// Calculate the centroid (geometric center) of a set of vertices.
+// Excludes duplicate closing vertex if present (would skew the average).
+// https://en.wikipedia.org/wiki/Centroid
+export const centroid = (vertices) => {
+  if (vertices.length === 0) return { x: 0, y: 0 }
+
+  let len = vertices.length
+
+  // Exclude closing vertex if it duplicates the first
+  if (len > 1) {
+    const first = vertices[0]
+    const last = vertices[len - 1]
+    const tolerance = 0.1
+
+    if (
+      Math.abs(first.x - last.x) < tolerance &&
+      Math.abs(first.y - last.y) < tolerance
+    ) {
+      len--
+    }
+  }
+
+  let cx = 0
+  let cy = 0
+
+  for (let i = 0; i < len; i++) {
+    cx += vertices[i].x
+    cy += vertices[i].y
+  }
+
+  return { x: cx / len, y: cy / len }
+}
+
 export const totalDistance = (vertices) => {
   let d = 0.0
   let previous = null
@@ -203,6 +236,16 @@ export const offset = (vertex, x, y) => {
   vertex.add({ x, y })
 
   return vertex
+}
+
+// Transform vertex to local space (offset then rotate)
+export const toLocalSpace = (vertex, x, y, rotation) => {
+  return rotate(offset(vertex, -x, -y), rotation)
+}
+
+// Transform vertex back to world space (rotate back then offset)
+export const toWorldSpace = (vertex, x, y, rotation) => {
+  return offset(rotate(vertex, -rotation), x, y)
 }
 
 // modifies the given array in place, centering the points on (0, 0)
@@ -637,4 +680,66 @@ export const calculateIntersection = (p1, p2, p3, p4) => {
     }
   }
   return null // intersection point is out of bounds
+}
+
+// Point-in-polygon test using ray casting (even-odd rule)
+// Returns true if point (px, py) is inside the polygon defined by ring
+// ring can be an array of [x, y] coordinate pairs OR objects with {x, y} properties
+export const pointInPolygon = (px, py, ring) => {
+  if (ring.length === 0) return false
+
+  const isArray = Array.isArray(ring[0])
+  let inside = false
+
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = isArray ? ring[i][0] : ring[i].x
+    const yi = isArray ? ring[i][1] : ring[i].y
+    const xj = isArray ? ring[j][0] : ring[j].x
+    const yj = isArray ? ring[j][1] : ring[j].y
+
+    if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+
+  return inside
+}
+
+// Project a point onto a line segment, returning the closest point on the segment
+export const projectToSegment = (point, p1, p2) => {
+  const dx = p2.x - p1.x
+  const dy = p2.y - p1.y
+  const lenSq = dx * dx + dy * dy
+
+  if (lenSq < 1e-10) {
+    return new Victor(p1.x, p1.y)
+  }
+
+  let t = ((point.x - p1.x) * dx + (point.y - p1.y) * dy) / lenSq
+  t = Math.max(0, Math.min(1, t))
+
+  return new Victor(p1.x + t * dx, p1.y + t * dy)
+}
+
+// Distance from a point to a line segment
+export const distanceToSegment = (point, p1, p2) => {
+  const projected = projectToSegment(point, p1, p2)
+  return distance(point, projected)
+}
+
+// Calculate signed area of a polygon using the shoelace formula
+// https://en.wikipedia.org/wiki/Shoelace_formula
+// Positive = counter-clockwise, negative = clockwise
+export const polygonArea = (vertices) => {
+  let area = 0
+  const n = vertices.length
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+
+    area += vertices[i].x * vertices[j].y
+    area -= vertices[j].x * vertices[i].y
+  }
+
+  return area / 2
 }

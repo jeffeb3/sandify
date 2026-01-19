@@ -1,5 +1,8 @@
 import { PriorityQueue } from "./PriorityQueue"
+import UnionFind from "./UnionFind"
 import Victor from "victor"
+import { eulerianTrail as computeEulerianTrail } from "./eulerian_trail/eulerianTrail"
+import { eulerizeEdges } from "./chinesePostman"
 
 export const mix = (v1, v2, s) => {
   let u = [v1.x, v1.y]
@@ -202,4 +205,115 @@ export default class Graph {
   getPairedKey(node1, node2) {
     return node1.toString() + "-" + node2.toString()
   }
+
+  // Find connected components in the graph via DFS
+  // Returns array of components, each component is array of node keys
+  findComponents() {
+    const visited = new Set()
+    const components = []
+
+    for (const nodeKey of this.nodeKeys) {
+      if (visited.has(nodeKey)) continue
+
+      const component = []
+      const stack = [nodeKey]
+
+      while (stack.length > 0) {
+        const key = stack.pop()
+
+        if (visited.has(key)) continue
+
+        visited.add(key)
+        component.push(key)
+
+        const neighbors = this.adjacencyList[key] || []
+
+        for (const { node } of neighbors) {
+          const neighborKey = node.toString()
+
+          if (!visited.has(neighborKey)) {
+            stack.push(neighborKey)
+          }
+        }
+      }
+
+      components.push(component)
+    }
+
+    return components
+  }
+
+  // Add bridge edges to connect disconnected components using MST (Kruskal's algorithm)
+  connectComponents() {
+    const components = this.findComponents()
+
+    if (components.length <= 1) return
+
+    // Build list of all possible bridges between all component pairs
+    // Then use Kruskal-style MST to connect them optimally
+    const allBridges = []
+
+    for (let i = 0; i < components.length; i++) {
+      for (let j = i + 1; j < components.length; j++) {
+        let bestDist = Infinity
+        let bestPair = null
+
+        // Find shortest bridge between component i and j
+        for (const key1 of components[i]) {
+          const node1 = this.nodeMap[key1]
+
+          for (const key2 of components[j]) {
+            const node2 = this.nodeMap[key2]
+            const dist = Math.hypot(node1.x - node2.x, node1.y - node2.y)
+
+            if (dist < bestDist) {
+              bestDist = dist
+              bestPair = [node1, node2]
+            }
+          }
+        }
+
+        if (bestPair) {
+          allBridges.push({
+            dist: bestDist,
+            pair: bestPair,
+            comp1: i,
+            comp2: j,
+          })
+        }
+      }
+    }
+
+    // Sort bridges by distance (shortest first)
+    allBridges.sort((a, b) => a.dist - b.dist)
+
+    const uf = new UnionFind()
+
+    for (let i = 0; i < components.length; i++) {
+      uf.makeSet(i)
+    }
+
+    // Kruskal's algorithm: add shortest bridges that connect new components
+    for (const bridge of allBridges) {
+      if (uf.union(bridge.comp1, bridge.comp2)) {
+        this.addEdge(bridge.pair[0], bridge.pair[1])
+      }
+    }
+  }
+}
+
+// Compute Eulerian trail over all edges in a graph using Chinese Postman algorithm.
+// Returns array of node keys representing the trail.
+// Use graph.nodeMap[key] to get the actual node objects.
+export const getEulerianTrail = (graph) => {
+  const edges = Object.values(graph.edgeMap)
+  const dijkstraFn = (startKey, endKey) =>
+    graph.dijkstraShortestPath(startKey, endKey)
+  const { edges: eulerizedEdges } = eulerizeEdges(
+    edges,
+    dijkstraFn,
+    graph.nodeMap,
+  )
+
+  return computeEulerianTrail({ edges: eulerizedEdges })
 }
