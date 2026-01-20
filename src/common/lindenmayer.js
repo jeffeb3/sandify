@@ -17,7 +17,7 @@ const shortestPath = (nodes) => {
     if (visited[edge12Key]) {
       const result = nearestUnvisitedNode(i + 1, nodes, visited, graph)
 
-      if (unvisitedNode != null) {
+      if (result != null) {
         const shortestSubPath = graph.bfsShortestPath(
           node1Key,
           result.node.toString(),
