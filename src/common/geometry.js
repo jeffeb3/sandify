@@ -11,6 +11,11 @@ export const radToDeg = (rad) => {
   return (rad * 180.0) / Math.PI
 }
 
+// snap a value to the nearest grid point
+export const snapToGrid = (value, tolerance) => {
+  return Math.round(value / tolerance) * tolerance
+}
+
 export const distance = (v1, v2) => {
   return Math.sqrt(Math.pow(v1.x - v2.x, 2.0) + Math.pow(v1.y - v2.y, 2.0))
 }

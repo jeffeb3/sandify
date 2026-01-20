@@ -57,9 +57,12 @@ export const getShape = (type, ...args) => {
 export const getDefaultShapeType = () => {
   const shape = localStorage.getItem("defaultShape")
 
-  // minor hack: fancy text relies on fonts being loaded, so it can't be used for initial
-  // state when the app loads
-  return shape && shape !== "fancyText" ? shape : "polygon"
+  // fancy text relies on fonts being loaded, so it can't be used for initial
+  // state when the app loads; also validate that the shape type exists (it may not if
+  // switching branches)
+  return shape && shape !== "fancyText" && shapeFactory[shape]
+    ? shape
+    : "polygon"
 }
 
 export const getDefaultShape = () => {
