@@ -551,6 +551,70 @@ export const annotateVertices = (vertices, attrs) => {
   return vertices
 }
 
+// Check if 4 points are approximately collinear
+const areCollinear = (p0, p1, p2, p3, tolerance = 0.01) => {
+  const dx = p3.x - p0.x
+  const dy = p3.y - p0.y
+  const len = Math.sqrt(dx * dx + dy * dy)
+
+  if (len < tolerance) return true
+
+  // Distance from p1 and p2 to the line through p0-p3
+  const dist1 = Math.abs(dx * (p0.y - p1.y) - dy * (p0.x - p1.x)) / len
+  const dist2 = Math.abs(dx * (p0.y - p2.y) - dy * (p0.x - p2.x)) / len
+
+  return dist1 < tolerance && dist2 < tolerance
+}
+
+// Attempt to subdivide a path using Catmull-Rom spline interpolation
+// Returns subdivided points that pass through all original points with smooth curves
+// Preserves straight segments when points are collinear
+export const catmullRomSpline = (points, segmentsPerCurve = 8) => {
+  if (points.length < 2) return points
+  if (points.length === 2) return points
+
+  const result = []
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[Math.min(points.length - 1, i + 2)]
+
+    result.push(p1)
+
+    // Skip interpolation for collinear segments (keep straight lines straight)
+    if (areCollinear(p0, p1, p2, p3)) {
+      continue
+    }
+
+    for (let t = 1; t < segmentsPerCurve; t++) {
+      const s = t / segmentsPerCurve
+      const s2 = s * s
+      const s3 = s2 * s
+
+      result.push({
+        x:
+          0.5 *
+          (2 * p1.x +
+            (-p0.x + p2.x) * s +
+            (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * s2 +
+            (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * s3),
+        y:
+          0.5 *
+          (2 * p1.y +
+            (-p0.y + p2.y) * s +
+            (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * s2 +
+            (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * s3),
+      })
+    }
+  }
+
+  result.push(points[points.length - 1])
+
+  return result
+}
+
 // returns the intersection point of two line segments
 export const calculateIntersection = (p1, p2, p3, p4) => {
   var denominator =
