@@ -23,6 +23,12 @@ export const voronoiOptions = {
     type: "togglebutton",
     choices: ["voronoi", "delaunay"],
   },
+  voronoiUniformity: {
+    title: "Uniformity",
+    type: "slider",
+    min: 0,
+    max: 20,
+  },
 }
 
 export default class Voronoi extends Effect {
@@ -51,14 +57,16 @@ export default class Voronoi extends Effect {
       ...super.getInitialState(),
       ...{
         voronoiPolygon: "voronoi",
+        voronoiUniformity: 0,
         seed: 1,
       },
     }
   }
 
   getVertices(effect, layer, vertices) {
-    const { seed, voronoiPolygon } = effect
+    const { seed, voronoiPolygon, voronoiUniformity = 0 } = effect
     const { width, height } = dimensions(vertices)
+
     this.rng = seedrandom(seed)
     noise.seed(seed)
 
@@ -68,7 +76,12 @@ export default class Voronoi extends Effect {
       ),
       (vertex) => vertex.toString(),
     )
-    const points = this.generatePointsFromVertices(mappedVertices)
+    let points = this.generatePointsFromVertices(mappedVertices)
+
+    if (voronoiUniformity > 0) {
+      points = this.relaxPoints(points, width, height, voronoiUniformity)
+    }
+
     this.graph = this.buildGraph(points, voronoiPolygon, width, height)
 
     this.vertices = []

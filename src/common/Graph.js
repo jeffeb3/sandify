@@ -1,4 +1,4 @@
-import { PriorityQueue } from "./PriorityQueue.js"
+import { PriorityQueue } from "./PriorityQueue"
 import Victor from "victor"
 
 export const mix = (v1, v2, s) => {
@@ -37,7 +37,9 @@ export const edgeKey = (node1, node2) => {
   return [node1Key, node2Key].sort().toString()
 }
 
-// note: requires string-based nodes to work properly
+// Note: requires string-based nodes to work properly.
+// Path cache is not invalidated on addNode/addEdge for performance.
+// If modifying graph after computing paths, call clearCachedPaths() manually.
 export default class Graph {
   constructor() {
     this.nodeMap = {}
@@ -58,7 +60,6 @@ export default class Graph {
       this.nodeKeys.add(key)
       this.nodeMap[key] = node
       this.adjacencyList[key] = []
-      this.clearCachedPaths()
     }
   }
 
@@ -72,7 +73,6 @@ export default class Graph {
       this.adjacencyList[node2Key].push({ node: node1, weight })
       this.edgeKeys.add(edge12Key)
       this.edgeMap[edge12Key] = [node1.toString(), node2.toString()]
-      this.clearCachedPaths()
     }
   }
 
@@ -93,18 +93,61 @@ export default class Graph {
     return Object.values(this.nodeMap).find(fn)
   }
 
+  // BFS-based shortest path - optimal for uniform edge weights
+  bfsShortestPath(startNode, endNode) {
+    let shortest = this.getCachedShortestPath(startNode, endNode)
+
+    if (shortest === undefined) {
+      const backtrace = {}
+      const visited = new Set()
+      const queue = [startNode]
+
+      visited.add(startNode)
+
+      while (queue.length > 0) {
+        const currentNode = queue.shift()
+
+        if (currentNode === endNode) {
+          break
+        }
+
+        for (const neighbor of this.adjacencyList[currentNode]) {
+          const neighborKey = neighbor.node.toString()
+
+          if (!visited.has(neighborKey)) {
+            visited.add(neighborKey)
+            backtrace[neighborKey] = currentNode
+            queue.push(neighborKey)
+          }
+        }
+      }
+
+      let path = [endNode.toString()]
+      let lastStep = endNode
+
+      while (lastStep !== startNode) {
+        path.unshift(backtrace[lastStep].toString())
+        lastStep = backtrace[lastStep]
+      }
+
+      shortest = path.map((node) => this.nodeMap[node])
+      this.cacheShortestPath(startNode, endNode, shortest)
+    }
+
+    return shortest
+  }
+
+  // Dijkstra's algorithm with binary heap - O((V+E) log V)
   dijkstraShortestPath(startNode, endNode) {
     let shortest = this.getCachedShortestPath(startNode, endNode)
 
     if (shortest === undefined) {
-      let times = {}
-      let backtrace = {}
-      let pq = new PriorityQueue()
-      let nodes = this.nodeKeys
+      const times = {}
+      const backtrace = {}
+      const pq = new PriorityQueue()
 
       times[startNode] = 0
-
-      nodes.forEach((node) => {
+      this.nodeKeys.forEach((node) => {
         if (node !== startNode) {
           times[node] = Infinity
         }
@@ -113,17 +156,18 @@ export default class Graph {
       pq.enqueue([startNode, 0])
 
       while (!pq.isEmpty()) {
-        let shortestStep = pq.dequeue()
-        let currentNode = shortestStep[0]
-        this.adjacencyList[currentNode.toString()].forEach((neighbor) => {
-          let time = times[currentNode] + neighbor.weight
+        const [currentNode] = pq.dequeue()
 
-          if (time < times[neighbor.node]) {
-            times[neighbor.node] = time
-            backtrace[neighbor.node] = currentNode
-            pq.enqueue([neighbor.node, time])
+        for (const neighbor of this.adjacencyList[currentNode]) {
+          const neighborKey = neighbor.node.toString()
+          const time = times[currentNode] + neighbor.weight
+
+          if (time < times[neighborKey]) {
+            times[neighborKey] = time
+            backtrace[neighborKey] = currentNode
+            pq.enqueue([neighborKey, time])
           }
-        })
+        }
       }
 
       let path = [endNode.toString()]

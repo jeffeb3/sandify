@@ -77,6 +77,12 @@ export const voronoiOptions = {
       )
     },
   },
+  voronoiUniformity: {
+    title: "Uniformity",
+    type: "slider",
+    min: 0,
+    max: 20,
+  },
   seed: {
     title: "Random seed",
     min: 1,
@@ -107,6 +113,7 @@ export default class Voronoi extends Shape {
         voronoiMinDistance: 30,
         voronoiMaxDistance: 50,
         voronoiFrequency: 5,
+        voronoiUniformity: 0,
         seed: 1,
       },
     }

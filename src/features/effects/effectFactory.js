@@ -9,7 +9,7 @@ import ProgramCode from "./ProgramCode"
 import Track from "./Track"
 import Transformer from "./Transformer"
 import Warp from "./Warp"
-// import Voronoi from "./Voronoi"
+import Voronoi from "./Voronoi"
 
 export const effectFactory = {
   loop: Loop,
@@ -21,8 +21,7 @@ export const effectFactory = {
   noise: Noise,
   track: Track,
   warp: Warp,
-  // too slow; disabling until we implement worker-based vertex computation
-  // voronoi: Voronoi
+  voronoi: Voronoi,
 }
 
 export const getEffect = (type, ...args) => {
