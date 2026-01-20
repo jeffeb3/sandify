@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useTranslation, Trans } from "react-i18next"
 import { useSelector, useDispatch } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
@@ -28,6 +29,7 @@ const exporters = {
 }
 
 const ExportDownloader = ({ showModal, toggleModal }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const machine = useSelector(selectCurrentMachine)
   const exporterState = useSelector(selectExporterState)
@@ -123,7 +125,7 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
       onHide={toggleModal}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Export to a file</Modal.Title>
+        <Modal.Title>{t("Export to a file")}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -207,15 +209,19 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
         <Row>
           <Col sm={5}></Col>
           <Col sm={7}>
-            See the{" "}
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://github.com/jeffeb3/sandify/wiki#export-variables"
-            >
-              wiki{" "}
-            </a>{" "}
-            for details on program export variables.
+            <Trans
+              i18nKey="export.wikiNote"
+              defaults="See the <0>wiki</0> for details on program export variables."
+              components={[
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/jeffeb3/sandify/wiki#export-variables"
+                >
+                  wiki
+                </a>,
+              ]}
+            />
           </Col>
         </Row>
 
@@ -237,14 +243,14 @@ const ExportDownloader = ({ showModal, toggleModal }) => {
           variant="light"
           onClick={handleCancel}
         >
-          Cancel
+          {t("Cancel")}
         </Button>
         <Button
           id="code-download"
           variant="primary"
           onClick={handleDownload}
         >
-          Download
+          {t("Download")}
         </Button>
       </Modal.Footer>
     </Modal>

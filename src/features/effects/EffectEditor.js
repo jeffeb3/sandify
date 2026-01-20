@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import { IconContext } from "react-icons"
 import {
@@ -16,6 +17,7 @@ import EffectLayer from "./EffectLayer"
 import { selectSelectedEffect } from "./effectsSlice"
 
 const EffectEditor = ({ id }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const effect = useSelector(selectSelectedEffect)
   const type = effect?.type || "mask" // guard zombie child
@@ -150,7 +152,9 @@ const EffectEditor = ({ id }) => {
         </Row>
       )}
       {model.description && (
-        <div className="mt-3 mb-2 bg-light p-4">{model.description}</div>
+        <div className="mt-3 mb-2 bg-light p-4">
+          {t(`description.${type}`, { defaultValue: model.description })}
+        </div>
       )}
     </div>
   )

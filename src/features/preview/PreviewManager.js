@@ -20,7 +20,7 @@ import "./PreviewManager.scss"
 import { updatePreview } from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
 
-const PreviewManager = () => {
+const PreviewManager = ({ isActive }) => {
   const dispatch = useDispatch()
   const currentLayer = useSelector(selectCurrentLayer)
   const currentEffectLayer = useSelector(selectCurrentEffect)
@@ -109,7 +109,7 @@ const PreviewManager = () => {
             className={`preview-wrapper d-flex flex-column${previewAlignClass}`}
             ref={wrapperRef}
           >
-            <PreviewWindow />
+            <PreviewWindow isActive={isActive} />
           </div>
         </div>
 

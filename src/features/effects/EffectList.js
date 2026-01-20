@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import Button from "react-bootstrap/Button"
 import ListGroup from "react-bootstrap/ListGroup"
@@ -25,6 +26,7 @@ const EffectRow = ({
   effect,
   handleEffectSelected,
   handleToggleEffectVisible,
+  t,
 }) => {
   const { name, id, visible } = effect
   const instance = getEffect(effect.type)
@@ -58,7 +60,7 @@ const EffectRow = ({
             className="layer-button"
             variant="light"
             data-id={id}
-            data-tooltip-content={visible ? "Hide effect" : "Show effect"}
+            data-tooltip-content={visible ? t("Hide effect") : t("Show effect")}
             data-tooltip-id="tooltip-toggle-visible"
             onClick={() => handleToggleEffectVisible(id, effect.visible)}
           >
@@ -72,7 +74,7 @@ const EffectRow = ({
             className="me-3"
             style={{ fontSize: "80%" }}
           >
-            {instance.label}
+            {t(instance.label)}
           </span>
         </div>
       </div>
@@ -81,6 +83,7 @@ const EffectRow = ({
 }
 
 const EffectList = ({ effects, selectedLayer }) => {
+  const { t } = useTranslation()
   const dispatch = useDispatch()
   const currentEffectId = useSelector(selectCurrentEffectId)
   const selectedEffectId = useSelector(selectSelectedEffectId)
@@ -145,6 +148,7 @@ const EffectList = ({ effects, selectedLayer }) => {
                 handleEffectSelected={handleEffectSelected}
                 handleToggleEffectVisible={handleToggleEffectVisible}
                 index={index}
+                t={t}
               />
             ))}
           </ListGroup>

@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -6,6 +7,7 @@ import ToggleButton from "react-bootstrap/ToggleButton"
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup"
 
 const ToggleButtonOption = (props) => {
+  const { t } = useTranslation()
   const option = props.options[props.optionKey]
   const { data } = props
   const model = props.model || data
@@ -27,7 +29,7 @@ const ToggleButtonOption = (props) => {
   return (
     <Row className={"align-items-center mb-1" + (visible ? "" : " d-none")}>
       <Col sm={5}>
-        <Form.Label className="m-0">{option.title}</Form.Label>
+        <Form.Label className="m-0">{t(option.title)}</Form.Label>
       </Col>
 
       <Col sm={7}>
@@ -48,7 +50,7 @@ const ToggleButtonOption = (props) => {
                 variant="light"
                 value={choice}
               >
-                {choice}
+                {t(choice)}
               </ToggleButton>
             )
           })}

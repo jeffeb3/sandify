@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -13,6 +14,7 @@ const CheckboxOption = ({
   onChange,
   label = true,
 }) => {
+  const { t } = useTranslation()
   const option = options[optionKey]
   const visible =
     option.isVisible === undefined ? true : option.isVisible(model, data)
@@ -36,7 +38,7 @@ const CheckboxOption = ({
             htmlFor="options-step"
             className="mb-0"
           >
-            {option.title}
+            {t(option.title)}
           </Form.Label>
         )}
       </Col>
