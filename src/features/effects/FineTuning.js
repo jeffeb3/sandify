@@ -2,6 +2,7 @@ import Victor from "victor"
 import convexHull from "convexhull-js"
 import { arrayRotate } from "@/common/util"
 import {
+  centroid,
   cloneVertex,
   cloneVertices,
   isLoop,
@@ -9,8 +10,14 @@ import {
   distance,
   boundingVerticesAtLength,
 } from "@/common/geometry"
+import {
+  traceBoundary,
+  boundaryAlgorithmMap,
+  boundaryAlgorithmChoices,
+} from "@/common/boundary"
 import { closest } from "@/common/proximity"
 import Effect from "./Effect"
+import { getShape } from "@/features/shapes/shapeFactory"
 
 const options = {
   reverse: {
@@ -33,8 +40,31 @@ const options = {
     step: 2,
   },
   drawBorder: {
-    title: "4: Add perimeter border",
+    title: "4: Add border",
     type: "checkbox",
+  },
+  // \u00A0 is a hacky way to indent these options under drawBorder
+  borderAlgorithm: {
+    title: "\u00A0\u00A0\u00A0\u00A0Algorithm",
+    type: "dropdown",
+    choices: boundaryAlgorithmChoices,
+    isVisible: (model, state) => {
+      return state.drawBorder === true
+    },
+  },
+  borderPadding: {
+    title: "\u00A0\u00A0\u00A0\u00A0Pad (%)",
+    step: 5,
+    isVisible: (model, state) => {
+      return state.drawBorder === true
+    },
+  },
+  borderOnly: {
+    title: "\u00A0\u00A0\u00A0\u00A0Draw border only",
+    type: "checkbox",
+    isVisible: (model, state) => {
+      return state.drawBorder === true
+    },
   },
   backtrackPct: {
     title: "5: Backtrack at end (%)",
@@ -73,6 +103,9 @@ export default class FineTuning extends Effect {
         rotateStartingPct: 0,
         reverse: false,
         drawBorder: false,
+        borderAlgorithm: "auto",
+        borderPadding: 0,
+        borderOnly: false,
       },
     }
   }
@@ -95,7 +128,19 @@ export default class FineTuning extends Effect {
       }
 
       if (effect.drawBorder) {
-        vertices = this.drawBorder(vertices, effect)
+        const shape = getShape(layer.type)
+        const state = { shape: layer }
+        const algorithm = shape.getBoundaryAlgorithm(
+          effect.borderAlgorithm || "auto",
+          state,
+        )
+
+        vertices = this.drawBorder(
+          vertices,
+          algorithm,
+          effect.borderPadding || 0,
+          effect.borderOnly || false,
+        )
       }
 
       if (effect.backtrackPct !== 0) {
@@ -128,6 +173,7 @@ export default class FineTuning extends Effect {
       // point and then draw the shape normally from there.
       const newVertices = vertices.splice(0, index2)
       const reversedNewVertices = cloneVertices(newVertices).reverse()
+
       vertices = [...reversedNewVertices, ...newVertices, ...vertices]
     }
 
@@ -157,22 +203,67 @@ export default class FineTuning extends Effect {
       effect.backtrackPct,
     )
     const backtrackVertices = cloneVertices(reversedVertices.slice(0, index2))
+
     backtrackVertices.push(vNew)
 
     return vertices.concat(backtrackVertices)
   }
 
-  drawBorder(vertices, effect) {
-    let hull = convexHull(cloneVertices(vertices))
-    const last = vertices[vertices.length - 1]
-    const closestVertex = closest(hull, last)
-    const index = hull.indexOf(closestVertex)
-    hull = arrayRotate(hull, index)
+  drawBorder(vertices, algorithm = "auto", scale = 0, borderOnly = false) {
+    let border
 
-    hull.forEach((vertex) => {
+    if (algorithm === "convex") {
+      // Convex hull border
+      border = convexHull(cloneVertices(vertices))
+
+      // Apply scaling from centroid
+      if (scale !== 0 && border.length > 0) {
+        const center = centroid(vertices)
+        const scaleFactor = 1 + scale / 100
+
+        border = border.map((v) => {
+          return new Victor(
+            center.x + (v.x - center.x) * scaleFactor,
+            center.y + (v.y - center.y) * scaleFactor,
+          )
+        })
+      }
+    } else {
+      // Convert algorithm string to number for traceBoundary
+      // null = auto-detect (production behavior)
+      const stageNum = boundaryAlgorithmMap[algorithm] ?? null
+
+      border = traceBoundary(cloneVertices(vertices), scale, stageNum)
+    }
+
+    // If borderOnly, return just the closed border path
+    if (borderOnly) {
+      border.push(cloneVertex(border[0]))
+      return border
+    }
+
+    const last = vertices[vertices.length - 1]
+    const closestVertex = closest(border, last)
+    const index = border.indexOf(closestVertex)
+
+    border = arrayRotate(border, index)
+
+    // Check if we should trace CW or CCW by comparing distances
+    // to the second border vertex vs the last border vertex
+    if (border.length > 2) {
+      const d1 = distance(last, border[1])
+      const d2 = distance(last, border[border.length - 1])
+
+      if (d2 < d1) {
+        // Reverse to take the shorter path around
+        border = [border[0], ...border.slice(1).reverse()]
+      }
+    }
+
+    border.forEach((vertex) => {
       vertices.push(vertex)
     })
-    vertices.push(cloneVertex(hull[0]))
+    vertices.push(cloneVertex(border[0]))
 
     return vertices
   }

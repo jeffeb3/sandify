@@ -5,11 +5,11 @@ import { isEqual } from "lodash"
 import {
   selectCurrentEffectId,
   selectEffectById,
-  selectEffectSelectionVertices,
   updateEffect,
 } from "@/features/effects/effectsSlice"
 import {
   selectLayerById,
+  selectEffectSelectionVertices,
   selectDraggingEffectVertices,
   selectIsUpstreamEffectDragging,
 } from "@/features/layers/layersSlice"
