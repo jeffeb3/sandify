@@ -1,4 +1,5 @@
 import { resizeVertices, dimensions, cloneVertices } from "@/common/geometry"
+import { getMachine } from "@/features/machines/machineFactory"
 import { pick } from "lodash"
 import { LRUCache } from "lru-cache"
 import Model from "@/common/Model"
@@ -32,10 +33,36 @@ export default class Shape extends Model {
       this.startingWidth,
       this.startingHeight,
     )
+
     return {
       width,
       height,
       aspectRatio: width / height,
+    }
+  }
+
+  // Scale initial dimensions to fit within a percentage of the machine size
+  // Preserves aspect ratio by fitting to the smaller machine dimension
+  scaledToMachine(props, scaleFactor = 0.6) {
+    if (!props) {
+      return { width: 0, height: 0, aspectRatio: 1.0 }
+    }
+
+    // Call base computation directly to avoid recursion when subclasses override initialDimensions
+    const { width, height } = this.recalculateDimensions(
+      props,
+      this.startingWidth,
+      this.startingHeight,
+    )
+    const aspectRatio = width / height
+    const machine = getMachine(props.machine)
+    const maxSize = Math.min(machine.width, machine.height) * scaleFactor
+    const scale = maxSize / Math.max(width, height)
+
+    return {
+      width: width * scale,
+      height: height * scale,
+      aspectRatio,
     }
   }
 
@@ -114,4 +141,32 @@ export default class Shape extends Model {
   handleUpdate(changes) {
     // default is to do nothing
   }
+}
+
+// Option onChange handler for filters that affect vertex dimensions/aspect ratio
+// Adjusts layer width/height to prevent distortion when aspect ratio changes
+export const adjustSizeForAspectRatio = (model, changes, state) => {
+  const currentVertices = model.getVertices({ shape: state })
+  const newVertices = model.getVertices({
+    shape: { ...state, ...changes },
+  })
+
+  const cDim = dimensions(currentVertices)
+  const nDim = dimensions(newVertices)
+  const cAr = cDim.width / cDim.height
+  const nAr = nDim.width / nDim.height
+
+  if (!isNaN(nAr) && !isNaN(cAr) && cAr !== nAr) {
+    const ar = (nAr * state.aspectRatio) / cAr
+
+    changes.aspectRatio = ar
+
+    if (nAr > 1) {
+      changes.height = state.height * (state.aspectRatio / ar)
+    } else {
+      changes.width = state.width * (ar / state.aspectRatio)
+    }
+  }
+
+  return changes
 }

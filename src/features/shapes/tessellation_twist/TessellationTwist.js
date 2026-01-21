@@ -1,7 +1,5 @@
 import Victor from "victor"
-import Graph, { mix } from "@/common/Graph"
-import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
-import { difference } from "@/common/util"
+import Graph, { mix, getEulerianTrail } from "@/common/Graph"
 import { cloneVertices } from "@/common/geometry"
 import Shape from "../Shape"
 
@@ -167,65 +165,9 @@ export default class TessellationTwist extends Shape {
       graph.addEdge(v1, v2)
     })
 
-    // build a graph
-    // find the eulerian trail that efficiently visits all of the vertices
-    let trail = eulerianTrail({ edges: Object.values(graph.edgeMap) })
-
-    let prevKey
-    let walkedVertices = []
-    var walkedEdges = []
-
-    // if there are nodes with an odd number of edges (as in pentagon and hexagon)
-    // there is not a eulerian trail that visits all of the nodes. So we need to identify
-    // the missing nodes and create edges for them. There is a complex algorithm
-    // (chinese postman) that can be used to do this for the general case, but
-    // it's computationally expensive and overkill for our situation.
-    for (i = 0; i < trail.length - 1; i++) {
-      let edge = [trail[i], trail[i + 1]].sort().toString()
-      walkedEdges.push(edge)
-    }
-    walkedEdges = new Set(walkedEdges)
-
-    let missingEdges = Array.from(
-      difference(walkedEdges, graph.edgeKeys),
-    ).reduce((hash, d) => {
-      d = d.split(",")
-      hash[d[0] + "," + d[1]] = d[2] + "," + d[3]
-      return hash
-    }, {})
-
-    trail.forEach((key, index) => {
-      let vertex = graph.nodeMap[key]
-
-      if (prevKey) {
-        if (!graph.hasEdge(key, prevKey)) {
-          // non-eulerian move, so we'll walk the shortest valid path between them
-          let path = graph.bfsShortestPath(prevKey, key)
-          path.shift()
-          path.forEach((node) => walkedVertices.push(node))
-          walkedVertices.push(vertex)
-        } else {
-          walkedVertices.push(vertex)
-        }
-      } else {
-        walkedVertices.push(vertex)
-      }
-
-      // add any missing edges
-      if (missingEdges[key]) {
-        let missingVertex = graph.nodeMap[missingEdges[key]]
-        let edgeKey = [key, missingEdges[key]].sort().toString()
-
-        if (graph.edgeMap[edgeKey]) {
-          // only add valid edges
-          walkedVertices.push(missingVertex)
-          walkedVertices.push(vertex)
-        }
-        delete missingEdges[key]
-      }
-
-      prevKey = key
-    })
+    // find the eulerian trail that efficiently visits all edges
+    const trail = getEulerianTrail(graph)
+    const walkedVertices = trail.map((key) => graph.nodeMap[key])
 
     const scale = 10.5 // to normalize starting size
     walkedVertices.forEach((point) => {

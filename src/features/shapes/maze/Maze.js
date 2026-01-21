@@ -1,10 +1,8 @@
 /* global console */
 import Shape from "../Shape"
 import seedrandom from "seedrandom"
-import Graph from "@/common/Graph"
+import Graph, { getEulerianTrail } from "@/common/Graph"
 import { getMachine } from "@/features/machines/machineFactory"
-import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
-import { eulerizeEdges } from "@/common/chinesePostman"
 import {
   cloneVertices,
   centerOnOrigin,
@@ -444,16 +442,7 @@ export default class Maze extends Shape {
       graph.addEdge(v1, v2)
     })
 
-    const edges = Object.values(graph.edgeMap)
-    const dijkstraFn = (startKey, endKey) => {
-      return graph.dijkstraShortestPath(startKey, endKey)
-    }
-    const { edges: eulerizedEdges } = eulerizeEdges(
-      edges,
-      dijkstraFn,
-      graph.nodeMap,
-    )
-    const trail = eulerianTrail({ edges: eulerizedEdges })
+    const trail = getEulerianTrail(graph)
     const walkedVertices = trail.map((key) => graph.nodeMap[key])
 
     if (solutionPath && solutionPath.length > 0) {

@@ -21,17 +21,34 @@ export const eulerianTrail = (options) => {
     return id[x]
   }
 
-  function dfs(v) {
-    for (; edgePointer[v] < g[v].length; edgePointer[v] += 1) {
-      var edge = g[v][edgePointer[v]]
-      var to = edge[0]
-      var id = edge[1]
-      if (!edgeUsed[id]) {
-        edgeUsed[id] = true
-        dfs(to)
+  // Iterative Hierholzer's algorithm (avoids stack overflow on large graphs)
+  function dfs(start) {
+    var stack = [start]
+
+    while (stack.length > 0) {
+      var v = stack[stack.length - 1] // peek
+
+      // Find next unused edge from v
+      var foundEdge = false
+
+      for (; edgePointer[v] < g[v].length; edgePointer[v] += 1) {
+        var edge = g[v][edgePointer[v]]
+        var to = edge[0]
+        var edgeId = edge[1]
+
+        if (!edgeUsed[edgeId]) {
+          edgeUsed[edgeId] = true
+          stack.push(to)
+          foundEdge = true
+          break
+        }
+      }
+
+      // If no unused edge found, this vertex is done
+      if (!foundEdge) {
+        trail.push(stack.pop())
       }
     }
-    trail.push(v)
   }
 
   function pushEdge(u, v, id) {
