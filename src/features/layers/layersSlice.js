@@ -1,12 +1,16 @@
 /* global localStorage */
 
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
+import { createSelector } from "reselect"
 import { createCachedSelector } from "re-reselect"
 import { v4 as uuidv4 } from "uuid"
 import Color from "color"
 import { arrayMoveImmutable } from "array-move"
-import { isEqual } from "lodash"
+import {
+  cachedByIdDeepEqual,
+  createDeepEqualSelector,
+  createResultEqualSelector,
+} from "@/common/selectors"
 import {
   rotate,
   offset,
@@ -192,6 +196,12 @@ const layersSlice = createSlice({
 
 // used in slice
 const { selectById } = adapter.getSelectors((state) => state.layers)
+
+// computes vertices for a layer with given effects and machine
+const computeLayerVertices = (layer, effects, machine, options) => {
+  const instance = new Layer(layer.type)
+  return instance.getVertices({ layer, effects, machine, options })
+}
 
 // returns vertices suitable for display in the preview window
 const previewVertices = (vertices, layer) => {
@@ -380,15 +390,9 @@ export const selectLayerVertices = createCachedSelector(
       return []
     } // zombie child
 
-    const instance = new Layer(layer.type)
-    return instance.getVertices({ layer, effects, machine })
+    return computeLayerVertices(layer, effects, machine)
   },
-)({
-  keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
-})
+)(cachedByIdDeepEqual)
 
 // returns the machine-bound vertices for a given layer
 const selectMachineVertices = createCachedSelector(
@@ -428,21 +432,10 @@ export const selectShapePreviewVertices = createCachedSelector(
       return []
     } // zombie child
 
-    const instance = new Layer(layer.type)
-    const vertices = instance.getVertices({
-      layer,
-      effects: [],
-      machine,
-    })
-
+    const vertices = computeLayerVertices(layer, [], machine)
     return previewVertices(vertices, layer)
   },
-)({
-  keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
-})
+)(cachedByIdDeepEqual)
 
 // creates a selector that returns previewable vertices for a given layer
 export const selectPreviewVertices = createCachedSelector(
@@ -472,31 +465,22 @@ export const selectDraggingEffectVertices = createCachedSelector(
       return []
     } // zombie child
 
-    const instance = new Layer(layer.type)
     const effect = effects.find((effect) => effect.id == effectId)
-
     if (!effect) {
-      // no longer visible
       return []
     }
 
     const effectInstance = new EffectLayer(effect.type)
     const idx = effects.findIndex((effect) => effect.id == effectId)
     const vertices = effectInstance.model.dragPreview
-      ? instance.getVertices({
-          layer,
-          effects: effects.slice(0, idx + 1),
-          machine,
-        })
+      ? computeLayerVertices(layer, effects.slice(0, idx + 1), machine)
       : []
 
     return previewVertices(previewVertices(vertices, layer), effect)
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
+  selectorCreator: createDeepEqualSelector,
 })
 
 // returns the preview vertices for a layer when an effect is being dragged; this includes all
@@ -511,28 +495,19 @@ export const selectShapeWhileEffectDraggingVertices = createCachedSelector(
       return []
     } // zombie child or inactive effect
 
-    const instance = new Layer(layer.type)
     const effect = effects.find((effect) => effect.id == effectId)
-
     if (!effect) {
-      // no longer visible
       return []
     }
 
     const idx = effects.findIndex((effect) => effect.id == effectId)
-    const vertices = instance.getVertices({
-      layer,
-      effects: effects.slice(0, idx),
-      machine,
-    })
+    const vertices = computeLayerVertices(layer, effects.slice(0, idx), machine)
 
     return previewVertices(vertices, layer)
   },
 )({
   keySelector: (state, id, effectId) => id + effectId,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
+  selectorCreator: createDeepEqualSelector,
 })
 
 // returns whether an upstream effect from the given effect is being dragged
@@ -556,77 +531,80 @@ export const selectIsUpstreamEffectDragging = createCachedSelector(
 
     return idx > draggingIdx
   },
-)({
-  keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
-})
+)(cachedByIdDeepEqual)
 
 // returns a array of all visible machine-bound vertices and the connections between them
-export const selectConnectedVertices = createSelector(selectState, (state) => {
-  if (!selectFontsLoaded(state)) {
-    return []
-  }
+export const selectConnectedVertices = createResultEqualSelector(
+  selectFontsLoaded,
+  selectVisibleLayerIds,
+  selectState,
+  (fontsLoaded, visibleLayerIds, state) => {
+    if (!fontsLoaded) {
+      return []
+    }
 
-  log("selectConnectedVertices")
-  const visibleLayerIds = selectVisibleLayerIds(state)
+    log("selectConnectedVertices")
 
-  return visibleLayerIds.reduce((acc, id) => {
-    const vertices = selectMachineVertices(state, id)
-    const connector = selectConnectingVertices(state, id)
+    return visibleLayerIds.reduce((acc, id) => {
+      const vertices = selectMachineVertices(state, id)
+      const connector = selectConnectingVertices(state, id)
 
-    acc.push(...vertices, ...connector.slice(1, -1))
+      acc.push(...vertices, ...connector.slice(1, -1))
 
-    return acc
-  }, [])
-})
+      return acc
+    }, [])
+  },
+)
 
 // returns an array of layers (and connectors) in an object structure designed to be exported by
 // an exporter
-export const selectLayersForExport = createSelector(selectState, (state) => {
-  if (!selectFontsLoaded(state)) {
-    return []
-  }
-
-  log("selectLayersForExport")
-  const visibleLayerIds = selectVisibleLayerIds(state)
-  let connectorCnt = 0
-
-  return visibleLayerIds.reduce((acc, id, index) => {
-    const vertices = selectMachineVertices(state, id)
-    const connector = selectConnectingVertices(state, id)
-    const effects = selectEffectsByLayerId(state, id)
-    const info = selectLayerById(state, id)
-    const codeEffects = effects.filter(
-      (effect) => effect.type === "programCode",
-    )
-
-    acc.push({
-      name: info.name,
-      type: "LAYER",
-      index,
-      vertices,
-      code: codeEffects.map((effect) => {
-        return {
-          pre: effect.programCodePre,
-          post: effect.programCodePost,
-        }
-      }),
-    })
-
-    if (connector.length > 0) {
-      acc.push({
-        type: "CONNECTOR",
-        index: connectorCnt,
-        vertices: connector,
-      })
-      connectorCnt += 1
+export const selectLayersForExport = createResultEqualSelector(
+  selectFontsLoaded,
+  selectVisibleLayerIds,
+  selectState,
+  (fontsLoaded, visibleLayerIds, state) => {
+    if (!fontsLoaded) {
+      return []
     }
 
-    return acc
-  }, [])
-})
+    log("selectLayersForExport")
+    let connectorCnt = 0
+
+    return visibleLayerIds.reduce((acc, id, index) => {
+      const vertices = selectMachineVertices(state, id)
+      const connector = selectConnectingVertices(state, id)
+      const effects = selectEffectsByLayerId(state, id)
+      const info = selectLayerById(state, id)
+      const codeEffects = effects.filter(
+        (effect) => effect.type === "programCode",
+      )
+
+      acc.push({
+        name: info.name,
+        type: "LAYER",
+        index,
+        vertices,
+        code: codeEffects.map((effect) => {
+          return {
+            pre: effect.programCodePre,
+            post: effect.programCodePost,
+          }
+        }),
+      })
+
+      if (connector.length > 0) {
+        acc.push({
+          type: "CONNECTOR",
+          index: connectorCnt,
+          vertices: connector,
+        })
+        connectorCnt += 1
+      }
+
+      return acc
+    }, [])
+  },
+)
 
 // returns an array of vertices connecting a given layer to the next (if it exists)
 export const selectConnectingVertices = createCachedSelector(
@@ -680,28 +658,31 @@ export const selectConnectingVertices = createCachedSelector(
 )((state, id) => id)
 
 // returns the starting offset for each layer, given previous layers
-export const selectVertexOffsets = createSelector(selectState, (state) => {
-  log("selectVertexOffsets")
-  const visibleLayerIds = selectVisibleLayerIds(state)
-  let offsets = {}
-  let offset = 0
+export const selectVertexOffsets = createResultEqualSelector(
+  selectVisibleLayerIds,
+  selectState,
+  (visibleLayerIds, state) => {
+    log("selectVertexOffsets")
+    let offsets = {}
+    let offset = 0
 
-  visibleLayerIds.forEach((id) => {
-    const vertices = selectMachineVertices(state, id)
-    const connector = selectConnectingVertices(state, id)
-    offsets[id] = { start: offset, end: offset + vertices.length - 1 }
+    visibleLayerIds.forEach((id) => {
+      const vertices = selectMachineVertices(state, id)
+      const connector = selectConnectingVertices(state, id)
+      offsets[id] = { start: offset, end: offset + vertices.length - 1 }
 
-    if (connector.length > 0) {
-      offsets[id + "-connector"] = {
-        start: offset + vertices.length,
-        end: offset + vertices.length + connector.length - 1,
+      if (connector.length > 0) {
+        offsets[id + "-connector"] = {
+          start: offset + vertices.length,
+          end: offset + vertices.length + connector.length - 1,
+        }
+        offset += vertices.length + connector.length
       }
-      offset += vertices.length + connector.length
-    }
-  })
+    })
 
-  return offsets
-})
+    return offsets
+  },
+)
 
 // returns statistics across all layers
 export const selectVerticesStats = createSelector(
@@ -725,11 +706,9 @@ export const selectLayerPreviewBounds = createCachedSelector(
   (state, id, isCurrent) => isCurrent,
   (layer, machineVertices, effects, machine, isCurrent) => {
     if (!layer) {
-      // zombie child
       return []
-    }
+    } // zombie child
 
-    const instance = new Layer(layer.type)
     const hasSelectableEffect = effects.find((effect) =>
       ["transformer", "mask"].includes(effect.type),
     )
@@ -740,12 +719,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
       !(isCurrent || hasInvertedMask) || !hasSelectableEffect
 
     const vertices = includeLayer
-      ? instance.getVertices({
-          layer,
-          effects: [],
-          machine,
-          options: { bounds: true },
-        })
+      ? computeLayerVertices(layer, [], machine, { bounds: true })
       : []
     const effectVertices = includeEffects ? machineVertices : []
 
@@ -757,9 +731,7 @@ export const selectLayerPreviewBounds = createCachedSelector(
   },
 )({
   keySelector: (state, id, isCurrent) => `${id}-${isCurrent}`,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
+  selectorCreator: createDeepEqualSelector,
 })
 
 // given a set of vertices and a slider value, returns the indices of the
