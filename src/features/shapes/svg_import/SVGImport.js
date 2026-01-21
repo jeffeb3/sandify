@@ -89,7 +89,11 @@ export default class SVGImport extends Shape {
     }
 
     try {
-      const paths = this.parseSVG(svgContent, svgMinStrokeWidth, svgFillBrightness)
+      const paths = this.parseSVG(
+        svgContent,
+        svgMinStrokeWidth,
+        svgFillBrightness,
+      )
 
       if (paths.length === 0) {
         return [new Victor(0, 0)]
