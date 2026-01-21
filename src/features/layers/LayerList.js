@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import Button from "react-bootstrap/Button"
 import ListGroup from "react-bootstrap/ListGroup"
@@ -23,7 +23,7 @@ import {
   updateLayer,
 } from "@/features/layers/layersSlice"
 
-const LayerRow = ({
+const LayerRow = React.memo(function LayerRow({
   current,
   selected,
   numLayers,
@@ -31,7 +31,7 @@ const LayerRow = ({
   handleLayerSelected,
   handleToggleLayerVisible,
   t,
-}) => {
+}) {
   const { name, id, visible } = layer
   const activeClass = current ? "active" : selected ? "selected" : ""
   const dragClass = numLayers > 1 ? "cursor-move" : ""
@@ -90,7 +90,7 @@ const LayerRow = ({
       </div>
     </ListGroup.Item>
   )
-}
+})
 
 const LayerList = () => {
   const { t } = useTranslation()
@@ -109,17 +109,26 @@ const LayerList = () => {
   const numLayers = useSelector(selectNumLayers)
   const layers = useSelector(selectAllLayers)
 
-  const handleLayerSelected = (event) => {
-    const id = event.target.closest(".list-group-item").id
-    dispatch(setCurrentLayer(id))
-  }
+  const handleLayerSelected = useCallback(
+    (event) => {
+      const id = event.target.closest(".list-group-item").id
+      dispatch(setCurrentLayer(id))
+    },
+    [dispatch],
+  )
 
-  const handleDragStart = ({ active }) => dispatch(setCurrentLayer(active.id))
+  const handleDragStart = useCallback(
+    ({ active }) => dispatch(setCurrentLayer(active.id)),
+    [dispatch],
+  )
 
-  const handleToggleLayerVisible = (id, visible) => {
-    dispatch(setCurrentLayer(id))
-    dispatch(updateLayer({ id, visible: !visible }))
-  }
+  const handleToggleLayerVisible = useCallback(
+    (id, visible) => {
+      dispatch(setCurrentLayer(id))
+      dispatch(updateLayer({ id, visible: !visible }))
+    },
+    [dispatch],
+  )
 
   const handleDragEnd = ({ active, over }) => {
     if (!over) {
