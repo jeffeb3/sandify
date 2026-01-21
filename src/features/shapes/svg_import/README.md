@@ -20,6 +20,17 @@ All geometry (open paths, closed shapes, disconnected elements) feeds into a uni
 
 This approach handles arbitrary SVG topology without special-casing open vs closed paths.
 
+### Small SVG Handling
+
+SVGs with dimensions smaller than 500 units are scaled up to ~2000 units before Bezier linearization. The `points-on-path` library uses fixed tolerances, so small coordinate values produce coarse output. Scaling up first yields smoother curves, and the shape system normalizes the result anyway.
+
+## UI Options
+
+| Option | Description |
+|--------|-------------|
+| Min stroke width | Filter out strokes thinner than this value (0-10). Useful for hiding fine detail lines. |
+| Fill brightness | Range slider (0-255) to filter filled shapes by perceived brightness. Lower values = darker fills. Useful for excluding backgrounds or focusing on outlines. |
+
 ## SVG Elements
 
 ### Supported
@@ -47,7 +58,7 @@ This approach handles arbitrary SVG topology without special-casing open vs clos
 
 ## Sample images
 
-The sample SVGs Located in `samples/` serve as tests for various SVG element types.
+The sample SVGs located in `samples/` serve as tests for various SVG element types.
 
 | File | Size | Tests |
 |------|------|-------|
@@ -60,6 +71,6 @@ The sample SVGs Located in `samples/` serve as tests for various SVG element typ
 
 ## Potential Enhancements
 
-- `<clipPath>` / `<mask>` support (requires geometry library like Clipper.js)
+- `<clipPath>` / `<mask>` support (complex to implement correctly with nested clips)
 - `<marker>` support
 - Fill hatching/infill patterns

@@ -349,16 +349,7 @@ export const circle = (radius, start = 0, x = 0, y = 0, resolution = 128.0) => {
 
 // returns an array of points drawing an ellipse with given radii
 export const ellipse = (rx, ry, cx = 0, cy = 0, resolution = 128.0) => {
-  let points = []
-
-  for (let i = 0; i <= resolution; i++) {
-    let angle = ((Math.PI * 2.0) / resolution) * i
-    points.push(
-      new Victor(cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry),
-    )
-  }
-
-  return points
+  return ellipticalArc(rx, ry, 0, Math.PI * 2, cx, cy, resolution / 4)
 }
 
 // returns an array of points drawing an elliptical arc

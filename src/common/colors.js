@@ -10,6 +10,9 @@ const colors = {
   transformerBorderColor: "#fefefe", // almost white
 }
 
+// ITU-R BT.601 luminance formula for perceived brightness
+const luminance = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b
+
 // Parse a CSS color string and return perceived brightness (0-255), or null if unparseable
 export const getColorBrightness = (color) => {
   if (!color || color === "none") {
@@ -25,12 +28,12 @@ export const getColorBrightness = (color) => {
       hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]
     }
 
-    if (hex.length === 6) {
+    if (hex.length === 6 && /^[0-9a-f]{6}$/.test(hex)) {
       const r = parseInt(hex.slice(0, 2), 16)
       const g = parseInt(hex.slice(2, 4), 16)
       const b = parseInt(hex.slice(4, 6), 16)
 
-      return 0.299 * r + 0.587 * g + 0.114 * b
+      return luminance(r, g, b)
     }
   }
 
@@ -41,7 +44,7 @@ export const getColorBrightness = (color) => {
     const g = parseInt(rgbMatch[2], 10)
     const b = parseInt(rgbMatch[3], 10)
 
-    return 0.299 * r + 0.587 * g + 0.114 * b
+    return luminance(r, g, b)
   }
 
   const namedColors = {

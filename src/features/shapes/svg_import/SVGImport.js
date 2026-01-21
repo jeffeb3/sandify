@@ -23,14 +23,14 @@ const options = {
     type: "textarea",
     isVisible: () => DEBUG,
   },
-  minStrokeWidth: {
+  svgMinStrokeWidth: {
     title: "Min stroke width",
     min: 0,
     max: 10,
     step: 1,
     onChange: adjustSizeForAspectRatio,
   },
-  fillBrightness: {
+  svgFillBrightness: {
     title: "Fill brightness",
     type: "slider",
     range: true,
@@ -48,11 +48,12 @@ const DEFAULT_SVG = `<svg viewBox="0 0 100 100">
   <circle cx="50" cy="50" r="40" stroke="black" fill="none"/>
 </svg>`
 
-const SUBSAMPLE_LENGTH = 40
-const SMALL_SVG_THRESHOLD = 500
-const TARGET_SVG_SIZE = 2000
-const CURVE_RESOLUTION = 128
-const DUPLICATE_THRESHOLD = 0.01
+const SUBSAMPLE_LENGTH = 40 // Max segment length for line/polyline/polygon edges
+const SMALL_SVG_THRESHOLD = 500 // SVGs smaller than this get scaled up for precision
+const TARGET_SVG_SIZE = 2000 // Target size when scaling up small SVGs
+const CURVE_RESOLUTION = 128 // Points per circle/ellipse
+const CORNER_RESOLUTION = 16 // Points per rounded rectangle corner
+const DUPLICATE_THRESHOLD = 0.01 // Distance below which consecutive points are merged
 const NODE_MERGE_TOLERANCE = 3 // SVG units - nodes within this distance share a key
 const CLOSED_PATH_TOLERANCE = 0.5 // Distance threshold to consider a path closed
 const OUTLIER_THRESHOLD = 10 // Skip segments that are 10x longer than median
@@ -70,8 +71,8 @@ export default class SVGImport extends Shape {
     return {
       ...super.getInitialState(),
       svgContent: props?.svgContent || DEFAULT_SVG,
-      minStrokeWidth: 0,
-      fillBrightness: [0, 255],
+      svgMinStrokeWidth: 0,
+      svgFillBrightness: [0, 255],
       maintainAspectRatio: true,
     }
   }
@@ -81,14 +82,14 @@ export default class SVGImport extends Shape {
   }
 
   getVertices(state) {
-    const { svgContent, minStrokeWidth, fillBrightness } = state.shape
+    const { svgContent, svgMinStrokeWidth, svgFillBrightness } = state.shape
 
     if (!svgContent || svgContent.trim() === "") {
       return [new Victor(0, 0)]
     }
 
     try {
-      const paths = this.parseSVG(svgContent, minStrokeWidth, fillBrightness)
+      const paths = this.parseSVG(svgContent, svgMinStrokeWidth, svgFillBrightness)
 
       if (paths.length === 0) {
         return [new Victor(0, 0)]
@@ -163,7 +164,9 @@ export default class SVGImport extends Shape {
           return
         }
 
-        if (!this.isElementVisible(element, minStrokeWidth, fillBrightness)) {
+        if (
+          !this.shouldIncludeElement(element, minStrokeWidth, fillBrightness)
+        ) {
           return
         }
 
@@ -206,8 +209,8 @@ export default class SVGImport extends Shape {
   }
 
   // Determine if an SVG element should be included based on stroke width and fill brightness.
-  // Returns true if element passes the visibility filters.
-  isElementVisible(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
+  // Returns true if element passes the filter criteria.
+  shouldIncludeElement(element, minStrokeWidth = 0, fillBrightness = [0, 255]) {
     const styles = getComputedStyle(element)
 
     // Skip elements with filters (blur, drop shadow, etc.)
@@ -288,8 +291,8 @@ export default class SVGImport extends Shape {
       return pointArrays
         .filter((points) => points.length > 0)
         .map((points) => points.map((pt) => new Victor(pt[0], pt[1])))
-    } catch {
-      // Skip malformed paths (e.g., containing NaN)
+    } catch (e) {
+      if (DEBUG) console.warn("Malformed path: ", d, e)
       return null
     }
   }
@@ -363,9 +366,13 @@ export default class SVGImport extends Shape {
       )
     }
 
-    // Rounded rectangle - build path with corner arcs
+    return this.buildRoundedRectPath(x, y, width, height, rx, ry)
+  }
+
+  // Build a closed path for a rounded rectangle with corner arcs
+  buildRoundedRectPath(x, y, width, height, rx, ry) {
     const vertices = []
-    const resolution = 16 // points per corner
+    const resolution = CORNER_RESOLUTION
 
     // Subsample straight edges to match arc segment density
     const arcLength = (Math.PI / 2) * Math.max(rx, ry)
@@ -491,7 +498,10 @@ export default class SVGImport extends Shape {
     return ellipse(rx, ry, cx, cy, CURVE_RESOLUTION)
   }
 
-  // Nodes within tolerance share the same key - could extract to geometry.js if reused
+  // Creates a node object for the graph that uses snapped coordinates as its key.
+  // The custom toString() returns quantized coordinates, so nearby points (within tolerance)
+  // produce the same key and are treated as the same node - enabling edge merging at junctions.
+  // The node retains original (x, y) for accurate vertex output.
   proximityNode(x, y, tolerance = 1) {
     const sx = snapToGrid(x, tolerance)
     const sy = snapToGrid(y, tolerance)
