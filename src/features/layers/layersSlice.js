@@ -296,7 +296,7 @@ export const selectSelectedLayer = createSelector(
   },
 )
 
-export const selectVisibleLayerIds = createSelector(
+export const selectVisibleLayerIds = createResultEqualSelector(
   [selectLayerIds, selectLayerEntities],
   (layerIds, layers) => {
     return layerIds.filter((id) => layers[id].visible)
@@ -375,9 +375,12 @@ export const selectActiveEffect = createCachedSelector(
   },
 )((state, id) => id)
 
-export const selectAllImageIds = createSelector([selectAllLayers], (layers) => {
-  return layers.map((layer) => layer.imageId).filter((id) => id)
-})
+export const selectAllImageIds = createResultEqualSelector(
+  [selectAllLayers],
+  (layers) => {
+    return layers.map((layer) => layer.imageId).filter((id) => id)
+  },
+)
 
 // returns the vertices for a given layer
 export const selectLayerVertices = createCachedSelector(
