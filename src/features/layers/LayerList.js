@@ -130,16 +130,19 @@ const LayerList = () => {
     [dispatch],
   )
 
-  const handleDragEnd = ({ active, over }) => {
-    if (!over) {
-      return
-    }
-    if (active.id !== over.id) {
-      const oldIndex = layers.findIndex((layer) => layer.id === active.id)
-      const newIndex = layers.findIndex((layer) => layer.id === over.id)
-      dispatch(moveLayer({ oldIndex, newIndex }))
-    }
-  }
+  const handleDragEnd = useCallback(
+    ({ active, over }) => {
+      if (!over) {
+        return
+      }
+      if (active.id !== over.id) {
+        const oldIndex = layers.findIndex((layer) => layer.id === active.id)
+        const newIndex = layers.findIndex((layer) => layer.id === over.id)
+        dispatch(moveLayer({ oldIndex, newIndex }))
+      }
+    },
+    [dispatch, layers],
+  )
 
   return (
     <DndContext
