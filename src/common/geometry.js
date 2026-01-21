@@ -748,3 +748,13 @@ export const polygonArea = (vertices) => {
 
   return area / 2
 }
+
+// Create a node with proximity-based key for graph operations
+// Nodes within tolerance share the same key string
+export const proximityNode = (x, y, tolerance = 1, precision = 2) => {
+  const sx = snapToGrid(x, tolerance)
+  const sy = snapToGrid(y, tolerance)
+  const key = `${sx.toFixed(precision)},${sy.toFixed(precision)}`
+
+  return { x, y, toString: () => key }
+}
