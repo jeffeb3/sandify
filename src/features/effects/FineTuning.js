@@ -45,7 +45,7 @@ const options = {
   },
   // \u00A0 is a hacky way to indent these options under drawBorder
   borderAlgorithm: {
-    title: "\u00A0\u00A0\u00A0\u00A0Algorithm",
+    title: "\u00A0\u00A0\u00A0\u00A0Border type",
     type: "dropdown",
     choices: boundaryAlgorithmChoices,
     isVisible: (model, state) => {
@@ -53,7 +53,7 @@ const options = {
     },
   },
   borderPadding: {
-    title: "\u00A0\u00A0\u00A0\u00A0Pad (%)",
+    title: "\u00A0\u00A0\u00A0\u00A0Padding (%)",
     step: 5,
     isVisible: (model, state) => {
       return state.drawBorder === true

@@ -1,13 +1,13 @@
 import Victor from "victor"
-import { traceBoundary, boundaryAlgorithm } from "./boundary"
+import { traceBoundary, boundaryAlgorithm } from "."
 import {
   createSquare,
   createStar as createStarBase,
   createFigure8,
   createOpenPath,
   getShapeVertices,
-} from "./testHelpers"
-import fancyTextSan from "./__fixtures__/fancyTextSan"
+} from "../testHelpers"
+import fancyTextSan from "../__fixtures__/fancyTextSan"
 
 // Wrap createStar to close the path (boundary tests expect closed paths)
 const createStar = (outerRadius = 50, innerRadius = 20) => {
@@ -301,8 +301,8 @@ describe("traceBoundary", () => {
     })
 
     it("uses footprint algorithm for text", () => {
-      const result = traceBoundary(fancyTextSan)
-      expect(result.sdfApplied).toBe(true)
+      const result = boundaryAlgorithm(fancyTextSan)
+      expect(result.algorithm).toBe("footprint")
     })
   })
 
@@ -370,16 +370,16 @@ describe("traceBoundary", () => {
       })
     })
 
-    describe("fill patterns should use concave", () => {
-      it("voronoi uses concave", () => {
+    describe("fill patterns should use fillPattern", () => {
+      it("voronoi uses fillPattern", () => {
         const { result } = expectAlgorithm("voronoi")
-        expect(result.algorithm).toBe("concave")
+        expect(result.algorithm).toBe("fillPattern")
         expect(result.isFillPattern).toBe(true)
       })
 
-      it("tessellationTwist uses concave", () => {
+      it("tessellationTwist uses fillPattern", () => {
         const { result } = expectAlgorithm("tessellationTwist")
-        expect(result.algorithm).toBe("concave")
+        expect(result.algorithm).toBe("fillPattern")
         expect(result.isFillPattern).toBe(true)
       })
     })
