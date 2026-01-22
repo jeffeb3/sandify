@@ -19,7 +19,9 @@ import {
 import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
 import { getFont, fontNames, getFontWeights } from "@/features/fonts/fontsSlice"
 
-const MIN_SPACING_MULTIPLIER = 1.2
+const MIN_SPACING_MULTIPLIER = 1.2 // Minimum line height as multiple of letter "A" height
+const FONT_SIZE = 5 // OpenType rendering size; produces fluid curves at different scales
+const TOLERANCE = 0.01 // Proximity threshold for merging nearby vertices in graph
 
 const options = {
   fancyText: {
@@ -261,7 +263,7 @@ export default class FancyText extends Shape {
 
     // Use Array.from to properly handle Unicode (emoji are multi-byte)
     const chars = Array.from(word)
-    const fSize = 5 // matches convertTextToPoints
+    const fSize = FONT_SIZE
     const charCircuits = []
     let xOffset = 0
 
@@ -368,7 +370,7 @@ export default class FancyText extends Shape {
 
     const first = circuit[0]
     const last = circuit[circuit.length - 1]
-    const isClosed = distance(first, last) < 0.01
+    const isClosed = distance(first, last) < TOLERANCE
     const loop = isClosed ? circuit.slice(0, -1) : circuit
 
     return { loop, isClosed }
@@ -471,7 +473,7 @@ export default class FancyText extends Shape {
     // these values produce fluid text curves at different sizes
     const tolerance = 0.001
     const distance = 0.001
-    const fSize = 5
+    const fSize = FONT_SIZE
     const x = 0
     const y = 0
 
@@ -486,7 +488,7 @@ export default class FancyText extends Shape {
   }
 
   // Nodes within tolerance share the same key for graph merging
-  proximityNode(x, y, tolerance = 0.01) {
+  proximityNode(x, y, tolerance = TOLERANCE) {
     const sx = Math.round(x / tolerance) * tolerance
     const sy = Math.round(y / tolerance) * tolerance
     const key = `${sx.toFixed(4)},${sy.toFixed(4)}`
@@ -495,7 +497,7 @@ export default class FancyText extends Shape {
   }
 
   // Build graph from all letter paths for Chinese Postman traversal
-  buildPathGraph(paths, tolerance = 0.01) {
+  buildPathGraph(paths, tolerance = TOLERANCE) {
     const graph = new Graph()
 
     for (const path of paths) {
@@ -529,8 +531,7 @@ export default class FancyText extends Shape {
       return paths[0].map((v) => cloneVertex(v))
     }
 
-    const tolerance = 0.01
-    const graph = this.buildPathGraph(paths, tolerance)
+    const graph = this.buildPathGraph(paths, TOLERANCE)
 
     // Connect disconnected components with minimal bridges
     graph.connectComponents()
@@ -560,7 +561,7 @@ export default class FancyText extends Shape {
           const last = vertices[vertices.length - 1]
           const dist = distance(node, last)
 
-          if (dist < tolerance) continue
+          if (dist < TOLERANCE) continue
         }
         vertices.push(cloneVertex(node))
       }
