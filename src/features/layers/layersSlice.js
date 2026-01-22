@@ -11,12 +11,9 @@ import {
   totalDistance,
   findBounds,
   cloneVertex,
-  resizeVertices,
-  cloneVertices,
-  centerOnOrigin,
   toLocalSpace,
 } from "@/common/geometry"
-import { traceBoundary } from "@/common/boundary"
+import { prepareMaskBoundary } from "@/common/boundary"
 import { orderByKey } from "@/common/util"
 import { insertOne, prepareAfterAdd } from "@/common/slice"
 import { getDefaultShapeType, getShape } from "@/features/shapes/shapeFactory"
@@ -620,14 +617,10 @@ export const selectEffectSelectionVertices = createCachedSelector(
       maskSourceVertices.length >= 3
     ) {
       // Trace boundary to handle self-intersecting shapes (e.g., Fractal Spirograph)
-      const boundary = traceBoundary(maskSourceVertices)
-      const centeredMask = centerOnOrigin(cloneVertices(boundary))
-
-      const result = resizeVertices(
-        cloneVertices(centeredMask),
+      const result = prepareMaskBoundary(
+        maskSourceVertices,
         effect.width,
         effect.height,
-        true,
       )
 
       // Ensure the selection path is closed

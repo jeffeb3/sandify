@@ -10,6 +10,9 @@ import {
   centroid,
   pointInPolygon,
   polygonArea,
+  centerOnOrigin,
+  cloneVertices,
+  resizeVertices,
 } from "./geometry"
 
 // Detection thresholds for algorithm selection
@@ -25,7 +28,33 @@ const SDF_RATIO_MULTI = 3 // Ratio threshold for multi-path (text)
 const SDF_RATIO_OPEN = 2 // Ratio threshold for open fractals
 const SDF_RATIO_VERY_HIGH = 40 // Very high ratio single-path = footprint (lsystem)
 const DOMINANCE_RATIO = 5 // Path area ratio for "largest dominates"
-const SCALE = 1000
+const CLIPPER_SCALE = 1000 // Clipper2 scale factor (float → int conversion)
+
+// Edge offset constants
+const PARALLEL_TOLERANCE = 0.0001 // Tolerance for parallel line detection
+const SPIKE_CLAMP_MULTIPLIER = 3 // Max distance = offset * this (prevents spikes)
+
+// Bitmap/SDF constants
+const BITMAP_SIZE_LARGE = 1024 // Bitmap size for fine detail (scale <= 10)
+const BITMAP_SIZE_SMALL = 512 // Bitmap size for large borders (scale > 10)
+const BITMAP_SCALE_THRESHOLD = 10 // Scale value that switches bitmap size
+const SMOOTH_RADIUS_FRACTION = 0.15 // Fraction of stroke width for smoothing
+
+// Apply centroid-based scaling to a hull (in CLIPPER_SCALE units).
+// Used for expand/convex algorithms where we scale from center rather than edge offset.
+const applyCentroidScale = (hull, vertices, scale) => {
+  if (scale === 0 || hull.length === 0) return hull
+
+  const center = centroid(vertices)
+  const centerX = center.x * CLIPPER_SCALE
+  const centerY = center.y * CLIPPER_SCALE
+  const scaleFactor = 1 + scale / 100
+
+  return hull.map(([x, y]) => [
+    centerX + (x - centerX) * scaleFactor,
+    centerY + (y - centerY) * scaleFactor,
+  ])
+}
 
 // Algorithm name to numeric value mapping for traceBoundary
 // null = auto, 0 = concave, 1 = expand, 2 = footprint, 3 = convex
@@ -201,6 +230,7 @@ export const boundaryAlgorithm = (vertices) => {
       pointsPerPath: 0,
       isOpenPath: false,
       isFillPattern: false,
+      bounds: [],
     }
   }
 
@@ -216,7 +246,10 @@ export const boundaryAlgorithm = (vertices) => {
   const path = new Path64()
 
   for (const v of vertices) {
-    path.push({ x: Math.round(v.x * SCALE), y: Math.round(v.y * SCALE) })
+    path.push({
+      x: Math.round(v.x * CLIPPER_SCALE),
+      y: Math.round(v.y * CLIPPER_SCALE),
+    })
   }
 
   let boundary = Clipper.Union([path], null, FillRule.NonZero)
@@ -231,11 +264,12 @@ export const boundaryAlgorithm = (vertices) => {
       pointsPerPath: 0,
       isOpenPath,
       isFillPattern: false,
+      bounds,
     }
   }
 
   // Filter out degenerate paths
-  const inputArea = inputWidth * inputHeight * SCALE * SCALE
+  const inputArea = inputWidth * inputHeight * CLIPPER_SCALE * CLIPPER_SCALE
   const minArea = inputArea * MIN_AREA_RATIO
   const maxPathArea = Math.max(
     ...boundary.map((p) => Math.abs(Clipper.area(p))),
@@ -298,23 +332,24 @@ export const boundaryAlgorithm = (vertices) => {
     allPoints.length > FILL_PATTERN_MIN_POINTS &&
     pointsPerPath < pppThreshold
 
-  // Footprint needed for:
-  //   Multi-path with high ratio (but not fill patterns)
-  //   Open fractals (single path, open, moderate ratio)
-  //   Very high ratio single-path (lsystem with ratio 54)
-  //   Open paths with degenerate Clipper results (zero-area paths from precision issues)
-  // Moderate-ratio single-path closed shapes (Maze, Hypocycloid) use expand
+  // Footprint detection - each case represents a shape type needing SDF approach
   const hasZeroAreaPaths = maxArea < minArea // Very small area indicates degenerate geometry
   const hasDegenerateRatio = ratio <= 1 // Hull collapsed to convex hull
+
+  const isMultiPathText =
+    boundary.length > 1 && ratio > SDF_RATIO_MULTI && !isFillPattern
+  const isOpenFractal =
+    isOpenPath &&
+    boundary.length === 1 &&
+    (ratio >= SDF_RATIO_OPEN || hasDegenerateRatio)
+  const isDegenerateOpenPath =
+    isOpenPath &&
+    boundary.length > 1 &&
+    (hasZeroAreaPaths || hasDegenerateRatio)
+  const isVeryHighRatio = boundary.length === 1 && ratio > SDF_RATIO_VERY_HIGH
+
   const useFootprint =
-    (boundary.length > 1 && ratio > SDF_RATIO_MULTI && !isFillPattern) ||
-    (isOpenPath &&
-      boundary.length === 1 &&
-      (ratio >= SDF_RATIO_OPEN || hasDegenerateRatio)) ||
-    (isOpenPath &&
-      boundary.length > 1 &&
-      (hasZeroAreaPaths || hasDegenerateRatio)) || // Degenerate open path
-    (boundary.length === 1 && ratio > SDF_RATIO_VERY_HIGH)
+    isMultiPathText || isOpenFractal || isDegenerateOpenPath || isVeryHighRatio
 
   // Determine algorithm
   let algorithm, reason
@@ -346,6 +381,8 @@ export const boundaryAlgorithm = (vertices) => {
     isOpenPath,
     isFillPattern,
     largestDominates,
+    hull,
+    bounds,
   }
 }
 
@@ -353,10 +390,10 @@ export const boundaryAlgorithm = (vertices) => {
 // Used by the "concave" algorithm to expand/contract the boundary.
 // Handles deep concavities by falling back to raster dilation.
 //
-// hull: array of [x, y] points in SCALE units
+// hull: array of [x, y] points in CLIPPER_SCALE units
 // scale: percentage to expand (positive) or contract (negative)
 // vertices: original shape vertices (for centroid calculation)
-// Returns: offset hull as [[x, y], ...] in SCALE units, or null if no offset needed
+// Returns: offset hull as [[x, y], ...] in CLIPPER_SCALE units, or null if no offset needed
 const applyEdgeOffset = (hull, scale, vertices) => {
   if (scale === 0 || hull.length === 0) {
     return null
@@ -487,7 +524,7 @@ const applyEdgeOffset = (hull, scale, vertices) => {
 
     let newX, newY
 
-    if (Math.abs(denom) < 0.0001) {
+    if (Math.abs(denom) < PARALLEL_TOLERANCE) {
       if (avgLen > 0) {
         newX = v1x + (avgNx / avgLen) * d
         newY = v1y + (avgNy / avgLen) * d
@@ -503,7 +540,7 @@ const applyEdgeOffset = (hull, scale, vertices) => {
     }
 
     // Clamp to prevent spikes at deeply concave vertices
-    const maxDist = d * 3
+    const maxDist = d * SPIKE_CLAMP_MULTIPLIER
     const distFromOriginal = Math.sqrt((newX - v1x) ** 2 + (newY - v1y) ** 2)
 
     if (distFromOriginal > maxDist && avgLen > 0) {
@@ -527,8 +564,8 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
   const BITMAP_SIZE = 512
   const MAX_CONTOUR_POINTS = 1000
   const worldHull = dedupedHull.map(([x, y]) => ({
-    x: x / SCALE,
-    y: y / SCALE,
+    x: x / CLIPPER_SCALE,
+    y: y / CLIPPER_SCALE,
   }))
   const hullWorldBounds = worldHull.reduce(
     (acc, v) => ({
@@ -539,7 +576,7 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
     }),
     { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity },
   )
-  const worldD = dilationD / SCALE
+  const worldD = dilationD / CLIPPER_SCALE
   const padding = worldD * 2
   const worldWidth = hullWorldBounds.maxX - hullWorldBounds.minX + padding * 2
   const worldHeight = hullWorldBounds.maxY - hullWorldBounds.minY + padding * 2
@@ -579,8 +616,8 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
     }
 
     let offsetPoints = largestRing.map(([x, y]) => [
-      (x / bitmapScale + hullWorldBounds.minX - padding) * SCALE,
-      (y / bitmapScale + hullWorldBounds.minY - padding) * SCALE,
+      (x / bitmapScale + hullWorldBounds.minX - padding) * CLIPPER_SCALE,
+      (y / bitmapScale + hullWorldBounds.minY - padding) * CLIPPER_SCALE,
     ])
 
     if (offsetPoints.length > MAX_CONTOUR_POINTS) {
@@ -591,8 +628,8 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
     // If scale > threshold, centroid-scale the dilated result
     if (useThresholdDilation) {
       const center = centroid(vertices)
-      const centerX = center.x * SCALE
-      const centerY = center.y * SCALE
+      const centerX = center.x * CLIPPER_SCALE
+      const centerY = center.y * CLIPPER_SCALE
       const scaleFactor =
         (1 + scale / 100) / (1 + DILATION_SCALE_THRESHOLD / 100)
 
@@ -606,15 +643,222 @@ const applyEdgeOffsetRaster = (dedupedHull, scale, smallerDim, vertices) => {
   }
 
   // Dilation failed - fall back to pure centroid scaling
-  const center = centroid(vertices)
-  const centerX = center.x * SCALE
-  const centerY = center.y * SCALE
-  const scaleFactor = 1 + scale / 100
+  return applyCentroidScale(dedupedHull, vertices, scale)
+}
 
-  return dedupedHull.map(([x, y]) => [
-    centerX + (x - centerX) * scaleFactor,
-    centerY + (y - centerY) * scaleFactor,
-  ])
+// Fill pattern boundary for shapes with many small disconnected cells
+// (Voronoi, TessellationTwist). Concaveman fails on these (creates zigzags).
+// Uses bounding box for rectangular patterns, convex hull for polygonal.
+const traceFillPattern = (
+  bounds,
+  inputWidth,
+  inputHeight,
+  convex,
+  vertices,
+) => {
+  const RECTANGULAR_THRESHOLD = 0.85 // Above this = use bounding box
+  const bboxArea = inputWidth * inputHeight
+  const convexArea = Math.abs(polygonArea(convex))
+  const fillRatio = convexArea / (bboxArea * CLIPPER_SCALE * CLIPPER_SCALE)
+
+  if (fillRatio > RECTANGULAR_THRESHOLD) {
+    const result = [
+      [bounds[0].x * CLIPPER_SCALE, bounds[0].y * CLIPPER_SCALE],
+      [bounds[1].x * CLIPPER_SCALE, bounds[0].y * CLIPPER_SCALE],
+      [bounds[1].x * CLIPPER_SCALE, bounds[1].y * CLIPPER_SCALE],
+      [bounds[0].x * CLIPPER_SCALE, bounds[1].y * CLIPPER_SCALE],
+      [bounds[0].x * CLIPPER_SCALE, bounds[0].y * CLIPPER_SCALE],
+    ]
+
+    result.bboxCenter = {
+      x: (bounds[0].x + bounds[1].x) / 2,
+      y: (bounds[0].y + bounds[1].y) / 2,
+    }
+
+    return result
+  } else {
+    const verticesConvex = convexHull(vertices.map((v) => ({ x: v.x, y: v.y })))
+
+    return verticesConvex.map((p) => [p.x * CLIPPER_SCALE, p.y * CLIPPER_SCALE])
+  }
+}
+
+// Ink Footprint: stroke original pen path directly to bitmap, then SDF.
+// Preserves concave details that get lost when boundary regions merge.
+const traceInkFootprint = (
+  vertices,
+  bounds,
+  inputWidth,
+  inputHeight,
+  scale,
+) => {
+  // Reduce resolution at higher scales - don't need fine detail for large borders
+  const BITMAP_SIZE =
+    scale > BITMAP_SCALE_THRESHOLD ? BITMAP_SIZE_SMALL : BITMAP_SIZE_LARGE
+
+  // Dynamic padding: more padding at higher scale values to allow expansion
+  // scale=0% → 10% padding (max resolution), scale=100% → 60% padding (room for expansion)
+  const PADDING_RATIO = 0.1 + (scale / 100) * 0.5
+  const MAX_CONTOUR_POINTS = 2000
+  const EDGE_THRESHOLD = 0.5 // SDF value at shape edge
+
+  try {
+    // Compute stroke width based on path statistics (in world units)
+    const segments = []
+
+    for (let i = 1; i < vertices.length; i++) {
+      segments.push(distance(vertices[i], vertices[i - 1]))
+    }
+    segments.sort((a, b) => a - b)
+
+    const ds_med =
+      segments.length > 0 ? segments[Math.floor(segments.length / 2)] : 1
+    const D = Math.max(inputWidth, inputHeight, 1)
+
+    // World-space base width: clamp between 0.5% and 2% of bbox diagonal
+    const k = 3
+    const w_world_min = 0.005 * D
+    const w_world_max = 0.02 * D
+    const w_world_base = Math.max(
+      w_world_min,
+      Math.min(k * ds_med, w_world_max),
+    )
+
+    // Add scale-based expansion to stroke width for uniform border growth
+    const smallerDim = Math.min(inputWidth, inputHeight)
+    const scaleExpansion = ((scale / 100) * smallerDim) / 2
+    const w_world = w_world_base + scaleExpansion
+
+    // Setup bitmap with padding
+    const padding = Math.max(inputWidth, inputHeight) * PADDING_RATIO
+    const bitmapWidth = BITMAP_SIZE
+    const bitmapHeight = Math.round(
+      (BITMAP_SIZE * (inputHeight + 2 * padding)) / (inputWidth + 2 * padding),
+    )
+
+    // Scale factor: world coords to bitmap coords
+    const scaleX = bitmapWidth / (inputWidth + 2 * padding)
+    const scaleY = bitmapHeight / (inputHeight + 2 * padding)
+    const bitmapScale = Math.min(scaleX, scaleY)
+
+    // Stroke width in bitmap pixels (floor of 2px minimum)
+    const w_px = Math.max(2, Math.round(w_world * bitmapScale))
+
+    // Transform vertices to bitmap space
+    const bitmapVertices = vertices.map((v) => ({
+      x: (v.x - bounds[0].x + padding) * bitmapScale,
+      y: (v.y - bounds[0].y + padding) * bitmapScale,
+    }))
+
+    // Stroke the original pen path directly to bitmap.
+    // The stroke width creates the "ink footprint" of the tool path.
+    const bitmap = new Uint8ClampedArray(bitmapWidth * bitmapHeight)
+
+    // Stroke the original vertices - this is the actual pen path
+    strokePolygonToBitmap(
+      bitmap,
+      bitmapWidth,
+      bitmapHeight,
+      bitmapVertices,
+      w_px,
+    )
+
+    // Small dilation to smooth edges and merge filled regions with strokes
+    const SMOOTH_RADIUS = Math.max(2, Math.round(w_px * SMOOTH_RADIUS_FRACTION))
+    const finalBitmap = dilate(bitmap, bitmapWidth, bitmapHeight, SMOOTH_RADIUS)
+
+    // Compute SDF on dilated bitmap
+    const sdf = calcSdf(finalBitmap, {
+      width: bitmapWidth,
+      height: bitmapHeight,
+      cutoff: EDGE_THRESHOLD,
+      radius: Math.max(bitmapWidth, bitmapHeight) / 4,
+    })
+
+    // Extract contour at fixed threshold (tight to shape)
+    // Scaling is applied via centroid scaling after extraction for linear behavior
+    const contourResult = contours()
+      .size([bitmapWidth, bitmapHeight])
+      .thresholds([EDGE_THRESHOLD])(sdf)
+
+    if (
+      contourResult.length === 0 ||
+      contourResult[0].coordinates.length === 0
+    ) {
+      return null
+    }
+
+    // Get the SDF contour ring
+    const rings = contourResult[0].coordinates
+    let largestRing = rings[0][0]
+    let largestArea = 0
+
+    for (const ring of rings) {
+      const pts = ring[0]
+      let area = 0
+
+      for (let j = 0; j < pts.length; j++) {
+        const k = (j + 1) % pts.length
+
+        area += pts[j][0] * pts[k][1]
+        area -= pts[k][0] * pts[j][1]
+      }
+      area = Math.abs(area / 2)
+      if (area > largestArea) {
+        largestArea = area
+        largestRing = pts
+      }
+    }
+
+    // The contour may shortcut through interior bays (like S flourish)
+    // Detect this by finding vertices that are OUTSIDE the contour polygon.
+    // The bay is "open to exterior" so the contour shortcuts past flourish vertices.
+
+    // Find vertices that are OUTSIDE the contour polygon
+    // These are vertices the contour is shortcutting past
+    const outsideVertices = []
+
+    for (const v of bitmapVertices) {
+      if (!pointInPolygon(v.x, v.y, largestRing)) {
+        outsideVertices.push([v.x, v.y])
+      }
+    }
+
+    let finalRing
+
+    if (outsideVertices.length === 0) {
+      // All vertices inside contour - use it directly
+      finalRing = largestRing
+    } else {
+      // Some vertices outside contour - contour is shortcutting past them
+      // Add outside vertices to contour and re-wrap with concaveman
+      const allPoints = [...largestRing, ...outsideVertices]
+
+      finalRing = concaveman(allPoints, 2.0, 0)
+    }
+
+    // Convert bitmap coords back to world coords (then to CLIPPER_SCALE units for output)
+    let rawPoints = finalRing.map(([x, y]) => [
+      (x / bitmapScale + bounds[0].x - padding) * CLIPPER_SCALE,
+      (y / bitmapScale + bounds[0].y - padding) * CLIPPER_SCALE,
+    ])
+
+    // Downsample if too many points
+    if (rawPoints.length > MAX_CONTOUR_POINTS) {
+      const step = Math.ceil(rawPoints.length / MAX_CONTOUR_POINTS)
+
+      rawPoints = rawPoints.filter((_, i) => i % step === 0)
+    }
+
+    // Note: scaling is done via stroke width expansion, not centroid scaling
+    // This gives uniform border growth that doesn't overlap the shape
+
+    rawPoints.sdfApplied = true
+
+    return rawPoints
+  } catch {
+    return null
+  }
 }
 
 // Extract the outer boundary of a shape for border tracing.
@@ -636,7 +880,8 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   }
 
   const detection = boundaryAlgorithm(vertices)
-  const { boundary, isFillPattern, largestDominates } = detection
+  const { boundary, isFillPattern, hull: initialHull } = detection
+  let hull = initialHull
   const useFootprint =
     algorithm === 2 ||
     (algorithm === null && detection.algorithm === "footprint")
@@ -661,238 +906,12 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
     return fallbackHull.map((v) => new Victor(v.x, v.y))
   }
 
-  // Determine which boundary paths to use
-  const bounds = findBounds(vertices)
-  const inputWidth = bounds[1].x - bounds[0].x
-  const inputHeight = bounds[1].y - bounds[0].y
-  const pathAreas = boundary.map((p) => Math.abs(Clipper.area(p)))
-  const sortedAreas = [...pathAreas].sort((a, b) => b - a)
-  const maxArea = sortedAreas[0]
-  let hull
-
-  if (boundary.length === 1) {
-    hull = boundary[0].map((pt) => [pt.x, pt.y])
-  } else if (largestDominates) {
-    const largestPath = boundary[pathAreas.indexOf(maxArea)]
-
-    hull = largestPath.map((pt) => [pt.x, pt.y])
-  } else {
-    const hullInputPoints = boundary.flatMap((p) => p.map((pt) => [pt.x, pt.y]))
-
-    hull = concaveman(hullInputPoints, 1.0)
-  }
-
-  // Compute convex hull for traceFillPattern
+  // Get bounds from detection; compute convex hull for traceFillPattern
+  const { bounds } = detection
+  const inputWidth = bounds.length > 0 ? bounds[1].x - bounds[0].x : 0
+  const inputHeight = bounds.length > 0 ? bounds[1].y - bounds[0].y : 0
   const allPoints = boundary.flatMap((p) => p.map((pt) => [pt.x, pt.y]))
   const convex = convexHull(allPoints.map(([x, y]) => ({ x, y })))
-
-  // Convex hull of original vertices - used when Clipper2 boundary
-  // loses extreme points or stroke expansion fails
-  const verticesConvex = () =>
-    convexHull(vertices.map((v) => ({ x: v.x, y: v.y })))
-
-  // Fill pattern approach for shapes with many small disconnected cells
-  // (Voronoi, TessellationTwist). Concaveman fails on these (creates zigzags).
-  // Uses bounding box for rectangular patterns, convex hull for polygonal.
-  const traceFillPattern = () => {
-    const RECTANGULAR_THRESHOLD = 0.85 // Above this = use bounding box
-    const bboxArea = inputWidth * inputHeight
-    const convexArea = Math.abs(polygonArea(convex))
-    const fillRatio = convexArea / (bboxArea * SCALE * SCALE)
-
-    if (fillRatio > RECTANGULAR_THRESHOLD) {
-      const result = [
-        [bounds[0].x * SCALE, bounds[0].y * SCALE],
-        [bounds[1].x * SCALE, bounds[0].y * SCALE],
-        [bounds[1].x * SCALE, bounds[1].y * SCALE],
-        [bounds[0].x * SCALE, bounds[1].y * SCALE],
-        [bounds[0].x * SCALE, bounds[0].y * SCALE],
-      ]
-
-      result.bboxCenter = {
-        x: (bounds[0].x + bounds[1].x) / 2,
-        y: (bounds[0].y + bounds[1].y) / 2,
-      }
-      return result
-    } else {
-      return verticesConvex().map((p) => [p.x * SCALE, p.y * SCALE])
-    }
-  }
-
-  // Ink Footprint: stroke original pen path directly to bitmap, then SDF.
-  // Preserves concave details that get lost when boundary regions merge.
-  const traceInkFootprint = () => {
-    // Reduce resolution at higher scales - don't need fine detail for large borders
-    const BITMAP_SIZE = scale > 10 ? 512 : 1024
-
-    // Dynamic padding: more padding at higher scale values to allow expansion
-    // scale=0% → 10% padding (max resolution), scale=100% → 60% padding (room for expansion)
-    const PADDING_RATIO = 0.1 + (scale / 100) * 0.5
-    const MAX_CONTOUR_POINTS = 2000
-    const EDGE_THRESHOLD = 0.5 // SDF value at shape edge
-
-    try {
-      // Compute stroke width based on path statistics (in world units)
-      const segments = []
-
-      for (let i = 1; i < vertices.length; i++) {
-        segments.push(distance(vertices[i], vertices[i - 1]))
-      }
-      segments.sort((a, b) => a - b)
-
-      const ds_med =
-        segments.length > 0 ? segments[Math.floor(segments.length / 2)] : 1
-      const D = Math.max(inputWidth, inputHeight, 1)
-
-      // World-space base width: clamp between 0.5% and 2% of bbox diagonal
-      const k = 3
-      const w_world_min = 0.005 * D
-      const w_world_max = 0.02 * D
-      const w_world_base = Math.max(
-        w_world_min,
-        Math.min(k * ds_med, w_world_max),
-      )
-
-      // Add scale-based expansion to stroke width for uniform border growth
-      const smallerDim = Math.min(inputWidth, inputHeight)
-      const scaleExpansion = ((scale / 100) * smallerDim) / 2
-      const w_world = w_world_base + scaleExpansion
-
-      // Setup bitmap with padding
-      const padding = Math.max(inputWidth, inputHeight) * PADDING_RATIO
-      const bitmapWidth = BITMAP_SIZE
-      const bitmapHeight = Math.round(
-        (BITMAP_SIZE * (inputHeight + 2 * padding)) /
-          (inputWidth + 2 * padding),
-      )
-
-      // Scale factor: world coords to bitmap coords
-      const scaleX = bitmapWidth / (inputWidth + 2 * padding)
-      const scaleY = bitmapHeight / (inputHeight + 2 * padding)
-      const bitmapScale = Math.min(scaleX, scaleY)
-
-      // Stroke width in bitmap pixels (floor of 2px minimum)
-      const w_px = Math.max(2, Math.round(w_world * bitmapScale))
-
-      // Transform vertices to bitmap space
-      const bitmapVertices = vertices.map((v) => ({
-        x: (v.x - bounds[0].x + padding) * bitmapScale,
-        y: (v.y - bounds[0].y + padding) * bitmapScale,
-      }))
-
-      // Stroke the original pen path directly to bitmap.
-      // The stroke width creates the "ink footprint" of the tool path.
-      const bitmap = new Uint8ClampedArray(bitmapWidth * bitmapHeight)
-
-      // Stroke the original vertices - this is the actual pen path
-      strokePolygonToBitmap(
-        bitmap,
-        bitmapWidth,
-        bitmapHeight,
-        bitmapVertices,
-        w_px,
-      )
-
-      // Small dilation to smooth edges and merge filled regions with strokes
-      const SMOOTH_RADIUS = Math.max(2, Math.round(w_px * 0.15))
-      const finalBitmap = dilate(
-        bitmap,
-        bitmapWidth,
-        bitmapHeight,
-        SMOOTH_RADIUS,
-      )
-
-      // Compute SDF on dilated bitmap
-      const sdf = calcSdf(finalBitmap, {
-        width: bitmapWidth,
-        height: bitmapHeight,
-        cutoff: EDGE_THRESHOLD,
-        radius: Math.max(bitmapWidth, bitmapHeight) / 4,
-      })
-
-      // Extract contour at fixed threshold (tight to shape)
-      // Scaling is applied via centroid scaling after extraction for linear behavior
-      const contourResult = contours()
-        .size([bitmapWidth, bitmapHeight])
-        .thresholds([EDGE_THRESHOLD])(sdf)
-
-      if (
-        contourResult.length === 0 ||
-        contourResult[0].coordinates.length === 0
-      ) {
-        return null
-      }
-
-      // Get the SDF contour ring
-      const rings = contourResult[0].coordinates
-      let largestRing = rings[0][0]
-      let largestArea = 0
-
-      for (const ring of rings) {
-        const pts = ring[0]
-        let area = 0
-
-        for (let j = 0; j < pts.length; j++) {
-          const k = (j + 1) % pts.length
-
-          area += pts[j][0] * pts[k][1]
-          area -= pts[k][0] * pts[j][1]
-        }
-        area = Math.abs(area / 2)
-        if (area > largestArea) {
-          largestArea = area
-          largestRing = pts
-        }
-      }
-
-      // The contour may shortcut through interior bays (like S flourish)
-      // Detect this by finding vertices that are OUTSIDE the contour polygon.
-      // The bay is "open to exterior" so the contour shortcuts past flourish vertices.
-
-      // Find vertices that are OUTSIDE the contour polygon
-      // These are vertices the contour is shortcutting past
-      const outsideVertices = []
-      for (const v of bitmapVertices) {
-        if (!pointInPolygon(v.x, v.y, largestRing)) {
-          outsideVertices.push([v.x, v.y])
-        }
-      }
-
-      let finalRing
-
-      if (outsideVertices.length === 0) {
-        // All vertices inside contour - use it directly
-        finalRing = largestRing
-      } else {
-        // Some vertices outside contour - contour is shortcutting past them
-        // Add outside vertices to contour and re-wrap with concaveman
-        const allPoints = [...largestRing, ...outsideVertices]
-        finalRing = concaveman(allPoints, 2.0, 0)
-      }
-
-      // Convert bitmap coords back to world coords (then to SCALE units for output)
-      let rawPoints = finalRing.map(([x, y]) => [
-        (x / bitmapScale + bounds[0].x - padding) * SCALE,
-        (y / bitmapScale + bounds[0].y - padding) * SCALE,
-      ])
-
-      // Downsample if too many points
-      if (rawPoints.length > MAX_CONTOUR_POINTS) {
-        const step = Math.ceil(rawPoints.length / MAX_CONTOUR_POINTS)
-
-        rawPoints = rawPoints.filter((_, i) => i % step === 0)
-      }
-
-      // Note: scaling is done via stroke width expansion, not centroid scaling
-      // This gives uniform border growth that doesn't overlap the shape
-
-      rawPoints.sdfApplied = true
-
-      return rawPoints
-    } catch {
-      return null
-    }
-  }
 
   // Select algorithm based on parameter or auto-detect
   // Algorithm values: 0 = concave, 1 = expand, 2 = footprint, 3 = convex, null = auto
@@ -907,46 +926,24 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
   const autoFillPattern = algorithm === null && isFillPattern && !useFootprint
 
   if (useFootprint) {
-    hull = traceInkFootprint() || hull
+    hull =
+      traceInkFootprint(vertices, bounds, inputWidth, inputHeight, scale) ||
+      hull
   } else if (useConvex) {
     // Convex mode: use convex hull, apply centroid scale
     hull = convex.map((pt) => [pt.x, pt.y])
-
-    if (scale !== 0 && hull.length > 0) {
-      const center = centroid(vertices)
-      const centerX = center.x * SCALE
-      const centerY = center.y * SCALE
-      const scaleFactor = 1 + scale / 100
-
-      hull = hull.map(([x, y]) => [
-        centerX + (x - centerX) * scaleFactor,
-        centerY + (y - centerY) * scaleFactor,
-      ])
-    }
+    hull = applyCentroidScale(hull, vertices, scale)
     hull.sdfApplied = true // Skip edge offset below
   } else if (useExpand) {
     // Expand mode: use concaveman hull (already computed), apply centroid scale
-    // Mark as sdfApplied to skip edge offset math below
-    if (scale !== 0 && hull.length > 0) {
-      // Use original vertices' centroid for consistent positioning
-      // Note: hull is in SCALE units (×1000), so convert centroid too
-      const center = centroid(vertices)
-      const centerX = center.x * SCALE
-      const centerY = center.y * SCALE
-      const scaleFactor = 1 + scale / 100
-
-      hull = hull.map(([x, y]) => [
-        centerX + (x - centerX) * scaleFactor,
-        centerY + (y - centerY) * scaleFactor,
-      ])
-    }
+    hull = applyCentroidScale(hull, vertices, scale)
     hull.sdfApplied = true // Skip edge offset below
   } else if (useConcave) {
     // Explicit concave: use concaveman hull (already computed), apply edge offset below
     // hull is already set from concaveman, just let it fall through to edge offset
   } else if (autoFillPattern || boundary.length > 1) {
     // Auto-detected fill patterns or multi-boundary shapes
-    hull = traceFillPattern()
+    hull = traceFillPattern(bounds, inputWidth, inputHeight, convex, vertices)
   }
 
   // Apply edge offset for concave algorithm (skip if already handled by SDF)
@@ -958,7 +955,9 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
     }
   }
 
-  const result = hull.map(([x, y]) => new Victor(x / SCALE, y / SCALE))
+  const result = hull.map(
+    ([x, y]) => new Victor(x / CLIPPER_SCALE, y / CLIPPER_SCALE),
+  )
 
   if (hull.sdfApplied) result.sdfApplied = true
 
@@ -971,4 +970,18 @@ export const traceBoundary = (vertices, scale = 0, algorithm = null) => {
         : "concave"
 
   return result
+}
+
+// Prepare a mask boundary from source vertices: trace boundary, center, and resize.
+// Used by Mask effect and layer selection rendering.
+export const prepareMaskBoundary = (
+  vertices,
+  width,
+  height,
+  algorithm = null,
+) => {
+  const boundary = traceBoundary(vertices, 0, algorithm)
+  const centered = centerOnOrigin(cloneVertices(boundary))
+
+  return resizeVertices(cloneVertices(centered), width, height, true)
 }

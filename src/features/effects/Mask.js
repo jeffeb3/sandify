@@ -1,17 +1,10 @@
 import Effect from "./Effect"
 import Victor from "victor"
+import { circle, toLocalSpace, toWorldSpace } from "@/common/geometry"
 import {
-  circle,
-  resizeVertices,
-  cloneVertices,
-  centerOnOrigin,
-  toLocalSpace,
-  toWorldSpace,
-} from "@/common/geometry"
-import {
-  traceBoundary,
   boundaryAlgorithmMap,
   boundaryAlgorithmChoices,
+  prepareMaskBoundary,
 } from "@/common/boundary"
 import PolarMachine from "@/features/machines/PolarMachine"
 import RectMachine from "@/features/machines/RectMachine"
@@ -152,13 +145,11 @@ export default class Mask extends Effect {
       // Trace boundary first (handles self-intersecting shapes), then center, scale, and rotate
       const algorithm =
         boundaryAlgorithmMap[effect.maskBoundaryAlgorithm || "auto"]
-      const boundary = traceBoundary(maskSourceVertices, 0, algorithm)
-      const centeredMask = centerOnOrigin(cloneVertices(boundary))
-      const scaledMask = resizeVertices(
-        cloneVertices(centeredMask),
+      const scaledMask = prepareMaskBoundary(
+        maskSourceVertices,
         effect.width,
         effect.height,
-        true,
+        algorithm,
       )
 
       vertices = vertices.map((vertex) => {
