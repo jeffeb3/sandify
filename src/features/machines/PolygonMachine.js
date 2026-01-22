@@ -9,24 +9,17 @@ import {
   snapToGrid,
   projectToSegment,
   distanceToSegment,
+  isPathClosed,
 } from "@/common/geometry"
 import Graph from "@/common/Graph"
 import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
 import { eulerizeEdges } from "@/common/chinesePostman"
 
 const CLIPPER_SCALE = 1000 // Scale factor for Clipper2 integer coordinates
-const CLOSED_PATH_EPSILON = 0.01 // Max gap to consider path closed
+const CLOSED_PATH_EPSILON = 0.01 // Max gap for deduplication
 const EDGE_EPSILON = 1e-6 // Tolerance for on-edge detection
 const PARALLEL_EPSILON = 1e-10 // Tolerance for parallel line detection
 const NODE_TOLERANCE = 1 // Proximity tolerance for graph node merging
-
-// Helper: check if a path forms a closed loop
-const isPathClosed = (vertices) => {
-  if (vertices.length < 3) return false
-  const first = vertices[0]
-  const last = vertices[vertices.length - 1]
-  return first.distance(last) < CLOSED_PATH_EPSILON
-}
 
 // Helper: check if two line segments intersect (excluding endpoints)
 const segmentsIntersect = (p1, p2, p3, p4) => {

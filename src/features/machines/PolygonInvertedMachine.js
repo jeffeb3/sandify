@@ -1,15 +1,6 @@
 import PolygonMachine from "./PolygonMachine"
-import { cloneVertices, cloneVertex } from "@/common/geometry"
+import { cloneVertices, cloneVertex, isPathClosed } from "@/common/geometry"
 import { closest } from "@/common/proximity"
-
-const CLOSED_PATH_EPSILON = 0.01
-
-const isPathClosed = (vertices) => {
-  if (vertices.length < 3) return false
-  const first = vertices[0]
-  const last = vertices[vertices.length - 1]
-  return first.distance(last) < CLOSED_PATH_EPSILON
-}
 
 // Machine that clips vertices that fall INSIDE the polygon mask (inverted)
 // Keeps vertices outside the mask, removes vertices inside

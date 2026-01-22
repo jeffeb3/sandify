@@ -5,7 +5,7 @@ import {
   centroid,
   cloneVertex,
   cloneVertices,
-  isLoop,
+  isPathClosed,
   totalDistance,
   distance,
   boundingVerticesAtLength,
@@ -161,7 +161,7 @@ export default class FineTuning extends Effect {
 
     const { vNew, index2 } = this.getBoundingSegment(vertices, rotation)
 
-    if (isLoop(vertices)) {
+    if (isPathClosed(vertices)) {
       // can do this efficiently by rotating where we start along the same vertices
       vertices.splice(index2, 0, vNew)
       vertices = arrayRotate(vertices, index2)
