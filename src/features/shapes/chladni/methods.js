@@ -1,17 +1,18 @@
 import BESSEL from "bessel"
 import { BESSEL_ZEROS, SUPERPOSITION, EXCITATION } from "./config"
+import { toPolar } from "@/common/geometry"
 import {
   defaultTerms,
   defaultScale,
   getEffectiveValue,
-  toPolar,
+  getTrig,
 } from "./helpers"
 
 // Rectangular plate interference pattern
 // Domain: [0, 1] or [-1, 1]
 export function interferenceRectangular(x, y, opts) {
   const { m, n, superposition, amplitude, boundary } = opts
-  const trig = boundary === "free" ? Math.cos : Math.sin
+  const trig = getTrig(boundary)
   const mode = SUPERPOSITION[superposition]
   const term1 = trig(n * Math.PI * x) * trig(m * Math.PI * y)
   const term2 = trig(m * Math.PI * x) * trig(n * Math.PI * y)
@@ -34,12 +35,10 @@ export function interferenceRectangular(x, y, opts) {
 // Domain: x,y in [-1, 1], circular boundary at r=1
 export function interferenceCircular(x, y, opts) {
   const { m, n, radial, superposition, amplitude, boundary } = opts
-  const polar = toPolar(x, y)
+  const { r, theta } = toPolar(x, y)
 
-  if (!polar) return 1000
-
-  const { r, theta } = polar
-  const trig = boundary === "free" ? Math.cos : Math.sin
+  if (r > 1) return 1000
+  const trig = getTrig(boundary)
   const mode = SUPERPOSITION[superposition]
 
   // Default terms: two different angular modes, same radial zero
@@ -66,7 +65,7 @@ export function interferenceCircular(x, y, opts) {
 // frequency scales all harmonics (zoom), modes controls complexity
 export function harmonicRectangular(x, y, opts) {
   const { modes, decay, frequency, boundary } = opts
-  const trig = boundary === "free" ? Math.cos : Math.sin
+  const trig = getTrig(boundary)
   const scaledFreq = frequency * 1.5 - 1
   const decayExp = (decay + 1) / 8
 
@@ -94,11 +93,9 @@ export function harmonicRectangular(x, y, opts) {
 // modes controls angular complexity, radial controls radial complexity
 export function harmonicCircular(x, y, opts) {
   let { modes, radial, decay, frequency } = opts
-  const polar = toPolar(x, y)
+  const { r, theta } = toPolar(x, y)
 
-  if (!polar) return 1000
-
-  const { r, theta } = polar
+  if (r > 1) return 1000
   const scaledFreq = frequency * 1.5
   const decayExp = (decay + 1) / 16
   let sum = 0
@@ -211,11 +208,9 @@ export function excitationRectangular(x, y, opts) {
 // Loops over angular modes (m) and radial modes (n)
 export function excitationCircular(x, y, opts) {
   const { excitation, spread, position, modes, radial, frequency } = opts
-  const polar = toPolar(x, y)
+  const { r, theta } = toPolar(x, y)
 
-  if (!polar) return 1000
-
-  const { r, theta } = polar
+  if (r > 1) return 1000
   const spreadFactor = spread / 5
   const freq = frequency * 2 - 1
   let sum = 0

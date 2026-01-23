@@ -1,3 +1,5 @@
+export const getTrig = (boundary) => (boundary === "free" ? Math.cos : Math.sin)
+
 // Default values for superposition modes
 export const defaultTerms = ({ term1, term2 }) => [term1, term2]
 export const defaultScale = { rectangular: 1, circular: 2.5 }
@@ -17,13 +19,4 @@ export function getEffectiveValue(
   const v = (mode?.[key] || defaults)[shape]
 
   return typeof v === "function" ? v(value) / divisor : v * (value / divisor)
-}
-
-// Convert cartesian to polar, returning null if outside unit circle
-export function toPolar(x, y) {
-  const r = Math.sqrt(x * x + y * y)
-
-  if (r > 1) return null
-
-  return { r, theta: Math.atan2(y, x) }
 }

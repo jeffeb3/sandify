@@ -113,6 +113,12 @@ export const angle = (point) => {
   return Math.atan2(point.y, point.x)
 }
 
+// Convert cartesian to polar coordinates
+export const toPolar = (x, y) => ({
+  r: Math.sqrt(x * x + y * y),
+  theta: Math.atan2(y, x),
+})
+
 // returns whether a point is on the segment defined by start and end
 export const onSegment = (start, end, point) => {
   return (
