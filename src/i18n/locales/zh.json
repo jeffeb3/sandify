@@ -1,5 +1,6 @@
 {
   "about.tagline": "为使用滚珠在沙子中绘画的机器人创建图案",
+  "description.chladni": "克拉尼图形是振动板的节线图案。沙子聚集在振幅为零的线上。",
   "description.circlePacker": "圆形包装是不同大小圆形的排列，使得不会发生重叠，且在不产生重叠的情况下无法放大任何圆形。",
   "description.epicycloid": "三叶草形状是外摆线。想象两个圆，外圆绕着内圆滚动。外圆上的点在滚动过程中形成的轨迹称为外摆线。",
   "description.fractalSpirograph": "分形螺旋图由一系列相互旋转的圆生成。图案是通过跟踪沿最外圆滚动的点创建的。",
@@ -16,6 +17,7 @@
   "description.voronoi": "沃罗诺伊图根据一组种子点将空间划分为区域。每个区域包含所有比其他种子点更接近其种子点的点。",
   "export.wikiNote": "有关程序导出变量的详细信息，请参阅<0>wiki</0>。",
   "layer.seeMoreInfo": "查看<0>{{linkText}}</0>了解更多信息。",
+  "linkText.chladni": "维基百科",
   "linkText.circlePacker": "维基百科",
   "linkText.epicycloid": "Wolfram 数学世界",
   "linkText.fractalSpirograph": "这篇博客文章",
@@ -262,6 +264,7 @@
   "upper left": "左上",
   "upper right": "右上",
   "Velocity": "速度",
+  "Vibration": "振动",
   "Voronoi": "沃罗诺伊图",
   "W": "宽",
   "Warp": "扭曲",
