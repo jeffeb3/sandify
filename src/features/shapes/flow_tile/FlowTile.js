@@ -50,7 +50,7 @@ const options = {
     type: "checkbox",
   },
   seed: {
-    title: "Seed",
+    title: "Random seed",
     min: 1,
     randomMax: 1000,
   },
