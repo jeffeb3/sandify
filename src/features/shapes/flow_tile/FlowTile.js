@@ -77,8 +77,8 @@ export default class FlowTile extends Shape {
       ...super.getInitialState(),
       ...{
         tileType: "flowTile",
-        tileWidth: 5,
-        tileHeight: 5,
+        tileWidth: 8,
+        tileHeight: 8,
         tileStyle: "Arc",
         tileNoise: "Random",
         tileNoiseScale: 0.2,
@@ -99,6 +99,7 @@ export default class FlowTile extends Shape {
       changes.tileWidth !== layer.tileWidth
     ) {
       const scale = changes.tileWidth / layer.tileWidth
+
       changes.width = layer.width * scale
     }
 
@@ -107,6 +108,7 @@ export default class FlowTile extends Shape {
       changes.tileHeight !== layer.tileHeight
     ) {
       const scale = changes.tileHeight / layer.tileHeight
+
       changes.height = layer.height * scale
     }
   }
@@ -183,7 +185,6 @@ export default class FlowTile extends Shape {
     const right = tileWidth * 2 - 1
     const top = -1
     const bottom = tileHeight * 2 - 1
-
     const segments = []
 
     // Split each border segment at the tile edge midpoint
@@ -192,6 +193,7 @@ export default class FlowTile extends Shape {
       const x1 = col * 2 - 1
       const xMid = col * 2
       const x2 = (col + 1) * 2 - 1
+
       segments.push([new Victor(x1, top), new Victor(xMid, top)])
       segments.push([new Victor(xMid, top), new Victor(x2, top)])
     }
@@ -200,6 +202,7 @@ export default class FlowTile extends Shape {
       const y1 = row * 2 - 1
       const yMid = row * 2
       const y2 = (row + 1) * 2 - 1
+
       segments.push([new Victor(right, y1), new Victor(right, yMid)])
       segments.push([new Victor(right, yMid), new Victor(right, y2)])
     }
@@ -208,6 +211,7 @@ export default class FlowTile extends Shape {
       const x1 = col * 2 - 1
       const xMid = (col - 1) * 2
       const x2 = (col - 1) * 2 - 1
+
       segments.push([new Victor(x1, bottom), new Victor(xMid, bottom)])
       segments.push([new Victor(xMid, bottom), new Victor(x2, bottom)])
     }
@@ -216,6 +220,7 @@ export default class FlowTile extends Shape {
       const y1 = row * 2 - 1
       const yMid = (row - 1) * 2
       const y2 = (row - 1) * 2 - 1
+
       segments.push([new Victor(left, y1), new Victor(left, yMid)])
       segments.push([new Victor(left, yMid), new Victor(left, y2)])
     }
@@ -229,15 +234,18 @@ export default class FlowTile extends Shape {
         col * tileNoiseScale,
         row * tileNoiseScale,
       )
+
       return noiseVal > 0 ? 0 : 1
     } else if (tileNoise === "Simplex") {
       const noiseVal = noisejs.simplex2(
         col * tileNoiseScale,
         row * tileNoiseScale,
       )
+
       return noiseVal > 0 ? 0 : 1
     } else {
       const rng = seedrandom(`${seed}-${col}-${row}`)
+
       return rng() < 0.5 ? 0 : 1
     }
   }
@@ -247,17 +255,26 @@ export default class FlowTile extends Shape {
     return tileRenderers[tileStyle](bounds, orientation, strokeWidth, showBorder)
   }
 
+  // Convert multiple disconnected paths into a single continuous drawing path.
+  //
+  // 1. Build a graph where path endpoints are nodes and paths are edges
+  // 2. Store original vertices in pathSegments keyed by edge
+  // 3. Build a routing graph for Dijkstra fallback when gaps exist
+  // 4. Connect perimeter stroke-offset points to border vertices
+  // 5. Bridge disconnected components via MST
+  // 6. Find Eulerian trail (visits every edge exactly once)
+  // 7. Expand trail back to full vertices
   connectPaths(paths, strokeWidth = 0) {
     if (paths.length === 0) return []
     if (paths.length === 1) return paths[0]
 
     const bounds = this.getBounds(paths)
     const pathSegments = new Map()
-    const graph = this.buildGraphFromPaths(paths, strokeWidth, pathSegments)
+    const graph = this.buildPathGraph(paths, strokeWidth, pathSegments)
     const routingGraph = this.buildRoutingGraph(graph, pathSegments)
 
     this.addPerimeterRouting(routingGraph, pathSegments, bounds)
-    this.updateBorderWeights(routingGraph, bounds)
+    this.preferBorderRouting(routingGraph, bounds)
     graph.connectComponents()
 
     const trail = getEulerianTrail(graph)
@@ -265,7 +282,7 @@ export default class FlowTile extends Shape {
     return this.expandTrail(trail, pathSegments, routingGraph, graph)
   }
 
-  buildGraphFromPaths(paths, strokeWidth, pathSegments) {
+  buildPathGraph(paths, strokeWidth, pathSegments) {
     const graph = new Graph()
 
     for (const path of paths) {
@@ -345,7 +362,7 @@ export default class FlowTile extends Shape {
     const routingGraph = new Graph()
 
     for (const [edgeKey] of pathSegments) {
-      const [key1, key2] = this.parseEdgeKey(edgeKey)
+      const [key1, key2] = this.splitEdgeKey(edgeKey)
       const node1 = graph.nodeMap[key1]
       const node2 = graph.nodeMap[key2]
 
@@ -359,22 +376,24 @@ export default class FlowTile extends Shape {
     return routingGraph
   }
 
-  // Edge keys: "x1,y1,x2,y2" (4 parts) or "x,y" node keys (2 parts)
-  parseEdgeKey(edgeKey) {
+  // Split edge key "x1,y1,x2,y2" into two node keys ["x1,y1", "x2,y2"]
+  splitEdgeKey(edgeKey) {
     const parts = edgeKey.split(",")
-    return parts.length === 4
-      ? [parts.slice(0, 2).join(","), parts.slice(2).join(",")]
-      : parts
+
+    return [parts.slice(0, 2).join(","), parts.slice(2).join(",")]
   }
 
   // Connect stroke-offset points on perimeter to nearest border vertices
   addPerimeterRouting(routingGraph, pathSegments, bounds) {
     const { minX, maxX, minY, maxY } = bounds
 
+    // Border midpoints are at even integers (0, 2, 4...), tile corners at odd (-1, 1, 3...).
+    // Snap fractional stroke-offset coords to nearest odd integer (corner vertex).
     const snapToOddInt = (v) => {
       const lower = Math.floor(v)
       const lowerOdd = lower % 2 === 0 ? lower - 1 : lower
       const upperOdd = lowerOdd + 2
+
       return Math.abs(v - lowerOdd) <= Math.abs(v - upperOdd) ? lowerOdd : upperOdd
     }
 
@@ -414,11 +433,12 @@ export default class FlowTile extends Shape {
 
     // Connect components and add pathSegments for new edges
     const edgesBefore = new Set(routingGraph.edgeKeys)
+
     routingGraph.connectComponents()
 
     for (const edgeKey of routingGraph.edgeKeys) {
       if (!edgesBefore.has(edgeKey) && !pathSegments.has(edgeKey)) {
-        const [key1, key2] = this.parseEdgeKey(edgeKey)
+        const [key1, key2] = this.splitEdgeKey(edgeKey)
         const node1 = routingGraph.nodeMap[key1]
         const node2 = routingGraph.nodeMap[key2]
 
@@ -433,7 +453,7 @@ export default class FlowTile extends Shape {
   }
 
   // Make Dijkstra prefer border paths over interior diagonals
-  updateBorderWeights(routingGraph, bounds) {
+  preferBorderRouting(routingGraph, bounds) {
     const { minX, maxX, minY, maxY } = bounds
     const isOnBorder = (node) =>
       node.x === minX || node.x === maxX || node.y === minY || node.y === maxY
@@ -445,6 +465,7 @@ export default class FlowTile extends Shape {
 
         if (node1 && node2) {
           const bothOnBorder = isOnBorder(node1) && isOnBorder(node2)
+
           neighbor.weight = bothOnBorder ? 0.01 : 1.0
         }
       }
@@ -503,9 +524,11 @@ export default class FlowTile extends Shape {
           } else {
             if (result.length === 0) {
               const pFrom = routingGraph.nodeMap[pFromKey]
+
               if (pFrom) result.push(new Victor(pFrom.x, pFrom.y))
             }
             const pTo = routingGraph.nodeMap[pToKey]
+
             if (pTo) result.push(new Victor(pTo.x, pTo.y))
           }
         }
