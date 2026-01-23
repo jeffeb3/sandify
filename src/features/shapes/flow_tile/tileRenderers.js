@@ -3,7 +3,16 @@ import { arc } from "@/common/geometry"
 import { getEdgeMidpoints } from "./geometry"
 
 // Create arc path with exact start/end points and push to paths array
-function pushArcPath(paths, radius, startAngle, endAngle, cx, cy, startPt, endPt) {
+function pushArcPath(
+  paths,
+  radius,
+  startAngle,
+  endAngle,
+  cx,
+  cy,
+  startPt,
+  endPt,
+) {
   const arcPath = arc(radius, startAngle, endAngle, cx, cy)
 
   arcPath[0] = startPt.clone()
@@ -27,35 +36,99 @@ function drawStrokedArcTile(bounds, orientation, strokeWidth, tileBorder) {
   const { left, right, top, bottom } = bounds
   const cx = bounds.cx ?? (left + right) / 2
   const cy = bounds.cy ?? (top + bottom) / 2
-  const baseRadius = (bounds.size ?? (right - left)) / 2
+  const baseRadius = (bounds.size ?? right - left) / 2
   const halfStroke = strokeWidth / 2
   const innerRadius = baseRadius - halfStroke
   const outerRadius = baseRadius + halfStroke
 
   if (orientation === 0) {
     // Top-left corner arcs
-    pushArcPath(paths, innerRadius, Math.PI / 2, 0, left, top,
-      new Victor(left, cy - halfStroke), new Victor(cx - halfStroke, top))
-    pushArcPath(paths, outerRadius, Math.PI / 2, 0, left, top,
-      new Victor(left, cy + halfStroke), new Victor(cx + halfStroke, top))
+    pushArcPath(
+      paths,
+      innerRadius,
+      Math.PI / 2,
+      0,
+      left,
+      top,
+      new Victor(left, cy - halfStroke),
+      new Victor(cx - halfStroke, top),
+    )
+    pushArcPath(
+      paths,
+      outerRadius,
+      Math.PI / 2,
+      0,
+      left,
+      top,
+      new Victor(left, cy + halfStroke),
+      new Victor(cx + halfStroke, top),
+    )
 
     // Bottom-right corner arcs
-    pushArcPath(paths, innerRadius, -Math.PI / 2, -Math.PI, right, bottom,
-      new Victor(right, cy + halfStroke), new Victor(cx + halfStroke, bottom))
-    pushArcPath(paths, outerRadius, -Math.PI / 2, -Math.PI, right, bottom,
-      new Victor(right, cy - halfStroke), new Victor(cx - halfStroke, bottom))
+    pushArcPath(
+      paths,
+      innerRadius,
+      -Math.PI / 2,
+      -Math.PI,
+      right,
+      bottom,
+      new Victor(right, cy + halfStroke),
+      new Victor(cx + halfStroke, bottom),
+    )
+    pushArcPath(
+      paths,
+      outerRadius,
+      -Math.PI / 2,
+      -Math.PI,
+      right,
+      bottom,
+      new Victor(right, cy - halfStroke),
+      new Victor(cx - halfStroke, bottom),
+    )
   } else {
     // Top-right corner arcs
-    pushArcPath(paths, innerRadius, Math.PI, Math.PI / 2, right, top,
-      new Victor(cx + halfStroke, top), new Victor(right, cy - halfStroke))
-    pushArcPath(paths, outerRadius, Math.PI, Math.PI / 2, right, top,
-      new Victor(cx - halfStroke, top), new Victor(right, cy + halfStroke))
+    pushArcPath(
+      paths,
+      innerRadius,
+      Math.PI,
+      Math.PI / 2,
+      right,
+      top,
+      new Victor(cx + halfStroke, top),
+      new Victor(right, cy - halfStroke),
+    )
+    pushArcPath(
+      paths,
+      outerRadius,
+      Math.PI,
+      Math.PI / 2,
+      right,
+      top,
+      new Victor(cx - halfStroke, top),
+      new Victor(right, cy + halfStroke),
+    )
 
     // Bottom-left corner arcs
-    pushArcPath(paths, innerRadius, 0, -Math.PI / 2, left, bottom,
-      new Victor(cx - halfStroke, bottom), new Victor(left, cy + halfStroke))
-    pushArcPath(paths, outerRadius, 0, -Math.PI / 2, left, bottom,
-      new Victor(cx + halfStroke, bottom), new Victor(left, cy - halfStroke))
+    pushArcPath(
+      paths,
+      innerRadius,
+      0,
+      -Math.PI / 2,
+      left,
+      bottom,
+      new Victor(cx - halfStroke, bottom),
+      new Victor(left, cy + halfStroke),
+    )
+    pushArcPath(
+      paths,
+      outerRadius,
+      0,
+      -Math.PI / 2,
+      left,
+      bottom,
+      new Victor(cx + halfStroke, bottom),
+      new Victor(left, cy - halfStroke),
+    )
   }
 
   if (tileBorder) {
@@ -75,15 +148,42 @@ function drawArcTile(bounds, orientation, strokeWidth, tileBorder) {
 
   const paths = []
   const { left, right, top, bottom } = bounds
-  const baseRadius = (bounds.size ?? (right - left)) / 2
+  const baseRadius = (bounds.size ?? right - left) / 2
   const { midLeft, midRight, midTop, midBottom } = getEdgeMidpoints(bounds)
 
   if (orientation === 0) {
     pushArcPath(paths, baseRadius, Math.PI / 2, 0, left, top, midLeft, midTop)
-    pushArcPath(paths, baseRadius, -Math.PI / 2, -Math.PI, right, bottom, midRight, midBottom)
+    pushArcPath(
+      paths,
+      baseRadius,
+      -Math.PI / 2,
+      -Math.PI,
+      right,
+      bottom,
+      midRight,
+      midBottom,
+    )
   } else {
-    pushArcPath(paths, baseRadius, Math.PI, Math.PI / 2, right, top, midTop, midRight)
-    pushArcPath(paths, baseRadius, 0, -Math.PI / 2, left, bottom, midBottom, midLeft)
+    pushArcPath(
+      paths,
+      baseRadius,
+      Math.PI,
+      Math.PI / 2,
+      right,
+      top,
+      midTop,
+      midRight,
+    )
+    pushArcPath(
+      paths,
+      baseRadius,
+      0,
+      -Math.PI / 2,
+      left,
+      bottom,
+      midBottom,
+      midLeft,
+    )
   }
 
   if (tileBorder) {

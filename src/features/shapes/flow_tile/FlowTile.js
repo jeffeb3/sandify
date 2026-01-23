@@ -119,7 +119,6 @@ export default class FlowTile extends Shape {
       tileHeight,
       tileStyle,
       tileNoise,
-      tileNoiseScale,
       tileStrokeWidth,
       seed,
     } = state.shape
@@ -252,7 +251,12 @@ export default class FlowTile extends Shape {
 
   drawTile(cx, cy, tileStyle, strokeWidth, showBorder, orientation) {
     const bounds = tileBounds(cx, cy)
-    return tileRenderers[tileStyle](bounds, orientation, strokeWidth, showBorder)
+    return tileRenderers[tileStyle](
+      bounds,
+      orientation,
+      strokeWidth,
+      showBorder,
+    )
   }
 
   // Convert multiple disconnected paths into a single continuous drawing path.
@@ -299,10 +303,23 @@ export default class FlowTile extends Shape {
         graph.addNode(startNode)
         graph.addNode(midNode)
         graph.addNode(endNode)
-        graph.addEdge(startNode, midNode, this.edgeWeight(path[0], path[midIdx]))
-        graph.addEdge(midNode, endNode, this.edgeWeight(path[midIdx], path[path.length - 1]))
+        graph.addEdge(
+          startNode,
+          midNode,
+          this.edgeWeight(path[0], path[midIdx]),
+        )
+        graph.addEdge(
+          midNode,
+          endNode,
+          this.edgeWeight(path[midIdx], path[path.length - 1]),
+        )
 
-        this.storeSegment(pathSegments, startNode, midNode, path.slice(0, midIdx + 1))
+        this.storeSegment(
+          pathSegments,
+          startNode,
+          midNode,
+          path.slice(0, midIdx + 1),
+        )
         this.storeSegment(pathSegments, midNode, endNode, path.slice(midIdx))
       } else if (isLongPath) {
         // Long path with stroke: endpoints only (avoids inner/outer ribbon crossings)
@@ -311,7 +328,11 @@ export default class FlowTile extends Shape {
 
         graph.addNode(startNode)
         graph.addNode(endNode)
-        graph.addEdge(startNode, endNode, this.edgeWeight(path[0], path[path.length - 1]))
+        graph.addEdge(
+          startNode,
+          endNode,
+          this.edgeWeight(path[0], path[path.length - 1]),
+        )
 
         this.storeSegment(pathSegments, startNode, endNode, path)
       } else {
@@ -394,7 +415,9 @@ export default class FlowTile extends Shape {
       const lowerOdd = lower % 2 === 0 ? lower - 1 : lower
       const upperOdd = lowerOdd + 2
 
-      return Math.abs(v - lowerOdd) <= Math.abs(v - upperOdd) ? lowerOdd : upperOdd
+      return Math.abs(v - lowerOdd) <= Math.abs(v - upperOdd)
+        ? lowerOdd
+        : upperOdd
     }
 
     for (const nodeKey of routingGraph.nodeKeys) {
@@ -485,7 +508,14 @@ export default class FlowTile extends Shape {
       if (segment) {
         this.appendSegment(segment, fromKey, toKey, result)
       } else {
-        this.routeViaGraph(fromKey, toKey, pathSegments, routingGraph, graph, result)
+        this.routeViaGraph(
+          fromKey,
+          toKey,
+          pathSegments,
+          routingGraph,
+          graph,
+          result,
+        )
       }
     }
 
@@ -495,8 +525,12 @@ export default class FlowTile extends Shape {
   // Add segment vertices, handling direction and skipping shared endpoints
   appendSegment(segment, fromKey, toKey, result) {
     const goingForward = fromKey <= toKey
-    const shouldReverse = goingForward ? segment.needsReverse : !segment.needsReverse
-    const vertices = shouldReverse ? [...segment.vertices].reverse() : segment.vertices
+    const shouldReverse = goingForward
+      ? segment.needsReverse
+      : !segment.needsReverse
+    const vertices = shouldReverse
+      ? [...segment.vertices].reverse()
+      : segment.vertices
     const startIdx = result.length === 0 ? 0 : 1
 
     for (let j = startIdx; j < vertices.length; j++) {
@@ -509,7 +543,12 @@ export default class FlowTile extends Shape {
     const fromNode = routingGraph.nodeMap[fromKey]
     const toNode = routingGraph.nodeMap[toKey]
 
-    if (fromNode && toNode && routingGraph.nodeKeys.has(fromKey) && routingGraph.nodeKeys.has(toKey)) {
+    if (
+      fromNode &&
+      toNode &&
+      routingGraph.nodeKeys.has(fromKey) &&
+      routingGraph.nodeKeys.has(toKey)
+    ) {
       const pathNodes = routingGraph.dijkstraShortestPath(fromKey, toKey)
 
       if (pathNodes && pathNodes.length > 1) {
