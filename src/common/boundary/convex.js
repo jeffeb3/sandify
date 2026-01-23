@@ -16,7 +16,11 @@ import { applyCentroidScale } from "./utils"
 export const traceConvexBoundary = (ctx) => {
   const { vertices, scale, convex } = ctx
 
-  return applyCentroidScale(convex.map((pt) => [pt.x, pt.y]), vertices, scale)
+  return applyCentroidScale(
+    convex.map((pt) => [pt.x, pt.y]),
+    vertices,
+    scale,
+  )
 }
 
 // Convex hull boundary with optional centroid scaling.

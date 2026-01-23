@@ -56,7 +56,13 @@ const traceFillPattern = (
 // Fill pattern: bounding box or convex hull + edge offset
 export const traceFillPatternBoundary = (ctx) => {
   const { vertices, bounds, inputWidth, inputHeight, scale, convex } = ctx
-  const fillHull = traceFillPattern(bounds, inputWidth, inputHeight, convex, vertices)
+  const fillHull = traceFillPattern(
+    bounds,
+    inputWidth,
+    inputHeight,
+    convex,
+    vertices,
+  )
 
   return applyEdgeOffset(fillHull, scale, vertices) || fillHull
 }
