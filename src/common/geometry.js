@@ -113,6 +113,12 @@ export const angle = (point) => {
   return Math.atan2(point.y, point.x)
 }
 
+// Convert cartesian to polar coordinates
+export const toPolar = (x, y) => ({
+  r: Math.sqrt(x * x + y * y),
+  theta: Math.atan2(y, x),
+})
+
 // returns whether a point is on the segment defined by start and end
 export const onSegment = (start, end, point) => {
   return (
@@ -747,4 +753,14 @@ export const polygonArea = (vertices) => {
   }
 
   return area / 2
+}
+
+// Create a node with proximity-based key for graph operations
+// Nodes within tolerance share the same key string
+export const proximityNode = (x, y, tolerance = 1, precision = 2) => {
+  const sx = snapToGrid(x, tolerance)
+  const sy = snapToGrid(y, tolerance)
+  const key = `${sx.toFixed(precision)},${sy.toFixed(precision)}`
+
+  return { x, y, toString: () => key }
 }

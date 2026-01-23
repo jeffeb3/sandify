@@ -3,7 +3,7 @@
 import Victor from "victor"
 import Effect from "./Effect"
 import { effectOptions } from "./EffectLayer"
-import { subsample, circle } from "@/common/geometry"
+import { subsample, circle, toPolar } from "@/common/geometry"
 import { evaluate } from "mathjs"
 
 const options = {
@@ -161,21 +161,10 @@ export default class Warp extends Effect {
     return vertices.map((vertex) => {
       const originalx = vertex.x - effect.x
       const originaly = vertex.y - effect.y
-      const theta = Math.atan2(originaly, originalx)
-      const x =
-        originalx +
-        scale *
-          Math.cos(theta) *
-          Math.cos(
-            Math.sqrt(originalx * originalx + originaly * originaly) / periodx,
-          )
-      const y =
-        originaly +
-        scale *
-          Math.sin(theta) *
-          Math.cos(
-            Math.sqrt(originalx * originalx + originaly * originaly) / periody,
-          )
+      const { r, theta } = toPolar(originalx, originaly)
+      const x = originalx + scale * Math.cos(theta) * Math.cos(r / periodx)
+      const y = originaly + scale * Math.sin(theta) * Math.cos(r / periody)
+
       return new Victor(x + effect.x, y + effect.y)
     })
   }
