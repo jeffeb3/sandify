@@ -12,6 +12,7 @@ import {
   selectLayerVertices,
 } from "@/features/layers/layersSlice"
 import { dimensions } from "@/common/geometry"
+import { getShape } from "@/features/shapes/shapeFactory"
 
 const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
   const store = useStore()
@@ -29,9 +30,12 @@ const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
   const precedingLayerIds =
     effectLayerIndex > 0 ? allLayerIds.slice(0, effectLayerIndex) : []
 
-  // Build choices from preceding layers (use shallowEqual to avoid new array reference triggering re-renders)
+  // Build choices from preceding layers, excluding Erasers (they fill space, not define boundaries)
   const layers = useSelector(
-    (state) => precedingLayerIds.map((id) => selectLayerById(state, id)),
+    (state) =>
+      precedingLayerIds
+        .map((id) => selectLayerById(state, id))
+        .filter((layer) => getShape(layer.type).selectGroup !== "Erasers"),
     shallowEqual,
   )
 

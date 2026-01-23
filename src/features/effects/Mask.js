@@ -56,7 +56,7 @@ const options = {
     isVisible: (model, state) => state.maskMachine === "layer",
   },
   maskBoundaryAlgorithm: {
-    title: "Boundary algorithm",
+    title: "Boundary type",
     type: "dropdown",
     choices: boundaryAlgorithmChoices,
     isVisible: (model, state) => state.maskMachine === "layer",
