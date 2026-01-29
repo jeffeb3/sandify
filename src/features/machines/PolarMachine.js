@@ -155,6 +155,19 @@ export default class PolarMachine extends Machine {
     return Math.abs(deltaAngle) * this.state.maxRadius
   }
 
+  // Returns the position of a vertex along the perimeter (0 to 2π for circles).
+  // Used for optimized segment ordering.
+  getPerimeterPosition(vertex) {
+    let a = angle(vertex)
+    if (a < 0) a += 2 * Math.PI
+    return a
+  }
+
+  // Returns the total perimeter length.
+  getPerimeterLength() {
+    return 2 * Math.PI
+  }
+
   // Returns points along the circle from the start to the end, tracing a circle of radius size.
   tracePerimeter(start, end) {
     return arc(this.state.maxRadius, start.angle(), end.angle())
@@ -173,9 +186,9 @@ export default class PolarMachine extends Machine {
 
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta = 1) {
-    const rm = Math.sqrt(Math.pow(this.state.maxRadius, 2))
-    const r1 = Math.sqrt(Math.pow(v1.x, 2) + Math.pow(v1.y, 2))
-    const r2 = Math.sqrt(Math.pow(v2.x, 2) + Math.pow(v2.y, 2))
+    const rm = this.state.maxRadius
+    const r1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y)
+    const r2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y)
 
     return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta
   }

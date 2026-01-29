@@ -1,32 +1,65 @@
 import Effect from "./Effect"
 import Victor from "victor"
-import { rotate, offset, circle } from "@/common/geometry"
+import { circle, toLocalSpace, toWorldSpace } from "@/common/geometry"
+import {
+  boundaryAlgorithmMap,
+  boundaryAlgorithmChoices,
+  prepareMaskBoundary,
+} from "@/common/boundary"
 import PolarMachine from "@/features/machines/PolarMachine"
 import RectMachine from "@/features/machines/RectMachine"
 import PolarInvertedMachine from "@/features/machines/PolarInvertedMachine"
 import RectInvertedMachine from "@/features/machines/RectInvertedMachine"
+import PolygonMachine from "@/features/machines/PolygonMachine"
+import PolygonInvertedMachine from "@/features/machines/PolygonInvertedMachine"
+
+const machineMap = {
+  rectangle: { normal: RectMachine, inverted: RectInvertedMachine },
+  circle: { normal: PolarMachine, inverted: PolarInvertedMachine },
+  layer: { normal: PolygonMachine, inverted: PolygonInvertedMachine },
+}
+
+const getMachineClass = (maskMachine, invert) =>
+  machineMap[maskMachine][invert ? "inverted" : "normal"]
 
 const options = {
   maskMachine: {
     title: "Mask shape",
     type: "togglebutton",
-    choices: ["rectangle", "circle"],
+    choices: ["rectangle", "circle", "layer"],
     onChange: (model, changes, state) => {
       if (changes.maskMachine) {
         if (changes.maskMachine === "circle") {
           changes.rotation = 0
 
           const size = Math.max(state.width, state.height)
+
           changes.height = size
           changes.width = size
           changes.maintainAspectRatio = true
         } else {
           changes.maintainAspectRatio = false
         }
+
+        // Clear layer selection when switching away from layer mode
+        if (changes.maskMachine !== "layer") {
+          changes.maskLayerId = null
+        }
       }
 
       return changes
     },
+  },
+  maskLayerId: {
+    title: "Source layer",
+    type: "layerSelect",
+    isVisible: (model, state) => state.maskMachine === "layer",
+  },
+  maskBoundaryAlgorithm: {
+    title: "Boundary type",
+    type: "dropdown",
+    choices: boundaryAlgorithmChoices,
+    isVisible: (model, state) => state.maskMachine === "layer",
   },
   maskMinimizeMoves: {
     title: "Minimize perimeter moves",
@@ -54,11 +87,11 @@ export default class Mask extends Effect {
   }
 
   canRotate(state) {
-    return state.maskMachine != "circle"
+    return state.maskMachine === "rectangle" || state.maskMachine === "layer"
   }
 
   canChangeAspectRatio(state) {
-    return state.maskMachine != "circle"
+    return state.maskMachine === "rectangle"
   }
 
   canChangeSize(state) {
@@ -75,6 +108,8 @@ export default class Mask extends Effect {
         maskMachine: "rectangle",
         maskInvert: false,
         maskBorder: false,
+        maskLayerId: null,
+        maskBoundaryAlgorithm: "auto",
       },
     }
   }
@@ -99,22 +134,54 @@ export default class Mask extends Effect {
     }
   }
 
-  getVertices(effect, layer, vertices) {
+  getVertices(effect, layer, vertices, maskSourceVertices) {
+    // Layer-based masking
+    if (effect.maskMachine === "layer") {
+      // No valid source layer - pass through unchanged
+      if (!maskSourceVertices || maskSourceVertices.length < 3) {
+        return vertices
+      }
+
+      // Trace boundary first (handles self-intersecting shapes), then center, scale, and rotate
+      const algorithm =
+        boundaryAlgorithmMap[effect.maskBoundaryAlgorithm || "auto"]
+      const scaledMask = prepareMaskBoundary(
+        maskSourceVertices,
+        effect.width,
+        effect.height,
+        algorithm,
+      )
+
+      vertices = vertices.map((vertex) => {
+        return toLocalSpace(vertex, effect.x, effect.y, effect.rotation)
+      })
+
+      if (!effect.dragging) {
+        const MachineClass = getMachineClass("layer", effect.maskInvert)
+        const machine = new MachineClass(
+          { minimizeMoves: effect.maskMinimizeMoves },
+          scaledMask,
+        )
+
+        vertices = machine.polish(vertices, { border: effect.maskBorder })
+      }
+
+      return vertices.map((vertex) => {
+        return toWorldSpace(vertex, effect.x, effect.y, effect.rotation)
+      })
+    }
+
+    // Standard rectangle/circle masking
     vertices = vertices.map((vertex) => {
-      return rotate(offset(vertex, -effect.x, -effect.y), effect.rotation)
+      return toLocalSpace(vertex, effect.x, effect.y, effect.rotation)
     })
 
     if (!effect.dragging) {
-      const machineClass =
-        effect.maskMachine === "circle"
-          ? effect.maskInvert
-            ? PolarInvertedMachine
-            : PolarMachine
-          : effect.maskInvert
-            ? RectInvertedMachine
-            : RectMachine
-
-      const machine = new machineClass({
+      const MachineClass = getMachineClass(
+        effect.maskMachine,
+        effect.maskInvert,
+      )
+      const machine = new MachineClass({
         minX: 0,
         maxX: effect.width,
         minY: 0,
@@ -123,11 +190,12 @@ export default class Mask extends Effect {
         maxRadius: effect.width / 2,
         mask: true,
       })
+
       vertices = machine.polish(vertices, { border: effect.maskBorder })
     }
 
     return vertices.map((vertex) => {
-      return offset(rotate(vertex, -effect.rotation), effect.x, effect.y)
+      return toWorldSpace(vertex, effect.x, effect.y, effect.rotation)
     })
   }
 }

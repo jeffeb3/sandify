@@ -524,13 +524,14 @@ export const findMinimumVertex = (value, arr, fn) => {
   return found
 }
 
-export const isLoop = (vertices, precision = 3) => {
-  return (
-    vertices.length > 1 &&
-    vertexRoundP(vertices[0], precision).isEqualTo(
-      vertexRoundP(vertices[vertices.length - 1], precision),
-    )
-  )
+// Check if a path forms a closed loop using distance threshold.
+export const isPathClosed = (vertices, epsilon = 0.01) => {
+  if (vertices.length < 3) return false
+
+  const first = vertices[0]
+  const last = vertices[vertices.length - 1]
+
+  return distance(first, last) < epsilon
 }
 
 // Convert theta, rho vertices to goofy x, y, which really represent scara angles.

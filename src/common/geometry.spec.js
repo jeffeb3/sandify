@@ -7,6 +7,7 @@ import {
   toWorldSpace,
   projectToSegment,
   distanceToSegment,
+  isPathClosed,
 } from "./geometry"
 
 describe("centroid", () => {
@@ -245,5 +246,58 @@ describe("distanceToSegment", () => {
     const dist = distanceToSegment(point, p1, p2)
 
     expect(dist).toBeCloseTo(0)
+  })
+})
+
+describe("isPathClosed", () => {
+  it("returns false for fewer than 3 vertices", () => {
+    expect(isPathClosed([])).toBe(false)
+    expect(isPathClosed([new Victor(0, 0)])).toBe(false)
+    expect(isPathClosed([new Victor(0, 0), new Victor(1, 1)])).toBe(false)
+  })
+
+  it("returns true when first and last vertices are the same", () => {
+    const closed = [
+      new Victor(0, 0),
+      new Victor(10, 0),
+      new Victor(10, 10),
+      new Victor(0, 0),
+    ]
+
+    expect(isPathClosed(closed)).toBe(true)
+  })
+
+  it("returns true when first and last are within epsilon", () => {
+    const almostClosed = [
+      new Victor(0, 0),
+      new Victor(10, 0),
+      new Victor(10, 10),
+      new Victor(0.005, 0.005), // within default 0.01 epsilon
+    ]
+
+    expect(isPathClosed(almostClosed)).toBe(true)
+  })
+
+  it("returns false when gap exceeds epsilon", () => {
+    const open = [
+      new Victor(0, 0),
+      new Victor(10, 0),
+      new Victor(10, 10),
+      new Victor(0, 5), // gap > 0.01
+    ]
+
+    expect(isPathClosed(open)).toBe(false)
+  })
+
+  it("respects custom epsilon", () => {
+    const path = [
+      new Victor(0, 0),
+      new Victor(10, 0),
+      new Victor(10, 10),
+      new Victor(0.5, 0), // gap = 0.5
+    ]
+
+    expect(isPathClosed(path, 0.01)).toBe(false)
+    expect(isPathClosed(path, 1.0)).toBe(true)
   })
 })

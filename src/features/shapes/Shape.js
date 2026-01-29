@@ -141,6 +141,13 @@ export default class Shape extends Model {
   handleUpdate(changes) {
     // default is to do nothing
   }
+
+  // Override to return the best boundary algorithm for this shape.
+  // Called when user selects "auto" or to override a suboptimal choice.
+  // Default: return the selected algorithm unchanged.
+  getBoundaryAlgorithm(selected, state) {
+    return selected
+  }
 }
 
 // Option onChange handler for filters that affect vertex dimensions/aspect ratio
