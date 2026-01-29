@@ -1,8 +1,9 @@
 import Victor from "victor"
-import { arrayRotate } from "@/common/util"
 import { pointsOnPath } from "points-on-path"
-import pointInPolygon from "point-in-polygon"
 import Shape from "./Shape"
+import Graph from "@/common/Graph"
+import { eulerianTrail } from "@/common/eulerian_trail/eulerianTrail"
+import { eulerizeEdges } from "@/common/chinesePostman"
 import {
   subsample,
   centerOnOrigin,
@@ -10,15 +11,17 @@ import {
   minY,
   horizontalAlign,
   findBounds,
-  nearestVertex,
   findMinimumVertex,
   dimensions,
+  cloneVertex,
+  distance,
 } from "@/common/geometry"
 import { connectMarkedVerticesAlongMachinePerimeter } from "@/features/machines/util"
 import { getFont, fontNames, getFontWeights } from "@/features/fonts/fontsSlice"
 
-const MIN_SPACING_MULTIPLIER = 1.2
-const SPECIAL_CHILDREN = ["i", "j", "?"]
+const MIN_SPACING_MULTIPLIER = 1.2 // Minimum line height as multiple of letter "A" height
+const FONT_SIZE = 5 // OpenType rendering size; produces fluid curves at different scales
+const TOLERANCE = 0.01 // Proximity threshold for merging nearby vertices in graph
 
 const options = {
   fancyText: {
@@ -87,16 +90,16 @@ export default class FancyText extends Shape {
       let words = state.shape.fancyText
         .split("\n")
         .filter((word) => word.length > 0)
+
       if (words.length === 0) {
         return [new Victor(0, 0)]
       }
 
-      words = words.map((word) => this.drawWord(word, font, state))
+      words = words
+        .map((word) => this.drawWord(word, font, state))
+        .filter((w) => w.length > 0) // Filter out empty results (spaces, etc.)
 
-      // Handle case where font doesn't have glyphs for the text (e.g., Chinese in Latin font)
-      const hasValidVertices = words.some((word) => word.length > 0)
-
-      if (!hasValidVertices) {
+      if (words.length === 0) {
         return [new Victor(0, 0)]
       }
 
@@ -127,6 +130,7 @@ export default class FancyText extends Shape {
     // Reset weight to Regular if switching to a font that doesn't have the current weight
     if (changes.fancyFont) {
       const newWeights = getFontWeights(changes.fancyFont)
+
       if (newWeights && !newWeights.includes(layer.fancyFontWeight)) {
         changes.fancyFontWeight = "Regular"
       } else if (!newWeights) {
@@ -180,6 +184,7 @@ export default class FancyText extends Shape {
 
   centerOnOrigin(vertices) {
     const bounds = findBounds(vertices.flat())
+
     vertices.forEach((vs) => centerOnOrigin(vs, bounds))
   }
 
@@ -192,28 +197,30 @@ export default class FancyText extends Shape {
 
       if (i > 0) {
         const prevVertices = vertices[i - 1]
-        const next = currVertices[0]
-        const prev = prevVertices[prevVertices.length - 1]
 
         if (state.shape.fancyConnectLines === "outside") {
-          // mark this vertex; we will connect to the next vertice along the machine perimeter
-          // once all other transformations have happened
+          // mark last vertex; we will connect along the machine perimeter
+          const prev = prevVertices[prevVertices.length - 1]
+
           prev.connector = true
-          prev.hidden = true // don't render this line in the preview
+          prev.hidden = true
         } else {
-          // connect the two rows by drawing a horizontal line in the middle of the two rows
+          // Find vertical boundaries for mid-point calculation
           const lowest =
             prevVertices[findMinimumVertex(null, prevVertices, (val, v) => v.y)]
           const highest =
             currVertices[
               findMinimumVertex(null, currVertices, (val, v) => -v.y)
             ]
-          newVertices.push(
-            new Victor(prev.x, lowest.y - (lowest.y - highest.y) / 2),
-          )
-          newVertices.push(
-            new Victor(next.x, lowest.y - (lowest.y - highest.y) / 2),
-          )
+          const midY = lowest.y - (lowest.y - highest.y) / 2
+
+          // Connect from end of previous row to start of current row via horizontal line
+          const prev = prevVertices[prevVertices.length - 1]
+          const next = currVertices[0]
+
+          // Draw horizontal connector at midY between where prev row ends and next row starts
+          newVertices.push(new Victor(prev.x, midY))
+          newVertices.push(new Victor(next.x, midY))
         }
       }
       newVertices.push(currVertices)
@@ -226,7 +233,6 @@ export default class FancyText extends Shape {
     let newVertices = []
     let yOffset = 0
     const offsets = []
-
     const letterA = this.drawWord("A", font, state)
     const minHeight = (maxY(letterA) - minY(letterA)) * MIN_SPACING_MULTIPLIER
 
@@ -251,126 +257,209 @@ export default class FancyText extends Shape {
   }
 
   drawWord(word, font, state) {
-    const pointsArr = []
-    let start = 0
+    if (word.length === 0) {
+      return []
+    }
 
-    // build top-level paths with children, sorted from left to right
-    const sortedPaths = this.buildOrderedPaths(word, font)
+    // Use Array.from to properly handle Unicode (emoji are multi-byte)
+    const chars = Array.from(word)
+    const fSize = FONT_SIZE
+    const charCircuits = []
+    let xOffset = 0
 
-    // draw paths, and connect them together
-    for (let i = 0; i < sortedPaths.length; i++) {
-      const path = sortedPaths[i]
-      let points = path.points
-      const nextPath = sortedPaths[i + 1]
-      const childPaths = path.children
+    // First pass: collect all character circuits with their positions
+    for (const char of chars) {
+      const charPaths = this.convertTextToPoints(char, font)
+      const glyph = font.charToGlyph(char)
+      const advanceWidth = ((glyph.advanceWidth || 0) / font.unitsPerEm) * fSize
 
-      if (i === 0) {
-        start =
-          state.shape.fancyConnectLines === "outside"
-            ? findMinimumVertex(null, points, (val, v) => v.x)
-            : (start = findMinimumVertex(null, points, (val, v) => -v.y))
+      if (charPaths.length === 0) {
+        xOffset += advanceWidth
+        continue
       }
 
-      // draw path
-      const loop = this.rotateLoop(start, points)
-      pointsArr.push(loop)
-      start = points.length - 1
+      // Offset paths by current x position
+      const offsetPaths = charPaths.map((path) =>
+        path.map((pt) => new Victor(pt.x + xOffset, pt.y)),
+      )
 
-      // draw children
-      if (childPaths) {
-        for (let j = 0; j < childPaths.length; j++) {
-          const childPoints = childPaths[j]
-          const { segment, end, nextStart } = this.connectPaths(
-            start,
-            points,
-            childPoints,
-          )
+      // Run Chinese Postman on this character's paths
+      const charVertices = this.connectPathsWithChinesePostman(offsetPaths)
 
-          pointsArr.push(segment)
-          pointsArr.push(this.rotateLoop(nextStart, childPoints))
-          pointsArr.push(points[end])
-          start = end
-        }
+      if (charVertices.length > 0) {
+        charCircuits.push(charVertices)
       }
 
-      // draw connection to next path
-      if (nextPath) {
-        const nextPoints = nextPath.points
-        const { segment, nextStart } = this.connectPaths(
-          start,
-          points,
-          nextPoints,
+      xOffset += advanceWidth
+    }
+
+    if (charCircuits.length === 0) {
+      return []
+    }
+
+    // Second pass: connect circuits with optimal connection points
+    let allVertices = []
+    const connectMode = state.shape.fancyConnectLines
+
+    for (let c = 0; c < charCircuits.length; c++) {
+      const { loop, isClosed } = this.getOpenLoop(charCircuits[c])
+
+      if (c === 0) {
+        // First character: rotate to start at predictable position for row connections
+        const startIdx = this.findStartIndex(loop, connectMode)
+        const rotated = this.rotateLoop(loop, startIdx, isClosed)
+
+        allVertices.push(...rotated)
+        charCircuits[c] = rotated
+      } else {
+        // Find optimal connection between previous and current character
+        const { loop: prevLoop } = this.getOpenLoop(charCircuits[c - 1])
+        const { idx1: bestPrevIdx, idx2: bestCurrIdx } = this.findClosestPair(
+          prevLoop,
+          loop,
         )
 
-        pointsArr.push(segment)
-        start = nextStart
-      } else {
-        const end =
-          state.shape.fancyConnectLines === "outside"
-            ? findMinimumVertex(null, loop, (val, v) => -v.x)
-            : findMinimumVertex(null, loop, (val, v) => v.y)
-        pointsArr.push(this.shortestPathAroundLoop(start, end, loop))
+        // Backtrack previous character to optimal end point
+        const prevEndIdx = prevLoop.length - 1
+
+        if (bestPrevIdx !== prevEndIdx) {
+          const backtrack = this.shortestPathAroundLoop(
+            prevEndIdx,
+            bestPrevIdx,
+            prevLoop,
+          )
+
+          allVertices.push(...backtrack.slice(1))
+        }
+
+        // Rotate current circuit to start at optimal point
+        const rotated = this.rotateLoop(loop, bestCurrIdx, isClosed)
+
+        allVertices.push(...rotated)
+        charCircuits[c] = rotated
       }
     }
 
-    return pointsArr.flat()
-  }
+    // Last character: backtrack to end at predictable position for row connections
+    if (charCircuits.length > 0) {
+      const { loop: lastLoop } = this.getOpenLoop(
+        charCircuits[charCircuits.length - 1],
+      )
+      const endIdx = this.findEndIndex(lastLoop, connectMode)
+      const currentEndIdx = lastLoop.length - 1
 
-  rotateLoop(start, points) {
-    if (start) {
-      points.pop()
-      points = arrayRotate(points, start)
-      points.push(points[0])
+      if (endIdx !== currentEndIdx) {
+        const backtrack = this.shortestPathAroundLoop(
+          currentEndIdx,
+          endIdx,
+          lastLoop,
+        )
+
+        allVertices.push(...backtrack.slice(1))
+      }
     }
 
-    return points
+    return allVertices
   }
 
-  connectPaths(start, points, nextPoints) {
-    const pStart = points[start]
-    const nextStart = nearestVertex(pStart, nextPoints)
-    const next = nextPoints[nextStart]
-    const end = nearestVertex(next, points)
-    const segment = this.shortestPathAroundLoop(start, end, points)
+  // Extract the open loop from a circuit (removing duplicate endpoint if closed)
+  getOpenLoop(circuit) {
+    if (circuit.length < 2) {
+      return { loop: circuit, isClosed: false }
+    }
 
-    segment.push(new Victor(next.x, next.y))
+    const first = circuit[0]
+    const last = circuit[circuit.length - 1]
+    const isClosed = distance(first, last) < TOLERANCE
+    const loop = isClosed ? circuit.slice(0, -1) : circuit
 
-    return { segment, end, nextStart }
+    return { loop, isClosed }
   }
 
-  // renders text using an OpenType font and converts it to points we can draw
-  convertTextToPoints(text, font) {
-    // these values produce fluid text curves at different sizes
-    const tolerance = 0.001
-    const distance = 0.001
-    const fSize = 5
-    const x = 0
-    const y = 0
+  // Rotate a loop to start at given index, optionally re-closing it
+  rotateLoop(loop, startIdx, isClosed) {
+    const rotated = [...loop.slice(startIdx), ...loop.slice(0, startIdx)]
 
-    const path = font.getPath(text, x, y, fSize).toPathData()
-    return pointsOnPath(path, tolerance, distance).map((path) => {
-      return subsample(
-        path.map((pt) => new Victor(pt[0], -pt[1])),
-        0.2,
+    if (isClosed && rotated.length > 0) {
+      rotated.push(cloneVertex(rotated[0]))
+    }
+
+    return rotated
+  }
+
+  // Find index of extreme point in loop based on connect mode
+  findStartIndex(loop, connectMode) {
+    if (connectMode === "outside") {
+      // Leftmost point
+      return loop.reduce(
+        (minIdx, pt, i) => (pt.x < loop[minIdx].x ? i : minIdx),
+        0,
       )
-    })
+    } else {
+      // Topmost point (highest y)
+      return loop.reduce(
+        (maxIdx, pt, i) => (pt.y > loop[maxIdx].y ? i : maxIdx),
+        0,
+      )
+    }
   }
 
-  // given a loop of points, returns the shortest path to a given index; the logic can
-  // most likely be simplified.
+  // Find index of extreme point for ending based on connect mode
+  findEndIndex(loop, connectMode) {
+    if (connectMode === "outside") {
+      // Rightmost point
+      return loop.reduce(
+        (maxIdx, pt, i) => (pt.x > loop[maxIdx].x ? i : maxIdx),
+        0,
+      )
+    } else {
+      // Bottommost point (lowest y)
+      return loop.reduce(
+        (minIdx, pt, i) => (pt.y < loop[minIdx].y ? i : minIdx),
+        0,
+      )
+    }
+  }
+
+  // Find the closest pair of points between two loops
+  findClosestPair(loop1, loop2) {
+    let bestIdx1 = 0
+    let bestIdx2 = 0
+    let bestDist = Infinity
+
+    for (let i = 0; i < loop1.length; i++) {
+      for (let j = 0; j < loop2.length; j++) {
+        const dist = distance(loop1[i], loop2[j])
+
+        if (dist < bestDist) {
+          bestDist = dist
+          bestIdx1 = i
+          bestIdx2 = j
+        }
+      }
+    }
+
+    return { idx1: bestIdx1, idx2: bestIdx2, dist: bestDist }
+  }
+
+  // Given a loop of points, returns the shortest path from start index to end index
   shortestPathAroundLoop(start, end, loop) {
+    if (start === end) {
+      return [loop[start]]
+    }
+
     if (start > end) {
       if (Math.abs(start - end) > loop.length / 2) {
         // go the other way around
-        return loop.slice(start, loop.length - 1).concat(loop.slice(0, end + 1))
+        return loop.slice(start, loop.length).concat(loop.slice(0, end + 1))
       } else {
-        return loop.slice(end, start).reverse()
+        return loop.slice(end, start + 1).reverse()
       }
     } else {
       if (Math.abs(start - end) > loop.length / 2) {
         // go the other way around
         return loop
-          .slice(end, loop.length - 1)
+          .slice(end, loop.length)
           .concat(loop.slice(0, start + 1))
           .reverse()
       } else {
@@ -379,85 +468,106 @@ export default class FancyText extends Shape {
     }
   }
 
-  buildGraph(word, font) {
-    const graph = {}
-    const points = this.convertTextToPoints(word, font)
-    const childMap = this.findExternalChildren(word, font)
-    const polygons = points.map((pts) => pts.map((pt) => [pt.x, pt.y]))
+  // renders text using an OpenType font and converts it to points we can draw
+  convertTextToPoints(text, font) {
+    // these values produce fluid text curves at different sizes
+    const tolerance = 0.001
+    const distance = 0.001
+    const fSize = FONT_SIZE
+    const x = 0
+    const y = 0
 
-    for (let i = 0; i < points.length; i++) {
-      if (graph[i]) {
-        continue
+    const path = font.getPath(text, x, y, fSize).toPathData()
+
+    return pointsOnPath(path, tolerance, distance).map((path) => {
+      return subsample(
+        path.map((pt) => new Victor(pt[0], -pt[1])),
+        0.2,
+      )
+    })
+  }
+
+  // Nodes within tolerance share the same key for graph merging
+  proximityNode(x, y, tolerance = TOLERANCE) {
+    const sx = Math.round(x / tolerance) * tolerance
+    const sy = Math.round(y / tolerance) * tolerance
+    const key = `${sx.toFixed(4)},${sy.toFixed(4)}`
+
+    return { x, y, toString: () => key }
+  }
+
+  // Build graph from all letter paths for Chinese Postman traversal
+  buildPathGraph(paths, tolerance = TOLERANCE) {
+    const graph = new Graph()
+
+    for (const path of paths) {
+      if (path.length < 2) continue
+
+      // Add nodes for all vertices
+      for (const pt of path) {
+        graph.addNode(this.proximityNode(pt.x, pt.y, tolerance))
       }
 
-      // figure out which polygons are top-level letters and which are
-      // children; children are mostly internal to the parent letter (e.g.,
-      // 'a', 'b'), but there are special external cases that are harder to
-      // determine, so we're hard-wiring the rules, e.g. ('i', 'j')
-      const samplePoint = [points[i][0].x, points[i][0].y]
-      let idx = childMap[i]
+      // Add edges for consecutive vertices
+      for (let i = 0; i < path.length - 1; i++) {
+        const pt1 = path[i]
+        const pt2 = path[i + 1]
+        const node1 = this.proximityNode(pt1.x, pt1.y, tolerance)
+        const node2 = this.proximityNode(pt2.x, pt2.y, tolerance)
 
-      if (idx === undefined) {
-        idx = polygons.findIndex((polygon) => {
-          return pointInPolygon(samplePoint, polygon)
-        })
-      }
-
-      if (idx !== -1 && idx !== i) {
-        graph[idx] ||= { points: points[idx] }
-        graph[idx].children ||= []
-        graph[idx].children.push(points[i])
-      } else {
-        graph[i] = { points: points[i] }
+        if (node1.toString() !== node2.toString()) {
+          graph.addEdge(node1, node2)
+        }
       }
     }
 
     return graph
   }
 
-  // scans a word for letters which has external child paths and builds a map of this information
-  findExternalChildren(word, font) {
-    const childMap = {}
-    let pos = 0
-
-    for (let i = 0; i < word.length; i++) {
-      const paths = this.convertTextToPoints(word[i], font)
-
-      if (SPECIAL_CHILDREN.includes(word[i]) && paths.length > 1) {
-        // when given a special child (e.g., "i"), we have to figure out which is the parent and
-        // which is the child. The order can differ between fonts.
-        const h1 = findMinimumVertex(null, paths[0], (val, v) => -v.y)
-        const h2 = findMinimumVertex(null, paths[1], (val, v) => -v.y)
-
-        if (paths[0][h1].y < paths[1][h2].y) {
-          childMap[pos + 1] = pos
-        } else {
-          childMap[pos] = pos + 1
-        }
-      }
-
-      pos += paths.length
+  // Use Chinese Postman algorithm to find optimal path through all letter paths
+  connectPathsWithChinesePostman(paths) {
+    if (paths.length === 0) return []
+    if (paths.length === 1 && paths[0].length > 0) {
+      return paths[0].map((v) => cloneVertex(v))
     }
 
-    return childMap
-  }
+    const graph = this.buildPathGraph(paths, TOLERANCE)
 
-  // returns a list of paths moving from left to right
-  buildOrderedPaths(word, font) {
-    // construct a graph (two-levels deep) with top-level paths that optionally contain
-    // a possible (fully contained) child paths
-    const graph = this.buildGraph(word, font)
+    // Connect disconnected components with minimal bridges
+    graph.connectComponents()
 
-    return Object.keys(graph)
-      .sort((leftIndex, rightIndex) => {
-        const leftPoints = graph[leftIndex].points
-        const rightPoints = graph[rightIndex].points
-        return (
-          Math.min(...leftPoints.map((pt) => pt.x)) -
-          Math.min(...rightPoints.map((pt) => pt.x))
-        )
-      })
-      .map((key) => graph[key])
+    const edges = Object.values(graph.edgeMap)
+
+    if (edges.length === 0) {
+      return paths.flat().map((v) => cloneVertex(v))
+    }
+
+    const dijkstraFn = (startKey, endKey) =>
+      graph.dijkstraShortestPath(startKey, endKey)
+    const { edges: eulerizedEdges } = eulerizeEdges(
+      edges,
+      dijkstraFn,
+      graph.nodeMap,
+    )
+    const trail = eulerianTrail({ edges: eulerizedEdges })
+    const vertices = []
+
+    for (const nodeKey of trail) {
+      const node = graph.nodeMap[nodeKey]
+
+      if (node) {
+        // Skip duplicates
+        if (vertices.length > 0) {
+          const last = vertices[vertices.length - 1]
+          const dist = distance(node, last)
+
+          if (dist < TOLERANCE) continue
+        }
+        vertices.push(cloneVertex(node))
+      }
+    }
+
+    return vertices
   }
 
   getOptions() {
