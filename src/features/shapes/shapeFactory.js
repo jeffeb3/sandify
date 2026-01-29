@@ -4,6 +4,7 @@ import Circle from "./Circle"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"
 import LayerImport from "./LayerImport"
+import SVGImport from "./svg_import/SVGImport"
 import FractalSpirograph from "./fractal_spirograph/FractalSpirograph"
 import Heart from "./Heart"
 import Hypocycloid from "./Hypocycloid"
@@ -48,6 +49,7 @@ export const shapeFactory = {
   noise_wave: NoiseWave,
   fileImport: LayerImport,
   imageImport: ImageImport,
+  svgImport: SVGImport,
 }
 
 export const getShape = (type, ...args) => {
