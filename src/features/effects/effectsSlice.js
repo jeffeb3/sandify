@@ -1,9 +1,9 @@
 /* global localStorage */
 
 import { createSlice, createEntityAdapter } from "@reduxjs/toolkit"
-import { createSelector, createSelectorCreator, lruMemoize } from "reselect"
+import { createSelector } from "reselect"
 import { createCachedSelector } from "re-reselect"
-import { isEqual } from "lodash"
+import { cachedByIdDeepEqual } from "@/common/selectors"
 import { insertOne, prepareAfterAdd, updateOne } from "@/common/slice"
 import { selectState } from "@/features/app/appSlice"
 import EffectLayer from "./EffectLayer"
@@ -150,9 +150,4 @@ export const selectEffectSelectionVertices = createCachedSelector(
     const instance = new EffectLayer(effect.type)
     return instance.getSelectionVertices(effect)
   },
-)({
-  keySelector: (state, id) => id,
-  selectorCreator: createSelectorCreator(lruMemoize, {
-    equalityCheck: isEqual,
-  }),
-})
+)(cachedByIdDeepEqual)

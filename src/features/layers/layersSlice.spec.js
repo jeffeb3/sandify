@@ -20,6 +20,8 @@ import layersReducer, {
   setSelectedLayer,
   updateLayer,
   selectLayerVertices,
+  selectConnectedVertices,
+  selectVerticesStats,
 } from "./layersSlice"
 import effectsReducer, { updateEffect } from "@/features/effects/effectsSlice"
 import machinesReducer from "@/features/machines/machinesSlice"
@@ -685,6 +687,68 @@ describe("layers selectors", () => {
       selectLayerVertices(store.getState(), "A")
 
       expect(selectLayerVertices.recomputations()).toBe(2)
+    })
+  })
+
+  describe("selectConnectedVertices reference stability", () => {
+    let store
+    beforeEach(() => {
+      store = configureStore({
+        reducer: {
+          effects: effectsReducer,
+          layers: layersReducer,
+          machines: machinesReducer,
+          fonts: fontsReducer,
+          images: imagesReducer,
+        },
+        preloadedState: {
+          ...initialState,
+          fonts: { loaded: true },
+        },
+      })
+      resetUniqueId(3)
+      selectVerticesStats.resetRecomputations()
+    })
+
+    it("should return same reference when vertices unchanged", () => {
+      // First call
+      const result1 = selectConnectedVertices(store.getState())
+
+      // Dispatch unrelated change (layer name doesn't affect vertices)
+      store.dispatch(updateLayer({ id: "A", name: "renamed" }))
+
+      // Second call after state change
+      const result2 = selectConnectedVertices(store.getState())
+
+      // Reference should be the same (result equality check)
+      expect(result1).toBe(result2)
+    })
+
+    it("should not recompute downstream selectors when reference stable", () => {
+      // First call to downstream selector
+      selectVerticesStats(store.getState())
+      expect(selectVerticesStats.recomputations()).toBe(1)
+
+      // Dispatch unrelated change
+      store.dispatch(updateLayer({ id: "A", name: "renamed" }))
+
+      // Second call - should NOT recompute because input reference is stable
+      selectVerticesStats(store.getState())
+      expect(selectVerticesStats.recomputations()).toBe(1)
+    })
+
+    it("should return new reference when vertices actually change", () => {
+      const result1 = selectConnectedVertices(store.getState())
+      const initialLength = result1.length
+
+      // Hide a layer - this definitely changes the output
+      store.dispatch(updateLayer({ id: "A", visible: false }))
+
+      const result2 = selectConnectedVertices(store.getState())
+
+      // Reference should be different (fewer vertices now)
+      expect(result1).not.toBe(result2)
+      expect(result2.length).toBeLessThan(initialLength)
     })
   })
 })
