@@ -1,6 +1,6 @@
 import Victor from "victor"
 import Graph, { mix, getEulerianTrail } from "@/common/Graph"
-import { cloneVertices } from "@/common/geometry"
+import { cloneVertices, magnitude } from "@/common/geometry"
 import Shape from "../Shape"
 
 const vecTriangle = [
@@ -22,15 +22,10 @@ function getEdges(edges, a, b, c, count, settings) {
 
   if (count === 0) {
     if (settings.rotate > 0) {
-      da =
-        Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2)) *
-        ((settings.rotate * Math.PI) / 180.0)
-      db =
-        Math.sqrt(Math.pow(b.x, 2) + Math.pow(b.y, 2)) *
-        ((settings.rotate * Math.PI) / 180.0)
-      dc =
-        Math.sqrt(Math.pow(c.x, 2) + Math.pow(c.y, 2)) *
-        ((settings.rotate * Math.PI) / 180.0)
+      const rotateRad = (settings.rotate * Math.PI) / 180.0
+      da = magnitude(a.x, a.y) * rotateRad
+      db = magnitude(b.x, b.y) * rotateRad
+      dc = magnitude(c.x, c.y) * rotateRad
     } else {
       da = (settings.rotate * Math.PI) / 180.0
       db = (settings.rotate * Math.PI) / 180.0
