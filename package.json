@@ -54,6 +54,7 @@
     "reselect": "^5.1.1",
     "sass": "^1.96.0",
     "seedrandom": "^3.0.5",
+    "skeleton-tracing-js": "^1.0.2",
     "uuid": "^13.0.0",
     "victor": "^1.1.0"
   },

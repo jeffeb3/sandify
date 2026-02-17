@@ -82,6 +82,9 @@ const options = {
     min: 0.1,
     max: 5,
     step: 0.1,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageAmplitude")
+    },
   },
   imageSampling: {
     title: "Sampling",
@@ -132,6 +135,31 @@ const options = {
     max: 360,
     isVisible: (layer, state) => {
       return hasSetting(state, "imageAngle")
+    },
+  },
+  imageThreshold: {
+    title: "Threshold",
+    min: 1,
+    max: 254,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageThreshold")
+    },
+  },
+  imageMinSegmentLength: {
+    title: "Min segment length",
+    min: 0,
+    max: 50,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageMinSegmentLength")
+    },
+  },
+  imageSimplifyTolerance: {
+    title: "Simplify tolerance",
+    min: 0,
+    max: 10,
+    step: 0.5,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageSimplifyTolerance")
     },
   },
   imageBrightness: {
@@ -193,6 +221,9 @@ export default class ImageImport extends Shape {
         imageDirection: "clockwise",
         imageStepSize: 5,
         imageAngle: 0,
+        imageThreshold: 128,
+        imageMinSegmentLength: 5,
+        imageSimplifyTolerance: 1,
         imageMinClippedBrightness: 0,
         imageMaxClippedBrightness: 255,
         imageBrightnessFilter: [0, 255],
@@ -270,6 +301,9 @@ export default class ImageImport extends Shape {
       imageDirection,
       imageStepSize,
       imageAngle,
+      imageThreshold,
+      imageMinSegmentLength,
+      imageSimplifyTolerance,
     } = state.shape
 
     const imageMinClippedBrightness = state.shape.imageBrightnessFilter[0]
@@ -300,6 +334,9 @@ export default class ImageImport extends Shape {
       Direction: imageDirection,
       Angle: imageAngle,
       StepSize: imageStepSize,
+      Threshold: imageThreshold,
+      MinSegmentLength: imageMinSegmentLength,
+      SimplifyTolerance: imageSimplifyTolerance,
       MaxClippedBrightness: imageMaxClippedBrightness,
       MinClippedBrightness: imageMinClippedBrightness,
       width: canvas.width,

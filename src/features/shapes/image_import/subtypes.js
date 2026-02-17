@@ -1,3 +1,4 @@
+import linetrace from "./linetrace"
 import sawtooth from "./sawtooth"
 import spiral from "./spiral"
 import springs from "./springs"
@@ -55,6 +56,14 @@ export const subtypes = {
   Waves: {
     algorithm: waves,
     settings: ["imageAngle", "imageStepSize"],
+  },
+  "Line Trace": {
+    algorithm: linetrace,
+    settings: [
+      "imageThreshold",
+      "imageMinSegmentLength",
+      "imageSimplifyTolerance",
+    ],
   },
 }
 
