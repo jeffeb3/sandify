@@ -4,7 +4,9 @@ import React, { useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import Select from "react-select"
 import Slider from "rc-slider"
+import Button from "react-bootstrap/Button"
 import "rc-slider/assets/index.css"
+import { FaPencilAlt } from "react-icons/fa"
 import {
   updateEffect,
   selectCurrentEffect,
@@ -12,12 +14,17 @@ import {
 import {
   selectPreviewSliderValue,
   selectPreviewZoom,
+  selectDrawingMode,
 } from "@/features/preview/previewSlice"
 import { updateLayer, selectCurrentLayer } from "@/features/layers/layersSlice"
 import { getShape } from "@/features/shapes/shapeFactory"
 import { getEffect } from "@/features/effects/effectFactory"
 import "./PreviewManager.scss"
-import { updatePreview } from "./previewSlice"
+import {
+  updatePreview,
+  toggleDrawingMode,
+  exitDrawingMode,
+} from "./previewSlice"
 import PreviewWindow from "./PreviewWindow"
 
 const PreviewManager = ({ isActive }) => {
@@ -26,6 +33,7 @@ const PreviewManager = ({ isActive }) => {
   const currentEffectLayer = useSelector(selectCurrentEffect)
   const sliderValue = useSelector(selectPreviewSliderValue)
   const zoom = useSelector(selectPreviewZoom)
+  const drawingMode = useSelector(selectDrawingMode)
   const wrapperRef = useRef()
 
   const currentShape = getShape(currentLayer?.type || "polygon")
@@ -46,6 +54,10 @@ const PreviewManager = ({ isActive }) => {
 
   const handleZoomChange = (option) => {
     dispatch(updatePreview({ zoom: option.value }))
+  }
+
+  const handleDrawToggle = () => {
+    dispatch(toggleDrawingMode())
   }
 
   const arrowKeyChange = (layer, event) => {
@@ -77,6 +89,11 @@ const PreviewManager = ({ isActive }) => {
   }
 
   const handleKeyDown = (event) => {
+    if (event.key === "Escape" && drawingMode) {
+      dispatch(exitDrawingMode())
+      return
+    }
+
     if (currentLayer) {
       if (currentShape.canMove(currentLayer)) {
         const attrs = arrowKeyChange(currentLayer, event)
@@ -115,6 +132,16 @@ const PreviewManager = ({ isActive }) => {
 
         <div className="mt-auto py-2 bg-white d-flex align-items-center">
           <div className="mx-2">
+            <Button
+              variant={drawingMode ? "primary" : "outline-secondary"}
+              size="sm"
+              onClick={handleDrawToggle}
+              title={drawingMode ? "Exit draw mode (Esc)" : "Draw on canvas"}
+            >
+              <FaPencilAlt />
+            </Button>
+          </div>
+          <div className="mx-1">
             <Select
               id="zoom-select"
               options={zoomChoices}
