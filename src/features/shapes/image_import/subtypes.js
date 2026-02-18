@@ -61,6 +61,8 @@ export const subtypes = {
     algorithm: linetrace,
     settings: [
       "imageThreshold",
+      "imageDilateRadius",
+      "imageResidualRecovery",
       "imageMinSegmentLength",
       "imageSimplifyTolerance",
     ],

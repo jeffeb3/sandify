@@ -162,6 +162,22 @@ const options = {
       return hasSetting(state, "imageSimplifyTolerance")
     },
   },
+  imageDilateRadius: {
+    title: "Thicken lines",
+    min: 0,
+    max: 5,
+    step: 1,
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageDilateRadius")
+    },
+  },
+  imageResidualRecovery: {
+    title: "Recover fine detail",
+    type: "checkbox",
+    isVisible: (layer, state) => {
+      return hasSetting(state, "imageResidualRecovery")
+    },
+  },
   imageBrightness: {
     title: "Brightness",
     type: "slider",
@@ -222,8 +238,10 @@ export default class ImageImport extends Shape {
         imageStepSize: 5,
         imageAngle: 0,
         imageThreshold: 128,
-        imageMinSegmentLength: 5,
-        imageSimplifyTolerance: 1,
+        imageMinSegmentLength: 0,
+        imageSimplifyTolerance: 0,
+        imageDilateRadius: 0,
+        imageResidualRecovery: true,
         imageMinClippedBrightness: 0,
         imageMaxClippedBrightness: 255,
         imageBrightnessFilter: [0, 255],
@@ -304,6 +322,8 @@ export default class ImageImport extends Shape {
       imageThreshold,
       imageMinSegmentLength,
       imageSimplifyTolerance,
+      imageDilateRadius,
+      imageResidualRecovery,
     } = state.shape
 
     const imageMinClippedBrightness = state.shape.imageBrightnessFilter[0]
@@ -337,6 +357,8 @@ export default class ImageImport extends Shape {
       Threshold: imageThreshold,
       MinSegmentLength: imageMinSegmentLength,
       SimplifyTolerance: imageSimplifyTolerance,
+      DilateRadius: imageDilateRadius,
+      ResidualRecovery: imageResidualRecovery,
       MaxClippedBrightness: imageMaxClippedBrightness,
       MinClippedBrightness: imageMinClippedBrightness,
       width: canvas.width,
