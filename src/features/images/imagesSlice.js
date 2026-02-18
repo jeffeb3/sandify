@@ -60,8 +60,8 @@ export const selectImagesLoaded = (state) => state.images.loaded
 
 // returns a sensibly downscaled dimensions for an loaded image (aesthetics and performance)
 const downscaledDimensions = (image) => {
-  let cw = 800
-  let ch = 600
+  let cw = 1600
+  let ch = 1200
   const w = image.width
   const h = image.height
 
@@ -71,15 +71,15 @@ const downscaledDimensions = (image) => {
     if (w > h) {
       ch = Math.round(cw / aspectRatio)
 
-      if (ch > 600) {
-        ch = 600
+      if (ch > 1200) {
+        ch = 1200
         cw = Math.round(ch * aspectRatio)
       }
     } else {
       cw = Math.round(ch * aspectRatio)
 
-      if (cw > 800) {
-        cw = 800
+      if (cw > 1600) {
+        cw = 1600
         ch = Math.round(cw / aspectRatio)
       }
     }

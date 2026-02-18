@@ -1,6 +1,7 @@
 /* global localStorage */
 
 import Circle from "./Circle"
+import Drawing from "./Drawing"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"
 import LayerImport from "./LayerImport"
@@ -46,6 +47,7 @@ export const shapeFactory = {
   wiper: Wiper,
   spaceFiller: SpaceFiller,
   noise_wave: NoiseWave,
+  drawing: Drawing,
   fileImport: LayerImport,
   imageImport: ImageImport,
 }
