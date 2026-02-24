@@ -1,3 +1,4 @@
+/* global structuredClone */
 import { combineReducers } from "redux"
 import machinesReducer from "@/features/machines/machinesSlice"
 import exporterReducer from "@/features/export/exporterSlice"
@@ -21,7 +22,7 @@ const combinedReducer = combineReducers({
 })
 
 const resetPattern = (state, action) => {
-  const newState = JSON.parse(JSON.stringify(state)) // deep copy
+  const newState = structuredClone(state)
 
   newState.layers = undefined
   newState.effects = undefined
@@ -39,7 +40,7 @@ const resetAll = (state, action) => {
 
 const loadPattern = (state, action) => {
   const { layers, effects, images } = action.payload
-  const newState = JSON.parse(JSON.stringify(state)) // deep copy
+  const newState = structuredClone(state)
 
   newState.layers = layers
   newState.effects = effects

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer, Group } from "react-konva"
 import { isEqual } from "lodash"
@@ -318,112 +318,136 @@ const ShapePreview = (ownProps) => {
     context.fillStrokeShape(shape)
   }
 
-  const handleChange = (attrs) => {
-    attrs.id = layer.id
-    dispatch(updateLayer(attrs))
-  }
+  const handleChange = useCallback(
+    (attrs) => {
+      attrs.id = layer.id
+      dispatch(updateLayer(attrs))
+    },
+    [dispatch, layer?.id],
+  )
 
-  const handleDragStart = (e) => {
-    if (e.currentTarget === e.target) {
-      if (isCurrent) {
+  const handleDragStart = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        if (isCurrent) {
+          handleChange({ dragging: true })
+        }
+      }
+    },
+    [isCurrent, handleChange],
+  )
+
+  const handleDragEnd = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        handleChange({
+          dragging: false,
+          x: roundP(e.target.x(), 0),
+          y: roundP(-e.target.y(), 0),
+        })
+      }
+    },
+    [handleChange],
+  )
+
+  const handleTransform = useCallback(
+    (e) => {
+      const ref = groupRef.current
+      const scaleX = Math.abs(ref.scaleX())
+      const scaleY = Math.abs(ref.scaleY())
+      const width = roundP(Math.max(5, layer.width * scaleX), 0)
+      const height = roundP(Math.max(5, layer.height * scaleY), 0)
+      const originalRotation = roundP(layer.rotation, 0)
+      let rotation = roundP(ref.rotation(), 0)
+
+      if (
+        (width != layer.width || height != layer.height) &&
+        rotation == originalRotation + 180.0 * Math.sign(rotation)
+      ) {
+        // node has been flipped while scaling
+        ref.rotation(originalRotation)
+      }
+      ref.scaleX(scaleX)
+      ref.scaleY(scaleY)
+    },
+    [layer?.width, layer?.height, layer?.rotation],
+  )
+
+  const handleTransformStart = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
         handleChange({ dragging: true })
       }
-    }
-  }
+    },
+    [handleChange],
+  )
 
-  const handleDragEnd = (e) => {
-    if (e.currentTarget === e.target) {
-      handleChange({
-        dragging: false,
-        x: roundP(e.target.x(), 0),
-        y: roundP(-e.target.y(), 0),
-      })
-    }
-  }
-
-  const handleTransform = (e) => {
-    const ref = groupRef.current
-    const scaleX = Math.abs(ref.scaleX())
-    const scaleY = Math.abs(ref.scaleY())
-    const width = roundP(Math.max(5, layer.width * scaleX), 0)
-    const height = roundP(Math.max(5, layer.height * scaleY), 0)
-    const originalRotation = roundP(layer.rotation, 0)
-    let rotation = roundP(ref.rotation(), 0)
-
-    if (
-      (width != layer.width || height != layer.height) &&
-      rotation == originalRotation + 180.0 * Math.sign(rotation)
-    ) {
-      // node has been flipped while scaling
-      ref.rotation(originalRotation)
-    }
-    ref.scaleX(scaleX)
-    ref.scaleY(scaleY)
-  }
-
-  const handleTransformStart = (e) => {
-    if (e.currentTarget === e.target) {
-      handleChange({ dragging: true })
-    }
-  }
-
-  const handleTransformEnd = (e) => {
-    if (e.currentTarget === e.target) {
-      const node = groupRef.current
-      const width = roundP(
-        Math.max(5, layer.width * Math.abs(node.scaleX())),
-        0,
-      )
-      const height = roundP(
-        Math.max(5, layer.height * Math.abs(node.scaleY())),
-        0,
-      )
-      const rotation = roundP(node.rotation(), 0)
-
-      node.scaleX(1)
-      node.scaleY(1)
-
-      const changes = {
-        dragging: false,
-        width,
-        height,
-        rotation,
-      }
-
-      if (!layer.maintainAspectRatio) {
-        changes.aspectRatio = width / height
-      }
-      handleChange(changes)
-    }
-  }
-
-  const handleWheel = (e) => {
-    if (isCurrent) {
-      e.evt.preventDefault()
-
-      const deltaX = e.evt.deltaX
-      const deltaY = e.evt.deltaY
-
-      if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
-        dispatch(
-          updateLayer({
-            width: scaleByWheel(layer.width, deltaX, deltaY),
-            height: scaleByWheel(layer.height, deltaX, deltaY),
-            id: layer.id,
-          }),
+  const handleTransformEnd = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        const node = groupRef.current
+        const width = roundP(
+          Math.max(5, layer.width * Math.abs(node.scaleX())),
+          0,
         )
-      }
-    }
-  }
+        const height = roundP(
+          Math.max(5, layer.height * Math.abs(node.scaleY())),
+          0,
+        )
+        const rotation = roundP(node.rotation(), 0)
 
-  const handleClick = (e) => {
-    if (selectableEffect && !isCurrent) {
-      dispatch(setCurrentEffect(selectableEffect.id))
-    } else {
-      dispatch(setCurrentLayer(ownProps.id))
-    }
-    e.cancelBubble = true // don't bubble this up to the preview window
-  }
+        node.scaleX(1)
+        node.scaleY(1)
+
+        const changes = {
+          dragging: false,
+          width,
+          height,
+          rotation,
+        }
+
+        if (!layer.maintainAspectRatio) {
+          changes.aspectRatio = width / height
+        }
+        handleChange(changes)
+      }
+    },
+    [layer?.width, layer?.height, layer?.maintainAspectRatio, handleChange],
+  )
+
+  const handleWheel = useCallback(
+    (e) => {
+      if (isCurrent) {
+        e.evt.preventDefault()
+
+        const deltaX = e.evt.deltaX
+        const deltaY = e.evt.deltaY
+
+        if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
+          dispatch(
+            updateLayer({
+              width: scaleByWheel(layer.width, deltaX, deltaY),
+              height: scaleByWheel(layer.height, deltaX, deltaY),
+              id: layer.id,
+            }),
+          )
+        }
+      }
+    },
+    [isCurrent, dispatch, layer?.width, layer?.height, layer?.id],
+  )
+
+  const handleClick = useCallback(
+    (e) => {
+      if (selectableEffect && !isCurrent) {
+        dispatch(setCurrentEffect(selectableEffect.id))
+      } else {
+        dispatch(setCurrentLayer(ownProps.id))
+      }
+      e.cancelBubble = true // don't bubble this up to the preview window
+    },
+    [selectableEffect, isCurrent, dispatch, ownProps.id],
+  )
 
   // Order of these layers is very important. The current layer or effect must always
   // be the last one in order for Konva to allow dragging and transformer manipulation.

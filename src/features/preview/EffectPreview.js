@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Shape, Transformer } from "react-konva"
 import { isEqual } from "lodash"
@@ -130,99 +130,120 @@ const EffectPreview = (ownProps) => {
     }
   }
 
-  const handleChange = (attrs) => {
-    attrs.id = effect.id
-    dispatch(updateEffect(attrs))
-  }
+  const handleChange = useCallback(
+    (attrs) => {
+      attrs.id = effect.id
+      dispatch(updateEffect(attrs))
+    },
+    [dispatch, effect?.id],
+  )
 
-  const handleDragStart = (e) => {
-    if (e.currentTarget === e.target) {
-      if (isCurrent) {
+  const handleDragStart = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        if (isCurrent) {
+          handleChange({ dragging: true })
+        }
+      }
+    },
+    [isCurrent, handleChange],
+  )
+
+  const handleDragEnd = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        handleChange({
+          dragging: false,
+          x: roundP(e.target.x(), 0),
+          y: roundP(-e.target.y(), 0),
+        })
+      }
+    },
+    [handleChange],
+  )
+
+  const handleTransform = useCallback(
+    (e) => {
+      const ref = shapeRef.current
+      const scaleX = Math.abs(ref.scaleX())
+      const scaleY = Math.abs(ref.scaleY())
+      const width = roundP(Math.max(5, effect.width * scaleX), 0)
+      const height = roundP(Math.max(5, effect.height * scaleY), 0)
+      const originalRotation = roundP(effect.rotation, 0)
+      let rotation = roundP(ref.rotation(), 0)
+
+      if (
+        (width != effect.width || height != effect.height) &&
+        rotation == originalRotation + 180.0 * Math.sign(rotation)
+      ) {
+        // node has been flipped while scaling
+        ref.rotation(originalRotation)
+      }
+
+      ref.scaleX(scaleX)
+      ref.scaleY(scaleY)
+    },
+    [effect?.width, effect?.height, effect?.rotation],
+  )
+
+  const handleTransformStart = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
         handleChange({ dragging: true })
       }
-    }
-  }
+    },
+    [handleChange],
+  )
 
-  const handleDragEnd = (e) => {
-    if (e.currentTarget === e.target) {
-      handleChange({
-        dragging: false,
-        x: roundP(e.target.x(), 0),
-        y: roundP(-e.target.y(), 0),
-      })
-    }
-  }
-
-  const handleTransform = (e) => {
-    const ref = shapeRef.current
-    const scaleX = Math.abs(ref.scaleX())
-    const scaleY = Math.abs(ref.scaleY())
-    const width = roundP(Math.max(5, effect.width * scaleX), 0)
-    const height = roundP(Math.max(5, effect.height * scaleY), 0)
-    const originalRotation = roundP(effect.rotation, 0)
-    let rotation = roundP(ref.rotation(), 0)
-
-    if (
-      (width != effect.width || height != effect.height) &&
-      rotation == originalRotation + 180.0 * Math.sign(rotation)
-    ) {
-      // node has been flipped while scaling
-      ref.rotation(originalRotation)
-    }
-
-    ref.scaleX(scaleX)
-    ref.scaleY(scaleY)
-  }
-
-  const handleTransformStart = (e) => {
-    if (e.currentTarget === e.target) {
-      handleChange({ dragging: true })
-    }
-  }
-
-  const handleTransformEnd = (e) => {
-    if (e.currentTarget === e.target) {
-      const node = shapeRef.current
-      const width = roundP(
-        Math.max(5, effect.width * Math.abs(node.scaleX())),
-        0,
-      )
-      const height = roundP(
-        Math.max(5, effect.height * Math.abs(node.scaleY())),
-        0,
-      )
-      const rotation = roundP(node.rotation(), 0)
-
-      node.scaleX(1)
-      node.scaleY(1)
-
-      handleChange({
-        dragging: false,
-        width,
-        height,
-        rotation,
-      })
-    }
-  }
-
-  const handleWheel = (e) => {
-    if (isCurrent) {
-      e.evt.preventDefault()
-
-      const deltaX = e.evt.deltaX
-      const deltaY = e.evt.deltaY
-
-      if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
-        dispatch(
-          updateEffect({
-            width: scaleByWheel(effect.width, deltaX, deltaY),
-            height: scaleByWheel(effect.height, deltaX, deltaY),
-            id: effect.id,
-          }),
+  const handleTransformEnd = useCallback(
+    (e) => {
+      if (e.currentTarget === e.target) {
+        const node = shapeRef.current
+        const width = roundP(
+          Math.max(5, effect.width * Math.abs(node.scaleX())),
+          0,
         )
+        const height = roundP(
+          Math.max(5, effect.height * Math.abs(node.scaleY())),
+          0,
+        )
+        const rotation = roundP(node.rotation(), 0)
+
+        node.scaleX(1)
+        node.scaleY(1)
+
+        handleChange({
+          dragging: false,
+          width,
+          height,
+          rotation,
+        })
       }
-    }
-  }
+    },
+    [effect?.width, effect?.height, handleChange],
+  )
+
+  const handleWheel = useCallback(
+    (e) => {
+      if (isCurrent) {
+        e.evt.preventDefault()
+
+        const deltaX = e.evt.deltaX
+        const deltaY = e.evt.deltaY
+
+        if (Math.abs(deltaX) > 0 || Math.abs(deltaY) > 0) {
+          dispatch(
+            updateEffect({
+              width: scaleByWheel(effect.width, deltaX, deltaY),
+              height: scaleByWheel(effect.height, deltaX, deltaY),
+              id: effect.id,
+            }),
+          )
+        }
+      }
+    },
+    [isCurrent, dispatch, effect?.width, effect?.height, effect?.id],
+  )
 
   // some effects never render anything
   if (!(height === 0 || height) && !(width === 0 || width)) {
