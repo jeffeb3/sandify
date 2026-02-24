@@ -67,10 +67,11 @@ const layersSlice = createSlice({
     addLayer: {
       reducer(state, action) {
         const layer = insertOne(state, action)
+        const shape = getShape(layer.type)
 
         state.selected = layer.id
         layer.effectIds = []
-        if (layer.type !== "fileImport" && layer.type !== "imageImport") {
+        if (shape.selectGroup !== "import") {
           localStorage.setItem("defaultShape", layer.type)
         }
       },

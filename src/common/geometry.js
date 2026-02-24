@@ -255,6 +255,27 @@ export const toWorldSpace = (vertex, x, y, rotation) => {
   return offset(rotate(vertex, -rotation), x, y)
 }
 
+// applies a DOMMatrix (or object with a,b,c,d,e,f) to a vertex
+// | a c e |   | x |   | a*x + c*y + e |
+// | b d f | × | y | = | b*x + d*y + f |
+export const applyMatrix = (vertex, matrix) => {
+  const { a, b, c, d, e, f } = matrix
+  const newX = a * vertex.x + c * vertex.y + e
+  const newY = b * vertex.x + d * vertex.y + f
+
+  vertex.x = newX
+  vertex.y = newY
+
+  return vertex
+}
+
+// applies a matrix to an array of vertices
+export const applyMatrixToVertices = (vertices, matrix) => {
+  vertices.forEach((vertex) => applyMatrix(vertex, matrix))
+
+  return vertices
+}
+
 // modifies the given array in place, centering the points on (0, 0)
 export const centerOnOrigin = (vertices, bounds) => {
   if (vertices.length === 0) return vertices
@@ -322,6 +343,37 @@ export const circle = (radius, start = 0, x = 0, y = 0, resolution = 128.0) => {
     let angle = ((Math.PI * 2.0) / resolution) * i + start
     points.push(
       new Victor(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius),
+    )
+  }
+
+  return points
+}
+
+// returns an array of points drawing an ellipse with given radii
+export const ellipse = (rx, ry, cx = 0, cy = 0, resolution = 128.0) => {
+  return ellipticalArc(rx, ry, 0, Math.PI * 2, cx, cy, resolution / 4)
+}
+
+// returns an array of points drawing an elliptical arc
+export const ellipticalArc = (
+  rx,
+  ry,
+  startAngle,
+  endAngle,
+  cx = 0,
+  cy = 0,
+  resolution = 16,
+) => {
+  const steps = Math.max(
+    4,
+    Math.ceil((resolution * Math.abs(endAngle - startAngle)) / (Math.PI / 2)),
+  )
+  const points = []
+
+  for (let i = 0; i <= steps; i++) {
+    const angle = startAngle + ((endAngle - startAngle) * i) / steps
+    points.push(
+      new Victor(cx + Math.cos(angle) * rx, cy + Math.sin(angle) * ry),
     )
   }
 

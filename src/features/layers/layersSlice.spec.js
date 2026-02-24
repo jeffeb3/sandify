@@ -70,6 +70,7 @@ describe("layers reducer", () => {
           },
           addLayer({
             name: "foo",
+            type: "polygon",
           }),
         ),
       ).toEqual({
@@ -78,6 +79,7 @@ describe("layers reducer", () => {
           1: {
             id: "1",
             name: "foo",
+            type: "polygon",
             effectIds: [],
           },
         },

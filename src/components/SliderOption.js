@@ -85,27 +85,39 @@ const SliderOption = ({
   }
 
   let marks
-  const parsedValue = parseFloat(value)
-  const clampedValue = Math.min(
-    Math.max(isNaN(parsedValue) ? minimum : parsedValue, minimum),
-    maximum,
-  )
+  let sliderValue
 
-  if (isNaN(minimum) || isNaN(maximum)) {
-    marks = {}
-  } else if (option.range) {
-    marks = {
-      [minimum]: `${minimum}`,
-      [value[0]]: `${value[0]}`,
-      [value[1]]: `${value[1]}`,
-      [maximum]: `${maximum}`,
-    }
+  if (option.range) {
+    // Range slider: value should be an array [min, max]
+    const rangeValue = Array.isArray(value) ? value : [minimum, maximum]
+    sliderValue = [
+      Math.min(Math.max(rangeValue[0], minimum), maximum),
+      Math.min(Math.max(rangeValue[1], minimum), maximum),
+    ]
+    marks =
+      isNaN(minimum) || isNaN(maximum)
+        ? {}
+        : {
+            [minimum]: `${minimum}`,
+            [sliderValue[0]]: `${sliderValue[0]}`,
+            [sliderValue[1]]: `${sliderValue[1]}`,
+            [maximum]: `${maximum}`,
+          }
   } else {
-    marks = {
-      [minimum]: `${minimum}`,
-      [clampedValue]: `${clampedValue}`,
-      [maximum]: `${maximum}`,
-    }
+    // Regular slider: value is a single number
+    const parsedValue = parseFloat(value)
+    sliderValue = Math.min(
+      Math.max(isNaN(parsedValue) ? minimum : parsedValue, minimum),
+      maximum,
+    )
+    marks =
+      isNaN(minimum) || isNaN(maximum)
+        ? {}
+        : {
+            [minimum]: `${minimum}`,
+            [sliderValue]: `${sliderValue}`,
+            [maximum]: `${maximum}`,
+          }
   }
 
   const renderedSlider = (
@@ -118,7 +130,7 @@ const SliderOption = ({
         marks={marks}
         range={option.range}
         allowCross={false}
-        value={clampedValue}
+        value={sliderValue}
         onChangeComplete={handleChangeComplete}
         onChange={handleChange}
       />
