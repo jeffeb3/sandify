@@ -13,6 +13,8 @@ const previewSlice = createSlice({
     canvasHeight: 600,
     sliderValue: 0.0,
     zoom: 1.0,
+    drawingMode: false,
+    drawingPoints: [],
   },
   reducers: {
     updatePreview(state, action) {
@@ -22,10 +24,31 @@ const previewSlice = createSlice({
       state.canvasHeight = action.payload.height
       state.canvasWidth = action.payload.width
     },
+    toggleDrawingMode(state) {
+      state.drawingMode = !state.drawingMode
+      state.drawingPoints = []
+    },
+    exitDrawingMode(state) {
+      state.drawingMode = false
+      state.drawingPoints = []
+    },
+    addDrawingPoint(state, action) {
+      state.drawingPoints.push(action.payload)
+    },
+    clearDrawingPoints(state) {
+      state.drawingPoints = []
+    },
   },
 })
 
-export const { updatePreview, setPreviewSize } = previewSlice.actions
+export const {
+  updatePreview,
+  setPreviewSize,
+  toggleDrawingMode,
+  exitDrawingMode,
+  addDrawingPoint,
+  clearDrawingPoints,
+} = previewSlice.actions
 export default previewSlice.reducer
 
 // ------------------------------
@@ -45,4 +68,14 @@ export const selectPreviewSliderValue = createSelector(
 export const selectPreviewZoom = createSelector(
   selectPreviewState,
   (state) => state.zoom,
+)
+
+export const selectDrawingMode = createSelector(
+  selectPreviewState,
+  (state) => state.drawingMode ?? false,
+)
+
+export const selectDrawingPoints = createSelector(
+  selectPreviewState,
+  (state) => state.drawingPoints ?? [],
 )
