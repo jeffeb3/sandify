@@ -6,6 +6,7 @@ import {
   cloneVertex,
   subsample,
   circle,
+  magnitude,
 } from "@/common/geometry"
 import Victor from "victor"
 import Machine, { machineOptions } from "./Machine"
@@ -187,8 +188,8 @@ export default class PolarMachine extends Machine {
   // Returns whether a given path lies on the perimeter of the circle.
   onPerimeter(v1, v2, delta = 1) {
     const rm = this.state.maxRadius
-    const r1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y)
-    const r2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y)
+    const r1 = magnitude(v1.x, v1.y)
+    const r2 = magnitude(v2.x, v2.y)
 
     return Math.abs(r1 - rm) < delta && Math.abs(r2 - rm) < delta
   }

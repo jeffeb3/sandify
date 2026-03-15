@@ -5,9 +5,10 @@ import React, { useEffect, useRef } from "react"
 import Form from "react-bootstrap/Form"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentMachine } from "@/features/machines/machinesSlice"
-import { addLayerWithImage } from "@/features/layers/layersSlice"
+import { addLayer, addLayerWithImage } from "@/features/layers/layersSlice"
+import Layer from "@/features/layers/Layer"
 
-const ImageUploader = ({ toggleModal, showModal }) => {
+const ImageUploader = ({ showModal }) => {
   const machineState = useSelector(selectCurrentMachine)
   const dispatch = useDispatch()
   const inputRef = useRef()
@@ -18,6 +19,59 @@ const ImageUploader = ({ toggleModal, showModal }) => {
     }
   }, [showModal])
 
+  const handleSvgFile = (file) => {
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const layer = new Layer("svgImport")
+      const attrs = {
+        ...layer.getInitialState({
+          machine: machineState,
+          svgContent: reader.result,
+        }),
+        name: file.name,
+      }
+
+      dispatch(addLayer(attrs))
+      inputRef.current.value = ""
+    }
+
+    reader.readAsText(file)
+  }
+
+  const handleImageFile = (file) => {
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const image = new Image()
+
+      image.onload = () => {
+        const layerProps = {
+          machine: machineState,
+          width: image.width,
+          height: image.height,
+          name: file.name,
+        }
+
+        dispatch(
+          addLayerWithImage({
+            layerProps,
+            image: {
+              src: reader.result,
+              height: image.height,
+              width: image.width,
+            },
+          }),
+        )
+        inputRef.current.value = ""
+      }
+
+      image.src = reader.result
+    }
+
+    reader.readAsDataURL(file)
+  }
+
   const handleFileSelected = (event) => {
     const file = event.target.files[0]
     const maxSize = 1024 * 1024 // 1 MB
@@ -25,36 +79,10 @@ const ImageUploader = ({ toggleModal, showModal }) => {
     if (file) {
       if (file.size > maxSize) {
         toast.error("This file is too large to import (maximum size 1 MB).")
+      } else if (file.name.toLowerCase().endsWith(".svg")) {
+        handleSvgFile(file)
       } else {
-        const reader = new FileReader()
-        reader.onload = (event) => {
-          const image = new Image()
-
-          image.onload = () => {
-            const layerProps = {
-              machine: machineState,
-              width: image.width,
-              height: image.height,
-              name: file.name,
-            }
-
-            dispatch(
-              addLayerWithImage({
-                layerProps,
-                image: {
-                  src: reader.result,
-                  height: image.height,
-                  width: image.width,
-                },
-              }),
-            )
-            inputRef.current.value = "" // reset to allow more uploads
-          }
-
-          image.src = reader.result
-        }
-
-        reader.readAsDataURL(file)
+        handleImageFile(file)
       }
     }
   }
@@ -65,7 +93,7 @@ const ImageUploader = ({ toggleModal, showModal }) => {
         id="imageImportUpload"
         ref={inputRef}
         type="file"
-        accept=".png,.jpg,.jpeg,.webp"
+        accept=".png,.jpg,.jpeg,.webp,.svg"
         onChange={handleFileSelected}
         style={{ display: "none" }}
       />

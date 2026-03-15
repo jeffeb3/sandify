@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useDispatch, useSelector } from "react-redux"
 import Button from "react-bootstrap/Button"
@@ -20,14 +20,14 @@ import {
 } from "./effectsSlice"
 import { getEffect } from "@/features/effects/effectFactory"
 
-const EffectRow = ({
+const EffectRow = React.memo(function EffectRow({
   current,
   selected,
   effect,
   handleEffectSelected,
   handleToggleEffectVisible,
   t,
-}) => {
+}) {
   const { name, id, visible } = effect
   const instance = getEffect(effect.type)
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -80,7 +80,7 @@ const EffectRow = ({
       </div>
     </ListGroup.Item>
   )
-}
+})
 
 const EffectList = ({ effects, selectedLayer }) => {
   const { t } = useTranslation()
@@ -98,28 +98,40 @@ const EffectList = ({ effects, selectedLayer }) => {
     }),
   )
 
-  const handleDragStart = ({ active }) => dispatch(setCurrentEffect(active.id))
+  const handleDragStart = useCallback(
+    ({ active }) => dispatch(setCurrentEffect(active.id)),
+    [dispatch],
+  )
 
-  const handleDragEnd = ({ active, over }) => {
-    if (!over) {
-      return
-    }
-    if (active.id !== over.id) {
-      const oldIndex = effects.findIndex((effect) => effect.id === active.id)
-      const newIndex = effects.findIndex((effect) => effect.id === over.id)
-      dispatch(moveEffect({ id: selectedLayer.id, oldIndex, newIndex }))
-    }
-  }
+  const handleDragEnd = useCallback(
+    ({ active, over }) => {
+      if (!over) {
+        return
+      }
+      if (active.id !== over.id) {
+        const oldIndex = effects.findIndex((effect) => effect.id === active.id)
+        const newIndex = effects.findIndex((effect) => effect.id === over.id)
+        dispatch(moveEffect({ id: selectedLayer.id, oldIndex, newIndex }))
+      }
+    },
+    [dispatch, effects, selectedLayer?.id],
+  )
 
-  const handleToggleEffectVisible = (id, visible) => {
-    dispatch(setCurrentEffect(id))
-    dispatch(updateEffect({ id, visible: !visible }))
-  }
+  const handleToggleEffectVisible = useCallback(
+    (id, visible) => {
+      dispatch(setCurrentEffect(id))
+      dispatch(updateEffect({ id, visible: !visible }))
+    },
+    [dispatch],
+  )
 
-  const handleEffectSelected = (event) => {
-    const id = event.target.closest(".list-group-item").id
-    dispatch(setCurrentEffect(id))
-  }
+  const handleEffectSelected = useCallback(
+    (event) => {
+      const id = event.target.closest(".list-group-item").id
+      dispatch(setCurrentEffect(id))
+    },
+    [dispatch],
+  )
 
   return (
     <DndContext
@@ -158,4 +170,4 @@ const EffectList = ({ effects, selectedLayer }) => {
   )
 }
 
-export default EffectList
+export default React.memo(EffectList)
