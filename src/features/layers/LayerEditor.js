@@ -152,7 +152,9 @@ const LayerEditor = () => {
       <div className="border-top border-secondary">
         {targetLayer && (
           <div className="alert alert-warning mb-0">
-            {t("Mask source for")} the <span className="fst-italic">{targetLayer.name}</span> layer (hidden)
+            {t("Mask source for")} the{" "}
+            <span className="fst-italic">{targetLayer.name}</span> layer
+            (hidden)
           </div>
         )}
 
