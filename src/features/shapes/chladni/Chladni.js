@@ -3,6 +3,32 @@ import Shape from "../Shape"
 import { SUPERPOSITION } from "./config"
 import { drawContours, drawBorder, buildPath } from "./pathBuilder"
 
+// Superposition modes that produce blank patterns when M = N
+const BLANK_WHEN_EQUAL = ["subtract", "beat", "difference"]
+
+// Helper to check if M=N would produce a blank pattern
+function wouldBeBlank(superposition) {
+  return BLANK_WHEN_EQUAL.includes(superposition)
+}
+
+// Skip M=N by adjusting the value in the direction of change
+function skipEqualMN(newVal, otherVal, oldVal, min, max) {
+  if (newVal !== otherVal) return newVal
+
+  // Determine direction of change
+  const increasing = newVal > oldVal
+
+  if (increasing && newVal < max) {
+    return newVal + 1
+  } else if (!increasing && newVal > min) {
+    return newVal - 1
+  } else if (newVal < max) {
+    return newVal + 1
+  } else {
+    return newVal - 1
+  }
+}
+
 const options = {
   chladniMethod: {
     title: "Method",
@@ -20,6 +46,22 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => state.chladniMethod === "interference",
+    onChange: (model, changes, state) => {
+      if (!wouldBeBlank(state.chladniSuperposition)) return changes
+
+      const min = state.chladniShape === "circular" ? 0 : 1
+      const newM = skipEqualMN(
+        changes.chladniM,
+        state.chladniN,
+        state.chladniM,
+        min,
+        10,
+      )
+
+      changes.chladniM = newM
+
+      return changes
+    },
   },
   chladniN: {
     title: "N",
@@ -27,6 +69,21 @@ const options = {
     max: 10,
     step: 1,
     isVisible: (layer, state) => state.chladniMethod === "interference",
+    onChange: (model, changes, state) => {
+      if (!wouldBeBlank(state.chladniSuperposition)) return changes
+
+      const newN = skipEqualMN(
+        changes.chladniN,
+        state.chladniM,
+        state.chladniN,
+        1,
+        10,
+      )
+
+      changes.chladniN = newN
+
+      return changes
+    },
   },
   chladniModes: {
     title: "Complexity",
@@ -202,8 +259,9 @@ export default class Chladni extends Shape {
     const contourLevels = parseInt(state.shape.chladniContours)
     const scale = 50
 
-    // Handle degenerate case: m=n with "add" gives z=0 everywhere (interference only)
-    if (method === "interference" && m === n && superposition === "add") {
+    // Handle degenerate case: m=n with certain superpositions gives z=0 everywhere
+    // This is a safety fallback for old saved patterns; UI now prevents this
+    if (method === "interference" && m === n && wouldBeBlank(superposition)) {
       return [
         new Victor(-scale, -scale),
         new Victor(scale, scale),
