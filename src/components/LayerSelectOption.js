@@ -1,7 +1,7 @@
 /* global document */
 
 import React from "react"
-import { useSelector, useStore, shallowEqual } from "react-redux"
+import { useSelector, useStore, useDispatch, shallowEqual } from "react-redux"
 import Col from "react-bootstrap/Col"
 import Row from "react-bootstrap/Row"
 import Form from "react-bootstrap/Form"
@@ -10,12 +10,14 @@ import {
   selectLayerIds,
   selectLayerById,
   selectLayerVertices,
+  updateLayer,
 } from "@/features/layers/layersSlice"
 import { dimensions } from "@/common/geometry"
 import { getShape } from "@/features/shapes/shapeFactory"
 
 const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
   const store = useStore()
+  const dispatch = useDispatch()
   const option = options[optionKey]
   const currentChoice = data[optionKey]
   const effectLayerId = data.layerId
@@ -43,9 +45,7 @@ const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
     { value: "", label: "(none)" },
     ...layers.map((layer) => ({
       value: layer.id,
-      label:
-        (layer.name || `Layer ${layer.id.slice(0, 6)}`) +
-        (layer.visible ? "" : " (hidden)"),
+      label: layer.name || `Layer ${layer.id.slice(0, 6)}`,
     })),
   ]
 
@@ -69,6 +69,13 @@ const LayerSelectOption = ({ options, optionKey, data, onChange, index }) => {
         attrs.width = dims.width
         attrs.height = dims.height
       }
+    }
+
+    if (currentChoice && currentChoice !== value) {
+      dispatch(updateLayer({ id: currentChoice, visible: true }))
+    }
+    if (value) {
+      dispatch(updateLayer({ id: value, visible: false }))
     }
 
     if (option.onChange !== undefined) {

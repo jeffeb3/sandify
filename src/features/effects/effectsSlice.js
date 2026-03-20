@@ -151,3 +151,18 @@ export const selectEffectSelectionVertices = createCachedSelector(
     return instance.getSelectionVertices(effect)
   },
 )(cachedByIdDeepEqual)
+
+export const selectMaskSources = createSelector(
+  selectAllEffects,
+  (effects) => {
+    const map = new Map()
+
+    effects
+      .filter(
+        (e) => e.type === "mask" && e.maskMachine === "layer" && e.maskLayerId,
+      )
+      .forEach((e) => map.set(e.maskLayerId, e.layerId))
+
+    return map
+  },
+)
