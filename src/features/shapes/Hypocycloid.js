@@ -46,7 +46,7 @@ export default class Star extends Shape {
     let rotations = Number.isInteger(a / b) ? 1 : b
     let scale = b < a ? 1 / a : 1 / (2 * (b - a / 2))
 
-    for (let i = 0; i < 128 * rotations; i++) {
+    for (let i = 0; i <= 128 * rotations; i++) {
       let angle = ((Math.PI * 2.0) / 128.0) * i
       points.push(
         new Victor(

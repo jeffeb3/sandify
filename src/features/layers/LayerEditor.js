@@ -16,15 +16,25 @@ import {
 } from "react-icons/ai"
 import ModelOption from "@/components/ModelOption"
 import { getShapeSelectOptions } from "@/features/shapes/shapeFactory"
-import { updateLayer, changeModelType } from "./layersSlice"
+import {
+  updateLayer,
+  changeModelType,
+  selectSelectedLayer,
+  selectLayerById,
+} from "./layersSlice"
 import Layer from "./Layer"
 import EffectManager from "@/features/effects/EffectManager"
-import { selectSelectedLayer } from "./layersSlice"
+import { selectMaskSources } from "@/features/effects/effectsSlice"
 
 const LayerEditor = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const layer = useSelector(selectSelectedLayer)
+  const maskSources = useSelector(selectMaskSources)
+  const targetLayerId = maskSources.get(layer.id)
+  const targetLayer = useSelector((state) =>
+    targetLayerId ? selectLayerById(state, targetLayerId) : null,
+  )
   const instance = new Layer(layer.type)
   const model = instance.model
   const layerOptions = instance.getOptions()
@@ -139,11 +149,21 @@ const LayerEditor = () => {
 
   return (
     <div className="overflow-visible flex-grow-1">
-      <div className="px-3 pt-3 border-top border-secondary">
-        {renderOption({ optionKey: "name" })}
-        {renderedModelSelection}
-        {renderedModelOptions}
-        {renderOption({ optionKey: "connectionMethod" })}
+      <div className="border-top border-secondary">
+        {targetLayer && (
+          <div className="alert alert-warning mb-0">
+            {t("Mask source for")} the{" "}
+            <span className="fst-italic">{targetLayer.name}</span> layer
+            (hidden)
+          </div>
+        )}
+
+        <div className="pt-3 px-3">
+          {renderOption({ optionKey: "name" })}
+          {renderedModelSelection}
+          {renderedModelOptions}
+          {renderOption({ optionKey: "connectionMethod" })}
+        </div>
       </div>
       {model.canTransform(layer) && (
         <div className="px-3 py-2">
@@ -230,7 +250,7 @@ const LayerEditor = () => {
         </div>
       )}
 
-      <div className="border-top border-secondary px-3 pt-1">
+      <div className="border-top border-secondary px-3 pt-1 pb-4">
         <EffectManager />
       </div>
 

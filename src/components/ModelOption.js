@@ -5,6 +5,7 @@ import CheckboxOption from "@/components/CheckboxOption"
 import ToggleButtonOption from "@/components/ToggleButtonOption"
 import QuadrantButtonsOption from "@/components/QuadrantButtonsOption"
 import SliderOption from "@/components/SliderOption"
+import LayerSelectOption from "@/components/LayerSelectOption"
 
 const ModelOption = ({
   model,
@@ -27,6 +28,13 @@ const ModelOption = ({
     case "dropdown":
       return (
         <DropdownOption
+          key={optionKey}
+          {...props}
+        />
+      )
+    case "layerSelect":
+      return (
+        <LayerSelectOption
           key={optionKey}
           {...props}
         />
