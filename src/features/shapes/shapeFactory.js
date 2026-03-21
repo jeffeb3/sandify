@@ -1,5 +1,6 @@
 /* global localStorage */
 
+import Chladni from "./chladni/Chladni"
 import Circle from "./Circle"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"
@@ -47,6 +48,7 @@ export const shapeFactory = {
   circlePacker: CirclePacker,
   wiper: Wiper,
   spaceFiller: SpaceFiller,
+  chladni: Chladni,
   flowTile: FlowTile,
   noise_wave: NoiseWave,
   fileImport: LayerImport,

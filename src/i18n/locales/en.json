@@ -1,5 +1,6 @@
 {
   "about.tagline": "create patterns for robots that draw in sand with ball bearings",
+  "description.chladni": "Chladni figures are nodal line patterns from vibrating plates. Sand collects along lines where amplitude is zero.",
   "description.circlePacker": "Circle packing is an arrangement of circles of different sizes such that no overlapping occurs and no circle can be enlarged without creating an overlap.",
   "description.epicycloid": "A clover shape is an epicycloid. Imagine two circles, with the outer circle rolling around the inside one. The shape traced by a point on the outer circle as it rolls is called an epicycloid.",
   "description.flowTile": "Flow tiles are a form of Truchet tiling, named after Sébastien Truchet who first documented them in 1704. Each square tile has two possible orientations. When placed on a grid, adjacent tiles connect to form continuous flowing paths or maze-like patterns.",
@@ -17,6 +18,7 @@
   "description.voronoi": "A Voronoi diagram divides a space into regions based on a set of seed points. Each region contains all the points that are closer to its seed point than to any other seed point.",
   "export.wikiNote": "See the <0>wiki</0> for details on program export variables.",
   "layer.seeMoreInfo": "See <0>{{linkText}}</0> for more information.",
+  "linkText.chladni": "Wikipedia",
   "linkText.circlePacker": "Wikipedia",
   "linkText.epicycloid": "Wolfram Mathworld",
   "linkText.flowTile": "Wikipedia",

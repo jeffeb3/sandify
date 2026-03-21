@@ -5,6 +5,7 @@ import Fisheye from "./Fisheye"
 import Loop from "./Loop"
 import Mask from "./Mask"
 import Noise from "./noise/Noise"
+import Pixelate from "./Pixelate"
 import ProgramCode from "./ProgramCode"
 import Track from "./Track"
 import Transformer from "./Transformer"
@@ -22,6 +23,7 @@ export const effectFactory = {
   track: Track,
   warp: Warp,
   voronoi: Voronoi,
+  pixelate: Pixelate,
 }
 
 export const getEffect = (type, ...args) => {
@@ -29,7 +31,10 @@ export const getEffect = (type, ...args) => {
 }
 
 export const getDefaultEffectType = () => {
-  return localStorage.getItem("defaultEffect") || "mask"
+  const effect = localStorage.getItem("defaultEffect")
+
+  // validate that the effect type exists (it may not if switching branches)
+  return effect && effectFactory[effect] ? effect : "mask"
 }
 
 export const getDefaultEffect = () => {
