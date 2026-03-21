@@ -1,52 +1,71 @@
-# Sandify v1.2.2
+# Sandify v1.3.0
+
+This is a whopper of a release. Lots of cool new features for you to try!
 
 ## New Features
 
-### Maze Shape
+### SVG Import
 
-You can now generate traversable mazes in Sandify! Choose from four different grid types (Rectangle, Circle, Hexagon, or Triangle) and seven maze algorithms including Backtracker, Kruskal, Prim, and more. You can have the pattern draw the solution path or try to solve it yourself.
+Import SVG files directly into Sandify. Upload any SVG to convert into a continuous drawing path. The importer handles most SVGs fairly well.
 
-To try it out, select **Maze** as the layer Type.
+Use the Min stroke width and Fill brightness filters to focus in on the elements you want. For best results, convert text to paths in your SVG editor before importing.
 
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/ea4a1ea4-e278-4938-80c8-2cd9ce49698c" />
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/86f741dd-ce60-4f72-878c-a5b9fdf483bd" />
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/1ea407c4-29d2-4751-b8f1-b6d5bea4d91c" />
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/a8517d5f-7d0f-4595-be31-73264c6cdb8d" />
+To try it out, click the Import button and select an SVG file.
 
-### New Fractal Spirograph Types
+<image: svg import tiger>
 
-We've added several new L-system patterns (Anklet of Krishna, Fractal Tree 6, Lévy C Curve, Terdragon). There are also 2 new options: one to let you add randomness with branch probability, and one that adjusts angle offsets.
+<image: svg import car>
 
-To try it out, select **Fractal Spirograph** and then try out different types and options.
+### Layer Masks
 
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/d8d7ce24-f031-4c05-b4a3-f8dd0208d7d9" />
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/ca4da7af-01dd-487f-a5fa-92bbeec59cc7" />
+Customize a layer (any shape and/or effects), and then use that layer as an outline to clip another layer. This feature opens up infinite creative possibilities like filling text with patterns or creating custom-shaped designs. We can't wait to see what you come up with.
 
-### Voronoi Effect
+Sandify tries to automatically detect the best outline for your mask based on the shape, but if  doesn't look right, you can override it by changing the Border Type.
 
-The Voronoi shape now has an effect counterpart! It will convert any pattern into a Voronoi diagram, with some pretty dramatic results.
+To try it out, add the 'Mask' effect to a layer and then select another layer as the source. The the selected (mask) layer is automatically hidden.
 
-To try it out, add an effect to a layer and select **Voronoi**.
+<image: layer mask text filled>
 
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/b4fa0948-8134-4de6-b633-c2dbd380b902" />
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/25606362-68e4-402d-8070-7f811261b09e" />
+<image: layer mask polygon>
+s
+### Vibrations Shape
 
-### Internationalization
+Chladni figures are patterns Ernst Chladni discovered by bowing metal plates covered in sand - the sand collects along lines where the plate doesn't move.
 
-Thanks in large part to [@songfei](https://github.com/songfei) efforts, Sandify now supports multiple languages! We've added full Chinese translation support. To switch languages, go to the Settings tab and select a language (English or Simplified Chinese).
+Choose from three methods that roughly model real-world vibration interactions, Interference, Harmonic, and Excitation. Each method has a ton of different options to play around with, all of which produce really cool designs.
 
-<img width="405" height="229" alt="image" src="https://github.com/user-attachments/assets/b7e37894-5eda-4b0d-a753-a97af3b7fd9a" />
+To try it out, select 'Vibrations' as the layer type.
 
-### New Fancy Text Fonts
+<image: chladni rectangular interference>
 
-The Fancy Text shape got a bunch of new fonts (Caveat, Fira Code, Montserrat, Permanent Marker, and Source Han Serif CN). Several fonts also have bold variants.
+<image: chladni circular>
 
-<img width="444" height="586" alt="image" src="https://github.com/user-attachments/assets/49738040-5a91-4a29-96ac-731381b00fbc" />
+### Flow Tiles Shape
 
-## Bug Fixes
+Create flowing maze-like patterns using Truchet tiles. These deceptively simple tiles - squares with two orientation options - connect to form continuous winding paths.
 
--   Fixed aspect ratio issues when changing dimensions
--   Fixed slider inputs not updating when typing values
+Choose between Arc and Diagonal styles. You can adjust the grid size, stroke width, and seed to explore different configurations.
+
+To try it out, select 'Flow Tile' as the layer type.
+
+<image: flow tile arc>
+
+<image: flow tile diagonal>
+
+### Pixelate Effect
+
+Turn any pattern into pixel art! The Pixelate effect converts shapes into a grid of filled squares, with an adjustable pixel size.
+
+To try it out, add the 'Pixelate' effect to any layer.
+
+<image: pixelate effect>
+
+## Other improvements and Fixes
+
+- Added several performance optimizations to speed up rendering and dramatically reduce browser hanging issues with very complex patterns
+- Improved the drawing of accurate borders when using the Fine Tuning effect, and added a Border Type option for more control when needed.
+- Fixed Fancy Text rendering of Noto Emoji characters
+- Fixed range slider inputs not updating correctly when typing values
 
 ## Forum Discussion
 
