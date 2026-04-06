@@ -65,6 +65,11 @@ export default class Reuleaux extends Shape {
       }
     }
 
+    // Close the path
+    if (points.length > 0) {
+      points.push(points[0].clone())
+    }
+
     return points
   }
 

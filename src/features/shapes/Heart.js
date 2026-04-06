@@ -25,7 +25,7 @@ export default class Heart extends Shape {
   getVertices(state) {
     const points = []
 
-    for (let i = 0; i < 128; i++) {
+    for (let i = 0; i <= 128; i++) {
       let angle = ((Math.PI * 2.0) / 128.0) * i
       let scale = 0.9
 
@@ -40,6 +40,7 @@ export default class Heart extends Shape {
         ),
       )
     }
+
     return points
   }
 }

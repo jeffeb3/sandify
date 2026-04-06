@@ -5,12 +5,28 @@
   padding-right: 0.5rem !important;
 
   .active.list-group-item & {
-    color: white;
+    color: white !important;
     background-color: inherit;
   }
 
   .selected.list-group-item & {
     background-color: #d2d2d2;
+  }
+}
+
+.layer-icon {
+  color: #6c757d;
+  padding: 0.5rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+
+  > svg {
+    width: 16px;
+    height: 26px;
+  }
+
+  .active.list-group-item & {
+    color: white;
   }
 }
 
@@ -21,5 +37,11 @@
 #layers {
   .list-group-item {
     padding: 0.5rem 0.25rem;
+
+    &.layer-hidden {
+      > div {
+        opacity: 0.7;
+      }
+    }
   }
 }

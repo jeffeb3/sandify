@@ -175,11 +175,20 @@ module.exports = {
     "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
     "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)":
       "<rootDir>/config/jest/fileTransform.js",
-    "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/babel-jest",
+    "^.+\\.(js|jsx|mjs|ts|tsx)$": "<rootDir>/node_modules/babel-jest",
   },
 
-  // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  transformIgnorePatterns: ["<rootDir>/node_modules/points-on-path/src"],
+  // ESM packages that need transformation (and their transitive ESM deps)
+  transformIgnorePatterns: [
+    "<rootDir>/node_modules/(?!(" +
+      "array-move|clipper2-js|color|color-string|concaveman|" +
+      "d3|d3-.*|delaunator|internmap|" +
+      "kdbush|konva|liang-barsky|mathjs|" +
+      "point-in-polygon|points-on-path|points-on-curve|path-data-parser|" +
+      "react-error-boundary|uuid|" +
+      "tinyqueue|rbush|quickselect|robust-predicates|typed-function" +
+    ")/)",
+  ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,

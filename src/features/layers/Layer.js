@@ -107,7 +107,7 @@ export default class Layer {
   }
 
   // returns an array of Victor vertices
-  getVertices({ layer, effects, machine, options = {} }) {
+  getVertices({ layer, effects, machine, maskSourceVertices, options = {} }) {
     const layerState = { shape: layer, machine }
 
     this.state = layer
@@ -118,7 +118,7 @@ export default class Layer {
       centerOnOrigin(this.vertices)
     }
 
-    this.applyEffects(effects)
+    this.applyEffects(effects, maskSourceVertices)
     this.transform()
     this.vertices = this.model.finalizeVertices(
       this.vertices,
@@ -155,10 +155,15 @@ export default class Layer {
     })
   }
 
-  applyEffects(effects) {
+  applyEffects(effects, maskSourceVertices) {
     effects.forEach((effect) => {
       const effectLayer = new EffectLayer(effect.type)
-      this.vertices = effectLayer.getVertices(effect, this.state, this.vertices)
+      this.vertices = effectLayer.getVertices(
+        effect,
+        this.state,
+        this.vertices,
+        maskSourceVertices,
+      )
     })
   }
 
