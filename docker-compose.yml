@@ -1,17 +1,16 @@
 
 # build with:
-#   docker-compose build sandify
+#   docker compose build sandify
 #
 # install/update with:
-#   docker-compose run --entrypoint "npm install" sandify
+#   docker compose run --entrypoint "npm install" sandify
 #
 # run with:
-#   docker-compose run sandify
+#   docker compose run sandify
 #
 # test with:
-#   docker-compose run --entrypoint "npm test" sandify
+#   docker compose run --entrypoint "npm test" sandify
 #
-version: '3.7'
 
 services:
   sandify:
