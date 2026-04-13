@@ -7,6 +7,8 @@ describe("preview reducer", () => {
       canvasHeight: 600,
       sliderValue: 0,
       zoom: 1,
+      drawingMode: false,
+      drawingPoints: [],
     })
   })
 

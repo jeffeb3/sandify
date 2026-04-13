@@ -2,6 +2,7 @@
 
 import Chladni from "./chladni/Chladni"
 import Circle from "./Circle"
+import Drawing from "./Drawing"
 import Epicycloid from "./Epicycloid"
 import FancyText from "./FancyText"
 import FlowTile from "./flow_tile/FlowTile"
@@ -51,6 +52,7 @@ export const shapeFactory = {
   chladni: Chladni,
   flowTile: FlowTile,
   noise_wave: NoiseWave,
+  drawing: Drawing,
   fileImport: LayerImport,
   imageImport: ImageImport,
   svgImport: SVGImport,
